@@ -4,5 +4,48 @@
     "source.organizeImports": "explicit",
     "source.sortMembers": "explicit"
   },
-  "css.lint.unknownAtRules": "ignore"
+  "css.lint.unknownAtRules": "ignore",
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "tailwindCSS.includeLanguages": {
+    "css": "tailwindcss"
+  },
+  "editor.quickSuggestions": {
+    "strings": "on"
+  },
+  "tailwindCSS.experimental.configFile": "./global.css",
+  "tailwindCSS.hovers": true,
+  "tailwindCSS.suggestions": true,
+  "tailwindCSS.classFunctions": ["useResolveClassNames", "cn", "tv", "clsx"],
+  "tailwindCSS.classAttributes": [
+    "class",
+    "className",
+    "headerClassName",
+    "contentContainerClassName",
+    "columnWrapperClassName",
+    "endFillColorClassName",
+    "imageClassName",
+    "tintColorClassName",
+    "ios_backgroundColorClassName",
+    "thumbColorClassName",
+    "trackColorOnClassName",
+    "trackColorOffClassName",
+    "selectionColorClassName",
+    "cursorColorClassName",
+    "underlineColorAndroidClassName",
+    "placeholderTextColorClassName",
+    "selectionHandleColorClassName",
+    "colorsClassName",
+    "progressBackgroundColorClassName",
+    "titleColorClassName",
+    "underlayColorClassName",
+    "colorClassName",
+    "backdropColorClassName",
+    "backgroundColorClassName",
+    "statusBarBackgroundColorClassName",
+    "drawerBackgroundColorClassName",
+    "ListFooterComponentClassName",
+    "ListHeaderComponentClassName"
+  ]
 }

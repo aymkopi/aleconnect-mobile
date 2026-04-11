@@ -3,3 +3,161 @@
 @import "heroui-native/styles";
 
 @source "./node_modules/heroui-native/lib";
+
+@theme inline static {
+  /* Semantic token bridge for Tailwind utilities (bg-*, text-*, border-*) */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-default: var(--default);
+  --color-default-foreground: var(--default-foreground);
+  --color-surface: var(--surface);
+  --color-surface-foreground: var(--surface-foreground);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-surface-secondary-foreground: var(--surface-secondary-foreground);
+  --color-surface-tertiary: var(--surface-tertiary);
+  --color-surface-tertiary-foreground: var(--surface-tertiary-foreground);
+  --color-overlay: var(--overlay);
+  --color-overlay-foreground: var(--overlay-foreground);
+  --color-segment: var(--segment);
+  --color-segment-foreground: var(--segment-foreground);
+  --color-separator: var(--separator);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-focus: var(--focus);
+  --color-link: var(--link);
+}
+
+/*
+ * HeroUI Native theme overrides.
+ * Keep light/dark variable sets in sync to avoid dev-mode warnings.
+ * @see https://heroui.com/docs/native/getting-started/theming
+ */
+
+@layer theme {
+  :root {
+    @variant light {
+      /* Theme Colors (Light Mode) */
+      --accent: oklch(78.25% 0.1217 241.67);
+      --accent-foreground: oklch(15% 0.0243 241.67);
+      --background: oklch(97.02% 0.0019 241.67);
+      --backdrop: oklch(0% 0 0 / 20%);
+      --border: oklch(90% 0.0019 241.67);
+      --danger: oklch(65.32% 0.2337 24.28);
+      --danger-foreground: oklch(99.11% 0 0);
+      --default: oklch(94% 0.0019 241.67);
+      --default-foreground: oklch(21.03% 0.0059 241.67);
+      --field-background: oklch(100% 0.0009 241.67);
+      --field-border: transparent;
+      --field-foreground: oklch(21.03% 0.0019 241.67);
+      --field-placeholder: oklch(55.17% 0.0038 241.67);
+      --field-shadow:
+        0 2px 4px 0 rgba(15, 23, 42, 0.04), 0 1px 2px 0 rgba(15, 23, 42, 0.06),
+        0 0 1px 0 rgba(15, 23, 42, 0.06);
+      --focus: oklch(78.25% 0.1217 241.67);
+      --foreground: oklch(21.03% 0.0019 241.67);
+      --link: oklch(66% 0.17 241.67);
+      --muted: oklch(55.17% 0.0038 241.67);
+      --overlay: oklch(100% 0.0006 241.67);
+      --overlay-foreground: oklch(21.03% 0.0019 241.67);
+      --overlay-shadow:
+        0 2px 8px 0 rgba(15, 23, 42, 0.02),
+        0 -6px 12px 0 rgba(15, 23, 42, 0.01),
+        0 14px 28px 0 rgba(15, 23, 42, 0.03);
+      --scrollbar: oklch(87.1% 0.0019 241.67);
+      --segment: oklch(100% 0.0019 241.67);
+      --segment-foreground: oklch(21.03% 0.0019 241.67);
+      --separator: oklch(92% 0.0019 241.67);
+      --success: oklch(73.29% 0.1942 149.35);
+      --success-foreground: oklch(21.03% 0.0059 149.35);
+      --surface: oklch(100% 0.0009 241.67);
+      --surface-foreground: oklch(21.03% 0.0019 241.67);
+      --surface-secondary: oklch(95.24% 0.0015 241.67);
+      --surface-secondary-foreground: oklch(21.03% 0.0019 241.67);
+      --surface-tertiary: oklch(93.73% 0.0015 241.67);
+      --surface-tertiary-foreground: oklch(21.03% 0.0019 241.67);
+      --surface-shadow:
+        0 2px 4px 0 rgba(15, 23, 42, 0.04), 0 1px 2px 0 rgba(15, 23, 42, 0.06),
+        0 0 1px 0 rgba(15, 23, 42, 0.06);
+      --shadow-floating-bar: 0 10px 20px rgba(15, 23, 42, 0.16);
+      --shadow-surface-card: 0 12px 28px rgba(15, 23, 42, 0.08);
+      --warning: oklch(78.19% 0.1591 70.87);
+      --warning-foreground: oklch(21.03% 0.0059 70.87);
+
+      /* Border Radius */
+      --radius: 0.5rem;
+      --field-radius: 0.5rem;
+
+      /* Font Family */
+      --font-sans: "Geist_400Regular";
+      --font-normal: "Geist_400Regular";
+      --font-medium: "Geist_500Medium";
+      --font-semibold: "Geist_600SemiBold";
+      --font-bold: "Geist_600SemiBold";
+      --font-extrabold: "Geist_600SemiBold";
+      --font-black: "Geist_600SemiBold";
+    }
+
+    @variant dark {
+      /* Theme Colors (Dark Mode) */
+      --accent: oklch(78.25% 0.1217 241.67);
+      --accent-foreground: oklch(15% 0.0243 241.67);
+      --background: oklch(12% 0.0019 241.67);
+      --backdrop: oklch(0% 0 0 / 20%);
+      --border: oklch(28% 0.0019 241.67);
+      --danger: oklch(59.4% 0.1974 23.17);
+      --danger-foreground: oklch(99.11% 0 0);
+      --default: oklch(27.4% 0.0019 241.67);
+      --default-foreground: oklch(99.11% 0 0);
+      --field-background: oklch(21.03% 0.0038 241.67);
+      --field-border: transparent;
+      --field-foreground: oklch(99.11% 0.0019 241.67);
+      --field-placeholder: oklch(70.5% 0.0038 241.67);
+      --field-shadow: 0 0 0 0 transparent inset;
+      --focus: oklch(78.25% 0.1217 241.67);
+      --foreground: oklch(99.11% 0.0019 241.67);
+      --link: oklch(76% 0.17 241.67);
+      --muted: oklch(70.5% 0.0038 241.67);
+      --overlay: oklch(21.03% 0.0038 241.67);
+      --overlay-foreground: oklch(99.11% 0.0019 241.67);
+      --overlay-shadow: 0 0 1px 0 rgba(255, 255, 255, 0.3) inset;
+      --scrollbar: oklch(70.5% 0.0019 241.67);
+      --segment: oklch(39.64% 0.0019 241.67);
+      --segment-foreground: oklch(99.11% 0.0019 241.67);
+      --separator: oklch(25% 0.0019 241.67);
+      --success: oklch(73.29% 0.1942 149.35);
+      --success-foreground: oklch(21.03% 0.0059 149.35);
+      --surface: oklch(21.03% 0.0038 241.67);
+      --surface-foreground: oklch(99.11% 0.0019 241.67);
+      --surface-secondary: oklch(25.7% 0.0029 241.67);
+      --surface-secondary-foreground: oklch(99.11% 0.0019 241.67);
+      --surface-tertiary: oklch(27.21% 0.0029 241.67);
+      --surface-tertiary-foreground: oklch(99.11% 0.0019 241.67);
+      --surface-shadow: 0 0 0 0 transparent inset;
+      --shadow-floating-bar: 0 10px 20px rgba(0, 0, 0, 0.55);
+      --shadow-surface-card: 0 12px 28px rgba(0, 0, 0, 0.35);
+      --warning: oklch(82.03% 0.1393 74.88);
+      --warning-foreground: oklch(21.03% 0.0059 74.88);
+
+      /* Border Radius */
+      --radius: 0.5rem;
+      --field-radius: 0.5rem;
+
+      /* Font Family */
+      --font-sans: "Geist_400Regular";
+      --font-normal: "Geist_400Regular";
+      --font-medium: "Geist_500Medium";
+      --font-semibold: "Geist_600SemiBold";
+      --font-bold: "Geist_600SemiBold";
+      --font-extrabold: "Geist_600SemiBold";
+      --font-black: "Geist_600SemiBold";
+    }
+  }
+}
