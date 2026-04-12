@@ -1,14 +1,24 @@
+import { appScrollableBottomPadding } from "@/components/floating-app-bar";
 import {
+  Avatar,
   Button,
-  Label,
   ListGroup,
   Separator,
+  Surface,
   useThemeColor,
 } from "heroui-native";
 import type { LucideIcon } from "lucide-react-native";
-import { LucidePhone, LucideUserRound } from "lucide-react-native";
+import {
+  LucideBookUser,
+  LucideGauge,
+  LucideMail,
+  LucideMapPin,
+  LucidePhone,
+  LucideUserRound
+} from "lucide-react-native";
 import type { ComponentProps } from "react";
-import { ScrollView } from "react-native";
+import { ScrollView, Text } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type AccountDetailsBuilderProps = {
   icon: LucideIcon;
@@ -57,6 +67,9 @@ export function AccountDetailsBuilder({
 }
 
 export default function ProfileDetailsRoute() {
+  const insets = useSafeAreaInsets();
+  const bottomPadding = appScrollableBottomPadding(insets.bottom);
+
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
@@ -64,10 +77,18 @@ export default function ProfileDetailsRoute() {
       contentContainerStyle={{
         flexGrow: 1,
         padding: 20,
-        gap: 4,
+        gap: 6,
+        paddingBottom: bottomPadding,
       }}
     >
-      <Label className="text-foreground">Account</Label>
+      <Surface className="items-center justify-center py-10">
+        <Avatar size="lg" alt="Profile picture" />
+        <Text className="text-lg font-bold text-foreground mt-4">
+          Justine Lee
+        </Text>
+      </Surface>
+
+      <Text className="text-sm mt-3 text-muted">User Details</Text>
       <ListGroup>
         <AccountDetailsBuilder
           icon={LucideUserRound}
@@ -88,7 +109,7 @@ export default function ProfileDetailsRoute() {
         />
         <Separator className="mx-4" />
         <AccountDetailsBuilder
-          icon={LucideUserRound}
+          icon={LucideMail}
           description="Email"
           title="justine@example.com"
           button={{
@@ -98,6 +119,39 @@ export default function ProfileDetailsRoute() {
             onPress: () => {},
           }}
         />
+        <Separator className="mx-4" />
+        <AccountDetailsBuilder
+          icon={LucideMapPin}
+          description="Address"
+          title="123 Main Street, Anytown, USA"
+          button={{
+            variant: "tertiary",
+            size: "sm",
+            name: "Update",
+            onPress: () => {},
+          }}
+        />
+      </ListGroup>
+      <Text className="text-sm mt-3 text-muted">Account Details</Text>
+
+      <ListGroup>
+        <AccountDetailsBuilder
+          icon={LucideBookUser}
+          description="Account Number"
+          title="123456789"
+        ></AccountDetailsBuilder>
+        <Separator className="mx-4" />
+        <AccountDetailsBuilder
+          icon={LucideGauge}
+          description="Meter S/N"
+          title="123456789"
+        ></AccountDetailsBuilder>
+        <Separator className="mx-4" />
+        <AccountDetailsBuilder
+          icon={LucideGauge}
+          description="Service Type"
+          title="Residential"
+        ></AccountDetailsBuilder>
       </ListGroup>
     </ScrollView>
   );

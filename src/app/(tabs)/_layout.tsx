@@ -1,7 +1,10 @@
 import { FloatingTabsBar } from "@/components/floating-tabs-bar";
 import { Tabs } from "expo-router";
+import { useThemeColor } from "heroui-native";
 
 export default function TabsLayout() {
+  const [sceneBackgroundColor] = useThemeColor(["background"]);
+
   return (
     <Tabs
       detachInactiveScreens={false}
@@ -11,6 +14,8 @@ export default function TabsLayout() {
         freezeOnBlur: true,
         headerShown: false,
         headerLeft: () => null,
+        lazy: false,
+        sceneStyle: { backgroundColor: sceneBackgroundColor },
         tabBarShowLabel: false,
       }}
     >

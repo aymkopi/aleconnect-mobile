@@ -6,10 +6,15 @@ export default function ProfileLayout() {
     "foreground",
     "surface",
   ]);
+  const [contentBackgroundColor] = useThemeColor(["background"]);
 
   return (
     <Stack
       screenOptions={{
+        contentStyle: {
+          backgroundColor: contentBackgroundColor,
+        },
+        freezeOnBlur: true,
         headerTintColor,
         headerTitleStyle: { color: headerTintColor },
         headerStyle: { backgroundColor: headerBackgroundColor },
