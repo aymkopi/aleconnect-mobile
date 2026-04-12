@@ -1,4 +1,5 @@
 import { appScrollableBottomPadding } from "@/components/floating-app-bar";
+import * as ImagePicker from "expo-image-picker";
 import {
   Avatar,
   Button,
@@ -13,12 +14,15 @@ import {
   LucideGauge,
   LucideMail,
   LucideMapPin,
+  LucidePencil,
   LucidePhone,
-  LucideUserRound
+  LucideUserRound,
 } from "lucide-react-native";
-import type { ComponentProps } from "react";
-import { ScrollView, Text } from "react-native";
+import { useState, type ComponentProps } from "react";
+import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { useConsumerProfileContext } from "../../../context/consumer-profile-context";
 
 type AccountDetailsBuilderProps = {
   icon: LucideIcon;
@@ -69,6 +73,53 @@ export function AccountDetailsBuilder({
 export default function ProfileDetailsRoute() {
   const insets = useSafeAreaInsets();
   const bottomPadding = appScrollableBottomPadding(insets.bottom);
+  const { profile, isLoading, error } = useConsumerProfileContext();
+  const [avatarPhoto, setAvatarPhoto] =
+    useState<ImagePicker.ImagePickerAsset | null>(null);
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
+
+  const handleEditAvatarPress = async () => {
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      Alert.alert(
+        "Permission required",
+        "Allow photo library access to update your profile picture.",
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      allowsMultipleSelection: false,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (result.canceled || !result.assets?.length) {
+      return;
+    }
+
+    const selectedPhoto = result.assets[0];
+    setAvatarPhoto(selectedPhoto);
+    setAvatarUri(selectedPhoto.uri);
+  };
+
+  const displayName = profile?.fullName ?? "Profile not linked";
+  const displayPhone = profile?.contactNum ?? "No phone on file";
+  const displayEmail = profile?.email ?? "No email on file";
+  const displayAddress =
+    profile?.fullAddress ??
+    ([profile?.purokOrStreet, profile?.barangay, profile?.municipality]
+      .filter(Boolean)
+      .join(", ") ||
+      "No address on file");
+  const displayAccountNumber = profile?.accountNumber ?? "No account number";
+  const displayMeterSerial =
+    profile?.meterSerialNum ?? "No meter serial number";
+  const displayServiceType = profile?.serviceType ?? "No service type";
 
   return (
     <ScrollView
@@ -82,10 +133,48 @@ export default function ProfileDetailsRoute() {
       }}
     >
       <Surface className="items-center justify-center py-10">
-        <Avatar size="lg" alt="Profile picture" />
+        <View style={{ position: "relative" }}>
+          <Avatar
+            size="lg"
+            alt="Profile picture"
+            style={{
+              width: 100,
+              height: 100,
+              borderRadius: 50,
+            }}
+          >
+            {avatarUri ? <Avatar.Image source={{ uri: avatarUri }} /> : null}
+          </Avatar>
+          <Pressable
+            onPress={handleEditAvatarPress}
+            accessibilityRole="button"
+            accessibilityLabel="Edit profile picture"
+            style={{
+              position: "absolute",
+              right: -4,
+              bottom: -4,
+              width: 36,
+              height: 36,
+              borderRadius: 18,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            className="bg-accent border-2 border-background"
+          >
+            <LucidePencil size={16} color="white" />
+          </Pressable>
+        </View>
         <Text className="text-lg font-bold text-foreground mt-4">
-          Justine Lee
+          {isLoading ? "Loading profile..." : displayName}
         </Text>
+        {avatarPhoto ? (
+          <Text className="text-xs text-muted mt-2" numberOfLines={1}>
+            Selected photo: {avatarPhoto.fileName ?? "avatar.jpg"}
+          </Text>
+        ) : null}
+        {error ? (
+          <Text className="text-sm text-danger mt-2">{error.message}</Text>
+        ) : null}
       </Surface>
 
       <Text className="text-sm mt-3 text-muted">User Details</Text>
@@ -93,13 +182,13 @@ export default function ProfileDetailsRoute() {
         <AccountDetailsBuilder
           icon={LucideUserRound}
           description="Name"
-          title="Justine Lee"
+          title={displayName}
         />
         <Separator className="mx-4" />
         <AccountDetailsBuilder
           icon={LucidePhone}
           description="Phone"
-          title="123-456-7890"
+          title={displayPhone}
           button={{
             variant: "tertiary",
             size: "sm",
@@ -111,7 +200,7 @@ export default function ProfileDetailsRoute() {
         <AccountDetailsBuilder
           icon={LucideMail}
           description="Email"
-          title="justine@example.com"
+          title={displayEmail}
           button={{
             variant: "tertiary",
             size: "sm",
@@ -123,7 +212,7 @@ export default function ProfileDetailsRoute() {
         <AccountDetailsBuilder
           icon={LucideMapPin}
           description="Address"
-          title="123 Main Street, Anytown, USA"
+          title={displayAddress}
           button={{
             variant: "tertiary",
             size: "sm",
@@ -138,19 +227,19 @@ export default function ProfileDetailsRoute() {
         <AccountDetailsBuilder
           icon={LucideBookUser}
           description="Account Number"
-          title="123456789"
+          title={displayAccountNumber}
         ></AccountDetailsBuilder>
         <Separator className="mx-4" />
         <AccountDetailsBuilder
           icon={LucideGauge}
           description="Meter S/N"
-          title="123456789"
+          title={displayMeterSerial}
         ></AccountDetailsBuilder>
         <Separator className="mx-4" />
         <AccountDetailsBuilder
           icon={LucideGauge}
           description="Service Type"
-          title="Residential"
+          title={displayServiceType}
         ></AccountDetailsBuilder>
       </ListGroup>
     </ScrollView>

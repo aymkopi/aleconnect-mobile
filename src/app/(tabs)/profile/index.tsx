@@ -13,10 +13,13 @@ import { ScrollView, Text, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Uniwind, useCSSVariable, useUniwind } from "uniwind";
 
+import { useConsumerProfileContext } from "../../../context/consumer-profile-context";
+
 export default function ProfileRoute() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
+  const { profile, isLoading } = useConsumerProfileContext();
   const { theme, hasAdaptiveThemes } = useUniwind();
   const foregroundColor = useCSSVariable("--accent");
   const mutedColor = useCSSVariable("--muted");
@@ -82,9 +85,13 @@ export default function ProfileRoute() {
               justifyContent: "center",
             }}
           >
-            <Label className="text-foreground">Justine Lee</Label>
+            <Label className="text-foreground">
+              {isLoading
+                ? "Loading profile..."
+                : (profile?.fullName ?? "Profile not linked")}
+            </Label>
             <Text numberOfLines={1} className="text-muted">
-              0324027303
+              {isLoading ? "" : (profile?.accountNumber ?? "No account number")}
             </Text>
           </View>
           <Button
@@ -98,6 +105,13 @@ export default function ProfileRoute() {
             <LucideChevronRight size={20} color={iconMutedColor} />
           </Button>
         </View>
+        {profile ? (
+          <Text className="text-muted text-sm mt-2" numberOfLines={1}>
+            {profile.fullAddress ??
+              profile.email ??
+              "No address or email on file"}
+          </Text>
+        ) : null}
       </View>
       <View className="gap-2 mt-3">
         <Text className="text-sm text-muted ml-2">Personalization</Text>
