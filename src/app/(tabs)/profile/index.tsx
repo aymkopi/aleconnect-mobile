@@ -216,6 +216,32 @@ export default function ProfileRoute() {
               </Button>
             </ListGroup.ItemSuffix>
           </ListGroup.Item>
+          <ListGroup.Item>
+            <ListGroup.ItemPrefix>
+              <LucideBell size={20} color={iconForegroundColor} />
+            </ListGroup.ItemPrefix>
+            <ListGroup.ItemContent>
+              <ListGroup.ItemTitle>Facebook</ListGroup.ItemTitle>
+            </ListGroup.ItemContent>
+            <ListGroup.ItemSuffix />
+          </ListGroup.Item>
+          <ListGroup.Item>
+            <ListGroup.ItemPrefix>
+              <LucideLanguages size={20} color={iconForegroundColor} />
+            </ListGroup.ItemPrefix>
+            <ListGroup.ItemContent>
+              <ListGroup.ItemTitle>Languages</ListGroup.ItemTitle>
+            </ListGroup.ItemContent>
+            <ListGroup.ItemSuffix>
+              <Button
+                feedbackVariant="scale-highlight"
+                variant="tertiary"
+                size="sm"
+              >
+                Change
+              </Button>
+            </ListGroup.ItemSuffix>
+          </ListGroup.Item>
         </ListGroup>
       </View>
     </ScrollView>

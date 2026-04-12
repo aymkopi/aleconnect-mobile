@@ -1,7 +1,8 @@
+import { BlurView } from "expo-blur";
 import { PressableFeedback, useThemeColor } from "heroui-native";
 import type { LucideIcon } from "lucide-react-native";
 import { AlertTriangle, Home, Phone, UserRound } from "lucide-react-native";
-import type { FC } from "react";
+import type { FC, RefObject } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { Text, View } from "react-native";
 import Animated, {
@@ -33,6 +34,7 @@ interface AppBarItem {
 interface FloatingAppBarProps {
   readonly currentIndex: number;
   readonly onSelect: (index: number) => void;
+  readonly blurTarget: RefObject<View | null>;
 }
 
 interface TabFrame {
@@ -132,10 +134,12 @@ const TabItem: FC<TabItemProps> = ({
  */
 export const FloatingAppBar: FC<FloatingAppBarProps> = ({
   currentIndex,
+  blurTarget,
   onSelect,
 }) => {
   const insets = useSafeAreaInsets();
   const floatingBarShadow = useCSSVariable("--shadow-floating-bar");
+  const [surfaceColor] = useThemeColor(["surface"]);
   const [tabFrames, setTabFrames] = useState<Partial<Record<number, TabFrame>>>(
     {},
   );
@@ -182,15 +186,31 @@ export const FloatingAppBar: FC<FloatingAppBarProps> = ({
         {/* Bar background container */}
         <View
           accessibilityRole="tablist"
-          className="relative flex-row items-center justify-around overflow-hidden rounded-full border-[0.5px] border-border bg-surface px-2"
+          className="relative flex-row items-center justify-around overflow-hidden rounded-full border-[0.5px] border-border px-2"
           style={{
             height: APP_BAR_HEIGHT,
             boxShadow:
               typeof floatingBarShadow === "string"
                 ? floatingBarShadow
                 : undefined,
+            backgroundColor: "transparent",
           }}
         >
+          <BlurView
+            pointerEvents="none"
+            tint="systemMaterial"
+            intensity={90}
+            blurTarget={blurTarget}
+            blurMethod="dimezisBlurViewSdk31Plus"
+            className="absolute inset-0"
+          />
+
+          <View
+            pointerEvents="none"
+            className="absolute inset-0"
+            style={{ backgroundColor: surfaceColor, opacity: 0.72 }}
+          />
+
           <Animated.View
             pointerEvents="none"
             className="absolute rounded-full bg-accent/20"
