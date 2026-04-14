@@ -27,7 +27,7 @@ export default function ProfileLayout() {
         <Stack.Screen
           name="details"
           options={{
-            title: "Account details",
+            title: "Account",
           }}
         />
       </Stack>

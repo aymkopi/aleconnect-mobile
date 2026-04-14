@@ -18,6 +18,14 @@ export interface ConsumerProfileView {
   readonly updatedAt: Date;
 }
 
+export type ConsumerProfileViewCachePayload = Omit<
+  ConsumerProfileView,
+  "createdAt" | "updatedAt"
+> & {
+  createdAt: string;
+  updatedAt: string;
+};
+
 function readString(
   value: unknown,
   fallback: string | null = null,
@@ -66,5 +74,25 @@ export function toConsumerProfileView(
     isActive: readBoolean(row.is_active),
     createdAt: readDate(row.created_at),
     updatedAt: readDate(row.updated_at),
+  };
+}
+
+export function toConsumerProfileViewCachePayload(
+  profile: ConsumerProfileView,
+): ConsumerProfileViewCachePayload {
+  return {
+    ...profile,
+    createdAt: profile.createdAt.toISOString(),
+    updatedAt: profile.updatedAt.toISOString(),
+  };
+}
+
+export function fromConsumerProfileViewCachePayload(
+  payload: ConsumerProfileViewCachePayload,
+): ConsumerProfileView {
+  return {
+    ...payload,
+    createdAt: readDate(payload.createdAt),
+    updatedAt: readDate(payload.updatedAt),
   };
 }

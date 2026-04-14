@@ -1,11 +1,19 @@
 import { appScrollableBottomPadding } from "@/components/floating-app-bar";
+import { useAuthSession } from "@/hooks/use-auth-session";
 import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
+
 import {
+  Alert,
   Avatar,
+  BottomSheet,
   Button,
+  InputGroup,
+  Label,
   ListGroup,
   Separator,
   Surface,
+  useBottomSheetAwareHandlers,
   useThemeColor,
 } from "heroui-native";
 import type { LucideIcon } from "lucide-react-native";
@@ -18,10 +26,17 @@ import {
   LucidePhone,
   LucideUserRound,
 } from "lucide-react-native";
-import { useState, type ComponentProps } from "react";
-import { Alert, Pressable, ScrollView, Text, View } from "react-native";
+import React, { useEffect, useState, type ComponentProps } from "react";
+import {
+  Alert as NativeAlert,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { uploadCurrentUserAvatar } from "@/services/profile";
 import { useConsumerProfileContext } from "../../../context/consumer-profile-context";
 
 type AccountDetailsBuilderProps = {
@@ -34,6 +49,23 @@ type AccountDetailsBuilderProps = {
     name: string;
     onPress: () => void;
   } | null;
+};
+
+type EditableField = "phone" | "email" | "address";
+
+type ProfileDetailsSheetContentProps = {
+  editingField: EditableField | null;
+  sheetTitle: string;
+  sheetDescription: string;
+  SheetIcon: LucideIcon;
+  inputValue: string;
+  inputError: string | null;
+  currentPhone: string;
+  currentEmail: string;
+  isUpdating: boolean;
+  onChangeInput: (nextValue: string) => void;
+  onCancel: () => void;
+  onSave: () => void;
 };
 
 export function AccountDetailsBuilder({
@@ -70,20 +102,145 @@ export function AccountDetailsBuilder({
   );
 }
 
+function ProfileDetailsSheetContent({
+  editingField,
+  sheetTitle,
+  sheetDescription,
+  SheetIcon,
+  inputValue,
+  inputError,
+  currentPhone,
+  currentEmail,
+  isUpdating,
+  onChangeInput,
+  onCancel,
+  onSave,
+}: ProfileDetailsSheetContentProps) {
+  const { onFocus, onBlur } = useBottomSheetAwareHandlers();
+
+  return (
+    <View style={{ padding: 10, gap: 16 }}>
+      <View>
+        <BottomSheet.Title>{sheetTitle}</BottomSheet.Title>
+        <BottomSheet.Description>{sheetDescription}</BottomSheet.Description>
+      </View>
+      <View>
+        <Label isInvalid={!!inputError}>
+          {editingField === "phone"
+            ? "New phone number"
+            : editingField === "email"
+              ? "New email address"
+              : "New address"}
+        </Label>
+        <InputGroup>
+          <InputGroup.Prefix>
+            <SheetIcon size={18} color="#888" />
+          </InputGroup.Prefix>
+          <InputGroup.Input
+            isInvalid={!!inputError}
+            variant="secondary"
+            onFocus={onFocus}
+            onBlur={onBlur}
+            value={inputValue}
+            onChangeText={onChangeInput}
+            keyboardType={editingField === "phone" ? "number-pad" : "default"}
+            autoCapitalize="none"
+            autoCorrect={false}
+            maxLength={
+              editingField === "phone"
+                ? 11
+                : editingField === "email"
+                  ? 50
+                  : undefined
+            }
+            placeholder={
+              editingField === "phone"
+                ? "Enter new phone number"
+                : editingField === "email"
+                  ? "Enter new email"
+                  : "Address update coming soon"
+            }
+          />
+        </InputGroup>
+
+        {inputError ? (
+          <Text className="text-sm text-danger">{inputError}</Text>
+        ) : null}
+      </View>
+      <Alert className="bg-accent/10 border border-accent/20" status="accent">
+        <Alert.Indicator />
+        <Alert.Description>
+          {editingField === "phone"
+            ? `Current phone number: ${currentPhone}.`
+            : editingField === "email"
+              ? `Current email: ${currentEmail}.`
+              : "Address updates will be available soon."}
+        </Alert.Description>
+      </Alert>
+
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-evenly",
+
+          gap: 8,
+        }}
+      >
+        <Button
+          variant="tertiary"
+          size="md"
+          onPress={onCancel}
+          isDisabled={isUpdating}
+          style={{ flex: 1 }}
+        >
+          <Button.Label>Cancel</Button.Label>
+        </Button>
+        <Button
+          variant="primary"
+          size="md"
+          onPress={onSave}
+          isDisabled={isUpdating}
+          style={{ flex: 1 }}
+        >
+          <Button.Label>{isUpdating ? "Saving..." : "Save"}</Button.Label>
+        </Button>
+      </View>
+    </View>
+  );
+}
+
 export default function ProfileDetailsRoute() {
+  const router = useRouter();
   const insets = useSafeAreaInsets();
+  const [accentColor] = useThemeColor(["accent"]);
   const bottomPadding = appScrollableBottomPadding(insets.bottom);
-  const { profile, isLoading, error } = useConsumerProfileContext();
+  const { session } = useAuthSession();
+  const { profile, isLoading, error, reload, setAvatarUrl } =
+    useConsumerProfileContext();
+  const [editingField, setEditingField] = useState<EditableField | null>(null);
+  const [inputValue, setInputValue] = useState("");
+  const [inputError, setInputError] = useState<string | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [localPhone, setLocalPhone] = useState<string | null>(null);
+  const [localEmail, setLocalEmail] = useState<string | null>(null);
+  const [localAddress, setLocalAddress] = useState<string | null>(null);
   const [avatarPhoto, setAvatarPhoto] =
     useState<ImagePicker.ImagePickerAsset | null>(null);
-  const [avatarUri, setAvatarUri] = useState<string | null>(null);
+  const [avatarUri, setAvatarUri] = useState<string | null>(
+    () => profile?.avatarUrl ?? null,
+  );
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  useEffect(() => {
+    setAvatarUri(profile?.avatarUrl ?? null);
+  }, [profile?.avatarUrl]);
 
   const handleEditAvatarPress = async () => {
     const permissionResult =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permissionResult.granted) {
-      Alert.alert(
+      NativeAlert.alert(
         "Permission required",
         "Allow photo library access to update your profile picture.",
       );
@@ -103,14 +260,37 @@ export default function ProfileDetailsRoute() {
     }
 
     const selectedPhoto = result.assets[0];
-    setAvatarPhoto(selectedPhoto);
-    setAvatarUri(selectedPhoto.uri);
+    setIsUploadingAvatar(true);
+
+    try {
+      const { compressAvatarToStrictLimit } =
+        await import("@/utils/avatar-image-processing");
+      const imageBytes = await compressAvatarToStrictLimit(selectedPhoto.uri);
+      const nextAvatarUrl = await uploadCurrentUserAvatar({
+        imageBytes,
+        contentType: "image/webp",
+      });
+
+      setAvatarPhoto(selectedPhoto);
+      setAvatarUri(nextAvatarUrl);
+      await setAvatarUrl(nextAvatarUrl);
+      void reload({ forceNetwork: true });
+    } catch (nextError) {
+      const message =
+        nextError instanceof Error
+          ? nextError.message
+          : "Failed to upload profile image.";
+      NativeAlert.alert("Upload failed", message);
+    } finally {
+      setIsUploadingAvatar(false);
+    }
   };
 
   const displayName = profile?.fullName ?? "Profile not linked";
-  const displayPhone = profile?.contactNum ?? "No phone on file";
-  const displayEmail = profile?.email ?? "No email on file";
+  const displayPhone = localPhone ?? profile?.contactNum ?? "No phone on file";
+  const displayEmail = localEmail ?? profile?.email ?? "No email on file";
   const displayAddress =
+    localAddress ??
     profile?.fullAddress ??
     ([profile?.purokOrStreet, profile?.barangay, profile?.municipality]
       .filter(Boolean)
@@ -120,6 +300,159 @@ export default function ProfileDetailsRoute() {
   const displayMeterSerial =
     profile?.meterSerialNum ?? "No meter serial number";
   const displayServiceType = profile?.serviceType ?? "No service type";
+
+  const openEditSheet = (field: EditableField) => {
+    setEditingField(field);
+    setInputError(null);
+    setInputValue("");
+  };
+
+  const closeEditSheet = () => {
+    setEditingField(null);
+    setInputError(null);
+    setInputValue("");
+  };
+
+  const validateInput = (
+    field: EditableField,
+    value: string,
+  ): string | null => {
+    const trimmed = value.trim();
+
+    if (!trimmed) {
+      return "Please enter a value.";
+    }
+
+    if (field === "phone") {
+      const phoneDigits = trimmed.replace(/\D/g, "");
+      const currentPhoneDigits = (profile?.contactNum ?? "").replace(/\D/g, "");
+
+      if (phoneDigits.length !== 11) {
+        return "Phone number must be exactly 11 digits.";
+      }
+
+      if (currentPhoneDigits && phoneDigits === currentPhoneDigits) {
+        return "New phone number cannot be the same as your current number.";
+      }
+
+      return null;
+    }
+
+    if (field === "email") {
+      const currentEmail = (profile?.email ?? "").trim().toLowerCase();
+      const normalizedEmail = trimmed.toLowerCase();
+
+      if (trimmed.length > 50) {
+        return "Email must be at most 50 characters.";
+      }
+
+      if (!trimmed.includes("@")) {
+        return "Email must include '@'.";
+      }
+
+      const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailPattern.test(trimmed)) {
+        return "Please enter a valid email address.";
+      }
+
+      if (currentEmail && normalizedEmail === currentEmail) {
+        return "New email cannot be the same as your current email.";
+      }
+
+      return null;
+    }
+
+    return "Address updates will be available soon.";
+  };
+
+  const handleSaveUpdate = async () => {
+    if (!editingField) {
+      return;
+    }
+
+    const validationError = validateInput(editingField, inputValue);
+    if (validationError) {
+      setInputError(validationError);
+      return;
+    }
+
+    setIsUpdating(true);
+    setInputError(null);
+
+    try {
+      if (editingField === "phone") {
+        setLocalPhone(inputValue.trim().replace(/\D/g, ""));
+      }
+
+      if (editingField === "email") {
+        setLocalEmail(inputValue.trim());
+      }
+
+      if (editingField === "address") {
+        setLocalAddress(inputValue.trim());
+      }
+
+      closeEditSheet();
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const sheetIcon =
+    editingField === "phone"
+      ? LucidePhone
+      : editingField === "email"
+        ? LucideMail
+        : LucideMapPin;
+
+  const sheetTitle =
+    editingField === "phone"
+      ? "Update Phone Number"
+      : editingField === "email"
+        ? "Update Email"
+        : "Update Address";
+
+  const sheetDescription =
+    editingField === "phone"
+      ? "Enter your new phone number to update your account."
+      : editingField === "email"
+        ? "Enter your new email address to update your account."
+        : "Address update form preview.";
+
+  const SheetIcon = sheetIcon;
+
+  if (!session) {
+    return (
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        className="flex-1 bg-background"
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: "center",
+          padding: 20,
+          paddingBottom: bottomPadding,
+        }}
+      >
+        <Surface className="rounded-3xl p-6" style={{ gap: 12 }}>
+          <Text className="text-2xl font-bold text-foreground">
+            Sign in required
+          </Text>
+          <Text className="text-sm text-muted">
+            Account details are only available for signed-in users.
+          </Text>
+          <Button
+            variant="primary"
+            size="md"
+            onPress={() => {
+              router.push("/sign-in");
+            }}
+          >
+            <Button.Label>Sign in</Button.Label>
+          </Button>
+        </Surface>
+      </ScrollView>
+    );
+  }
 
   return (
     <ScrollView
@@ -141,12 +474,32 @@ export default function ProfileDetailsRoute() {
               width: 100,
               height: 100,
               borderRadius: 50,
+              borderColor: accentColor,
+              borderWidth: 3,
             }}
           >
             {avatarUri ? <Avatar.Image source={{ uri: avatarUri }} /> : null}
+            {!avatarUri ? (
+              <Avatar.Fallback
+                style={{ width: 100, height: 100, borderRadius: 50 }}
+              >
+                <Text
+                  style={{ fontSize: 45, fontWeight: "700", color: "#888" }}
+                >
+                  {displayName
+                    ?.split(/\s+/)
+                    .filter(Boolean)
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase()
+                    .slice(0, 2) || "?"}
+                </Text>
+              </Avatar.Fallback>
+            ) : null}
           </Avatar>
           <Pressable
             onPress={handleEditAvatarPress}
+            disabled={isUploadingAvatar}
             accessibilityRole="button"
             accessibilityLabel="Edit profile picture"
             style={{
@@ -172,12 +525,15 @@ export default function ProfileDetailsRoute() {
             Selected photo: {avatarPhoto.fileName ?? "avatar.jpg"}
           </Text>
         ) : null}
+        {isUploadingAvatar ? (
+          <Text className="text-xs text-muted mt-2">Uploading avatar...</Text>
+        ) : null}
         {error ? (
           <Text className="text-sm text-danger mt-2">{error.message}</Text>
         ) : null}
       </Surface>
 
-      <Text className="text-sm mt-3 text-muted">User Details</Text>
+      <Text className="text-sm mt-3 text-muted">User Profile</Text>
       <ListGroup>
         <AccountDetailsBuilder
           icon={LucideUserRound}
@@ -190,10 +546,12 @@ export default function ProfileDetailsRoute() {
           description="Phone"
           title={displayPhone}
           button={{
-            variant: "tertiary",
+            variant: "primary",
             size: "sm",
             name: "Update",
-            onPress: () => {},
+            onPress: () => {
+              openEditSheet("phone");
+            },
           }}
         />
         <Separator className="mx-4" />
@@ -202,10 +560,12 @@ export default function ProfileDetailsRoute() {
           description="Email"
           title={displayEmail}
           button={{
-            variant: "tertiary",
+            variant: "primary",
             size: "sm",
             name: "Update",
-            onPress: () => {},
+            onPress: () => {
+              openEditSheet("email");
+            },
           }}
         />
         <Separator className="mx-4" />
@@ -214,10 +574,12 @@ export default function ProfileDetailsRoute() {
           description="Address"
           title={displayAddress}
           button={{
-            variant: "tertiary",
+            variant: "primary",
             size: "sm",
             name: "Update",
-            onPress: () => {},
+            onPress: () => {
+              openEditSheet("address");
+            },
           }}
         />
       </ListGroup>
@@ -242,6 +604,43 @@ export default function ProfileDetailsRoute() {
           title={displayServiceType}
         ></AccountDetailsBuilder>
       </ListGroup>
+
+      <BottomSheet
+        isOpen={editingField !== null}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) {
+            closeEditSheet();
+          }
+        }}
+      >
+        <BottomSheet.Portal>
+          <BottomSheet.Overlay />
+          <BottomSheet.Content
+            keyboardBehavior="interactive"
+            keyboardBlurBehavior="restore"
+          >
+            <ProfileDetailsSheetContent
+              editingField={editingField}
+              sheetTitle={sheetTitle}
+              sheetDescription={sheetDescription}
+              SheetIcon={SheetIcon}
+              inputValue={inputValue}
+              inputError={inputError}
+              currentPhone={profile?.contactNum ?? "No phone on file"}
+              currentEmail={profile?.email ?? "No email on file"}
+              isUpdating={isUpdating}
+              onChangeInput={(nextValue) => {
+                setInputError(null);
+                setInputValue(nextValue);
+              }}
+              onCancel={closeEditSheet}
+              onSave={() => {
+                void handleSaveUpdate();
+              }}
+            />
+          </BottomSheet.Content>
+        </BottomSheet.Portal>
+      </BottomSheet>
     </ScrollView>
   );
 }

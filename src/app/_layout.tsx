@@ -1,8 +1,8 @@
 import {
-  Geist_400Regular,
-  Geist_500Medium,
-  Geist_600SemiBold,
-  useFonts as useGeistFonts,
+    Geist_400Regular,
+    Geist_500Medium,
+    Geist_600SemiBold,
+    useFonts as useGeistFonts,
 } from "@expo-google-fonts/geist";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -11,6 +11,8 @@ import { HeroUINativeProvider } from "heroui-native";
 import { useEffect, useRef } from "react";
 import { Text, TextInput } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+
+import { AuthSessionProvider } from "@/context/auth-session-context";
 import "../../global.css";
 
 void SplashScreen.preventAutoHideAsync();
@@ -61,10 +63,18 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <HeroUINativeProvider>
-        <StatusBar style="auto" />
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        </Stack>
+        <AuthSessionProvider>
+          <StatusBar style="auto" />
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="sign-in"
+              options={{
+                headerShown: false,
+              }}
+            />
+          </Stack>
+        </AuthSessionProvider>
       </HeroUINativeProvider>
     </GestureHandlerRootView>
   );
