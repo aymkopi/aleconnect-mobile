@@ -4,19 +4,14 @@ import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 
 import {
-  Alert,
   Avatar,
   BottomSheet,
   Button,
-  InputGroup,
-  Label,
   ListGroup,
   Separator,
   Surface,
-  useBottomSheetAwareHandlers,
   useThemeColor,
 } from "heroui-native";
-import type { LucideIcon } from "lucide-react-native";
 import {
   LucideBookUser,
   LucideGauge,
@@ -26,8 +21,9 @@ import {
   LucidePhone,
   LucideUserRound,
 } from "lucide-react-native";
-import React, { useEffect, useState, type ComponentProps } from "react";
+import React, { useEffect, useState } from "react";
 import {
+  Keyboard,
   Alert as NativeAlert,
   Pressable,
   ScrollView,
@@ -35,179 +31,14 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { AccountDetailsBuilder } from "./components/AccountDetailsBuilder";
+import {
+  EditableField,
+  ProfileDetailsSheetContent,
+} from "./components/ProfileDetailsSheetContent";
 
 import { uploadCurrentUserAvatar } from "@/services/profile";
 import { useConsumerProfileContext } from "../../../context/consumer-profile-context";
-
-type AccountDetailsBuilderProps = {
-  icon: LucideIcon;
-  description: string;
-  title: string;
-  button?: {
-    variant: ComponentProps<typeof Button>["variant"];
-    size: ComponentProps<typeof Button>["size"];
-    name: string;
-    onPress: () => void;
-  } | null;
-};
-
-type EditableField = "phone" | "email" | "address";
-
-type ProfileDetailsSheetContentProps = {
-  editingField: EditableField | null;
-  sheetTitle: string;
-  sheetDescription: string;
-  SheetIcon: LucideIcon;
-  inputValue: string;
-  inputError: string | null;
-  currentPhone: string;
-  currentEmail: string;
-  isUpdating: boolean;
-  onChangeInput: (nextValue: string) => void;
-  onCancel: () => void;
-  onSave: () => void;
-};
-
-export function AccountDetailsBuilder({
-  icon: Icon,
-  description,
-  title,
-  button = null,
-}: AccountDetailsBuilderProps) {
-  const [accentIconColor] = useThemeColor(["accent"]);
-  return (
-    <ListGroup.Item>
-      <ListGroup.ItemPrefix>
-        <Icon size={20} color={accentIconColor} />
-      </ListGroup.ItemPrefix>
-      <ListGroup.ItemContent>
-        <ListGroup.ItemDescription className="tracking-wide text-xs uppercase">
-          {description}
-        </ListGroup.ItemDescription>
-        <ListGroup.ItemTitle>{title}</ListGroup.ItemTitle>
-      </ListGroup.ItemContent>
-      {button ? (
-        <ListGroup.ItemSuffix>
-          <Button
-            feedbackVariant="scale-highlight"
-            variant={button.variant}
-            size={button.size}
-            onPress={button.onPress}
-          >
-            <Button.Label>{button.name}</Button.Label>
-          </Button>
-        </ListGroup.ItemSuffix>
-      ) : null}
-    </ListGroup.Item>
-  );
-}
-
-function ProfileDetailsSheetContent({
-  editingField,
-  sheetTitle,
-  sheetDescription,
-  SheetIcon,
-  inputValue,
-  inputError,
-  currentPhone,
-  currentEmail,
-  isUpdating,
-  onChangeInput,
-  onCancel,
-  onSave,
-}: ProfileDetailsSheetContentProps) {
-  const { onFocus, onBlur } = useBottomSheetAwareHandlers();
-
-  return (
-    <View style={{ padding: 10, gap: 16 }}>
-      <View>
-        <BottomSheet.Title>{sheetTitle}</BottomSheet.Title>
-        <BottomSheet.Description>{sheetDescription}</BottomSheet.Description>
-      </View>
-      <View>
-        <Label isInvalid={!!inputError}>
-          {editingField === "phone"
-            ? "New phone number"
-            : editingField === "email"
-              ? "New email address"
-              : "New address"}
-        </Label>
-        <InputGroup>
-          <InputGroup.Prefix>
-            <SheetIcon size={18} color="#888" />
-          </InputGroup.Prefix>
-          <InputGroup.Input
-            isInvalid={!!inputError}
-            variant="secondary"
-            onFocus={onFocus}
-            onBlur={onBlur}
-            value={inputValue}
-            onChangeText={onChangeInput}
-            keyboardType={editingField === "phone" ? "number-pad" : "default"}
-            autoCapitalize="none"
-            autoCorrect={false}
-            maxLength={
-              editingField === "phone"
-                ? 11
-                : editingField === "email"
-                  ? 50
-                  : undefined
-            }
-            placeholder={
-              editingField === "phone"
-                ? "Enter new phone number"
-                : editingField === "email"
-                  ? "Enter new email"
-                  : "Address update coming soon"
-            }
-          />
-        </InputGroup>
-
-        {inputError ? (
-          <Text className="text-sm text-danger">{inputError}</Text>
-        ) : null}
-      </View>
-      <Alert className="bg-accent/10 border border-accent/20" status="accent">
-        <Alert.Indicator />
-        <Alert.Description>
-          {editingField === "phone"
-            ? `Current phone number: ${currentPhone}.`
-            : editingField === "email"
-              ? `Current email: ${currentEmail}.`
-              : "Address updates will be available soon."}
-        </Alert.Description>
-      </Alert>
-
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-evenly",
-
-          gap: 8,
-        }}
-      >
-        <Button
-          variant="tertiary"
-          size="md"
-          onPress={onCancel}
-          isDisabled={isUpdating}
-          style={{ flex: 1 }}
-        >
-          <Button.Label>Cancel</Button.Label>
-        </Button>
-        <Button
-          variant="primary"
-          size="md"
-          onPress={onSave}
-          isDisabled={isUpdating}
-          style={{ flex: 1 }}
-        >
-          <Button.Label>{isUpdating ? "Saving..." : "Save"}</Button.Label>
-        </Button>
-      </View>
-    </View>
-  );
-}
 
 export default function ProfileDetailsRoute() {
   const router = useRouter();
@@ -308,6 +139,7 @@ export default function ProfileDetailsRoute() {
   };
 
   const closeEditSheet = () => {
+    Keyboard.dismiss();
     setEditingField(null);
     setInputError(null);
     setInputValue("");
@@ -547,7 +379,6 @@ export default function ProfileDetailsRoute() {
           title={displayPhone}
           button={{
             variant: "primary",
-            size: "sm",
             name: "Update",
             onPress: () => {
               openEditSheet("phone");
@@ -561,7 +392,6 @@ export default function ProfileDetailsRoute() {
           title={displayEmail}
           button={{
             variant: "primary",
-            size: "sm",
             name: "Update",
             onPress: () => {
               openEditSheet("email");
@@ -575,7 +405,6 @@ export default function ProfileDetailsRoute() {
           title={displayAddress}
           button={{
             variant: "primary",
-            size: "sm",
             name: "Update",
             onPress: () => {
               openEditSheet("address");
@@ -618,6 +447,7 @@ export default function ProfileDetailsRoute() {
           <BottomSheet.Content
             keyboardBehavior="interactive"
             keyboardBlurBehavior="restore"
+            android_keyboardInputMode="adjustPan"
           >
             <ProfileDetailsSheetContent
               editingField={editingField}

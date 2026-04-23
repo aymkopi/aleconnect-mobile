@@ -1,16 +1,17 @@
 import { Redirect, useRouter } from "expo-router";
 import {
-    Button,
-    InputGroup,
-    Label,
-    Surface,
-    useThemeColor,
+  Button,
+  Input,
+  Label,
+  Surface,
+  TextField,
+  useThemeColor,
 } from "heroui-native";
 import {
-    LucideEye,
-    LucideEyeOff,
-    LucideLock,
-    LucideUserRound,
+  LucideEye,
+  LucideEyeOff,
+  LucideLock,
+  LucideUserRound,
 } from "lucide-react-native";
 import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -26,7 +27,7 @@ export default function SignInRoute() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [accentColor, mutedColor] = useThemeColor(["accent", "muted"]);
+  const [mutedColor] = useThemeColor(["muted"]);
 
   const handleSignIn = async () => {
     setErrorMessage(null);
@@ -74,13 +75,11 @@ export default function SignInRoute() {
           </Text>
         </View>
 
-        <View style={{ gap: 8 }}>
+        <TextField>
           <Label className="text-foreground">Account number</Label>
-          <InputGroup>
-            <InputGroup.Prefix isDecorative>
-              <LucideUserRound size={18} color={mutedColor} />
-            </InputGroup.Prefix>
-            <InputGroup.Input
+          <View className="w-full flex-row items-center">
+            <Input
+              className="w-full px-10"
               value={accountNumber}
               onChangeText={setAccountNumber}
               autoCapitalize="none"
@@ -90,16 +89,17 @@ export default function SignInRoute() {
               keyboardType="number-pad"
               placeholder="Enter account number"
             />
-          </InputGroup>
-        </View>
+            <View className="absolute left-3.5" pointerEvents="none">
+              <LucideUserRound size={18} color={mutedColor} />
+            </View>
+          </View>
+        </TextField>
 
-        <View style={{ gap: 8 }}>
+        <TextField>
           <Label className="text-foreground">Password</Label>
-          <InputGroup>
-            <InputGroup.Prefix isDecorative>
-              <LucideLock size={18} color={mutedColor} />
-            </InputGroup.Prefix>
-            <InputGroup.Input
+          <View className="w-full flex-row items-center">
+            <Input
+              className="w-full px-10 pr-12"
               value={password}
               onChangeText={setPassword}
               autoCapitalize="none"
@@ -108,7 +108,10 @@ export default function SignInRoute() {
               secureTextEntry={!isPasswordVisible}
               placeholder="Enter password"
             />
-            <InputGroup.Suffix>
+            <View className="absolute left-3.5" pointerEvents="none">
+              <LucideLock size={18} color={mutedColor} />
+            </View>
+            <View className="absolute right-1.5">
               <Button
                 isIconOnly
                 variant="ghost"
@@ -126,14 +129,12 @@ export default function SignInRoute() {
                   <LucideEye size={18} color={mutedColor} />
                 )}
               </Button>
-            </InputGroup.Suffix>
-          </InputGroup>
-        </View>
+            </View>
+          </View>
+        </TextField>
 
         {errorMessage ? (
-          <Text className="text-danger text-sm" selectable>
-            {errorMessage}
-          </Text>
+          <Text className="text-danger text-sm">{errorMessage}</Text>
         ) : null}
 
         <Button
@@ -148,29 +149,17 @@ export default function SignInRoute() {
         </Button>
 
         <Button
-          variant="ghost"
+          variant="tertiary"
           size="md"
           onPress={() => router.push("/(tabs)/home")}
         >
           <Button.Label>Continue without account</Button.Label>
         </Button>
 
-        <Text className="text-xs text-muted" selectable>
+        <Text className="text-xs text-muted">
           Need help? Contact support to verify your account credentials.
         </Text>
       </Surface>
-
-      <View
-        style={{
-          alignItems: "center",
-          marginTop: 16,
-          opacity: 0.8,
-        }}
-      >
-        <Text style={{ color: accentColor }} className="text-xs">
-          ALEConnect
-        </Text>
-      </View>
     </ScrollView>
   );
 }
