@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "714474758331",
+    "project_id": "aleconnect-5fd1e",
+    "storage_bucket": "aleconnect-5fd1e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:714474758331:android:93dc8fa2bce08b2a13499e",
+        "android_client_info": {
+          "package_name": "com.kapecakes.aleconnectmobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBL_l7wXIUj1dLcKLpBTi1vkBBpR5oQPBM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

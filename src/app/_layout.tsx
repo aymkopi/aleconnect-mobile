@@ -1,17 +1,18 @@
 import {
-    Geist_400Regular,
-    Geist_500Medium,
-    Geist_600SemiBold,
-    useFonts as useGeistFonts,
+  Geist_400Regular,
+  Geist_500Medium,
+  Geist_600SemiBold,
+  useFonts as useGeistFonts,
 } from "@expo-google-fonts/geist";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { HeroUINativeProvider } from "heroui-native";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { Text, TextInput } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
+import { PushNotificationsReceiver } from "@/components/push-notifications-receiver";
 import { AuthSessionProvider } from "@/context/auth-session-context";
 import "../../global.css";
 
@@ -24,6 +25,9 @@ export default function RootLayout() {
     Geist_600SemiBold,
   });
   const didApplyDefaultFonts = useRef(false);
+  const handlePushTokenReceived = useCallback((token: string) => {
+    console.log("ExponentPushToken", token);
+  }, []);
 
   useEffect(() => {
     if (!fontsLoaded) {
@@ -64,6 +68,9 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <HeroUINativeProvider>
         <AuthSessionProvider>
+          <PushNotificationsReceiver
+            onPushTokenReceived={handlePushTokenReceived}
+          />
           <StatusBar style="auto" />
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

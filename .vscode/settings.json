@@ -47,5 +47,6 @@
     "drawerBackgroundColorClassName",
     "ListFooterComponentClassName",
     "ListHeaderComponentClassName"
-  ]
+  ],
+  "java.configuration.updateBuildConfiguration": "interactive"
 }
