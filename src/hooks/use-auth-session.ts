@@ -1,15 +1,16 @@
-import type { Session } from "@supabase/supabase-js";
-
 import { useAuthSessionContext } from "@/context/auth-session-context";
+import type { AuthSession } from "@/services/api";
 
 export type UseAuthSessionState = {
-  readonly session: Session | null;
+  readonly session: AuthSession | null;
   readonly isLoading: boolean;
+  readonly refreshSession: () => Promise<AuthSession | null>;
   readonly signOut: () => Promise<void>;
 };
 
 export function useAuthSession(): UseAuthSessionState {
-  const { session, isLoading, signOut } = useAuthSessionContext();
+  const { session, isLoading, refreshSession, signOut } =
+    useAuthSessionContext();
 
-  return { session, isLoading, signOut };
+  return { session, isLoading, refreshSession, signOut };
 }

@@ -1,64 +1,72 @@
-import type { Session } from "@supabase/supabase-js";
 import type { PropsWithChildren } from "react";
 import {
-    createContext,
-    createElement,
-    useCallback,
-    useContext,
-    useEffect,
-    useMemo,
-    useState,
+  createContext,
+  createElement,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
 } from "react";
 
-import { supabase } from "@/services/supabase";
+import {
+  apiRequest,
+  clearAuthToken,
+  getAuthToken,
+  type AuthSession,
+} from "@/services/api";
 
 export type AuthSessionContextValue = {
-  readonly session: Session | null;
+  readonly session: AuthSession | null;
   readonly isLoading: boolean;
+  readonly refreshSession: () => Promise<AuthSession | null>;
   readonly signOut: () => Promise<void>;
 };
 
 const AuthSessionContext = createContext<AuthSessionContextValue | null>(null);
 
 export function AuthSessionProvider({ children }: PropsWithChildren) {
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<AuthSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    void supabase.auth.getSession().then(({ data }) => {
-      if (!isMounted) {
-        return;
-      }
-
-      setSession(data.session ?? null);
+  const refreshSession = useCallback(async () => {
+    const token = await getAuthToken();
+    if (!token) {
+      setSession(null);
       setIsLoading(false);
-    });
+      return null;
+    }
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    try {
+      const nextSession = await apiRequest<AuthSession>(
+        "/api/auth/get-session",
+      );
       setSession(nextSession);
+      return nextSession;
+    } catch {
+      await clearAuthToken();
+      setSession(null);
+      return null;
+    } finally {
       setIsLoading(false);
-    });
-
-    return () => {
-      isMounted = false;
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  const signOut = useCallback(async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      throw error;
     }
   }, []);
 
+  const signOut = useCallback(async () => {
+    await apiRequest<{ success: boolean }>("/api/auth/sign-out", {
+      method: "POST",
+    }).catch(() => null);
+    await clearAuthToken();
+    setSession(null);
+  }, []);
+
+  useEffect(() => {
+    void refreshSession();
+  }, [refreshSession]);
+
   const value = useMemo(
-    () => ({ session, isLoading, signOut }),
-    [session, isLoading, signOut],
+    () => ({ session, isLoading, refreshSession, signOut }),
+    [session, isLoading, refreshSession, signOut],
   );
 
   return createElement(AuthSessionContext.Provider, { value }, children);

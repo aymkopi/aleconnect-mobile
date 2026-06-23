@@ -21,7 +21,7 @@ import { signInWithAccountNumber } from "@/services/auth";
 
 export default function SignInRoute() {
   const router = useRouter();
-  const { session, isLoading } = useAuthSession();
+  const { session, isLoading, refreshSession } = useAuthSession();
   const [accountNumber, setAccountNumber] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -35,6 +35,7 @@ export default function SignInRoute() {
 
     try {
       await signInWithAccountNumber({ accountNumber, password });
+      await refreshSession();
       router.replace("/(tabs)/home");
     } catch (error) {
       const message =

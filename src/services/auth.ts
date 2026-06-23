@@ -1,14 +1,25 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { supabase } from "@/services/supabase";
+import {
+  ApiRequestError,
+  apiRequest,
+  clearAuthToken,
+  setAuthToken,
+  type AuthUser,
+} from "@/services/api";
 
 type SignInWithAccountNumberParams = {
   accountNumber: string;
   password: string;
 };
 
-const loginRateLimitMaxAttempts = 5;
-const loginRateLimitWindowMs = 5 * 60 * 1000;
+type ConsumerLoginResponse = {
+  token: string;
+  user: AuthUser;
+};
+
+const loginRateLimitMaxAttempts = 100; //MAXIMUM NUMBER OF LOGIN ATTEMPTS ALLOWED WITHIN THE RATE LIMIT WINDOW
+const loginRateLimitWindowMs = 5 * 60 * 1000; //RATE LIMIT WINDOW IN MILLISECONDS (5 MINUTES)
 const loginRateLimitKeyPrefix = "login_attempts_v1";
 
 function getRateLimitKey(accountNumber: string): string {
@@ -104,33 +115,22 @@ function normalizePassword(value: string): string {
   return value;
 }
 
-export async function resolveConsumerEmailByAccountNumber(
+function resolveConsumerUsernameByAccountNumber(
   accountNumber: string,
-): Promise<string | null> {
+): string | null {
   const normalizedAccountNumber = normalizeAccountNumber(accountNumber);
 
   if (!normalizedAccountNumber) {
     return null;
   }
 
-  const { data, error } = await supabase.rpc(
-    "resolve_consumer_email_by_account_number",
-    {
-      p_account_number: normalizedAccountNumber,
-    },
-  );
-
-  if (error) {
-    throw error;
-  }
-
-  return typeof data === "string" && data.length > 0 ? data : null;
+  return normalizedAccountNumber;
 }
 
 export async function signInWithAccountNumber({
   accountNumber,
   password,
-}: SignInWithAccountNumberParams): Promise<void> {
+}: SignInWithAccountNumberParams): Promise<ConsumerLoginResponse> {
   const normalizedAccountNumber = normalizeAccountNumber(accountNumber);
   const normalizedPassword = normalizePassword(password);
 
@@ -140,24 +140,39 @@ export async function signInWithAccountNumber({
 
   await assertRateLimit(normalizedAccountNumber);
 
-  const email = await resolveConsumerEmailByAccountNumber(
+  const username = resolveConsumerUsernameByAccountNumber(
     normalizedAccountNumber,
   );
 
-  if (!email) {
+  if (!username) {
     await registerFailedAttempt(normalizedAccountNumber);
     throw new Error("Invalid account number or password.");
   }
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password: normalizedPassword,
-  });
+  let login: ConsumerLoginResponse;
+  try {
+    login = await apiRequest<ConsumerLoginResponse>(
+      "/api/auth/sign-in/username",
+      {
+        method: "POST",
+        body: JSON.stringify({ username, password: normalizedPassword }),
+      },
+    );
+  } catch (error) {
+    if (error instanceof ApiRequestError && error.status !== 401) {
+      throw error;
+    }
 
-  if (error) {
     await registerFailedAttempt(normalizedAccountNumber);
     throw new Error("Invalid account number or password.");
   }
 
+  if (login.user.role !== "consumer") {
+    await clearAuthToken();
+    throw new Error("This app only supports consumer accounts.");
+  }
+
+  await setAuthToken(login.token);
   await clearAttempts(normalizedAccountNumber);
+  return login;
 }

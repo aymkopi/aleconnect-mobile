@@ -1,142 +1,75 @@
-import { supabase } from "@/services/supabase";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { apiRequest } from "@/services/api";
 
 import {
   toConsumerProfileView,
   type ConsumerProfileView,
 } from "@/models/consumer-profile-view";
 
-const avatarBucket = "profile_images";
-const avatarSignedUrlTtlSeconds = 60 * 60 * 24 * 30;
-const avatarSignedUrlCachePrefix = "avatar_signed_url_v1";
-const avatarSignedUrlRefreshBufferMs = 5 * 60 * 1000;
-
-type AvatarSignedUrlCachePayload = {
-  url: string;
-  expiresAt: number;
+type MobileProfileResponse = {
+  id: string;
+  name: string;
+  email: string;
+  username: string | null;
+  phoneNumber: string | null;
+  avatarUrl: string | null;
+  mapCoordinates: string | null;
+  purokOrStreet: string | null;
+  barangayName: string | null;
+  municipalityName: string | null;
+  customerClass: string | null;
+  poleNumber: string | null;
+  meterSerialNumber: string | null;
+  mustChangePassword: boolean;
 };
 
-function buildAvatarSignedUrlCacheKey(path: string): string {
-  return `${avatarSignedUrlCachePrefix}:${encodeURIComponent(path)}`;
-}
-
-async function getCachedAvatarSignedUrl(path: string): Promise<string | null> {
-  const cacheKey = buildAvatarSignedUrlCacheKey(path);
-  const raw = await AsyncStorage.getItem(cacheKey);
-
-  if (!raw) {
+function parseCoordinates(value: string | null): Record<string, unknown> | null {
+  if (!value) {
     return null;
   }
 
   try {
-    const parsed = JSON.parse(raw) as AvatarSignedUrlCachePayload;
-    if (!parsed?.url || typeof parsed.expiresAt !== "number") {
-      return null;
-    }
-
-    if (Date.now() >= parsed.expiresAt - avatarSignedUrlRefreshBufferMs) {
-      return null;
-    }
-
-    return parsed.url;
+    const parsed = JSON.parse(value) as unknown;
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? (parsed as Record<string, unknown>)
+      : null;
   } catch {
     return null;
   }
 }
 
-async function cacheAvatarSignedUrl(path: string, url: string): Promise<void> {
-  const cacheKey = buildAvatarSignedUrlCacheKey(path);
-  const payload: AvatarSignedUrlCachePayload = {
-    url,
-    expiresAt: Date.now() + avatarSignedUrlTtlSeconds * 1000,
+function toProfileRow(profile: MobileProfileResponse): Record<string, unknown> {
+  const fullAddress =
+    [profile.purokOrStreet, profile.barangayName, profile.municipalityName]
+      .filter(Boolean)
+      .join(", ") || null;
+
+  return {
+    profile_id: profile.id,
+    account_number: profile.username,
+    full_name: profile.name,
+    contact_num: profile.phoneNumber,
+    email: profile.email,
+    avatar_url: profile.avatarUrl,
+    purok_or_street: profile.purokOrStreet,
+    barangay: profile.barangayName,
+    municipality: profile.municipalityName,
+    full_address: fullAddress,
+    meter_serial_num: profile.meterSerialNumber,
+    pole_number: profile.poleNumber,
+    service_type: profile.customerClass,
+    home_coordinates: parseCoordinates(profile.mapCoordinates),
+    is_active: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   };
-
-  await AsyncStorage.setItem(cacheKey, JSON.stringify(payload));
-}
-
-function extractAvatarPath(value: string): string | null {
-  const trimmed = value.trim();
-  if (!trimmed) {
-    return null;
-  }
-
-  if (/^https?:\/\//i.test(trimmed)) {
-    const match = trimmed.match(/\/profile_images\/([^?]+)/i);
-    if (!match || !match[1]) {
-      return null;
-    }
-
-    return decodeURIComponent(match[1]);
-  }
-
-  return trimmed;
-}
-
-function appendVersion(url: string): string {
-  const separator = url.includes("?") ? "&" : "?";
-  return `${url}${separator}v=${Date.now()}`;
-}
-
-async function createAvatarSignedUrl(path: string): Promise<string> {
-  const cachedUrl = await getCachedAvatarSignedUrl(path);
-  if (cachedUrl) {
-    return cachedUrl;
-  }
-
-  const { data, error } = await supabase.storage
-    .from(avatarBucket)
-    .createSignedUrl(path, avatarSignedUrlTtlSeconds);
-
-  if (error) {
-    throw error;
-  }
-
-  await cacheAvatarSignedUrl(path, data.signedUrl);
-  return data.signedUrl;
 }
 
 export async function fetchCurrentConsumerProfileView(): Promise<ConsumerProfileView | null> {
-  const { data: userData, error: userError } = await supabase.auth.getUser();
+  const profile = await apiRequest<MobileProfileResponse>(
+    "/api/mobile/profile",
+  );
 
-  if (userError) {
-    throw userError;
-  }
-
-  const user = userData.user;
-  if (!user) {
-    return null;
-  }
-
-  const { data, error } = await supabase
-    .from("v_consumer_details")
-    .select("*")
-    .eq("profile_id", user.id)
-    .maybeSingle();
-
-  if (error) {
-    throw error;
-  }
-
-  if (!data) {
-    return null;
-  }
-
-  const view = toConsumerProfileView(data as Record<string, unknown>);
-  if (!view.avatarUrl) {
-    return view;
-  }
-
-  const avatarPath = extractAvatarPath(view.avatarUrl);
-  if (!avatarPath) {
-    return { ...view, avatarUrl: null };
-  }
-
-  try {
-    const signedUrl = await createAvatarSignedUrl(avatarPath);
-    return { ...view, avatarUrl: signedUrl };
-  } catch {
-    return { ...view, avatarUrl: null };
-  }
+  return toConsumerProfileView(toProfileRow(profile));
 }
 
 export type UploadProfileAvatarInput = {
@@ -148,42 +81,33 @@ export async function uploadCurrentUserAvatar({
   imageBytes,
   contentType,
 }: UploadProfileAvatarInput): Promise<string> {
-  const { data: userData, error: userError } = await supabase.auth.getUser();
+  const { uploadUrl, key } = await apiRequest<{
+    uploadUrl: string;
+    key: string;
+  }>("/api/mobile/profile/avatar-upload", {
+    method: "POST",
+    body: JSON.stringify({ contentType }),
+  });
 
-  if (userError) {
-    throw userError;
+  const uploadResponse = await fetch(uploadUrl, {
+    method: "PUT",
+    headers: { "content-type": contentType },
+    body: imageBytes,
+  });
+
+  if (!uploadResponse.ok) {
+    throw new Error(`Avatar upload failed with ${uploadResponse.status}`);
   }
 
-  const user = userData.user;
-  if (!user) {
-    throw new Error("Sign in required to upload avatar.");
-  }
+  const { avatarUrl } = await apiRequest<{ avatarUrl: string }>(
+    "/api/mobile/profile/avatar-complete",
+    {
+      method: "POST",
+      body: JSON.stringify({ key }),
+    },
+  );
 
-  const avatarPath = `${user.id}/avatar.webp`;
-  const { error: uploadError } = await supabase.storage
-    .from(avatarBucket)
-    .upload(avatarPath, imageBytes, {
-      contentType,
-      upsert: true,
-      cacheControl: "31536000",
-    });
-
-  if (uploadError) {
-    throw uploadError;
-  }
-
-  const { error: updateError } = await supabase
-    .from("profiles")
-    .update({ avatar_url: avatarPath, updated_at: new Date().toISOString() })
-    .eq("profile_id", user.id);
-
-  if (updateError) {
-    throw updateError;
-  }
-
-  const signedUrl = await createAvatarSignedUrl(avatarPath);
-  return appendVersion(signedUrl);
+  return avatarUrl;
 }
 
 export { ConsumerProfileView };
-
