@@ -1,0 +1,252 @@
+import { appScrollableBottomPadding } from "@/components/floating-app-bar";
+import { statusBarHeight } from "@/constants";
+import {
+  complaintCategories,
+  formatReportDate,
+  recentReports,
+  type CategoryId,
+} from "@/features/complaints/data";
+import { useRouter } from "expo-router";
+import {
+  Button,
+  Input,
+  ListGroup,
+  Separator,
+  useThemeColor,
+} from "heroui-native";
+import { Bell, FileText, Plus, Search, X } from "lucide-react-native";
+import { useMemo, useState } from "react";
+import {
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+  useWindowDimensions,
+} from "react-native";
+import Animated, {
+  FadeIn,
+  FadeOut,
+  LinearTransition,
+} from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+export default function ComplaintsRoute() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const bottomPadding = appScrollableBottomPadding(insets.bottom);
+  const [accentColor, foregroundColor] = useThemeColor([
+    "accent",
+    "foreground",
+  ]);
+  const [selectedFilter, setSelectedFilter] = useState<CategoryId | "all">(
+    "all",
+  );
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [query, setQuery] = useState("");
+
+  const filteredReports = useMemo(
+    () =>
+      recentReports
+        .filter((report) =>
+          selectedFilter === "all" ? true : report.category === selectedFilter,
+        )
+        .filter((report) =>
+          query
+            ? `${report.title} ${report.type} ${report.ticket}`
+                .toLowerCase()
+                .includes(query.toLowerCase())
+            : true,
+        )
+        .sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+        ),
+    [query, selectedFilter],
+  );
+
+  const openCreate = () => router.push("/complaints/new");
+
+  return (
+    <View className="flex-1 bg-background" style={{ width }}>
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        className="bg-background"
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingHorizontal: 20,
+          gap: 12,
+          paddingBottom: bottomPadding,
+        }}
+      >
+        <View
+          className="bg-accent rounded-b-3xl"
+          style={{
+            marginHorizontal: -20,
+            minHeight: 210,
+            padding: 24,
+            paddingTop: statusBarHeight + 28,
+            justifyContent: "space-between",
+          }}
+        >
+          <View className="flex-row items-start justify-between">
+            <View className="flex-1 pr-4">
+              <Text className="text-white text-[34px] font-black">
+                Complaints
+              </Text>
+              <Text className="mt-1 text-sm font-medium text-white/85">
+                Reports, updates, and service requests
+              </Text>
+            </View>
+            <Button
+              isIconOnly
+              variant="ghost"
+              accessibilityLabel="Notifications"
+            >
+              <Bell size={21} color="white" />
+              <View className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-danger" />
+            </Button>
+          </View>
+
+          <View className="flex-row items-end justify-between">
+            <View>
+              <Text className="text-xs font-bold uppercase text-white/70">
+                Active reports
+              </Text>
+              <Text className="text-3xl font-black text-white">
+                {recentReports.length}
+              </Text>
+            </View>
+            <Button variant="secondary" onPress={openCreate} size="sm">
+              <Plus size={16} color={accentColor} />
+              <Button.Label>New report</Button.Label>
+            </Button>
+          </View>
+        </View>
+
+        <Text className="ml-2 mt-3 text-sm text-muted">Reports</Text>
+
+        <Animated.View
+          layout={LinearTransition.duration(220)}
+          className="flex-row items-center gap-2"
+        >
+          {isSearchOpen ? (
+            <Animated.View
+              entering={FadeIn.duration(180)}
+              exiting={FadeOut.duration(120)}
+              className="flex-1"
+            >
+              <Input
+                value={query}
+                onChangeText={setQuery}
+                placeholder="Search reports"
+                autoFocus
+              />
+            </Animated.View>
+          ) : (
+            <Animated.View
+              entering={FadeIn.duration(180)}
+              exiting={FadeOut.duration(120)}
+              className="flex-1"
+            >
+              <Text className="text-foreground text-xl font-black">
+                Recent reports
+              </Text>
+            </Animated.View>
+          )}
+          <Button
+            isIconOnly
+            variant="secondary"
+            size="lg"
+            onPress={() => {
+              setIsSearchOpen((current) => !current);
+              if (isSearchOpen) {
+                setQuery("");
+              }
+            }}
+            accessibilityLabel={isSearchOpen ? "Close search" : "Search"}
+          >
+            {isSearchOpen ? (
+              <X size={20} color={foregroundColor} />
+            ) : (
+              <Search size={20} color={foregroundColor} />
+            )}
+          </Button>
+        </Animated.View>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ gap: 8 }}
+        >
+          {[
+            { id: "all" as const, title: "All" },
+            ...complaintCategories.map((category) => ({
+              id: category.id,
+              title: category.title,
+            })),
+          ].map((filter) => {
+            const isActive = selectedFilter === filter.id;
+            return (
+              <Pressable
+                key={filter.id}
+                onPress={() => setSelectedFilter(filter.id)}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isActive }}
+                className={`rounded-full px-4 py-2 ${
+                  isActive ? "bg-accent" : "bg-surface"
+                }`}
+              >
+                <Text
+                  className={`text-sm font-bold ${
+                    isActive ? "text-white" : "text-foreground"
+                  }`}
+                >
+                  {filter.title}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+
+        <ListGroup>
+          {filteredReports.map((report, index) => {
+            const category = complaintCategories.find(
+              (item) => item.id === report.category,
+            );
+            return (
+              <View key={report.id}>
+                {index > 0 ? <Separator className="mx-4" /> : null}
+                <ListGroup.Item>
+                  <ListGroup.ItemPrefix>
+                    <View
+                      className="h-11 w-11 items-center justify-center rounded-2xl"
+                      style={{ backgroundColor: category?.color ?? accentColor }}
+                    >
+                      <FileText size={19} color="white" />
+                    </View>
+                  </ListGroup.ItemPrefix>
+                  <ListGroup.ItemContent>
+                    <ListGroup.ItemTitle className="font-bold">
+                      {report.title}
+                    </ListGroup.ItemTitle>
+                    <ListGroup.ItemDescription>
+                      {report.type} - {formatReportDate(report.date)}
+                    </ListGroup.ItemDescription>
+                    <Text className="text-accent mt-1 text-xs font-black">
+                      {report.ticket}
+                    </Text>
+                  </ListGroup.ItemContent>
+                  <ListGroup.ItemSuffix>
+                    <Text className="text-foreground rounded-full bg-default px-3 py-1 text-xs font-bold">
+                      {report.status}
+                    </Text>
+                  </ListGroup.ItemSuffix>
+                </ListGroup.Item>
+              </View>
+            );
+          })}
+        </ListGroup>
+      </ScrollView>
+    </View>
+  );
+}
