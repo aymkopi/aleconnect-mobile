@@ -1,20 +1,33 @@
 import { appScrollableBottomPadding } from "@/components/floating-app-bar";
 import { statusBarHeight } from "@/constants";
+import { useConsumerProfileContext } from "@/context/consumer-profile-context";
 import {
-  complaintCategories,
+  emptyComplaintMeta,
   initialComplaintForm,
-  nextTicketNumber,
-  reportTypesByCategory,
   type ComplaintFormState,
+  type ComplaintMeta,
 } from "@/features/complaints/data";
-import { useAuthSession } from "@/hooks/use-auth-session";
+import {
+  createEvidenceUploads,
+  fetchComplaintMeta,
+  submitComplaint,
+  uploadEvidenceToR2,
+} from "@/services/complaints";
+import { compressEvidencePhoto } from "@/utils/evidence-image-processing";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import * as ImagePicker from "expo-image-picker";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import {
   BottomSheet,
   Button,
   Checkbox,
+  ControlField,
+  FieldError,
   Input,
   Label,
+  ScrollShadow,
+  Separator,
   Surface,
   TextField,
   useThemeColor,
@@ -26,9 +39,11 @@ import {
   ChevronRight,
   MapPin,
 } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import {
-  type DimensionValue,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -37,6 +52,11 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+type SelectOption = {
+  value: string;
+  label: string;
+};
+
 function ReportInput({
   label,
   value,
@@ -44,6 +64,9 @@ function ReportInput({
   onChangeText,
   multiline,
   isRequired,
+  isInvalid,
+  error,
+  isDisabled,
 }: {
   label: string;
   value: string;
@@ -51,9 +74,16 @@ function ReportInput({
   onChangeText: (value: string) => void;
   multiline?: boolean;
   isRequired?: boolean;
+  isInvalid?: boolean;
+  error?: string;
+  isDisabled?: boolean;
 }) {
   return (
-    <TextField isRequired={isRequired}>
+    <TextField
+      isRequired={isRequired}
+      isInvalid={isInvalid}
+      isDisabled={isDisabled}
+    >
       <Label>{label}</Label>
       <Input
         value={value}
@@ -63,8 +93,129 @@ function ReportInput({
         numberOfLines={multiline ? 4 : 1}
         textAlignVertical={multiline ? "top" : "center"}
       />
+      <FieldError>{error}</FieldError>
     </TextField>
   );
+}
+
+function SelectField({
+  label,
+  value,
+  placeholder,
+  options,
+  onChange,
+  isRequired,
+  isInvalid,
+  error,
+  isDisabled,
+}: {
+  label: string;
+  value: string;
+  placeholder: string;
+  options: SelectOption[];
+  onChange: (value: string) => void;
+  isRequired?: boolean;
+  isInvalid?: boolean;
+  error?: string;
+  isDisabled?: boolean;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [backgroundColor, foregroundColor] = useThemeColor([
+    "background",
+    "foreground",
+  ]);
+  const snapPoints = useMemo(() => ["50%"], []);
+  const selectedOption = options.find((option) => option.value === value);
+
+  return (
+    <>
+      <TextField
+        isRequired={isRequired}
+        isInvalid={isInvalid}
+        isDisabled={isDisabled}
+      >
+        <Label>{label}</Label>
+        <Button
+          variant="secondary"
+          isDisabled={isDisabled}
+          onPress={() => setIsOpen(true)}
+          className="justify-between"
+        >
+          <Button.Label
+            className={selectedOption ? "text-foreground" : "text-muted"}
+          >
+            {selectedOption?.label ?? placeholder}
+          </Button.Label>
+          <ChevronRight size={18} color={foregroundColor} />
+        </Button>
+        <FieldError>{error}</FieldError>
+      </TextField>
+
+      <BottomSheet isOpen={isOpen} onOpenChange={setIsOpen}>
+        <BottomSheet.Portal>
+          <BottomSheet.Overlay />
+          <BottomSheet.Content
+            snapPoints={snapPoints}
+            enableOverDrag={false}
+            enableDynamicSizing={false}
+            contentContainerClassName="h-full"
+          >
+            <BottomSheet.Title>{label}</BottomSheet.Title>
+            <ScrollShadow
+              className="flex-1"
+              color={backgroundColor}
+              size={36}
+              LinearGradientComponent={LinearGradient}
+            >
+              <BottomSheetScrollView
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator
+                contentContainerStyle={{ paddingBottom: 24 }}
+              >
+                {options.map((option, index) => (
+                  <Fragment key={option.value}>
+                    {index > 0 ? <Separator /> : null}
+                    <Button
+                      variant="ghost"
+                      className="justify-between rounded-none"
+                      onPress={() => {
+                        onChange(option.value);
+                        setIsOpen(false);
+                      }}
+                    >
+                      <Button.Label>{option.label}</Button.Label>
+                      {option.value === value ? (
+                        <Check size={18} color={foregroundColor} />
+                      ) : null}
+                    </Button>
+                  </Fragment>
+                ))}
+              </BottomSheetScrollView>
+            </ScrollShadow>
+          </BottomSheet.Content>
+        </BottomSheet.Portal>
+      </BottomSheet>
+    </>
+  );
+}
+
+function findHomeAddress(meta: ComplaintMeta, profile: ReturnType<typeof useConsumerProfileContext>["profile"]) {
+  const municipality = meta.municipalities.find(
+    (item) =>
+      item.name.toLowerCase() === profile?.municipality?.trim().toLowerCase(),
+  );
+  const barangay = meta.barangays.find(
+    (item) =>
+      item.municipalityCode === municipality?.code &&
+      item.name.toLowerCase() === profile?.barangay?.trim().toLowerCase(),
+  );
+
+  return {
+    municipalityCode: municipality?.code ?? "",
+    barangayPsgc: barangay?.code ?? "",
+    purok: profile?.purokOrStreet ?? "",
+    landmark: "",
+  };
 }
 
 export default function NewComplaintRoute() {
@@ -77,32 +228,69 @@ export default function NewComplaintRoute() {
     "muted",
     "foreground",
   ]);
-  const { session } = useAuthSession();
-  const sessionUsername = session?.user.username ?? "";
+  const { profile } = useConsumerProfileContext();
+  const [meta, setMeta] = useState<ComplaintMeta>(emptyComplaintMeta);
   const [isMapSheetOpen, setIsMapSheetOpen] = useState(false);
   const [step, setStep] = useState(1);
-  const [form, setForm] = useState<ComplaintFormState>({
-    ...initialComplaintForm,
-    accountNumber: sessionUsername,
-  });
+  const [attemptedStep, setAttemptedStep] = useState<number | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [form, setForm] = useState<ComplaintFormState>(initialComplaintForm);
 
   useEffect(() => {
-    if (!sessionUsername) {
-      return;
-    }
+    let isMounted = true;
 
-    setForm((current) =>
-      current.accountNumber
-        ? current
-        : { ...current, accountNumber: sessionUsername },
-    );
-  }, [sessionUsername]);
+    fetchComplaintMeta()
+      .then((nextMeta) => {
+        if (isMounted) {
+          setMeta(nextMeta);
+        }
+      })
+      .catch((error) => {
+        if (isMounted) {
+          setSubmitError(
+            error instanceof Error
+              ? error.message
+              : "Failed to load complaint form.",
+          );
+        }
+      });
 
-  const selectedCategory = complaintCategories.find(
-    (category) => category.id === form.category,
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    setForm((current) => ({
+      ...current,
+      accountNumber: profile?.accountNumber ?? current.accountNumber,
+      ...(current.useHomeAddress ? findHomeAddress(meta, profile) : {}),
+    }));
+  }, [meta, profile]);
+
+  const selectedCategory = meta.categories.find(
+    (category) => category.id === form.categoryId,
   );
-  const reportTypes = form.category ? reportTypesByCategory[form.category] : [];
-  const progressWidth = `${(step / 5) * 100}%` as DimensionValue;
+  const selectedType = meta.types.find((type) => type.id === form.typeId);
+  const selectedMunicipality = meta.municipalities.find(
+    (municipality) => municipality.code === form.municipalityCode,
+  );
+  const selectedBarangay = meta.barangays.find(
+    (barangay) => barangay.code === form.barangayPsgc,
+  );
+
+  const reportTypeOptions = meta.types
+    .filter((type) => type.categoryId === form.categoryId)
+    .map((type) => ({ value: type.id, label: type.title }));
+  const municipalityOptions = meta.municipalities.map((municipality) => ({
+    value: municipality.code,
+    label: municipality.name,
+  }));
+  const barangayOptions = meta.barangays
+    .filter((barangay) => barangay.municipalityCode === form.municipalityCode)
+    .map((barangay) => ({ value: barangay.code, label: barangay.name }));
+
   const title =
     step === 1
       ? "Report an Issue"
@@ -115,17 +303,18 @@ export default function NewComplaintRoute() {
             : "To be verified";
   const canGoNext =
     step === 1
-      ? Boolean(form.category)
+      ? Boolean(form.categoryId)
       : step === 2
         ? Boolean(
-            form.reportType &&
+            form.typeId &&
               form.accountNumber &&
-              form.municipality &&
-              form.barangay,
+              form.municipalityCode &&
+              form.barangayPsgc,
           )
         : step === 3
-          ? Boolean(form.description && form.photos >= 3)
+          ? Boolean(form.description && form.photos.length >= 3)
           : true;
+  const showErrors = attemptedStep === step && !canGoNext;
 
   const updateForm = <Key extends keyof ComplaintFormState>(
     key: Key,
@@ -134,27 +323,103 @@ export default function NewComplaintRoute() {
     setForm((current) => ({ ...current, [key]: value }));
   };
 
-  const handleNext = () => {
-    if (step === 4) {
-      updateForm("ticketNumber", nextTicketNumber());
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const { uploads } = await createEvidenceUploads(form.photos.length);
+      const imageBytes = await Promise.all(form.photos.map(compressEvidencePhoto));
+
+      await Promise.all(
+        uploads.map((upload, index) =>
+          uploadEvidenceToR2(upload.uploadUrl, imageBytes[index]),
+        ),
+      );
+
+      const ticket = await submitComplaint({
+        typeId: form.typeId,
+        accountNumber: form.accountNumber,
+        barangayPsgc: form.barangayPsgc,
+        purok: form.purok,
+        landmark: form.landmark,
+        description: form.description,
+        actionDesired: form.desiredAction,
+        imageKeys: uploads.map((upload) => upload.key),
+      });
+
+      setForm((current) => ({
+        ...current,
+        imageKeys: uploads.map((upload) => upload.key),
+        ticketNumber: ticket.ticketNumber,
+      }));
       setStep(5);
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error ? error.message : "Failed to submit complaint.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleNext = () => {
+    if (!canGoNext) {
+      setAttemptedStep(step);
+      return;
+    }
+
+    setAttemptedStep(null);
+
+    if (step === 4) {
+      void handleSubmit();
       return;
     }
 
     setStep((current) => Math.min(5, current + 1));
   };
 
+  const addPhotos = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permission.granted) {
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsMultipleSelection: true,
+      selectionLimit: Math.max(1, 5 - form.photos.length),
+      quality: 0.8,
+    });
+
+    if (result.canceled) {
+      return;
+    }
+
+    updateForm(
+      "photos",
+      [...form.photos, ...result.assets.map((asset) => asset.uri)].slice(0, 5),
+    );
+  };
+
   return (
-    <View className="flex-1 bg-background" style={{ width }}>
+    <KeyboardAvoidingView
+      className="flex-1 bg-background"
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 8 : 0}
+      style={{ width }}
+    >
       <ScrollView
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
         className="bg-background"
         contentContainerStyle={{
           flexGrow: 1,
           paddingHorizontal: 20,
           paddingTop: statusBarHeight + 16,
           gap: 16,
-          paddingBottom: bottomPadding + 104,
+          paddingBottom: bottomPadding + 50,
         }}
       >
         <View className="gap-4">
@@ -176,29 +441,40 @@ export default function NewComplaintRoute() {
               </Text>
             </View>
           </View>
-          <View className="h-1.5 overflow-hidden rounded-full bg-default">
-            <View
-              className="h-full rounded-full bg-accent"
-              style={{ width: progressWidth }}
-            />
+          <View className="flex-row gap-2 pl-14">
+            {Array.from({ length: 5 }, (_, index) => (
+              <View
+                key={index}
+                className={`h-1.5 flex-1 rounded-full ${
+                  index + 1 <= step ? "bg-accent" : "bg-default"
+                }`}
+              />
+            ))}
           </View>
         </View>
+
+        {submitError ? (
+          <Text className="text-danger text-sm">{submitError}</Text>
+        ) : null}
 
         {step === 1 ? (
           <>
             <Text className="ml-2 text-sm text-muted">Category</Text>
             <View className="flex-row flex-wrap gap-3">
-              {complaintCategories.map((category, index) => {
-                const selected = form.category === category.id;
+              {meta.categories.map((category, index) => {
+                const selected = form.categoryId === category.id;
                 return (
                   <Pressable
                     key={category.id}
                     onPress={() => {
-                      updateForm("category", category.id);
-                      updateForm(
-                        "reportType",
-                        reportTypesByCategory[category.id][0],
+                      const firstType = meta.types.find(
+                        (type) => type.categoryId === category.id,
                       );
+                      setForm((current) => ({
+                        ...current,
+                        categoryId: category.id,
+                        typeId: firstType?.id ?? "",
+                      }));
                     }}
                     accessibilityRole="button"
                     accessibilityState={{ selected }}
@@ -207,7 +483,7 @@ export default function NewComplaintRoute() {
                       backgroundColor: category.color,
                       minHeight: index === 0 ? 124 : 142,
                       width: index === 0 ? "100%" : "47.8%",
-                      opacity: selected || !form.category ? 1 : 0.72,
+                      opacity: selected || !form.categoryId ? 1 : 0.72,
                     }}
                   >
                     <Text className="text-white text-[21px] font-black leading-6">
@@ -231,85 +507,95 @@ export default function NewComplaintRoute() {
         {step === 2 ? (
           <>
             <Text className="ml-2 text-sm text-muted">Complaint type</Text>
-            <Surface className="gap-2 rounded-3xl p-3">
-              {reportTypes.map((type) => {
-                const selected = form.reportType === type;
-                return (
-                  <Pressable
-                    key={type}
-                    onPress={() => updateForm("reportType", type)}
-                    className={`flex-row items-center justify-between rounded-2xl px-4 py-3 ${
-                      selected ? "bg-accent" : "bg-transparent"
-                    }`}
-                  >
-                    <Text
-                      className={`font-bold ${
-                        selected ? "text-white" : "text-foreground"
-                      }`}
-                    >
-                      {type}
-                    </Text>
-                    {selected ? <Check size={17} color="white" /> : null}
-                  </Pressable>
-                );
-              })}
-            </Surface>
+            <SelectField
+              isRequired
+              label="Complaint type"
+              value={form.typeId}
+              placeholder="Select complaint type"
+              options={reportTypeOptions}
+              onChange={(value) => updateForm("typeId", value)}
+              isInvalid={showErrors && !form.typeId}
+              error="Select a complaint type."
+            />
 
             <Text className="ml-2 text-sm text-muted">Account</Text>
             <ReportInput
               isRequired
+              isDisabled
               label="Account number"
               value={form.accountNumber}
               placeholder="100001321412634"
-              onChangeText={(value) => updateForm("accountNumber", value)}
+              onChangeText={() => undefined}
+              isInvalid={showErrors && !form.accountNumber}
+              error="Account number is required."
             />
 
             <Text className="ml-2 text-sm text-muted">Address</Text>
-            <Checkbox
+            <ControlField
               isSelected={form.useHomeAddress}
-              onSelectedChange={(selected) =>
-                updateForm("useHomeAddress", selected)
-              }
+              onSelectedChange={(selected) => {
+                setForm((current) => ({
+                  ...current,
+                  useHomeAddress: selected,
+                  ...(selected ? findHomeAddress(meta, profile) : {}),
+                }));
+              }}
             >
-              <Checkbox.Indicator />
-              <Text className="text-foreground text-sm font-semibold">
-                Use home address
-              </Text>
-            </Checkbox>
+              <ControlField.Indicator>
+                <Checkbox className="mt-0.5" />
+              </ControlField.Indicator>
+              <View className="flex-1">
+                <Label>Use home address</Label>
+              </View>
+            </ControlField>
             <View className="flex-row items-end gap-2">
               <View className="flex-1">
-                <ReportInput
+                <SelectField
                   isRequired
                   label="Municipality"
-                  value={form.municipality}
-                  placeholder="Municipality"
-                  onChangeText={(value) => updateForm("municipality", value)}
+                  value={form.municipalityCode}
+                  placeholder="Select municipality"
+                  options={municipalityOptions}
+                  isDisabled={form.useHomeAddress}
+                  onChange={(value) => {
+                    updateForm("municipalityCode", value);
+                    updateForm("barangayPsgc", "");
+                  }}
+                  isInvalid={showErrors && !form.municipalityCode}
+                  error="Select a municipality."
                 />
               </View>
               <Button
                 isIconOnly
                 variant="secondary"
                 size="lg"
+                isDisabled={form.useHomeAddress}
                 onPress={() => setIsMapSheetOpen(true)}
                 accessibilityLabel="Open map picker"
               >
                 <MapPin size={20} color={foregroundColor} />
               </Button>
             </View>
-            <ReportInput
+            <SelectField
               isRequired
               label="Barangay"
-              value={form.barangay}
-              placeholder="Barangay"
-              onChangeText={(value) => updateForm("barangay", value)}
+              value={form.barangayPsgc}
+              placeholder="Select barangay"
+              options={barangayOptions}
+              onChange={(value) => updateForm("barangayPsgc", value)}
+              isDisabled={form.useHomeAddress || !form.municipalityCode}
+              isInvalid={showErrors && !form.barangayPsgc}
+              error="Select a barangay."
             />
             <ReportInput
+              isDisabled={form.useHomeAddress}
               label="Purok"
               value={form.purok}
               placeholder="Purok or street"
               onChangeText={(value) => updateForm("purok", value)}
             />
             <ReportInput
+              isDisabled={form.useHomeAddress}
               label="Landmark"
               value={form.landmark}
               placeholder="Nearest landmark"
@@ -328,6 +614,8 @@ export default function NewComplaintRoute() {
               placeholder="Describe the issue"
               multiline
               onChangeText={(value) => updateForm("description", value)}
+              isInvalid={showErrors && !form.description}
+              error="Describe the complaint."
             />
             <ReportInput
               label="Action desired"
@@ -342,7 +630,7 @@ export default function NewComplaintRoute() {
                   Evidence photos *
                 </Text>
                 <Text className="text-muted text-xs font-bold">
-                  {form.photos}/5
+                  {form.photos.length}/5
                 </Text>
               </View>
               <Text className="text-muted mt-1 text-sm">
@@ -352,23 +640,25 @@ export default function NewComplaintRoute() {
                 {Array.from({ length: 5 }, (_, index) => (
                   <Pressable
                     key={index}
-                    onPress={() =>
-                      updateForm(
-                        "photos",
-                        Math.min(5, Math.max(form.photos, index + 1)),
-                      )
-                    }
+                    onPress={index < form.photos.length ? undefined : addPhotos}
                     className={`h-14 flex-1 items-center justify-center rounded-2xl ${
-                      index < form.photos ? "bg-accent" : "bg-background"
+                      index < form.photos.length ? "bg-accent" : "bg-background"
                     }`}
                   >
-                    <Camera
-                      size={18}
-                      color={index < form.photos ? "white" : mutedColor}
-                    />
+                    {form.photos[index] ? (
+                      <Image
+                        source={{ uri: form.photos[index] }}
+                        className="h-full w-full rounded-2xl"
+                      />
+                    ) : (
+                      <Camera size={18} color={mutedColor} />
+                    )}
                   </Pressable>
                 ))}
               </View>
+              <FieldError isInvalid={showErrors && form.photos.length < 3}>
+                Add at least 3 photos.
+              </FieldError>
             </Surface>
           </>
         ) : null}
@@ -378,17 +668,22 @@ export default function NewComplaintRoute() {
             <Text className="text-foreground text-lg font-black">Preview</Text>
             {[
               ["Category", selectedCategory?.title],
-              ["Type", form.reportType],
+              ["Type", selectedType?.title],
               ["Account", form.accountNumber],
               [
                 "Address",
-                [form.purok, form.barangay, form.municipality, form.landmark]
+                [
+                  form.purok,
+                  selectedBarangay?.name,
+                  selectedMunicipality?.name,
+                  form.landmark,
+                ]
                   .filter(Boolean)
                   .join(", "),
               ],
               ["Description", form.description],
               ["Action desired", form.desiredAction || "Not specified"],
-              ["Photos", `${form.photos} attached`],
+              ["Photos", `${form.photos.length} attached`],
             ].map(([label, value]) => (
               <View key={label} className="border-border mt-3 border-t pt-3">
                 <Text className="text-muted text-xs font-bold">{label}</Text>
@@ -444,31 +739,36 @@ export default function NewComplaintRoute() {
       {step < 5 ? (
         <View
           pointerEvents="box-none"
-          className="absolute inset-x-0 bottom-0 flex-row items-end justify-between px-5"
+          className="absolute inset-x-0 bottom-16 flex-row items-end justify-between px-5"
           style={{ paddingBottom: insets.bottom + 18 }}
         >
           <Button
             variant="secondary"
             isIconOnly
-            isDisabled={step === 1}
-            onPress={() => setStep((current) => Math.max(1, current - 1))}
+            isDisabled={step === 1 || isSubmitting}
+            onPress={() => {
+              setAttemptedStep(null);
+              setStep((current) => Math.max(1, current - 1));
+            }}
             accessibilityLabel="Previous"
           >
             <ChevronLeft size={20} color={foregroundColor} />
           </Button>
           <Button
             variant="primary"
-            isIconOnly
-            size="lg"
-            isDisabled={!canGoNext}
+            size="md"
+            isDisabled={(attemptedStep === step && !canGoNext) || isSubmitting}
             onPress={handleNext}
             accessibilityLabel={step === 4 ? "Submit report" : "Next"}
-            className="h-16 w-16 rounded-full"
+            className="rounded-full"
           >
+            <Button.Label className="ml-2">
+              {isSubmitting ? "Submitting" : step === 4 ? "Submit" : "Next"}
+            </Button.Label>
             {step === 4 ? (
-              <Check size={24} color="white" />
+              <Check size={20} color="white" />
             ) : (
-              <ChevronRight size={24} color="white" />
+              <ChevronRight size={20} color="white" />
             )}
           </Button>
         </View>
@@ -490,6 +790,6 @@ export default function NewComplaintRoute() {
           </BottomSheet.Content>
         </BottomSheet.Portal>
       </BottomSheet>
-    </View>
+    </KeyboardAvoidingView>
   );
 }

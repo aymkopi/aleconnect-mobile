@@ -5,6 +5,14 @@ import { Platform } from "react-native";
 import { expoPushProjectId } from "@/constants";
 
 const pushNotificationChannelId = "default";
+type PermissionLike = {
+  readonly granted?: boolean;
+  readonly status?: "granted" | "denied" | "undetermined";
+};
+
+function isPermissionGranted(permission: PermissionLike): boolean {
+  return permission.granted === true || permission.status === "granted";
+}
 
 export function configurePushNotificationHandler(): void {
   Notifications.setNotificationHandler({
@@ -34,16 +42,17 @@ export async function registerForPushNotificationsAsync(): Promise<
   }
 
   try {
-    const { status: existingStatus } =
-      await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
+    const existingPermission =
+      (await Notifications.getPermissionsAsync()) as PermissionLike;
+    let isGranted = isPermissionGranted(existingPermission);
 
-    if (existingStatus !== "granted") {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
+    if (!isGranted) {
+      const requestedPermission =
+        (await Notifications.requestPermissionsAsync()) as PermissionLike;
+      isGranted = isPermissionGranted(requestedPermission);
     }
 
-    if (finalStatus !== "granted") {
+    if (!isGranted) {
       return null;
     }
 

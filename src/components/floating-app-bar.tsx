@@ -181,6 +181,16 @@ export const FloatingAppBar: FC<FloatingAppBarProps> = ({
 
   return (
     <View pointerEvents="box-none" className="absolute bottom-0 left-0 right-0">
+      {/* TODO: Add a fading shadow or blur gradient below the app bar to indicate scrollable content and provide visual separation between the app bar and the content above it. This will enhance the user experience by making it clear that the content can be scrolled and that the app bar is a persistent navigation element. */}
+      <View pointerEvents="none" className="px-5">
+        {[0.08, 0.16, 0.24].map((opacity, index) => (
+          <View
+            key={opacity}
+            className="h-4 bg-background"
+            style={{ opacity, marginBottom: index === 2 ? -2 : 0 }}
+          />
+        ))}
+      </View>
       {/* Outer padding container */}
       <View className="px-3.75" style={{ paddingBottom: bottomInset }}>
         {/* Bar background container */}

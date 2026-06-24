@@ -31,11 +31,11 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { AccountDetailsBuilder } from "./components/AccountDetailsBuilder";
+import { AccountDetailsBuilder } from "@/features/profile/components/AccountDetailsBuilder";
 import {
   EditableField,
   ProfileDetailsSheetContent,
-} from "./components/ProfileDetailsSheetContent";
+} from "@/features/profile/components/ProfileDetailsSheetContent";
 
 import { uploadCurrentUserAvatar } from "@/services/profile";
 import { useConsumerProfileContext } from "../../../context/consumer-profile-context";

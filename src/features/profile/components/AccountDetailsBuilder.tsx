@@ -1,4 +1,4 @@
-import { Button, ListGroup, TagGroup, useThemeColor } from "heroui-native";
+import { Button, ListGroup, useThemeColor } from "heroui-native";
 import type { LucideIcon } from "lucide-react-native";
 import type { ComponentProps } from "react";
 import React from "react";

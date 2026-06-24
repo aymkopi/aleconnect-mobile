@@ -1,12 +1,16 @@
 import { appScrollableBottomPadding } from "@/components/floating-app-bar";
 import { statusBarHeight } from "@/constants";
 import {
-  complaintCategories,
+  emptyComplaintMeta,
   formatReportDate,
-  recentReports,
-  type CategoryId,
+  type ComplaintMeta,
+  type Report,
 } from "@/features/complaints/data";
-import { useRouter } from "expo-router";
+import {
+  fetchComplaintMeta,
+  fetchComplaintReports,
+} from "@/services/complaints";
+import { useFocusEffect, useRouter } from "expo-router";
 import {
   Button,
   Input,
@@ -15,7 +19,7 @@ import {
   useThemeColor,
 } from "heroui-native";
 import { Bell, FileText, Plus, Search, X } from "lucide-react-native";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -39,29 +43,61 @@ export default function ComplaintsRoute() {
     "accent",
     "foreground",
   ]);
-  const [selectedFilter, setSelectedFilter] = useState<CategoryId | "all">(
-    "all",
-  );
+  const [meta, setMeta] = useState<ComplaintMeta>(emptyComplaintMeta);
+  const [reports, setReports] = useState<Report[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedFilter, setSelectedFilter] = useState("all");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
 
+  useFocusEffect(
+    useCallback(() => {
+      let isMounted = true;
+
+      Promise.all([fetchComplaintMeta(), fetchComplaintReports()])
+        .then(([nextMeta, nextReports]) => {
+          if (!isMounted) {
+            return;
+          }
+
+          setMeta(nextMeta);
+          setReports(nextReports);
+          setError(null);
+        })
+        .catch((nextError) => {
+          if (isMounted) {
+            setError(
+              nextError instanceof Error
+                ? nextError.message
+                : "Failed to load complaints.",
+            );
+          }
+        });
+
+      return () => {
+        isMounted = false;
+      };
+    }, []),
+  );
+
   const filteredReports = useMemo(
     () =>
-      recentReports
+      reports
         .filter((report) =>
-          selectedFilter === "all" ? true : report.category === selectedFilter,
+          selectedFilter === "all" ? true : report.categoryId === selectedFilter,
         )
         .filter((report) =>
           query
-            ? `${report.title} ${report.type} ${report.ticket}`
+            ? `${report.title} ${report.typeTitle} ${report.ticketNumber}`
                 .toLowerCase()
                 .includes(query.toLowerCase())
             : true,
         )
         .sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         ),
-    [query, selectedFilter],
+    [query, reports, selectedFilter],
   );
 
   const openCreate = () => router.push("/complaints/new");
@@ -72,7 +108,6 @@ export default function ComplaintsRoute() {
         contentInsetAdjustmentBehavior="automatic"
         className="bg-background"
         contentContainerStyle={{
-          flexGrow: 1,
           paddingHorizontal: 20,
           gap: 12,
           paddingBottom: bottomPadding,
@@ -113,7 +148,7 @@ export default function ComplaintsRoute() {
                 Active reports
               </Text>
               <Text className="text-3xl font-black text-white">
-                {recentReports.length}
+                {reports.length}
               </Text>
             </View>
             <Button variant="secondary" onPress={openCreate} size="sm">
@@ -122,8 +157,6 @@ export default function ComplaintsRoute() {
             </Button>
           </View>
         </View>
-
-        <Text className="ml-2 mt-3 text-sm text-muted">Reports</Text>
 
         <Animated.View
           layout={LinearTransition.duration(220)}
@@ -177,10 +210,12 @@ export default function ComplaintsRoute() {
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ gap: 8 }}
+          className="flex-row -mx-4"
+          contentContainerClassName="px-4"
         >
           {[
             { id: "all" as const, title: "All" },
-            ...complaintCategories.map((category) => ({
+            ...meta.categories.map((category) => ({
               id: category.id,
               title: category.title,
             })),
@@ -208,10 +243,12 @@ export default function ComplaintsRoute() {
           })}
         </ScrollView>
 
+        {error ? <Text className="text-danger text-sm">{error}</Text> : null}
+
         <ListGroup>
           {filteredReports.map((report, index) => {
-            const category = complaintCategories.find(
-              (item) => item.id === report.category,
+            const category = meta.categories.find(
+              (item) => item.id === report.categoryId,
             );
             return (
               <View key={report.id}>
@@ -220,7 +257,9 @@ export default function ComplaintsRoute() {
                   <ListGroup.ItemPrefix>
                     <View
                       className="h-11 w-11 items-center justify-center rounded-2xl"
-                      style={{ backgroundColor: category?.color ?? accentColor }}
+                      style={{
+                        backgroundColor: category?.color ?? accentColor,
+                      }}
                     >
                       <FileText size={19} color="white" />
                     </View>
@@ -230,10 +269,10 @@ export default function ComplaintsRoute() {
                       {report.title}
                     </ListGroup.ItemTitle>
                     <ListGroup.ItemDescription>
-                      {report.type} - {formatReportDate(report.date)}
+                      {report.typeTitle} - {formatReportDate(report.createdAt)}
                     </ListGroup.ItemDescription>
                     <Text className="text-accent mt-1 text-xs font-black">
-                      {report.ticket}
+                      {report.ticketNumber}
                     </Text>
                   </ListGroup.ItemContent>
                   <ListGroup.ItemSuffix>
