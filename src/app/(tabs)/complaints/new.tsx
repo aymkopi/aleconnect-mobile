@@ -418,8 +418,16 @@ export default function NewComplaintRoute() {
             <Button
               isIconOnly
               variant="ghost"
-              onPress={() => router.back()}
-              accessibilityLabel="Back to complaints"
+              onPress={() => {
+                if (step > 1) {
+                  setAttemptedStep(null);
+                  setStep((current) => Math.max(1, current - 1));
+                  return;
+                }
+
+                router.back();
+              }}
+              accessibilityLabel={step > 1 ? "Previous step" : "Back to complaints"}
             >
               <ChevronLeft size={22} color={foregroundColor} />
             </Button>
@@ -744,21 +752,9 @@ export default function NewComplaintRoute() {
       {step < 5 ? (
         <View
           pointerEvents="box-none"
-          className="absolute inset-x-0 bottom-16 flex-row items-end justify-between px-5"
+          className="absolute inset-x-0 bottom-0 flex-row items-end justify-end px-5"
           style={{ paddingBottom: insets.bottom + 18 }}
         >
-          <Button
-            variant="secondary"
-            isIconOnly
-            isDisabled={step === 1 || isSubmitting}
-            onPress={() => {
-              setAttemptedStep(null);
-              setStep((current) => Math.max(1, current - 1));
-            }}
-            accessibilityLabel="Previous"
-          >
-            <ChevronLeft size={20} color={foregroundColor} />
-          </Button>
           <Button
             variant="primary"
             size="md"
