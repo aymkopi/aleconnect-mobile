@@ -36,6 +36,12 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+function formatStatus(status: string) {
+  return status
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
 export default function ComplaintsRoute() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -289,8 +295,8 @@ export default function ComplaintsRoute() {
                     </Text>
                   </ListGroup.ItemContent>
                   <ListGroup.ItemSuffix>
-                    <Text className="text-foreground rounded-full bg-default px-3 py-1 text-xs font-bold capitalize">
-                      {report.status}
+                    <Text className="text-foreground rounded-full bg-default px-3 py-1 text-xs font-bold">
+                      {formatStatus(report.status)}
                     </Text>
                   </ListGroup.ItemSuffix>
                 </ListGroup.Item>

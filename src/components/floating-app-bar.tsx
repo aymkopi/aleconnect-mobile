@@ -22,6 +22,7 @@ const APP_BAR_OUTER_PADDING = 15;
 const TAB_MIN_HIT_AREA = 44;
 const ACTIVE_PILL_VERTICAL_INSET = 4;
 const ACTIVE_PILL_ANIMATION_MS = 280;
+const CONTENT_FADE_STEPS = [0, 0.04, 0.08, 0.14, 0.22, 0.34] as const;
 
 /**
  * Types
@@ -181,13 +182,15 @@ export const FloatingAppBar: FC<FloatingAppBarProps> = ({
 
   return (
     <View pointerEvents="box-none" className="absolute bottom-0 left-0 right-0">
-      {/* TODO: Add a fading shadow or blur gradient below the app bar to indicate scrollable content and provide visual separation between the app bar and the content above it. This will enhance the user experience by making it clear that the content can be scrolled and that the app bar is a persistent navigation element. */}
       <View pointerEvents="none" className="px-5">
-        {[0.08, 0.16, 0.24].map((opacity, index) => (
+        {CONTENT_FADE_STEPS.map((opacity, index) => (
           <View
-            key={opacity}
-            className="h-4 bg-background"
-            style={{ opacity, marginBottom: index === 2 ? -2 : 0 }}
+            key={`${opacity}-${index}`}
+            className="h-3 bg-background"
+            style={{
+              opacity,
+              marginBottom: index === CONTENT_FADE_STEPS.length - 1 ? -2 : 0,
+            }}
           />
         ))}
       </View>
@@ -218,7 +221,7 @@ export const FloatingAppBar: FC<FloatingAppBarProps> = ({
           <View
             pointerEvents="none"
             className="absolute inset-0"
-            style={{ backgroundColor: surfaceColor, opacity: 0.72 }}
+            style={{ backgroundColor: surfaceColor, opacity: 0.94 }}
           />
 
           <Animated.View

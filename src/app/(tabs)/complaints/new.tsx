@@ -17,7 +17,6 @@ import {
 import { compressEvidencePhoto } from "@/utils/evidence-image-processing";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import * as ImagePicker from "expo-image-picker";
-import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import {
   BottomSheet,
@@ -27,7 +26,6 @@ import {
   FieldError,
   Input,
   Label,
-  ScrollShadow,
   Separator,
   Surface,
   TextField,
@@ -121,10 +119,7 @@ function SelectField({
   isDisabled?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [backgroundColor, foregroundColor] = useThemeColor([
-    "background",
-    "foreground",
-  ]);
+  const [foregroundColor] = useThemeColor(["foreground"]);
   const snapPoints = useMemo(() => ["50%"], []);
   const selectedOption = options.find((option) => option.value === value);
 
@@ -162,37 +157,32 @@ function SelectField({
             contentContainerClassName="h-full"
           >
             <BottomSheet.Title>{label}</BottomSheet.Title>
-            <ScrollShadow
-              className="flex-1"
-              color={backgroundColor}
-              size={36}
-              LinearGradientComponent={LinearGradient}
+            {/* ponytail: ScrollShadow crashes in current native bundle; re-add after linear-gradient works. */}
+            <BottomSheetScrollView
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator
+              style={{ flex: 1 }}
+              contentContainerStyle={{ paddingBottom: 24 }}
             >
-              <BottomSheetScrollView
-                keyboardShouldPersistTaps="handled"
-                showsVerticalScrollIndicator
-                contentContainerStyle={{ paddingBottom: 24 }}
-              >
-                {options.map((option, index) => (
-                  <Fragment key={option.value}>
-                    {index > 0 ? <Separator /> : null}
-                    <Button
-                      variant="ghost"
-                      className="justify-between rounded-none"
-                      onPress={() => {
-                        onChange(option.value);
-                        setIsOpen(false);
-                      }}
-                    >
-                      <Button.Label>{option.label}</Button.Label>
-                      {option.value === value ? (
-                        <Check size={18} color={foregroundColor} />
-                      ) : null}
-                    </Button>
-                  </Fragment>
-                ))}
-              </BottomSheetScrollView>
-            </ScrollShadow>
+              {options.map((option, index) => (
+                <Fragment key={option.value}>
+                  {index > 0 ? <Separator /> : null}
+                  <Button
+                    variant="ghost"
+                    className="justify-between rounded-none"
+                    onPress={() => {
+                      onChange(option.value);
+                      setIsOpen(false);
+                    }}
+                  >
+                    <Button.Label>{option.label}</Button.Label>
+                    {option.value === value ? (
+                      <Check size={18} color={foregroundColor} />
+                    ) : null}
+                  </Button>
+                </Fragment>
+              ))}
+            </BottomSheetScrollView>
           </BottomSheet.Content>
         </BottomSheet.Portal>
       </BottomSheet>

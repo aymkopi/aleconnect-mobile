@@ -7,11 +7,39 @@ interface FloatingTabsBarProps extends BottomTabBarProps {
   readonly blurTarget: RefObject<View | null>;
 }
 
+type NestedRoute = {
+  name?: string;
+  state?: {
+    index?: number;
+    routes?: NestedRoute[];
+  };
+};
+
+function getFocusedNestedRouteName(route: NestedRoute): string | undefined {
+  const nestedState = route.state;
+  const nestedRoute = nestedState?.routes?.[nestedState.index ?? 0];
+
+  if (!nestedRoute) {
+    return undefined;
+  }
+
+  return getFocusedNestedRouteName(nestedRoute) ?? nestedRoute.name;
+}
+
 export function FloatingTabsBar({
   state,
   navigation,
   blurTarget,
 }: FloatingTabsBarProps) {
+  const activeRoute = state.routes[state.index];
+  const nestedRouteName = activeRoute
+    ? getFocusedNestedRouteName(activeRoute as NestedRoute)
+    : undefined;
+
+  if (nestedRouteName && nestedRouteName !== "index") {
+    return null;
+  }
+
   return (
     <View pointerEvents="box-none" style={{ flex: 0 }}>
       <FloatingAppBar
