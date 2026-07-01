@@ -1,12 +1,50 @@
 import { appScrollableBottomPadding } from "@/components/floating-app-bar";
-import { ScrollView, Text, View, useWindowDimensions } from "react-native";
+import { statusBarHeight } from "@/constants";
+import { Button, ListGroup, Surface, useThemeColor } from "heroui-native";
+import {
+  AlertTriangle,
+  ArrowUpRight,
+  Building2,
+  Globe,
+  MessageCircle,
+  Phone,
+} from "lucide-react-native";
+import { Linking, ScrollView, Text, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useCSSVariable } from "uniwind";
+
+const hotlineGroups = [
+  {
+    title: "Emergency concern",
+    description: "For live-wire, fire, or immediate safety risks.",
+    icon: AlertTriangle,
+    action: "Call nearest emergency office",
+  },
+  {
+    title: "ALECO support",
+    description: "Account, billing, and service report assistance.",
+    icon: Building2,
+    action: "Use official ALECO channels",
+  },
+  {
+    title: "Messenger support",
+    description: "Open ALECO Facebook page for current public updates.",
+    icon: MessageCircle,
+    action: "Open Facebook",
+    url: "https://www.facebook.com/albayelectric",
+  },
+  {
+    title: "Website",
+    description: "Visit ALECO website for advisories and information.",
+    icon: Globe,
+    action: "Open website",
+    url: "https://web.alecoinc.com.ph/",
+  },
+];
 
 export default function HotlinesRoute() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const surfaceCardShadow = useCSSVariable("--shadow-surface-card");
+  const [accentColor, mutedColor] = useThemeColor(["accent", "muted"]);
   const bottomPadding = appScrollableBottomPadding(insets.bottom);
 
   return (
@@ -17,85 +55,72 @@ export default function HotlinesRoute() {
       contentContainerStyle={{
         flexGrow: 1,
         paddingHorizontal: 20,
-        paddingTop: 28,
-        gap: 14,
+        paddingTop: statusBarHeight + 22,
+        gap: 16,
         paddingBottom: bottomPadding,
       }}
     >
-      <Text
-        selectable
-        style={{
-          fontSize: 30,
-          fontWeight: "800",
-        }}
-        className="text-foreground"
-      >
-        Hotlines
-      </Text>
+      <View className="flex-row items-start justify-between">
+        <View className="flex-1 pr-4">
+          <Text className="text-foreground text-[34px] font-black leading-10">
+            Hotlines
+          </Text>
+          <Text className="text-muted mt-1 text-[15px] leading-5">
+            Fast access to safety, support, and official ALECO channels.
+          </Text>
+        </View>
+        <Button isIconOnly variant="secondary" accessibilityLabel="Call">
+          <Phone size={20} color={accentColor} />
+        </Button>
+      </View>
 
-      <Text
-        selectable
-        style={{
-          fontSize: 16,
-          lineHeight: 24,
-        }}
-        className="text-muted"
-      >
-        Access emergency and support contacts quickly with curated hotline
-        groups.
-      </Text>
-
-      <View
-        className="border-border bg-surface"
-        style={{
-          marginTop: 8,
-          borderRadius: 24,
-          borderWidth: 1,
-          padding: 20,
-          gap: 12,
-          boxShadow:
-            typeof surfaceCardShadow === "string"
-              ? surfaceCardShadow
-              : undefined,
-        }}
-      >
-        <Text
-          selectable
-          style={{
-            fontSize: 13,
-            fontWeight: "700",
-            letterSpacing: 0.6,
-          }}
-          className="text-muted"
-        >
-          PAGE HIGHLIGHTS
+      <Surface className="rounded-[24px] p-5">
+        <Text className="text-foreground text-[17px] font-bold leading-6">
+          Safety first
         </Text>
+        <Text className="text-muted mt-1 text-[14px] leading-5">
+          Stay away from downed lines and damaged electrical equipment. Use
+          emergency services for immediate danger.
+        </Text>
+      </Surface>
 
-        {["Emergency lines", "Support teams", "Saved contacts"].map(
-          (highlight) => (
-            <View
-              key={highlight}
-              className="border-border bg-surface-secondary"
-              style={{
-                borderRadius: 14,
-                borderWidth: 1,
-                paddingHorizontal: 14,
-                paddingVertical: 12,
-              }}
-            >
-              <Text
-                selectable
-                style={{
-                  fontSize: 15,
-                  fontWeight: "600",
-                }}
-                className="text-surface-secondary-foreground"
+      <View className="gap-2">
+        <Text className="ml-2 text-sm font-semibold text-muted">Contacts</Text>
+        <ListGroup>
+          {hotlineGroups.map((group) => {
+            const Icon = group.icon;
+            return (
+              <ListGroup.Item
+                key={group.title}
+                onPress={
+                  group.url
+                    ? () => {
+                        void Linking.openURL(group.url);
+                      }
+                    : undefined
+                }
               >
-                {highlight}
-              </Text>
-            </View>
-          ),
-        )}
+                <ListGroup.ItemPrefix>
+                  <Icon size={20} color={accentColor} />
+                </ListGroup.ItemPrefix>
+                <ListGroup.ItemContent>
+                  <ListGroup.ItemTitle>{group.title}</ListGroup.ItemTitle>
+                  <ListGroup.ItemDescription>
+                    {group.description}
+                  </ListGroup.ItemDescription>
+                  <Text className="text-accent mt-1 text-xs font-bold">
+                    {group.action}
+                  </Text>
+                </ListGroup.ItemContent>
+                <ListGroup.ItemSuffix>
+                  {group.url ? (
+                    <ArrowUpRight size={18} color={mutedColor} />
+                  ) : null}
+                </ListGroup.ItemSuffix>
+              </ListGroup.Item>
+            );
+          })}
+        </ListGroup>
       </View>
     </ScrollView>
   );

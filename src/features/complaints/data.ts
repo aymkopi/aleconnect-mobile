@@ -82,6 +82,18 @@ export const initialComplaintForm: ComplaintFormState = {
   ticketNumber: null,
 };
 
+const complaintCategoryTitles: Record<string, string> = {
+  "Complaints/Service on Service Drop": "Service Drop",
+  "Complaints on KWHR Meter": "Electric Meter",
+  "Distribution Pole Complaint and Others": "Poles and Lines",
+  "Clearing of Distribution Line": "Line Clearing",
+  "Other Verified Complaints": "Official Referrals",
+};
+
+export function formatComplaintCategoryTitle(title: string) {
+  return complaintCategoryTitles[title] ?? title;
+}
+
 export function formatReportDate(value: string) {
   return new Intl.DateTimeFormat("en", {
     month: "short",

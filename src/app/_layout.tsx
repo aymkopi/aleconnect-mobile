@@ -1,9 +1,4 @@
-import {
-  Geist_400Regular,
-  Geist_500Medium,
-  Geist_600SemiBold,
-  useFonts as useGeistFonts,
-} from "@expo-google-fonts/geist";
+import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -19,10 +14,11 @@ import "../../global.css";
 void SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const [fontsLoaded] = useGeistFonts({
-    Geist_400Regular,
-    Geist_500Medium,
-    Geist_600SemiBold,
+  const [fontsLoaded] = useFonts({
+    Satoshi_400Regular: require("../../assets/fonts/Satoshi-Regular.ttf"),
+    Satoshi_500Medium: require("../../assets/fonts/Satoshi-Medium.ttf"),
+    Satoshi_700Bold: require("../../assets/fonts/Satoshi-Bold.ttf"),
+    Satoshi_900Black: require("../../assets/fonts/Satoshi-Black.ttf"),
   });
   const didApplyDefaultFonts = useRef(false);
   const handlePushTokenReceived = useCallback((token: string) => {
@@ -45,13 +41,13 @@ export default function RootLayout() {
       TextHost.defaultProps = TextHost.defaultProps ?? {};
       TextHost.defaultProps.style = [
         TextHost.defaultProps.style,
-        { fontFamily: "Geist_400Regular" },
+        { fontFamily: "Satoshi_400Regular" },
       ];
 
       TextInputHost.defaultProps = TextInputHost.defaultProps ?? {};
       TextInputHost.defaultProps.style = [
         TextInputHost.defaultProps.style,
-        { fontFamily: "Geist_400Regular" },
+        { fontFamily: "Satoshi_400Regular" },
       ];
 
       didApplyDefaultFonts.current = true;

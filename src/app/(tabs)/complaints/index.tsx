@@ -2,6 +2,7 @@ import { appScrollableBottomPadding } from "@/components/floating-app-bar";
 import { statusBarHeight } from "@/constants";
 import {
   emptyComplaintMeta,
+  formatComplaintCategoryTitle,
   formatReportDate,
   type ComplaintMeta,
   type Report,
@@ -16,6 +17,7 @@ import {
   Input,
   ListGroup,
   Separator,
+  Surface,
   useThemeColor,
 } from "heroui-native";
 import { Bell, FileText, Plus, Search, X } from "lucide-react-native";
@@ -114,22 +116,22 @@ export default function ComplaintsRoute() {
         }}
       >
         <View
-          className="bg-accent rounded-b-3xl"
+          className="bg-accent rounded-b-[28px]"
           style={{
             marginHorizontal: -20,
-            minHeight: 210,
-            padding: 24,
-            paddingTop: statusBarHeight + 28,
+            minHeight: 188,
+            padding: 22,
+            paddingTop: statusBarHeight + 24,
             justifyContent: "space-between",
           }}
         >
           <View className="flex-row items-start justify-between">
             <View className="flex-1 pr-4">
-              <Text className="text-white text-[34px] font-black">
+              <Text className="text-white text-[32px] font-black leading-9">
                 Complaints
               </Text>
-              <Text className="mt-1 text-sm font-medium text-white/85">
-                Reports, updates, and service requests
+              <Text className="mt-1 text-[15px] font-medium leading-5 text-white/85">
+                Track service reports and follow ticket updates.
               </Text>
             </View>
             <Button
@@ -145,9 +147,9 @@ export default function ComplaintsRoute() {
           <View className="flex-row items-end justify-between">
             <View>
               <Text className="text-xs font-bold uppercase text-white/70">
-                Active reports
+                Reports filed
               </Text>
-              <Text className="text-3xl font-black text-white">
+              <Text className="text-[30px] font-black leading-9 text-white">
                 {reports.length}
               </Text>
             </View>
@@ -181,7 +183,7 @@ export default function ComplaintsRoute() {
               exiting={FadeOut.duration(120)}
               className="flex-1"
             >
-              <Text className="text-foreground text-xl font-black">
+              <Text className="text-foreground text-[22px] font-black leading-7">
                 Recent reports
               </Text>
             </Animated.View>
@@ -217,7 +219,7 @@ export default function ComplaintsRoute() {
             { id: "all" as const, title: "All" },
             ...meta.categories.map((category) => ({
               id: category.id,
-              title: category.title,
+              title: formatComplaintCategoryTitle(category.title),
             })),
           ].map((filter) => {
             const isActive = selectedFilter === filter.id;
@@ -227,7 +229,7 @@ export default function ComplaintsRoute() {
                 onPress={() => setSelectedFilter(filter.id)}
                 accessibilityRole="button"
                 accessibilityState={{ selected: isActive }}
-                className={`rounded-full px-4 py-2 ${
+                className={`min-h-11 justify-center rounded-full px-4 ${
                   isActive ? "bg-accent" : "bg-surface"
                 }`}
               >
@@ -245,8 +247,19 @@ export default function ComplaintsRoute() {
 
         {error ? <Text className="text-danger text-sm">{error}</Text> : null}
 
-        <ListGroup>
-          {filteredReports.map((report, index) => {
+        {filteredReports.length === 0 ? (
+          <Surface className="items-center rounded-[22px] p-6">
+            <FileText size={28} color={accentColor} />
+            <Text className="text-foreground mt-3 text-center text-base font-bold">
+              No reports yet
+            </Text>
+            <Text className="text-muted mt-1 text-center text-sm leading-5">
+              New complaints and service reports will appear here.
+            </Text>
+          </Surface>
+        ) : (
+          <ListGroup>
+            {filteredReports.map((report, index) => {
             const category = meta.categories.find(
               (item) => item.id === report.categoryId,
             );
@@ -276,15 +289,16 @@ export default function ComplaintsRoute() {
                     </Text>
                   </ListGroup.ItemContent>
                   <ListGroup.ItemSuffix>
-                    <Text className="text-foreground rounded-full bg-default px-3 py-1 text-xs font-bold">
+                    <Text className="text-foreground rounded-full bg-default px-3 py-1 text-xs font-bold capitalize">
                       {report.status}
                     </Text>
                   </ListGroup.ItemSuffix>
                 </ListGroup.Item>
               </View>
             );
-          })}
-        </ListGroup>
+            })}
+          </ListGroup>
+        )}
       </ScrollView>
     </View>
   );

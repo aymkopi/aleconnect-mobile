@@ -13,6 +13,7 @@ import {
   LucideHeart,
   LucideLanguages,
   LucideLogOut,
+  LucideRefreshCcw,
   LucideShieldCheck,
   LucideSunMoon,
 } from "lucide-react-native";
@@ -28,6 +29,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Uniwind, useCSSVariable, useUniwind } from "uniwind";
 
 import { useConsumerProfileContext } from "../../../context/consumer-profile-context";
+import { clearComplaintMetaCache } from "@/services/complaints";
 
 export default function ProfileRoute() {
   const router = useRouter();
@@ -36,6 +38,7 @@ export default function ProfileRoute() {
   const { session, signOut } = useAuthSession();
   const { profile, isLoading } = useConsumerProfileContext();
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [isClearingCache, setIsClearingCache] = useState(false);
   const { theme, hasAdaptiveThemes } = useUniwind();
   const foregroundColor = useCSSVariable("--accent");
   const mutedColor = useCSSVariable("--muted");
@@ -91,6 +94,16 @@ export default function ProfileRoute() {
       router.replace("/sign-in");
     } finally {
       setIsSigningOut(false);
+    }
+  };
+
+  const handleClearComplaintCache = async () => {
+    setIsClearingCache(true);
+
+    try {
+      await clearComplaintMetaCache();
+    } finally {
+      setIsClearingCache(false);
     }
   };
 
@@ -344,6 +357,26 @@ export default function ProfileRoute() {
                 </Text>
                 <LucideChevronRight size={20} color={iconMutedColor} />
               </View>
+            </ListGroup.ItemSuffix>
+          </ListGroup.Item>
+          <ListGroup.Item>
+            <ListGroup.ItemPrefix>
+              <LucideRefreshCcw size={20} color={iconForegroundColor} />
+            </ListGroup.ItemPrefix>
+            <ListGroup.ItemContent>
+              <ListGroup.ItemTitle>Cached complaint data</ListGroup.ItemTitle>
+            </ListGroup.ItemContent>
+            <ListGroup.ItemSuffix>
+              <Button
+                variant="secondary"
+                size="sm"
+                onPress={handleClearComplaintCache}
+                isDisabled={isClearingCache}
+              >
+                <Button.Label>
+                  {isClearingCache ? "Clearing..." : "Clear"}
+                </Button.Label>
+              </Button>
             </ListGroup.ItemSuffix>
           </ListGroup.Item>
         </ListGroup>

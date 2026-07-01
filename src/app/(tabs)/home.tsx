@@ -1,13 +1,52 @@
 import { appScrollableBottomPadding } from "@/components/floating-app-bar";
+import { statusBarHeight } from "@/constants";
+import { useAuthSession } from "@/hooks/use-auth-session";
+import { useRouter } from "expo-router";
+import { Button, ListGroup, Surface, useThemeColor } from "heroui-native";
+import {
+  Bell,
+  ChevronRight,
+  FileText,
+  Phone,
+  UserRound,
+  Zap,
+} from "lucide-react-native";
 import { ScrollView, Text, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useCSSVariable } from "uniwind";
 
 export default function HomeRoute() {
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const surfaceCardShadow = useCSSVariable("--shadow-surface-card");
+  const { session } = useAuthSession();
+  const [accentColor, foregroundColor, mutedColor] = useThemeColor([
+    "accent",
+    "foreground",
+    "muted",
+  ]);
   const bottomPadding = appScrollableBottomPadding(insets.bottom);
+  const quickActions = [
+    {
+      title: "Report an issue",
+      description: "File a complaint or service request.",
+      icon: FileText,
+      onPress: () => router.push("/complaints/new"),
+    },
+    {
+      title: "Call support",
+      description: "Open ALECO hotline contacts.",
+      icon: Phone,
+      onPress: () => router.push("/hotlines"),
+    },
+    {
+      title: session ? "View account" : "Sign in",
+      description: session
+        ? "Check account and service details."
+        : "Use your account number to unlock services.",
+      icon: UserRound,
+      onPress: () => router.push(session ? "/profile" : "/sign-in"),
+    },
+  ];
 
   return (
     <ScrollView
@@ -17,85 +56,68 @@ export default function HomeRoute() {
       contentContainerStyle={{
         flexGrow: 1,
         paddingHorizontal: 20,
-        paddingTop: 28,
-        gap: 14,
+        paddingTop: statusBarHeight + 22,
+        gap: 16,
         paddingBottom: bottomPadding,
       }}
     >
-      <Text
-        selectable
-        style={{
-          fontSize: 30,
-          fontWeight: "800",
-        }}
-        className="text-foreground"
-      >
-        Home
-      </Text>
+      <View className="flex-row items-start justify-between">
+        <View className="flex-1 pr-4">
+          <Text className="text-foreground text-[34px] font-black leading-10">
+            Home
+          </Text>
+          <Text className="text-muted mt-1 text-[15px] leading-5">
+            Your ALECO account, reports, and support in one place.
+          </Text>
+        </View>
+        <Button isIconOnly variant="secondary" accessibilityLabel="Alerts">
+          <Bell size={20} color={foregroundColor} />
+        </Button>
+      </View>
 
-      <Text
-        selectable
-        style={{
-          fontSize: 16,
-          lineHeight: 24,
-        }}
-        className="text-muted"
-      >
-        Welcome to AleConnect. Monitor the latest updates and quick actions from
-        one place.
-      </Text>
+      <Surface className="rounded-[24px] p-5">
+        <View className="flex-row items-center gap-4">
+          <View className="h-12 w-12 items-center justify-center rounded-2xl bg-accent">
+            <Zap size={23} color="white" />
+          </View>
+          <View className="flex-1">
+            <Text className="text-foreground text-[17px] font-bold leading-6">
+              {session ? "Service dashboard" : "Guest mode"}
+            </Text>
+            <Text className="text-muted mt-1 text-[14px] leading-5">
+              {session
+                ? "Track your reports and account updates."
+                : "Sign in to see account-specific updates."}
+            </Text>
+          </View>
+        </View>
+      </Surface>
 
-      <View
-        className="border-border bg-surface"
-        style={{
-          marginTop: 8,
-          borderRadius: 24,
-          borderWidth: 1,
-          padding: 20,
-          gap: 12,
-          boxShadow:
-            typeof surfaceCardShadow === "string"
-              ? surfaceCardShadow
-              : undefined,
-        }}
-      >
-        <Text
-          selectable
-          style={{
-            fontSize: 13,
-            fontWeight: "700",
-            letterSpacing: 0.6,
-          }}
-          className="text-muted"
-        >
-          PAGE HIGHLIGHTS
+      <View className="gap-2">
+        <Text className="ml-2 text-sm font-semibold text-muted">
+          Quick actions
         </Text>
-
-        {["Community feed", "Recent reports", "Recommended actions"].map(
-          (highlight) => (
-            <View
-              key={highlight}
-              className="border-border bg-surface-secondary"
-              style={{
-                borderRadius: 14,
-                borderWidth: 1,
-                paddingHorizontal: 14,
-                paddingVertical: 12,
-              }}
-            >
-              <Text
-                selectable
-                style={{
-                  fontSize: 15,
-                  fontWeight: "600",
-                }}
-                className="text-surface-secondary-foreground"
-              >
-                {highlight}
-              </Text>
-            </View>
-          ),
-        )}
+        <ListGroup>
+          {quickActions.map((action) => {
+            const Icon = action.icon;
+            return (
+              <ListGroup.Item key={action.title} onPress={action.onPress}>
+                <ListGroup.ItemPrefix>
+                  <Icon size={20} color={accentColor} />
+                </ListGroup.ItemPrefix>
+                <ListGroup.ItemContent>
+                  <ListGroup.ItemTitle>{action.title}</ListGroup.ItemTitle>
+                  <ListGroup.ItemDescription>
+                    {action.description}
+                  </ListGroup.ItemDescription>
+                </ListGroup.ItemContent>
+                <ListGroup.ItemSuffix>
+                  <ChevronRight size={18} color={mutedColor} />
+                </ListGroup.ItemSuffix>
+              </ListGroup.Item>
+            );
+          })}
+        </ListGroup>
       </View>
     </ScrollView>
   );

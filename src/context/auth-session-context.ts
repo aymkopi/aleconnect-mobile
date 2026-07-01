@@ -1,4 +1,5 @@
 import type { PropsWithChildren } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   createContext,
   createElement,
@@ -10,6 +11,7 @@ import {
 } from "react";
 
 import {
+  ApiRequestError,
   apiRequest,
   clearAuthToken,
   getAuthToken,
@@ -24,6 +26,42 @@ export type AuthSessionContextValue = {
 };
 
 const AuthSessionContext = createContext<AuthSessionContextValue | null>(null);
+const authSessionCacheKey = "auth_session_cache_v1";
+const authSessionCacheTtlMs = 30 * 24 * 60 * 60 * 1000;
+
+type AuthSessionCache = {
+  fetchedAt: number;
+  value: AuthSession;
+};
+
+async function readCachedSession(): Promise<AuthSession | null> {
+  const raw = await AsyncStorage.getItem(authSessionCacheKey);
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as AuthSessionCache;
+    if (Date.now() - parsed.fetchedAt > authSessionCacheTtlMs) {
+      return null;
+    }
+
+    return parsed.value;
+  } catch {
+    return null;
+  }
+}
+
+async function writeCachedSession(value: AuthSession): Promise<void> {
+  await AsyncStorage.setItem(
+    authSessionCacheKey,
+    JSON.stringify({ fetchedAt: Date.now(), value } satisfies AuthSessionCache),
+  );
+}
+
+async function clearCachedSession(): Promise<void> {
+  await AsyncStorage.removeItem(authSessionCacheKey);
+}
 
 export function AuthSessionProvider({ children }: PropsWithChildren) {
   const [session, setSession] = useState<AuthSession | null>(null);
@@ -32,9 +70,16 @@ export function AuthSessionProvider({ children }: PropsWithChildren) {
   const refreshSession = useCallback(async () => {
     const token = await getAuthToken();
     if (!token) {
+      await clearCachedSession();
       setSession(null);
       setIsLoading(false);
       return null;
+    }
+
+    const cachedSession = await readCachedSession();
+    if (cachedSession) {
+      setSession(cachedSession);
+      setIsLoading(false);
     }
 
     try {
@@ -42,11 +87,16 @@ export function AuthSessionProvider({ children }: PropsWithChildren) {
         "/api/auth/get-session",
       );
       setSession(nextSession);
+      await writeCachedSession(nextSession);
       return nextSession;
-    } catch {
-      await clearAuthToken();
-      setSession(null);
-      return null;
+    } catch (error) {
+      if (error instanceof ApiRequestError && error.status === 401) {
+        await clearAuthToken();
+        await clearCachedSession();
+        setSession(null);
+      }
+
+      return cachedSession;
     } finally {
       setIsLoading(false);
     }
@@ -57,6 +107,7 @@ export function AuthSessionProvider({ children }: PropsWithChildren) {
       method: "POST",
     }).catch(() => null);
     await clearAuthToken();
+    await clearCachedSession();
     setSession(null);
   }, []);
 

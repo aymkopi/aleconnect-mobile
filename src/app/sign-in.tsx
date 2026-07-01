@@ -16,6 +16,7 @@ import {
 import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 
+import { statusBarHeight } from "@/constants";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { signInWithAccountNumber } from "@/services/auth";
 
@@ -62,20 +63,24 @@ export default function SignInRoute() {
       className="flex-1 bg-background"
       contentContainerStyle={{
         flexGrow: 1,
-        justifyContent: "center",
-        padding: 20,
+        justifyContent: "flex-start",
+        paddingHorizontal: 20,
+        paddingTop: statusBarHeight + 44,
+        paddingBottom: 28,
+        gap: 24,
       }}
     >
-      <Surface className="p-6 rounded-3xl" style={{ gap: 12 }}>
-        <View style={{ gap: 4 }}>
-          <Text className="text-2xl font-semibold text-foreground">
-            Welcome back
-          </Text>
-          <Text className="text-muted text-sm">
-            Sign in with your account number and password.
-          </Text>
-        </View>
+      <View className="gap-2">
+        <Text className="text-foreground text-[34px] font-black leading-10">
+          Sign in
+        </Text>
+        <Text className="text-muted text-[15px] leading-5">
+          Use your ALECO account number to view service details and file
+          reports.
+        </Text>
+      </View>
 
+      <Surface className="rounded-[24px] p-5" style={{ gap: 14 }}>
         <TextField>
           <Label className="text-foreground">Account number</Label>
           <View className="w-full flex-row items-center">
@@ -140,7 +145,7 @@ export default function SignInRoute() {
 
         <Button
           variant="primary"
-          size="md"
+          size="lg"
           onPress={handleSignIn}
           isDisabled={isSubmitting}
         >
@@ -158,7 +163,7 @@ export default function SignInRoute() {
         </Button>
 
         <Text className="text-xs text-muted">
-          Need help? Contact support to verify your account credentials.
+          No sign-ups here. Your account must already exist in ALECO records.
         </Text>
       </Surface>
     </ScrollView>

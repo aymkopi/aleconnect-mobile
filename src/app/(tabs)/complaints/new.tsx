@@ -3,6 +3,7 @@ import { statusBarHeight } from "@/constants";
 import { useConsumerProfileContext } from "@/context/consumer-profile-context";
 import {
   emptyComplaintMeta,
+  formatComplaintCategoryTitle,
   initialComplaintForm,
   type ComplaintFormState,
   type ComplaintMeta,
@@ -293,7 +294,7 @@ export default function NewComplaintRoute() {
 
   const title =
     step === 1
-      ? "Report an Issue"
+      ? "Report an issue"
       : step === 2
         ? "Location and Account"
         : step === 3
@@ -419,7 +420,7 @@ export default function NewComplaintRoute() {
           paddingHorizontal: 20,
           paddingTop: statusBarHeight + 16,
           gap: 16,
-          paddingBottom: bottomPadding + 50,
+          paddingBottom: bottomPadding + 140,
         }}
       >
         <View className="gap-4">
@@ -433,11 +434,13 @@ export default function NewComplaintRoute() {
               <ChevronLeft size={22} color={foregroundColor} />
             </Button>
             <View className="flex-1">
-              <Text className="text-foreground text-2xl font-black">
+              <Text className="text-foreground text-[28px] font-black leading-8">
                 {title}
               </Text>
-              <Text className="text-muted text-sm">
-                {selectedCategory?.title ?? "Choose a category"}
+              <Text className="text-muted mt-1 text-[15px] leading-5">
+                {selectedCategory
+                  ? formatComplaintCategoryTitle(selectedCategory.title)
+                  : "Choose the closest category"}
               </Text>
             </View>
           </View>
@@ -459,9 +462,11 @@ export default function NewComplaintRoute() {
 
         {step === 1 ? (
           <>
-            <Text className="ml-2 text-sm text-muted">Category</Text>
-            <View className="flex-row flex-wrap gap-3">
-              {meta.categories.map((category, index) => {
+            <Text className="ml-2 text-sm font-semibold text-muted">
+              Category
+            </Text>
+            <View className="gap-3">
+              {meta.categories.map((category) => {
                 const selected = form.categoryId === category.id;
                 return (
                   <Pressable
@@ -478,23 +483,33 @@ export default function NewComplaintRoute() {
                     }}
                     accessibilityRole="button"
                     accessibilityState={{ selected }}
-                    className="overflow-hidden rounded-3xl p-4"
-                    style={{
-                      backgroundColor: category.color,
-                      minHeight: index === 0 ? 124 : 142,
-                      width: index === 0 ? "100%" : "47.8%",
-                      opacity: selected || !form.categoryId ? 1 : 0.72,
-                    }}
+                    className={`min-h-[76px] flex-row items-center gap-3 rounded-[20px] border px-4 py-3 ${
+                      selected
+                        ? "border-accent bg-surface"
+                        : "border-border bg-surface"
+                    }`}
                   >
-                    <Text className="text-white text-[21px] font-black leading-6">
-                      {category.title}
-                    </Text>
-                    <Text className="mt-3 text-sm font-semibold text-white/90">
-                      {category.description}
-                    </Text>
+                    <View
+                      className="h-11 w-11 items-center justify-center rounded-2xl"
+                      style={{ backgroundColor: category.color }}
+                    >
+                      {selected ? (
+                        <Check size={20} color="white" />
+                      ) : (
+                        <View className="h-2.5 w-2.5 rounded-full bg-white" />
+                      )}
+                    </View>
+                    <View className="flex-1">
+                      <Text className="text-foreground text-[16px] font-bold leading-5">
+                        {formatComplaintCategoryTitle(category.title)}
+                      </Text>
+                      <Text className="text-muted mt-1 text-[13px] font-medium leading-[18px]">
+                        {category.description}
+                      </Text>
+                    </View>
                     {selected ? (
-                      <View className="absolute right-3 top-3 h-7 w-7 items-center justify-center rounded-full bg-white/25">
-                        <Check size={16} color="white" />
+                      <View className="h-7 w-7 items-center justify-center rounded-full bg-accent">
+                        <Check size={15} color="white" />
                       </View>
                     ) : null}
                   </Pressable>

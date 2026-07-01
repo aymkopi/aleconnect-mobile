@@ -96,13 +96,13 @@
       --field-radius: 0.5rem;
 
       /* Font Family */
-      --font-sans: "Geist_400Regular";
-      --font-normal: "Geist_400Regular";
-      --font-medium: "Geist_500Medium";
-      --font-semibold: "Geist_600SemiBold";
-      --font-bold: "Geist_600SemiBold";
-      --font-extrabold: "Geist_600SemiBold";
-      --font-black: "Geist_600SemiBold";
+      --font-sans: "Satoshi_400Regular";
+      --font-normal: "Satoshi_400Regular";
+      --font-medium: "Satoshi_500Medium";
+      --font-semibold: "Satoshi_700Bold";
+      --font-bold: "Satoshi_700Bold";
+      --font-extrabold: "Satoshi_900Black";
+      --font-black: "Satoshi_900Black";
     }
 
     @variant dark {
@@ -151,13 +151,13 @@
       --field-radius: 0.5rem;
 
       /* Font Family */
-      --font-sans: "Geist_400Regular";
-      --font-normal: "Geist_400Regular";
-      --font-medium: "Geist_500Medium";
-      --font-semibold: "Geist_600SemiBold";
-      --font-bold: "Geist_600SemiBold";
-      --font-extrabold: "Geist_600SemiBold";
-      --font-black: "Geist_600SemiBold";
+      --font-sans: "Satoshi_400Regular";
+      --font-normal: "Satoshi_400Regular";
+      --font-medium: "Satoshi_500Medium";
+      --font-semibold: "Satoshi_700Bold";
+      --font-bold: "Satoshi_700Bold";
+      --font-extrabold: "Satoshi_900Black";
+      --font-black: "Satoshi_900Black";
     }
   }
 }
