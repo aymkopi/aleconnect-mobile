@@ -28,7 +28,7 @@
       "hidden": false
     },
     "web": {
-      "output": "static",
+      "output": "single",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
@@ -44,7 +44,8 @@
         }
       ],
       "expo-notifications",
-      "expo-web-browser"
+      "expo-web-browser",
+      "./plugins/with-android-predictive-back-disabled"
     ],
     "experiments": {
       "typedRoutes": true,

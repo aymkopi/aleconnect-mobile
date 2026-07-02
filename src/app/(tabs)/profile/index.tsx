@@ -3,7 +3,15 @@ import { statusBarHeight } from "@/constants";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import Feather from "@expo/vector-icons/Feather";
 import { useRouter } from "expo-router";
-import { Avatar, Button, ListGroup, Select } from "heroui-native";
+import {
+  Avatar,
+  Button,
+  Label,
+  ListGroup,
+  Select,
+  Skeleton,
+  Typography,
+} from "heroui-native";
 import {
   LucideArrowUpRight,
   LucideBell,
@@ -20,8 +28,8 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import {
   Linking,
+  RefreshControl,
   ScrollView,
-  Text,
   View,
   useWindowDimensions,
 } from "react-native";
@@ -29,16 +37,17 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Uniwind, useCSSVariable, useUniwind } from "uniwind";
 
 import { useConsumerProfileContext } from "../../../context/consumer-profile-context";
-import { clearComplaintMetaCache } from "@/services/complaints";
+import { clearComplaintCache } from "@/services/complaints";
 
 export default function ProfileRoute() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const { session, signOut } = useAuthSession();
-  const { profile, isLoading } = useConsumerProfileContext();
+  const { profile, isLoading, reload } = useConsumerProfileContext();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [isClearingCache, setIsClearingCache] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { theme, hasAdaptiveThemes } = useUniwind();
   const foregroundColor = useCSSVariable("--accent");
   const mutedColor = useCSSVariable("--muted");
@@ -64,7 +73,7 @@ export default function ProfileRoute() {
   const isGuest = !session;
 
   useEffect(() => {
-    void router.prefetch("/(tabs)/profile/details");
+    void router.prefetch("/profile/details");
   }, [router]);
 
   const openPreferredLink = async ({
@@ -101,9 +110,19 @@ export default function ProfileRoute() {
     setIsClearingCache(true);
 
     try {
-      await clearComplaintMetaCache();
+      await clearComplaintCache();
     } finally {
       setIsClearingCache(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+
+    try {
+      await reload({ forceNetwork: true });
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -118,6 +137,16 @@ export default function ProfileRoute() {
         gap: 10,
         paddingBottom: bottomPadding,
       }}
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefreshing}
+          onRefresh={() => {
+            void handleRefresh();
+          }}
+          tintColor={iconForegroundColor}
+          colors={iconForegroundColor ? [iconForegroundColor] : undefined}
+        />
+      }
     >
       <View
         className={"bg-accent rounded-b-3xl"}
@@ -158,27 +187,27 @@ export default function ProfileRoute() {
                 justifyContent: "center",
               }}
             >
-              <Text
+              <Typography.Heading
+                type="h6"
+                weight="semibold"
                 style={{
                   color: "white",
-                  fontSize: 20,
-                  fontWeight: "600",
                   lineHeight: 20,
                 }}
                 numberOfLines={1}
               >
                 Get the Full Experience
-              </Text>
-              <Text
+              </Typography.Heading>
+              <Typography.Paragraph
+                type="body-sm"
                 style={{
                   color: "rgba(255,255,255,0.9)",
-                  fontSize: 14,
                   lineHeight: 20,
                 }}
                 numberOfLines={2}
               >
                 Sign in to access account details and full services.
-              </Text>
+              </Typography.Paragraph>
               <Button
                 variant="secondary"
                 size="sm"
@@ -232,38 +261,43 @@ export default function ProfileRoute() {
                 justifyContent: "center",
               }}
             >
-              <Text
-                style={{
-                  color: "white",
-                  fontSize: 20,
-                  fontWeight: "700",
-                  lineHeight: 30,
-                }}
-                numberOfLines={1}
-              >
-                {isLoading
-                  ? "Loading profile..."
-                  : (profile?.fullName ?? "Profile not linked")}
-              </Text>
-              <Text
-                style={{
-                  color: "rgba(255,255,255,0.9)",
-                  fontSize: 14,
-                  lineHeight: 20,
-                }}
-                numberOfLines={2}
-              >
-                {isLoading
-                  ? ""
-                  : (profile?.accountNumber ?? "No account number")}
-              </Text>
+              {isLoading ? (
+                <View className="gap-2">
+                  <Skeleton className="h-5 w-40 rounded-full bg-white/30" />
+                  <Skeleton className="h-4 w-28 rounded-full bg-white/25" />
+                </View>
+              ) : (
+                <>
+                  <Typography.Heading
+                    type="h6"
+                    weight="bold"
+                    style={{
+                      color: "white",
+                      lineHeight: 30,
+                    }}
+                    numberOfLines={1}
+                  >
+                    {profile?.fullName ?? "Profile not linked"}
+                  </Typography.Heading>
+                  <Typography.Paragraph
+                    type="body-sm"
+                    style={{
+                      color: "rgba(255,255,255,0.9)",
+                      lineHeight: 20,
+                    }}
+                    numberOfLines={2}
+                  >
+                    {profile?.accountNumber ?? "No account number"}
+                  </Typography.Paragraph>
+                </>
+              )}
             </View>
             <Button
               isIconOnly
               variant="ghost"
               size="md"
               onPress={() => {
-                router.navigate("/(tabs)/profile/details");
+                router.navigate("/profile/details");
               }}
             >
               <LucideChevronRight size={20} color="white" />
@@ -272,7 +306,7 @@ export default function ProfileRoute() {
         )}
       </View>
       <View className="gap-2 mt-3">
-        <Text className="text-sm text-muted ml-2">Personalization</Text>
+        <Label className="ml-2 text-sm text-muted">Personalization</Label>
         <ListGroup>
           <ListGroup.Item>
             <ListGroup.ItemPrefix>
@@ -288,9 +322,9 @@ export default function ProfileRoute() {
                   alignItems: "center",
                 }}
               >
-                <Text className="text-[12px] font-medium text-muted">
+                <Typography type="body-xs" color="muted" weight="medium">
                   {currentThemeLabel}
-                </Text>
+                </Typography>
                 <Select
                   value={selectedTheme}
                   onValueChange={(option) => {
@@ -326,7 +360,7 @@ export default function ProfileRoute() {
             </ListGroup.ItemSuffix>
           </ListGroup.Item>
         </ListGroup>
-        <Text className="text-sm mt-3 text-muted ml-2">Settings</Text>
+        <Label className="ml-2 mt-3 text-sm text-muted">Settings</Label>
         <ListGroup>
           <ListGroup.Item>
             <ListGroup.ItemPrefix>
@@ -352,9 +386,9 @@ export default function ProfileRoute() {
                   gap: 5,
                 }}
               >
-                <Text className="text-[12px] font-medium text-muted">
+                <Typography type="body-xs" color="muted" weight="medium">
                   English
-                </Text>
+                </Typography>
                 <LucideChevronRight size={20} color={iconMutedColor} />
               </View>
             </ListGroup.ItemSuffix>
@@ -380,7 +414,7 @@ export default function ProfileRoute() {
             </ListGroup.ItemSuffix>
           </ListGroup.Item>
         </ListGroup>
-        <Text className="text-sm mt-3 text-muted ml-2">Social Links</Text>
+        <Label className="ml-2 mt-3 text-sm text-muted">Social Links</Label>
         <ListGroup>
           <ListGroup.Item
             onPress={() =>
@@ -437,7 +471,7 @@ export default function ProfileRoute() {
           </ListGroup.Item>
         </ListGroup>
 
-        <Text className="text-sm mt-3 text-muted ml-2">Legal</Text>
+        <Label className="ml-2 mt-3 text-sm text-muted">Legal</Label>
         <ListGroup>
           <ListGroup.Item>
             <ListGroup.ItemPrefix>
@@ -465,7 +499,7 @@ export default function ProfileRoute() {
 
         {!isGuest ? (
           <>
-            <Text className="text-sm mt-3 text-muted ml-2">Account</Text>
+            <Label className="ml-2 mt-3 text-sm text-muted">Account</Label>
             <ListGroup variant="default">
               <ListGroup.Item>
                 <ListGroup.ItemPrefix>
@@ -482,7 +516,9 @@ export default function ProfileRoute() {
                     onPress={handleSignOut}
                     isDisabled={isSigningOut}
                   >
-                    {isSigningOut ? "Signing out..." : "Sign out"}
+                    <Button.Label>
+                      {isSigningOut ? "Signing out..." : "Sign out"}
+                    </Button.Label>
                   </Button>
                 </ListGroup.ItemSuffix>
               </ListGroup.Item>

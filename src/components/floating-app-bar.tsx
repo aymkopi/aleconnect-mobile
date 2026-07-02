@@ -1,18 +1,11 @@
-import { BlurView } from "expo-blur";
-import { PressableFeedback, useThemeColor } from "heroui-native";
+import { PressableFeedback, Typography, useThemeColor } from "heroui-native";
 import type { LucideIcon } from "lucide-react-native";
 import { AlertTriangle, Home, Phone, UserRound } from "lucide-react-native";
-import type { FC, RefObject } from "react";
-import { useEffect, useMemo, useState } from "react";
-import { Text, View } from "react-native";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
+import type { FC } from "react";
+import { useMemo } from "react";
+import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import "tailwindcss";
-import { useCSSVariable } from "uniwind";
 
 /**
  * Constants
@@ -20,8 +13,6 @@ import { useCSSVariable } from "uniwind";
 const APP_BAR_HEIGHT = 65;
 const APP_BAR_OUTER_PADDING = 15;
 const TAB_MIN_HIT_AREA = 44;
-const ACTIVE_PILL_VERTICAL_INSET = 4;
-const ACTIVE_PILL_ANIMATION_MS = 280;
 const CONTENT_FADE_STEPS = [0, 0.04, 0.08, 0.14, 0.22, 0.34] as const;
 
 /**
@@ -35,12 +26,6 @@ interface AppBarItem {
 interface FloatingAppBarProps {
   readonly currentIndex: number;
   readonly onSelect: (index: number) => void;
-  readonly blurTarget: RefObject<View | null>;
-}
-
-interface TabFrame {
-  readonly x: number;
-  readonly width: number;
 }
 
 /**
@@ -68,7 +53,6 @@ interface TabItemProps {
   readonly Icon: LucideIcon;
   readonly isActive: boolean;
   readonly onPress: () => void;
-  readonly onLayout: (frame: TabFrame) => void;
 }
 
 const TabItem: FC<TabItemProps> = ({
@@ -76,7 +60,6 @@ const TabItem: FC<TabItemProps> = ({
   Icon,
   isActive,
   onPress,
-  onLayout,
 }) => {
   const [activeIconColor, inactiveIconColor] = useThemeColor([
     "foreground",
@@ -87,26 +70,24 @@ const TabItem: FC<TabItemProps> = ({
   return (
     <PressableFeedback
       onPress={onPress}
-      onLayout={(event) => {
-        onLayout({
-          x: event.nativeEvent.layout.x,
-          width: event.nativeEvent.layout.width,
-        });
-      }}
       accessibilityRole="tab"
       accessibilityState={{ selected: isActive }}
       accessibilityLabel={title}
-      className="flex-1 items-center justify-center gap-0.5 rounded-lg"
+      className={`flex-1 items-center justify-center gap-0.5 rounded-full ${
+        isActive ? "bg-accent/20" : ""
+      }`}
       style={{ minHeight: TAB_MIN_HIT_AREA }}
     >
       <Icon size={20} strokeWidth={2.2} color={iconColor} />
-      <Text
+      <Typography
+        type="body-xs"
+        weight={isActive ? "bold" : "semibold"}
         className={`text-xs ${
-          isActive ? "font-bold text-foreground" : "font-semibold text-muted"
+          isActive ? "text-foreground" : "text-muted"
         }`}
       >
         {title}
-      </Text>
+      </Typography>
     </PressableFeedback>
   );
 };
@@ -135,50 +116,16 @@ const TabItem: FC<TabItemProps> = ({
  */
 export const FloatingAppBar: FC<FloatingAppBarProps> = ({
   currentIndex,
-  blurTarget,
   onSelect,
 }) => {
   const insets = useSafeAreaInsets();
-  const floatingBarShadow = useCSSVariable("--shadow-floating-bar");
   const [surfaceColor] = useThemeColor(["surface"]);
-  const [tabFrames, setTabFrames] = useState<Partial<Record<number, TabFrame>>>(
-    {},
-  );
-  const pillLeft = useSharedValue(0);
-  const pillWidth = useSharedValue(0);
 
   // Memoize bottom inset to prevent unnecessary recalculations
   const bottomInset = useMemo(
     () => Math.max(insets.bottom, 8),
     [insets.bottom],
   );
-
-  useEffect(() => {
-    const frame = tabFrames[currentIndex];
-
-    if (!frame) {
-      return;
-    }
-
-    pillLeft.value = withTiming(frame.x, {
-      duration: ACTIVE_PILL_ANIMATION_MS,
-    });
-    pillWidth.value = withTiming(frame.width, {
-      duration: ACTIVE_PILL_ANIMATION_MS,
-    });
-  }, [currentIndex, pillLeft, pillWidth, tabFrames]);
-
-  const activePillStyle = useAnimatedStyle(() => {
-    if (pillWidth.value <= 0) {
-      return { opacity: 0 };
-    }
-
-    return {
-      opacity: 1,
-      left: pillLeft.value,
-      width: pillWidth.value,
-    };
-  }, []);
 
   return (
     <View pointerEvents="box-none" className="absolute bottom-0 left-0 right-0">
@@ -202,38 +149,18 @@ export const FloatingAppBar: FC<FloatingAppBarProps> = ({
           className="relative flex-row items-center justify-around overflow-hidden rounded-full border-[0.5px] border-border px-2"
           style={{
             height: APP_BAR_HEIGHT,
-            boxShadow:
-              typeof floatingBarShadow === "string"
-                ? floatingBarShadow
-                : undefined,
+            elevation: 10,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 12 },
+            shadowOpacity: 0.16,
+            shadowRadius: 24,
             backgroundColor: "transparent",
           }}
         >
-          <BlurView
-            pointerEvents="none"
-            tint="systemMaterial"
-            intensity={90}
-            blurTarget={blurTarget}
-            blurMethod="dimezisBlurViewSdk31Plus"
-            className="absolute inset-0"
-          />
-
           <View
             pointerEvents="none"
             className="absolute inset-0"
-            style={{ backgroundColor: surfaceColor, opacity: 0.94 }}
-          />
-
-          <Animated.View
-            pointerEvents="none"
-            className="absolute rounded-full bg-accent/20"
-            style={[
-              {
-                top: ACTIVE_PILL_VERTICAL_INSET,
-                bottom: ACTIVE_PILL_VERTICAL_INSET,
-              },
-              activePillStyle,
-            ]}
+            style={{ backgroundColor: surfaceColor, opacity: 0.96 }}
           />
 
           {/* Tab items */}
@@ -244,12 +171,6 @@ export const FloatingAppBar: FC<FloatingAppBarProps> = ({
               Icon={Icon}
               isActive={index === currentIndex}
               onPress={() => onSelect(index)}
-              onLayout={(frame) => {
-                setTabFrames((currentFrames) => ({
-                  ...currentFrames,
-                  [index]: frame,
-                }));
-              }}
             />
           ))}
         </View>

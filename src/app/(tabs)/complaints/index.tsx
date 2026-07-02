@@ -17,23 +17,20 @@ import {
   Input,
   ListGroup,
   Separator,
+  Skeleton,
   Surface,
+  Typography,
   useThemeColor,
 } from "heroui-native";
 import { Bell, FileText, Plus, Search, X } from "lucide-react-native";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   Pressable,
+  RefreshControl,
   ScrollView,
-  Text,
   View,
   useWindowDimensions,
 } from "react-native";
-import Animated, {
-  FadeIn,
-  FadeOut,
-  LinearTransition,
-} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function formatStatus(status: string) {
@@ -42,10 +39,34 @@ function formatStatus(status: string) {
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
+function ReportsSkeleton() {
+  return (
+    <Surface className="rounded-[22px] p-4">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <View
+          key={index}
+          className={`flex-row items-center gap-3 ${
+            index > 0 ? "border-t border-separator pt-4" : ""
+          } ${index < 3 ? "pb-4" : ""}`}
+        >
+          <Skeleton className="h-11 w-11 rounded-2xl" />
+          <View className="flex-1 gap-2">
+            <Skeleton className="h-4 w-4/5 rounded-full" />
+            <Skeleton className="h-3 w-3/5 rounded-full" />
+          </View>
+          <Skeleton className="h-7 w-16 rounded-full" />
+        </View>
+      ))}
+    </Surface>
+  );
+}
+
 export default function ComplaintsRoute() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
+  const scrollRef = useRef<ScrollView | null>(null);
+  const hasLoadedRef = useRef(false);
   const bottomPadding = appScrollableBottomPadding(insets.bottom);
   const [accentColor, foregroundColor] = useThemeColor([
     "accent",
@@ -54,38 +75,47 @@ export default function ComplaintsRoute() {
   const [meta, setMeta] = useState<ComplaintMeta>(emptyComplaintMeta);
   const [reports, setReports] = useState<Report[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
 
+  const loadComplaints = useCallback(async (options?: { force?: boolean }) => {
+    if (options?.force) {
+      setIsRefreshing(true);
+    } else if (!hasLoadedRef.current) {
+      setIsLoading(true);
+    }
+
+    try {
+      const [nextMeta, nextReports] = await Promise.all([
+        fetchComplaintMeta(options),
+        fetchComplaintReports(options),
+      ]);
+
+      setMeta(nextMeta);
+      setReports(nextReports);
+      setError(null);
+    } catch (nextError) {
+      setError(
+        nextError instanceof Error
+          ? nextError.message
+          : "Failed to load complaints.",
+      );
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+      hasLoadedRef.current = true;
+    }
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
-      let isMounted = true;
+      scrollRef.current?.scrollTo({ y: 0, animated: false });
 
-      Promise.all([fetchComplaintMeta(), fetchComplaintReports()])
-        .then(([nextMeta, nextReports]) => {
-          if (!isMounted) {
-            return;
-          }
-
-          setMeta(nextMeta);
-          setReports(nextReports);
-          setError(null);
-        })
-        .catch((nextError) => {
-          if (isMounted) {
-            setError(
-              nextError instanceof Error
-                ? nextError.message
-                : "Failed to load complaints.",
-            );
-          }
-        });
-
-      return () => {
-        isMounted = false;
-      };
-    }, []),
+      void loadComplaints();
+    }, [loadComplaints]),
   );
 
   const filteredReports = useMemo(
@@ -108,11 +138,17 @@ export default function ComplaintsRoute() {
     [query, reports, selectedFilter],
   );
 
-  const openCreate = () => router.push("/complaints/new");
+  const openCreate = () => {
+    if (__DEV__) {
+      console.log("[nav] complaints open new");
+    }
+    router.push("/complaints/new");
+  };
 
   return (
     <View className="flex-1 bg-background" style={{ width }}>
       <ScrollView
+        ref={scrollRef}
         contentInsetAdjustmentBehavior="automatic"
         className="bg-background"
         contentContainerStyle={{
@@ -120,6 +156,16 @@ export default function ComplaintsRoute() {
           gap: 12,
           paddingBottom: bottomPadding,
         }}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={() => {
+              void loadComplaints({ force: true });
+            }}
+            tintColor={accentColor}
+            colors={[accentColor]}
+          />
+        }
       >
         <View
           className="bg-accent rounded-b-[28px]"
@@ -133,12 +179,16 @@ export default function ComplaintsRoute() {
         >
           <View className="flex-row items-start justify-between">
             <View className="flex-1 pr-4">
-              <Text className="text-white text-[32px] font-black leading-9">
+              <Typography.Heading type="h1" weight="bold" className="text-white">
                 Complaints
-              </Text>
-              <Text className="mt-1 text-[15px] font-medium leading-5 text-white/85">
+              </Typography.Heading>
+              <Typography.Paragraph
+                type="body-sm"
+                weight="medium"
+                className="mt-1 text-white/85"
+              >
                 Track service reports and follow ticket updates.
-              </Text>
+              </Typography.Paragraph>
             </View>
             <Button
               isIconOnly
@@ -152,12 +202,12 @@ export default function ComplaintsRoute() {
 
           <View className="flex-row items-end justify-between">
             <View>
-              <Text className="text-xs font-bold uppercase text-white/70">
+              <Typography type="body-xs" weight="bold" className="uppercase text-white/70">
                 Reports filed
-              </Text>
-              <Text className="text-[30px] font-black leading-9 text-white">
+              </Typography>
+              <Typography.Heading type="h2" weight="bold" className="text-white">
                 {reports.length}
-              </Text>
+              </Typography.Heading>
             </View>
             <Button variant="secondary" onPress={openCreate} size="sm">
               <Plus size={16} color={accentColor} />
@@ -166,33 +216,22 @@ export default function ComplaintsRoute() {
           </View>
         </View>
 
-        <Animated.View
-          layout={LinearTransition.duration(220)}
-          className="flex-row items-center gap-2"
-        >
+        <View className="flex-row items-center gap-2">
           {isSearchOpen ? (
-            <Animated.View
-              entering={FadeIn.duration(180)}
-              exiting={FadeOut.duration(120)}
-              className="flex-1"
-            >
+            <View className="flex-1">
               <Input
                 value={query}
                 onChangeText={setQuery}
                 placeholder="Search reports"
                 autoFocus
               />
-            </Animated.View>
+            </View>
           ) : (
-            <Animated.View
-              entering={FadeIn.duration(180)}
-              exiting={FadeOut.duration(120)}
-              className="flex-1"
-            >
-              <Text className="text-foreground text-[22px] font-black leading-7">
+            <View className="flex-1">
+              <Typography.Heading type="h4" weight="bold">
                 Recent reports
-              </Text>
-            </Animated.View>
+              </Typography.Heading>
+            </View>
           )}
           <Button
             isIconOnly
@@ -212,7 +251,7 @@ export default function ComplaintsRoute() {
               <Search size={20} color={foregroundColor} />
             )}
           </Button>
-        </Animated.View>
+        </View>
 
         <ScrollView
           horizontal
@@ -239,29 +278,47 @@ export default function ComplaintsRoute() {
                   isActive ? "bg-accent" : "bg-surface"
                 }`}
               >
-                <Text
+                <Typography
+                  type="body-sm"
+                  weight="bold"
                   className={`text-sm font-bold ${
                     isActive ? "text-white" : "text-foreground"
                   }`}
                 >
                   {filter.title}
-                </Text>
+                </Typography>
               </Pressable>
             );
           })}
         </ScrollView>
 
-        {error ? <Text className="text-danger text-sm">{error}</Text> : null}
+        {error ? (
+          <Typography.Paragraph type="body-sm" className="text-danger">
+            {error}
+          </Typography.Paragraph>
+        ) : null}
 
-        {filteredReports.length === 0 ? (
+        {isLoading ? (
+          <ReportsSkeleton />
+        ) : filteredReports.length === 0 ? (
           <Surface className="items-center rounded-[22px] p-6">
             <FileText size={28} color={accentColor} />
-            <Text className="text-foreground mt-3 text-center text-base font-bold">
+            <Typography.Heading
+              type="h6"
+              weight="bold"
+              align="center"
+              className="mt-3"
+            >
               No reports yet
-            </Text>
-            <Text className="text-muted mt-1 text-center text-sm leading-5">
+            </Typography.Heading>
+            <Typography.Paragraph
+              type="body-sm"
+              color="muted"
+              align="center"
+              className="mt-1"
+            >
               New complaints and service reports will appear here.
-            </Text>
+            </Typography.Paragraph>
           </Surface>
         ) : (
           <ListGroup>
@@ -290,14 +347,18 @@ export default function ComplaintsRoute() {
                     <ListGroup.ItemDescription>
                       {report.typeTitle} - {formatReportDate(report.createdAt)}
                     </ListGroup.ItemDescription>
-                    <Text className="text-accent mt-1 text-xs font-black">
+                    <Typography type="body-xs" weight="bold" className="mt-1 text-accent">
                       {report.ticketNumber}
-                    </Text>
+                    </Typography>
                   </ListGroup.ItemContent>
                   <ListGroup.ItemSuffix>
-                    <Text className="text-foreground rounded-full bg-default px-3 py-1 text-xs font-bold">
+                    <Typography
+                      type="body-xs"
+                      weight="bold"
+                      className="rounded-full bg-default px-3 py-1"
+                    >
                       {formatStatus(report.status)}
-                    </Text>
+                    </Typography>
                   </ListGroup.ItemSuffix>
                 </ListGroup.Item>
               </View>

@@ -1,11 +1,7 @@
 import { FloatingAppBar } from "@/components/floating-app-bar";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import type { RefObject } from "react";
+import { usePathname } from "expo-router";
 import { View } from "react-native";
-
-interface FloatingTabsBarProps extends BottomTabBarProps {
-  readonly blurTarget: RefObject<View | null>;
-}
 
 type NestedRoute = {
   name?: string;
@@ -29,14 +25,18 @@ function getFocusedNestedRouteName(route: NestedRoute): string | undefined {
 export function FloatingTabsBar({
   state,
   navigation,
-  blurTarget,
-}: FloatingTabsBarProps) {
+}: BottomTabBarProps) {
+  const pathname = usePathname();
   const activeRoute = state.routes[state.index];
   const nestedRouteName = activeRoute
     ? getFocusedNestedRouteName(activeRoute as NestedRoute)
     : undefined;
 
-  if (nestedRouteName && nestedRouteName !== "index") {
+  if (
+    pathname.endsWith("/complaints/new") ||
+    pathname.endsWith("/profile/details") ||
+    (nestedRouteName && nestedRouteName !== "index")
+  ) {
     return null;
   }
 
@@ -44,7 +44,6 @@ export function FloatingTabsBar({
     <View pointerEvents="box-none" style={{ flex: 0 }}>
       <FloatingAppBar
         currentIndex={state.index}
-        blurTarget={blurTarget}
         onSelect={(index) => {
           const route = state.routes[index];
 

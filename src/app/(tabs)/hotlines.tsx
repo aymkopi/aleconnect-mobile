@@ -1,6 +1,13 @@
 import { appScrollableBottomPadding } from "@/components/floating-app-bar";
 import { statusBarHeight } from "@/constants";
-import { Button, ListGroup, Surface, useThemeColor } from "heroui-native";
+import {
+  Button,
+  Label,
+  ListGroup,
+  Surface,
+  Typography,
+  useThemeColor,
+} from "heroui-native";
 import {
   AlertTriangle,
   ArrowUpRight,
@@ -9,7 +16,14 @@ import {
   MessageCircle,
   Phone,
 } from "lucide-react-native";
-import { Linking, ScrollView, Text, View, useWindowDimensions } from "react-native";
+import { useState } from "react";
+import {
+  Linking,
+  RefreshControl,
+  ScrollView,
+  View,
+  useWindowDimensions,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const hotlineGroups = [
@@ -45,7 +59,14 @@ export default function HotlinesRoute() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const [accentColor, mutedColor] = useThemeColor(["accent", "muted"]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const bottomPadding = appScrollableBottomPadding(insets.bottom);
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    requestAnimationFrame(() => {
+      setIsRefreshing(false);
+    });
+  };
 
   return (
     <ScrollView
@@ -59,15 +80,23 @@ export default function HotlinesRoute() {
         gap: 16,
         paddingBottom: bottomPadding,
       }}
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefreshing}
+          onRefresh={handleRefresh}
+          tintColor={accentColor}
+          colors={[accentColor]}
+        />
+      }
     >
       <View className="flex-row items-start justify-between">
         <View className="flex-1 pr-4">
-          <Text className="text-foreground text-[34px] font-black leading-10">
+          <Typography.Heading type="h1" weight="bold">
             Hotlines
-          </Text>
-          <Text className="text-muted mt-1 text-[15px] leading-5">
+          </Typography.Heading>
+          <Typography.Paragraph type="body-sm" color="muted" className="mt-1">
             Fast access to safety, support, and official ALECO channels.
-          </Text>
+          </Typography.Paragraph>
         </View>
         <Button isIconOnly variant="secondary" accessibilityLabel="Call">
           <Phone size={20} color={accentColor} />
@@ -75,17 +104,17 @@ export default function HotlinesRoute() {
       </View>
 
       <Surface className="rounded-[24px] p-5">
-        <Text className="text-foreground text-[17px] font-bold leading-6">
+        <Typography.Heading type="h6" weight="bold">
           Safety first
-        </Text>
-        <Text className="text-muted mt-1 text-[14px] leading-5">
+        </Typography.Heading>
+        <Typography.Paragraph type="body-sm" color="muted" className="mt-1">
           Stay away from downed lines and damaged electrical equipment. Use
           emergency services for immediate danger.
-        </Text>
+        </Typography.Paragraph>
       </Surface>
 
       <View className="gap-2">
-        <Text className="ml-2 text-sm font-semibold text-muted">Contacts</Text>
+        <Label className="ml-2 text-sm font-semibold text-muted">Contacts</Label>
         <ListGroup>
           {hotlineGroups.map((group) => {
             const Icon = group.icon;
@@ -108,9 +137,9 @@ export default function HotlinesRoute() {
                   <ListGroup.ItemDescription>
                     {group.description}
                   </ListGroup.ItemDescription>
-                  <Text className="text-accent mt-1 text-xs font-bold">
+                  <Typography type="body-xs" weight="bold" className="mt-1 text-accent">
                     {group.action}
-                  </Text>
+                  </Typography>
                 </ListGroup.ItemContent>
                 <ListGroup.ItemSuffix>
                   {group.url ? (

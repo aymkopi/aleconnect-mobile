@@ -1,9 +1,15 @@
-import { Stack } from "expo-router";
-import { useThemeColor } from "heroui-native";
+import { Stack, useRouter } from "expo-router";
+import { Button, useThemeColor } from "heroui-native";
+import { ChevronLeft } from "lucide-react-native";
 
 import { ConsumerProfileProvider } from "../../../context/consumer-profile-context";
 
+export const unstable_settings = {
+  initialRouteName: "index",
+};
+
 export default function ProfileLayout() {
+  const router = useRouter();
   const [headerTintColor, headerBackgroundColor] = useThemeColor([
     "foreground",
     "surface",
@@ -27,6 +33,22 @@ export default function ProfileLayout() {
         <Stack.Screen
           name="details"
           options={{
+            headerBackVisible: false,
+            headerLeft: () => (
+              <Button
+                isIconOnly
+                variant="ghost"
+                onPress={() => {
+                  if (__DEV__) {
+                    console.log("[nav] profile details header back");
+                  }
+                  router.replace("/profile");
+                }}
+                accessibilityLabel="Back to profile"
+              >
+                <ChevronLeft size={22} color={headerTintColor} />
+              </Button>
+            ),
             title: "Account",
           }}
         />

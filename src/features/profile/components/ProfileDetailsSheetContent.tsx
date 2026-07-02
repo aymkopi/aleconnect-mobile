@@ -95,7 +95,6 @@ export function ProfileDetailsSheetContent({
         </TextField>
       </View>
       <Alert className="bg-accent/10 border border-accent/20" status="accent">
-        <Alert.Indicator />
         <Alert.Description>
           {editingField === "phone"
             ? `Current phone number: ${currentPhone}.`

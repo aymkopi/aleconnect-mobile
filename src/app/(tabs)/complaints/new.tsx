@@ -1,4 +1,3 @@
-import { appScrollableBottomPadding } from "@/components/floating-app-bar";
 import { statusBarHeight } from "@/constants";
 import { useConsumerProfileContext } from "@/context/consumer-profile-context";
 import {
@@ -17,7 +16,7 @@ import {
 import { compressEvidencePhoto } from "@/utils/evidence-image-processing";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useNavigation, useRouter } from "expo-router";
 import {
   BottomSheet,
   Button,
@@ -29,6 +28,7 @@ import {
   Separator,
   Surface,
   TextField,
+  Typography,
   useThemeColor,
 } from "heroui-native";
 import {
@@ -38,14 +38,22 @@ import {
   ChevronRight,
   MapPin,
 } from "lucide-react-native";
-import { Fragment, useEffect, useMemo, useState } from "react";
 import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  BackHandler,
   Image,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
   ScrollView,
-  Text,
   View,
   useWindowDimensions,
 } from "react-native";
@@ -120,32 +128,54 @@ function SelectField({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [foregroundColor] = useThemeColor(["foreground"]);
-  const snapPoints = useMemo(() => ["50%"], []);
+  const { height } = useWindowDimensions();
+  const sheetHeight = useMemo(
+    () =>
+      Math.min(
+        height * 0.5,
+        Math.max(168, 92 + Math.min(options.length, 6) * 54),
+      ),
+    [height, options.length],
+  );
+  const listMaxHeight = Math.max(96, sheetHeight - 72);
+  const snapPoints = useMemo(() => [sheetHeight], [sheetHeight]);
   const selectedOption = options.find((option) => option.value === value);
 
   return (
     <>
-      <TextField
-        isRequired={isRequired}
-        isInvalid={isInvalid}
-        isDisabled={isDisabled}
-      >
-        <Label>{label}</Label>
-        <Button
-          variant="secondary"
-          isDisabled={isDisabled}
+      <View className="gap-2">
+        <View className="flex-row items-center gap-1">
+          <Label>{label}</Label>
+          {isRequired ? (
+            <Typography className="text-danger" type="body-sm">
+              *
+            </Typography>
+          ) : null}
+        </View>
+        <Pressable
+          disabled={isDisabled}
+          accessibilityRole="button"
+          accessibilityState={{ disabled: isDisabled }}
           onPress={() => setIsOpen(true)}
-          className="justify-between"
+          className={`min-h-14 flex-row items-center justify-between rounded-full px-4 ${
+            isDisabled ? "bg-surface-secondary opacity-60" : "bg-surface-secondary"
+          }`}
         >
-          <Button.Label
+          <Typography
+            type="body-sm"
+            weight="medium"
             className={selectedOption ? "text-foreground" : "text-muted"}
           >
             {selectedOption?.label ?? placeholder}
-          </Button.Label>
+          </Typography>
           <ChevronRight size={18} color={foregroundColor} />
-        </Button>
-        <FieldError>{error}</FieldError>
-      </TextField>
+        </Pressable>
+        {isInvalid && error ? (
+          <Typography type="body-xs" className="text-danger">
+            {error}
+          </Typography>
+        ) : null}
+      </View>
 
       <BottomSheet isOpen={isOpen} onOpenChange={setIsOpen}>
         <BottomSheet.Portal>
@@ -154,14 +184,17 @@ function SelectField({
             snapPoints={snapPoints}
             enableOverDrag={false}
             enableDynamicSizing={false}
-            contentContainerClassName="h-full"
+            keyboardBehavior="interactive"
+            keyboardBlurBehavior="restore"
+            android_keyboardInputMode="adjustResize"
           >
             <BottomSheet.Title>{label}</BottomSheet.Title>
             {/* ponytail: ScrollShadow crashes in current native bundle; re-add after linear-gradient works. */}
             <BottomSheetScrollView
               keyboardShouldPersistTaps="handled"
+              nestedScrollEnabled
               showsVerticalScrollIndicator
-              style={{ flex: 1 }}
+              style={{ maxHeight: listMaxHeight }}
               contentContainerStyle={{ paddingBottom: 24 }}
             >
               {options.map((option, index) => (
@@ -190,7 +223,10 @@ function SelectField({
   );
 }
 
-function findHomeAddress(meta: ComplaintMeta, profile: ReturnType<typeof useConsumerProfileContext>["profile"]) {
+function findHomeAddress(
+  meta: ComplaintMeta,
+  profile: ReturnType<typeof useConsumerProfileContext>["profile"],
+) {
   const municipality = meta.municipalities.find(
     (item) =>
       item.name.toLowerCase() === profile?.municipality?.trim().toLowerCase(),
@@ -211,9 +247,11 @@ function findHomeAddress(meta: ComplaintMeta, profile: ReturnType<typeof useCons
 
 export default function NewComplaintRoute() {
   const router = useRouter();
+  const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const bottomPadding = appScrollableBottomPadding(insets.bottom);
+  const scrollRef = useRef<ScrollView | null>(null);
+  const isLeavingToParentRef = useRef(false);
   const [accentColor, mutedColor, foregroundColor] = useThemeColor([
     "accent",
     "muted",
@@ -227,6 +265,9 @@ export default function NewComplaintRoute() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [form, setForm] = useState<ComplaintFormState>(initialComplaintForm);
+  const [keyboardBottomInset, setKeyboardBottomInset] = useState(0);
+  const childBottomPadding =
+    Math.max(insets.bottom, 16) + (step < 5 ? 112 : 32) + keyboardBottomInset;
 
   useEffect(() => {
     let isMounted = true;
@@ -259,6 +300,23 @@ export default function NewComplaintRoute() {
       ...(current.useHomeAddress ? findHomeAddress(meta, profile) : {}),
     }));
   }, [meta, profile]);
+
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener(
+      "keyboardDidShow",
+      (event) => {
+        setKeyboardBottomInset(Math.min(event.endCoordinates.height, 320));
+      },
+    );
+    const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
+      setKeyboardBottomInset(0);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
 
   const selectedCategory = meta.categories.find(
     (category) => category.id === form.categoryId,
@@ -298,9 +356,9 @@ export default function NewComplaintRoute() {
       : step === 2
         ? Boolean(
             form.typeId &&
-              form.accountNumber &&
-              form.municipalityCode &&
-              form.barangayPsgc,
+            form.accountNumber &&
+            form.municipalityCode &&
+            form.barangayPsgc,
           )
         : step === 3
           ? Boolean(form.description && form.photos.length >= 3)
@@ -320,7 +378,9 @@ export default function NewComplaintRoute() {
 
     try {
       const { uploads } = await createEvidenceUploads(form.photos.length);
-      const imageBytes = await Promise.all(form.photos.map(compressEvidencePhoto));
+      const imageBytes = await Promise.all(
+        form.photos.map(compressEvidencePhoto),
+      );
 
       await Promise.all(
         uploads.map((upload, index) =>
@@ -353,6 +413,77 @@ export default function NewComplaintRoute() {
       setIsSubmitting(false);
     }
   };
+
+  const navigateToComplaintsParent = useCallback(() => {
+    isLeavingToParentRef.current = true;
+    router.replace("/complaints");
+  }, [router]);
+
+  const handleBackPress = useCallback(() => {
+    if (isMapSheetOpen) {
+      if (__DEV__) {
+        console.log("[nav] complaints map sheet back");
+      }
+      setIsMapSheetOpen(false);
+      return;
+    }
+
+    if (step === 5) {
+      if (__DEV__) {
+        console.log("[nav] complaints success back to parent");
+      }
+      navigateToComplaintsParent();
+      return;
+    }
+
+    if (step > 1) {
+      if (__DEV__) {
+        console.log("[nav] complaints previous step", { step });
+      }
+      setAttemptedStep(null);
+      setStep((current) => Math.max(1, current - 1));
+      return;
+    }
+
+    if (__DEV__) {
+      console.log("[nav] complaints child back to parent");
+    }
+    navigateToComplaintsParent();
+  }, [isMapSheetOpen, navigateToComplaintsParent, step]);
+
+  useFocusEffect(
+    useCallback(() => {
+      scrollRef.current?.scrollTo({ y: 0, animated: false });
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        () => {
+          handleBackPress();
+          return true;
+        },
+      );
+
+      return () => {
+        subscription.remove();
+      };
+    }, [handleBackPress]),
+  );
+
+  useEffect(
+    () =>
+      navigation.addListener("beforeRemove", (event) => {
+        if (isLeavingToParentRef.current) {
+          return;
+        }
+
+        if (__DEV__) {
+          console.log("[nav] complaints beforeRemove intercepted");
+        }
+        event.preventDefault();
+        handleBackPress();
+      }),
+    [handleBackPress, navigation],
+  );
 
   const handleNext = () => {
     if (!canGoNext) {
@@ -402,44 +533,42 @@ export default function NewComplaintRoute() {
       style={{ width }}
     >
       <ScrollView
+        ref={scrollRef}
+        automaticallyAdjustKeyboardInsets={Platform.OS === "ios"}
         keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="interactive"
+        keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
+        contentInsetAdjustmentBehavior="automatic"
         className="bg-background"
         contentContainerStyle={{
           flexGrow: 1,
           paddingHorizontal: 20,
           paddingTop: statusBarHeight + 16,
           gap: 16,
-          paddingBottom: bottomPadding + 140,
+          paddingBottom: childBottomPadding,
         }}
+        scrollIndicatorInsets={{ bottom: childBottomPadding }}
       >
         <View className="gap-4">
           <View className="flex-row items-center gap-3">
             <Button
               isIconOnly
               variant="ghost"
-              onPress={() => {
-                if (step > 1) {
-                  setAttemptedStep(null);
-                  setStep((current) => Math.max(1, current - 1));
-                  return;
-                }
-
-                router.back();
-              }}
-              accessibilityLabel={step > 1 ? "Previous step" : "Back to complaints"}
+              onPress={handleBackPress}
+              accessibilityLabel={
+                step > 1 ? "Previous step" : "Back to complaints"
+              }
             >
               <ChevronLeft size={22} color={foregroundColor} />
             </Button>
             <View className="flex-1">
-              <Text className="text-foreground text-[28px] font-black leading-8">
+              <Typography.Heading type="h2" weight="bold">
                 {title}
-              </Text>
-              <Text className="text-muted mt-1 text-[15px] leading-5">
+              </Typography.Heading>
+              <Typography.Paragraph type="body-sm" color="muted" className="mt-1">
                 {selectedCategory
                   ? formatComplaintCategoryTitle(selectedCategory.title)
                   : "Choose the closest category"}
-              </Text>
+              </Typography.Paragraph>
             </View>
           </View>
           <View className="flex-row gap-2 pl-14">
@@ -455,14 +584,16 @@ export default function NewComplaintRoute() {
         </View>
 
         {submitError ? (
-          <Text className="text-danger text-sm">{submitError}</Text>
+          <Typography.Paragraph type="body-sm" className="text-danger">
+            {submitError}
+          </Typography.Paragraph>
         ) : null}
 
         {step === 1 ? (
           <>
-            <Text className="ml-2 text-sm font-semibold text-muted">
+            <Label className="ml-2 text-sm font-semibold text-muted">
               Category
-            </Text>
+            </Label>
             <View className="gap-3">
               {meta.categories.map((category) => {
                 const selected = form.categoryId === category.id;
@@ -481,7 +612,7 @@ export default function NewComplaintRoute() {
                     }}
                     accessibilityRole="button"
                     accessibilityState={{ selected }}
-                    className={`min-h-[76px] flex-row items-center gap-3 rounded-[20px] border px-4 py-3 ${
+                    className={`min-h-19 flex-row items-center gap-3 rounded-[20px] border px-4 py-3 ${
                       selected
                         ? "border-accent bg-surface"
                         : "border-border bg-surface"
@@ -498,12 +629,17 @@ export default function NewComplaintRoute() {
                       )}
                     </View>
                     <View className="flex-1">
-                      <Text className="text-foreground text-[16px] font-bold leading-5">
+                      <Typography.Heading type="h6" weight="bold">
                         {formatComplaintCategoryTitle(category.title)}
-                      </Text>
-                      <Text className="text-muted mt-1 text-[13px] font-medium leading-[18px]">
+                      </Typography.Heading>
+                      <Typography.Paragraph
+                        type="body-xs"
+                        color="muted"
+                        weight="medium"
+                        className="mt-1"
+                      >
                         {category.description}
-                      </Text>
+                      </Typography.Paragraph>
                     </View>
                     {selected ? (
                       <View className="h-7 w-7 items-center justify-center rounded-full bg-accent">
@@ -519,7 +655,7 @@ export default function NewComplaintRoute() {
 
         {step === 2 ? (
           <>
-            <Text className="ml-2 text-sm text-muted">Complaint type</Text>
+            <Label className="ml-2 text-sm text-muted">Complaint type</Label>
             <SelectField
               isRequired
               label="Complaint type"
@@ -531,7 +667,7 @@ export default function NewComplaintRoute() {
               error="Select a complaint type."
             />
 
-            <Text className="ml-2 text-sm text-muted">Account</Text>
+            <Label className="ml-2 text-sm text-muted">Account</Label>
             <ReportInput
               isRequired
               isDisabled
@@ -543,7 +679,7 @@ export default function NewComplaintRoute() {
               error="Account number is required."
             />
 
-            <Text className="ml-2 text-sm text-muted">Address</Text>
+            <Label className="ml-2 text-sm text-muted">Address</Label>
             <ControlField
               isSelected={form.useHomeAddress}
               onSelectedChange={(selected) => {
@@ -619,7 +755,7 @@ export default function NewComplaintRoute() {
 
         {step === 3 ? (
           <>
-            <Text className="ml-2 text-sm text-muted">Report details</Text>
+            <Label className="ml-2 text-sm text-muted">Report details</Label>
             <ReportInput
               isRequired
               label="Description"
@@ -639,16 +775,16 @@ export default function NewComplaintRoute() {
             />
             <Surface variant="secondary" className="rounded-3xl p-4">
               <View className="flex-row items-center justify-between">
-                <Text className="text-foreground text-sm font-bold">
+                <Typography type="body-sm" weight="bold">
                   Evidence photos *
-                </Text>
-                <Text className="text-muted text-xs font-bold">
+                </Typography>
+                <Typography type="body-xs" color="muted" weight="bold">
                   {form.photos.length}/5
-                </Text>
+                </Typography>
               </View>
-              <Text className="text-muted mt-1 text-sm">
+              <Typography.Paragraph type="body-sm" color="muted" className="mt-1">
                 Add at least 3 clear photos.
-              </Text>
+              </Typography.Paragraph>
               <View className="mt-3 flex-row gap-2">
                 {Array.from({ length: 5 }, (_, index) => (
                   <Pressable
@@ -678,7 +814,7 @@ export default function NewComplaintRoute() {
 
         {step === 4 ? (
           <Surface className="rounded-3xl p-4">
-            <Text className="text-foreground text-lg font-black">Preview</Text>
+            <Typography.Heading type="h5" weight="bold">Preview</Typography.Heading>
             {[
               ["Category", selectedCategory?.title],
               ["Type", selectedType?.title],
@@ -699,15 +835,19 @@ export default function NewComplaintRoute() {
               ["Photos", `${form.photos.length} attached`],
             ].map(([label, value]) => (
               <View key={label} className="border-border mt-3 border-t pt-3">
-                <Text className="text-muted text-xs font-bold">{label}</Text>
-                <Text className="text-foreground mt-1 text-sm font-semibold">
+                <Label className="text-xs font-bold text-muted">{label}</Label>
+                <Typography.Paragraph
+                  type="body-sm"
+                  weight="semibold"
+                  className="mt-1"
+                >
                   {value || "Not provided"}
-                </Text>
+                </Typography.Paragraph>
               </View>
             ))}
-            <Text className="text-muted mt-4 text-xs leading-4">
+            <Typography.Paragraph type="body-xs" color="muted" className="mt-4">
               By submitting this form, I agree to all terms and conditions.
-            </Text>
+            </Typography.Paragraph>
           </Surface>
         ) : null}
 
@@ -716,31 +856,45 @@ export default function NewComplaintRoute() {
             <View className="h-14 w-14 items-center justify-center rounded-full bg-success/20">
               <Check size={28} color="#16a34a" />
             </View>
-            <Text className="text-foreground mt-4 text-center text-xl font-black">
+            <Typography.Heading
+              type="h4"
+              weight="bold"
+              align="center"
+              className="mt-4"
+            >
               We received your complaint.
-            </Text>
-            <Text className="text-muted mt-4 text-xs font-bold">
+            </Typography.Heading>
+            <Typography type="body-xs" color="muted" weight="bold" className="mt-4">
               Reference Number
-            </Text>
-            <Text className="bg-accent mt-1 rounded-full px-4 py-2 text-base font-black text-white">
+            </Typography>
+            <Typography
+              type="body"
+              weight="bold"
+              className="mt-1 rounded-full bg-accent px-4 py-2 text-white"
+            >
               {form.ticketNumber}
-            </Text>
-            <Text className="text-muted mt-5 text-center text-sm leading-5">
+            </Typography>
+            <Typography.Paragraph
+              type="body-sm"
+              color="muted"
+              align="center"
+              className="mt-5"
+            >
               Technicians have been notified. You will receive updates once a
               crew is assigned.
-            </Text>
+            </Typography.Paragraph>
             <View className="mt-5 w-full flex-row gap-2">
               <Button
                 variant="primary"
                 className="flex-1"
-                onPress={() => router.replace("/complaints")}
+                onPress={navigateToComplaintsParent}
               >
                 <Button.Label>Back to complaints</Button.Label>
               </Button>
               <Button
                 variant="secondary"
                 className="flex-1"
-                onPress={() => router.replace("/complaints")}
+                onPress={navigateToComplaintsParent}
               >
                 <Button.Label>View status</Button.Label>
               </Button>
@@ -749,11 +903,11 @@ export default function NewComplaintRoute() {
         ) : null}
       </ScrollView>
 
-      {step < 5 ? (
+      {step < 5 && keyboardBottomInset === 0 ? (
         <View
           pointerEvents="box-none"
           className="absolute inset-x-0 bottom-0 flex-row items-end justify-end px-5"
-          style={{ paddingBottom: insets.bottom + 18 }}
+          style={{ paddingBottom: Math.max(insets.bottom, 16) + 12 }}
         >
           <Button
             variant="primary"
@@ -775,22 +929,30 @@ export default function NewComplaintRoute() {
         </View>
       ) : null}
 
-      <BottomSheet isOpen={isMapSheetOpen} onOpenChange={setIsMapSheetOpen}>
-        <BottomSheet.Portal>
-          <BottomSheet.Overlay />
-          <BottomSheet.Content snapPoints={["92%"]}>
-            <BottomSheet.Close />
-            <BottomSheet.Title>Choose location</BottomSheet.Title>
-            <BottomSheet.Description>
-              Map picker will be connected next.
-            </BottomSheet.Description>
-            <View className="mt-5 h-80 items-center justify-center rounded-3xl bg-surface-secondary">
-              <MapPin size={36} color={accentColor} />
-              <Text className="text-muted mt-2 text-sm">Map placeholder</Text>
-            </View>
-          </BottomSheet.Content>
-        </BottomSheet.Portal>
-      </BottomSheet>
+      {isMapSheetOpen ? (
+        <BottomSheet isOpen={isMapSheetOpen} onOpenChange={setIsMapSheetOpen}>
+          <BottomSheet.Portal>
+            <BottomSheet.Overlay />
+            <BottomSheet.Content snapPoints={["92%"]}>
+              <BottomSheet.Close />
+              <BottomSheet.Title>Choose location</BottomSheet.Title>
+              <BottomSheet.Description>
+                Map picker will be connected next.
+              </BottomSheet.Description>
+              <View className="mt-5 h-80 items-center justify-center rounded-3xl bg-surface-secondary">
+                <MapPin size={36} color={accentColor} />
+                <Typography.Paragraph
+                  type="body-sm"
+                  color="muted"
+                  className="mt-2"
+                >
+                  Map placeholder
+                </Typography.Paragraph>
+              </View>
+            </BottomSheet.Content>
+          </BottomSheet.Portal>
+        </BottomSheet>
+      ) : null}
     </KeyboardAvoidingView>
   );
 }

@@ -1,15 +1,16 @@
-import { appScrollableBottomPadding } from "@/components/floating-app-bar";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 
 import {
   Avatar,
   BottomSheet,
   Button,
+  Label,
   ListGroup,
   Separator,
   Surface,
+  Typography,
   useThemeColor,
 } from "heroui-native";
 import {
@@ -21,13 +22,13 @@ import {
   LucidePhone,
   LucideUserRound,
 } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  BackHandler,
   Keyboard,
   Alert as NativeAlert,
   Pressable,
   ScrollView,
-  Text,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -44,7 +45,8 @@ export default function ProfileDetailsRoute() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [accentColor] = useThemeColor(["accent"]);
-  const bottomPadding = appScrollableBottomPadding(insets.bottom);
+  const scrollRef = useRef<ScrollView | null>(null);
+  const bottomPadding = Math.max(insets.bottom, 16) + 24;
   const { session } = useAuthSession();
   const { profile, isLoading, error, reload, setAvatarUrl } =
     useConsumerProfileContext();
@@ -62,9 +64,49 @@ export default function ProfileDetailsRoute() {
   );
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
+  const closeEditSheet = useCallback(() => {
+    Keyboard.dismiss();
+    setEditingField(null);
+    setInputError(null);
+    setInputValue("");
+  }, []);
+
   useEffect(() => {
     setAvatarUri(profile?.avatarUrl ?? null);
   }, [profile?.avatarUrl]);
+
+  const handleBackPress = useCallback(() => {
+    if (editingField) {
+      if (__DEV__) {
+        console.log("[nav] profile details close sheet");
+      }
+      closeEditSheet();
+      return;
+    }
+
+    if (__DEV__) {
+      console.log("[nav] profile details back to parent");
+    }
+    router.replace("/profile");
+  }, [closeEditSheet, editingField, router]);
+
+  useFocusEffect(
+    useCallback(() => {
+      scrollRef.current?.scrollTo({ y: 0, animated: false });
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        () => {
+          handleBackPress();
+          return true;
+        },
+      );
+
+      return () => {
+        subscription.remove();
+      };
+    }, [handleBackPress]),
+  );
 
   const handleEditAvatarPress = async () => {
     const permissionResult =
@@ -134,13 +176,6 @@ export default function ProfileDetailsRoute() {
 
   const openEditSheet = (field: EditableField) => {
     setEditingField(field);
-    setInputError(null);
-    setInputValue("");
-  };
-
-  const closeEditSheet = () => {
-    Keyboard.dismiss();
-    setEditingField(null);
     setInputError(null);
     setInputValue("");
   };
@@ -256,6 +291,7 @@ export default function ProfileDetailsRoute() {
   if (!session) {
     return (
       <ScrollView
+        ref={scrollRef}
         contentInsetAdjustmentBehavior="automatic"
         className="flex-1 bg-background"
         contentContainerStyle={{
@@ -266,12 +302,12 @@ export default function ProfileDetailsRoute() {
         }}
       >
         <Surface className="rounded-3xl p-6" style={{ gap: 12 }}>
-          <Text className="text-2xl font-bold text-foreground">
+          <Typography.Heading type="h3" weight="bold">
             Sign in required
-          </Text>
-          <Text className="text-sm text-muted">
+          </Typography.Heading>
+          <Typography.Paragraph type="body-sm" color="muted">
             Account details are only available for signed-in users.
-          </Text>
+          </Typography.Paragraph>
           <Button
             variant="primary"
             size="md"
@@ -288,6 +324,7 @@ export default function ProfileDetailsRoute() {
 
   return (
     <ScrollView
+      ref={scrollRef}
       contentInsetAdjustmentBehavior="automatic"
       className="flex-1 bg-background"
       contentContainerStyle={{
@@ -315,7 +352,9 @@ export default function ProfileDetailsRoute() {
               <Avatar.Fallback
                 style={{ width: 100, height: 100, borderRadius: 50 }}
               >
-                <Text
+                <Typography
+                  type="h1"
+                  weight="bold"
                   style={{ fontSize: 45, fontWeight: "700", color: "#888" }}
                 >
                   {displayName
@@ -325,7 +364,7 @@ export default function ProfileDetailsRoute() {
                     .join("")
                     .toUpperCase()
                     .slice(0, 2) || "?"}
-                </Text>
+                </Typography>
               </Avatar.Fallback>
             ) : null}
           </Avatar>
@@ -349,23 +388,32 @@ export default function ProfileDetailsRoute() {
             <LucidePencil size={16} color="white" />
           </Pressable>
         </View>
-        <Text className="text-lg font-bold text-foreground mt-4">
+        <Typography.Heading type="h5" weight="bold" className="mt-4">
           {isLoading ? "Loading profile..." : displayName}
-        </Text>
+        </Typography.Heading>
         {avatarPhoto ? (
-          <Text className="text-xs text-muted mt-2" numberOfLines={1}>
+          <Typography
+            type="body-xs"
+            color="muted"
+            className="mt-2"
+            numberOfLines={1}
+          >
             Selected photo: {avatarPhoto.fileName ?? "avatar.jpg"}
-          </Text>
+          </Typography>
         ) : null}
         {isUploadingAvatar ? (
-          <Text className="text-xs text-muted mt-2">Uploading avatar...</Text>
+          <Typography type="body-xs" color="muted" className="mt-2">
+            Uploading avatar...
+          </Typography>
         ) : null}
         {error ? (
-          <Text className="text-sm text-danger mt-2">{error.message}</Text>
+          <Typography.Paragraph type="body-sm" className="mt-2 text-danger">
+            {error.message}
+          </Typography.Paragraph>
         ) : null}
       </Surface>
 
-      <Text className="text-sm mt-3 text-muted">User Profile</Text>
+      <Label className="mt-3 text-sm text-muted">User Profile</Label>
       <ListGroup>
         <AccountDetailsBuilder
           icon={LucideUserRound}
@@ -412,7 +460,7 @@ export default function ProfileDetailsRoute() {
           }}
         />
       </ListGroup>
-      <Text className="text-sm mt-3 text-muted">Account Details</Text>
+      <Label className="mt-3 text-sm text-muted">Account Details</Label>
 
       <ListGroup>
         <AccountDetailsBuilder
@@ -434,43 +482,45 @@ export default function ProfileDetailsRoute() {
         ></AccountDetailsBuilder>
       </ListGroup>
 
-      <BottomSheet
-        isOpen={editingField !== null}
-        onOpenChange={(nextOpen) => {
-          if (!nextOpen) {
-            closeEditSheet();
-          }
-        }}
-      >
-        <BottomSheet.Portal>
-          <BottomSheet.Overlay />
-          <BottomSheet.Content
-            keyboardBehavior="interactive"
-            keyboardBlurBehavior="restore"
-            android_keyboardInputMode="adjustPan"
-          >
-            <ProfileDetailsSheetContent
-              editingField={editingField}
-              sheetTitle={sheetTitle}
-              sheetDescription={sheetDescription}
-              SheetIcon={SheetIcon}
-              inputValue={inputValue}
-              inputError={inputError}
-              currentPhone={profile?.contactNum ?? "No phone on file"}
-              currentEmail={profile?.email ?? "No email on file"}
-              isUpdating={isUpdating}
-              onChangeInput={(nextValue) => {
-                setInputError(null);
-                setInputValue(nextValue);
-              }}
-              onCancel={closeEditSheet}
-              onSave={() => {
-                void handleSaveUpdate();
-              }}
-            />
-          </BottomSheet.Content>
-        </BottomSheet.Portal>
-      </BottomSheet>
+      {editingField !== null ? (
+        <BottomSheet
+          isOpen={editingField !== null}
+          onOpenChange={(nextOpen) => {
+            if (!nextOpen) {
+              closeEditSheet();
+            }
+          }}
+        >
+          <BottomSheet.Portal>
+            <BottomSheet.Overlay />
+            <BottomSheet.Content
+              keyboardBehavior="interactive"
+              keyboardBlurBehavior="restore"
+              android_keyboardInputMode="adjustResize"
+            >
+              <ProfileDetailsSheetContent
+                editingField={editingField}
+                sheetTitle={sheetTitle}
+                sheetDescription={sheetDescription}
+                SheetIcon={SheetIcon}
+                inputValue={inputValue}
+                inputError={inputError}
+                currentPhone={profile?.contactNum ?? "No phone on file"}
+                currentEmail={profile?.email ?? "No email on file"}
+                isUpdating={isUpdating}
+                onChangeInput={(nextValue) => {
+                  setInputError(null);
+                  setInputValue(nextValue);
+                }}
+                onCancel={closeEditSheet}
+                onSave={() => {
+                  void handleSaveUpdate();
+                }}
+              />
+            </BottomSheet.Content>
+          </BottomSheet.Portal>
+        </BottomSheet>
+      ) : null}
     </ScrollView>
   );
 }

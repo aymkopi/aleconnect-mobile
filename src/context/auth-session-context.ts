@@ -21,7 +21,9 @@ import {
 export type AuthSessionContextValue = {
   readonly session: AuthSession | null;
   readonly isLoading: boolean;
-  readonly refreshSession: () => Promise<AuthSession | null>;
+  readonly refreshSession: (options?: {
+    forceNetwork?: boolean;
+  }) => Promise<AuthSession | null>;
   readonly signOut: () => Promise<void>;
 };
 
@@ -67,40 +69,47 @@ export function AuthSessionProvider({ children }: PropsWithChildren) {
   const [session, setSession] = useState<AuthSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const refreshSession = useCallback(async () => {
-    const token = await getAuthToken();
-    if (!token) {
-      await clearCachedSession();
-      setSession(null);
-      setIsLoading(false);
-      return null;
-    }
-
-    const cachedSession = await readCachedSession();
-    if (cachedSession) {
-      setSession(cachedSession);
-      setIsLoading(false);
-    }
-
-    try {
-      const nextSession = await apiRequest<AuthSession>(
-        "/api/auth/get-session",
-      );
-      setSession(nextSession);
-      await writeCachedSession(nextSession);
-      return nextSession;
-    } catch (error) {
-      if (error instanceof ApiRequestError && error.status === 401) {
-        await clearAuthToken();
+  const refreshSession = useCallback(
+    async (options?: { forceNetwork?: boolean }) => {
+      const token = await getAuthToken();
+      if (!token) {
         await clearCachedSession();
         setSession(null);
+        setIsLoading(false);
+        return null;
       }
 
-      return cachedSession;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+      const cachedSession = await readCachedSession();
+      if (cachedSession) {
+        setSession(cachedSession);
+        setIsLoading(false);
+
+        if (!options?.forceNetwork) {
+          return cachedSession;
+        }
+      }
+
+      try {
+        const nextSession = await apiRequest<AuthSession>(
+          "/api/auth/get-session",
+        );
+        setSession(nextSession);
+        await writeCachedSession(nextSession);
+        return nextSession;
+      } catch (error) {
+        if (error instanceof ApiRequestError && error.status === 401) {
+          await clearAuthToken();
+          await clearCachedSession();
+          setSession(null);
+        }
+
+        return cachedSession;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [],
+  );
 
   const signOut = useCallback(async () => {
     await apiRequest<{ success: boolean }>("/api/auth/sign-out", {

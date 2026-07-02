@@ -10,6 +10,14 @@ export type EvidenceUpload = {
 
 const complaintMetaCacheKey = "complaint_meta_cache_v1";
 const complaintMetaCacheTtlMs = 90 * 24 * 60 * 60 * 1000;
+const complaintReportsCacheTtlMs = 60 * 1000;
+
+let complaintMetaMemoryCache: ComplaintMetaCache | null = null;
+let complaintMetaRequest: Promise<ComplaintMeta> | null = null;
+let complaintReportsMemoryCache:
+  | { fetchedAt: number; value: Report[] }
+  | null = null;
+let complaintReportsRequest: Promise<Report[]> | null = null;
 
 type ComplaintMetaCache = {
   fetchedAt: number;
@@ -17,6 +25,13 @@ type ComplaintMetaCache = {
 };
 
 async function readComplaintMetaCache(): Promise<ComplaintMeta | null> {
+  if (
+    complaintMetaMemoryCache &&
+    Date.now() - complaintMetaMemoryCache.fetchedAt <= complaintMetaCacheTtlMs
+  ) {
+    return complaintMetaMemoryCache.value;
+  }
+
   const raw = await AsyncStorage.getItem(complaintMetaCacheKey);
   if (!raw) {
     return null;
@@ -28,6 +43,7 @@ async function readComplaintMetaCache(): Promise<ComplaintMeta | null> {
       return null;
     }
 
+    complaintMetaMemoryCache = parsed;
     return parsed.value;
   } catch {
     return null;
@@ -35,32 +51,81 @@ async function readComplaintMetaCache(): Promise<ComplaintMeta | null> {
 }
 
 async function writeComplaintMetaCache(value: ComplaintMeta): Promise<void> {
+  complaintMetaMemoryCache = { fetchedAt: Date.now(), value };
   await AsyncStorage.setItem(
     complaintMetaCacheKey,
-    JSON.stringify({ fetchedAt: Date.now(), value } satisfies ComplaintMetaCache),
+    JSON.stringify(complaintMetaMemoryCache satisfies ComplaintMetaCache),
   );
 }
 
 export async function clearComplaintMetaCache(): Promise<void> {
+  complaintMetaMemoryCache = null;
   await AsyncStorage.removeItem(complaintMetaCacheKey);
 }
 
-export async function fetchComplaintMeta(): Promise<ComplaintMeta> {
-  const cached = await readComplaintMetaCache();
-  if (cached) {
-    return cached;
-  }
-
-  const meta = await apiRequest<ComplaintMeta>("/api/mobile/complaints/meta");
-  await writeComplaintMetaCache(meta);
-  return meta;
+export async function clearComplaintCache(): Promise<void> {
+  complaintReportsMemoryCache = null;
+  complaintReportsRequest = null;
+  await clearComplaintMetaCache();
 }
 
-export async function fetchComplaintReports(): Promise<Report[]> {
-  const response = await apiRequest<{ reports: Report[] }>(
+export async function fetchComplaintMeta(
+  options?: { force?: boolean },
+): Promise<ComplaintMeta> {
+  if (!options?.force) {
+    const cached = await readComplaintMetaCache();
+    if (cached) {
+      return cached;
+    }
+  }
+
+  if (complaintMetaRequest) {
+    return complaintMetaRequest;
+  }
+
+  complaintMetaRequest = apiRequest<ComplaintMeta>("/api/mobile/complaints/meta")
+    .then(async (meta) => {
+      await writeComplaintMetaCache(meta);
+      return meta;
+    })
+    .finally(() => {
+      complaintMetaRequest = null;
+    });
+
+  return complaintMetaRequest;
+}
+
+export async function fetchComplaintReports(
+  options?: { force?: boolean },
+): Promise<Report[]> {
+  if (
+    !options?.force &&
+    complaintReportsMemoryCache &&
+    Date.now() - complaintReportsMemoryCache.fetchedAt <=
+      complaintReportsCacheTtlMs
+  ) {
+    return complaintReportsMemoryCache.value;
+  }
+
+  if (complaintReportsRequest) {
+    return complaintReportsRequest;
+  }
+
+  complaintReportsRequest = apiRequest<{ reports: Report[] }>(
     "/api/mobile/complaints",
-  );
-  return response.reports;
+  )
+    .then((response) => {
+      complaintReportsMemoryCache = {
+        fetchedAt: Date.now(),
+        value: response.reports,
+      };
+      return response.reports;
+    })
+    .finally(() => {
+      complaintReportsRequest = null;
+    });
+
+  return complaintReportsRequest;
 }
 
 export async function createEvidenceUploads(count: number) {
@@ -97,11 +162,13 @@ export type SubmitComplaintInput = {
 };
 
 export async function submitComplaint(input: SubmitComplaintInput) {
-  return apiRequest<{ ticketId: string; ticketNumber: string }>(
+  const response = await apiRequest<{ ticketId: string; ticketNumber: string }>(
     "/api/mobile/complaints",
     {
       method: "POST",
       body: JSON.stringify(input),
     },
   );
+  complaintReportsMemoryCache = null;
+  return response;
 }

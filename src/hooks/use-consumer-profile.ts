@@ -13,6 +13,14 @@ import { fetchCurrentConsumerProfileView } from "@/services/profile";
 const profileCacheTtlMs = 24 * 60 * 60 * 1000;
 const profileCachePayloadPrefix = "profile_cache_payload_v1";
 const profileCacheFetchedAtPrefix = "profile_cache_fetched_at_v1";
+const profileMemoryCache = new Map<
+  string,
+  { fetchedAt: number; value: ConsumerProfileView | null }
+>();
+const profileRequests = new Map<
+  string,
+  Promise<ConsumerProfileView | null>
+>();
 
 function buildPayloadKey(userId: string): string {
   return `${profileCachePayloadPrefix}:${userId}`;
@@ -52,7 +60,18 @@ export function useConsumerProfile(): UseConsumerProfileState {
       }
 
       try {
-        const nextProfile = await fetchCurrentConsumerProfileView();
+        const activeRequest =
+          profileRequests.get(userId) ?? fetchCurrentConsumerProfileView();
+        profileRequests.set(userId, activeRequest);
+
+        const nextProfile = await activeRequest.finally(() => {
+          profileRequests.delete(userId);
+        });
+
+        profileMemoryCache.set(userId, {
+          fetchedAt: Date.now(),
+          value: nextProfile,
+        });
         setProfile(nextProfile);
         setError(null);
         setIsLoading(false);
@@ -101,6 +120,16 @@ export function useConsumerProfile(): UseConsumerProfileState {
         return;
       }
 
+      const memoryProfile = profileMemoryCache.get(userId);
+      if (
+        memoryProfile &&
+        Date.now() - memoryProfile.fetchedAt <= profileCacheTtlMs
+      ) {
+        setProfile(memoryProfile.value);
+        setIsLoading(false);
+        return;
+      }
+
       const payloadKey = buildPayloadKey(userId);
       const fetchedAtKey = buildFetchedAtKey(userId);
 
@@ -115,6 +144,10 @@ export function useConsumerProfile(): UseConsumerProfileState {
       if (cachedPayloadText) {
         const cachedProfile = parseCachedProfile(cachedPayloadText);
         if (cachedProfile) {
+          profileMemoryCache.set(userId, {
+            fetchedAt: cachedFetchedAtText ? Number(cachedFetchedAtText) : 0,
+            value: cachedProfile,
+          });
           setProfile(cachedProfile);
           setIsLoading(false);
 
@@ -157,6 +190,10 @@ export function useConsumerProfile(): UseConsumerProfileState {
       };
 
       setProfile(nextProfile);
+      profileMemoryCache.set(userId, {
+        fetchedAt: Date.now(),
+        value: nextProfile,
+      });
 
       const payload = JSON.stringify(
         toConsumerProfileViewCachePayload(nextProfile),

@@ -37,7 +37,7 @@ export default function SignInRoute() {
     try {
       await signInWithAccountNumber({ accountNumber, password });
       await refreshSession();
-      router.replace("/(tabs)/home");
+      router.replace("/home");
     } catch (error) {
       const message =
         error instanceof Error
@@ -54,7 +54,7 @@ export default function SignInRoute() {
   }
 
   if (session) {
-    return <Redirect href="/(tabs)/home" />;
+    return <Redirect href="/home" />;
   }
 
   return (
@@ -157,7 +157,7 @@ export default function SignInRoute() {
         <Button
           variant="tertiary"
           size="md"
-          onPress={() => router.push("/(tabs)/home")}
+          onPress={() => router.push("/home")}
         >
           <Button.Label>Continue without account</Button.Label>
         </Button>
