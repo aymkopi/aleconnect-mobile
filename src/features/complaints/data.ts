@@ -41,6 +41,28 @@ export type Report = {
   createdAt: string;
   status: string;
   ticketNumber: string;
+  description?: string | null;
+  imageUrls?: string[];
+};
+
+export type ReportHistoryItem = {
+  id: string;
+  fromStatus: string | null;
+  toStatus: string;
+  note: string | null;
+  changedAt: string;
+};
+
+export type ReportDetail = Report & {
+  actionDesired: string | null;
+  purok: string | null;
+  barangayPsgc: string | null;
+  barangayName: string | null;
+  municipalityName: string | null;
+  landmark: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  history: ReportHistoryItem[];
 };
 
 export type ComplaintFormState = {
@@ -55,8 +77,20 @@ export type ComplaintFormState = {
   description: string;
   desiredAction: string;
   photos: string[];
+  photoUploads: ComplaintPhotoUpload[];
   imageKeys: string[];
+  latitude: number | null;
+  longitude: number | null;
+  ticketId: string | null;
   ticketNumber: string | null;
+};
+
+export type ComplaintPhotoUpload = {
+  uri: string;
+  key: string | null;
+  uploadUrl: string | null;
+  status: "processing" | "uploaded" | "failed";
+  error?: string;
 };
 
 export const emptyComplaintMeta: ComplaintMeta = {
@@ -78,7 +112,11 @@ export const initialComplaintForm: ComplaintFormState = {
   description: "",
   desiredAction: "",
   photos: [],
+  photoUploads: [],
   imageKeys: [],
+  latitude: null,
+  longitude: null,
+  ticketId: null,
   ticketNumber: null,
 };
 
@@ -101,4 +139,10 @@ export function formatReportDate(value: string) {
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(value));
+}
+
+export function formatStatus(status: string) {
+  return status
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }

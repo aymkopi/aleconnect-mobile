@@ -8,7 +8,10 @@
     "scheme": "aleconnectmobile",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/images/icon.png"
+      "icon": "./assets/images/icon.png",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Aleconnect uses your location to place complaint map pins."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +22,11 @@
       },
       "googleServicesFile": "./google-services.json",
       "predictiveBackGestureEnabled": false,
-      "package": "com.kapecakes.aleconnectmobile"
+      "package": "com.kapecakes.aleconnectmobile",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ]
     },
     "androidStatusBar": {
       "barStyle": "dark-content",
@@ -43,9 +50,20 @@
           }
         }
       ],
-      "expo-notifications",
+      [
+        "expo-notifications",
+        {
+          "sounds": [
+            "./assets/sounds/high-critical_alert.wav",
+            "./assets/sounds/info-alert.wav",
+            "./assets/sounds/low-medium-alert.wav"
+          ]
+        }
+      ],
+      "expo-location",
       "expo-web-browser",
-      "./plugins/with-android-predictive-back-disabled"
+      "./plugins/with-android-predictive-back-disabled",
+      "@maplibre/maplibre-react-native"
     ],
     "experiments": {
       "typedRoutes": true,

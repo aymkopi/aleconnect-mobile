@@ -6,11 +6,11 @@ import { useRouter } from "expo-router";
 import {
   Avatar,
   Button,
-  Label,
-  ListGroup,
   Select,
   Skeleton,
+  Surface,
   Typography,
+  useThemeColor,
 } from "heroui-native";
 import {
   LucideArrowUpRight,
@@ -21,23 +21,140 @@ import {
   LucideHeart,
   LucideLanguages,
   LucideLogOut,
-  LucideRefreshCcw,
   LucideShieldCheck,
   LucideSunMoon,
+  LucideUserRound,
 } from "lucide-react-native";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   Linking,
+  Pressable,
   RefreshControl,
   ScrollView,
   View,
   useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Uniwind, useCSSVariable, useUniwind } from "uniwind";
+import { Uniwind, useUniwind } from "uniwind";
 
 import { useConsumerProfileContext } from "../../../context/consumer-profile-context";
-import { clearComplaintCache } from "@/services/complaints";
+
+type ProfileRowProps = {
+  icon: ReactNode;
+  title: string;
+  description?: string;
+  value?: string;
+  action?: ReactNode;
+  onPress?: () => void;
+  accessibilityLabel?: string;
+};
+
+function IconBubble({ children }: { children: ReactNode }) {
+  return (
+    <View className="h-10 w-10 items-center justify-center rounded-2xl bg-accent-soft">
+      {children}
+    </View>
+  );
+}
+
+function ProfileSection({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <View className="gap-2">
+      <Typography
+        type="body-xs"
+        color="muted"
+        weight="semibold"
+        className="px-1"
+      >
+        {title}
+      </Typography>
+      <View className="gap-2">{children}</View>
+    </View>
+  );
+}
+
+function ProfileRow({
+  icon,
+  title,
+  description,
+  value,
+  action,
+  onPress,
+  accessibilityLabel,
+}: ProfileRowProps) {
+  return (
+    <Surface className="rounded-[22px] p-0">
+      <Pressable
+        disabled={!onPress}
+        onPress={onPress}
+        accessibilityRole={onPress ? "button" : undefined}
+        accessibilityLabel={accessibilityLabel ?? title}
+        className="min-h-16 flex-row items-center gap-3 px-4 py-3"
+      >
+        {icon}
+        <View className="flex-1">
+          <Typography type="body-sm" weight="semibold">
+            {title}
+          </Typography>
+          {description ? (
+            <Typography.Paragraph
+              type="body-xs"
+              color="muted"
+              numberOfLines={2}
+            >
+              {description}
+            </Typography.Paragraph>
+          ) : null}
+        </View>
+        {value ? (
+          <Typography type="body-xs" color="muted" weight="medium">
+            {value}
+          </Typography>
+        ) : null}
+        {action}
+      </Pressable>
+    </Surface>
+  );
+}
+
+function QuickAction({
+  icon,
+  title,
+  description,
+  onPress,
+}: {
+  icon: ReactNode;
+  title: string;
+  description: string;
+  onPress: () => void;
+}) {
+  return (
+    <Surface className="flex-1 rounded-3xl p-0">
+      <Pressable
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={title}
+        className="min-h-29.5 gap-3 px-4 py-4"
+      >
+        {icon}
+        <View className="gap-1">
+          <Typography type="body-sm" weight="bold">
+            {title}
+          </Typography>
+          <Typography.Paragraph type="body-xs" color="muted" numberOfLines={2}>
+            {description}
+          </Typography.Paragraph>
+        </View>
+      </Pressable>
+    </Surface>
+  );
+}
 
 export default function ProfileRoute() {
   const router = useRouter();
@@ -46,17 +163,13 @@ export default function ProfileRoute() {
   const { session, signOut } = useAuthSession();
   const { profile, isLoading, reload } = useConsumerProfileContext();
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const [isClearingCache, setIsClearingCache] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { theme, hasAdaptiveThemes } = useUniwind();
-  const foregroundColor = useCSSVariable("--accent");
-  const mutedColor = useCSSVariable("--muted");
-  const iconForegroundColor =
-    typeof foregroundColor === "string" ? foregroundColor : undefined;
-  const iconMutedColor =
-    typeof mutedColor === "string" ? mutedColor : undefined;
-  const surfaceCardShadow = useCSSVariable("--shadow-surface-card");
+  const [accentColor, mutedColor, accentForegroundColor, dangerColor] =
+    useThemeColor(["accent", "muted", "accent-foreground", "danger"]);
   const bottomPadding = appScrollableBottomPadding(insets.bottom);
+  const isGuest = !session;
+
   const themeOptions = useMemo(
     () => [
       { value: "system", label: "Auto" },
@@ -69,11 +182,18 @@ export default function ProfileRoute() {
   const selectedTheme =
     themeOptions.find((option) => option.value === activeTheme) ??
     themeOptions[0];
-  const currentThemeLabel = selectedTheme.label;
-  const isGuest = !session;
+  const initials =
+    (profile?.fullName ?? "?")
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((name) => name[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2) || "?";
 
   useEffect(() => {
     void router.prefetch("/profile/details");
+    void router.prefetch("/profile/push-notifications");
   }, [router]);
 
   const openPreferredLink = async ({
@@ -88,7 +208,7 @@ export default function ProfileRoute() {
         await Linking.openURL(appUrl);
         return;
       } catch {
-        // Fall through to the browser URL.
+        // App deep links can fail when the app is not installed; browser URL is the fallback.
       }
     }
 
@@ -103,16 +223,6 @@ export default function ProfileRoute() {
       router.replace("/sign-in");
     } finally {
       setIsSigningOut(false);
-    }
-  };
-
-  const handleClearComplaintCache = async () => {
-    setIsClearingCache(true);
-
-    try {
-      await clearComplaintCache();
-    } finally {
-      setIsClearingCache(false);
     }
   };
 
@@ -134,7 +244,8 @@ export default function ProfileRoute() {
       contentContainerStyle={{
         flexGrow: 1,
         paddingHorizontal: 20,
-        gap: 10,
+        paddingTop: 0,
+        gap: 16,
         paddingBottom: bottomPadding,
       }}
       refreshControl={
@@ -143,389 +254,276 @@ export default function ProfileRoute() {
           onRefresh={() => {
             void handleRefresh();
           }}
-          tintColor={iconForegroundColor}
-          colors={iconForegroundColor ? [iconForegroundColor] : undefined}
+          tintColor={accentColor}
+          colors={[accentColor]}
         />
       }
     >
       <View
-        className={"bg-accent rounded-b-3xl"}
+        className="bg-accent rounded-b-[28px]"
         style={{
           marginHorizontal: -20,
-          justifyContent: "center",
-          minHeight: 250,
-          padding: 25,
-          paddingTop: statusBarHeight + 30,
-          boxShadow:
-            typeof surfaceCardShadow === "string"
-              ? surfaceCardShadow
-              : undefined,
+          minHeight: 208,
+          padding: 22,
+          paddingTop: statusBarHeight + 24,
+          justifyContent: "space-between",
         }}
       >
-        {isGuest ? (
-          <View
+        <View className="gap-1">
+          <Typography.Heading
+            type="h2"
+            weight="bold"
+            style={{ color: accentForegroundColor }}
+          >
+            Profile
+          </Typography.Heading>
+          <Typography.Paragraph
+            type="body-sm"
+            style={{ color: accentForegroundColor, opacity: 0.76 }}
+          >
+            Account access, alerts, and app preferences.
+          </Typography.Paragraph>
+        </View>
+
+        <View className="flex-row items-center gap-4">
+          <Avatar
+            size="lg"
+            alt={isGuest ? "Guest profile" : "Profile picture"}
             style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 16,
+              width: 76,
+              height: 76,
+              borderRadius: 38,
+              borderWidth: 2,
+              borderColor: accentForegroundColor,
             }}
           >
-            <Avatar
-              size="lg"
-              style={{
-                width: 75,
-                height: 75,
-                borderRadius: 37.5,
-              }}
-              alt="Guest profile"
-            />
-            <View
-              style={{
-                flex: 1,
-                minWidth: 0,
-                gap: 8,
-                justifyContent: "center",
-              }}
-            >
-              <Typography.Heading
-                type="h6"
-                weight="semibold"
-                style={{
-                  color: "white",
-                  lineHeight: 20,
-                }}
-                numberOfLines={1}
-              >
-                Get the Full Experience
-              </Typography.Heading>
-              <Typography.Paragraph
-                type="body-sm"
-                style={{
-                  color: "rgba(255,255,255,0.9)",
-                  lineHeight: 20,
-                }}
-                numberOfLines={2}
-              >
-                Sign in to access account details and full services.
-              </Typography.Paragraph>
-              <Button
-                variant="secondary"
-                size="sm"
-                onPress={() => {
-                  router.push("/sign-in");
-                }}
-                style={{ alignSelf: "flex-start" }}
-              >
-                <Button.Label>Sign in</Button.Label>
-              </Button>
-            </View>
+            {!isGuest && profile?.avatarUrl ? (
+              <Avatar.Image
+                key={profile.avatarUrl}
+                source={{ uri: profile.avatarUrl }}
+              />
+            ) : null}
+            <Avatar.Fallback>{isGuest ? "?" : initials}</Avatar.Fallback>
+          </Avatar>
+          <View className="flex-1 gap-1">
+            {isLoading && !isGuest ? (
+              <View className="gap-2">
+                <Skeleton className="h-6 w-44 rounded-full" />
+                <Skeleton className="h-4 w-36 rounded-full" />
+              </View>
+            ) : (
+              <>
+                <Typography.Heading
+                  type="h4"
+                  weight="bold"
+                  numberOfLines={1}
+                  style={{ color: accentForegroundColor }}
+                >
+                  {isGuest
+                    ? "Guest mode"
+                    : (profile?.fullName ?? "Profile not linked")}
+                </Typography.Heading>
+                <Typography.Paragraph
+                  type="body-sm"
+                  numberOfLines={2}
+                  style={{ color: accentForegroundColor, opacity: 0.76 }}
+                >
+                  {isGuest
+                    ? "Sign in to view account data and manage notifications."
+                    : (profile?.accountNumber ?? "No account number linked")}
+                </Typography.Paragraph>
+              </>
+            )}
           </View>
-        ) : (
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 16,
-            }}
-          >
-            <Avatar
-              size="lg"
-              style={{
-                width: 75,
-                height: 75,
-                borderRadius: 37.5,
-              }}
-              alt="Profile picture"
-            >
-              {profile?.avatarUrl ? (
-                <Avatar.Image
-                  key={profile.avatarUrl}
-                  source={{ uri: profile.avatarUrl }}
-                />
-              ) : null}
-              <Avatar.Fallback>
-                {(profile?.fullName ?? "?")
-                  .split(/\s+/)
-                  .filter(Boolean)
-                  .map((name) => name[0])
-                  .join("")
-                  .toUpperCase()
-                  .slice(0, 2) || "?"}
-              </Avatar.Fallback>
-            </Avatar>
-            <View
-              style={{
-                flex: 1,
-                minWidth: 0,
-                gap: 2,
-                justifyContent: "center",
-              }}
-            >
-              {isLoading ? (
-                <View className="gap-2">
-                  <Skeleton className="h-5 w-40 rounded-full bg-white/30" />
-                  <Skeleton className="h-4 w-28 rounded-full bg-white/25" />
-                </View>
-              ) : (
-                <>
-                  <Typography.Heading
-                    type="h6"
-                    weight="bold"
-                    style={{
-                      color: "white",
-                      lineHeight: 30,
-                    }}
-                    numberOfLines={1}
-                  >
-                    {profile?.fullName ?? "Profile not linked"}
-                  </Typography.Heading>
-                  <Typography.Paragraph
-                    type="body-sm"
-                    style={{
-                      color: "rgba(255,255,255,0.9)",
-                      lineHeight: 20,
-                    }}
-                    numberOfLines={2}
-                  >
-                    {profile?.accountNumber ?? "No account number"}
-                  </Typography.Paragraph>
-                </>
-              )}
-            </View>
+          {isGuest ? (
             <Button
               isIconOnly
-              variant="ghost"
+              variant="primary"
               size="md"
               onPress={() => {
-                router.navigate("/profile/details");
+                router.push("/sign-in");
+              }}
+              accessibilityLabel="Sign in"
+            >
+              <LucideUserRound size={19} color={accentForegroundColor} />
+            </Button>
+          ) : null}
+        </View>
+      </View>
+
+      <View className="flex-row gap-3">
+        <QuickAction
+          icon={
+            <IconBubble>
+              <LucideUserRound size={20} color={accentColor} />
+            </IconBubble>
+          }
+          title="Account details"
+          description="Contact, address, meter"
+          onPress={() => router.push(isGuest ? "/sign-in" : "/profile/details")}
+        />
+        <QuickAction
+          icon={
+            <IconBubble>
+              <LucideBell size={20} color={accentColor} />
+            </IconBubble>
+          }
+          title="Alerts"
+          description="Push and feeder alerts"
+          onPress={() =>
+            router.push(isGuest ? "/sign-in" : "/profile/push-notifications")
+          }
+        />
+      </View>
+
+      <ProfileSection title="Preferences">
+        <ProfileRow
+          icon={
+            <IconBubble>
+              <LucideSunMoon size={20} color={accentColor} />
+            </IconBubble>
+          }
+          title="Theme"
+          description="Use system mode or choose a fixed appearance."
+          value={
+            themeOptions.find((option) => option.value === activeTheme)?.label
+          }
+          action={
+            <Select
+              value={selectedTheme}
+              onValueChange={(option) => {
+                if (!option) return;
+                Uniwind.setTheme(option.value as "system" | "light" | "dark");
               }}
             >
-              <LucideChevronRight size={20} color="white" />
-            </Button>
-          </View>
-        )}
-      </View>
-      <View className="gap-2 mt-3">
-        <Label className="ml-2 text-sm text-muted">Personalization</Label>
-        <ListGroup>
-          <ListGroup.Item>
-            <ListGroup.ItemPrefix>
-              <LucideSunMoon size={20} color={iconForegroundColor} />
-            </ListGroup.ItemPrefix>
-            <ListGroup.ItemContent>
-              <ListGroup.ItemTitle>Change Theme</ListGroup.ItemTitle>
-            </ListGroup.ItemContent>
-            <ListGroup.ItemSuffix>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                }}
-              >
-                <Typography type="body-xs" color="muted" weight="medium">
-                  {currentThemeLabel}
-                </Typography>
-                <Select
-                  value={selectedTheme}
-                  onValueChange={(option) => {
-                    if (!option) {
-                      return;
-                    }
+              <Select.Trigger variant="unstyled">
+                <Select.Value placeholder="Theme" />
+                <Select.TriggerIndicator
+                  iconProps={{ size: 16, color: mutedColor }}
+                />
+              </Select.Trigger>
+              <Select.Portal>
+                <Select.Overlay />
+                <Select.Content presentation="popover" width={150} align="end">
+                  <Select.Item value="system" label="Auto" />
+                  <Select.Item value="light" label="Light" />
+                  <Select.Item value="dark" label="Dark" />
+                </Select.Content>
+              </Select.Portal>
+            </Select>
+          }
+        />
+        <ProfileRow
+          icon={
+            <IconBubble>
+              <LucideLanguages size={20} color={accentColor} />
+            </IconBubble>
+          }
+          title="Language"
+          description="Interface language"
+          value="English"
+          action={<LucideChevronRight size={19} color={mutedColor} />}
+        />
+      </ProfileSection>
 
-                    Uniwind.setTheme(
-                      option.value as "system" | "light" | "dark",
-                    );
-                  }}
-                >
-                  <Select.Trigger variant="unstyled">
-                    <Select.Value placeholder="Theme" />
-                    <Select.TriggerIndicator
-                      iconProps={{ size: 16, color: iconMutedColor }}
-                    />
-                  </Select.Trigger>
-                  <Select.Portal>
-                    <Select.Overlay />
-                    <Select.Content
-                      presentation="popover"
-                      width={150}
-                      align="end"
-                    >
-                      <Select.Item value="system" label="Auto"></Select.Item>
-                      <Select.Item value="light" label="Light"></Select.Item>
-                      <Select.Item value="dark" label="Dark"></Select.Item>
-                    </Select.Content>
-                  </Select.Portal>
-                </Select>
-              </View>
-            </ListGroup.ItemSuffix>
-          </ListGroup.Item>
-        </ListGroup>
-        <Label className="ml-2 mt-3 text-sm text-muted">Settings</Label>
-        <ListGroup>
-          <ListGroup.Item>
-            <ListGroup.ItemPrefix>
-              <LucideBell size={20} color={iconForegroundColor} />
-            </ListGroup.ItemPrefix>
-            <ListGroup.ItemContent>
-              <ListGroup.ItemTitle>Push Notifications</ListGroup.ItemTitle>
-            </ListGroup.ItemContent>
-            <ListGroup.ItemSuffix />
-          </ListGroup.Item>
-          <ListGroup.Item>
-            <ListGroup.ItemPrefix>
-              <LucideLanguages size={20} color={iconForegroundColor} />
-            </ListGroup.ItemPrefix>
-            <ListGroup.ItemContent>
-              <ListGroup.ItemTitle>Languages</ListGroup.ItemTitle>
-            </ListGroup.ItemContent>
-            <ListGroup.ItemSuffix>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 5,
-                }}
-              >
-                <Typography type="body-xs" color="muted" weight="medium">
-                  English
-                </Typography>
-                <LucideChevronRight size={20} color={iconMutedColor} />
-              </View>
-            </ListGroup.ItemSuffix>
-          </ListGroup.Item>
-          <ListGroup.Item>
-            <ListGroup.ItemPrefix>
-              <LucideRefreshCcw size={20} color={iconForegroundColor} />
-            </ListGroup.ItemPrefix>
-            <ListGroup.ItemContent>
-              <ListGroup.ItemTitle>Cached complaint data</ListGroup.ItemTitle>
-            </ListGroup.ItemContent>
-            <ListGroup.ItemSuffix>
+      <ProfileSection title="Links">
+        <ProfileRow
+          icon={
+            <IconBubble>
+              <Feather name="facebook" size={20} color={accentColor} />
+            </IconBubble>
+          }
+          title="Facebook"
+          description="ALECO announcements and public updates"
+          onPress={() =>
+            void openPreferredLink({
+              appUrl:
+                "fb://facewebmodal/f?href=https://www.facebook.com/albayelectric/",
+              webUrl: "https://www.facebook.com/albayelectric",
+            })
+          }
+          action={<LucideArrowUpRight size={18} color={mutedColor} />}
+        />
+        <ProfileRow
+          icon={
+            <IconBubble>
+              <LucideGlobe size={20} color={accentColor} />
+            </IconBubble>
+          }
+          title="ALECO website"
+          description="Official web portal"
+          onPress={() =>
+            void openPreferredLink({ webUrl: "https://web.alecoinc.com.ph/" })
+          }
+          action={<LucideArrowUpRight size={18} color={mutedColor} />}
+        />
+        <ProfileRow
+          icon={
+            <IconBubble>
+              <LucideHeart size={20} color={accentColor} />
+            </IconBubble>
+          }
+          title="About ALECO"
+          description="Organization profile and services"
+          onPress={() =>
+            void openPreferredLink({
+              webUrl: "https://web.alecoinc.com.ph/about",
+            })
+          }
+          action={<LucideArrowUpRight size={18} color={mutedColor} />}
+        />
+      </ProfileSection>
+
+      <ProfileSection title="Legal">
+        <ProfileRow
+          icon={
+            <IconBubble>
+              <LucideFileText size={20} color={accentColor} />
+            </IconBubble>
+          }
+          title="Terms and conditions"
+          description="Rules for using Aleconnect"
+          action={<LucideChevronRight size={19} color={mutedColor} />}
+        />
+        <ProfileRow
+          icon={
+            <IconBubble>
+              <LucideShieldCheck size={20} color={accentColor} />
+            </IconBubble>
+          }
+          title="Privacy policy"
+          description="How account data is handled"
+          action={<LucideChevronRight size={19} color={mutedColor} />}
+        />
+      </ProfileSection>
+
+      {!isGuest ? (
+        <ProfileSection title="Session">
+          <ProfileRow
+            icon={
+              <IconBubble>
+                <LucideLogOut size={20} color={dangerColor} />
+              </IconBubble>
+            }
+            title="Sign out"
+            description="End this device session."
+            action={
               <Button
-                variant="secondary"
+                feedbackVariant="scale-highlight"
+                variant="danger-soft"
                 size="sm"
-                onPress={handleClearComplaintCache}
-                isDisabled={isClearingCache}
+                onPress={handleSignOut}
+                isDisabled={isSigningOut}
+                accessibilityLabel="Sign out"
               >
                 <Button.Label>
-                  {isClearingCache ? "Clearing..." : "Clear"}
+                  {isSigningOut ? "Signing out..." : "Sign out"}
                 </Button.Label>
               </Button>
-            </ListGroup.ItemSuffix>
-          </ListGroup.Item>
-        </ListGroup>
-        <Label className="ml-2 mt-3 text-sm text-muted">Social Links</Label>
-        <ListGroup>
-          <ListGroup.Item
-            onPress={() =>
-              void openPreferredLink({
-                appUrl:
-                  "fb://facewebmodal/f?href=https://www.facebook.com/albayelectric/",
-                webUrl: "https://www.facebook.com/albayelectric",
-              })
             }
-          >
-            <ListGroup.ItemPrefix>
-              <Feather name="facebook" size={20} color={iconForegroundColor} />
-            </ListGroup.ItemPrefix>
-            <ListGroup.ItemContent>
-              <ListGroup.ItemTitle>Facebook</ListGroup.ItemTitle>
-            </ListGroup.ItemContent>
-            <ListGroup.ItemSuffix>
-              <LucideArrowUpRight size={20} color={iconMutedColor} />
-            </ListGroup.ItemSuffix>
-          </ListGroup.Item>
-          <ListGroup.Item
-            onPress={() =>
-              void openPreferredLink({
-                webUrl: "https://web.alecoinc.com.ph/",
-              })
-            }
-          >
-            <ListGroup.ItemPrefix>
-              <LucideGlobe size={20} color={iconForegroundColor} />
-            </ListGroup.ItemPrefix>
-            <ListGroup.ItemContent>
-              <ListGroup.ItemTitle>ALECO Website</ListGroup.ItemTitle>
-            </ListGroup.ItemContent>
-            <ListGroup.ItemSuffix>
-              <LucideArrowUpRight size={20} color={iconMutedColor} />
-            </ListGroup.ItemSuffix>
-          </ListGroup.Item>
-          <ListGroup.Item
-            onPress={() =>
-              void openPreferredLink({
-                webUrl: "https://web.alecoinc.com.ph/about",
-              })
-            }
-          >
-            <ListGroup.ItemPrefix>
-              <LucideHeart size={20} color={iconForegroundColor} />
-            </ListGroup.ItemPrefix>
-            <ListGroup.ItemContent>
-              <ListGroup.ItemTitle>About Us</ListGroup.ItemTitle>
-            </ListGroup.ItemContent>
-            <ListGroup.ItemSuffix>
-              <LucideArrowUpRight size={20} color={iconMutedColor} />
-            </ListGroup.ItemSuffix>
-          </ListGroup.Item>
-        </ListGroup>
-
-        <Label className="ml-2 mt-3 text-sm text-muted">Legal</Label>
-        <ListGroup>
-          <ListGroup.Item>
-            <ListGroup.ItemPrefix>
-              <LucideFileText size={20} color={iconForegroundColor} />
-            </ListGroup.ItemPrefix>
-            <ListGroup.ItemContent>
-              <ListGroup.ItemTitle>Terms and Conditions</ListGroup.ItemTitle>
-            </ListGroup.ItemContent>
-            <ListGroup.ItemSuffix>
-              <LucideChevronRight size={20} color={iconMutedColor} />
-            </ListGroup.ItemSuffix>
-          </ListGroup.Item>
-          <ListGroup.Item>
-            <ListGroup.ItemPrefix>
-              <LucideShieldCheck size={20} color={iconForegroundColor} />
-            </ListGroup.ItemPrefix>
-            <ListGroup.ItemContent>
-              <ListGroup.ItemTitle>Privacy Policy</ListGroup.ItemTitle>
-            </ListGroup.ItemContent>
-            <ListGroup.ItemSuffix>
-              <LucideChevronRight size={20} color={iconMutedColor} />
-            </ListGroup.ItemSuffix>
-          </ListGroup.Item>
-        </ListGroup>
-
-        {!isGuest ? (
-          <>
-            <Label className="ml-2 mt-3 text-sm text-muted">Account</Label>
-            <ListGroup variant="default">
-              <ListGroup.Item>
-                <ListGroup.ItemPrefix>
-                  <LucideLogOut size={20} color={iconForegroundColor} />
-                </ListGroup.ItemPrefix>
-                <ListGroup.ItemContent>
-                  <ListGroup.ItemTitle>Sign out</ListGroup.ItemTitle>
-                </ListGroup.ItemContent>
-                <ListGroup.ItemSuffix>
-                  <Button
-                    feedbackVariant="scale-highlight"
-                    variant="danger-soft"
-                    size="sm"
-                    onPress={handleSignOut}
-                    isDisabled={isSigningOut}
-                  >
-                    <Button.Label>
-                      {isSigningOut ? "Signing out..." : "Sign out"}
-                    </Button.Label>
-                  </Button>
-                </ListGroup.ItemSuffix>
-              </ListGroup.Item>
-            </ListGroup>
-          </>
-        ) : null}
-      </View>
+          />
+        </ProfileSection>
+      ) : null}
     </ScrollView>
   );
 }

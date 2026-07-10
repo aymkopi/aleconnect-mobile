@@ -3,6 +3,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { aleconnectApiBaseUrl } from "@/constants";
 
 const authTokenKey = "aleconnect_auth_token_v1";
+const forcedLogoutReasonKey = "aleconnect_forced_logout_reason_v1";
+const forcedLogoutMessage =
+  "You have been logged out because your account was accessed from another device.";
+const authInvalidatedListeners = new Set<(reason: string) => void>();
 
 export class ApiRequestError extends Error {
   constructor(
@@ -20,6 +24,7 @@ export type AuthUser = {
   readonly username: string | null;
   readonly role: "consumer";
   readonly mustChangePassword?: boolean;
+  readonly expoNotificationToken?: string | null;
 };
 
 export type AuthSession = {
@@ -42,6 +47,32 @@ export async function setAuthToken(token: string): Promise<void> {
 
 export async function clearAuthToken(): Promise<void> {
   await AsyncStorage.removeItem(authTokenKey);
+}
+
+export function subscribeAuthInvalidated(
+  listener: (reason: string) => void,
+): () => void {
+  authInvalidatedListeners.add(listener);
+  return () => {
+    authInvalidatedListeners.delete(listener);
+  };
+}
+
+export async function consumeForcedLogoutReason(): Promise<string | null> {
+  const reason = await AsyncStorage.getItem(forcedLogoutReasonKey);
+  if (reason) {
+    await AsyncStorage.removeItem(forcedLogoutReasonKey);
+  }
+
+  return reason;
+}
+
+async function markAuthInvalidated(): Promise<void> {
+  // A 401 with a stored token means the server no longer accepts this session.
+  // The common case is a newer device login replacing this device's session.
+  await AsyncStorage.setItem(forcedLogoutReasonKey, forcedLogoutMessage);
+  await clearAuthToken();
+  authInvalidatedListeners.forEach((listener) => listener(forcedLogoutMessage));
 }
 
 async function readJson<T>(response: Response): Promise<T> {
@@ -74,6 +105,10 @@ export async function apiRequest<T>(
   });
 
   if (!response.ok) {
+    if (response.status === 401 && token) {
+      await markAuthInvalidated();
+    }
+
     const body = await readJson<{ error?: string; message?: string }>(
       response,
     ).catch(() => null);

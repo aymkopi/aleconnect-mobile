@@ -1,6 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import type { ComplaintMeta, Report } from "@/features/complaints/data";
+import type {
+  ComplaintMeta,
+  Report,
+  ReportDetail,
+} from "@/features/complaints/data";
 import { apiRequest } from "@/services/api";
 
 export type EvidenceUpload = {
@@ -128,6 +132,12 @@ export async function fetchComplaintReports(
   return complaintReportsRequest;
 }
 
+export async function fetchComplaintReportDetail(id: string): Promise<ReportDetail> {
+  return apiRequest<{ report: ReportDetail }>(
+    `/api/mobile/complaints/${encodeURIComponent(id)}`,
+  ).then((response) => response.report);
+}
+
 export async function createEvidenceUploads(count: number) {
   return apiRequest<{ draftId: string; uploads: EvidenceUpload[] }>(
     "/api/mobile/complaints/evidence-upload",
@@ -159,6 +169,8 @@ export type SubmitComplaintInput = {
   description: string;
   actionDesired: string;
   imageKeys: string[];
+  latitude: number | null;
+  longitude: number | null;
 };
 
 export async function submitComplaint(input: SubmitComplaintInput) {

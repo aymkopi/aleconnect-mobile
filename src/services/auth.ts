@@ -7,6 +7,8 @@ import {
   setAuthToken,
   type AuthUser,
 } from "@/services/api";
+import { registerDevicePushToken } from "@/services/notification-settings";
+import { registerForPushNotificationsAsync } from "@/services/push-notifications";
 
 type SignInWithAccountNumberParams = {
   accountNumber: string;
@@ -150,12 +152,20 @@ export async function signInWithAccountNumber({
   }
 
   let login: ConsumerLoginResponse;
+  let expoNotificationToken: string | null = null;
   try {
+    // Send the Expo token during login so the backend can save the current device
+    // while it replaces any older Better Auth sessions for this user.
+    expoNotificationToken = await registerForPushNotificationsAsync();
     login = await apiRequest<ConsumerLoginResponse>(
       "/api/auth/sign-in/username",
       {
         method: "POST",
-        body: JSON.stringify({ username, password: normalizedPassword }),
+        body: JSON.stringify({
+          username,
+          password: normalizedPassword,
+          expoNotificationToken,
+        }),
       },
     );
   } catch (error) {
@@ -173,6 +183,13 @@ export async function signInWithAccountNumber({
   }
 
   await setAuthToken(login.token);
+  if (expoNotificationToken) {
+    // Login write is server-side best effort; this authenticated call confirms DB update
+    // after the token is already stored locally for future API requests.
+    await registerDevicePushToken(expoNotificationToken).catch((error) => {
+      console.warn("Failed to save login push token", error);
+    });
+  }
   await clearAttempts(normalizedAccountNumber);
   return login;
 }

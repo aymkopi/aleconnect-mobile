@@ -1,7 +1,8 @@
 import { appScrollableBottomPadding } from "@/components/floating-app-bar";
 import { statusBarHeight } from "@/constants";
 import { useAuthSession } from "@/hooks/use-auth-session";
-import { useRouter } from "expo-router";
+import { fetchNotifications } from "@/services/notifications";
+import { useFocusEffect, useRouter } from "expo-router";
 import {
   Button,
   Label,
@@ -18,7 +19,7 @@ import {
   UserRound,
   Zap,
 } from "lucide-react-native";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import {
   RefreshControl,
   ScrollView,
@@ -33,17 +34,36 @@ export default function HomeRoute() {
   const { width } = useWindowDimensions();
   const { session, refreshSession } = useAuthSession();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [accentColor, foregroundColor, mutedColor] = useThemeColor([
     "accent",
     "foreground",
     "muted",
   ]);
   const bottomPadding = appScrollableBottomPadding(insets.bottom);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!session) {
+        setUnreadCount(0);
+        return;
+      }
+
+      void fetchNotifications()
+        .then((response) => setUnreadCount(response.unreadCount))
+        .catch(() => setUnreadCount(0));
+    }, [session]),
+  );
+
   const handleRefresh = async () => {
     setIsRefreshing(true);
 
     try {
       await refreshSession({ forceNetwork: true });
+      if (session) {
+        const response = await fetchNotifications();
+        setUnreadCount(response.unreadCount);
+      }
     } finally {
       setIsRefreshing(false);
     }
@@ -103,8 +123,20 @@ export default function HomeRoute() {
             Your ALECO account, reports, and support in one place.
           </Typography.Paragraph>
         </View>
-        <Button isIconOnly variant="secondary" accessibilityLabel="Alerts">
+        <Button
+          isIconOnly
+          variant="secondary"
+          accessibilityLabel="Alerts"
+          onPress={() => router.push(session ? "/notifications" : "/sign-in")}
+        >
           <Bell size={20} color={foregroundColor} />
+          {unreadCount > 0 ? (
+            <View className="absolute -right-1 -top-1 min-h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1">
+              <Typography type="body-xs" weight="bold" className="text-white">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </Typography>
+            </View>
+          ) : null}
         </Button>
       </View>
 

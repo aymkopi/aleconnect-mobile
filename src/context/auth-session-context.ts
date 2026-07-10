@@ -15,6 +15,7 @@ import {
   apiRequest,
   clearAuthToken,
   getAuthToken,
+  subscribeAuthInvalidated,
   type AuthSession,
 } from "@/services/api";
 
@@ -101,6 +102,7 @@ export function AuthSessionProvider({ children }: PropsWithChildren) {
           await clearAuthToken();
           await clearCachedSession();
           setSession(null);
+          return null;
         }
 
         return cachedSession;
@@ -123,6 +125,16 @@ export function AuthSessionProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     void refreshSession();
   }, [refreshSession]);
+
+  useEffect(() => {
+    return subscribeAuthInvalidated(() => {
+      // Any authenticated endpoint can discover that this device was replaced.
+      // Clear local state immediately so protected screens fall back to sign-in.
+      void clearCachedSession();
+      setSession(null);
+      setIsLoading(false);
+    });
+  }, []);
 
   const value = useMemo(
     () => ({ session, isLoading, refreshSession, signOut }),

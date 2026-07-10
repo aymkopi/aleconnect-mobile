@@ -2,11 +2,10 @@ import { appScrollableBottomPadding } from "@/components/floating-app-bar";
 import { statusBarHeight } from "@/constants";
 import {
   emptyComplaintMeta,
-  formatComplaintCategoryTitle,
-  formatReportDate,
   type ComplaintMeta,
   type Report,
 } from "@/features/complaints/data";
+import { ReportListGroup } from "@/features/complaints/report-list";
 import {
   fetchComplaintMeta,
   fetchComplaintReports,
@@ -14,18 +13,14 @@ import {
 import { useFocusEffect, useRouter } from "expo-router";
 import {
   Button,
-  Input,
-  ListGroup,
-  Separator,
   Skeleton,
   Surface,
   Typography,
   useThemeColor,
 } from "heroui-native";
-import { Bell, FileText, Plus, Search, X } from "lucide-react-native";
+import { Bell, CalendarDays, ChevronRight, FileText, Plus } from "lucide-react-native";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
-  Pressable,
   RefreshControl,
   ScrollView,
   View,
@@ -33,31 +28,31 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-function formatStatus(status: string) {
-  return status
-    .replace(/[_-]+/g, " ")
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+function isThisMonth(value: string) {
+  const date = new Date(value);
+  const now = new Date();
+  return (
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth()
+  );
 }
 
 function ReportsSkeleton() {
   return (
-    <Surface className="rounded-[22px] p-4">
-      {Array.from({ length: 4 }).map((_, index) => (
-        <View
-          key={index}
-          className={`flex-row items-center gap-3 ${
-            index > 0 ? "border-t border-separator pt-4" : ""
-          } ${index < 3 ? "pb-4" : ""}`}
-        >
-          <Skeleton className="h-11 w-11 rounded-2xl" />
-          <View className="flex-1 gap-2">
-            <Skeleton className="h-4 w-4/5 rounded-full" />
-            <Skeleton className="h-3 w-3/5 rounded-full" />
+    <View className="gap-3">
+      {Array.from({ length: 3 }).map((_, index) => (
+        <Surface key={index} className="rounded-3xl p-4">
+          <View className="flex-row gap-3">
+            <Skeleton className="h-12 w-12 rounded-2xl" />
+            <View className="flex-1 gap-2">
+              <Skeleton className="h-3 w-24 rounded-full" />
+              <Skeleton className="h-5 w-4/5 rounded-full" />
+              <Skeleton className="h-3 w-3/5 rounded-full" />
+            </View>
           </View>
-          <Skeleton className="h-7 w-16 rounded-full" />
-        </View>
+        </Surface>
       ))}
-    </Surface>
+    </View>
   );
 }
 
@@ -68,18 +63,12 @@ export default function ComplaintsRoute() {
   const scrollRef = useRef<ScrollView | null>(null);
   const hasLoadedRef = useRef(false);
   const bottomPadding = appScrollableBottomPadding(insets.bottom);
-  const [accentColor, foregroundColor] = useThemeColor([
-    "accent",
-    "foreground",
-  ]);
+  const [accentColor] = useThemeColor(["accent"]);
   const [meta, setMeta] = useState<ComplaintMeta>(emptyComplaintMeta);
   const [reports, setReports] = useState<Report[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState("all");
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [query, setQuery] = useState("");
 
   const loadComplaints = useCallback(async (options?: { force?: boolean }) => {
     if (options?.force) {
@@ -93,7 +82,6 @@ export default function ComplaintsRoute() {
         fetchComplaintMeta(options),
         fetchComplaintReports(options),
       ]);
-
       setMeta(nextMeta);
       setReports(nextReports);
       setError(null);
@@ -113,36 +101,23 @@ export default function ComplaintsRoute() {
   useFocusEffect(
     useCallback(() => {
       scrollRef.current?.scrollTo({ y: 0, animated: false });
-
       void loadComplaints();
     }, [loadComplaints]),
   );
 
-  const filteredReports = useMemo(
+  const monthReports = useMemo(
     () =>
       reports
-        .filter((report) =>
-          selectedFilter === "all" ? true : report.categoryId === selectedFilter,
-        )
-        .filter((report) =>
-          query
-            ? `${report.title} ${report.typeTitle} ${report.ticketNumber}`
-                .toLowerCase()
-                .includes(query.toLowerCase())
-            : true,
-        )
+        .filter((report) => isThisMonth(report.createdAt))
         .sort(
           (a, b) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         ),
-    [query, reports, selectedFilter],
+    [reports],
   );
 
-  const openCreate = () => {
-    if (__DEV__) {
-      console.log("[nav] complaints open new");
-    }
-    router.push("/complaints/new");
+  const openReport = (report: Report) => {
+    router.push({ pathname: "/complaints/[id]", params: { id: report.id } });
   };
 
   return (
@@ -153,15 +128,13 @@ export default function ComplaintsRoute() {
         className="bg-background"
         contentContainerStyle={{
           paddingHorizontal: 20,
-          gap: 12,
+          gap: 16,
           paddingBottom: bottomPadding,
         }}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
-            onRefresh={() => {
-              void loadComplaints({ force: true });
-            }}
+            onRefresh={() => void loadComplaints({ force: true })}
             tintColor={accentColor}
             colors={[accentColor]}
           />
@@ -171,7 +144,7 @@ export default function ComplaintsRoute() {
           className="bg-accent rounded-b-[28px]"
           style={{
             marginHorizontal: -20,
-            minHeight: 188,
+            minHeight: 200,
             padding: 22,
             paddingTop: statusBarHeight + 24,
             justifyContent: "space-between",
@@ -187,7 +160,7 @@ export default function ComplaintsRoute() {
                 weight="medium"
                 className="mt-1 text-white/85"
               >
-                Track service reports and follow ticket updates.
+                File reports and track active service tickets.
               </Typography.Paragraph>
             </View>
             <Button
@@ -200,97 +173,50 @@ export default function ComplaintsRoute() {
             </Button>
           </View>
 
-          <View className="flex-row items-end justify-between">
-            <View>
-              <Typography type="body-xs" weight="bold" className="uppercase text-white/70">
-                Reports filed
-              </Typography>
-              <Typography.Heading type="h2" weight="bold" className="text-white">
-                {reports.length}
-              </Typography.Heading>
+          <View className="flex-row items-end justify-between gap-3">
+            <View className="flex-row gap-3">
+              <Surface className="rounded-3xl bg-white/15 px-4 py-3">
+                <Typography type="body-xs" weight="bold" className="text-white/75">
+                  This month
+                </Typography>
+                <Typography.Heading type="h3" weight="bold" className="text-white">
+                  {monthReports.length}
+                </Typography.Heading>
+              </Surface>
+              <Surface className="rounded-3xl bg-white/15 px-4 py-3">
+                <Typography type="body-xs" weight="bold" className="text-white/75">
+                  All reports
+                </Typography>
+                <Typography.Heading type="h3" weight="bold" className="text-white">
+                  {reports.length}
+                </Typography.Heading>
+              </Surface>
             </View>
-            <Button variant="secondary" onPress={openCreate} size="sm">
+            <Button variant="secondary" onPress={() => router.push("/complaints/new")} size="sm">
               <Plus size={16} color={accentColor} />
-              <Button.Label>New report</Button.Label>
+              <Button.Label>New</Button.Label>
             </Button>
           </View>
         </View>
 
-        <View className="flex-row items-center gap-2">
-          {isSearchOpen ? (
-            <View className="flex-1">
-              <Input
-                value={query}
-                onChangeText={setQuery}
-                placeholder="Search reports"
-                autoFocus
-              />
-            </View>
-          ) : (
-            <View className="flex-1">
-              <Typography.Heading type="h4" weight="bold">
-                Recent reports
-              </Typography.Heading>
-            </View>
-          )}
+        <View className="flex-row items-center justify-between">
+          <View>
+            <Typography.Heading type="h4" weight="bold">
+              Recent this month
+            </Typography.Heading>
+            <Typography type="body-xs" color="muted" weight="medium">
+              Latest reports only. Full history lives in archive.
+            </Typography>
+          </View>
           <Button
-            isIconOnly
-            variant="secondary"
-            size="lg"
-            onPress={() => {
-              setIsSearchOpen((current) => !current);
-              if (isSearchOpen) {
-                setQuery("");
-              }
-            }}
-            accessibilityLabel={isSearchOpen ? "Close search" : "Search"}
+            variant="ghost"
+            size="sm"
+            onPress={() => router.push("/complaints/list")}
           >
-            {isSearchOpen ? (
-              <X size={20} color={foregroundColor} />
-            ) : (
-              <Search size={20} color={foregroundColor} />
-            )}
+            <Button.Label>View all</Button.Label>
+            <ChevronRight size={16} color={accentColor} />
           </Button>
         </View>
-
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: 8 }}
-          className="flex-row -mx-4"
-          contentContainerClassName="px-4"
-        >
-          {[
-            { id: "all" as const, title: "All" },
-            ...meta.categories.map((category) => ({
-              id: category.id,
-              title: formatComplaintCategoryTitle(category.title),
-            })),
-          ].map((filter) => {
-            const isActive = selectedFilter === filter.id;
-            return (
-              <Pressable
-                key={filter.id}
-                onPress={() => setSelectedFilter(filter.id)}
-                accessibilityRole="button"
-                accessibilityState={{ selected: isActive }}
-                className={`min-h-11 justify-center rounded-full px-4 ${
-                  isActive ? "bg-accent" : "bg-surface"
-                }`}
-              >
-                <Typography
-                  type="body-sm"
-                  weight="bold"
-                  className={`text-sm font-bold ${
-                    isActive ? "text-white" : "text-foreground"
-                  }`}
-                >
-                  {filter.title}
-                </Typography>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
 
         {error ? (
           <Typography.Paragraph type="body-sm" className="text-danger">
@@ -300,71 +226,32 @@ export default function ComplaintsRoute() {
 
         {isLoading ? (
           <ReportsSkeleton />
-        ) : filteredReports.length === 0 ? (
-          <Surface className="items-center rounded-[22px] p-6">
-            <FileText size={28} color={accentColor} />
-            <Typography.Heading
-              type="h6"
-              weight="bold"
-              align="center"
-              className="mt-3"
-            >
-              No reports yet
+        ) : monthReports.length === 0 ? (
+          <Surface className="items-center rounded-3xl p-6">
+            <CalendarDays size={28} color={accentColor} />
+            <Typography.Heading type="h6" weight="bold" align="center" className="mt-3">
+              No reports this month
             </Typography.Heading>
-            <Typography.Paragraph
-              type="body-sm"
-              color="muted"
-              align="center"
-              className="mt-1"
-            >
-              New complaints and service reports will appear here.
+            <Typography.Paragraph type="body-sm" color="muted" align="center" className="mt-1">
+              Older tickets are still available in your report archive.
             </Typography.Paragraph>
+            <Button
+              variant="secondary"
+              className="mt-4"
+              onPress={() => router.push("/complaints/list")}
+            >
+              <FileText size={16} color={accentColor} />
+              <Button.Label>Open archive</Button.Label>
+            </Button>
           </Surface>
         ) : (
-          <ListGroup>
-            {filteredReports.map((report, index) => {
-            const category = meta.categories.find(
-              (item) => item.id === report.categoryId,
-            );
-            return (
-              <View key={report.id}>
-                {index > 0 ? <Separator className="mx-4" /> : null}
-                <ListGroup.Item>
-                  <ListGroup.ItemPrefix>
-                    <View
-                      className="h-11 w-11 items-center justify-center rounded-2xl"
-                      style={{
-                        backgroundColor: category?.color ?? accentColor,
-                      }}
-                    >
-                      <FileText size={19} color="white" />
-                    </View>
-                  </ListGroup.ItemPrefix>
-                  <ListGroup.ItemContent>
-                    <ListGroup.ItemTitle className="font-bold">
-                      {report.title}
-                    </ListGroup.ItemTitle>
-                    <ListGroup.ItemDescription>
-                      {report.typeTitle} - {formatReportDate(report.createdAt)}
-                    </ListGroup.ItemDescription>
-                    <Typography type="body-xs" weight="bold" className="mt-1 text-accent">
-                      {report.ticketNumber}
-                    </Typography>
-                  </ListGroup.ItemContent>
-                  <ListGroup.ItemSuffix>
-                    <Typography
-                      type="body-xs"
-                      weight="bold"
-                      className="rounded-full bg-default px-3 py-1"
-                    >
-                      {formatStatus(report.status)}
-                    </Typography>
-                  </ListGroup.ItemSuffix>
-                </ListGroup.Item>
-              </View>
-            );
-            })}
-          </ListGroup>
+          <ReportListGroup
+            reports={monthReports.slice(0, 5)}
+            getColor={(report) =>
+              meta.categories.find((item) => item.id === report.categoryId)?.color
+            }
+            onPress={openReport}
+          />
         )}
       </ScrollView>
     </View>

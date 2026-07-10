@@ -3,6 +3,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useFocusEffect, useRouter } from "expo-router";
 
 import {
+  Alert,
   Avatar,
   BottomSheet,
   Button,
@@ -26,7 +27,6 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   BackHandler,
   Keyboard,
-  Alert as NativeAlert,
   Pressable,
   ScrollView,
   View,
@@ -40,6 +40,12 @@ import {
 
 import { uploadCurrentUserAvatar } from "@/services/profile";
 import { useConsumerProfileContext } from "../../../context/consumer-profile-context";
+
+type FeedbackMessage = {
+  title: string;
+  description: string;
+  status: "danger" | "success" | "accent";
+};
 
 export default function ProfileDetailsRoute() {
   const router = useRouter();
@@ -63,6 +69,7 @@ export default function ProfileDetailsRoute() {
     () => profile?.avatarUrl ?? null,
   );
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [feedback, setFeedback] = useState<FeedbackMessage | null>(null);
 
   const closeEditSheet = useCallback(() => {
     Keyboard.dismiss();
@@ -113,10 +120,11 @@ export default function ProfileDetailsRoute() {
       await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permissionResult.granted) {
-      NativeAlert.alert(
-        "Permission required",
-        "Allow photo library access to update your profile picture.",
-      );
+      setFeedback({
+        status: "danger",
+        title: "Permission required",
+        description: "Allow photo library access to update your profile picture.",
+      });
       return;
     }
 
@@ -153,7 +161,11 @@ export default function ProfileDetailsRoute() {
         nextError instanceof Error
           ? nextError.message
           : "Failed to upload profile image.";
-      NativeAlert.alert("Upload failed", message);
+      setFeedback({
+        status: "danger",
+        title: "Upload failed",
+        description: message,
+      });
     } finally {
       setIsUploadingAvatar(false);
     }
@@ -323,97 +335,107 @@ export default function ProfileDetailsRoute() {
   }
 
   return (
-    <ScrollView
-      ref={scrollRef}
-      contentInsetAdjustmentBehavior="automatic"
-      className="flex-1 bg-background"
-      contentContainerStyle={{
-        flexGrow: 1,
-        padding: 20,
-        gap: 6,
-        paddingBottom: bottomPadding,
-      }}
-    >
-      <Surface className="items-center justify-center py-10">
-        <View style={{ position: "relative" }}>
-          <Avatar
-            size="lg"
-            alt="Profile picture"
-            style={{
-              width: 100,
-              height: 100,
-              borderRadius: 50,
-              borderColor: accentColor,
-              borderWidth: 3,
-            }}
-          >
-            {avatarUri ? <Avatar.Image source={{ uri: avatarUri }} /> : null}
-            {!avatarUri ? (
-              <Avatar.Fallback
-                style={{ width: 100, height: 100, borderRadius: 50 }}
+    <View className="flex-1 bg-background">
+      <ScrollView
+        ref={scrollRef}
+        contentInsetAdjustmentBehavior="automatic"
+        className="flex-1 bg-background"
+        contentContainerStyle={{
+          flexGrow: 1,
+          padding: 20,
+          gap: 6,
+          paddingBottom: bottomPadding,
+        }}
+      >
+        {/* Identity card mirrors the profile parent: compact, scannable, first-screen useful. */}
+        <Surface className="rounded-3xl p-5">
+          <View className="flex-row items-center gap-4">
+            <View style={{ position: "relative" }}>
+              <Avatar
+                size="lg"
+                alt="Profile picture"
+                style={{
+                  width: 84,
+                  height: 84,
+                  borderRadius: 42,
+                  borderColor: accentColor,
+                  borderWidth: 2,
+                }}
               >
-                <Typography
-                  type="h1"
-                  weight="bold"
-                  style={{ fontSize: 45, fontWeight: "700", color: "#888" }}
-                >
-                  {displayName
-                    ?.split(/\s+/)
-                    .filter(Boolean)
-                    .map((n) => n[0])
-                    .join("")
-                    .toUpperCase()
-                    .slice(0, 2) || "?"}
+                {avatarUri ? <Avatar.Image source={{ uri: avatarUri }} /> : null}
+                {!avatarUri ? (
+                  <Avatar.Fallback
+                    style={{ width: 84, height: 84, borderRadius: 42 }}
+                  >
+                    <Typography type="h3" weight="bold" color="muted">
+                      {displayName
+                        ?.split(/\s+/)
+                        .filter(Boolean)
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase()
+                        .slice(0, 2) || "?"}
+                    </Typography>
+                  </Avatar.Fallback>
+                ) : null}
+              </Avatar>
+              <Pressable
+                onPress={handleEditAvatarPress}
+                disabled={isUploadingAvatar}
+                accessibilityRole="button"
+                accessibilityLabel="Edit profile picture"
+                style={{
+                  position: "absolute",
+                  right: -3,
+                  bottom: -3,
+                  width: 36,
+                  height: 36,
+                  borderRadius: 18,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                className="bg-accent border-2 border-background"
+              >
+                <LucidePencil size={16} color="white" />
+              </Pressable>
+            </View>
+            <View className="flex-1 gap-1">
+              <Typography.Heading type="h5" weight="bold" numberOfLines={2}>
+                {isLoading ? "Loading profile..." : displayName}
+              </Typography.Heading>
+              <Typography.Paragraph type="body-xs" color="muted" numberOfLines={2}>
+                {displayAccountNumber}
+              </Typography.Paragraph>
+              {avatarPhoto ? (
+                <Typography type="body-xs" color="muted" numberOfLines={1}>
+                  Selected photo: {avatarPhoto.fileName ?? "avatar.jpg"}
                 </Typography>
-              </Avatar.Fallback>
-            ) : null}
-          </Avatar>
-          <Pressable
-            onPress={handleEditAvatarPress}
-            disabled={isUploadingAvatar}
-            accessibilityRole="button"
-            accessibilityLabel="Edit profile picture"
-            style={{
-              position: "absolute",
-              right: -4,
-              bottom: -4,
-              width: 36,
-              height: 36,
-              borderRadius: 18,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-            className="bg-accent border-2 border-background"
-          >
-            <LucidePencil size={16} color="white" />
-          </Pressable>
-        </View>
-        <Typography.Heading type="h5" weight="bold" className="mt-4">
-          {isLoading ? "Loading profile..." : displayName}
-        </Typography.Heading>
-        {avatarPhoto ? (
-          <Typography
-            type="body-xs"
-            color="muted"
-            className="mt-2"
-            numberOfLines={1}
-          >
-            Selected photo: {avatarPhoto.fileName ?? "avatar.jpg"}
-          </Typography>
-        ) : null}
-        {isUploadingAvatar ? (
-          <Typography type="body-xs" color="muted" className="mt-2">
-            Uploading avatar...
-          </Typography>
-        ) : null}
-        {error ? (
-          <Typography.Paragraph type="body-sm" className="mt-2 text-danger">
-            {error.message}
-          </Typography.Paragraph>
-        ) : null}
-      </Surface>
+              ) : null}
+              {isUploadingAvatar ? (
+                <Typography type="body-xs" color="muted">
+                  Uploading avatar...
+                </Typography>
+              ) : null}
+              {error ? (
+                <Typography.Paragraph type="body-sm" className="text-danger">
+                  {error.message}
+                </Typography.Paragraph>
+              ) : null}
+            </View>
+          </View>
+        </Surface>
 
-      <Label className="mt-3 text-sm text-muted">User Profile</Label>
+        {feedback ? (
+          <Alert status={feedback.status} className="mt-2">
+            <Alert.Indicator />
+            <Alert.Content>
+              <Alert.Title>{feedback.title}</Alert.Title>
+              <Alert.Description>{feedback.description}</Alert.Description>
+            </Alert.Content>
+          </Alert>
+        ) : null}
+
+      <Label className="mt-3 text-sm text-muted">Personal details</Label>
       <ListGroup>
         <AccountDetailsBuilder
           icon={LucideUserRound}
@@ -460,7 +482,7 @@ export default function ProfileDetailsRoute() {
           }}
         />
       </ListGroup>
-      <Label className="mt-3 text-sm text-muted">Account Details</Label>
+      <Label className="mt-3 text-sm text-muted">Service account</Label>
 
       <ListGroup>
         <AccountDetailsBuilder
@@ -482,45 +504,45 @@ export default function ProfileDetailsRoute() {
         ></AccountDetailsBuilder>
       </ListGroup>
 
-      {editingField !== null ? (
-        <BottomSheet
-          isOpen={editingField !== null}
-          onOpenChange={(nextOpen) => {
-            if (!nextOpen) {
-              closeEditSheet();
-            }
-          }}
-        >
-          <BottomSheet.Portal>
-            <BottomSheet.Overlay />
-            <BottomSheet.Content
-              keyboardBehavior="interactive"
-              keyboardBlurBehavior="restore"
-              android_keyboardInputMode="adjustResize"
-            >
-              <ProfileDetailsSheetContent
-                editingField={editingField}
-                sheetTitle={sheetTitle}
-                sheetDescription={sheetDescription}
-                SheetIcon={SheetIcon}
-                inputValue={inputValue}
-                inputError={inputError}
-                currentPhone={profile?.contactNum ?? "No phone on file"}
-                currentEmail={profile?.email ?? "No email on file"}
-                isUpdating={isUpdating}
-                onChangeInput={(nextValue) => {
-                  setInputError(null);
-                  setInputValue(nextValue);
-                }}
-                onCancel={closeEditSheet}
-                onSave={() => {
-                  void handleSaveUpdate();
-                }}
-              />
-            </BottomSheet.Content>
-          </BottomSheet.Portal>
-        </BottomSheet>
-      ) : null}
-    </ScrollView>
+      </ScrollView>
+
+      <BottomSheet
+        isOpen={editingField !== null}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) {
+            closeEditSheet();
+          }
+        }}
+      >
+        <BottomSheet.Portal>
+          <BottomSheet.Overlay />
+          <BottomSheet.Content
+            keyboardBehavior="interactive"
+            keyboardBlurBehavior="restore"
+            android_keyboardInputMode="adjustResize"
+          >
+            <ProfileDetailsSheetContent
+              editingField={editingField}
+              sheetTitle={sheetTitle}
+              sheetDescription={sheetDescription}
+              SheetIcon={SheetIcon}
+              inputValue={inputValue}
+              inputError={inputError}
+              currentPhone={profile?.contactNum ?? "No phone on file"}
+              currentEmail={profile?.email ?? "No email on file"}
+              isUpdating={isUpdating}
+              onChangeInput={(nextValue) => {
+                setInputError(null);
+                setInputValue(nextValue);
+              }}
+              onCancel={closeEditSheet}
+              onSave={() => {
+                void handleSaveUpdate();
+              }}
+            />
+          </BottomSheet.Content>
+        </BottomSheet.Portal>
+      </BottomSheet>
+    </View>
   );
 }

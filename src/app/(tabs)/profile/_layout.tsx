@@ -52,6 +52,25 @@ export default function ProfileLayout() {
             title: "Account",
           }}
         />
+        <Stack.Screen
+          name="push-notifications"
+          options={{
+            headerBackVisible: false,
+            headerLeft: () => (
+              <Button
+                isIconOnly
+                variant="ghost"
+                onPress={() => {
+                  router.replace("/profile");
+                }}
+                accessibilityLabel="Back to profile"
+              >
+                <ChevronLeft size={22} color={headerTintColor} />
+              </Button>
+            ),
+            title: "Push notifications",
+          }}
+        />
       </Stack>
     </ConsumerProfileProvider>
   );

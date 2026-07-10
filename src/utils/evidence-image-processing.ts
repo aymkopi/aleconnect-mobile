@@ -1,3 +1,4 @@
+// Change this value when ALECO/R2 evidence file-size policy changes.
 const evidenceMaxBytes = 5 * 1024 * 1024;
 const evidenceDimension = 1400;
 const evidenceCompressionSteps = [0.85, 0.75, 0.65, 0.55, 0.45, 0.35];
