@@ -1,19 +1,16 @@
 import { appScrollableBottomPadding } from "@/components/floating-app-bar";
+import { Alert, AlertText } from "@/components/ui/alert";
+import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
+import { Heading } from "@/components/ui/heading";
+import { Progress, ProgressFilledTrack } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Text } from "@/components/ui/text";
 import {
   fetchNotificationSettings,
   saveNotificationSettings,
   type NotificationSettings,
   type NotificationSubstation,
 } from "@/services/notification-settings";
-import {
-  Alert,
-  Button,
-  Label,
-  Skeleton,
-  Surface,
-  Typography,
-  useThemeColor,
-} from "heroui-native";
 import {
   BellRing,
   Check,
@@ -37,6 +34,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCSSVariable } from "uniwind";
 
 import { useAuthSession } from "@/hooks/use-auth-session";
+import { useAppColors } from "@/hooks/use-app-colors";
 
 type ParentState = "none" | "partial" | "all";
 type Notice = {
@@ -98,7 +96,7 @@ function TriStateCheckbox({
   onPress: () => void;
   accessibilityLabel: string;
 }) {
-  const [accentColor, accentForeground, borderColor] = useThemeColor([
+  const [accentColor, accentForeground, borderColor] = useAppColors([
     "accent",
     "accent-foreground",
     "border",
@@ -130,7 +128,7 @@ function TriStateCheckbox({
 }
 
 function FeederCheckbox({ selected }: { selected: boolean }) {
-  const [accentColor, accentForeground, borderColor] = useThemeColor([
+  const [accentColor, accentForeground, borderColor] = useAppColors([
     "accent",
     "accent-foreground",
     "border",
@@ -155,7 +153,7 @@ function FeederCheckbox({ selected }: { selected: boolean }) {
 }
 
 function ToggleSwitch({ value }: { value: boolean }) {
-  const [accentColor, mutedColor] = useThemeColor(["accent", "muted"]);
+  const [accentColor, mutedColor] = useAppColors(["accent", "muted"]);
   return (
     <View className="h-11 w-14 justify-center" style={{ pointerEvents: "none" }}>
       <View
@@ -194,10 +192,10 @@ function PreferenceSwitch({
     >
       <View className="h-11 w-8 items-center justify-center">{icon}</View>
       <View className="flex-1">
-        <Label>{title}</Label>
-        <Typography.Paragraph type="body-xs" color="muted">
+        <Text className="font-medium text-foreground">{title}</Text>
+        <Text className="text-xs text-muted-foreground">
           {description}
-        </Typography.Paragraph>
+        </Text>
       </View>
       <ToggleSwitch value={value} />
     </Pressable>
@@ -219,7 +217,7 @@ export default function PushNotificationsRoute() {
   const { session, isLoading: isSessionLoading } = useAuthSession();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const [accentColor, mutedColor] = useThemeColor(["accent", "muted"]);
+  const [accentColor, mutedColor] = useAppColors(["accent", "muted"]);
   const floatingShadow = useCSSVariable("--shadow-floating-bar");
   const [settings, setSettings] = useState<NotificationSettings | null>(null);
   const [receivePushNotifications, setReceivePushNotifications] =
@@ -366,23 +364,15 @@ export default function PushNotificationsRoute() {
         className="flex-1 items-center justify-center bg-background px-6"
         style={{ width }}
       >
-        <Surface className="w-full items-center rounded-3xl p-6">
+        <View className="w-full items-center rounded-lg border border-border bg-card p-6">
           <BellRing size={28} color={accentColor} />
-          <Typography.Heading
-            type="h5"
-            weight="bold"
-            className="mt-4 text-center"
-          >
+          <Heading className="mt-4 text-center" size="md">
             Sign in required
-          </Typography.Heading>
-          <Typography.Paragraph
-            type="body-sm"
-            color="muted"
-            className="mt-2 text-center"
-          >
+          </Heading>
+          <Text className="mt-2 text-center text-sm text-muted-foreground">
             Sign in to manage feeder and substation alerts.
-          </Typography.Paragraph>
-        </Surface>
+          </Text>
+        </View>
       </View>
     );
   }
@@ -410,49 +400,45 @@ export default function PushNotificationsRoute() {
           paddingBottom: bottomPadding + 120,
         }}
       >
-        <Surface className="rounded-3xl p-5">
+        <View className="rounded-lg border border-border bg-card p-5">
           <View className="flex-row items-center gap-3">
             <View className="h-12 w-12 items-center justify-center rounded-2xl bg-accent-soft">
               <BellRing size={22} color={accentColor} />
             </View>
             <View className="flex-1">
-              <Typography.Heading type="h5" weight="bold">
+              <Heading size="md">
                 Alert preferences
-              </Typography.Heading>
-              <Typography.Paragraph type="body-xs" color="muted">
+              </Heading>
+              <Text className="text-xs text-muted-foreground">
                 Choose which grid updates should reach this device.
-              </Typography.Paragraph>
+              </Text>
             </View>
           </View>
           <View className="mt-4 gap-2">
             <View className="flex-row items-center justify-between">
-              <Typography type="body-xs" color="muted" weight="medium">
+              <Text className="text-xs font-medium text-muted-foreground">
                 {selectedCount}/{totalFeederCount} feeders
-              </Typography>
-              <Typography type="body-xs" color="muted" weight="medium">
+              </Text>
+              <Text className="text-xs font-medium text-muted-foreground">
                 {selectionPercent}%
-              </Typography>
+              </Text>
             </View>
-            <View className="h-2 overflow-hidden rounded-full bg-surface-secondary">
-              <View
-                className="h-full rounded-full bg-accent"
-                style={{ width: `${selectionPercent}%` }}
-              />
-            </View>
+            <Progress value={selectionPercent}>
+              <ProgressFilledTrack />
+            </Progress>
           </View>
-        </Surface>
+        </View>
 
         {notice ? (
-          <Alert status={notice.status}>
-            <Alert.Indicator />
-            <Alert.Content>
-              <Alert.Title>{notice.title}</Alert.Title>
-              <Alert.Description>{notice.description}</Alert.Description>
-            </Alert.Content>
+          <Alert variant={notice.status === "danger" ? "destructive" : "default"}>
+            <View className="flex-1 gap-1">
+              <AlertText className="font-bold">{notice.title}</AlertText>
+              <AlertText>{notice.description}</AlertText>
+            </View>
           </Alert>
         ) : null}
 
-        <Surface className="gap-3 rounded-3xl p-4">
+        <View className="gap-3 rounded-lg border border-border bg-card p-4">
           <PreferenceSwitch
             icon={<BellRing size={20} color={accentColor} />}
             title="Push notifications"
@@ -467,11 +453,11 @@ export default function PushNotificationsRoute() {
             value={receiveAdvisories}
             onChange={setReceiveAdvisories}
           />
-        </Surface>
+        </View>
 
         <View className="gap-2">
           <View className="flex-row items-center justify-between px-2">
-            <Label className="text-sm text-muted">Substations and feeders</Label>
+            <Text className="text-sm text-muted-foreground">Substations and feeders</Text>
             <View className="flex-row gap-2">
               <Button
                 size="sm"
@@ -480,7 +466,7 @@ export default function PushNotificationsRoute() {
                 isDisabled={isLoading || !settings || selectedCount === 0}
                 accessibilityLabel="Clear feeder selections"
               >
-                <Button.Label>Clear</Button.Label>
+                <ButtonText>Clear</ButtonText>
               </Button>
               <Button
                 size="sm"
@@ -494,8 +480,8 @@ export default function PushNotificationsRoute() {
                 }
                 accessibilityLabel="Select all feeders"
               >
-                <CheckCheck size={15} color={accentColor} />
-                <Button.Label>All</Button.Label>
+                <ButtonIcon as={CheckCheck} height={15} width={15} />
+                <ButtonText>All</ButtonText>
               </Button>
             </View>
           </View>
@@ -510,7 +496,7 @@ export default function PushNotificationsRoute() {
                 ).length;
 
                 return (
-                  <Surface key={substation.id} className="rounded-[22px] p-3">
+                  <View key={substation.id} className="rounded-lg border border-border bg-card p-3">
                     <View className="flex-row items-center gap-3">
                       <TriStateCheckbox
                         state={state}
@@ -523,26 +509,25 @@ export default function PushNotificationsRoute() {
                         accessibilityRole="button"
                         accessibilityLabel={`Toggle ${substation.name}`}
                       >
-                        <Typography type="body-sm" weight="bold">
+                        <Text className="text-sm font-bold text-foreground">
                           {substation.name}
-                        </Typography>
-                        <Typography type="body-xs" color="muted">
+                        </Text>
+                        <Text className="text-xs text-muted-foreground">
                           {selectedInGroup}/{substation.feeders.length} feeders
-                        </Typography>
+                        </Text>
                       </Pressable>
                       <Button
-                        isIconOnly
+                        size="icon"
                         variant="ghost"
-                        size="sm"
                         onPress={() => toggleExpanded(substation.id)}
                         accessibilityLabel={
                           expanded ? "Collapse feeders" : "Expand feeders"
                         }
                       >
                         {expanded ? (
-                          <ChevronDown size={18} color={mutedColor} />
+                          <ButtonIcon as={ChevronDown} height={18} width={18} />
                         ) : (
-                          <ChevronRight size={18} color={mutedColor} />
+                          <ButtonIcon as={ChevronRight} height={18} width={18} />
                         )}
                       </Button>
                     </View>
@@ -565,13 +550,13 @@ export default function PushNotificationsRoute() {
                             />
                             <View className="flex-1 flex-row items-center gap-2">
                               <RadioTower size={16} color={mutedColor} />
-                              <Label>{feeder.name}</Label>
+                              <Text className="font-medium text-foreground">{feeder.name}</Text>
                             </View>
                           </Pressable>
                         ))}
                       </View>
                     ) : null}
-                  </Surface>
+                  </View>
                 );
               })}
             </View>
@@ -588,7 +573,6 @@ export default function PushNotificationsRoute() {
       >
         {/* Floating save button stays above the tab bar and scroll content. */}
         <Button
-          variant="primary"
           size="lg"
           onPress={save}
           isDisabled={isSaving || isLoading || !settings}
@@ -599,8 +583,8 @@ export default function PushNotificationsRoute() {
               typeof floatingShadow === "string" ? floatingShadow : undefined,
           }}
         >
-          <Save size={18} color="white" />
-          <Button.Label>{isSaving ? "Saving..." : "Save"}</Button.Label>
+          <ButtonIcon as={Save} height={18} width={18} />
+          <ButtonText>{isSaving ? "Saving..." : "Save"}</ButtonText>
         </Button>
       </View>
     </View>
