@@ -41,7 +41,7 @@ export function FloatingTabsBar({
   }
 
   return (
-    <View pointerEvents="box-none" style={{ flex: 0 }}>
+    <View style={{ flex: 0, pointerEvents: "box-none" }}>
       <FloatingAppBar
         currentIndex={state.index}
         onSelect={(index) => {

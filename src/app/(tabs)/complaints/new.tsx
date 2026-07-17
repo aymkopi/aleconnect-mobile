@@ -1170,9 +1170,11 @@ export default function NewComplaintRoute() {
 
       {step < 5 && keyboardBottomInset === 0 ? (
         <View
-          pointerEvents="box-none"
           className="absolute inset-x-0 bottom-0 flex-row items-end justify-end px-5"
-          style={{ paddingBottom: Math.max(insets.bottom, 16) + 12 }}
+          style={{
+            paddingBottom: Math.max(insets.bottom, 16) + 12,
+            pointerEvents: "box-none",
+          }}
         >
           <Button
             isDisabled={isSubmitting}

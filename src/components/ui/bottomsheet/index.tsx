@@ -228,11 +228,11 @@ export const BottomSheetPortal = ({
         }}
         enablePanDownToClose={enablePanDownToClose}
         // @ts-ignore
-        className={className}
+        className={className ?? null}
         // @ts-ignore
-        backgroundClassName={`${backgroundClassName} bg-background border border-border/90 rounded-xl`}
+        backgroundClassName={`${backgroundClassName ?? ''} bg-background border border-border/90 rounded-xl`}
         // @ts-ignore
-        handleIndicatorClassName={`${handleIndicatorClassName} bg-primary`}
+        handleIndicatorClassName={`${handleIndicatorClassName ?? ''} bg-primary`}
         {...props}
       >
         {props.children}

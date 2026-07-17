@@ -135,7 +135,7 @@ const Popover = React.forwardRef<
       exiting={FadeOut.duration(150)}
       className={popoverStyle({ class: className })}
       context={{ placement }}
-      pointerEvents="box-none"
+      style={{ pointerEvents: 'box-none' }}
     />
   );
 });
@@ -151,7 +151,7 @@ const PopoverContent = React.forwardRef<
       className={popoverContentStyle({
         class: className,
       })}
-      pointerEvents="auto"
+      style={{ pointerEvents: 'auto' }}
     />
   );
 });

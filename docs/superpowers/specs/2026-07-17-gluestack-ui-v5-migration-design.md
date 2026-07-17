@@ -13,7 +13,7 @@ The completed migration must contain no HeroUI Native provider, imports, styles,
 ## Approved Decisions
 
 - Use GlueStack UI v5.
-- Source GlueStack components only from the official repository's current `main` branch. Resolve and record the remote `main` SHA before copying files; never use `main-v4-alpha` or allow CLI auto-detection to choose a source branch.
+- Source GlueStack components only from the official repository's current `main` branch. Resolve and record the remote `main` SHA before copying files; never allow CLI auto-detection to choose a different source branch.
 - Keep UniWind as the Tailwind CSS v4 styling engine.
 - Do not migrate to NativeWind v5. Aleconnect Mobile is Expo-only, UniWind is already configured, and NativeWind v5 would add preview dependencies and a PostCSS build path without adding required capability.
 - Preserve and polish the current Aleconnect visual identity rather than adopting GlueStack defaults or performing an unrelated full redesign.
@@ -311,7 +311,7 @@ The migration is complete only when all of the following are true:
 
 ## Risks and Controls
 
-- **Source drift:** Resolve `refs/heads/main` at execution time, verify the sparse checkout SHA, record it, and abort on any mismatch. Do not invoke the CLI path that may fall back to `main-v4-alpha`.
+- **Source drift:** Resolve `refs/heads/main` at execution time, verify the sparse checkout SHA, record it, and abort on any mismatch. Do not invoke a CLI path that can select a non-`main` branch.
 - **Theme drift:** Map existing Aleconnect tokens before migrating routes and verify light/dark screenshots at every phase.
 - **Overlay regressions:** Migrate sheets, selects, modals, and portals as complete feature units and test keyboard plus long-list behavior on native and web.
 - **Generated component volume:** Add only components used by a planned phase. Do not install the entire component catalog.

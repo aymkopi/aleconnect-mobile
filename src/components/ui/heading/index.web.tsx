@@ -4,6 +4,7 @@ import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
 type IHeadingProps = VariantProps<typeof headingStyle> &
   React.ComponentPropsWithoutRef<'h1'> & {
     as?: React.ElementType;
+    numberOfLines?: number;
   };
 
 const MappedHeading = memo(
@@ -18,10 +19,25 @@ const MappedHeading = memo(
       sub,
       italic,
       highlight,
+      numberOfLines,
+      style,
       ...props
     },
     ref
   ) {
+    const headingProps = {
+      ...props,
+      style: numberOfLines
+        ? {
+            ...style,
+            display: '-webkit-box',
+            WebkitBoxOrient: 'vertical' as const,
+            WebkitLineClamp: numberOfLines,
+            overflow: 'hidden',
+          }
+        : style,
+    };
+
     switch (size) {
       case '5xl':
       case '4xl':
@@ -39,7 +55,7 @@ const MappedHeading = memo(
               highlight: highlight as boolean,
               class: className,
             })}
-            {...props}
+            {...headingProps}
             ref={ref}
           />
         );
@@ -57,7 +73,7 @@ const MappedHeading = memo(
               highlight: highlight as boolean,
               class: className,
             })}
-            {...props}
+            {...headingProps}
             ref={ref}
           />
         );
@@ -75,7 +91,7 @@ const MappedHeading = memo(
               highlight: highlight as boolean,
               class: className,
             })}
-            {...props}
+            {...headingProps}
             ref={ref}
           />
         );
@@ -93,7 +109,7 @@ const MappedHeading = memo(
               highlight: highlight as boolean,
               class: className,
             })}
-            {...props}
+            {...headingProps}
             ref={ref}
           />
         );
@@ -111,7 +127,7 @@ const MappedHeading = memo(
               highlight: highlight as boolean,
               class: className,
             })}
-            {...props}
+            {...headingProps}
             ref={ref}
           />
         );
@@ -130,7 +146,7 @@ const MappedHeading = memo(
               highlight: highlight as boolean,
               class: className,
             })}
-            {...props}
+            {...headingProps}
             ref={ref}
           />
         );
@@ -148,7 +164,7 @@ const MappedHeading = memo(
               highlight: highlight as boolean,
               class: className,
             })}
-            {...props}
+            {...headingProps}
             ref={ref}
           />
         );
@@ -158,7 +174,14 @@ const MappedHeading = memo(
 
 const Heading = memo(
   forwardRef<HTMLHeadingElement, IHeadingProps>(function Heading(
-    { className, size = 'lg', as: AsComp, ...props },
+    {
+      className,
+      size = 'lg',
+      as: AsComp,
+      numberOfLines,
+      style,
+      ...props
+    },
     ref
   ) {
     const {
@@ -185,6 +208,17 @@ const Heading = memo(
             highlight: highlight as boolean,
             class: className,
           })}
+          style={
+            numberOfLines
+              ? {
+                  ...style,
+                  display: '-webkit-box',
+                  WebkitBoxOrient: 'vertical',
+                  WebkitLineClamp: numberOfLines,
+                  overflow: 'hidden',
+                }
+              : style
+          }
           {...props}
           ref={ref}
         />
@@ -192,7 +226,14 @@ const Heading = memo(
     }
 
     return (
-      <MappedHeading className={className} size={size} ref={ref} {...props} />
+      <MappedHeading
+        className={className}
+        size={size}
+        numberOfLines={numberOfLines}
+        style={style}
+        ref={ref}
+        {...props}
+      />
     );
   })
 );

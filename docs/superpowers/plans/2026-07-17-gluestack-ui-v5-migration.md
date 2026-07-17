@@ -11,7 +11,7 @@
 ## Global Constraints
 
 - Use only the official `gluestack/gluestack-ui` repository's current `main` branch. Resolve `refs/heads/main`, verify the checkout SHA, and record it before copying components.
-- Do not use `gluestack-ui init` or `gluestack-ui add`; CLI styling-engine fallback can select the obsolete `main-v4-alpha` branch.
+- Do not use `gluestack-ui init` or `gluestack-ui add`; CLI styling-engine detection can select a source branch other than the required current `main`.
 - Keep UniWind and Tailwind CSS v4; do not install NativeWind or PostCSS.
 - Keep existing Expo Router paths, backend contracts, authentication, MapLibre, R2 uploads, notifications, and state flows unchanged.
 - Preserve and polish Aleconnect's existing identity; do not replace it with GlueStack defaults.
