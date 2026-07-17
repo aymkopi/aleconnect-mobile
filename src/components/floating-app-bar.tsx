@@ -1,11 +1,13 @@
-import { PressableFeedback, Typography, useThemeColor } from "heroui-native";
 import type { LucideIcon } from "lucide-react-native";
 import { AlertTriangle, Home, Phone, UserRound } from "lucide-react-native";
 import type { FC } from "react";
 import { useMemo } from "react";
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import "tailwindcss";
+
+import { Pressable } from "@/components/ui/pressable";
+import { Text } from "@/components/ui/text";
+import { useAppColors } from "@/hooks/use-app-colors";
 
 /**
  * Constants
@@ -61,14 +63,14 @@ const TabItem: FC<TabItemProps> = ({
   isActive,
   onPress,
 }) => {
-  const [activeIconColor, inactiveIconColor] = useThemeColor([
+  const [activeIconColor, inactiveIconColor] = useAppColors([
     "foreground",
     "muted",
   ]);
   const iconColor = isActive ? activeIconColor : inactiveIconColor;
 
   return (
-    <PressableFeedback
+    <Pressable
       onPress={onPress}
       accessibilityRole="tab"
       accessibilityState={{ selected: isActive }}
@@ -79,16 +81,14 @@ const TabItem: FC<TabItemProps> = ({
       style={{ minHeight: TAB_MIN_HIT_AREA }}
     >
       <Icon size={20} strokeWidth={2.2} color={iconColor} />
-      <Typography
-        type="body-xs"
-        weight={isActive ? "bold" : "semibold"}
-        className={`text-xs ${
+      <Text
+        className={`text-xs ${isActive ? "font-bold" : "font-semibold"} ${
           isActive ? "text-foreground" : "text-muted"
         }`}
       >
         {title}
-      </Typography>
-    </PressableFeedback>
+      </Text>
+    </Pressable>
   );
 };
 
@@ -119,7 +119,7 @@ export const FloatingAppBar: FC<FloatingAppBarProps> = ({
   onSelect,
 }) => {
   const insets = useSafeAreaInsets();
-  const [surfaceColor] = useThemeColor(["surface"]);
+  const [surfaceColor] = useAppColors(["surface"]);
 
   // Memoize bottom inset to prevent unnecessary recalculations
   const bottomInset = useMemo(

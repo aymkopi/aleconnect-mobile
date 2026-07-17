@@ -1,7 +1,8 @@
 import { Stack, useRouter } from "expo-router";
-import { Button, useThemeColor } from "heroui-native";
 import { ChevronLeft } from "lucide-react-native";
 
+import { Button, ButtonIcon } from "@/components/ui/button";
+import { useAppColors } from "@/hooks/use-app-colors";
 import { ConsumerProfileProvider } from "../../../context/consumer-profile-context";
 
 export const unstable_settings = {
@@ -10,11 +11,11 @@ export const unstable_settings = {
 
 export default function ProfileLayout() {
   const router = useRouter();
-  const [headerTintColor, headerBackgroundColor] = useThemeColor([
+  const [headerTintColor, headerBackgroundColor] = useAppColors([
     "foreground",
     "surface",
   ]);
-  const [contentBackgroundColor] = useThemeColor(["background"]);
+  const [contentBackgroundColor] = useAppColors(["background"]);
 
   return (
     <ConsumerProfileProvider>
@@ -36,7 +37,7 @@ export default function ProfileLayout() {
             headerBackVisible: false,
             headerLeft: () => (
               <Button
-                isIconOnly
+                size="icon"
                 variant="ghost"
                 onPress={() => {
                   if (__DEV__) {
@@ -46,7 +47,7 @@ export default function ProfileLayout() {
                 }}
                 accessibilityLabel="Back to profile"
               >
-                <ChevronLeft size={22} color={headerTintColor} />
+                <ButtonIcon as={ChevronLeft} height={22} width={22} />
               </Button>
             ),
             title: "Account",
@@ -58,14 +59,14 @@ export default function ProfileLayout() {
             headerBackVisible: false,
             headerLeft: () => (
               <Button
-                isIconOnly
+                size="icon"
                 variant="ghost"
                 onPress={() => {
                   router.replace("/profile");
                 }}
                 accessibilityLabel="Back to profile"
               >
-                <ChevronLeft size={22} color={headerTintColor} />
+                <ButtonIcon as={ChevronLeft} height={22} width={22} />
               </Button>
             ),
             title: "Push notifications",

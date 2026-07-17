@@ -3,7 +3,7 @@ import { Stack, useRouter } from "expo-router";
 import type * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { Alert as HeroAlert, HeroUINativeProvider } from "heroui-native";
+import { HeroUINativeProvider } from "heroui-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Text, TextInput, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -11,6 +11,7 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { useUniwind } from "uniwind";
 
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
+import { Alert, AlertText } from "@/components/ui/alert";
 import { PushNotificationsReceiver } from "@/components/push-notifications-receiver";
 import { AuthSessionProvider } from "@/context/auth-session-context";
 import { useAuthSession } from "@/hooks/use-auth-session";
@@ -104,13 +105,12 @@ function ForcedLogoutRedirect() {
       className="absolute inset-x-0 top-0 z-50 px-5"
       style={{ paddingTop: 54, pointerEvents: "box-none" }}
     >
-      <HeroAlert status="danger">
-        <HeroAlert.Indicator />
-        <HeroAlert.Content>
-          <HeroAlert.Title>Logged out</HeroAlert.Title>
-          <HeroAlert.Description>{logoutMessage}</HeroAlert.Description>
-        </HeroAlert.Content>
-      </HeroAlert>
+      <Alert className="items-start shadow-lg" variant="destructive">
+        <View className="flex-1 gap-1">
+          <AlertText className="font-bold">Logged out</AlertText>
+          <AlertText>{logoutMessage}</AlertText>
+        </View>
+      </Alert>
     </View>
   );
 }
@@ -141,15 +141,19 @@ function ComplaintSubmissionToastHost() {
       className="absolute inset-x-0 top-0 z-50 px-5"
       style={{ paddingTop: 54, pointerEvents: "box-none" }}
     >
-      <HeroAlert status={toast.status}>
-        <HeroAlert.Indicator />
-        <HeroAlert.Content>
-          <HeroAlert.Title>
+      <Alert
+        className={`items-start shadow-lg ${
+          toast.status === "success" ? "border-success" : ""
+        }`}
+        variant={toast.status === "danger" ? "destructive" : "default"}
+      >
+        <View className="flex-1 gap-1">
+          <AlertText className="font-bold">
             {toast.status === "success" ? "Report submitted" : "Report failed"}
-          </HeroAlert.Title>
-          <HeroAlert.Description>{toast.message}</HeroAlert.Description>
-        </HeroAlert.Content>
-      </HeroAlert>
+          </AlertText>
+          <AlertText>{toast.message}</AlertText>
+        </View>
+      </Alert>
     </View>
   );
 }

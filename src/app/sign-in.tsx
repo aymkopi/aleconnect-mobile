@@ -1,21 +1,30 @@
 import { Redirect, useRouter } from "expo-router";
 import {
-  Button,
-  Input,
-  Label,
-  Surface,
-  TextField,
-  useThemeColor,
-} from "heroui-native";
-import {
   LucideEye,
   LucideEyeOff,
   LucideLock,
   LucideUserRound,
 } from "lucide-react-native";
 import { useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
+import { Alert, AlertText } from "@/components/ui/alert";
+import {
+  Button,
+  ButtonSpinner,
+  ButtonText,
+} from "@/components/ui/button";
+import {
+  FormControl,
+  FormControlError,
+  FormControlErrorText,
+  FormControlLabel,
+  FormControlLabelText,
+} from "@/components/ui/form-control";
+import { Heading } from "@/components/ui/heading";
+import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
+import { Text } from "@/components/ui/text";
 import { statusBarHeight } from "@/constants";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { signInWithAccountNumber } from "@/services/auth";
@@ -28,14 +37,26 @@ export default function SignInRoute() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [mutedColor] = useThemeColor(["muted"]);
+  const [showValidation, setShowValidation] = useState(false);
+
+  const isAccountNumberInvalid = showValidation && !accountNumber.trim();
+  const isPasswordInvalid = showValidation && !password;
 
   const handleSignIn = async () => {
     setErrorMessage(null);
+    setShowValidation(true);
+
+    if (!accountNumber.trim() || !password) {
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      await signInWithAccountNumber({ accountNumber, password });
+      await signInWithAccountNumber({
+        accountNumber: accountNumber.trim(),
+        password,
+      });
       await refreshSession();
       router.replace("/home");
     } catch (error) {
@@ -58,114 +79,126 @@ export default function SignInRoute() {
   }
 
   return (
-    <ScrollView
-      contentInsetAdjustmentBehavior="automatic"
-      className="flex-1 bg-background"
-      contentContainerStyle={{
-        flexGrow: 1,
-        justifyContent: "flex-start",
-        paddingHorizontal: 20,
-        paddingTop: statusBarHeight + 44,
-        paddingBottom: 28,
-        gap: 24,
-      }}
-    >
-      <View className="gap-2">
-        <Text className="text-foreground text-[34px] font-black leading-10">
-          Sign in
-        </Text>
-        <Text className="text-muted text-[15px] leading-5">
-          Use your ALECO account number to view service details and file
-          reports.
-        </Text>
-      </View>
+    <View className="flex-1 bg-background">
+      <KeyboardAwareScrollView
+        bottomOffset={24}
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: "flex-start",
+          paddingHorizontal: 20,
+          paddingTop: statusBarHeight + 44,
+          paddingBottom: 28,
+          gap: 24,
+        }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View className="gap-2">
+          <Heading className="text-[34px] font-black leading-10" size="3xl">
+            Sign in
+          </Heading>
+          <Text className="text-[15px] leading-5 text-muted">
+            Use your ALECO account number to view service details and file
+            reports.
+          </Text>
+        </View>
 
-      <Surface className="rounded-[24px] p-5" style={{ gap: 14 }}>
-        <TextField>
-          <Label className="text-foreground">Account number</Label>
-          <View className="w-full flex-row items-center">
-            <Input
-              className="w-full px-10"
-              value={accountNumber}
-              onChangeText={setAccountNumber}
-              autoCapitalize="none"
-              maxLength={15}
-              textContentType="username"
-              autoCorrect={false}
-              keyboardType="number-pad"
-              placeholder="Enter account number"
-            />
-            <View className="absolute left-3.5" pointerEvents="none">
-              <LucideUserRound size={18} color={mutedColor} />
-            </View>
-          </View>
-        </TextField>
+        <View className="gap-4 rounded-2xl border border-border bg-card p-5">
+          <FormControl isInvalid={isAccountNumberInvalid} isRequired>
+            <FormControlLabel>
+              <FormControlLabelText>Account number</FormControlLabelText>
+            </FormControlLabel>
+            <Input className="h-12 rounded-xl">
+              <InputSlot style={{ pointerEvents: "none" }}>
+                <InputIcon as={LucideUserRound} />
+              </InputSlot>
+              <InputField
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType="number-pad"
+                maxLength={15}
+                onChangeText={setAccountNumber}
+                placeholder="Enter account number"
+                textContentType="username"
+                value={accountNumber}
+              />
+            </Input>
+            {isAccountNumberInvalid ? (
+              <FormControlError>
+                <FormControlErrorText>
+                  Account number is required.
+                </FormControlErrorText>
+              </FormControlError>
+            ) : null}
+          </FormControl>
 
-        <TextField>
-          <Label className="text-foreground">Password</Label>
-          <View className="w-full flex-row items-center">
-            <Input
-              className="w-full px-10 pr-12"
-              value={password}
-              onChangeText={setPassword}
-              autoCapitalize="none"
-              textContentType="password"
-              autoCorrect={false}
-              secureTextEntry={!isPasswordVisible}
-              placeholder="Enter password"
-            />
-            <View className="absolute left-3.5" pointerEvents="none">
-              <LucideLock size={18} color={mutedColor} />
-            </View>
-            <View className="absolute right-1.5">
-              <Button
-                isIconOnly
-                variant="ghost"
-                size="sm"
-                onPress={() => {
-                  setIsPasswordVisible((current) => !current);
-                }}
+          <FormControl isInvalid={isPasswordInvalid} isRequired>
+            <FormControlLabel>
+              <FormControlLabelText>Password</FormControlLabelText>
+            </FormControlLabel>
+            <Input className="h-12 rounded-xl">
+              <InputSlot style={{ pointerEvents: "none" }}>
+                <InputIcon as={LucideLock} />
+              </InputSlot>
+              <InputField
+                autoCapitalize="none"
+                autoCorrect={false}
+                onChangeText={setPassword}
+                onSubmitEditing={() => void handleSignIn()}
+                placeholder="Enter password"
+                secureTextEntry={!isPasswordVisible}
+                textContentType="password"
+                value={password}
+              />
+              <InputSlot
                 accessibilityLabel={
                   isPasswordVisible ? "Hide password" : "Show password"
                 }
+                accessibilityRole="button"
+                className="h-10 w-10"
+                onPress={() => setIsPasswordVisible((current) => !current)}
               >
-                {isPasswordVisible ? (
-                  <LucideEyeOff size={18} color={mutedColor} />
-                ) : (
-                  <LucideEye size={18} color={mutedColor} />
-                )}
-              </Button>
-            </View>
-          </View>
-        </TextField>
+                <InputIcon as={isPasswordVisible ? LucideEyeOff : LucideEye} />
+              </InputSlot>
+            </Input>
+            {isPasswordInvalid ? (
+              <FormControlError>
+                <FormControlErrorText>Password is required.</FormControlErrorText>
+              </FormControlError>
+            ) : null}
+          </FormControl>
 
-        {errorMessage ? (
-          <Text className="text-danger text-sm">{errorMessage}</Text>
-        ) : null}
+          {errorMessage ? (
+            <Alert variant="destructive">
+              <AlertText>{errorMessage}</AlertText>
+            </Alert>
+          ) : null}
 
-        <Button
-          variant="primary"
-          size="lg"
-          onPress={handleSignIn}
-          isDisabled={isSubmitting}
-        >
-          <Button.Label>
-            {isSubmitting ? "Signing in..." : "Sign in"}
-          </Button.Label>
-        </Button>
+          <Button
+            className="h-12 rounded-xl"
+            isDisabled={isSubmitting}
+            onPress={() => void handleSignIn()}
+            size="lg"
+          >
+            {isSubmitting ? <ButtonSpinner /> : null}
+            <ButtonText>
+              {isSubmitting ? "Signing in..." : "Sign in"}
+            </ButtonText>
+          </Button>
 
-        <Button
-          variant="tertiary"
-          size="md"
-          onPress={() => router.push("/home")}
-        >
-          <Button.Label>Continue without account</Button.Label>
-        </Button>
+          <Button
+            className="h-11 rounded-xl"
+            onPress={() => router.push("/home")}
+            variant="outline"
+          >
+            <ButtonText>Continue without account</ButtonText>
+          </Button>
 
-        <Text className="text-xs text-muted">
-          No sign-ups here. Your account must already exist in ALECO records.
-        </Text>
-      </Surface>
-    </ScrollView>
+          <Text className="text-xs text-muted">
+            No sign-ups here. Your account must already exist in ALECO records.
+          </Text>
+        </View>
+      </KeyboardAwareScrollView>
+    </View>
   );
 }
