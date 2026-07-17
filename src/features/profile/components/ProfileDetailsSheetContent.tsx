@@ -1,13 +1,15 @@
+import { Alert, AlertText } from "@/components/ui/alert";
+import { BottomSheetTextInput } from "@/components/ui/bottomsheet";
+import { Button, ButtonText } from "@/components/ui/button";
 import {
-  Alert,
-  BottomSheet,
-  Button,
-  FieldError,
-  Input,
-  Label,
-  TextField,
-  useBottomSheetAwareHandlers,
-} from "heroui-native";
+  FormControl,
+  FormControlError,
+  FormControlErrorText,
+  FormControlLabel,
+  FormControlLabelText,
+} from "@/components/ui/form-control";
+import { Heading } from "@/components/ui/heading";
+import { Text } from "@/components/ui/text";
 import { type LucideIcon } from "lucide-react-native";
 import React from "react";
 import { View } from "react-native";
@@ -43,30 +45,25 @@ export function ProfileDetailsSheetContent({
   onCancel,
   onSave,
 }: ProfileDetailsSheetContentProps) {
-  const { onFocus, onBlur } = useBottomSheetAwareHandlers();
-
   return (
-    <View style={{ paddingBottom: 20, paddingHorizontal: 10, gap: 16 }}>
-      <View>
-        <BottomSheet.Title>{sheetTitle}</BottomSheet.Title>
-        <BottomSheet.Description>{sheetDescription}</BottomSheet.Description>
+    <View className="gap-4 px-2 pb-5">
+      <View className="gap-1">
+        <Heading size="lg">{sheetTitle}</Heading>
+        <Text className="text-sm text-muted-foreground">{sheetDescription}</Text>
       </View>
-      <View>
-        <TextField isInvalid={!!inputError}>
-          <Label>
+      <FormControl isInvalid={!!inputError} isRequired>
+          <FormControlLabel>
+            <FormControlLabelText>
             {editingField === "phone"
               ? "New phone number"
               : editingField === "email"
                 ? "New email address"
                 : "New address"}
-          </Label>
+            </FormControlLabelText>
+          </FormControlLabel>
           <View className="w-full flex-row items-center">
-            <Input
-              className="flex-1 px-10"
-              isInvalid={!!inputError}
-              variant="secondary"
-              onFocus={onFocus}
-              onBlur={onBlur}
+            <BottomSheetTextInput
+              className="h-12 flex-1 rounded-xl pl-10"
               value={inputValue}
               onChangeText={onChangeInput}
               keyboardType={editingField === "phone" ? "number-pad" : "default"}
@@ -87,21 +84,24 @@ export function ProfileDetailsSheetContent({
                     : "Address update coming soon"
               }
             />
-            <View className="absolute left-3.5" pointerEvents="none">
+            <View className="absolute left-3.5" style={{ pointerEvents: "none" }}>
               <SheetIcon size={18} color="#888" />
             </View>
           </View>
-          {inputError ? <FieldError>{inputError}</FieldError> : null}
-        </TextField>
-      </View>
-      <Alert className="bg-accent/10 border border-accent/20" status="accent">
-        <Alert.Description>
+          {inputError ? (
+            <FormControlError>
+              <FormControlErrorText>{inputError}</FormControlErrorText>
+            </FormControlError>
+          ) : null}
+      </FormControl>
+      <Alert className="border-primary/20 bg-primary/10">
+        <AlertText>
           {editingField === "phone"
             ? `Current phone number: ${currentPhone}.`
             : editingField === "email"
               ? `Current email: ${currentEmail}.`
               : "Address updates will be available soon."}
-        </Alert.Description>
+        </AlertText>
       </Alert>
 
       <View
@@ -112,22 +112,19 @@ export function ProfileDetailsSheetContent({
         }}
       >
         <Button
-          variant="tertiary"
-          size="md"
+          variant="outline"
           onPress={onCancel}
           isDisabled={isUpdating}
           style={{ flex: 1 }}
         >
-          <Button.Label>Cancel</Button.Label>
+          <ButtonText>Cancel</ButtonText>
         </Button>
         <Button
-          variant="primary"
-          size="md"
           onPress={onSave}
           isDisabled={isUpdating}
           style={{ flex: 1 }}
         >
-          <Button.Label>{isUpdating ? "Saving..." : "Save"}</Button.Label>
+          <ButtonText>{isUpdating ? "Saving..." : "Save"}</ButtonText>
         </Button>
       </View>
     </View>

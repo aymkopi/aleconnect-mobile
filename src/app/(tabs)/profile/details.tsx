@@ -1,19 +1,28 @@
 import { useAuthSession } from "@/hooks/use-auth-session";
+import { useAppColors } from "@/hooks/use-app-colors";
 import * as ImagePicker from "expo-image-picker";
 import { useFocusEffect, useRouter } from "expo-router";
 
 import {
   Alert,
+  AlertText,
+} from "@/components/ui/alert";
+import {
   Avatar,
+  AvatarFallbackText,
+  AvatarImage,
+} from "@/components/ui/avatar";
+import {
   BottomSheet,
-  Button,
-  Label,
-  ListGroup,
-  Separator,
-  Surface,
-  Typography,
-  useThemeColor,
-} from "heroui-native";
+  BottomSheetBackdrop,
+  BottomSheetContent,
+  BottomSheetPortal,
+  type BottomSheetRef,
+} from "@/components/ui/bottomsheet";
+import { Button, ButtonText } from "@/components/ui/button";
+import { Heading } from "@/components/ui/heading";
+import { ListSection } from "@/components/ui/list-section";
+import { Text } from "@/components/ui/text";
 import {
   LucideBookUser,
   LucideGauge,
@@ -50,8 +59,9 @@ type FeedbackMessage = {
 export default function ProfileDetailsRoute() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [accentColor] = useThemeColor(["accent"]);
+  const [accentColor] = useAppColors(["accent"]);
   const scrollRef = useRef<ScrollView | null>(null);
+  const editSheetRef = useRef<BottomSheetRef>(null);
   const bottomPadding = Math.max(insets.bottom, 16) + 24;
   const { session } = useAuthSession();
   const { profile, isLoading, error, reload, setAvatarUrl } =
@@ -71,12 +81,17 @@ export default function ProfileDetailsRoute() {
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackMessage | null>(null);
 
-  const closeEditSheet = useCallback(() => {
-    Keyboard.dismiss();
+  const resetEditSheet = useCallback(() => {
     setEditingField(null);
     setInputError(null);
     setInputValue("");
   }, []);
+
+  const closeEditSheet = useCallback(() => {
+    Keyboard.dismiss();
+    editSheetRef.current?.close();
+    resetEditSheet();
+  }, [resetEditSheet]);
 
   useEffect(() => {
     setAvatarUri(profile?.avatarUrl ?? null);
@@ -190,6 +205,7 @@ export default function ProfileDetailsRoute() {
     setEditingField(field);
     setInputError(null);
     setInputValue("");
+    requestAnimationFrame(() => editSheetRef.current?.open());
   };
 
   const validateInput = (
@@ -313,23 +329,21 @@ export default function ProfileDetailsRoute() {
           paddingBottom: bottomPadding,
         }}
       >
-        <Surface className="rounded-3xl p-6" style={{ gap: 12 }}>
-          <Typography.Heading type="h3" weight="bold">
+        <View className="gap-3 rounded-lg border border-border bg-card p-6">
+          <Heading size="lg">
             Sign in required
-          </Typography.Heading>
-          <Typography.Paragraph type="body-sm" color="muted">
+          </Heading>
+          <Text className="text-sm text-muted-foreground">
             Account details are only available for signed-in users.
-          </Typography.Paragraph>
+          </Text>
           <Button
-            variant="primary"
-            size="md"
             onPress={() => {
               router.push("/sign-in");
             }}
           >
-            <Button.Label>Sign in</Button.Label>
+            <ButtonText>Sign in</ButtonText>
           </Button>
-        </Surface>
+        </View>
       </ScrollView>
     );
   }
@@ -348,26 +362,17 @@ export default function ProfileDetailsRoute() {
         }}
       >
         {/* Identity card mirrors the profile parent: compact, scannable, first-screen useful. */}
-        <Surface className="rounded-3xl p-5">
+        <View className="rounded-lg border border-border bg-card p-5">
           <View className="flex-row items-center gap-4">
             <View style={{ position: "relative" }}>
               <Avatar
-                size="lg"
-                alt="Profile picture"
-                style={{
-                  width: 84,
-                  height: 84,
-                  borderRadius: 42,
-                  borderColor: accentColor,
-                  borderWidth: 2,
-                }}
+                accessibilityLabel="Profile picture"
+                className="h-[84px] w-[84px] border-2"
+                style={{ borderColor: accentColor }}
               >
-                {avatarUri ? <Avatar.Image source={{ uri: avatarUri }} /> : null}
+                {avatarUri ? <AvatarImage source={{ uri: avatarUri }} /> : null}
                 {!avatarUri ? (
-                  <Avatar.Fallback
-                    style={{ width: 84, height: 84, borderRadius: 42 }}
-                  >
-                    <Typography type="h3" weight="bold" color="muted">
+                  <AvatarFallbackText className="text-lg font-bold text-muted-foreground">
                       {displayName
                         ?.split(/\s+/)
                         .filter(Boolean)
@@ -375,8 +380,7 @@ export default function ProfileDetailsRoute() {
                         .join("")
                         .toUpperCase()
                         .slice(0, 2) || "?"}
-                    </Typography>
-                  </Avatar.Fallback>
+                  </AvatarFallbackText>
                 ) : null}
               </Avatar>
               <Pressable
@@ -400,127 +404,119 @@ export default function ProfileDetailsRoute() {
               </Pressable>
             </View>
             <View className="flex-1 gap-1">
-              <Typography.Heading type="h5" weight="bold" numberOfLines={2}>
+              <Heading numberOfLines={2} size="md">
                 {isLoading ? "Loading profile..." : displayName}
-              </Typography.Heading>
-              <Typography.Paragraph type="body-xs" color="muted" numberOfLines={2}>
+              </Heading>
+              <Text className="text-xs text-muted-foreground" numberOfLines={2}>
                 {displayAccountNumber}
-              </Typography.Paragraph>
+              </Text>
               {avatarPhoto ? (
-                <Typography type="body-xs" color="muted" numberOfLines={1}>
+                <Text className="text-xs text-muted-foreground" numberOfLines={1}>
                   Selected photo: {avatarPhoto.fileName ?? "avatar.jpg"}
-                </Typography>
+                </Text>
               ) : null}
               {isUploadingAvatar ? (
-                <Typography type="body-xs" color="muted">
+                <Text className="text-xs text-muted-foreground">
                   Uploading avatar...
-                </Typography>
+                </Text>
               ) : null}
               {error ? (
-                <Typography.Paragraph type="body-sm" className="text-danger">
+                <Text className="text-sm text-destructive">
                   {error.message}
-                </Typography.Paragraph>
+                </Text>
               ) : null}
             </View>
           </View>
-        </Surface>
+        </View>
 
         {feedback ? (
-          <Alert status={feedback.status} className="mt-2">
-            <Alert.Indicator />
-            <Alert.Content>
-              <Alert.Title>{feedback.title}</Alert.Title>
-              <Alert.Description>{feedback.description}</Alert.Description>
-            </Alert.Content>
+          <Alert
+            className="mt-2"
+            variant={feedback.status === "danger" ? "destructive" : "default"}
+          >
+            <View className="flex-1 gap-1">
+              <AlertText className="font-bold">{feedback.title}</AlertText>
+              <AlertText>{feedback.description}</AlertText>
+            </View>
           </Alert>
         ) : null}
 
-      <Label className="mt-3 text-sm text-muted">Personal details</Label>
-      <ListGroup>
+      <ListSection title="Personal details">
         <AccountDetailsBuilder
           icon={LucideUserRound}
           description="Name"
           title={displayName}
         />
-        <Separator className="mx-4" />
         <AccountDetailsBuilder
           icon={LucidePhone}
           description="Phone"
           title={displayPhone}
           button={{
-            variant: "primary",
+            variant: "secondary",
             name: "Update",
             onPress: () => {
               openEditSheet("phone");
             },
           }}
         />
-        <Separator className="mx-4" />
         <AccountDetailsBuilder
           icon={LucideMail}
           description="Email"
           title={displayEmail}
           button={{
-            variant: "primary",
+            variant: "secondary",
             name: "Update",
             onPress: () => {
               openEditSheet("email");
             },
           }}
         />
-        <Separator className="mx-4" />
         <AccountDetailsBuilder
           icon={LucideMapPin}
           description="Address"
           title={displayAddress}
           button={{
-            variant: "primary",
+            variant: "secondary",
             name: "Update",
             onPress: () => {
               openEditSheet("address");
             },
           }}
+          showDivider={false}
         />
-      </ListGroup>
-      <Label className="mt-3 text-sm text-muted">Service account</Label>
+      </ListSection>
 
-      <ListGroup>
+      <ListSection title="Service account">
         <AccountDetailsBuilder
           icon={LucideBookUser}
           description="Account Number"
           title={displayAccountNumber}
-        ></AccountDetailsBuilder>
-        <Separator className="mx-4" />
+        />
         <AccountDetailsBuilder
           icon={LucideGauge}
           description="Meter S/N"
           title={displayMeterSerial}
-        ></AccountDetailsBuilder>
-        <Separator className="mx-4" />
+        />
         <AccountDetailsBuilder
           icon={LucideGauge}
           description="Service Type"
           title={displayServiceType}
-        ></AccountDetailsBuilder>
-      </ListGroup>
+          showDivider={false}
+        />
+      </ListSection>
 
       </ScrollView>
 
-      <BottomSheet
-        isOpen={editingField !== null}
-        onOpenChange={(nextOpen) => {
-          if (!nextOpen) {
-            closeEditSheet();
-          }
-        }}
-      >
-        <BottomSheet.Portal>
-          <BottomSheet.Overlay />
-          <BottomSheet.Content
-            keyboardBehavior="interactive"
-            keyboardBlurBehavior="restore"
-            android_keyboardInputMode="adjustResize"
-          >
+      <BottomSheet ref={editSheetRef} onClose={resetEditSheet}>
+        <BottomSheetPortal
+          backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
+          enableDynamicSizing
+          maxDynamicContentSize={440}
+          keyboardBehavior="interactive"
+          keyboardBlurBehavior="restore"
+          android_keyboardInputMode="adjustResize"
+        >
+          <BottomSheetContent>
             <ProfileDetailsSheetContent
               editingField={editingField}
               sheetTitle={sheetTitle}
@@ -540,8 +536,8 @@ export default function ProfileDetailsRoute() {
                 void handleSaveUpdate();
               }}
             />
-          </BottomSheet.Content>
-        </BottomSheet.Portal>
+          </BottomSheetContent>
+        </BottomSheetPortal>
       </BottomSheet>
     </View>
   );
