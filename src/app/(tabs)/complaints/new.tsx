@@ -1,4 +1,52 @@
 import { statusBarHeight } from "@/constants";
+import {
+  BottomSheet,
+  BottomSheetBackdrop,
+  BottomSheetContent,
+  BottomSheetPortal,
+  type BottomSheetRef,
+} from "@/components/ui/bottomsheet";
+import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
+import {
+  Checkbox,
+  CheckboxIcon,
+  CheckboxIndicator,
+  CheckboxLabel,
+} from "@/components/ui/checkbox";
+import { Divider } from "@/components/ui/divider";
+import {
+  FormControl,
+  FormControlError,
+  FormControlErrorText,
+  FormControlLabel,
+  FormControlLabelText,
+} from "@/components/ui/form-control";
+import { Heading } from "@/components/ui/heading";
+import { Input, InputField } from "@/components/ui/input";
+import {
+  Modal,
+  ModalBackdrop,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+} from "@/components/ui/modal";
+import { Progress, ProgressFilledTrack } from "@/components/ui/progress";
+import {
+  Select,
+  SelectBackdrop,
+  SelectContent,
+  SelectDragIndicator,
+  SelectDragIndicatorWrapper,
+  SelectIcon,
+  SelectInput,
+  SelectItem,
+  SelectPortal,
+  SelectScrollView,
+  SelectTrigger,
+} from "@/components/ui/select";
+import { Text } from "@/components/ui/text";
+import { Textarea, TextareaInput } from "@/components/ui/textarea";
 import { aleconnectApiBaseUrl } from "@/constants/api";
 import { useConsumerProfileContext } from "@/context/consumer-profile-context";
 import {
@@ -16,28 +64,13 @@ import {
 } from "@/services/complaints";
 import { emitComplaintSubmissionToast } from "@/services/complaint-submission-events";
 import { compressEvidencePhoto } from "@/utils/evidence-image-processing";
-import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 import { useFocusEffect, useNavigation, useRouter } from "expo-router";
 import {
-  BottomSheet,
-  Button,
-  Checkbox,
-  ControlField,
-  Dialog,
-  FieldError,
-  Input,
-  Label,
-  Separator,
-  Surface,
-  TextField,
-  Typography,
-  useThemeColor,
-} from "heroui-native";
-import {
   Camera,
   Check,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   CircleX,
@@ -48,7 +81,6 @@ import {
   Fragment,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -65,6 +97,7 @@ import {
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import type { KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAppColors } from "@/hooks/use-app-colors";
 
 const minEvidencePhotos = 1;
 const maxEvidencePhotos = 3;
@@ -107,22 +140,33 @@ function ReportInput({
   isDisabled?: boolean;
 }) {
   return (
-    <TextField
-      isRequired={isRequired}
-      isInvalid={isInvalid}
-      isDisabled={isDisabled}
-    >
-      <Label>{label}</Label>
-      <Input
-        value={value}
-        placeholder={placeholder}
-        onChangeText={onChangeText}
-        multiline={multiline}
-        numberOfLines={multiline ? 4 : 1}
-        textAlignVertical={multiline ? "top" : "center"}
-      />
-      <FieldError>{error}</FieldError>
-    </TextField>
+    <FormControl isRequired={isRequired} isInvalid={isInvalid} isDisabled={isDisabled}>
+      <FormControlLabel>
+        <FormControlLabelText>{label}</FormControlLabelText>
+      </FormControlLabel>
+      {multiline ? (
+        <Textarea className="rounded-xl" isDisabled={isDisabled} isInvalid={isInvalid}>
+          <TextareaInput
+            value={value}
+            placeholder={placeholder}
+            onChangeText={onChangeText}
+          />
+        </Textarea>
+      ) : (
+        <Input className="h-12 rounded-xl" isDisabled={isDisabled} isInvalid={isInvalid}>
+          <InputField
+            value={value}
+            placeholder={placeholder}
+            onChangeText={onChangeText}
+          />
+        </Input>
+      )}
+      {isInvalid && error ? (
+        <FormControlError>
+          <FormControlErrorText>{error}</FormControlErrorText>
+        </FormControlError>
+      ) : null}
+    </FormControl>
   );
 }
 
@@ -147,100 +191,44 @@ function SelectField({
   error?: string;
   isDisabled?: boolean;
 }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [foregroundColor] = useThemeColor(["foreground"]);
-  const { height } = useWindowDimensions();
-  const sheetHeight = useMemo(
-    () =>
-      Math.min(
-        height * 0.5,
-        Math.max(168, 92 + Math.min(options.length, 6) * 54),
-      ),
-    [height, options.length],
-  );
-  const listMaxHeight = Math.max(96, sheetHeight - 72);
-  const snapPoints = useMemo(() => [sheetHeight], [sheetHeight]);
-  const selectedOption = options.find((option) => option.value === value);
-
   return (
-    <>
-      <View className="gap-2">
-        <View className="flex-row items-center gap-1">
-          <Label>{label}</Label>
-          {isRequired ? (
-            <Typography className="text-danger" type="body-sm">
-              *
-            </Typography>
-          ) : null}
-        </View>
-        <Pressable
-          disabled={isDisabled}
-          accessibilityRole="button"
-          accessibilityState={{ disabled: isDisabled }}
-          onPress={() => setIsOpen(true)}
-          className={`min-h-14 flex-row items-center justify-between rounded-full px-4 ${
-            isDisabled ? "bg-surface-secondary opacity-60" : "bg-surface-secondary"
-          }`}
-        >
-          <Typography
-            type="body-sm"
-            weight="medium"
-            className={selectedOption ? "text-foreground" : "text-muted"}
-          >
-            {selectedOption?.label ?? placeholder}
-          </Typography>
-          <ChevronRight size={18} color={foregroundColor} />
-        </Pressable>
-        {isInvalid && error ? (
-          <Typography type="body-xs" className="text-danger">
-            {error}
-          </Typography>
-        ) : null}
-      </View>
-
-      <BottomSheet isOpen={isOpen} onOpenChange={setIsOpen}>
-        <BottomSheet.Portal>
-          <BottomSheet.Overlay />
-          <BottomSheet.Content
-            snapPoints={snapPoints}
-            enableOverDrag={false}
-            enableDynamicSizing={false}
-            keyboardBehavior="interactive"
-            keyboardBlurBehavior="restore"
-            android_keyboardInputMode="adjustResize"
-          >
-            <BottomSheet.Title>{label}</BottomSheet.Title>
-            {/* ponytail: ScrollShadow crashes in current native bundle; re-add after linear-gradient works. */}
-            <BottomSheetScrollView
-              keyboardShouldPersistTaps="handled"
-              nestedScrollEnabled
-              showsVerticalScrollIndicator
-              style={{ maxHeight: listMaxHeight }}
-              contentContainerStyle={{ paddingBottom: 24 }}
-            >
+    <FormControl isRequired={isRequired} isInvalid={isInvalid} isDisabled={isDisabled}>
+      <FormControlLabel>
+        <FormControlLabelText>{label}</FormControlLabelText>
+      </FormControlLabel>
+      <Select
+        isDisabled={isDisabled}
+        isInvalid={isInvalid}
+        selectedValue={value}
+        onValueChange={(nextValue) => nextValue && onChange(nextValue)}
+      >
+        <SelectTrigger className="h-12 rounded-xl">
+          <SelectInput placeholder={placeholder} />
+          <SelectIcon as={ChevronDown} className="mr-3" />
+        </SelectTrigger>
+        <SelectPortal>
+          <SelectBackdrop />
+          <SelectContent className="max-h-[50vh]">
+            <SelectDragIndicatorWrapper>
+              <SelectDragIndicator />
+            </SelectDragIndicatorWrapper>
+            <SelectScrollView nestedScrollEnabled showsVerticalScrollIndicator>
               {options.map((option, index) => (
                 <Fragment key={option.value}>
-                  {index > 0 ? <Separator /> : null}
-                  <Button
-                    variant="ghost"
-                    className="justify-between rounded-none"
-                    onPress={() => {
-                      onChange(option.value);
-                      setIsOpen(false);
-                    }}
-                  >
-                    <Button.Label>{option.label}</Button.Label>
-                    {option.value === value ? (
-                      <Check size={18} color={foregroundColor} />
-                    ) : null}
-                  </Button>
+                  {index > 0 ? <Divider /> : null}
+                  <SelectItem label={option.label} value={option.value} />
                 </Fragment>
               ))}
-            </BottomSheetScrollView>
-          </BottomSheet.Content>
-        </BottomSheet.Portal>
-      </BottomSheet>
-    </>
+            </SelectScrollView>
+          </SelectContent>
+        </SelectPortal>
+      </Select>
+      {isInvalid && error ? (
+        <FormControlError>
+          <FormControlErrorText>{error}</FormControlErrorText>
+        </FormControlError>
+      ) : null}
+    </FormControl>
   );
 }
 
@@ -311,14 +299,11 @@ export default function NewComplaintRoute() {
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   const scrollRef = useRef<KeyboardAwareScrollViewRef | null>(null);
+  const mapSheetRef = useRef<BottomSheetRef>(null);
   const isLeavingToParentRef = useRef(false);
   const isMountedRef = useRef(true);
   const submitBackgroundRef = useRef(false);
-  const [accentColor, mutedColor, foregroundColor] = useThemeColor([
-    "accent",
-    "muted",
-    "foreground",
-  ]);
+  const [accentColor, mutedColor] = useAppColors(["accent", "muted"]);
   const { profile } = useConsumerProfileContext();
   const [meta, setMeta] = useState<ComplaintMeta>(emptyComplaintMeta);
   const [isMapSheetOpen, setIsMapSheetOpen] = useState(false);
@@ -405,6 +390,14 @@ export default function NewComplaintRoute() {
       hideSubscription.remove();
     };
   }, []);
+
+  useEffect(() => {
+    if (isMapSheetOpen) {
+      requestAnimationFrame(() => mapSheetRef.current?.open());
+    } else {
+      mapSheetRef.current?.close();
+    }
+  }, [isMapSheetOpen]);
 
   const selectedCategory = meta.categories.find(
     (category) => category.id === form.categoryId,
@@ -804,24 +797,24 @@ export default function NewComplaintRoute() {
         <View className="gap-4">
           <View className="flex-row items-center gap-3">
             <Button
-              isIconOnly
+              size="icon"
               variant="ghost"
               onPress={handleBackPress}
               accessibilityLabel={
                 step > 1 ? "Previous step" : "Back to complaints"
               }
             >
-              <ChevronLeft size={22} color={foregroundColor} />
+              <ButtonIcon as={ChevronLeft} height={22} width={22} />
             </Button>
             <View className="flex-1">
-              <Typography.Heading type="h2" weight="bold">
+              <Heading size="xl">
                 {title}
-              </Typography.Heading>
-              <Typography.Paragraph type="body-sm" color="muted" className="mt-1">
+              </Heading>
+              <Text className="mt-1 text-sm text-muted-foreground">
                 {selectedCategory
                   ? formatComplaintCategoryTitle(selectedCategory.title)
                   : "Choose the closest category"}
-              </Typography.Paragraph>
+              </Text>
             </View>
           </View>
           <View className="flex-row gap-2 pl-14">
@@ -829,7 +822,7 @@ export default function NewComplaintRoute() {
               <View
                 key={index}
                 className={`h-1.5 flex-1 rounded-full ${
-                  index + 1 <= step ? "bg-accent" : "bg-default"
+                  index + 1 <= step ? "bg-primary" : "bg-secondary"
                 }`}
               />
             ))}
@@ -837,16 +830,16 @@ export default function NewComplaintRoute() {
         </View>
 
         {submitError ? (
-          <Typography.Paragraph type="body-sm" className="text-danger">
+          <Text className="text-sm text-destructive">
             {submitError}
-          </Typography.Paragraph>
+          </Text>
         ) : null}
 
         {step === 1 ? (
           <>
-            <Label className="ml-2 text-sm font-semibold text-muted">
+            <Text className="ml-2 text-sm font-semibold text-muted-foreground">
               Category
-            </Label>
+            </Text>
             <View className="gap-3">
               {meta.categories.map((category) => {
                 const selected = form.categoryId === category.id;
@@ -867,8 +860,8 @@ export default function NewComplaintRoute() {
                     accessibilityState={{ selected }}
                     className={`min-h-19 flex-row items-center gap-3 rounded-[20px] border px-4 py-3 ${
                       selected
-                        ? "border-accent bg-surface"
-                        : "border-border bg-surface"
+                        ? "border-primary bg-card"
+                        : "border-border bg-card"
                     }`}
                   >
                     <View
@@ -882,20 +875,15 @@ export default function NewComplaintRoute() {
                       )}
                     </View>
                     <View className="flex-1">
-                      <Typography.Heading type="h6" weight="bold">
+                      <Heading size="sm">
                         {formatComplaintCategoryTitle(category.title)}
-                      </Typography.Heading>
-                      <Typography.Paragraph
-                        type="body-xs"
-                        color="muted"
-                        weight="medium"
-                        className="mt-1"
-                      >
+                      </Heading>
+                      <Text className="mt-1 text-xs font-medium text-muted-foreground">
                         {category.description}
-                      </Typography.Paragraph>
+                      </Text>
                     </View>
                     {selected ? (
-                      <View className="h-7 w-7 items-center justify-center rounded-full bg-accent">
+                      <View className="h-7 w-7 items-center justify-center rounded-full bg-primary">
                         <Check size={15} color="white" />
                       </View>
                     ) : null}
@@ -908,7 +896,7 @@ export default function NewComplaintRoute() {
 
         {step === 2 ? (
           <>
-            <Label className="ml-2 text-sm text-muted">Complaint type</Label>
+            <Text className="ml-2 text-sm text-muted-foreground">Complaint type</Text>
             <SelectField
               isRequired
               label="Complaint type"
@@ -920,7 +908,7 @@ export default function NewComplaintRoute() {
               error="Select a complaint type."
             />
 
-            <Label className="ml-2 text-sm text-muted">Account</Label>
+            <Text className="ml-2 text-sm text-muted-foreground">Account</Text>
             <ReportInput
               isRequired
               isDisabled
@@ -932,10 +920,11 @@ export default function NewComplaintRoute() {
               error="Account number is required."
             />
 
-            <Label className="ml-2 text-sm text-muted">Address</Label>
-            <ControlField
-              isSelected={form.useHomeAddress}
-              onSelectedChange={(selected) => {
+            <Text className="ml-2 text-sm text-muted-foreground">Address</Text>
+            <Checkbox
+              value="home-address"
+              isChecked={form.useHomeAddress}
+              onChange={(selected) => {
                 const homeCoordinates = readCoordinates(profile?.homeCoordinates);
                 setForm((current) => ({
                   ...current,
@@ -949,14 +938,13 @@ export default function NewComplaintRoute() {
                     : {}),
                 }));
               }}
+              className="rounded-lg border border-border bg-card p-4"
             >
-              <ControlField.Indicator>
-                <Checkbox className="mt-0.5" />
-              </ControlField.Indicator>
-              <View className="flex-1">
-                <Label>Use home address</Label>
-              </View>
-            </ControlField>
+              <CheckboxIndicator>
+                <CheckboxIcon as={Check} />
+              </CheckboxIndicator>
+              <CheckboxLabel>Use home address</CheckboxLabel>
+            </Checkbox>
             <View className="flex-row items-end gap-2">
               <View className="flex-1">
                 <SelectField
@@ -975,14 +963,14 @@ export default function NewComplaintRoute() {
                 />
               </View>
               <Button
-                isIconOnly
+                className="h-12 w-12"
+                size="icon"
                 variant="secondary"
-                size="lg"
                 isDisabled={form.useHomeAddress}
                 onPress={() => void openMapPicker()}
                 accessibilityLabel="Open map picker"
               >
-                <MapPin size={20} color={foregroundColor} />
+                <ButtonIcon as={MapPin} height={20} width={20} />
               </Button>
             </View>
             <SelectField
@@ -1015,7 +1003,7 @@ export default function NewComplaintRoute() {
 
         {step === 3 ? (
           <>
-            <Label className="ml-2 text-sm text-muted">Report details</Label>
+            <Text className="ml-2 text-sm text-muted-foreground">Report details</Text>
             <ReportInput
               isRequired
               label="Description"
@@ -1033,18 +1021,18 @@ export default function NewComplaintRoute() {
               multiline
               onChangeText={(value) => updateForm("desiredAction", value)}
             />
-            <Surface variant="secondary" className="rounded-3xl p-4">
+            <View className="rounded-lg border border-border bg-secondary p-4">
               <View className="flex-row items-center justify-between">
-                <Typography type="body-sm" weight="bold">
+                <Text className="text-sm font-bold text-foreground">
                   Evidence photos *
-                </Typography>
-                <Typography type="body-xs" color="muted" weight="bold">
+                </Text>
+                <Text className="text-xs font-bold text-muted-foreground">
                   {form.photoUploads.length}/{maxEvidencePhotos}
-                </Typography>
+                </Text>
               </View>
-              <Typography.Paragraph type="body-sm" color="muted" className="mt-1">
+              <Text className="mt-1 text-sm text-muted-foreground">
                 Add 1 to 3 clear photos. Upload starts after selection.
-              </Typography.Paragraph>
+              </Text>
               <View className="mt-3 flex-row gap-2">
                 {Array.from({ length: maxEvidencePhotos }, (_, index) => {
                   const photo = form.photoUploads[index];
@@ -1063,20 +1051,19 @@ export default function NewComplaintRoute() {
                           className="h-full w-full rounded-2xl"
                         />
                         <Button
-                          isIconOnly
-                          size="sm"
-                          variant="danger"
+                          size="icon"
+                          variant="destructive"
                           className="absolute -right-2 -top-2 h-7 w-7 rounded-full"
                           onPress={() => removePhoto(photo.uri)}
                           accessibilityLabel="Remove evidence photo"
                         >
-                          <CircleX size={15} color="white" />
+                          <ButtonIcon as={CircleX} height={15} width={15} />
                         </Button>
                         {photo.status !== "uploaded" ? (
                           <View className="absolute inset-0 items-center justify-center rounded-2xl bg-black/45">
-                            <Typography type="body-xs" className="text-white">
+                            <Text className="text-xs text-white">
                               {photo.status === "failed" ? "Failed" : "Uploading"}
-                            </Typography>
+                            </Text>
                           </View>
                         ) : null}
                       </>
@@ -1087,22 +1074,20 @@ export default function NewComplaintRoute() {
                   );
                 })}
               </View>
-              <FieldError
-                isInvalid={
-                  showErrors &&
-                  (form.photoUploads.length < minEvidencePhotos ||
-                    form.photoUploads.some((photo) => photo.status !== "uploaded"))
-                }
-              >
-                Add at least 1 uploaded photo.
-              </FieldError>
-            </Surface>
+              {showErrors &&
+              (form.photoUploads.length < minEvidencePhotos ||
+                form.photoUploads.some((photo) => photo.status !== "uploaded")) ? (
+                <Text className="mt-2 text-xs text-destructive">
+                  Add at least 1 uploaded photo.
+                </Text>
+              ) : null}
+            </View>
           </>
         ) : null}
 
         {step === 4 ? (
-          <Surface className="rounded-3xl p-4">
-            <Typography.Heading type="h5" weight="bold">Preview</Typography.Heading>
+          <View className="rounded-lg border border-border bg-card p-4">
+            <Heading size="md">Preview</Heading>
             {[
               ["Category", selectedCategory?.title],
               ["Type", selectedType?.title],
@@ -1129,25 +1114,21 @@ export default function NewComplaintRoute() {
               ["Photos", `${form.photoUploads.length} attached`],
             ].map(([label, value]) => (
               <View key={label} className="border-border mt-3 border-t pt-3">
-                <Label className="text-xs font-bold text-muted">{label}</Label>
-                <Typography.Paragraph
-                  type="body-sm"
-                  weight="semibold"
-                  className="mt-1"
-                >
+                <Text className="text-xs font-bold text-muted-foreground">{label}</Text>
+                <Text className="mt-1 text-sm font-semibold text-foreground">
                   {value || "Not provided"}
-                </Typography.Paragraph>
+                </Text>
               </View>
             ))}
-            <Typography.Paragraph type="body-xs" color="muted" className="mt-4">
+            <Text className="mt-4 text-xs text-muted-foreground">
               By submitting this form, I agree to all terms and conditions.
-            </Typography.Paragraph>
-          </Surface>
+            </Text>
+          </View>
         ) : null}
 
         {step === 5 ? (
-          <Surface
-            className="items-center justify-center rounded-3xl p-6"
+          <View
+            className="items-center justify-center rounded-lg border border-border bg-card p-6"
             style={{
               minHeight: Math.max(420, height - statusBarHeight - 140),
             }}
@@ -1155,51 +1136,35 @@ export default function NewComplaintRoute() {
             <View className="h-14 w-14 items-center justify-center rounded-full bg-success/20">
               <Check size={28} color="#16a34a" />
             </View>
-            <Typography.Heading
-              type="h4"
-              weight="bold"
-              align="center"
-              className="mt-4"
-            >
+            <Heading className="mt-4 text-center" size="lg">
               We received your complaint.
-            </Typography.Heading>
-            <Typography type="body-xs" color="muted" weight="bold" className="mt-4">
+            </Heading>
+            <Text className="mt-4 text-xs font-bold text-muted-foreground">
               Reference Number
-            </Typography>
-            <Typography
-              type="body"
-              weight="bold"
-              align="center"
-              className="mt-2 rounded-full bg-accent px-5 py-3 text-white"
-            >
+            </Text>
+            <Text className="mt-2 rounded-full bg-primary px-5 py-3 text-center font-bold text-primary-foreground">
               {form.ticketNumber}
-            </Typography>
-            <Typography.Paragraph
-              type="body-sm"
-              color="muted"
-              align="center"
-              className="mt-5"
-            >
+            </Text>
+            <Text className="mt-5 text-center text-sm text-muted-foreground">
               Technicians have been notified. You will receive updates once a
               crew is assigned.
-            </Typography.Paragraph>
+            </Text>
             <View className="mt-5 w-full flex-row gap-2">
               <Button
-                variant="primary"
                 className="flex-1"
                 onPress={navigateToComplaintsParent}
               >
-                <Button.Label>Back to complaints</Button.Label>
+                <ButtonText>Back to complaints</ButtonText>
               </Button>
               <Button
                 variant="secondary"
                 className="flex-1"
                 onPress={viewSubmittedReport}
               >
-                <Button.Label>View details</Button.Label>
+                <ButtonText>View details</ButtonText>
               </Button>
             </View>
-          </Surface>
+          </View>
         ) : null}
       </KeyboardAwareScrollView>
 
@@ -1210,58 +1175,76 @@ export default function NewComplaintRoute() {
           style={{ paddingBottom: Math.max(insets.bottom, 16) + 12 }}
         >
           <Button
-            variant="primary"
-            size="md"
             isDisabled={isSubmitting}
             onPress={handleNext}
             accessibilityLabel={step === 4 ? "Submit report" : "Next"}
             className="rounded-full"
           >
-            <Button.Label className="ml-2">
+            <ButtonText className="ml-2">
               {isSubmitting ? "Submitting" : step === 4 ? "Submit" : "Next"}
-            </Button.Label>
+            </ButtonText>
             {step === 4 ? (
-              <Check size={20} color="white" />
+              <ButtonIcon as={Check} height={20} width={20} />
             ) : (
-              <ChevronRight size={20} color="white" />
+              <ButtonIcon as={ChevronRight} height={20} width={20} />
             )}
           </Button>
         </View>
       ) : null}
 
-      <Dialog isOpen={isSubmitting} onOpenChange={() => undefined}>
-        <Dialog.Portal>
-          <Dialog.Overlay />
-          <Dialog.Content isSwipeable={false} className="mx-5 rounded-3xl p-5">
-            <Dialog.Title>Submitting report</Dialog.Title>
-            <Dialog.Description>
+      <Modal isOpen={isSubmitting} onClose={() => undefined} size="sm">
+        <ModalBackdrop />
+        <ModalContent>
+          <ModalHeader>
+            <Heading size="md">Submitting report</Heading>
+          </ModalHeader>
+          <ModalBody>
+            <Text className="text-sm text-muted-foreground">
               {submitProgress || "Submitting report..."}
-            </Dialog.Description>
-            <View className="mt-5 overflow-hidden rounded-full bg-default">
-              <View className="h-2 rounded-full bg-accent" style={{ width: "72%" }} />
-            </View>
-            <Typography.Paragraph type="body-sm" color="muted" className="mt-4">
+            </Text>
+            <Progress className="mt-5" value={72}>
+              <ProgressFilledTrack />
+            </Progress>
+            <Text className="mt-4 text-sm text-muted-foreground">
               Evidence is already uploaded. ALECO database is creating your
               ticket number.
-            </Typography.Paragraph>
-            <Button variant="secondary" className="mt-5" onPress={waitFromHome}>
-              <Button.Label>Go home while submitting</Button.Label>
+            </Text>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="secondary" onPress={waitFromHome}>
+              <ButtonText>Go home while submitting</ButtonText>
             </Button>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
 
-      {isMapSheetOpen ? (
-        <BottomSheet isOpen={isMapSheetOpen} onOpenChange={setIsMapSheetOpen}>
-          <BottomSheet.Portal>
-            <BottomSheet.Overlay />
-            <BottomSheet.Content snapPoints={["100%"]}>
-              <BottomSheet.Close />
-              <BottomSheet.Title>Choose location</BottomSheet.Title>
-              <BottomSheet.Description>
+      <BottomSheet ref={mapSheetRef} onClose={() => setIsMapSheetOpen(false)}>
+        <BottomSheetPortal
+          snapPoints={["100%"]}
+          enableDynamicSizing={false}
+          keyboardBehavior="interactive"
+          keyboardBlurBehavior="restore"
+          android_keyboardInputMode="adjustResize"
+          backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
+        >
+          <BottomSheetContent className="h-full">
+              <View className="flex-row items-start justify-between gap-3">
+                <View className="flex-1">
+                  <Heading size="lg">Choose location</Heading>
+                  <Text className="text-sm text-muted-foreground">
                 Drag the pin inside Albay, then confirm the coordinates.
-              </BottomSheet.Description>
-              <View className="mt-5 flex-1 overflow-hidden rounded-3xl bg-surface-secondary">
+                  </Text>
+                </View>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onPress={() => setIsMapSheetOpen(false)}
+                  accessibilityLabel="Close map picker"
+                >
+                  <ButtonIcon as={CircleX} height={20} width={20} />
+                </Button>
+              </View>
+              <View className="mt-5 flex-1 overflow-hidden rounded-lg bg-secondary">
                 {Platform.OS === "web" ||
                 !MapLibreMap ||
                 !MapLibreCamera ||
@@ -1270,16 +1253,11 @@ export default function NewComplaintRoute() {
                 !mapCoordinates ? (
                   <View className="h-96 items-center justify-center px-6">
                     <MapPin size={36} color={accentColor} />
-                    <Typography.Paragraph
-                      type="body-sm"
-                      color="muted"
-                      align="center"
-                      className="mt-2"
-                    >
+                    <Text className="mt-2 text-center text-sm text-muted-foreground">
                       {Platform.OS === "web"
                         ? "Native map picker is available on Android and iOS."
                         : mapError ?? "Loading map..."}
-                    </Typography.Paragraph>
+                    </Text>
                   </View>
                 ) : (
                   <MapLibreMap
@@ -1327,51 +1305,44 @@ export default function NewComplaintRoute() {
                       }}
                     >
                       <View className="items-center">
-                        <View className="h-9 w-9 items-center justify-center rounded-full bg-accent shadow-lg">
+                        <View className="h-9 w-9 items-center justify-center rounded-full bg-primary shadow-lg">
                           <MapPin size={20} color="white" />
                         </View>
-                        <View className="-mt-1 h-3 w-3 rotate-45 bg-accent" />
+                        <View className="-mt-1 h-3 w-3 rotate-45 bg-primary" />
                       </View>
                     </ViewAnnotation>
                   </MapLibreMap>
                 )}
               </View>
-              <Surface variant="secondary" className="mt-4 rounded-3xl p-4">
-                <Typography type="body-xs" color="muted" weight="bold">
+              <View className="mt-4 rounded-lg border border-border bg-secondary p-4">
+                <Text className="text-xs font-bold text-muted-foreground">
                   Selected coordinates
-                </Typography>
-                <Typography type="body-sm" weight="bold" className="mt-1">
+                </Text>
+                <Text className="mt-1 text-sm font-bold text-foreground">
                   {formatCoordinate(mapCoordinates?.latitude ?? null)},{" "}
                   {formatCoordinate(mapCoordinates?.longitude ?? null)}
-                </Typography>
+                </Text>
                 {mapError ? (
-                  <Typography.Paragraph type="body-xs" className="mt-2 text-danger">
+                  <Text className="mt-2 text-xs text-destructive">
                     {mapError}
-                  </Typography.Paragraph>
+                  </Text>
                 ) : null}
-              </Surface>
+              </View>
               <Button
-                variant="primary"
                 size="lg"
                 className="mt-4"
                 onPress={confirmMapCoordinates}
                 isDisabled={!mapCoordinates}
               >
-                <Navigation size={18} color="white" />
-                <Button.Label>Confirm coordinates</Button.Label>
+                <ButtonIcon as={Navigation} height={18} width={18} />
+                <ButtonText>Confirm coordinates</ButtonText>
               </Button>
-              <Typography.Paragraph
-                type="body-xs"
-                color="muted"
-                align="center"
-                className="mt-2"
-              >
+              <Text className="mt-2 text-center text-xs text-muted-foreground">
                 Map is limited to Albay coordinates.
-              </Typography.Paragraph>
-            </BottomSheet.Content>
-          </BottomSheet.Portal>
-        </BottomSheet>
-      ) : null}
+              </Text>
+          </BottomSheetContent>
+        </BottomSheetPortal>
+      </BottomSheet>
     </KeyboardAvoidingView>
   );
 }
