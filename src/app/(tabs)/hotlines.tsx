@@ -1,27 +1,33 @@
 import { appScrollableBottomPadding } from "@/components/floating-app-bar";
+import {
+  Avatar,
+  AvatarFallbackText,
+  AvatarImage,
+} from "@/components/ui/avatar";
+import {
+  BottomSheet,
+  BottomSheetBackdrop,
+  BottomSheetContent,
+  BottomSheetPortal,
+  BottomSheetScrollView,
+  BottomSheetTextInput,
+  type BottomSheetRef,
+} from "@/components/ui/bottomsheet";
+import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
+import { Heading } from "@/components/ui/heading";
+import { SearchField } from "@/components/ui/search-field";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Text } from "@/components/ui/text";
 import { statusBarHeight } from "@/constants";
+import { useAppColors } from "@/hooks/use-app-colors";
 import {
   fetchHotlines,
   type HotlineAgency,
   type HotlineCategory,
   type HotlineContact,
 } from "@/services/hotlines";
-import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import * as Clipboard from "expo-clipboard";
 import { useFocusEffect } from "expo-router";
-import {
-  Avatar,
-  BottomSheet,
-  Button,
-  Input,
-  Label,
-  Skeleton,
-  Surface,
-  TextField,
-  Typography,
-  useBottomSheetAwareHandlers,
-  useThemeColor,
-} from "heroui-native";
 import type { LucideIcon } from "lucide-react-native";
 import {
   Bell,
@@ -164,38 +170,31 @@ function SheetSearchInput({
   onChangeText: (value: string) => void;
   placeholder: string;
 }) {
-  const { onFocus, onBlur } = useBottomSheetAwareHandlers();
   return (
-    <TextField>
       <View className="flex-row items-center">
-        <Input
+        <BottomSheetTextInput
           value={value}
           onChangeText={onChangeText}
-          onFocus={onFocus}
-          onBlur={onBlur}
           placeholder={placeholder}
-          variant="secondary"
-          className="flex-1 px-10"
+          className="h-12 flex-1 rounded-xl px-10"
           autoCorrect={false}
           autoCapitalize="none"
         />
-        <View className="absolute left-3" pointerEvents="none">
+        <View className="absolute left-3" style={{ pointerEvents: "none" }}>
           <Search size={17} color="#737373" />
         </View>
         {value ? (
           <Button
-            isIconOnly
-            size="sm"
+            size="icon"
             variant="ghost"
             className="absolute right-1"
             onPress={() => onChangeText("")}
             accessibilityLabel="Clear search"
           >
-            <X size={16} color="#737373" />
+            <ButtonIcon as={X} height={16} width={16} />
           </Button>
         ) : null}
       </View>
-    </TextField>
   );
 }
 
@@ -234,9 +233,9 @@ function EmergencySlider() {
       className="h-12 justify-center overflow-hidden rounded-full"
       style={{ backgroundColor }}
     >
-      <Typography type="body-xs" weight="bold" className="self-center text-muted">
+      <Text className="self-center text-xs font-bold text-muted-foreground">
         {">>> Slide to call"}
-      </Typography>
+      </Text>
       <Animated.View
         {...panResponder.panHandlers}
         className="absolute left-1 h-10 w-12 items-center justify-center rounded-full bg-white"
@@ -249,43 +248,38 @@ function EmergencySlider() {
 }
 
 function AgencyCard({ agency }: { agency: HotlineAgency }) {
-  const [accentColor, mutedColor] = useThemeColor(["accent", "muted"]);
-
   const call = (number: string) => Linking.openURL(`tel:${digits(number)}`);
   const copy = (number: string) => Clipboard.setStringAsync(number);
 
   return (
-    <Surface className="rounded-[24px] p-4">
+    <View className="rounded-lg border border-border bg-card p-4">
       <View className="flex-row items-start gap-3">
-        <Avatar size="md" alt={agency.name}>
-          {agency.logoUrl ? <Avatar.Image source={{ uri: agency.logoUrl }} /> : null}
+        <Avatar accessibilityLabel={agency.name}>
+          {agency.logoUrl ? <AvatarImage source={{ uri: agency.logoUrl }} /> : null}
           {!agency.logoUrl ? (
-            <Avatar.Fallback>
-              <Typography type="body-xs" weight="bold" className="text-accent">
+            <AvatarFallbackText className="font-bold text-primary">
                 {initials(agency.name)}
-              </Typography>
-            </Avatar.Fallback>
+            </AvatarFallbackText>
           ) : null}
         </Avatar>
         <View className="flex-1">
-          <Typography.Heading type="h6" weight="bold">
+          <Heading size="sm">
             {agency.name}
-          </Typography.Heading>
+          </Heading>
           {agency.description || agency.address ? (
-            <Typography.Paragraph type="body-xs" color="muted" className="mt-0.5">
+            <Text className="mt-0.5 text-xs text-muted-foreground">
               {agency.description || agency.address}
-            </Typography.Paragraph>
+            </Text>
           ) : null}
         </View>
         {agency.websiteLink ? (
           <Button
-            isIconOnly
-            size="sm"
+            size="icon"
             variant="ghost"
             onPress={() => Linking.openURL(agency.websiteLink!)}
             accessibilityLabel={`Open ${agency.name} website`}
           >
-            <Globe2 size={18} color={mutedColor} />
+            <ButtonIcon as={Globe2} height={18} width={18} />
           </Button>
         ) : null}
       </View>
@@ -295,41 +289,38 @@ function AgencyCard({ agency }: { agency: HotlineAgency }) {
           agency.contacts.map((contact) => (
             <View
               key={contact.id}
-              className="min-h-12 flex-row items-center gap-2 rounded-full bg-surface-secondary px-3"
+              className="min-h-12 flex-row items-center gap-2 rounded-full bg-secondary px-3"
             >
-              <Typography type="body-xs" weight="bold">
+              <Text className="text-xs font-bold text-foreground">
                 {contactLabel(contact)}:
-              </Typography>
-              <Typography type="body-xs" className="flex-1">
+              </Text>
+              <Text className="flex-1 text-xs text-foreground">
                 {contact.number}
-              </Typography>
+              </Text>
               <Button
-                isIconOnly
-                size="sm"
-                variant="primary"
+                size="icon"
                 onPress={() => call(contact.number)}
                 accessibilityLabel={`Call ${contact.number}`}
               >
-                <Phone size={15} color="white" />
+                <ButtonIcon as={Phone} height={15} width={15} />
               </Button>
               <Button
-                isIconOnly
-                size="sm"
+                size="icon"
                 variant="secondary"
                 onPress={() => copy(contact.number)}
                 accessibilityLabel={`Copy ${contact.number}`}
               >
-                <Copy size={15} color={accentColor} />
+                <ButtonIcon as={Copy} height={15} width={15} />
               </Button>
             </View>
           ))
         ) : (
-          <Typography.Paragraph type="body-xs" color="muted">
+          <Text className="text-xs text-muted-foreground">
             No hotline numbers listed.
-          </Typography.Paragraph>
+          </Text>
         )}
       </View>
-    </Surface>
+    </View>
   );
 }
 
@@ -346,7 +337,7 @@ function CategoryCard({
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      className="min-h-[86px] flex-1 flex-row items-center gap-3 rounded-[22px] border border-border bg-surface p-4"
+      className="min-h-[86px] flex-1 flex-row items-center gap-3 rounded-lg border border-border bg-card p-4"
     >
       <View
         className="h-9 w-9 items-center justify-center rounded-2xl"
@@ -355,12 +346,12 @@ function CategoryCard({
         <Icon size={20} color={visual.color} />
       </View>
       <View className="flex-1">
-        <Typography type="body-sm" weight="bold" numberOfLines={2}>
+        <Text className="text-sm font-bold text-foreground" numberOfLines={2}>
           {category.name}
-        </Typography>
-        <Typography type="body-xs" color="muted" className="mt-0.5">
+        </Text>
+        <Text className="mt-0.5 text-xs text-muted-foreground">
           {category.agencies.length} {category.agencies.length === 1 ? "agency" : "agencies"}
-        </Typography>
+        </Text>
       </View>
     </Pressable>
   );
@@ -383,17 +374,17 @@ function HotlineResults({
 
   return (
     <View className="gap-2">
-      <Label className="ml-2 text-sm font-semibold text-muted">
+      <Text className="ml-2 text-sm font-semibold text-muted-foreground">
         Matches
-      </Label>
+      </Text>
       {matches.length ? (
         matches.map(({ agency }) => <AgencyCard key={agency.id} agency={agency} />)
       ) : (
-        <Surface className="rounded-[22px] p-5">
-          <Typography.Paragraph type="body-sm" color="muted">
+        <View className="rounded-lg border border-border bg-card p-5">
+          <Text className="text-sm text-muted-foreground">
             No contacts match your search.
-          </Typography.Paragraph>
-        </Surface>
+          </Text>
+        </View>
       )}
     </View>
   );
@@ -416,15 +407,15 @@ export default function HotlinesRoute() {
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   const bottomPadding = appScrollableBottomPadding(insets.bottom);
-  const [accentColor, foregroundColor] = useThemeColor(["accent", "foreground"]);
+  const [accentColor] = useAppColors(["accent"]);
+  const categorySheetRef = useRef<BottomSheetRef>(null);
+  const allSheetRef = useRef<BottomSheetRef>(null);
   const [categories, setCategories] = useState<HotlineCategory[]>(fallbackCategories);
   const [query, setQuery] = useState("");
   const [sheetQuery, setSheetQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
-  const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
-  const [isAllSheetOpen, setIsAllSheetOpen] = useState(false);
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
 
   const loadHotlines = useCallback(async (options?: { force?: boolean }) => {
@@ -477,13 +468,13 @@ export default function HotlinesRoute() {
   const openCategory = (category: HotlineCategory) => {
     setSelectedCategoryId(category.id);
     setSheetQuery("");
-    setIsCategorySheetOpen(true);
+    requestAnimationFrame(() => categorySheetRef.current?.open());
   };
 
   const openAll = () => {
     setActiveCategoryId((current) => current ?? categories[0]?.id ?? null);
     setSheetQuery("");
-    setIsAllSheetOpen(true);
+    requestAnimationFrame(() => allSheetRef.current?.open());
   };
 
   return (
@@ -509,62 +500,41 @@ export default function HotlinesRoute() {
         }
       >
         <View className="flex-row items-start justify-between">
-          <Typography.Heading type="h1" weight="bold">
+          <Heading size="2xl">
             Hotlines
-          </Typography.Heading>
-          <Button isIconOnly variant="secondary" accessibilityLabel="Notifications">
-            <Bell size={20} color={foregroundColor} />
-            <View className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-danger" />
+          </Heading>
+          <Button size="icon" variant="secondary" accessibilityLabel="Notifications">
+            <ButtonIcon as={Bell} height={20} width={20} />
+            <View className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-destructive" />
           </Button>
         </View>
 
-        <TextField>
-          <View className="flex-row items-center">
-            <Input
-              value={query}
-              onChangeText={setQuery}
-              placeholder="Search number, agency, category"
-              variant="secondary"
-              className="flex-1 px-10"
-              autoCorrect={false}
-              autoCapitalize="none"
-            />
-            <View className="absolute left-3" pointerEvents="none">
-              <Search size={17} color="#737373" />
-            </View>
-            {query ? (
-              <Button
-                isIconOnly
-                size="sm"
-                variant="ghost"
-                className="absolute right-1"
-                onPress={() => setQuery("")}
-                accessibilityLabel="Clear search"
-              >
-                <X size={16} color="#737373" />
-              </Button>
-            ) : null}
-          </View>
-        </TextField>
+        <SearchField
+          accessibilityLabel="Search hotlines"
+          onChangeText={setQuery}
+          onClear={() => setQuery("")}
+          placeholder="Search number, agency, category"
+          value={query}
+        />
 
         {isLoading ? <HotlineSkeleton /> : null}
 
         {!isLoading ? (
           <>
-            <Surface className="rounded-[24px] p-4">
+            <View className="rounded-lg border border-border bg-card p-4">
               <View className="flex-row items-center gap-2">
                 <Siren size={21} color="#111827" />
-                <Typography.Heading type="h5" weight="bold">
+                <Heading size="md">
                   Call 911
-                </Typography.Heading>
+                </Heading>
               </View>
-              <Typography.Paragraph type="body-xs" className="mt-1">
+              <Text className="mt-1 text-xs text-foreground">
                 Use for life-threatening situations only.
-              </Typography.Paragraph>
+              </Text>
               <View className="mt-3">
                 <EmergencySlider />
               </View>
-            </Surface>
+            </View>
 
             <AgencyCard agency={aleco} />
 
@@ -572,12 +542,12 @@ export default function HotlinesRoute() {
 
             <View className="gap-2">
               <View className="flex-row items-center justify-between">
-                <Label className="ml-2 text-sm font-semibold text-muted">
+                <Text className="ml-2 text-sm font-semibold text-muted-foreground">
                   Categories
-                </Label>
+                </Text>
                 <Button variant="ghost" size="sm" onPress={openAll}>
-                  <Button.Label>View all</Button.Label>
-                  <ChevronRight size={15} color={accentColor} />
+                  <ButtonText>View all</ButtonText>
+                  <ButtonIcon as={ChevronRight} height={15} width={15} />
                 </Button>
               </View>
               {categoryRows.map((row) => (
@@ -597,33 +567,31 @@ export default function HotlinesRoute() {
         ) : null}
       </ScrollView>
 
-      <BottomSheet isOpen={isCategorySheetOpen} onOpenChange={setIsCategorySheetOpen}>
-        <BottomSheet.Portal>
-          <BottomSheet.Overlay />
-          <BottomSheet.Content
-            snapPoints={[categorySnapHeight]}
-            enableDynamicSizing={false}
-            enableOverDrag={false}
-            contentContainerClassName="h-full"
-            keyboardBehavior="interactive"
-            keyboardBlurBehavior="restore"
-            android_keyboardInputMode="adjustResize"
-          >
+      <BottomSheet ref={categorySheetRef} onClose={() => setSheetQuery("")}>
+        <BottomSheetPortal
+          snapPoints={[categorySnapHeight]}
+          enableDynamicSizing={false}
+          enableOverDrag={false}
+          keyboardBehavior="interactive"
+          keyboardBlurBehavior="restore"
+          android_keyboardInputMode="adjustResize"
+          backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
+        >
+          <BottomSheetContent className="h-full">
             <View className="flex-row items-start justify-between gap-3">
               <View className="flex-1">
-                <BottomSheet.Title>{selectedCategory?.name ?? "Hotlines"}</BottomSheet.Title>
-                <BottomSheet.Description>
+                <Heading size="lg">{selectedCategory?.name ?? "Hotlines"}</Heading>
+                <Text className="text-sm text-muted-foreground">
                   {selectedCategory?.description ?? "Search contacts in this category."}
-                </BottomSheet.Description>
+                </Text>
               </View>
               <Button
-                isIconOnly
-                size="sm"
+                size="icon"
                 variant="secondary"
-                onPress={() => setIsCategorySheetOpen(false)}
+                onPress={() => categorySheetRef.current?.close()}
                 accessibilityLabel="Close hotlines"
               >
-                <X size={16} color="#737373" />
+                <ButtonIcon as={X} height={16} width={16} />
               </Button>
             </View>
             <View className="mt-4">
@@ -643,44 +611,42 @@ export default function HotlinesRoute() {
                   <AgencyCard key={agency.id} agency={agency} />
                 ))
               ) : (
-                <Surface className="rounded-[22px] p-5">
-                  <Typography.Paragraph type="body-sm" color="muted">
+                <View className="rounded-lg border border-border bg-card p-5">
+                  <Text className="text-sm text-muted-foreground">
                     No hotline contacts found.
-                  </Typography.Paragraph>
-                </Surface>
+                  </Text>
+                </View>
               )}
             </BottomSheetScrollView>
-          </BottomSheet.Content>
-        </BottomSheet.Portal>
+          </BottomSheetContent>
+        </BottomSheetPortal>
       </BottomSheet>
 
-      <BottomSheet isOpen={isAllSheetOpen} onOpenChange={setIsAllSheetOpen}>
-        <BottomSheet.Portal>
-          <BottomSheet.Overlay />
-          <BottomSheet.Content
-            snapPoints={["92%"]}
-            enableDynamicSizing={false}
-            enableOverDrag={false}
-            contentContainerClassName="h-full"
-            keyboardBehavior="interactive"
-            keyboardBlurBehavior="restore"
-            android_keyboardInputMode="adjustResize"
-          >
+      <BottomSheet ref={allSheetRef} onClose={() => setSheetQuery("")}>
+        <BottomSheetPortal
+          snapPoints={["92%"]}
+          enableDynamicSizing={false}
+          enableOverDrag={false}
+          keyboardBehavior="interactive"
+          keyboardBlurBehavior="restore"
+          android_keyboardInputMode="adjustResize"
+          backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
+        >
+          <BottomSheetContent className="h-full">
             <View className="flex-row items-start justify-between gap-3">
               <View className="flex-1">
-                <BottomSheet.Title>All hotlines</BottomSheet.Title>
-                <BottomSheet.Description>
+                <Heading size="lg">All hotlines</Heading>
+                <Text className="text-sm text-muted-foreground">
                   Browse agencies by category.
-                </BottomSheet.Description>
+                </Text>
               </View>
               <Button
-                isIconOnly
-                size="sm"
+                size="icon"
                 variant="secondary"
-                onPress={() => setIsAllSheetOpen(false)}
+                onPress={() => allSheetRef.current?.close()}
                 accessibilityLabel="Close all hotlines"
               >
-                <X size={16} color="#737373" />
+                <ButtonIcon as={X} height={16} width={16} />
               </Button>
             </View>
             <View className="mt-4 gap-3">
@@ -702,16 +668,12 @@ export default function HotlinesRoute() {
                       key={category.id}
                       onPress={() => setActiveCategoryId(category.id)}
                       className={`min-h-10 justify-center rounded-full px-4 ${
-                        active ? "bg-accent" : "bg-surface-secondary"
+                        active ? "bg-primary" : "bg-secondary"
                       }`}
                     >
-                      <Typography
-                        type="body-xs"
-                        weight="bold"
-                        className={active ? "text-white" : "text-foreground"}
-                      >
+                      <Text className={`text-xs font-bold ${active ? "text-primary-foreground" : "text-foreground"}`}>
                         {category.name}
-                      </Typography>
+                      </Text>
                     </Pressable>
                   );
                 })}
@@ -727,15 +689,15 @@ export default function HotlinesRoute() {
                   <AgencyCard key={agency.id} agency={agency} />
                 ))
               ) : (
-                <Surface className="rounded-[22px] p-5">
-                  <Typography.Paragraph type="body-sm" color="muted">
+                <View className="rounded-lg border border-border bg-card p-5">
+                  <Text className="text-sm text-muted-foreground">
                     No hotline contacts found.
-                  </Typography.Paragraph>
-                </Surface>
+                  </Text>
+                </View>
               )}
             </BottomSheetScrollView>
-          </BottomSheet.Content>
-        </BottomSheet.Portal>
+          </BottomSheetContent>
+        </BottomSheetPortal>
       </BottomSheet>
     </View>
   );
