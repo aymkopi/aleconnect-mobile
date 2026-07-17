@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { View } from "react-native";
 
 import { Divider } from "@/components/ui/divider";
 import { Heading } from "@/components/ui/heading";
@@ -46,31 +47,43 @@ export function ListSectionItem({
   title: ReactNode;
   trailing?: ReactNode;
 }) {
+  const content = (
+    <>
+      {leading}
+      <VStack className="flex-1 gap-0.5">
+        {typeof title === "string" ? (
+          <Text className="font-semibold text-foreground">{title}</Text>
+        ) : (
+          title
+        )}
+        {typeof description === "string" ? (
+          <Text className="text-muted-foreground" size="sm">
+            {description}
+          </Text>
+        ) : (
+          description
+        )}
+      </VStack>
+      {trailing}
+    </>
+  );
+
   return (
     <>
-      <Pressable
-        accessibilityLabel={accessibilityLabel}
-        accessibilityRole={onPress ? "button" : undefined}
-        className="min-h-14 flex-row items-center gap-3 px-4 py-3"
-        onPress={onPress}
-      >
-        {leading}
-        <VStack className="flex-1 gap-0.5">
-          {typeof title === "string" ? (
-            <Text className="font-semibold text-foreground">{title}</Text>
-          ) : (
-            title
-          )}
-          {typeof description === "string" ? (
-            <Text className="text-muted-foreground" size="sm">
-              {description}
-            </Text>
-          ) : (
-            description
-          )}
-        </VStack>
-        {trailing}
-      </Pressable>
+      {onPress ? (
+        <Pressable
+          accessibilityLabel={accessibilityLabel}
+          accessibilityRole="button"
+          className="min-h-14 flex-row items-center gap-3 px-4 py-3"
+          onPress={onPress}
+        >
+          {content}
+        </Pressable>
+      ) : (
+        <View className="min-h-14 flex-row items-center gap-3 px-4 py-3">
+          {content}
+        </View>
+      )}
       {showDivider ? <Divider className="ml-4" /> : null}
     </>
   );
