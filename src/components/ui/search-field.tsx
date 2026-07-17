@@ -22,7 +22,7 @@ export function SearchField({
 }: SearchFieldProps) {
   return (
     <Input className={`h-12 rounded-xl ${className ?? ""}`} {...props}>
-      <InputSlot pointerEvents="none">
+      <InputSlot style={{ pointerEvents: "none" }}>
         <InputIcon as={Search} />
       </InputSlot>
       <InputField

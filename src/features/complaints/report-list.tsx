@@ -3,23 +3,18 @@ import {
   formatStatus,
   type Report,
 } from "@/features/complaints/data";
-import {
-  ListGroup,
-  PressableFeedback,
-  Separator,
-  Typography,
-  useThemeColor,
-} from "heroui-native";
+import { ListSection, ListSectionItem } from "@/components/ui/list-section";
+import { Text } from "@/components/ui/text";
+import { useAppColors } from "@/hooks/use-app-colors";
 import { FileText } from "lucide-react-native";
-import { Fragment } from "react";
 import { View } from "react-native";
 
 export function ReportStatusBadge({ status }: { status: string }) {
   return (
-    <View className="rounded-full bg-default px-3 py-1">
-      <Typography type="body-xs" weight="bold">
+    <View className="rounded-full bg-secondary px-3 py-1">
+      <Text className="text-xs font-bold text-secondary-foreground">
         {formatStatus(status)}
-      </Typography>
+      </Text>
     </View>
   );
 }
@@ -33,46 +28,42 @@ export function ReportListGroup({
   getColor?: (report: Report) => string | undefined;
   onPress: (report: Report) => void;
 }) {
-  const [accentColor] = useThemeColor(["accent"]);
+  const [accentColor] = useAppColors(["accent"]);
 
   return (
-    <ListGroup>
+    <ListSection>
       {reports.map((report, index) => (
-        <Fragment key={report.id}>
-          {index > 0 ? <Separator className="mx-4" /> : null}
-          <PressableFeedback animation={false} onPress={() => onPress(report)}>
-            <PressableFeedback.Scale>
-              <ListGroup.Item disabled>
-                <ListGroup.ItemPrefix>
-                  <View
-                    className="h-11 w-11 items-center justify-center rounded-2xl"
-                    style={{ backgroundColor: getColor?.(report) ?? accentColor }}
-                  >
-                    <FileText size={18} color="white" />
-                  </View>
-                </ListGroup.ItemPrefix>
-                <ListGroup.ItemContent>
-                  <View className="min-w-0">
-                    <Typography type="body-xs" color="muted" weight="bold">
-                      {report.ticketNumber}
-                    </Typography>
-                    <ListGroup.ItemTitle numberOfLines={2}>
-                      {report.title}
-                    </ListGroup.ItemTitle>
-                    <ListGroup.ItemDescription numberOfLines={2}>
-                      {report.typeTitle} - {formatReportDate(report.createdAt)}
-                    </ListGroup.ItemDescription>
-                  </View>
-                </ListGroup.ItemContent>
-                <ListGroup.ItemSuffix>
-                  <ReportStatusBadge status={report.status} />
-                </ListGroup.ItemSuffix>
-              </ListGroup.Item>
-            </PressableFeedback.Scale>
-            <PressableFeedback.Ripple />
-          </PressableFeedback>
-        </Fragment>
+        <ListSectionItem
+          key={report.id}
+          accessibilityLabel={`Open report ${report.ticketNumber}`}
+          description={
+            <Text className="text-sm text-muted-foreground" numberOfLines={2}>
+              {report.typeTitle} - {formatReportDate(report.createdAt)}
+            </Text>
+          }
+          leading={
+            <View
+              className="h-11 w-11 items-center justify-center rounded-xl"
+              style={{ backgroundColor: getColor?.(report) ?? accentColor }}
+            >
+              <FileText size={18} color="white" />
+            </View>
+          }
+          onPress={() => onPress(report)}
+          showDivider={index < reports.length - 1}
+          title={
+            <View className="min-w-0 gap-0.5">
+              <Text className="text-xs font-bold text-muted-foreground">
+                {report.ticketNumber}
+              </Text>
+              <Text className="font-semibold text-foreground" numberOfLines={2}>
+                {report.title}
+              </Text>
+            </View>
+          }
+          trailing={<ReportStatusBadge status={report.status} />}
+        />
       ))}
-    </ListGroup>
+    </ListSection>
   );
 }

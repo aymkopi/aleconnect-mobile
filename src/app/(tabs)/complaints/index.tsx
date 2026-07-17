@@ -1,4 +1,8 @@
 import { appScrollableBottomPadding } from "@/components/floating-app-bar";
+import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
+import { Heading } from "@/components/ui/heading";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Text } from "@/components/ui/text";
 import { statusBarHeight } from "@/constants";
 import {
   emptyComplaintMeta,
@@ -10,14 +14,8 @@ import {
   fetchComplaintMeta,
   fetchComplaintReports,
 } from "@/services/complaints";
+import { useAppColors } from "@/hooks/use-app-colors";
 import { useFocusEffect, useRouter } from "expo-router";
-import {
-  Button,
-  Skeleton,
-  Surface,
-  Typography,
-  useThemeColor,
-} from "heroui-native";
 import { Bell, CalendarDays, ChevronRight, FileText, Plus } from "lucide-react-native";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
@@ -41,7 +39,7 @@ function ReportsSkeleton() {
   return (
     <View className="gap-3">
       {Array.from({ length: 3 }).map((_, index) => (
-        <Surface key={index} className="rounded-3xl p-4">
+        <View key={index} className="rounded-lg border border-border bg-card p-4">
           <View className="flex-row gap-3">
             <Skeleton className="h-12 w-12 rounded-2xl" />
             <View className="flex-1 gap-2">
@@ -50,7 +48,7 @@ function ReportsSkeleton() {
               <Skeleton className="h-3 w-3/5 rounded-full" />
             </View>
           </View>
-        </Surface>
+        </View>
       ))}
     </View>
   );
@@ -63,7 +61,7 @@ export default function ComplaintsRoute() {
   const scrollRef = useRef<ScrollView | null>(null);
   const hasLoadedRef = useRef(false);
   const bottomPadding = appScrollableBottomPadding(insets.bottom);
-  const [accentColor] = useThemeColor(["accent"]);
+  const [accentColor] = useAppColors(["accent"]);
   const [meta, setMeta] = useState<ComplaintMeta>(emptyComplaintMeta);
   const [reports, setReports] = useState<Report[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -152,98 +150,95 @@ export default function ComplaintsRoute() {
         >
           <View className="flex-row items-start justify-between">
             <View className="flex-1 pr-4">
-              <Typography.Heading type="h1" weight="bold" className="text-white">
+              <Heading className="text-white" size="2xl">
                 Complaints
-              </Typography.Heading>
-              <Typography.Paragraph
-                type="body-sm"
-                weight="medium"
-                className="mt-1 text-white/85"
-              >
+              </Heading>
+              <Text className="mt-1 text-sm font-medium text-white/85">
                 File reports and track active service tickets.
-              </Typography.Paragraph>
+              </Text>
             </View>
             <Button
-              isIconOnly
+              className="relative"
+              size="icon"
               variant="ghost"
               accessibilityLabel="Notifications"
             >
-              <Bell size={21} color="white" />
+              <ButtonIcon as={Bell} className="text-white" height={21} width={21} />
               <View className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-danger" />
             </Button>
           </View>
 
           <View className="flex-row items-end justify-between gap-3">
             <View className="flex-row gap-3">
-              <Surface className="rounded-3xl bg-white/15 px-4 py-3">
-                <Typography type="body-xs" weight="bold" className="text-white/75">
+              <View className="rounded-lg bg-white/15 px-4 py-3">
+                <Text className="text-xs font-bold text-white/75">
                   This month
-                </Typography>
-                <Typography.Heading type="h3" weight="bold" className="text-white">
+                </Text>
+                <Heading className="text-white" size="lg">
                   {monthReports.length}
-                </Typography.Heading>
-              </Surface>
-              <Surface className="rounded-3xl bg-white/15 px-4 py-3">
-                <Typography type="body-xs" weight="bold" className="text-white/75">
+                </Heading>
+              </View>
+              <View className="rounded-lg bg-white/15 px-4 py-3">
+                <Text className="text-xs font-bold text-white/75">
                   All reports
-                </Typography>
-                <Typography.Heading type="h3" weight="bold" className="text-white">
+                </Text>
+                <Heading className="text-white" size="lg">
                   {reports.length}
-                </Typography.Heading>
-              </Surface>
+                </Heading>
+              </View>
             </View>
             <Button variant="secondary" onPress={() => router.push("/complaints/new")} size="sm">
-              <Plus size={16} color={accentColor} />
-              <Button.Label>New</Button.Label>
+              <ButtonIcon as={Plus} height={16} width={16} />
+              <ButtonText>New</ButtonText>
             </Button>
           </View>
         </View>
 
         <View className="flex-row items-center justify-between">
           <View>
-            <Typography.Heading type="h4" weight="bold">
+            <Heading size="md">
               Recent this month
-            </Typography.Heading>
-            <Typography type="body-xs" color="muted" weight="medium">
+            </Heading>
+            <Text className="text-xs font-medium text-muted-foreground">
               Latest reports only. Full history lives in archive.
-            </Typography>
+            </Text>
           </View>
           <Button
             variant="ghost"
             size="sm"
             onPress={() => router.push("/complaints/list")}
           >
-            <Button.Label>View all</Button.Label>
-            <ChevronRight size={16} color={accentColor} />
+            <ButtonText>View all</ButtonText>
+            <ButtonIcon as={ChevronRight} height={16} width={16} />
           </Button>
         </View>
 
         {error ? (
-          <Typography.Paragraph type="body-sm" className="text-danger">
+          <Text className="text-sm text-destructive">
             {error}
-          </Typography.Paragraph>
+          </Text>
         ) : null}
 
         {isLoading ? (
           <ReportsSkeleton />
         ) : monthReports.length === 0 ? (
-          <Surface className="items-center rounded-3xl p-6">
+          <View className="items-center rounded-lg border border-border bg-card p-6">
             <CalendarDays size={28} color={accentColor} />
-            <Typography.Heading type="h6" weight="bold" align="center" className="mt-3">
+            <Heading className="mt-3 text-center" size="sm">
               No reports this month
-            </Typography.Heading>
-            <Typography.Paragraph type="body-sm" color="muted" align="center" className="mt-1">
+            </Heading>
+            <Text className="mt-1 text-center text-sm text-muted-foreground">
               Older tickets are still available in your report archive.
-            </Typography.Paragraph>
+            </Text>
             <Button
               variant="secondary"
               className="mt-4"
               onPress={() => router.push("/complaints/list")}
             >
-              <FileText size={16} color={accentColor} />
-              <Button.Label>Open archive</Button.Label>
+              <ButtonIcon as={FileText} height={16} width={16} />
+              <ButtonText>Open archive</ButtonText>
             </Button>
-          </Surface>
+          </View>
         ) : (
           <ReportListGroup
             reports={monthReports.slice(0, 5)}

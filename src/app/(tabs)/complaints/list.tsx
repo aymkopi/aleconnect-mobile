@@ -1,4 +1,10 @@
 import { appScrollableBottomPadding } from "@/components/floating-app-bar";
+import { Button, ButtonIcon } from "@/components/ui/button";
+import { Heading } from "@/components/ui/heading";
+import { Menu, MenuItem, MenuItemLabel } from "@/components/ui/menu";
+import { SearchField } from "@/components/ui/search-field";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Text } from "@/components/ui/text";
 import { statusBarHeight } from "@/constants";
 import {
   emptyComplaintMeta,
@@ -12,16 +18,8 @@ import {
   fetchComplaintMeta,
   fetchComplaintReports,
 } from "@/services/complaints";
+import { useAppColors } from "@/hooks/use-app-colors";
 import { useFocusEffect, useRouter } from "expo-router";
-import {
-  Button,
-  Menu,
-  SearchField,
-  Skeleton,
-  Surface,
-  Typography,
-  useThemeColor,
-} from "heroui-native";
 import {
   ArrowDownNarrowWide,
   Check,
@@ -60,7 +58,7 @@ function ArchiveSkeleton() {
   return (
     <View className="gap-3">
       {Array.from({ length: 5 }).map((_, index) => (
-        <Surface key={index} className="rounded-3xl p-4">
+        <View key={index} className="rounded-lg border border-border bg-card p-4">
           <View className="flex-row gap-3">
             <Skeleton className="h-12 w-12 rounded-2xl" />
             <View className="flex-1 gap-2">
@@ -69,7 +67,7 @@ function ArchiveSkeleton() {
               <Skeleton className="h-3 w-2/3 rounded-full" />
             </View>
           </View>
-        </Surface>
+        </View>
       ))}
     </View>
   );
@@ -82,7 +80,7 @@ export default function ComplaintArchiveRoute() {
   const scrollRef = useRef<ScrollView | null>(null);
   const hasLoadedRef = useRef(false);
   const bottomPadding = appScrollableBottomPadding(insets.bottom);
-  const [accentColor] = useThemeColor(["accent"]);
+  const [accentColor] = useAppColors(["accent"]);
   const [meta, setMeta] = useState<ComplaintMeta>(emptyComplaintMeta);
   const [reports, setReports] = useState<Report[]>([]);
   const [query, setQuery] = useState("");
@@ -198,120 +196,122 @@ export default function ComplaintArchiveRoute() {
       >
         <View className="flex-row items-center gap-3">
           <Button
-            isIconOnly
+            size="icon"
             variant="secondary"
             onPress={() => router.back()}
             accessibilityLabel="Back to complaints"
           >
-            <ChevronLeft size={21} color={accentColor} />
+            <ButtonIcon as={ChevronLeft} height={21} width={21} />
           </Button>
           <View className="flex-1">
-            <Typography.Heading type="h2" weight="bold">
+            <Heading size="xl">
               Report archive
-            </Typography.Heading>
-            <Typography type="body-xs" color="muted" weight="medium">
+            </Heading>
+            <Text className="text-xs font-medium text-muted-foreground">
               Search, filter, and review all recent tickets.
-            </Typography>
+            </Text>
           </View>
         </View>
 
         <View className="flex-row items-end gap-2">
           <View className="flex-1">
-            <SearchField value={query} onChange={setQuery}>
-              <SearchField.Group>
-                <SearchField.SearchIcon />
-                <SearchField.Input placeholder="Search tickets" />
-                <SearchField.ClearButton />
-              </SearchField.Group>
-            </SearchField>
+            <SearchField
+              accessibilityLabel="Search tickets"
+              onChangeText={setQuery}
+              onClear={() => setQuery("")}
+              placeholder="Search tickets"
+              value={query}
+            />
           </View>
-          <Menu>
-            <Menu.Trigger asChild>
-              <Button isIconOnly variant="secondary" accessibilityLabel="Sort reports">
-                <ArrowDownNarrowWide size={18} color={accentColor} />
+          <Menu
+            placement="bottom right"
+            offset={6}
+            trigger={(triggerProps) => (
+              <Button {...triggerProps} size="icon" variant="secondary" accessibilityLabel="Sort reports">
+                <ButtonIcon as={ArrowDownNarrowWide} height={18} width={18} />
               </Button>
-            </Menu.Trigger>
-            <Menu.Portal>
-              <Menu.Overlay />
-              <Menu.Content presentation="popover" width={220}>
-                <Menu.Label>Sort by</Menu.Label>
-                {[
-                  ["newest", "Newest first"],
-                  ["oldest", "Oldest first"],
-                  ["status", "Status"],
-                ].map(([value, label]) => (
-                  <Menu.Item key={value} onPress={() => setSortMode(value as SortMode)}>
-                    <View className="w-5">
-                      {sortMode === value ? <Check size={16} color={accentColor} /> : null}
-                    </View>
-                    <Menu.ItemTitle>{label}</Menu.ItemTitle>
-                  </Menu.Item>
-                ))}
-              </Menu.Content>
-            </Menu.Portal>
+            )}
+          >
+            {[
+              ["newest", "Newest first"],
+              ["oldest", "Oldest first"],
+              ["status", "Status"],
+            ].map(([value, label]) => (
+              <MenuItem
+                key={value}
+                textValue={label}
+                onPress={() => setSortMode(value as SortMode)}
+              >
+                <View className="w-5">
+                  {sortMode === value ? <Check size={16} color={accentColor} /> : null}
+                </View>
+                <MenuItemLabel>{label}</MenuItemLabel>
+              </MenuItem>
+            ))}
           </Menu>
-          <Menu>
-            <Menu.Trigger asChild>
-              <Button isIconOnly variant="secondary" accessibilityLabel="Filter reports">
-                <Filter size={18} color={accentColor} />
+          <Menu
+            placement="bottom right"
+            offset={6}
+            trigger={(triggerProps) => (
+              <Button {...triggerProps} size="icon" variant="secondary" accessibilityLabel="Filter reports">
+                <ButtonIcon as={Filter} height={18} width={18} />
               </Button>
-            </Menu.Trigger>
-            <Menu.Portal>
-              <Menu.Overlay />
-              <Menu.Content presentation="popover" width={280}>
-                <Menu.Label>Category</Menu.Label>
-                {[
-                  { id: "all", title: "All categories" },
-                  ...meta.categories.map((category) => ({
-                    id: category.id,
-                    title: formatComplaintCategoryTitle(category.title),
-                  })),
-                ].map((category) => (
-                  <Menu.Item key={category.id} onPress={() => setCategoryId(category.id)}>
-                    <View className="w-5">
-                      {categoryId === category.id ? (
-                        <Check size={16} color={accentColor} />
-                      ) : null}
-                    </View>
-                    <Menu.ItemTitle>{category.title}</Menu.ItemTitle>
-                  </Menu.Item>
-                ))}
-              </Menu.Content>
-            </Menu.Portal>
+            )}
+          >
+            {[
+              { id: "all", title: "All categories" },
+              ...meta.categories.map((category) => ({
+                id: category.id,
+                title: formatComplaintCategoryTitle(category.title),
+              })),
+            ].map((category) => (
+              <MenuItem
+                key={category.id}
+                textValue={category.title}
+                onPress={() => setCategoryId(category.id)}
+              >
+                <View className="w-5">
+                  {categoryId === category.id ? (
+                    <Check size={16} color={accentColor} />
+                  ) : null}
+                </View>
+                <MenuItemLabel>{category.title}</MenuItemLabel>
+              </MenuItem>
+            ))}
           </Menu>
         </View>
 
         <View className="flex-row items-center justify-between">
-          <Typography.Heading type="h5" weight="bold">
+          <Heading size="sm">
             {visibleReports.length} reports
-          </Typography.Heading>
+          </Heading>
         </View>
 
         {error ? (
-          <Typography.Paragraph type="body-sm" className="text-danger">
+          <Text className="text-sm text-destructive">
             {error}
-          </Typography.Paragraph>
+          </Text>
         ) : null}
 
         {isLoading ? (
           <ArchiveSkeleton />
         ) : visibleReports.length === 0 ? (
-          <Surface className="items-center rounded-3xl p-6">
+          <View className="items-center rounded-lg border border-border bg-card p-6">
             <Search size={28} color={accentColor} />
-            <Typography.Heading type="h6" weight="bold" align="center" className="mt-3">
+            <Heading className="mt-3 text-center" size="sm">
               No matching reports
-            </Typography.Heading>
-            <Typography.Paragraph type="body-sm" color="muted" align="center" className="mt-1">
+            </Heading>
+            <Text className="mt-1 text-center text-sm text-muted-foreground">
               Try another search term or category.
-            </Typography.Paragraph>
-          </Surface>
+            </Text>
+          </View>
         ) : (
           <View className="gap-5">
             {groupedReports.map((group) => (
               <View key={group.key} className="gap-2">
-                <Typography type="body-xs" color="muted" weight="bold" className="ml-2">
+                <Text className="ml-2 text-xs font-bold text-muted-foreground">
                   {group.title}
-                </Typography>
+                </Text>
                 <ReportListGroup
                   reports={group.reports}
                   getColor={(report) =>

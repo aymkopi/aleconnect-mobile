@@ -1,4 +1,8 @@
 import { appScrollableBottomPadding } from "@/components/floating-app-bar";
+import { Button, ButtonIcon } from "@/components/ui/button";
+import { Heading } from "@/components/ui/heading";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Text } from "@/components/ui/text";
 import { statusBarHeight } from "@/constants";
 import {
   formatReportDate,
@@ -7,15 +11,9 @@ import {
   type ReportHistoryItem,
 } from "@/features/complaints/data";
 import { ReportStatusBadge } from "@/features/complaints/report-list";
+import { useAppColors } from "@/hooks/use-app-colors";
 import { fetchComplaintReportDetail } from "@/services/complaints";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
-import {
-  Button,
-  Skeleton,
-  Surface,
-  Typography,
-  useThemeColor,
-} from "heroui-native";
 import { CalendarClock, ChevronLeft, FileText, Image as ImageIcon, MapPin } from "lucide-react-native";
 import { useCallback, useRef, useState } from "react";
 import {
@@ -32,12 +30,12 @@ function DetailRow({ label, value }: { label: string; value?: string | null }) {
 
   return (
     <View className="border-border border-t pt-3">
-      <Typography type="body-xs" color="muted" weight="bold">
+      <Text className="text-xs font-bold text-muted-foreground">
         {label}
-      </Typography>
-      <Typography.Paragraph type="body-sm" weight="semibold" className="mt-1">
+      </Text>
+      <Text className="mt-1 text-sm font-semibold text-foreground">
         {value}
-      </Typography.Paragraph>
+      </Text>
     </View>
   );
 }
@@ -49,7 +47,7 @@ function TimelineItem({
   item: ReportHistoryItem;
   isLast: boolean;
 }) {
-  const [accentColor] = useThemeColor(["accent"]);
+  const [accentColor] = useAppColors(["accent"]);
 
   return (
     <View className="flex-row gap-3">
@@ -61,18 +59,18 @@ function TimelineItem({
         {!isLast ? <View className="w-0.5 flex-1 bg-border" /> : null}
       </View>
       <View className="flex-1 pb-5">
-        <Typography type="body-sm" weight="bold">
+        <Text className="text-sm font-bold text-foreground">
           {item.fromStatus
             ? `${formatStatus(item.fromStatus)} to ${formatStatus(item.toStatus)}`
             : formatStatus(item.toStatus)}
-        </Typography>
-        <Typography type="body-xs" color="muted" weight="medium" className="mt-1">
+        </Text>
+        <Text className="mt-1 text-xs font-medium text-muted-foreground">
           {formatReportDate(item.changedAt)}
-        </Typography>
+        </Text>
         {item.note ? (
-          <Typography.Paragraph type="body-sm" color="muted" className="mt-2">
+          <Text className="mt-2 text-sm text-muted-foreground">
             {item.note}
-          </Typography.Paragraph>
+          </Text>
         ) : null}
       </View>
     </View>
@@ -82,15 +80,15 @@ function TimelineItem({
 function DetailSkeleton() {
   return (
     <View className="gap-4">
-      <Surface className="rounded-3xl p-5">
+      <View className="rounded-lg border border-border bg-card p-5">
         <Skeleton className="h-4 w-28 rounded-full" />
         <Skeleton className="mt-3 h-8 w-3/4 rounded-full" />
         <Skeleton className="mt-4 h-20 w-full rounded-2xl" />
-      </Surface>
-      <Surface className="rounded-3xl p-5">
+      </View>
+      <View className="rounded-lg border border-border bg-card p-5">
         <Skeleton className="h-5 w-32 rounded-full" />
         <Skeleton className="mt-4 h-28 w-full rounded-2xl" />
-      </Surface>
+      </View>
     </View>
   );
 }
@@ -102,7 +100,7 @@ export default function ComplaintDetailRoute() {
   const { width } = useWindowDimensions();
   const scrollRef = useRef<ScrollView | null>(null);
   const bottomPadding = appScrollableBottomPadding(insets.bottom);
-  const [accentColor] = useThemeColor(["accent"]);
+  const [accentColor] = useAppColors(["accent"]);
   const [report, setReport] = useState<ReportDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -193,67 +191,57 @@ export default function ComplaintDetailRoute() {
       >
         <View className="flex-row items-center gap-3">
           <Button
-            isIconOnly
+            size="icon"
             variant="secondary"
             onPress={() => router.back()}
             accessibilityLabel="Back to reports"
           >
-            <ChevronLeft size={21} color={accentColor} />
+            <ButtonIcon as={ChevronLeft} height={21} width={21} />
           </Button>
           <View className="flex-1">
-            <Typography.Heading type="h2" weight="bold">
+            <Heading size="xl">
               Ticket details
-            </Typography.Heading>
-            <Typography type="body-xs" color="muted" weight="medium">
+            </Heading>
+            <Text className="text-xs font-medium text-muted-foreground">
               Necessary report updates only.
-            </Typography>
+            </Text>
           </View>
         </View>
 
         {error ? (
-          <Typography.Paragraph type="body-sm" className="text-danger">
+          <Text className="text-sm text-destructive">
             {error}
-          </Typography.Paragraph>
+          </Text>
         ) : null}
 
         {isLoading || !report ? (
           <DetailSkeleton />
         ) : (
           <>
-            <Surface className="items-center rounded-3xl p-6">
+            <View className="items-center rounded-lg border border-border bg-card p-6">
               <View className="h-14 w-14 items-center justify-center rounded-full bg-accent/15">
                 <FileText size={26} color={accentColor} />
               </View>
-              <Typography type="body-xs" color="muted" weight="bold" className="mt-4">
+              <Text className="mt-4 text-xs font-bold text-muted-foreground">
                 Reference number
-              </Typography>
-              <Typography.Heading
-                type="h3"
-                weight="bold"
-                align="center"
-                className="mt-1 text-accent"
-              >
+              </Text>
+              <Heading className="mt-1 text-center text-primary" size="lg">
                 {report.ticketNumber}
-              </Typography.Heading>
-              <Typography.Paragraph
-                type="body-sm"
-                color="muted"
-                align="center"
-                className="mt-3"
-              >
+              </Heading>
+              <Text className="mt-3 text-center text-sm text-muted-foreground">
                 {report.title}
-              </Typography.Paragraph>
+              </Text>
               <View className="mt-4">
                 <ReportStatusBadge status={report.status} />
               </View>
-            </Surface>
+            </View>
 
-            <Surface className="gap-3 rounded-3xl p-5">
+            <View className="gap-3 rounded-lg border border-border bg-card p-5">
               <View className="flex-row items-center gap-2">
                 <CalendarClock size={18} color={accentColor} />
-                <Typography.Heading type="h5" weight="bold">
+                <Heading size="sm">
                   Report
-                </Typography.Heading>
+                </Heading>
               </View>
               <DetailRow label="Type" value={report.typeTitle} />
               <DetailRow label="Submitted" value={formatReportDate(report.createdAt)} />
@@ -261,14 +249,14 @@ export default function ComplaintDetailRoute() {
               <DetailRow label="Action desired" value={report.actionDesired} />
               <DetailRow label="Address" value={address} />
               <DetailRow label="Coordinates" value={coordinates} />
-            </Surface>
+            </View>
 
-            <Surface className="rounded-3xl p-5">
+            <View className="rounded-lg border border-border bg-card p-5">
               <View className="flex-row items-center gap-2">
                 <MapPin size={18} color={accentColor} />
-                <Typography.Heading type="h5" weight="bold">
+                <Heading size="sm">
                   Timeline
-                </Typography.Heading>
+                </Heading>
               </View>
               <View className="mt-4">
                 {timeline.map((item, index) => (
@@ -279,15 +267,15 @@ export default function ComplaintDetailRoute() {
                   />
                 ))}
               </View>
-            </Surface>
+            </View>
 
             {report.imageUrls && report.imageUrls.length > 0 ? (
-              <Surface className="rounded-3xl p-5">
+              <View className="rounded-lg border border-border bg-card p-5">
                 <View className="flex-row items-center gap-2">
                   <ImageIcon size={18} color={accentColor} />
-                  <Typography.Heading type="h5" weight="bold">
+                  <Heading size="sm">
                     Evidence
-                  </Typography.Heading>
+                  </Heading>
                 </View>
                 <View className="mt-4 flex-row gap-2">
                   {report.imageUrls.slice(0, 3).map((url) => (
@@ -298,7 +286,7 @@ export default function ComplaintDetailRoute() {
                     />
                   ))}
                 </View>
-              </Surface>
+              </View>
             ) : null}
           </>
         )}
