@@ -1,0 +1,6 @@
+{
+  "repository": "https://github.com/gluestack/gluestack-ui.git",
+  "branch": "main",
+  "commit": "be060b5d184826d34623e490447a467ffb5cfe56",
+  "componentPath": "apps/starter-kit-expo-uniwind/components/ui"
+}

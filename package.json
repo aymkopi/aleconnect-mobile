@@ -11,8 +11,12 @@
     "lint": "expo lint"
   },
   "dependencies": {
+    "@expo/html-elements": "^0.13.8",
+    "@gluestack-ui/core": "^5.0.15",
+    "@gluestack-ui/utils": "^5.0.6",
     "@gorhom/bottom-sheet": "^5.2.9",
     "@maplibre/maplibre-react-native": "^11.3.6",
+    "@react-aria/utils": "^3.34.1",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-navigation/bottom-tabs": "^7.15.5",
     "@react-navigation/elements": "^2.9.10",

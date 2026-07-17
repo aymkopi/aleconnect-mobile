@@ -8,7 +8,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Text, TextInput, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
+import { useUniwind } from "uniwind";
 
+import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { PushNotificationsReceiver } from "@/components/push-notifications-receiver";
 import { AuthSessionProvider } from "@/context/auth-session-context";
 import { useAuthSession } from "@/hooks/use-auth-session";
@@ -152,6 +154,21 @@ function ComplaintSubmissionToastHost() {
   );
 }
 
+function AppUIProvider({ children }: { children: React.ReactNode }) {
+  const { theme, hasAdaptiveThemes } = useUniwind();
+  const mode = hasAdaptiveThemes
+    ? "system"
+    : theme === "dark"
+      ? "dark"
+      : "light";
+
+  return (
+    <GluestackUIProvider mode={mode}>
+      <HeroUINativeProvider>{children}</HeroUINativeProvider>
+    </GluestackUIProvider>
+  );
+}
+
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     Satoshi_400Regular: require("../../assets/fonts/Satoshi-Regular.ttf"),
@@ -198,7 +215,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <KeyboardProvider>
-        <HeroUINativeProvider>
+        <AppUIProvider>
           <AuthSessionProvider>
             <ForcedLogoutRedirect />
             <ComplaintSubmissionToastHost />
@@ -220,7 +237,7 @@ export default function RootLayout() {
               />
             </Stack>
           </AuthSessionProvider>
-        </HeroUINativeProvider>
+        </AppUIProvider>
       </KeyboardProvider>
     </GestureHandlerRootView>
   );
