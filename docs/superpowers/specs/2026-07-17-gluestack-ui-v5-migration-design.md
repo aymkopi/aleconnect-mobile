@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-17
 
-**Status:** Proposed for implementation planning
+**Status:** Approved for implementation planning
 
 ## Goal
 
@@ -13,6 +13,7 @@ The completed migration must contain no HeroUI Native provider, imports, styles,
 ## Approved Decisions
 
 - Use GlueStack UI v5.
+- Source GlueStack components only from the official repository's current `main` branch. Resolve and record the remote `main` SHA before copying files; never use `main-v4-alpha` or allow CLI auto-detection to choose a source branch.
 - Keep UniWind as the Tailwind CSS v4 styling engine.
 - Do not migrate to NativeWind v5. Aleconnect Mobile is Expo-only, UniWind is already configured, and NativeWind v5 would add preview dependencies and a PostCSS build path without adding required capability.
 - Preserve and polish the current Aleconnect visual identity rather than adopting GlueStack defaults or performing an unrelated full redesign.
@@ -34,6 +35,8 @@ Aleconnect Mobile currently uses:
 HeroUI Native is imported by 18 source files. It currently supplies the root provider, theme-color hook, typography, buttons, surfaces, lists, forms, validation messages, alerts, dialogs, selects, menus, avatars, skeletons, and bottom sheets. Complaints is the highest-risk migration area because it combines multi-step forms, validation, image processing, map selection, progress feedback, keyboard-aware scrolling, and multiple sheets.
 
 The worktree already contains unrelated and in-progress changes. Migration commits must stage only files intentionally changed by that phase and must preserve existing complaint, notification, map, backend, and Graphify work.
+
+Baseline verification on 2026-07-17 found that `npx tsc --noEmit`, `npm run lint`, and the existing notification-navigation test pass. `npx expo-doctor` passes 17 of 19 checks; it reports Expo SDK 55 patch-version drift and duplicate `expo-constants` installations. Dependency alignment is therefore a Phase 0 prerequisite rather than a GlueStack regression.
 
 ## Scope
 
@@ -78,7 +81,7 @@ Install the GlueStack foundation, migrate shared shell components, then convert 
 
 ### Local GlueStack Components
 
-GlueStack's CLI copies component source into the application. Generated components will live under `src/components/ui/` and be imported directly, for example:
+GlueStack components will be copied from the verified `apps/starter-kit-expo-uniwind/components/ui` directory on the official repository's current `main` branch. The resolved commit SHA will be recorded in `docs/gluestack-ui-source.json`, and copied components will live under `src/components/ui/` and be imported directly, for example:
 
 ```tsx
 import { Button, ButtonText } from "@/components/ui/button";
@@ -217,8 +220,8 @@ GlueStack BottomSheet is built on the already-installed Gorhom Bottom Sheet. App
 
 ### Phase 1: GlueStack foundation
 
-- Initialize GlueStack UI v5 for UniWind without accepting destructive CLI rewrites blindly.
-- Add only required components.
+- Resolve and verify the official repository's current `main` commit, then record that SHA.
+- Copy only required Expo UniWind components from that verified checkout.
 - Convert theme variables and add the GlueStack provider.
 - Add `useAppColors`, `SearchField`, and `ListSection`.
 - Keep HeroUI available for unmigrated routes.
@@ -308,7 +311,7 @@ The migration is complete only when all of the following are true:
 
 ## Risks and Controls
 
-- **CLI overwrites:** Run GlueStack initialization on the current worktree only after reviewing the generated diff. Preserve the existing `global.css`, `metro.config.js`, and provider behavior while merging required changes.
+- **Source drift:** Resolve `refs/heads/main` at execution time, verify the sparse checkout SHA, record it, and abort on any mismatch. Do not invoke the CLI path that may fall back to `main-v4-alpha`.
 - **Theme drift:** Map existing Aleconnect tokens before migrating routes and verify light/dark screenshots at every phase.
 - **Overlay regressions:** Migrate sheets, selects, modals, and portals as complete feature units and test keyboard plus long-list behavior on native and web.
 - **Generated component volume:** Add only components used by a planned phase. Do not install the entire component catalog.
