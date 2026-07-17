@@ -1,16 +1,13 @@
 import { appScrollableBottomPadding } from "@/components/floating-app-bar";
+import { Button, ButtonIcon } from "@/components/ui/button";
+import { Heading } from "@/components/ui/heading";
+import { ListSection, ListSectionItem } from "@/components/ui/list-section";
+import { Text } from "@/components/ui/text";
 import { statusBarHeight } from "@/constants";
 import { useAuthSession } from "@/hooks/use-auth-session";
+import { useAppColors } from "@/hooks/use-app-colors";
 import { fetchNotifications } from "@/services/notifications";
 import { useFocusEffect, useRouter } from "expo-router";
-import {
-  Button,
-  Label,
-  ListGroup,
-  Surface,
-  Typography,
-  useThemeColor,
-} from "heroui-native";
 import {
   Bell,
   ChevronRight,
@@ -35,11 +32,7 @@ export default function HomeRoute() {
   const { session, refreshSession } = useAuthSession();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [accentColor, foregroundColor, mutedColor] = useThemeColor([
-    "accent",
-    "foreground",
-    "muted",
-  ]);
+  const [accentColor, mutedColor] = useAppColors(["accent", "muted"]);
   const bottomPadding = appScrollableBottomPadding(insets.bottom);
 
   useFocusEffect(
@@ -116,74 +109,64 @@ export default function HomeRoute() {
     >
       <View className="flex-row items-start justify-between">
         <View className="flex-1 pr-4">
-          <Typography.Heading type="h1" weight="bold">
+          <Heading size="2xl">
             Home
-          </Typography.Heading>
-          <Typography.Paragraph type="body-sm" color="muted" className="mt-1">
+          </Heading>
+          <Text className="mt-1 text-sm text-muted-foreground">
             Your ALECO account, reports, and support in one place.
-          </Typography.Paragraph>
+          </Text>
         </View>
         <Button
-          isIconOnly
+          size="icon"
           variant="secondary"
           accessibilityLabel="Alerts"
           onPress={() => router.push(session ? "/notifications" : "/sign-in")}
         >
-          <Bell size={20} color={foregroundColor} />
+          <ButtonIcon as={Bell} height={20} width={20} />
           {unreadCount > 0 ? (
-            <View className="absolute -right-1 -top-1 min-h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1">
-              <Typography type="body-xs" weight="bold" className="text-white">
+            <View className="absolute -right-1 -top-1 min-h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1">
+              <Text className="text-xs font-bold text-white">
                 {unreadCount > 9 ? "9+" : unreadCount}
-              </Typography>
+              </Text>
             </View>
           ) : null}
         </Button>
       </View>
 
-      <Surface className="rounded-3xl p-5">
+      <View className="rounded-lg border border-border bg-card p-5">
         <View className="flex-row items-center gap-4">
           <View className="h-12 w-12 items-center justify-center rounded-2xl bg-accent">
             <Zap size={23} color="white" />
           </View>
           <View className="flex-1">
-            <Typography.Heading type="h6" weight="bold">
+            <Heading size="sm">
               {session ? "Service dashboard" : "Guest mode"}
-            </Typography.Heading>
-            <Typography.Paragraph type="body-sm" color="muted" className="mt-1">
+            </Heading>
+            <Text className="mt-1 text-sm text-muted-foreground">
               {session
                 ? "Track your reports and account updates."
                 : "Sign in to see account-specific updates."}
-            </Typography.Paragraph>
+            </Text>
           </View>
         </View>
-      </Surface>
+      </View>
 
-      <View className="gap-2">
-        <Label className="ml-2 text-sm font-semibold text-muted">
-          Quick actions
-        </Label>
-        <ListGroup>
-          {quickActions.map((action) => {
+      <ListSection title="Quick actions">
+          {quickActions.map((action, index) => {
             const Icon = action.icon;
             return (
-              <ListGroup.Item key={action.title} onPress={action.onPress}>
-                <ListGroup.ItemPrefix>
-                  <Icon size={20} color={accentColor} />
-                </ListGroup.ItemPrefix>
-                <ListGroup.ItemContent>
-                  <ListGroup.ItemTitle>{action.title}</ListGroup.ItemTitle>
-                  <ListGroup.ItemDescription>
-                    {action.description}
-                  </ListGroup.ItemDescription>
-                </ListGroup.ItemContent>
-                <ListGroup.ItemSuffix>
-                  <ChevronRight size={18} color={mutedColor} />
-                </ListGroup.ItemSuffix>
-              </ListGroup.Item>
+              <ListSectionItem
+                key={action.title}
+                description={action.description}
+                leading={<Icon size={20} color={accentColor} />}
+                onPress={action.onPress}
+                showDivider={index < quickActions.length - 1}
+                title={action.title}
+                trailing={<ChevronRight size={18} color={mutedColor} />}
+              />
             );
           })}
-        </ListGroup>
-      </View>
+      </ListSection>
     </ScrollView>
   );
 }

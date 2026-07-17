@@ -1,6 +1,14 @@
 import { appScrollableBottomPadding } from "@/components/floating-app-bar";
+import { Alert, AlertText } from "@/components/ui/alert";
+import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
+import { Heading } from "@/components/ui/heading";
+import { ListSection, ListSectionItem } from "@/components/ui/list-section";
+import { SearchField } from "@/components/ui/search-field";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Text } from "@/components/ui/text";
 import { statusBarHeight } from "@/constants";
 import { useAuthSession } from "@/hooks/use-auth-session";
+import { useAppColors } from "@/hooks/use-app-colors";
 import {
   fetchNotifications,
   markAllNotificationsRead,
@@ -8,18 +16,6 @@ import {
   type MobileNotification,
 } from "@/services/notifications";
 import { useFocusEffect, useRouter } from "expo-router";
-import {
-  Alert,
-  Button,
-  Label,
-  ListGroup,
-  SearchField,
-  Separator,
-  Skeleton,
-  Surface,
-  Typography,
-  useThemeColor,
-} from "heroui-native";
 import {
   Bell,
   CheckCheck,
@@ -30,11 +26,10 @@ import {
   Sparkles,
   Zap,
 } from "lucide-react-native";
-import { Fragment, useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   RefreshControl,
   ScrollView,
-  Text,
   View,
   useWindowDimensions,
 } from "react-native";
@@ -109,7 +104,7 @@ function NotificationDescription({
 }: {
   notification: MobileNotification;
 }) {
-  const [accentColor, mutedColor] = useThemeColor(["accent", "muted"]);
+  const [accentColor, mutedColor] = useAppColors(["accent", "muted"]);
   const description =
     notification.description?.trim() ||
     (notification.entityType === "advisory"
@@ -135,94 +130,88 @@ function NotificationDescription({
 function NotificationRow({
   notification,
   onOpen,
+  showDivider,
 }: {
   notification: MobileNotification;
   onOpen: (notification: MobileNotification) => void;
+  showDivider: boolean;
 }) {
-  const [foregroundColor, mutedColor] = useThemeColor(["foreground", "muted"]);
+  const [foregroundColor, mutedColor] = useAppColors(["foreground", "muted"]);
   const tone = severityTone(notification.severity);
   const Icon = notification.entityType === "advisory" ? Zap : FileText;
   const actionLabel = notification.ticketId ? "View report" : null;
 
   return (
-    <ListGroup.Item onPress={() => onOpen(notification)}>
-      <ListGroup.ItemPrefix>
-        <View
-          className="h-11 w-11 items-center justify-center rounded-2xl"
-          style={{ backgroundColor: tone.backgroundColor }}
-        >
-          <Icon size={19} color={tone.color} />
-        </View>
-      </ListGroup.ItemPrefix>
-      <ListGroup.ItemContent>
+    <ListSectionItem
+      accessibilityLabel={`Open notification: ${notification.title}`}
+      description={
         <View className="min-w-0">
-          <View className="flex-row items-center gap-2">
-            {!notification.isRead ? (
-              <View className="h-2 w-2 rounded-full bg-accent" />
-            ) : null}
-            <ListGroup.ItemTitle numberOfLines={2}>
-              {notification.title}
-            </ListGroup.ItemTitle>
-          </View>
           <NotificationDescription notification={notification} />
           <View className="mt-2 flex-row flex-wrap items-center gap-2">
             <View
               className="rounded-full px-2 py-1"
               style={{ backgroundColor: tone.backgroundColor }}
             >
-              <Text
-                style={{ color: tone.color }}
-              >
+              <Text className="text-xs font-semibold" style={{ color: tone.color }}>
                 {tone.label}
               </Text>
             </View>
-            <Typography type="body-xs" color="muted" weight="medium">
+            <Text className="text-xs font-medium text-muted-foreground">
               {formatTime(notification.createdAt)}
-            </Typography>
+            </Text>
+            {actionLabel ? (
+              <Text className="text-xs font-bold text-primary">{actionLabel}</Text>
+            ) : null}
           </View>
-          {actionLabel ? (
-            <Button
-              variant="secondary"
-              size="sm"
-              className="mt-3 self-start"
-              onPress={() => onOpen(notification)}
-            >
-              <Button.Label>{actionLabel}</Button.Label>
-            </Button>
-          ) : null}
         </View>
-      </ListGroup.ItemContent>
-      <ListGroup.ItemSuffix>
+      }
+      leading={
+        <View
+          className="h-11 w-11 items-center justify-center rounded-xl"
+          style={{ backgroundColor: tone.backgroundColor }}
+        >
+          <Icon size={19} color={tone.color} />
+        </View>
+      }
+      onPress={() => onOpen(notification)}
+      showDivider={showDivider}
+      title={
+        <View className="flex-row items-center gap-2">
+          {!notification.isRead ? (
+            <View className="h-2 w-2 rounded-full bg-primary" />
+          ) : null}
+          <Text className="flex-1 font-semibold text-foreground" numberOfLines={2}>
+            {notification.title}
+          </Text>
+        </View>
+      }
+      trailing={
         <ChevronRight
           size={18}
           color={notification.isRead ? mutedColor : foregroundColor}
         />
-      </ListGroup.ItemSuffix>
-    </ListGroup.Item>
+      }
+    />
   );
 }
 
 function EmptyState({ onExplore }: { onExplore: () => void }) {
-  const [accentColor] = useThemeColor(["accent"]);
+  const [accentColor] = useAppColors(["accent"]);
   return (
-    <Surface className="items-center rounded-3xl p-6">
+    <View className="items-center rounded-lg border border-border bg-card p-6">
       <View className="h-14 w-14 items-center justify-center rounded-3xl bg-accent-soft">
         <Sparkles size={24} color={accentColor} />
       </View>
-      <Typography.Heading type="h5" weight="bold" className="mt-4 text-center">
+      <Heading className="mt-4 text-center" size="md">
         No notifications yet
-      </Typography.Heading>
-      <Typography.Paragraph
-        type="body-sm"
-        color="muted"
-        className="mt-2 text-center"
-      >
+      </Heading>
+      <Text className="mt-2 text-center text-sm text-muted-foreground">
         Report updates and power advisories will appear here.
-      </Typography.Paragraph>
-      <Button variant="primary" className="mt-5" onPress={onExplore}>
-        <Button.Label>Explore home</Button.Label>
+      </Text>
+      <Button className="mt-5" onPress={onExplore}>
+        <ButtonText>Explore home</ButtonText>
       </Button>
-    </Surface>
+    </View>
   );
 }
 
@@ -241,7 +230,7 @@ export default function NotificationsRoute() {
   const { session, isLoading: isSessionLoading } = useAuthSession();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const [accentColor, foregroundColor] = useThemeColor(["accent", "foreground"]);
+  const [accentColor] = useAppColors(["accent"]);
   const [notifications, setNotifications] = useState<MobileNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [query, setQuery] = useState("");
@@ -374,55 +363,50 @@ export default function NotificationsRoute() {
     >
       <View className="flex-row items-center justify-between">
         <Button
-          isIconOnly
+          size="icon"
           variant="ghost"
           accessibilityLabel="Go back"
           onPress={() => (router.canGoBack() ? router.back() : router.replace("/home"))}
         >
-          <ChevronLeft size={22} color={foregroundColor} />
+          <ButtonIcon as={ChevronLeft} height={22} width={22} />
         </Button>
         <View className="flex-1 px-3">
-          <Typography.Heading type="h2" weight="bold" className="text-center">
+          <Heading className="text-center" size="xl">
             Notifications
-          </Typography.Heading>
-          <Typography.Paragraph
-            type="body-xs"
-            color="muted"
-            className="mt-1 text-center"
-          >
+          </Heading>
+          <Text className="mt-1 text-center text-xs text-muted-foreground">
             {unreadCount > 0 ? `${unreadCount} unread update${unreadCount === 1 ? "" : "s"}` : "All caught up"}
-          </Typography.Paragraph>
+          </Text>
         </View>
         <Button
-          isIconOnly
+          size="icon"
           variant="secondary"
           accessibilityLabel="Notification settings"
           onPress={() => router.push("/profile/push-notifications")}
         >
-          <Settings size={19} color={foregroundColor} />
+          <ButtonIcon as={Settings} height={19} width={19} />
         </Button>
       </View>
 
-      <SearchField value={query} onChange={setQuery}>
-        <SearchField.Group>
-          <SearchField.SearchIcon />
-          <SearchField.Input placeholder="Search notifications" />
-          <SearchField.ClearButton />
-        </SearchField.Group>
-      </SearchField>
+      <SearchField
+        accessibilityLabel="Search notifications"
+        onChangeText={setQuery}
+        onClear={() => setQuery("")}
+        placeholder="Search notifications"
+        value={query}
+      />
 
       {notice ? (
-        <Alert status={notice.status}>
-          <Alert.Indicator />
-          <Alert.Content>
-            <Alert.Title>{notice.title}</Alert.Title>
-            <Alert.Description>{notice.description}</Alert.Description>
-          </Alert.Content>
+        <Alert variant={notice.status === "danger" ? "destructive" : "default"}>
+          <View className="flex-1 gap-1">
+            <AlertText className="font-bold">{notice.title}</AlertText>
+            <AlertText>{notice.description}</AlertText>
+          </View>
         </Alert>
       ) : null}
 
       <View className="flex-row items-center justify-between px-2">
-        <Label className="text-sm text-muted">Updates</Label>
+        <Text className="text-sm text-muted-foreground">Updates</Text>
         <Button
           variant="ghost"
           size="sm"
@@ -430,8 +414,8 @@ export default function NotificationsRoute() {
           isDisabled={unreadCount === 0 || isMarkingRead}
           accessibilityLabel="Mark all notifications as read"
         >
-          <CheckCheck size={16} color={accentColor} />
-          <Button.Label>{isMarkingRead ? "Marking..." : "Read"}</Button.Label>
+          <ButtonIcon as={CheckCheck} height={16} width={16} />
+          <ButtonText>{isMarkingRead ? "Marking..." : "Read"}</ButtonText>
         </Button>
       </View>
 
@@ -445,41 +429,40 @@ export default function NotificationsRoute() {
         <View className="gap-5">
           {groups.map(([title, items]) => (
             <View key={title} className="gap-2">
-              <Label className="ml-2 text-sm font-semibold text-muted">
+              <Text className="ml-2 text-sm font-semibold text-muted-foreground">
                 {title}
-              </Label>
-              <ListGroup>
+              </Text>
+              <ListSection>
                 {items.map((notification, index) => (
-                  <Fragment key={notification.id}>
-                    {index > 0 ? <Separator className="mx-4" /> : null}
-                    <NotificationRow
-                      notification={notification}
-                      onOpen={openNotification}
-                    />
-                  </Fragment>
+                  <NotificationRow
+                    key={notification.id}
+                    notification={notification}
+                    onOpen={openNotification}
+                    showDivider={index < items.length - 1}
+                  />
                 ))}
-              </ListGroup>
+              </ListSection>
             </View>
           ))}
         </View>
       ) : null}
 
       {!isLoading && notifications.length > 0 ? (
-        <Surface className="rounded-3xl p-4">
+        <View className="rounded-lg border border-border bg-card p-4">
           <View className="flex-row items-center gap-3">
             <View className="h-10 w-10 items-center justify-center rounded-2xl bg-accent-soft">
               <Bell size={18} color={accentColor} />
             </View>
             <View className="flex-1">
-              <Typography type="body-sm" weight="bold">
+              <Text className="text-sm font-bold text-foreground">
                 Sound alerts are severity-based
-              </Typography>
-              <Typography.Paragraph type="body-xs" color="muted" className="mt-1">
+              </Text>
+              <Text className="mt-1 text-xs text-muted-foreground">
                 Critical, info, and routine notices use separate bundled sounds after the next native rebuild.
-              </Typography.Paragraph>
+              </Text>
             </View>
           </View>
-        </Surface>
+        </View>
       ) : null}
     </ScrollView>
   );
