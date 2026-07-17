@@ -3,7 +3,6 @@ import { Stack, useRouter } from "expo-router";
 import type * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { HeroUINativeProvider } from "heroui-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Text, TextInput, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -167,9 +166,7 @@ function AppUIProvider({ children }: { children: React.ReactNode }) {
       : "light";
 
   return (
-    <GluestackUIProvider mode={mode}>
-      <HeroUINativeProvider>{children}</HeroUINativeProvider>
-    </GluestackUIProvider>
+    <GluestackUIProvider mode={mode}>{children}</GluestackUIProvider>
   );
 }
 
