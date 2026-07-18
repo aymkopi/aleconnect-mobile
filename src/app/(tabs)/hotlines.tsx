@@ -28,7 +28,7 @@ import {
   type HotlineContact,
 } from "@/services/hotlines";
 import * as Clipboard from "expo-clipboard";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import type { LucideIcon } from "lucide-react-native";
 import {
   Bell,
@@ -405,6 +405,7 @@ function HotlineSkeleton() {
 }
 
 export default function HotlinesRoute() {
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   const bottomPadding = appScrollableBottomPadding(insets.bottom);
@@ -504,9 +505,13 @@ export default function HotlinesRoute() {
           <Heading size="2xl">
             Hotlines
           </Heading>
-          <Button size="icon" variant="secondary" accessibilityLabel="Notifications">
+          <Button
+            size="icon"
+            variant="secondary"
+            accessibilityLabel="Notifications"
+            onPress={() => router.push("/notifications")}
+          >
             <ButtonIcon as={Bell} height={20} width={20} />
-            <View className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-destructive" />
           </Button>
         </View>
 

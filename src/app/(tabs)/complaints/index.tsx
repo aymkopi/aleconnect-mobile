@@ -162,9 +162,9 @@ export default function ComplaintsRoute() {
               size="icon"
               variant="ghost"
               accessibilityLabel="Notifications"
+              onPress={() => router.push("/notifications")}
             >
               <ButtonIcon as={Bell} className="text-white" height={21} width={21} />
-              <View className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-danger" />
             </Button>
           </View>
 
