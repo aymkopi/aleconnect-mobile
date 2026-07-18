@@ -156,6 +156,8 @@ export default function ProfileRoute() {
   const { session, signOut } = useAuthSession();
   const { profile, isLoading, reload } = useConsumerProfileContext();
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [shouldRedirectAfterSignOut, setShouldRedirectAfterSignOut] =
+    useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { theme, hasAdaptiveThemes } = useUniwind();
   const [accentColor, mutedColor, accentForegroundColor, dangerColor] =
@@ -180,6 +182,13 @@ export default function ProfileRoute() {
     void router.prefetch("/profile/push-notifications");
   }, [router]);
 
+  useEffect(() => {
+    if (!shouldRedirectAfterSignOut || session) return;
+
+    setShouldRedirectAfterSignOut(false);
+    router.replace("/sign-in");
+  }, [router, session, shouldRedirectAfterSignOut]);
+
   const openPreferredLink = async ({
     appUrl,
     webUrl,
@@ -201,10 +210,10 @@ export default function ProfileRoute() {
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
+    setShouldRedirectAfterSignOut(true);
 
     try {
       await signOut();
-      router.replace("/sign-in");
     } finally {
       setIsSigningOut(false);
     }
