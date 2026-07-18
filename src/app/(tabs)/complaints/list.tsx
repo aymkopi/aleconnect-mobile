@@ -29,6 +29,7 @@ import {
 } from "lucide-react-native";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
+  BackHandler,
   RefreshControl,
   ScrollView,
   View,
@@ -118,11 +119,30 @@ export default function ComplaintArchiveRoute() {
     }
   }, []);
 
+  const handleBack = useCallback(() => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+
+    router.replace("/complaints");
+  }, [router]);
+
   useFocusEffect(
     useCallback(() => {
       scrollRef.current?.scrollTo({ y: 0, animated: false });
       void loadComplaints();
-    }, [loadComplaints]),
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        () => {
+          handleBack();
+          return true;
+        },
+      );
+
+      return () => subscription.remove();
+    }, [handleBack, loadComplaints]),
   );
 
   const visibleReports = useMemo(() => {
@@ -198,7 +218,7 @@ export default function ComplaintArchiveRoute() {
           <Button
             size="icon"
             variant="secondary"
-            onPress={() => router.back()}
+            onPress={handleBack}
             accessibilityLabel="Back to complaints"
           >
             <ButtonIcon as={ChevronLeft} height={21} width={21} />
