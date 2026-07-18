@@ -7,17 +7,7 @@ import {
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { ListSection, ListSectionItem } from "@/components/ui/list-section";
-import {
-  Select,
-  SelectBackdrop,
-  SelectContent,
-  SelectIcon,
-  SelectInput,
-  SelectItem,
-  SelectPortal,
-  SelectScrollView,
-  SelectTrigger,
-} from "@/components/ui/select";
+import { Menu, MenuItem, MenuItemLabel } from "@/components/ui/menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import { statusBarHeight } from "@/constants";
@@ -26,10 +16,10 @@ import { useAppColors } from "@/hooks/use-app-colors";
 import Feather from "@expo/vector-icons/Feather";
 import { useRouter } from "expo-router";
 import {
+  Check,
   LucideArrowUpRight,
   LucideBell,
   LucideChevronDown,
-  LucideChevronRight,
   LucideFileText,
   LucideGlobe,
   LucideHeart,
@@ -365,32 +355,43 @@ export default function ProfileRoute() {
           title="Theme"
           description="Use system mode or choose a fixed appearance."
           action={
-            <Select
-              selectedLabel={activeThemeLabel}
-              selectedValue={activeTheme}
-              onValueChange={(value) => {
-                if (!value) return;
-                Uniwind.setTheme(value as "system" | "light" | "dark");
-              }}
-            >
-              <SelectTrigger className="w-28" size="sm">
-                <SelectInput placeholder="Theme" value={activeThemeLabel} />
-                <SelectIcon as={LucideChevronDown} className="mr-3" />
-              </SelectTrigger>
-              <SelectPortal>
-                <SelectBackdrop />
-                <SelectContent
-                  title="Appearance"
-                  description="Choose how Aleconnect looks on this device."
+            <Menu
+              placement="bottom right"
+              offset={6}
+              trigger={(triggerProps) => (
+                <Button
+                  {...triggerProps}
+                  size="sm"
+                  variant="outline"
+                  className="w-28 justify-between"
+                  accessibilityLabel="Choose theme"
                 >
-                  <SelectScrollView>
-                    <SelectItem value="system" label="Auto" />
-                    <SelectItem value="light" label="Light" />
-                    <SelectItem value="dark" label="Dark" />
-                  </SelectScrollView>
-                </SelectContent>
-              </SelectPortal>
-            </Select>
+                  <ButtonText>{activeThemeLabel}</ButtonText>
+                  <ButtonIcon as={LucideChevronDown} height={16} width={16} />
+                </Button>
+              )}
+            >
+              {[
+                ["system", "Auto"],
+                ["light", "Light"],
+                ["dark", "Dark"],
+              ].map(([value, label]) => (
+                <MenuItem
+                  key={value}
+                  textValue={label}
+                  onPress={() =>
+                    Uniwind.setTheme(value as "system" | "light" | "dark")
+                  }
+                >
+                  <View className="w-5">
+                    {activeTheme === value ? (
+                      <Check size={16} color={accentColor} />
+                    ) : null}
+                  </View>
+                  <MenuItemLabel>{label}</MenuItemLabel>
+                </MenuItem>
+              ))}
+            </Menu>
           }
         />
         <ProfileRow
@@ -402,7 +403,6 @@ export default function ProfileRoute() {
           title="Language"
           description="Interface language"
           value="English"
-          action={<LucideChevronRight size={19} color={mutedColor} />}
           showDivider={false}
         />
       </ProfileSection>
@@ -437,7 +437,6 @@ export default function ProfileRoute() {
             void openPreferredLink({ webUrl: "https://web.alecoinc.com.ph/" })
           }
           action={<LucideArrowUpRight size={18} color={mutedColor} />}
-          showDivider={false}
         />
         <ProfileRow
           icon={
@@ -453,6 +452,7 @@ export default function ProfileRoute() {
             })
           }
           action={<LucideArrowUpRight size={18} color={mutedColor} />}
+          showDivider={false}
         />
       </ProfileSection>
 
@@ -465,7 +465,6 @@ export default function ProfileRoute() {
           }
           title="Terms and conditions"
           description="Rules for using Aleconnect"
-          action={<LucideChevronRight size={19} color={mutedColor} />}
         />
         <ProfileRow
           icon={
@@ -475,7 +474,6 @@ export default function ProfileRoute() {
           }
           title="Privacy policy"
           description="How account data is handled"
-          action={<LucideChevronRight size={19} color={mutedColor} />}
           showDivider={false}
         />
       </ProfileSection>

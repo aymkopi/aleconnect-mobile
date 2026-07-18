@@ -254,7 +254,7 @@ const SelectContent = React.forwardRef<
         <SelectDragIndicator />
       </SelectDragIndicatorWrapper>
       {title || description ? (
-        <View className="w-full px-1 pb-4 pt-1">
+        <View className="mb-4 w-full border-b border-border/80 px-1 pb-4 pt-1">
           {title ? (
             <Text accessibilityRole="header" className="text-xl font-extrabold text-foreground">
               {title}
