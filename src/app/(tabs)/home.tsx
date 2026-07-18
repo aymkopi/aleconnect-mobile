@@ -66,7 +66,8 @@ export default function HomeRoute() {
       title: "Report an issue",
       description: "File a complaint or service request.",
       icon: FileText,
-      onPress: () => router.push("/complaints/new"),
+      onPress: () =>
+        router.push(session ? "/complaints/new" : "/sign-in"),
     },
     {
       title: "Call support",
