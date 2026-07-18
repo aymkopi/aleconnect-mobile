@@ -1237,8 +1237,8 @@ export default function NewComplaintRoute() {
           android_keyboardInputMode="adjustResize"
           backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
         >
-          <BottomSheetContent className="h-full">
-              <View className="flex-row items-start justify-between gap-3">
+          <BottomSheetContent className="flex-1">
+              <View className="flex-row items-start justify-between gap-3 pb-1">
                 <View className="flex-1">
                   <Heading size="lg">Choose location</Heading>
                   <Text className="text-sm text-muted-foreground">
@@ -1247,14 +1247,14 @@ export default function NewComplaintRoute() {
                 </View>
                 <Button
                   size="icon"
-                  variant="ghost"
+                  variant="secondary"
                   onPress={() => setIsMapSheetOpen(false)}
                   accessibilityLabel="Close map picker"
                 >
                   <ButtonIcon as={CircleX} height={20} width={20} />
                 </Button>
               </View>
-              <View className="mt-5 flex-1 overflow-hidden rounded-lg bg-secondary">
+              <View className="flex-1 overflow-hidden rounded-lg border border-border bg-secondary">
                 {Platform.OS === "web" ||
                 !MapLibreMap ||
                 !MapLibreCamera ||
@@ -1324,7 +1324,7 @@ export default function NewComplaintRoute() {
                   </MapLibreMap>
                 )}
               </View>
-              <View className="mt-4 rounded-lg border border-border bg-secondary p-4">
+              <View className="rounded-lg border border-border bg-card p-4">
                 <Text className="text-xs font-bold text-muted-foreground">
                   Selected coordinates
                 </Text>
@@ -1340,14 +1340,13 @@ export default function NewComplaintRoute() {
               </View>
               <Button
                 size="lg"
-                className="mt-4"
                 onPress={confirmMapCoordinates}
                 isDisabled={!mapCoordinates}
               >
                 <ButtonIcon as={Navigation} height={18} width={18} />
                 <ButtonText>Confirm coordinates</ButtonText>
               </Button>
-              <Text className="mt-2 text-center text-xs text-muted-foreground">
+              <Text className="text-center text-xs text-muted-foreground">
                 Map is limited to Albay coordinates.
               </Text>
           </BottomSheetContent>

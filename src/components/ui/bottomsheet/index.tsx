@@ -13,25 +13,27 @@ import GorhomBottomSheet, {
   BottomSheetView as GorhomBottomSheetView,
 } from '@gorhom/bottom-sheet';
 import { withUniwind } from 'uniwind';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import React, {
   createContext,
   forwardRef,
   useCallback,
   useContext,
+  useEffect,
   useImperativeHandle,
   useMemo,
   useRef,
   useState,
 } from 'react';
 import type { PressableProps, TextInputProps, TextProps } from 'react-native';
-import { Keyboard, Platform, Text, View , Pressable as RNPressable } from 'react-native';
+import { BackHandler, Keyboard, Platform, Text, View, Pressable as RNPressable } from 'react-native';
 
 const bottomSheetBackdropStyle = tva({
   base: 'absolute inset-0 bg-black opacity-50',
 });
 
 const bottomSheetContentStyle = tva({
-  base: 'px-4 gap-2',
+  base: 'gap-4 px-5 pb-safe',
 });
 
 const bottomSheetTriggerStyle = tva({
@@ -39,7 +41,7 @@ const bottomSheetTriggerStyle = tva({
 });
 
 const bottomSheetHandleStyle = tva({
-  base: 'py-3 w-full items-center rounded-t-xl',
+  base: 'w-full items-center rounded-t-[28px] py-3',
 });
 
 const bottomSheetItemStyle = tva({
@@ -50,11 +52,11 @@ const bottomSheetItemTextStyle = tva({
 });
 
 const bottomSheetFooterStyle = tva({
-  base: 'p-4 border-t border-border/90',
+  base: 'border-t border-border/90 bg-background px-5 pb-safe pt-4',
 });
 
 const bottomSheetTextInputStyle = tva({
-  base: 'flex-1 text-foreground text-sm md:text-sm py-1 placeholder:text-muted-foreground  web:outline-none ios:leading-[0px] web:cursor-text  h-9 w-full flex-row items-center rounded-md border border-border dark:bg-input/30 bg-transparent shadow-xs overflow-hidden px-3 gap-2',
+  base: 'h-12 w-full flex-1 flex-row items-center gap-2 overflow-hidden rounded-xl border border-border bg-card px-4 py-1 text-base text-foreground shadow-xs placeholder:text-muted-foreground web:cursor-text web:outline-none ios:leading-[0px]',
 });
 
 type BottomSheetContextValue = {
@@ -204,12 +206,28 @@ export const BottomSheetPortal = ({
   keyboardBlurBehavior = 'restore',
   android_keyboardInputMode = 'adjustPan',
   enableBlurKeyboardOnGesture = true,
+  topInset,
   snapPoints,
   onChange,
   ...props
 }: IBottomSheetPortalProps) => {
-  const { bottomSheetRef, handleSheetChanges, isVisible, currentIndex } =
+  const insets = useSafeAreaInsets();
+  const { bottomSheetRef, handleClose, handleSheetChanges, isVisible, currentIndex } =
     useContext(BottomSheetContext);
+
+  useEffect(() => {
+    if (!isVisible || Platform.OS !== 'android') return;
+
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (Keyboard.isVisible()) {
+        Keyboard.dismiss();
+        return true;
+      }
+      handleClose();
+      return true;
+    });
+    return () => subscription.remove();
+  }, [handleClose, isVisible]);
 
   const memoizedSnapPoints = snapPoints;
 
@@ -235,6 +253,7 @@ export const BottomSheetPortal = ({
         keyboardBlurBehavior={keyboardBlurBehavior}
         android_keyboardInputMode={android_keyboardInputMode}
         enableBlurKeyboardOnGesture={enableBlurKeyboardOnGesture}
+        topInset={topInset ?? insets.top}
         onChange={(idx, position, type) => {
           handleSheetChanges(idx);
           onChange?.(idx, position, type);
@@ -243,9 +262,9 @@ export const BottomSheetPortal = ({
         // @ts-ignore
         className={className ?? ''}
         // @ts-ignore
-        backgroundClassName={`${backgroundClassName ?? ''} bg-background border border-border/90 rounded-xl`}
+        backgroundClassName={`${backgroundClassName ?? ''} rounded-t-[28px] border border-border/90 bg-background`}
         // @ts-ignore
-        handleIndicatorClassName={`${handleIndicatorClassName ?? ''} bg-primary`}
+        handleIndicatorClassName={`${handleIndicatorClassName ?? ''} bg-muted-foreground/60`}
         {...props}
       >
         {props.children}

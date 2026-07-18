@@ -248,12 +248,12 @@ const SelectContent = React.forwardRef<
         <SelectDragIndicator />
       </SelectDragIndicatorWrapper>
       {title || description ? (
-        <View className="w-full px-1 pb-3 pt-2">
+        <View className="w-full px-1 pb-4 pt-1">
           {title ? (
             <Text className="text-xl font-bold text-foreground">{title}</Text>
           ) : null}
           {description ? (
-            <Text className="mt-1 text-sm text-muted-foreground">
+            <Text className="mt-1 text-sm leading-5 text-muted-foreground">
               {description}
             </Text>
           ) : null}

@@ -46,12 +46,13 @@ export function ProfileDetailsSheetContent({
   onSave,
 }: ProfileDetailsSheetContentProps) {
   return (
-    <View className="gap-4 px-2 pb-5">
+    <View className="gap-4">
       <View className="gap-1">
         <Heading size="lg">{sheetTitle}</Heading>
         <Text className="text-sm text-muted-foreground">{sheetDescription}</Text>
       </View>
-      <FormControl isInvalid={!!inputError} isRequired>
+      <View className="gap-4 rounded-lg border border-border bg-card p-4">
+        <FormControl isInvalid={!!inputError} isRequired>
           <FormControlLabel>
             <FormControlLabelText>
             {editingField === "phone"
@@ -93,16 +94,17 @@ export function ProfileDetailsSheetContent({
               <FormControlErrorText>{inputError}</FormControlErrorText>
             </FormControlError>
           ) : null}
-      </FormControl>
-      <Alert className="border-primary/20 bg-primary/10">
-        <AlertText>
-          {editingField === "phone"
-            ? `Current phone number: ${currentPhone}.`
-            : editingField === "email"
-              ? `Current email: ${currentEmail}.`
-              : "Address updates will be available soon."}
-        </AlertText>
-      </Alert>
+        </FormControl>
+        <Alert className="border-primary/20 bg-primary/10">
+          <AlertText>
+            {editingField === "phone"
+              ? `Current phone number: ${currentPhone}.`
+              : editingField === "email"
+                ? `Current email: ${currentEmail}.`
+                : "Address updates will be available soon."}
+          </AlertText>
+        </Alert>
+      </View>
 
       <View
         style={{

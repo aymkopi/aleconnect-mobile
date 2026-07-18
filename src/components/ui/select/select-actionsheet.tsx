@@ -52,11 +52,11 @@ export const UIActionsheet = createActionsheet({
 const actionsheetStyle = tva({ base: 'w-full h-full web:pointer-events-none' });
 
 const actionsheetContentStyle = tva({
-  base: 'mt-auto items-stretch rounded-t-3xl border-t border-border bg-background px-4 pb-safe pt-2 shadow-lg web:pointer-events-auto web:select-none',
+  base: 'mt-auto items-stretch rounded-t-[28px] border border-border bg-background px-5 pb-safe pt-2 shadow-lg web:pointer-events-auto web:select-none',
 });
 
 const actionsheetItemStyle = tva({
-  base: 'min-h-14 w-full flex-row items-center border-b border-border px-3 py-3.5 last:border-b-0 data-[disabled=true]:opacity-40 data-[disabled=true]:web:pointer-events-auto data-[disabled=true]:web:cursor-not-allowed hover:bg-accent/40 active:bg-accent/50 data-[focus=true]:bg-accent/20 web:data-[focus-visible=true]:bg-accent/40 data-[checked=true]:bg-accent/80',
+  base: 'min-h-14 w-full flex-row items-center border-b border-border px-4 py-3.5 last:border-b-0 data-[disabled=true]:opacity-40 data-[disabled=true]:web:pointer-events-auto data-[disabled=true]:web:cursor-not-allowed hover:bg-accent/10 active:bg-accent/15 data-[focus=true]:bg-accent/10 web:data-[focus-visible=true]:bg-accent/15 data-[checked=true]:bg-primary/15',
 });
 
 const actionsheetItemTextStyle = tva({
@@ -94,11 +94,11 @@ const actionsheetItemTextStyle = tva({
 });
 
 const actionsheetDragIndicatorStyle = tva({
-  base: 'w-16 h-1 bg-muted-foreground rounded-full',
+  base: 'h-1 w-14 rounded-full bg-muted-foreground/60',
 });
 
 const actionsheetDragIndicatorWrapperStyle = tva({
-  base: 'w-full py-1 items-center',
+  base: 'w-full items-center pb-2 pt-1',
 });
 
 const actionsheetBackdropStyle = tva({
@@ -106,7 +106,7 @@ const actionsheetBackdropStyle = tva({
 });
 
 const actionsheetScrollViewStyle = tva({
-  base: 'mb-2 h-auto w-full rounded-xl border border-border',
+  base: 'mb-3 h-auto w-full overflow-hidden rounded-xl border border-border bg-card',
 });
 
 const actionsheetVirtualizedListStyle = tva({
