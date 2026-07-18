@@ -1,4 +1,5 @@
 import { appScrollableBottomPadding } from "@/components/floating-app-bar";
+import { Alert, AlertText } from "@/components/ui/alert";
 import {
   Avatar,
   AvatarFallbackText,
@@ -64,34 +65,6 @@ type CategoryVisual = {
   color: string;
   soft: string;
 };
-
-const fallbackCategories: HotlineCategory[] = [
-  {
-    id: "electricity",
-    name: "Electricity",
-    description: "Power interruption, electrical hazards, and ALECO support.",
-    agencies: [
-      {
-        id: "aleco",
-        categoryId: "electricity",
-        name: "Albay Electric Cooperative Inc.",
-        description: "Main Branch",
-        address: "Albay",
-        logoUrl: null,
-        websiteLink: "https://web.alecoinc.com.ph/",
-        contacts: [
-          { id: "globe", number: "09123456789", label: "Globe", type: "mobile" },
-          { id: "smart", number: "09876543210", label: "Smart", type: "mobile" },
-        ],
-      },
-    ],
-  },
-  { id: "medical", name: "Medical", description: null, agencies: [] },
-  { id: "drrmo", name: "DRRMO", description: null, agencies: [] },
-  { id: "public-safety", name: "Public Safety", description: null, agencies: [] },
-  { id: "fire-rescue", name: "Fire & Rescue", description: null, agencies: [] },
-  { id: "water", name: "Water Supply", description: null, agencies: [] },
-];
 
 const visuals: [RegExp, CategoryVisual][] = [
   [/electric|power|aleco/i, { icon: Zap, color: "#0ea5e9", soft: "#e0f2fe" }],
@@ -412,9 +385,10 @@ export default function HotlinesRoute() {
   const [accentColor] = useAppColors(["accent"]);
   const categorySheetRef = useRef<BottomSheetRef>(null);
   const allSheetRef = useRef<BottomSheetRef>(null);
-  const [categories, setCategories] = useState<HotlineCategory[]>(fallbackCategories);
+  const [categories, setCategories] = useState<HotlineCategory[]>([]);
   const [query, setQuery] = useState("");
   const [sheetQuery, setSheetQuery] = useState("");
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
@@ -424,13 +398,17 @@ export default function HotlinesRoute() {
     if (options?.force) setIsRefreshing(true);
     try {
       const data = await fetchHotlines(options);
-      if (data.categories.length) {
-        setCategories(data.categories);
-        setActiveCategoryId((current) => current ?? data.categories[0]?.id ?? null);
-      }
+      setCategories(data.categories);
+      setActiveCategoryId((current) =>
+        data.categories.some((category) => category.id === current)
+          ? current
+          : data.categories[0]?.id ?? null,
+      );
+      setLoadError(null);
     } catch {
-      setCategories((current) => (current.length ? current : fallbackCategories));
-      setActiveCategoryId((current) => current ?? fallbackCategories[0]?.id ?? null);
+      setLoadError(
+        "Hotline contacts could not be loaded. Check your connection and try again.",
+      );
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -446,8 +424,7 @@ export default function HotlinesRoute() {
   const aleco =
     categories
       .flatMap((category) => category.agencies)
-      .find((agency) => /albay electric|aleco/i.test(agency.name)) ??
-    fallbackCategories[0].agencies[0];
+      .find((agency) => /albay electric|aleco/i.test(agency.name));
 
   const selectedCategory = categories.find((category) => category.id === selectedCategoryId) ?? null;
   const activeCategory = categories.find((category) => category.id === activeCategoryId) ?? categories[0];
@@ -542,11 +519,27 @@ export default function HotlinesRoute() {
               </View>
             </View>
 
-            <AgencyCard agency={aleco} />
+            {loadError ? (
+              <Alert variant="destructive" className="items-center p-4">
+                <View className="flex-1 gap-1">
+                  <AlertText className="font-bold">Directory unavailable</AlertText>
+                  <AlertText>{loadError}</AlertText>
+                </View>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onPress={() => void loadHotlines({ force: true })}
+                >
+                  <ButtonText>Retry</ButtonText>
+                </Button>
+              </Alert>
+            ) : null}
+
+            {aleco ? <AgencyCard agency={aleco} /> : null}
 
             <HotlineResults categories={categories} query={query} />
 
-            <View className="gap-2">
+            {categories.length ? <View className="gap-2">
               <View className="flex-row items-center justify-between">
                 <Text className="ml-2 text-sm font-semibold text-muted-foreground">
                   Categories
@@ -568,7 +561,11 @@ export default function HotlinesRoute() {
                   {row.length === 1 ? <View className="flex-1" /> : null}
                 </View>
               ))}
-            </View>
+            </View> : !loadError ? (
+              <Alert className="p-4">
+                <AlertText>No hotline contacts are available right now.</AlertText>
+              </Alert>
+            ) : null}
           </>
         ) : null}
       </ScrollView>
