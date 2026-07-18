@@ -27,6 +27,7 @@ import {
 } from "lucide-react-native";
 import { useCallback, useMemo, useState } from "react";
 import {
+  BackHandler,
   RefreshControl,
   ScrollView,
   View,
@@ -261,6 +262,15 @@ export default function NotificationsRoute() {
     setIsLoading(false);
   }, [session]);
 
+  const handleBack = useCallback(() => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+
+    router.replace("/home");
+  }, [router]);
+
   useFocusEffect(
     useCallback(() => {
       void load().catch((error) => {
@@ -271,7 +281,17 @@ export default function NotificationsRoute() {
           description: error instanceof Error ? error.message : "Try again.",
         });
       });
-    }, [load]),
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        () => {
+          handleBack();
+          return true;
+        },
+      );
+
+      return () => subscription.remove();
+    }, [handleBack, load]),
   );
 
   const visibleNotifications = useMemo(() => {
@@ -372,7 +392,7 @@ export default function NotificationsRoute() {
           size="icon"
           variant="ghost"
           accessibilityLabel="Go back"
-          onPress={() => (router.canGoBack() ? router.back() : router.replace("/home"))}
+          onPress={handleBack}
         >
           <ButtonIcon as={ChevronLeft} height={22} width={22} />
         </Button>
