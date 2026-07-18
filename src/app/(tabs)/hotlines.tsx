@@ -572,9 +572,6 @@ export default function HotlinesRoute() {
           snapPoints={[categorySnapHeight]}
           enableDynamicSizing={false}
           enableOverDrag={false}
-          keyboardBehavior="interactive"
-          keyboardBlurBehavior="restore"
-          android_keyboardInputMode="adjustResize"
           backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
         >
           <BottomSheetContent className="h-full">
@@ -627,9 +624,6 @@ export default function HotlinesRoute() {
           snapPoints={["92%"]}
           enableDynamicSizing={false}
           enableOverDrag={false}
-          keyboardBehavior="interactive"
-          keyboardBlurBehavior="restore"
-          android_keyboardInputMode="adjustResize"
           backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
         >
           <BottomSheetContent className="h-full">

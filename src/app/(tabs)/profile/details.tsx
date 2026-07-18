@@ -512,9 +512,6 @@ export default function ProfileDetailsRoute() {
           backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
           enableDynamicSizing
           maxDynamicContentSize={440}
-          keyboardBehavior="interactive"
-          keyboardBlurBehavior="restore"
-          android_keyboardInputMode="adjustResize"
         >
           <BottomSheetContent>
             <ProfileDetailsSheetContent

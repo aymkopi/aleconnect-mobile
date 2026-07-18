@@ -200,6 +200,10 @@ export const BottomSheetPortal = ({
   handleIndicatorClassName,
   enablePanDownToClose = true,
   enableDynamicSizing = false,
+  keyboardBehavior = 'fillParent',
+  keyboardBlurBehavior = 'restore',
+  android_keyboardInputMode = 'adjustPan',
+  enableBlurKeyboardOnGesture = true,
   snapPoints,
   onChange,
   ...props
@@ -227,6 +231,10 @@ export const BottomSheetPortal = ({
         snapPoints={memoizedSnapPoints}
         index={validIndex}
         enableDynamicSizing={enableDynamicSizing}
+        keyboardBehavior={keyboardBehavior}
+        keyboardBlurBehavior={keyboardBlurBehavior}
+        android_keyboardInputMode={android_keyboardInputMode}
+        enableBlurKeyboardOnGesture={enableBlurKeyboardOnGesture}
         onChange={(idx, position, type) => {
           handleSheetChanges(idx);
           onChange?.(idx, position, type);
