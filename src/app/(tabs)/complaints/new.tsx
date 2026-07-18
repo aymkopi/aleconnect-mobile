@@ -98,7 +98,7 @@ import { useAppColors } from "@/hooks/use-app-colors";
 const minEvidencePhotos = 1;
 const maxEvidencePhotos = 3;
 const albayCenter = { latitude: 13.1775, longitude: 123.528 };
-const albayMapStyle = `${aleconnectApiBaseUrl}/styles/map-bright.json`;
+const albayMapStyle = `${aleconnectApiBaseUrl}/styles/map-bright.json?v=2`;
 const albayBounds = {
   minLatitude: 12.9,
   maxLatitude: 13.55,
