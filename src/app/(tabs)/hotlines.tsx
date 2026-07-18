@@ -22,6 +22,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import { statusBarHeight } from "@/constants";
 import { useAppColors } from "@/hooks/use-app-colors";
+import { useUnreadNotificationCount } from "@/hooks/use-unread-notification-count";
 import {
   fetchHotlines,
   type HotlineAgency,
@@ -383,6 +384,7 @@ export default function HotlinesRoute() {
   const { width, height } = useWindowDimensions();
   const bottomPadding = appScrollableBottomPadding(insets.bottom);
   const [accentColor] = useAppColors(["accent"]);
+  const unreadCount = useUnreadNotificationCount();
   const categorySheetRef = useRef<BottomSheetRef>(null);
   const allSheetRef = useRef<BottomSheetRef>(null);
   const [categories, setCategories] = useState<HotlineCategory[]>([]);
@@ -489,6 +491,13 @@ export default function HotlinesRoute() {
             onPress={() => router.push("/notifications")}
           >
             <ButtonIcon as={Bell} height={20} width={20} />
+            {unreadCount > 0 ? (
+              <View className="absolute -right-1 -top-1 min-h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1">
+                <Text className="text-xs font-bold text-white">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </Text>
+              </View>
+            ) : null}
           </Button>
         </View>
 

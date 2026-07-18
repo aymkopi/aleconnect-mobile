@@ -15,6 +15,7 @@ import {
   fetchComplaintReports,
 } from "@/services/complaints";
 import { useAppColors } from "@/hooks/use-app-colors";
+import { useUnreadNotificationCount } from "@/hooks/use-unread-notification-count";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Bell, CalendarDays, ChevronRight, FileText, Plus } from "lucide-react-native";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -62,6 +63,7 @@ export default function ComplaintsRoute() {
   const hasLoadedRef = useRef(false);
   const bottomPadding = appScrollableBottomPadding(insets.bottom);
   const [accentColor] = useAppColors(["accent"]);
+  const unreadCount = useUnreadNotificationCount();
   const [meta, setMeta] = useState<ComplaintMeta>(emptyComplaintMeta);
   const [reports, setReports] = useState<Report[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -165,6 +167,13 @@ export default function ComplaintsRoute() {
               onPress={() => router.push("/notifications")}
             >
               <ButtonIcon as={Bell} className="text-white" height={21} width={21} />
+              {unreadCount > 0 ? (
+                <View className="absolute -right-1 -top-1 min-h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1">
+                  <Text className="text-xs font-bold text-white">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </Text>
+                </View>
+              ) : null}
             </Button>
           </View>
 
