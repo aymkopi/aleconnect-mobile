@@ -17,6 +17,7 @@ import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { CalendarClock, ChevronLeft, FileText, Image as ImageIcon, MapPin } from "lucide-react-native";
 import { useCallback, useRef, useState } from "react";
 import {
+  BackHandler,
   Image,
   RefreshControl,
   ScrollView,
@@ -132,11 +133,30 @@ export default function ComplaintDetailRoute() {
     [id],
   );
 
+  const handleBack = useCallback(() => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+
+    router.replace("/complaints");
+  }, [router]);
+
   useFocusEffect(
     useCallback(() => {
       scrollRef.current?.scrollTo({ y: 0, animated: false });
       void loadReport();
-    }, [loadReport]),
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        () => {
+          handleBack();
+          return true;
+        },
+      );
+
+      return () => subscription.remove();
+    }, [handleBack, loadReport]),
   );
 
   const address = report
@@ -193,9 +213,7 @@ export default function ComplaintDetailRoute() {
           <Button
             size="icon"
             variant="secondary"
-            onPress={() =>
-              router.canGoBack() ? router.back() : router.replace("/complaints")
-            }
+            onPress={handleBack}
             accessibilityLabel="Back to reports"
           >
             <ButtonIcon as={ChevronLeft} height={21} width={21} />
