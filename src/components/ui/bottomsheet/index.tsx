@@ -14,6 +14,11 @@ import GorhomBottomSheet, {
 } from '@gorhom/bottom-sheet';
 import { withUniwind } from 'uniwind';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { X, type LucideIcon } from 'lucide-react-native';
+import { useAppColors } from '@/hooks/use-app-colors';
+import { Button, ButtonIcon } from '@/components/ui/button';
+import { Heading } from '@/components/ui/heading';
+import { Text as AppText } from '@/components/ui/text';
 import React, {
   createContext,
   forwardRef,
@@ -33,7 +38,7 @@ const bottomSheetBackdropStyle = tva({
 });
 
 const bottomSheetContentStyle = tva({
-  base: 'gap-4 px-5 pb-safe pt-1',
+  base: 'gap-4 px-5 pb-safe pt-0',
 });
 
 const bottomSheetTriggerStyle = tva({
@@ -397,6 +402,58 @@ export const BottomSheetContent = ({
     </StyledGorhomBottomSheetView>
   );
 };
+
+type BottomSheetHeaderProps = {
+  title: string;
+  description?: string;
+  icon?: LucideIcon;
+  showCloseButton?: boolean;
+  closeAccessibilityLabel?: string;
+  className?: string;
+};
+
+export function BottomSheetHeader({
+  title,
+  description,
+  icon: HeaderIcon,
+  showCloseButton = true,
+  closeAccessibilityLabel = 'Close sheet',
+  className = '',
+}: BottomSheetHeaderProps) {
+  const { handleClose } = useContext(BottomSheetContext);
+  const [accentColor] = useAppColors(['accent']);
+
+  return (
+    <View
+      className={`flex-row items-start gap-3 border-b border-border/80 pb-4 ${className}`}
+    >
+      {HeaderIcon ? (
+        <View className="h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-accent/20 bg-accent/10">
+          <HeaderIcon size={20} color={accentColor} />
+        </View>
+      ) : null}
+      <View className="min-w-0 flex-1 gap-1">
+        <Heading size="lg">{title}</Heading>
+        {description ? (
+          <AppText className="text-sm leading-5 text-muted-foreground">
+            {description}
+          </AppText>
+        ) : null}
+      </View>
+      {showCloseButton ? (
+        <Button
+          size="icon"
+          variant="secondary"
+          className="shrink-0"
+          onPress={handleClose}
+          accessibilityLabel={closeAccessibilityLabel}
+        >
+          <ButtonIcon as={X} height={16} width={16} />
+        </Button>
+      ) : null}
+    </View>
+  );
+}
 
 type IBottomSheetFooterProps = React.ComponentProps<
   typeof GorhomBottomSheetFooter

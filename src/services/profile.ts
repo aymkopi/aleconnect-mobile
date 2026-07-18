@@ -72,6 +72,16 @@ export async function fetchCurrentConsumerProfileView(): Promise<ConsumerProfile
   return toConsumerProfileView(toProfileRow(profile));
 }
 
+export async function updateCurrentConsumerProfile(
+  field: "phone" | "email" | "address",
+  value: string,
+): Promise<void> {
+  await apiRequest<{ updated: true }>("/api/mobile/profile", {
+    method: "PATCH",
+    body: JSON.stringify({ field, value }),
+  });
+}
+
 export type UploadProfileAvatarInput = {
   imageBytes: ArrayBuffer;
   contentType: string;

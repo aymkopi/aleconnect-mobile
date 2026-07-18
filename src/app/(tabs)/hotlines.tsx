@@ -8,6 +8,7 @@ import {
   BottomSheet,
   BottomSheetBackdrop,
   BottomSheetContent,
+  BottomSheetHeader,
   BottomSheetPortal,
   BottomSheetScrollView,
   BottomSheetTextInput,
@@ -575,23 +576,12 @@ export default function HotlinesRoute() {
           backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
         >
           <BottomSheetContent className="h-full">
-            <View className="flex-row items-start justify-between gap-3">
-              <View className="flex-1">
-                <Heading size="lg">{selectedCategory?.name ?? "Hotlines"}</Heading>
-                <Text className="text-sm text-muted-foreground">
-                  {selectedCategory?.description ?? "Search contacts in this category."}
-                </Text>
-              </View>
-              <Button
-                size="icon"
-                variant="secondary"
-                onPress={() => categorySheetRef.current?.close()}
-                accessibilityLabel="Close hotlines"
-              >
-                <ButtonIcon as={X} height={16} width={16} />
-              </Button>
-            </View>
-            <View className="mt-4">
+            <BottomSheetHeader
+              title={selectedCategory?.name ?? "Hotlines"}
+              description={selectedCategory?.description ?? "Search contacts in this category."}
+              closeAccessibilityLabel="Close hotlines"
+            />
+            <View>
               <SheetSearchInput
                 value={sheetQuery}
                 onChangeText={setSheetQuery}
@@ -627,23 +617,12 @@ export default function HotlinesRoute() {
           backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
         >
           <BottomSheetContent className="h-full">
-            <View className="flex-row items-start justify-between gap-3">
-              <View className="flex-1">
-                <Heading size="lg">All hotlines</Heading>
-                <Text className="text-sm text-muted-foreground">
-                  Browse agencies by category.
-                </Text>
-              </View>
-              <Button
-                size="icon"
-                variant="secondary"
-                onPress={() => allSheetRef.current?.close()}
-                accessibilityLabel="Close all hotlines"
-              >
-                <ButtonIcon as={X} height={16} width={16} />
-              </Button>
-            </View>
-            <View className="mt-4 gap-3">
+            <BottomSheetHeader
+              title="All hotlines"
+              description="Browse agencies by category."
+              closeAccessibilityLabel="Close all hotlines"
+            />
+            <View className="gap-3">
               <SheetSearchInput
                 value={sheetQuery}
                 onChangeText={setSheetQuery}

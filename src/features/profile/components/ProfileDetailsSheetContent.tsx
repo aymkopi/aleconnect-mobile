@@ -1,5 +1,8 @@
 import { Alert, AlertText } from "@/components/ui/alert";
-import { BottomSheetTextInput } from "@/components/ui/bottomsheet";
+import {
+  BottomSheetHeader,
+  BottomSheetTextInput,
+} from "@/components/ui/bottomsheet";
 import { Button, ButtonText } from "@/components/ui/button";
 import {
   FormControl,
@@ -8,8 +11,6 @@ import {
   FormControlLabel,
   FormControlLabelText,
 } from "@/components/ui/form-control";
-import { Heading } from "@/components/ui/heading";
-import { Text } from "@/components/ui/text";
 import { type LucideIcon } from "lucide-react-native";
 import React from "react";
 import { View } from "react-native";
@@ -25,6 +26,7 @@ export type ProfileDetailsSheetContentProps = {
   inputError: string | null;
   currentPhone: string;
   currentEmail: string;
+  currentAddress: string;
   isUpdating: boolean;
   onChangeInput: (nextValue: string) => void;
   onCancel: () => void;
@@ -40,6 +42,7 @@ export function ProfileDetailsSheetContent({
   inputError,
   currentPhone,
   currentEmail,
+  currentAddress,
   isUpdating,
   onChangeInput,
   onCancel,
@@ -47,11 +50,13 @@ export function ProfileDetailsSheetContent({
 }: ProfileDetailsSheetContentProps) {
   return (
     <View className="gap-4">
-      <View className="gap-1">
-        <Heading size="lg">{sheetTitle}</Heading>
-        <Text className="text-sm text-muted-foreground">{sheetDescription}</Text>
-      </View>
-      <View className="gap-4 rounded-lg border border-border bg-card p-4">
+      <BottomSheetHeader
+        title={sheetTitle}
+        description={sheetDescription}
+        icon={SheetIcon}
+        closeAccessibilityLabel={`Close ${sheetTitle.toLowerCase()}`}
+      />
+      <View className="gap-4 rounded-lg border border-border/90 bg-card p-4">
         <FormControl isInvalid={!!inputError} isRequired>
           <FormControlLabel>
             <FormControlLabelText>
@@ -59,30 +64,30 @@ export function ProfileDetailsSheetContent({
               ? "New phone number"
               : editingField === "email"
                 ? "New email address"
-                : "New address"}
+                : "New purok or street"}
             </FormControlLabelText>
           </FormControlLabel>
           <View className="w-full flex-row items-center">
             <BottomSheetTextInput
-              className="h-12 flex-1 rounded-xl pl-10"
+              className="h-12 flex-1 rounded-lg bg-background pl-10"
               value={inputValue}
               onChangeText={onChangeInput}
               keyboardType={editingField === "phone" ? "number-pad" : "default"}
-              autoCapitalize="none"
+              autoCapitalize={editingField === "address" ? "words" : "none"}
               autoCorrect={false}
               maxLength={
                 editingField === "phone"
                   ? 11
                   : editingField === "email"
                     ? 50
-                    : undefined
+                    : 100
               }
               placeholder={
                 editingField === "phone"
                   ? "Enter new phone number"
                   : editingField === "email"
                     ? "Enter new email"
-                    : "Address update coming soon"
+                    : "Enter purok or street"
               }
             />
             <View className="absolute left-3.5" style={{ pointerEvents: "none" }}>
@@ -95,13 +100,13 @@ export function ProfileDetailsSheetContent({
             </FormControlError>
           ) : null}
         </FormControl>
-        <Alert className="border-primary/20 bg-primary/10">
+        <Alert className="border-accent/20 bg-accent/10 px-3 py-3">
           <AlertText>
             {editingField === "phone"
               ? `Current phone number: ${currentPhone}.`
               : editingField === "email"
                 ? `Current email: ${currentEmail}.`
-                : "Address updates will be available soon."}
+                : `Current address: ${currentAddress}.`}
           </AlertText>
         </Alert>
       </View>

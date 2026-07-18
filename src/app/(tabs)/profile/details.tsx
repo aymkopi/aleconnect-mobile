@@ -47,7 +47,10 @@ import {
   ProfileDetailsSheetContent,
 } from "@/features/profile/components/ProfileDetailsSheetContent";
 
-import { uploadCurrentUserAvatar } from "@/services/profile";
+import {
+  updateCurrentConsumerProfile,
+  uploadCurrentUserAvatar,
+} from "@/services/profile";
 import { useConsumerProfileContext } from "../../../context/consumer-profile-context";
 
 type FeedbackMessage = {
@@ -70,9 +73,6 @@ export default function ProfileDetailsRoute() {
   const [inputValue, setInputValue] = useState("");
   const [inputError, setInputError] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [localPhone, setLocalPhone] = useState<string | null>(null);
-  const [localEmail, setLocalEmail] = useState<string | null>(null);
-  const [localAddress, setLocalAddress] = useState<string | null>(null);
   const [avatarPhoto, setAvatarPhoto] =
     useState<ImagePicker.ImagePickerAsset | null>(null);
   const [avatarUri, setAvatarUri] = useState<string | null>(
@@ -187,10 +187,9 @@ export default function ProfileDetailsRoute() {
   };
 
   const displayName = profile?.fullName ?? "Profile not linked";
-  const displayPhone = localPhone ?? profile?.contactNum ?? "No phone on file";
-  const displayEmail = localEmail ?? profile?.email ?? "No email on file";
+  const displayPhone = profile?.contactNum ?? "No phone on file";
+  const displayEmail = profile?.email ?? "No email on file";
   const displayAddress =
-    localAddress ??
     profile?.fullAddress ??
     ([profile?.purokOrStreet, profile?.barangay, profile?.municipality]
       .filter(Boolean)
@@ -257,7 +256,15 @@ export default function ProfileDetailsRoute() {
       return null;
     }
 
-    return "Address updates will be available soon.";
+    if (trimmed.length > 100) {
+      return "Purok or street must be at most 100 characters.";
+    }
+
+    if (profile?.purokOrStreet?.trim().toLowerCase() === trimmed.toLowerCase()) {
+      return "New purok or street cannot be the same as your current address.";
+    }
+
+    return null;
   };
 
   const handleSaveUpdate = async () => {
@@ -275,19 +282,21 @@ export default function ProfileDetailsRoute() {
     setInputError(null);
 
     try {
-      if (editingField === "phone") {
-        setLocalPhone(inputValue.trim().replace(/\D/g, ""));
-      }
-
-      if (editingField === "email") {
-        setLocalEmail(inputValue.trim());
-      }
-
-      if (editingField === "address") {
-        setLocalAddress(inputValue.trim());
-      }
-
+      const value = editingField === "phone"
+        ? inputValue.trim().replace(/\D/g, "")
+        : inputValue.trim();
+      await updateCurrentConsumerProfile(editingField, value);
+      await reload({ forceNetwork: true });
       closeEditSheet();
+      setFeedback({
+        status: "success",
+        title: "Profile updated",
+        description: `${sheetTitle.replace("Update ", "")} was saved.`,
+      });
+    } catch (nextError) {
+      setInputError(
+        nextError instanceof Error ? nextError.message : "Profile update failed.",
+      );
     } finally {
       setIsUpdating(false);
     }
@@ -312,7 +321,7 @@ export default function ProfileDetailsRoute() {
       ? "Enter your new phone number to update your account."
       : editingField === "email"
         ? "Enter your new email address to update your account."
-        : "Address update form preview.";
+        : "Update the purok or street saved to your account.";
 
   const SheetIcon = sheetIcon;
 
@@ -523,6 +532,7 @@ export default function ProfileDetailsRoute() {
               inputError={inputError}
               currentPhone={profile?.contactNum ?? "No phone on file"}
               currentEmail={profile?.email ?? "No email on file"}
+              currentAddress={displayAddress}
               isUpdating={isUpdating}
               onChangeInput={(nextValue) => {
                 setInputError(null);
