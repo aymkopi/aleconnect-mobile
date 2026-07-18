@@ -75,13 +75,25 @@ export function configurePushNotificationHandler(): void {
   });
 }
 
-export async function getLastNotificationResponseAsync(): Promise<Notifications.NotificationResponse | null> {
+export function clearLastNotificationResponse(): void {
+  if (Platform.OS === "web") return;
+
+  try {
+    Notifications.clearLastNotificationResponse();
+  } catch (error) {
+    console.warn("Failed to clear last notification response", error);
+  }
+}
+
+export async function consumeLastNotificationResponseAsync(): Promise<Notifications.NotificationResponse | null> {
   if (Platform.OS === "web") {
     return null;
   }
 
   try {
-    return await Notifications.getLastNotificationResponse();
+    const response = Notifications.getLastNotificationResponse();
+    if (response) clearLastNotificationResponse();
+    return response;
   } catch (error) {
     console.warn("Failed to get last notification response", error);
     return null;

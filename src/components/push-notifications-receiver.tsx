@@ -2,8 +2,9 @@ import * as Notifications from "expo-notifications";
 import { useEffect } from "react";
 
 import {
+    clearLastNotificationResponse,
     configurePushNotificationHandler,
-    getLastNotificationResponseAsync,
+    consumeLastNotificationResponseAsync,
     registerForPushNotificationsAsync,
 } from "@/services/push-notifications";
 
@@ -31,7 +32,7 @@ export function PushNotificationsReceiver({
       }
     });
 
-    void getLastNotificationResponseAsync().then((response) => {
+    void consumeLastNotificationResponseAsync().then((response) => {
       if (isMounted && response) {
         onNotificationResponseReceived?.(response);
       }
@@ -44,6 +45,7 @@ export function PushNotificationsReceiver({
 
     const notificationResponseSubscription =
       Notifications.addNotificationResponseReceivedListener((response) => {
+        clearLastNotificationResponse();
         onNotificationResponseReceived?.(response);
       });
 
