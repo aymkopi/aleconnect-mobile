@@ -15,7 +15,7 @@ import {
   markNotificationsRead,
   type MobileNotification,
 } from "@/services/notifications";
-import { useFocusEffect, useRouter } from "expo-router";
+import { Redirect, useFocusEffect, useRouter } from "expo-router";
 import {
   CheckCheck,
   ChevronLeft,
@@ -341,11 +341,7 @@ export default function NotificationsRoute() {
   };
 
   if (!isSessionLoading && !session) {
-    return (
-      <View className="flex-1 justify-center bg-background px-5" style={{ width }}>
-        <EmptyState onExplore={() => router.replace("/home")} />
-      </View>
-    );
+    return <Redirect href="/sign-in" />;
   }
 
   return (

@@ -22,6 +22,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import { statusBarHeight } from "@/constants";
 import { useAppColors } from "@/hooks/use-app-colors";
+import { useAuthSession } from "@/hooks/use-auth-session";
 import { useUnreadNotificationCount } from "@/hooks/use-unread-notification-count";
 import {
   fetchHotlines,
@@ -380,6 +381,7 @@ function HotlineSkeleton() {
 
 export default function HotlinesRoute() {
   const router = useRouter();
+  const { session } = useAuthSession();
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   const bottomPadding = appScrollableBottomPadding(insets.bottom);
@@ -488,7 +490,9 @@ export default function HotlinesRoute() {
             size="icon"
             variant="secondary"
             accessibilityLabel="Notifications"
-            onPress={() => router.push("/notifications")}
+            onPress={() =>
+              router.push(session ? "/notifications" : "/sign-in")
+            }
           >
             <ButtonIcon as={Bell} height={20} width={20} />
             {unreadCount > 0 ? (
