@@ -13,7 +13,6 @@ import {
   CheckboxIndicator,
   CheckboxLabel,
 } from "@/components/ui/checkbox";
-import { Divider } from "@/components/ui/divider";
 import {
   FormControl,
   FormControlError,
@@ -36,8 +35,6 @@ import {
   Select,
   SelectBackdrop,
   SelectContent,
-  SelectDragIndicator,
-  SelectDragIndicatorWrapper,
   SelectIcon,
   SelectInput,
   SelectItem,
@@ -78,7 +75,6 @@ import {
   Navigation,
 } from "lucide-react-native";
 import {
-  Fragment,
   useCallback,
   useEffect,
   useRef,
@@ -174,6 +170,7 @@ function SelectField({
   label,
   value,
   placeholder,
+  description,
   options,
   onChange,
   isRequired,
@@ -184,6 +181,7 @@ function SelectField({
   label: string;
   value: string;
   placeholder: string;
+  description: string;
   options: SelectOption[];
   onChange: (value: string) => void;
   isRequired?: boolean;
@@ -191,6 +189,10 @@ function SelectField({
   error?: string;
   isDisabled?: boolean;
 }) {
+  const selectedOptionLabel = options.find(
+    (option) => option.value === value,
+  )?.label;
+
   return (
     <FormControl isRequired={isRequired} isInvalid={isInvalid} isDisabled={isDisabled}>
       <FormControlLabel>
@@ -199,25 +201,28 @@ function SelectField({
       <Select
         isDisabled={isDisabled}
         isInvalid={isInvalid}
+        selectedLabel={selectedOptionLabel}
         selectedValue={value}
         onValueChange={(nextValue) => nextValue && onChange(nextValue)}
       >
         <SelectTrigger className="h-12 rounded-xl">
-          <SelectInput placeholder={placeholder} />
+          <SelectInput placeholder={placeholder} value={selectedOptionLabel} />
           <SelectIcon as={ChevronDown} className="mr-3" />
         </SelectTrigger>
         <SelectPortal>
           <SelectBackdrop />
-          <SelectContent className="max-h-[50vh]">
-            <SelectDragIndicatorWrapper>
-              <SelectDragIndicator />
-            </SelectDragIndicatorWrapper>
+          <SelectContent
+            className="max-h-[50vh]"
+            title={label}
+            description={description}
+          >
             <SelectScrollView nestedScrollEnabled showsVerticalScrollIndicator>
-              {options.map((option, index) => (
-                <Fragment key={option.value}>
-                  {index > 0 ? <Divider /> : null}
-                  <SelectItem label={option.label} value={option.value} />
-                </Fragment>
+              {options.map((option) => (
+                <SelectItem
+                  key={option.value}
+                  label={option.label}
+                  value={option.value}
+                />
               ))}
             </SelectScrollView>
           </SelectContent>
@@ -902,6 +907,7 @@ export default function NewComplaintRoute() {
               label="Complaint type"
               value={form.typeId}
               placeholder="Select complaint type"
+              description={`Choose the issue type under ${selectedCategory?.title ?? "this category"}.`}
               options={reportTypeOptions}
               onChange={(value) => updateForm("typeId", value)}
               isInvalid={showErrors && !form.typeId}
@@ -952,6 +958,7 @@ export default function NewComplaintRoute() {
                   label="Municipality"
                   value={form.municipalityCode}
                   placeholder="Select municipality"
+                  description="Choose the municipality where the issue is located."
                   options={municipalityOptions}
                   isDisabled={form.useHomeAddress}
                   onChange={(value) => {
@@ -978,6 +985,7 @@ export default function NewComplaintRoute() {
               label="Barangay"
               value={form.barangayPsgc}
               placeholder="Select barangay"
+              description="Choose a barangay within the selected municipality."
               options={barangayOptions}
               onChange={(value) => updateForm("barangayPsgc", value)}
               isDisabled={form.useHomeAddress || !form.municipalityCode}

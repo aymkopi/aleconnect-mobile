@@ -24,7 +24,7 @@ import {
   ActionsheetSectionList,
   ActionsheetSectionHeaderText,
 } from './select-actionsheet';
-import { Pressable, View, TextInput } from 'react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 
 const SelectTriggerWrapper = React.forwardRef<
   React.ComponentRef<typeof Pressable>,
@@ -231,15 +231,46 @@ SelectIcon.displayName = 'SelectIcon';
 // Actionsheet Components
 const SelectPortal = UISelect.Portal;
 const SelectBackdrop = UISelect.Backdrop;
-const SelectContent = UISelect.Content;
 const SelectDragIndicator = UISelect.DragIndicator;
 const SelectDragIndicatorWrapper = UISelect.DragIndicatorWrapper;
+type ISelectContentProps = React.ComponentProps<typeof UISelect.Content> & {
+  title?: string;
+  description?: string;
+};
+
+const SelectContent = React.forwardRef<
+  React.ComponentRef<typeof UISelect.Content>,
+  ISelectContentProps
+>(function SelectContent({ title, description, children, ...props }, ref) {
+  return (
+    <UISelect.Content ref={ref} {...props}>
+      <SelectDragIndicatorWrapper>
+        <SelectDragIndicator />
+      </SelectDragIndicatorWrapper>
+      {title || description ? (
+        <View className="w-full px-1 pb-3 pt-2">
+          {title ? (
+            <Text className="text-xl font-bold text-foreground">{title}</Text>
+          ) : null}
+          {description ? (
+            <Text className="mt-1 text-sm text-muted-foreground">
+              {description}
+            </Text>
+          ) : null}
+        </View>
+      ) : null}
+      {children}
+    </UISelect.Content>
+  );
+});
 const SelectItem = UISelect.Item;
 const SelectScrollView = UISelect.ScrollView;
 const SelectVirtualizedList = UISelect.VirtualizedList;
 const SelectFlatList = UISelect.FlatList;
 const SelectSectionList = UISelect.SectionList;
 const SelectSectionHeaderText = UISelect.SectionHeaderText;
+
+SelectContent.displayName = 'SelectContent';
 
 export {
   Select,

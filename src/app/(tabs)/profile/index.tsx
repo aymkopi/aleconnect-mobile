@@ -11,12 +11,11 @@ import {
   Select,
   SelectBackdrop,
   SelectContent,
-  SelectDragIndicator,
-  SelectDragIndicatorWrapper,
   SelectIcon,
   SelectInput,
   SelectItem,
   SelectPortal,
+  SelectScrollView,
   SelectTrigger,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -165,6 +164,8 @@ export default function ProfileRoute() {
   const isGuest = !session;
 
   const activeTheme = hasAdaptiveThemes ? "system" : theme;
+  const activeThemeLabel =
+    activeTheme === "system" ? "Auto" : activeTheme === "light" ? "Light" : "Dark";
   const initials =
     (profile?.fullName ?? "?")
       .split(/\s+/)
@@ -356,6 +357,7 @@ export default function ProfileRoute() {
           description="Use system mode or choose a fixed appearance."
           action={
             <Select
+              selectedLabel={activeThemeLabel}
               selectedValue={activeTheme}
               onValueChange={(value) => {
                 if (!value) return;
@@ -363,18 +365,20 @@ export default function ProfileRoute() {
               }}
             >
               <SelectTrigger className="w-28" size="sm">
-                <SelectInput placeholder="Theme" />
+                <SelectInput placeholder="Theme" value={activeThemeLabel} />
                 <SelectIcon as={LucideChevronDown} className="mr-3" />
               </SelectTrigger>
               <SelectPortal>
                 <SelectBackdrop />
-                <SelectContent>
-                  <SelectDragIndicatorWrapper>
-                    <SelectDragIndicator />
-                  </SelectDragIndicatorWrapper>
-                  <SelectItem value="system" label="Auto" />
-                  <SelectItem value="light" label="Light" />
-                  <SelectItem value="dark" label="Dark" />
+                <SelectContent
+                  title="Appearance"
+                  description="Choose how Aleconnect looks on this device."
+                >
+                  <SelectScrollView>
+                    <SelectItem value="system" label="Auto" />
+                    <SelectItem value="light" label="Light" />
+                    <SelectItem value="dark" label="Dark" />
+                  </SelectScrollView>
                 </SelectContent>
               </SelectPortal>
             </Select>

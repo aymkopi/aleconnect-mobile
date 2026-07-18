@@ -52,15 +52,15 @@ export const UIActionsheet = createActionsheet({
 const actionsheetStyle = tva({ base: 'w-full h-full web:pointer-events-none' });
 
 const actionsheetContentStyle = tva({
-  base: 'items-center rounded-tl-3xl rounded-tr-3xl p-2 bg-background web:pointer-events-auto web:select-none shadow-lg pb-safe',
+  base: 'mt-auto items-stretch rounded-t-3xl border-t border-border bg-background px-4 pb-safe pt-2 shadow-lg web:pointer-events-auto web:select-none',
 });
 
 const actionsheetItemStyle = tva({
-  base: 'w-full flex-row items-center p-3 rounded-sm data-[disabled=true]:opacity-40 data-[disabled=true]:web:pointer-events-auto data-[disabled=true]:web:cursor-not-allowed hover:bg-accent/40 active:bg-accent/50 data-[focus=true]:bg-accent/20 web:data-[focus-visible=true]:bg-accent/40 data-[checked=true]:bg-accent/80',
+  base: 'min-h-14 w-full flex-row items-center border-b border-border px-3 py-3.5 last:border-b-0 data-[disabled=true]:opacity-40 data-[disabled=true]:web:pointer-events-auto data-[disabled=true]:web:cursor-not-allowed hover:bg-accent/40 active:bg-accent/50 data-[focus=true]:bg-accent/20 web:data-[focus-visible=true]:bg-accent/40 data-[checked=true]:bg-accent/80',
 });
 
 const actionsheetItemTextStyle = tva({
-  base: 'text-foreground/70 font-normal font-body tracking-md text-left mx-2',
+  base: 'mx-1 text-left font-medium text-foreground',
   variants: {
     isTruncated: {
       true: '',
@@ -106,7 +106,7 @@ const actionsheetBackdropStyle = tva({
 });
 
 const actionsheetScrollViewStyle = tva({
-  base: 'w-full h-auto',
+  base: 'mb-2 h-auto w-full rounded-xl border border-border',
 });
 
 const actionsheetVirtualizedListStyle = tva({
