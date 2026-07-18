@@ -138,11 +138,22 @@ function NotificationRow({
   const [foregroundColor, mutedColor] = useAppColors(["foreground", "muted"]);
   const tone = severityTone(notification.severity);
   const Icon = notification.entityType === "advisory" ? Zap : FileText;
-  const actionLabel = notification.ticketId ? "View report" : null;
+  const actionLabel = notification.ticketId
+    ? "View report"
+    : !notification.isRead
+      ? "Mark as read"
+      : null;
+  const isActionable = Boolean(notification.ticketId || !notification.isRead);
 
   return (
     <ListSectionItem
-      accessibilityLabel={`Open notification: ${notification.title}`}
+      accessibilityLabel={
+        notification.ticketId
+          ? `View report notification: ${notification.title}`
+          : !notification.isRead
+            ? `Mark notification as read: ${notification.title}`
+            : notification.title
+      }
       description={
         <View className="min-w-0">
           <NotificationDescription notification={notification} />
@@ -172,7 +183,7 @@ function NotificationRow({
           <Icon size={19} color={tone.color} />
         </View>
       }
-      onPress={() => onOpen(notification)}
+      onPress={isActionable ? () => onOpen(notification) : undefined}
       showDivider={showDivider}
       title={
         <View className="flex-row items-center gap-2">
@@ -184,12 +195,12 @@ function NotificationRow({
           </Text>
         </View>
       }
-      trailing={
+      trailing={notification.ticketId ? (
         <ChevronRight
           size={18}
           color={notification.isRead ? mutedColor : foregroundColor}
         />
-      }
+      ) : undefined}
     />
   );
 }
