@@ -109,9 +109,14 @@ export const BottomSheet = forwardRef<BottomSheetRef, IBottomSheetRootProps>(
 
     const handleClose = useCallback(() => {
       Keyboard.dismiss();
+      if (Platform.OS === 'web') {
+        setCurrentIndex(-1);
+        setIsVisible(false);
+        onClose?.();
+        return;
+      }
       bottomSheetRef.current?.close();
-      setCurrentIndex(-1);
-    }, []);
+    }, [onClose]);
 
     const handleSheetChanges = useCallback(
       (index: number) => {
@@ -228,7 +233,7 @@ export const BottomSheetPortal = ({
         }}
         enablePanDownToClose={enablePanDownToClose}
         // @ts-ignore
-        className={className ?? null}
+        className={className ?? ''}
         // @ts-ignore
         backgroundClassName={`${backgroundClassName ?? ''} bg-background border border-border/90 rounded-xl`}
         // @ts-ignore
