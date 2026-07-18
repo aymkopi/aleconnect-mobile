@@ -7,21 +7,18 @@ import { expoPushProjectId } from "@/constants";
 export const notificationSoundChannels = {
   highCritical: {
     id: "alerts-high-critical",
-    developmentId: "alerts-high-critical-dev",
     name: "High and critical alerts",
-    sound: "high-critical_alert.wav",
+    sound: "high_critical_alert.wav",
   },
   info: {
     id: "alerts-info",
-    developmentId: "alerts-info-dev",
     name: "Information alerts",
-    sound: "info-alert.wav",
+    sound: "info_alert.wav",
   },
   lowMedium: {
     id: "alerts-low-medium",
-    developmentId: "alerts-low-medium-dev",
     name: "Low and medium alerts",
-    sound: "low-medium-alert.wav",
+    sound: "low_medium_alert.wav",
   },
 } as const;
 
@@ -34,52 +31,34 @@ function isPermissionGranted(permission: PermissionLike): boolean {
   return permission.granted === true || permission.status === "granted";
 }
 
-function shouldUseBundledNotificationSounds(): boolean {
-  return (
-    !__DEV__ ||
-    process.env.EXPO_PUBLIC_ENABLE_CUSTOM_NOTIFICATION_SOUNDS === "true"
-  );
-}
-
 async function configureAndroidNotificationChannels(): Promise<void> {
-  const useBundledSounds = shouldUseBundledNotificationSounds();
-  const channelId = (
-    channel: (typeof notificationSoundChannels)[keyof typeof notificationSoundChannels],
-  ) => (useBundledSounds ? channel.id : channel.developmentId);
-  const sound = (
-    channel: (typeof notificationSoundChannels)[keyof typeof notificationSoundChannels],
-  ) => (useBundledSounds ? channel.sound : undefined);
-
-  // Android locks a channel's sound after creation. Dev fallback channel ids
-  // prevent old dev-client builds from creating production channels without
-  // the custom sound files bundled into the native app.
   await Promise.all([
     Notifications.setNotificationChannelAsync(
-      channelId(notificationSoundChannels.highCritical),
+      notificationSoundChannels.highCritical.id,
       {
         importance: Notifications.AndroidImportance.MAX,
         lightColor: "#DC2626",
         name: notificationSoundChannels.highCritical.name,
-        sound: sound(notificationSoundChannels.highCritical),
+        sound: notificationSoundChannels.highCritical.sound,
         vibrationPattern: [0, 250, 150, 250],
       },
     ),
     Notifications.setNotificationChannelAsync(
-      channelId(notificationSoundChannels.info),
+      notificationSoundChannels.info.id,
       {
         importance: Notifications.AndroidImportance.DEFAULT,
         lightColor: "#208AEF",
         name: notificationSoundChannels.info.name,
-        sound: sound(notificationSoundChannels.info),
+        sound: notificationSoundChannels.info.sound,
       },
     ),
     Notifications.setNotificationChannelAsync(
-      channelId(notificationSoundChannels.lowMedium),
+      notificationSoundChannels.lowMedium.id,
       {
         importance: Notifications.AndroidImportance.HIGH,
         lightColor: "#F59E0B",
         name: notificationSoundChannels.lowMedium.name,
-        sound: sound(notificationSoundChannels.lowMedium),
+        sound: notificationSoundChannels.lowMedium.sound,
       },
     ),
   ]);

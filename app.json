@@ -55,9 +55,9 @@
         "expo-notifications",
         {
           "sounds": [
-            "./assets/sounds/high-critical_alert.wav",
-            "./assets/sounds/info-alert.wav",
-            "./assets/sounds/low-medium-alert.wav"
+            "./assets/sounds/high_critical_alert.wav",
+            "./assets/sounds/info_alert.wav",
+            "./assets/sounds/low_medium_alert.wav"
           ]
         }
       ],
