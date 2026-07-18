@@ -14,7 +14,7 @@ import { statusBarHeight } from "@/constants";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useAppColors } from "@/hooks/use-app-colors";
 import Feather from "@expo/vector-icons/Feather";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import {
   Check,
   LucideArrowUpRight,
@@ -31,7 +31,7 @@ import {
   LucideSunMoon,
   LucideUserRound,
 } from "lucide-react-native";
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Linking,
   Pressable,
@@ -143,6 +143,7 @@ function QuickAction({
 
 export default function ProfileRoute() {
   const router = useRouter();
+  const scrollRef = useRef<ScrollView | null>(null);
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const { session, signOut } = useAuthSession();
@@ -173,6 +174,12 @@ export default function ProfileRoute() {
     void router.prefetch("/profile/details");
     void router.prefetch("/profile/push-notifications");
   }, [router]);
+
+  useFocusEffect(
+    useCallback(() => {
+      scrollRef.current?.scrollTo({ y: 0, animated: false });
+    }, []),
+  );
 
   useEffect(() => {
     if (!shouldRedirectAfterSignOut || session) return;
@@ -223,6 +230,7 @@ export default function ProfileRoute() {
 
   return (
     <ScrollView
+      ref={scrollRef}
       contentInsetAdjustmentBehavior="automatic"
       style={{ width }}
       className="bg-background"
