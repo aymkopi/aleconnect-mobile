@@ -8,6 +8,7 @@
     "scheme": "aleconnectmobile",
     "userInterfaceStyle": "automatic",
     "ios": {
+      "bundleIdentifier": "com.kapecakes.aleconnectmobile",
       "icon": "./assets/images/icon.png",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Aleconnect uses your location to place complaint map pins."
