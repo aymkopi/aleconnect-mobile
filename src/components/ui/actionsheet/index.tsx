@@ -13,6 +13,7 @@ import {
   ScrollView,
   SectionList,
   Text,
+  useWindowDimensions,
   View,
   VirtualizedList,
 } from 'react-native';
@@ -49,11 +50,11 @@ export const UIActionsheet = createActionsheet({
 const actionsheetStyle = tva({ base: 'w-full h-full web:pointer-events-none' });
 
 const actionsheetContentStyle = tva({
-  base: 'items-center rounded-t-lg p-4 bg-background web:pointer-events-auto web:select-none border-t border-border dark:border-border/10 max-h-[80vh] pb-safe',
+  base: 'mt-auto items-stretch overflow-hidden rounded-t-[28px] border border-border bg-background px-5 pb-safe pt-2 shadow-lg web:pointer-events-auto web:select-none',
 });
 
 const actionsheetItemStyle = tva({
-  base: 'w-full flex-row items-center p-3 rounded-sm data-[disabled=true]:opacity-40 data-[disabled=true]:web:pointer-events-auto data-[disabled=true]:web:cursor-not-allowed data-[hover=true]:bg-accent data-[active=true]:bg-accent data-[focus=true]:bg-accent web:data-[focus-visible=true]:bg-accent gap-2',
+  base: 'min-h-14 w-full flex-row items-center gap-2 border-b border-border px-4 py-3.5 last:border-b-0 data-[disabled=true]:opacity-40 data-[disabled=true]:web:pointer-events-auto data-[disabled=true]:web:cursor-not-allowed data-[hover=true]:bg-accent/10 data-[active=true]:bg-accent/15 data-[focus=true]:bg-accent/10 web:data-[focus-visible=true]:bg-accent/15',
 });
 
 const actionsheetItemTextStyle = tva({
@@ -75,11 +76,11 @@ const actionsheetItemTextStyle = tva({
 });
 
 const actionsheetDragIndicatorStyle = tva({
-  base: 'w-[100px] h-2 bg-muted rounded-full',
+  base: 'h-1 w-14 rounded-full bg-muted-foreground/60',
 });
 
 const actionsheetDragIndicatorWrapperStyle = tva({
-  base: 'w-full py-1 items-center',
+  base: 'w-full items-center pb-2 pt-1',
 });
 
 const actionsheetBackdropStyle = tva({
@@ -87,7 +88,7 @@ const actionsheetBackdropStyle = tva({
 });
 
 const actionsheetScrollViewStyle = tva({
-  base: 'w-full h-auto',
+  base: 'mb-3 h-auto w-full overflow-hidden rounded-lg border border-border bg-card',
 });
 
 const actionsheetVirtualizedListStyle = tva({
@@ -212,6 +213,8 @@ const ActionsheetContent = React.forwardRef<
   React.ComponentRef<typeof UIActionsheet.Content>,
   IActionsheetContentProps
 >(function ActionsheetContent({ className, ...props }, ref) {
+  const { height } = useWindowDimensions();
+
   return (
     <UIActionsheet.Content
       className={actionsheetContentStyle({
@@ -219,6 +222,7 @@ const ActionsheetContent = React.forwardRef<
       })}
       ref={ref}
       {...props}
+      style={[{ maxHeight: height * 0.5 }, props.style]}
     />
   );
 });

@@ -17,7 +17,6 @@ import {
 } from "@/services/notifications";
 import { useFocusEffect, useRouter } from "expo-router";
 import {
-  Bell,
   CheckCheck,
   ChevronLeft,
   ChevronRight,
@@ -299,7 +298,7 @@ export default function NotificationsRoute() {
       setNotice({
         status: "success",
         title: "Marked as read",
-        description: "All visible notifications were cleared.",
+        description: "All notifications are now marked as read.",
       });
     } catch (error) {
       setNotice({
@@ -447,23 +446,6 @@ export default function NotificationsRoute() {
         </View>
       ) : null}
 
-      {!isLoading && notifications.length > 0 ? (
-        <View className="rounded-lg border border-border bg-card p-4">
-          <View className="flex-row items-center gap-3">
-            <View className="h-10 w-10 items-center justify-center rounded-2xl bg-accent-soft">
-              <Bell size={18} color={accentColor} />
-            </View>
-            <View className="flex-1">
-              <Text className="text-sm font-bold text-foreground">
-                Sound alerts are severity-based
-              </Text>
-              <Text className="mt-1 text-xs text-muted-foreground">
-                Critical, info, and routine notices use separate bundled sounds after the next native rebuild.
-              </Text>
-            </View>
-          </View>
-        </View>
-      ) : null}
     </ScrollView>
   );
 }

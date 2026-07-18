@@ -24,7 +24,7 @@ import {
   ActionsheetSectionList,
   ActionsheetSectionHeaderText,
 } from './select-actionsheet';
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput, useWindowDimensions, View } from 'react-native';
 
 const SelectTriggerWrapper = React.forwardRef<
   React.ComponentRef<typeof Pressable>,
@@ -242,15 +242,23 @@ const SelectContent = React.forwardRef<
   React.ComponentRef<typeof UISelect.Content>,
   ISelectContentProps
 >(function SelectContent({ title, description, children, ...props }, ref) {
+  const { height } = useWindowDimensions();
+
   return (
-    <UISelect.Content ref={ref} {...props}>
+    <UISelect.Content
+      ref={ref}
+      {...props}
+      style={[{ maxHeight: height * 0.5 }, props.style]}
+    >
       <SelectDragIndicatorWrapper>
         <SelectDragIndicator />
       </SelectDragIndicatorWrapper>
       {title || description ? (
         <View className="w-full px-1 pb-4 pt-1">
           {title ? (
-            <Text className="text-xl font-bold text-foreground">{title}</Text>
+            <Text accessibilityRole="header" className="text-xl font-extrabold text-foreground">
+              {title}
+            </Text>
           ) : null}
           {description ? (
             <Text className="mt-1 text-sm leading-5 text-muted-foreground">

@@ -33,7 +33,7 @@ const bottomSheetBackdropStyle = tva({
 });
 
 const bottomSheetContentStyle = tva({
-  base: 'gap-4 px-5 pb-safe',
+  base: 'gap-4 px-5 pb-safe pt-1',
 });
 
 const bottomSheetTriggerStyle = tva({
