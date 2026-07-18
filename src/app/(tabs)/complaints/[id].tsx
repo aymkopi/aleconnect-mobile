@@ -193,7 +193,9 @@ export default function ComplaintDetailRoute() {
           <Button
             size="icon"
             variant="secondary"
-            onPress={() => router.back()}
+            onPress={() =>
+              router.canGoBack() ? router.back() : router.replace("/complaints")
+            }
             accessibilityLabel="Back to reports"
           >
             <ButtonIcon as={ChevronLeft} height={21} width={21} />
