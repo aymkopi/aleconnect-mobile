@@ -60,6 +60,14 @@
           ]
         }
       ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Aleconnect uses selected photos as complaint evidence and profile images.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ],
       "expo-location",
       "expo-web-browser",
       "./plugins/with-android-predictive-back-disabled",
