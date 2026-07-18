@@ -20,9 +20,11 @@ import {
   LucideArrowUpRight,
   LucideBell,
   LucideChevronDown,
+  LucideChevronRight,
   LucideFileText,
   LucideGlobe,
   LucideHeart,
+  LucideKeyRound,
   LucideLanguages,
   LucideLogOut,
   LucideShieldCheck,
@@ -480,6 +482,17 @@ export default function ProfileRoute() {
 
       {!isGuest ? (
         <ProfileSection title="Session">
+          <ProfileRow
+            icon={
+              <IconBubble>
+                <LucideKeyRound size={20} color={accentColor} />
+              </IconBubble>
+            }
+            title="Change password"
+            description="Update your account password."
+            onPress={() => router.push("/profile/change-password")}
+            action={<LucideChevronRight size={19} color={mutedColor} />}
+          />
           <ProfileRow
             icon={
               <IconBubble>

@@ -179,3 +179,13 @@ export async function signInWithAccountNumber({
   await clearAttempts(normalizedAccountNumber);
   return login;
 }
+
+export async function changeConsumerPassword(
+  currentPassword: string,
+  newPassword: string,
+): Promise<void> {
+  await apiRequest<{ ok: true }>("/api/mobile/auth/change-password", {
+    method: "POST",
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+}

@@ -53,12 +53,14 @@ export default function SignInRoute() {
     setIsSubmitting(true);
 
     try {
-      await signInWithAccountNumber({
+      const login = await signInWithAccountNumber({
         accountNumber: accountNumber.trim(),
         password,
       });
-      await refreshSession();
-      router.replace("/home");
+      await refreshSession({ forceNetwork: true });
+      router.replace(
+        login.user.mustChangePassword ? "/profile/change-password" : "/home",
+      );
     } catch (error) {
       const message =
         error instanceof Error
@@ -75,7 +77,15 @@ export default function SignInRoute() {
   }
 
   if (session) {
-    return <Redirect href="/home" />;
+    return (
+      <Redirect
+        href={
+          session.user.mustChangePassword
+            ? "/profile/change-password"
+            : "/home"
+        }
+      />
+    );
   }
 
   return (

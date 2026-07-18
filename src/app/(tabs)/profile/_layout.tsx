@@ -2,6 +2,7 @@ import { Stack, useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 
 import { Button, ButtonIcon } from "@/components/ui/button";
+import { useAuthSession } from "@/hooks/use-auth-session";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { ConsumerProfileProvider } from "../../../context/consumer-profile-context";
 
@@ -11,6 +12,7 @@ export const unstable_settings = {
 
 export default function ProfileLayout() {
   const router = useRouter();
+  const { session } = useAuthSession();
   const [headerTintColor, headerBackgroundColor] = useAppColors([
     "foreground",
     "surface",
@@ -51,6 +53,24 @@ export default function ProfileLayout() {
               </Button>
             ),
             title: "Account",
+          }}
+        />
+        <Stack.Screen
+          name="change-password"
+          options={{
+            headerBackVisible: false,
+            headerLeft: () =>
+              session?.user.mustChangePassword ? null : (
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onPress={() => router.replace("/profile")}
+                  accessibilityLabel="Back to profile"
+                >
+                  <ButtonIcon as={ChevronLeft} height={22} width={22} />
+                </Button>
+              ),
+            title: "Change password",
           }}
         />
         <Stack.Screen
