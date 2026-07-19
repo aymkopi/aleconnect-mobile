@@ -38,7 +38,7 @@ const bottomSheetBackdropStyle = tva({
 });
 
 const bottomSheetContentStyle = tva({
-  base: 'gap-4 px-5 pb-safe pt-0',
+  base: 'gap-4 px-5 pb-safe-or-5 pt-0',
 });
 
 const bottomSheetTriggerStyle = tva({
@@ -46,7 +46,7 @@ const bottomSheetTriggerStyle = tva({
 });
 
 const bottomSheetHandleStyle = tva({
-  base: 'w-full items-center rounded-t-[28px] py-3',
+  base: 'w-full items-center rounded-t-xl py-3',
 });
 
 const bottomSheetItemStyle = tva({
@@ -57,7 +57,7 @@ const bottomSheetItemTextStyle = tva({
 });
 
 const bottomSheetFooterStyle = tva({
-  base: 'border-t border-border/90 bg-background px-5 pb-safe pt-4',
+  base: 'border-t border-border/90 bg-background px-5 pb-safe-or-5 pt-4',
 });
 
 const bottomSheetTextInputStyle = tva({
@@ -207,9 +207,9 @@ export const BottomSheetPortal = ({
   handleIndicatorClassName,
   enablePanDownToClose = true,
   enableDynamicSizing = false,
-  keyboardBehavior = 'fillParent',
+  keyboardBehavior = 'interactive',
   keyboardBlurBehavior = 'restore',
-  android_keyboardInputMode = 'adjustPan',
+  android_keyboardInputMode = 'adjustResize',
   enableBlurKeyboardOnGesture = true,
   topInset,
   snapPoints,
@@ -267,7 +267,7 @@ export const BottomSheetPortal = ({
         // @ts-ignore
         className={className ?? ''}
         // @ts-ignore
-        backgroundClassName={`${backgroundClassName ?? ''} rounded-t-[28px] border border-border/90 bg-background`}
+        backgroundClassName={`${backgroundClassName ?? ''} rounded-t-xl border border-border/90 bg-background`}
         // @ts-ignore
         handleIndicatorClassName={`${handleIndicatorClassName ?? ''} bg-muted-foreground/60`}
         {...props}
@@ -421,7 +421,7 @@ export function BottomSheetHeader({
   className = '',
 }: BottomSheetHeaderProps) {
   const { handleClose } = useContext(BottomSheetContext);
-  const [accentColor] = useAppColors(['accent']);
+  const [accentColor, foregroundColor] = useAppColors(['accent', 'foreground']);
 
   return (
     <View
@@ -443,12 +443,17 @@ export function BottomSheetHeader({
       {showCloseButton ? (
         <Button
           size="icon"
-          variant="secondary"
+          variant="ghost"
           className="shrink-0"
           onPress={handleClose}
           accessibilityLabel={closeAccessibilityLabel}
         >
-          <ButtonIcon as={X} height={16} width={16} />
+          <ButtonIcon
+            as={X}
+            color={foregroundColor}
+            height={16}
+            width={16}
+          />
         </Button>
       ) : null}
     </View>

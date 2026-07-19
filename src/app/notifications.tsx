@@ -1,4 +1,4 @@
-import { appScrollableBottomPadding } from "@/components/floating-app-bar";
+import { ChildAppBar } from "@/components/child-app-bar";
 import { Alert, AlertText } from "@/components/ui/alert";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
@@ -6,7 +6,6 @@ import { ListSection, ListSectionItem } from "@/components/ui/list-section";
 import { SearchField } from "@/components/ui/search-field";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
-import { statusBarHeight } from "@/constants";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useAppColors } from "@/hooks/use-app-colors";
 import {
@@ -18,7 +17,6 @@ import {
 import { Redirect, useFocusEffect, useRouter } from "expo-router";
 import {
   CheckCheck,
-  ChevronLeft,
   ChevronRight,
   FileText,
   Settings,
@@ -249,7 +247,7 @@ export default function NotificationsRoute() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isMarkingRead, setIsMarkingRead] = useState(false);
   const [notice, setNotice] = useState<Notice | null>(null);
-  const bottomPadding = appScrollableBottomPadding(insets.bottom);
+  const bottomPadding = Math.max(insets.bottom, 16) + 20;
 
   const load = useCallback(async () => {
     if (!session) {
@@ -354,7 +352,7 @@ export default function NotificationsRoute() {
 
     if (notification.ticketId) {
       router.push({
-        pathname: "/complaints/[id]",
+        pathname: "/report/[id]",
         params: { id: notification.ticketId },
       });
     }
@@ -365,54 +363,48 @@ export default function NotificationsRoute() {
   }
 
   return (
-    <ScrollView
-      className="bg-background"
-      contentInsetAdjustmentBehavior="automatic"
-      style={{ width }}
-      contentContainerStyle={{
-        flexGrow: 1,
-        gap: 14,
-        paddingHorizontal: 20,
-        paddingTop: statusBarHeight + 18,
-        paddingBottom: bottomPadding,
-      }}
-      refreshControl={
-        <RefreshControl
-          refreshing={isRefreshing}
-          onRefresh={() => {
-            void refresh();
-          }}
-          tintColor={accentColor}
-          colors={[accentColor]}
-        />
-      }
-    >
-      <View className="flex-row items-center justify-between">
-        <Button
-          size="icon"
-          variant="ghost"
-          accessibilityLabel="Go back"
-          onPress={handleBack}
-        >
-          <ButtonIcon as={ChevronLeft} height={22} width={22} />
-        </Button>
-        <View className="flex-1 px-3">
-          <Heading className="text-center" size="xl">
-            Notifications
-          </Heading>
-          <Text className="mt-1 text-center text-xs text-muted-foreground">
-            {unreadCount > 0 ? `${unreadCount} unread update${unreadCount === 1 ? "" : "s"}` : "All caught up"}
-          </Text>
-        </View>
-        <Button
-          size="icon"
-          variant="secondary"
-          accessibilityLabel="Notification settings"
-          onPress={() => router.push("/profile/push-notifications")}
-        >
-          <ButtonIcon as={Settings} height={19} width={19} />
-        </Button>
-      </View>
+    <View className="flex-1 bg-background" style={{ width }}>
+      <ChildAppBar
+        title="Notifications"
+        description={
+          unreadCount > 0
+            ? `${unreadCount} unread update${unreadCount === 1 ? "" : "s"}`
+            : "All caught up"
+        }
+        onBack={handleBack}
+        rightActions={
+          <Button
+            size="icon"
+            variant="ghost"
+            className="rounded-full"
+            accessibilityLabel="Notification settings"
+            onPress={() => router.push("/notification-settings")}
+          >
+            <ButtonIcon as={Settings} height={19} width={19} />
+          </Button>
+        }
+      />
+      <ScrollView
+        className="bg-background"
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={{
+          flexGrow: 1,
+          gap: 14,
+          paddingHorizontal: 20,
+          paddingTop: 8,
+          paddingBottom: bottomPadding,
+        }}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={() => {
+              void refresh();
+            }}
+            tintColor={accentColor}
+            colors={[accentColor]}
+          />
+        }
+      >
 
       <SearchField
         accessibilityLabel="Search notifications"
@@ -473,6 +465,7 @@ export default function NotificationsRoute() {
         </View>
       ) : null}
 
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }

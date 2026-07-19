@@ -1,7 +1,8 @@
-import { appScrollableBottomPadding } from "@/components/floating-app-bar";
+import { ChildAppBar } from "@/components/child-app-bar";
 import { Alert, AlertText } from "@/components/ui/alert";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
+import { Pressable } from "@/components/ui/pressable";
 import { Progress, ProgressFilledTrack } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
@@ -24,12 +25,13 @@ import {
 } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Pressable,
+  BackHandler,
   RefreshControl,
   ScrollView,
   View,
   useWindowDimensions,
 } from "react-native";
+import { useFocusEffect, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCSSVariable } from "uniwind";
 
@@ -206,7 +208,7 @@ function LoadingState() {
   return (
     <View className="gap-3">
       <Skeleton className="h-24 rounded-3xl" />
-      <Skeleton className="h-14 rounded-[20px]" />
+      <Skeleton className="h-14 rounded-xl" />
       <Skeleton className="h-28 rounded-3xl" />
       <Skeleton className="h-28 rounded-3xl" />
     </View>
@@ -214,6 +216,7 @@ function LoadingState() {
 }
 
 export default function PushNotificationsRoute() {
+  const router = useRouter();
   const { session, isLoading: isSessionLoading } = useAuthSession();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
@@ -233,7 +236,7 @@ export default function PushNotificationsRoute() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [notice, setNotice] = useState<Notice | null>(null);
-  const bottomPadding = appScrollableBottomPadding(insets.bottom);
+  const bottomPadding = Math.max(insets.bottom, 16);
 
   const selectedCount = selectedFeederIds.size;
   const totalFeederCount = useMemo(
@@ -246,6 +249,27 @@ export default function PushNotificationsRoute() {
   );
   const selectionPercent =
     totalFeederCount > 0 ? Math.round((selectedCount / totalFeederCount) * 100) : 0;
+
+  const handleBack = useCallback(() => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+    router.replace("/profile");
+  }, [router]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        () => {
+          handleBack();
+          return true;
+        },
+      );
+      return () => subscription.remove();
+    }, [handleBack]),
+  );
 
   const load = useCallback(async () => {
     if (!session) {
@@ -379,6 +403,11 @@ export default function PushNotificationsRoute() {
 
   return (
     <View className="flex-1 bg-background" style={{ width }}>
+      <ChildAppBar
+        title="Notification settings"
+        description="Choose which consumer updates reach this device"
+        onBack={handleBack}
+      />
       <ScrollView
         className="bg-background"
         contentInsetAdjustmentBehavior="automatic"
@@ -397,7 +426,7 @@ export default function PushNotificationsRoute() {
           gap: 12,
           paddingHorizontal: 20,
           paddingTop: 14,
-          paddingBottom: bottomPadding + 120,
+          paddingBottom: bottomPadding + 96,
         }}
       >
         <View className="rounded-lg border border-border bg-card p-5">

@@ -2,6 +2,14 @@
 @import "uniwind";
 
 @theme static {
+  /* Global radius control: standard components use rounded-xl (12px). */
+  --radius: 0.75rem;
+  --radius-sm: 0.75rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 0.75rem;
+  --field-radius: 0.75rem;
+
   /* Concrete defaults are required by Uniwind hooks during Expo web SSR. */
   --color-background: hsl(207 11% 96%);
   --color-foreground: hsl(207 3% 10%);
@@ -150,10 +158,6 @@
       --color-input: var(--border);
       --color-ring: var(--focus);
 
-      /* Border Radius */
-      --radius: 0.5rem;
-      --field-radius: 0.5rem;
-
       /* Font Family */
       --font-sans: "Satoshi_400Regular";
       --font-normal: "Satoshi_400Regular";
@@ -251,10 +255,6 @@
       --color-destructive: var(--danger);
       --color-input: var(--border);
       --color-ring: var(--focus);
-
-      /* Border Radius */
-      --radius: 0.5rem;
-      --field-radius: 0.5rem;
 
       /* Font Family */
       --font-sans: "Satoshi_400Regular";

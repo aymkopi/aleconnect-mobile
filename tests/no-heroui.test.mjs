@@ -27,3 +27,18 @@ test("HeroUI Native is absent from runtime source and dependencies", async () =>
 
   assert.doesNotMatch(contents.join("\n"), /heroui-native|HeroUINativeProvider/i);
 });
+
+test("app routes use the shared GlueStack Pressable", async () => {
+  const files = (await sourceFiles(path.join(root, "src", "app"))).filter(
+    (file) => file.endsWith(".tsx"),
+  );
+
+  for (const file of files) {
+    const source = await readFile(file, "utf8");
+    assert.doesNotMatch(
+      source,
+      /import\s*\{[^}]*\bPressable\b[^}]*\}\s*from\s*["']react-native["']/s,
+      path.relative(root, file),
+    );
+  }
+});

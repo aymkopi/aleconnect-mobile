@@ -9,7 +9,7 @@ test("parent notification badges use the authenticated unread count", async () =
       "utf8",
     ),
     readFile(
-      new URL("../src/app/(tabs)/complaints/index.tsx", import.meta.url),
+      new URL("../src/app/(tabs)/reports/index.tsx", import.meta.url),
       "utf8",
     ),
     readFile(

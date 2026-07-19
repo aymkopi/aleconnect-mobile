@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/bottomsheet";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
+import { Pressable } from "@/components/ui/pressable";
 import { SearchField } from "@/components/ui/search-field";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
@@ -54,7 +55,6 @@ import {
   Animated,
   Linking,
   PanResponder,
-  Pressable,
   RefreshControl,
   ScrollView,
   View,
@@ -70,11 +70,20 @@ type CategoryVisual = {
 
 const visuals: [RegExp, CategoryVisual][] = [
   [/electric|power|aleco/i, { icon: Zap, color: "#0ea5e9", soft: "#e0f2fe" }],
-  [/medical|health|hospital/i, { icon: Plus, color: "#ef4444", soft: "#fee2e2" }],
+  [
+    /medical|health|hospital/i,
+    { icon: Plus, color: "#ef4444", soft: "#fee2e2" },
+  ],
   [/fire|rescue/i, { icon: Flame, color: "#f97316", soft: "#ffedd5" }],
   [/water/i, { icon: Droplet, color: "#0284c7", soft: "#e0f2fe" }],
-  [/safety|police|public/i, { icon: Shield, color: "#2563eb", soft: "#dbeafe" }],
-  [/drrmo|disaster|risk/i, { icon: Building2, color: "#d97706", soft: "#fef3c7" }],
+  [
+    /safety|police|public/i,
+    { icon: Shield, color: "#2563eb", soft: "#dbeafe" },
+  ],
+  [
+    /drrmo|disaster|risk/i,
+    { icon: Building2, color: "#d97706", soft: "#fef3c7" },
+  ],
 ];
 
 function rowsOf<T>(items: T[], size: number) {
@@ -84,7 +93,10 @@ function rowsOf<T>(items: T[], size: number) {
 }
 
 function normalize(value: string) {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }
 
 function digits(value: string) {
@@ -122,18 +134,32 @@ function agencySearchText(agency: HotlineAgency, categoryName: string) {
       agency.description,
       agency.address,
       categoryName,
-      agency.contacts.map((contact) => `${contact.number} ${contact.label ?? ""} ${contact.type ?? ""}`).join(" "),
+      agency.contacts
+        .map(
+          (contact) =>
+            `${contact.number} ${contact.label ?? ""} ${contact.type ?? ""}`,
+        )
+        .join(" "),
     ].join(" "),
   );
 }
 
-function agencyMatches(agency: HotlineAgency, categoryName: string, query: string) {
+function agencyMatches(
+  agency: HotlineAgency,
+  categoryName: string,
+  query: string,
+) {
   const textQuery = normalize(query);
   const digitQuery = digits(query);
   if (!textQuery && !digitQuery) return true;
   return (
     agencySearchText(agency, categoryName).includes(textQuery) ||
-    Boolean(digitQuery && agency.contacts.some((contact) => digits(contact.number).includes(digitQuery)))
+    Boolean(
+      digitQuery &&
+      agency.contacts.some((contact) =>
+        digits(contact.number).includes(digitQuery),
+      ),
+    )
   );
 }
 
@@ -147,30 +173,30 @@ function SheetSearchInput({
   placeholder: string;
 }) {
   return (
-      <View className="flex-row items-center">
-        <BottomSheetTextInput
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={placeholder}
-          className="h-12 flex-1 rounded-xl px-10"
-          autoCorrect={false}
-          autoCapitalize="none"
-        />
-        <View className="absolute left-3" style={{ pointerEvents: "none" }}>
-          <Search size={17} color="#737373" />
-        </View>
-        {value ? (
-          <Button
-            size="icon"
-            variant="ghost"
-            className="absolute right-1"
-            onPress={() => onChangeText("")}
-            accessibilityLabel="Clear search"
-          >
-            <ButtonIcon as={X} height={16} width={16} />
-          </Button>
-        ) : null}
+    <View className="flex-row items-center">
+      <BottomSheetTextInput
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        className="h-12 flex-1 rounded-xl px-10"
+        autoCorrect={false}
+        autoCapitalize="none"
+      />
+      <View className="absolute left-3" style={{ pointerEvents: "none" }}>
+        <Search size={17} color="#737373" />
       </View>
+      {value ? (
+        <Button
+          size="icon"
+          variant="ghost"
+          className="absolute right-1"
+          onPress={() => onChangeText("")}
+          accessibilityLabel="Clear search"
+        >
+          <ButtonIcon as={X} height={16} width={16} />
+        </Button>
+      ) : null}
+    </View>
   );
 }
 
@@ -231,17 +257,17 @@ function AgencyCard({ agency }: { agency: HotlineAgency }) {
     <View className="rounded-lg border border-border bg-card p-4">
       <View className="flex-row items-start gap-3">
         <Avatar accessibilityLabel={agency.name}>
-          {agency.logoUrl ? <AvatarImage source={{ uri: agency.logoUrl }} /> : null}
+          {agency.logoUrl ? (
+            <AvatarImage source={{ uri: agency.logoUrl }} />
+          ) : null}
           {!agency.logoUrl ? (
             <AvatarFallbackText className="font-bold text-primary">
-                {initials(agency.name)}
+              {initials(agency.name)}
             </AvatarFallbackText>
           ) : null}
         </Avatar>
         <View className="flex-1">
-          <Heading size="sm">
-            {agency.name}
-          </Heading>
+          <Heading size="sm">{agency.name}</Heading>
           {agency.description || agency.address ? (
             <Text className="mt-0.5 text-xs text-muted-foreground">
               {agency.description || agency.address}
@@ -313,7 +339,7 @@ function CategoryCard({
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      className="min-h-[86px] flex-1 flex-row items-center gap-3 rounded-lg border border-border bg-card p-4"
+      className="min-h-[116px] flex-1 gap-3 rounded-lg border border-border bg-card p-4"
     >
       <View
         className="h-9 w-9 items-center justify-center rounded-2xl"
@@ -321,12 +347,13 @@ function CategoryCard({
       >
         <Icon size={20} color={visual.color} />
       </View>
-      <View className="flex-1">
-        <Text className="text-sm font-bold text-foreground" numberOfLines={2}>
+      <View className="flex-1 justify-end">
+        <Text className="text-sm font-bold text-foreground" numberOfLines={3}>
           {category.name}
         </Text>
         <Text className="mt-0.5 text-xs text-muted-foreground">
-          {category.agencies.length} {category.agencies.length === 1 ? "agency" : "agencies"}
+          {category.agencies.length}{" "}
+          {category.agencies.length === 1 ? "agency" : "agencies"}
         </Text>
       </View>
     </Pressable>
@@ -354,7 +381,9 @@ function HotlineResults({
         Matches
       </Text>
       {matches.length ? (
-        matches.map(({ agency }) => <AgencyCard key={agency.id} agency={agency} />)
+        matches.map(({ agency }) => (
+          <AgencyCard key={agency.id} agency={agency} />
+        ))
       ) : (
         <View className="rounded-lg border border-border bg-card p-5">
           <Text className="text-sm text-muted-foreground">
@@ -369,11 +398,11 @@ function HotlineResults({
 function HotlineSkeleton() {
   return (
     <View className="gap-4">
-      <Skeleton className="h-28 rounded-[24px]" />
-      <Skeleton className="h-44 rounded-[24px]" />
+      <Skeleton className="h-28 rounded-xl" />
+      <Skeleton className="h-44 rounded-xl" />
       <View className="flex-row gap-3">
-        <Skeleton className="h-24 flex-1 rounded-[22px]" />
-        <Skeleton className="h-24 flex-1 rounded-[22px]" />
+        <Skeleton className="h-24 flex-1 rounded-xl" />
+        <Skeleton className="h-24 flex-1 rounded-xl" />
       </View>
     </View>
   );
@@ -383,9 +412,12 @@ export default function HotlinesRoute() {
   const router = useRouter();
   const { session } = useAuthSession();
   const insets = useSafeAreaInsets();
-  const { width, height } = useWindowDimensions();
+  const { height, width } = useWindowDimensions();
   const bottomPadding = appScrollableBottomPadding(insets.bottom);
-  const [accentColor] = useAppColors(["accent"]);
+  const [accentColor, destructiveColor] = useAppColors([
+    "accent",
+    "destructive",
+  ]);
   const unreadCount = useUnreadNotificationCount();
   const categorySheetRef = useRef<BottomSheetRef>(null);
   const allSheetRef = useRef<BottomSheetRef>(null);
@@ -395,7 +427,9 @@ export default function HotlinesRoute() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
+    null,
+  );
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
 
   const loadHotlines = useCallback(async (options?: { force?: boolean }) => {
@@ -406,7 +440,7 @@ export default function HotlinesRoute() {
       setActiveCategoryId((current) =>
         data.categories.some((category) => category.id === current)
           ? current
-          : data.categories[0]?.id ?? null,
+          : (data.categories[0]?.id ?? null),
       );
       setLoadError(null);
     } catch {
@@ -425,13 +459,15 @@ export default function HotlinesRoute() {
     }, [loadHotlines]),
   );
 
-  const aleco =
-    categories
-      .flatMap((category) => category.agencies)
-      .find((agency) => /albay electric|aleco/i.test(agency.name));
+  const aleco = categories
+    .flatMap((category) => category.agencies)
+    .find((agency) => /albay electric|aleco/i.test(agency.name));
 
-  const selectedCategory = categories.find((category) => category.id === selectedCategoryId) ?? null;
-  const activeCategory = categories.find((category) => category.id === activeCategoryId) ?? categories[0];
+  const selectedCategory =
+    categories.find((category) => category.id === selectedCategoryId) ?? null;
+  const activeCategory =
+    categories.find((category) => category.id === activeCategoryId) ??
+    categories[0];
   const categoryAgencies = selectedCategory
     ? selectedCategory.agencies.filter((agency) =>
         agencyMatches(agency, selectedCategory.name, sheetQuery),
@@ -442,10 +478,6 @@ export default function HotlinesRoute() {
         agencyMatches(agency, activeCategory.name, sheetQuery),
       )
     : [];
-  const categorySnapHeight = Math.min(
-    height * 0.86,
-    Math.max(360, 190 + Math.min(categoryAgencies.length || 1, 3) * 150),
-  );
   const categoryRows = useMemo(() => rowsOf(categories, 2), [categories]);
 
   const openCategory = (category: HotlineCategory) => {
@@ -483,16 +515,12 @@ export default function HotlinesRoute() {
         }
       >
         <View className="flex-row items-start justify-between">
-          <Heading size="2xl">
-            Hotlines
-          </Heading>
+          <Heading size="2xl">Hotlines</Heading>
           <Button
             size="icon"
             variant="secondary"
             accessibilityLabel="Notifications"
-            onPress={() =>
-              router.push(session ? "/notifications" : "/sign-in")
-            }
+            onPress={() => router.push(session ? "/notifications" : "/sign-in")}
           >
             <ButtonIcon as={Bell} height={20} width={20} />
             {unreadCount > 0 ? (
@@ -517,25 +545,27 @@ export default function HotlinesRoute() {
 
         {!isLoading ? (
           <>
-            <View className="rounded-lg border border-border bg-card p-4">
-              <View className="flex-row items-center gap-2">
-                <Siren size={21} color="#111827" />
-                <Heading size="md">
-                  Call 911
-                </Heading>
+            {!query ? (
+              <View className="rounded-lg border border-border bg-card p-4">
+                <View className="flex-row items-center gap-2">
+                  <Siren size={21} color={destructiveColor} />
+                  <Heading size="md">Call 911</Heading>
+                </View>
+                <Text className="mt-1 text-xs text-foreground">
+                  Use for life-threatening situations only.
+                </Text>
+                <View className="mt-3">
+                  <EmergencySlider />
+                </View>
               </View>
-              <Text className="mt-1 text-xs text-foreground">
-                Use for life-threatening situations only.
-              </Text>
-              <View className="mt-3">
-                <EmergencySlider />
-              </View>
-            </View>
+            ) : null}
 
             {loadError ? (
               <Alert variant="destructive" className="items-center p-4">
                 <View className="flex-1 gap-1">
-                  <AlertText className="font-bold">Directory unavailable</AlertText>
+                  <AlertText className="font-bold">
+                    Directory unavailable
+                  </AlertText>
                   <AlertText>{loadError}</AlertText>
                 </View>
                 <Button
@@ -548,35 +578,42 @@ export default function HotlinesRoute() {
               </Alert>
             ) : null}
 
-            {aleco ? <AgencyCard agency={aleco} /> : null}
+            {!query && aleco ? <AgencyCard agency={aleco} /> : null}
 
             <HotlineResults categories={categories} query={query} />
 
-            {categories.length ? <View className="gap-2">
-              <View className="flex-row items-center justify-between">
-                <Text className="ml-2 text-sm font-semibold text-muted-foreground">
-                  Categories
-                </Text>
-                <Button variant="ghost" size="sm" onPress={openAll}>
-                  <ButtonText>View all</ButtonText>
-                  <ButtonIcon as={ChevronRight} height={15} width={15} />
-                </Button>
-              </View>
-              {categoryRows.map((row) => (
-                <View key={row.map((category) => category.id).join("-")} className="flex-row gap-3">
-                  {row.map((category) => (
-                    <CategoryCard
-                      key={category.id}
-                      category={category}
-                      onPress={() => openCategory(category)}
-                    />
-                  ))}
-                  {row.length === 1 ? <View className="flex-1" /> : null}
+            {!query && categories.length ? (
+              <View className="gap-2">
+                <View className="flex-row items-center justify-between">
+                  <Text className="ml-2 text-sm font-semibold text-muted-foreground">
+                    Categories
+                  </Text>
+                  <Button variant="ghost" size="sm" onPress={openAll}>
+                    <ButtonText>View all</ButtonText>
+                    <ButtonIcon as={ChevronRight} height={15} width={15} />
+                  </Button>
                 </View>
-              ))}
-            </View> : !loadError ? (
+                {categoryRows.map((row) => (
+                  <View
+                    key={row.map((category) => category.id).join("-")}
+                    className="flex-row gap-3"
+                  >
+                    {row.map((category) => (
+                      <CategoryCard
+                        key={category.id}
+                        category={category}
+                        onPress={() => openCategory(category)}
+                      />
+                    ))}
+                    {row.length === 1 ? <View className="flex-1" /> : null}
+                  </View>
+                ))}
+              </View>
+            ) : !query && !loadError ? (
               <Alert className="p-4">
-                <AlertText>No hotline contacts are available right now.</AlertText>
+                <AlertText>
+                  No hotline contacts are available right now.
+                </AlertText>
               </Alert>
             ) : null}
           </>
@@ -585,15 +622,27 @@ export default function HotlinesRoute() {
 
       <BottomSheet ref={categorySheetRef} onClose={() => setSheetQuery("")}>
         <BottomSheetPortal
-          snapPoints={[categorySnapHeight]}
-          enableDynamicSizing={false}
-          enableOverDrag={false}
           backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
+          enableDynamicSizing
+          maxDynamicContentSize={height * 0.55}
+          enableOverDrag={false}
+          keyboardBehavior="interactive"
         >
-          <BottomSheetContent className="h-full">
+          <BottomSheetScrollView
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator
+            contentContainerStyle={{
+              gap: 12,
+              paddingHorizontal: 20,
+              paddingBottom: 24,
+            }}
+          >
             <BottomSheetHeader
               title={selectedCategory?.name ?? "Hotlines"}
-              description={selectedCategory?.description ?? "Search contacts in this category."}
+              description={
+                selectedCategory?.description ??
+                "Search contacts in this category."
+              }
               closeAccessibilityLabel="Close hotlines"
             />
             <View>
@@ -603,24 +652,18 @@ export default function HotlinesRoute() {
                 placeholder="Search this category"
               />
             </View>
-            <BottomSheetScrollView
-              keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator
-              contentContainerStyle={{ gap: 12, paddingBottom: 24 }}
-            >
-              {categoryAgencies.length ? (
-                categoryAgencies.map((agency) => (
-                  <AgencyCard key={agency.id} agency={agency} />
-                ))
-              ) : (
-                <View className="rounded-lg border border-border bg-card p-5">
-                  <Text className="text-sm text-muted-foreground">
-                    No hotline contacts found.
-                  </Text>
-                </View>
-              )}
-            </BottomSheetScrollView>
-          </BottomSheetContent>
+            {categoryAgencies.length ? (
+              categoryAgencies.map((agency) => (
+                <AgencyCard key={agency.id} agency={agency} />
+              ))
+            ) : (
+              <View className="rounded-lg border border-border bg-card p-5">
+                <Text className="text-sm text-muted-foreground">
+                  No hotline contacts found.
+                </Text>
+              </View>
+            )}
+          </BottomSheetScrollView>
         </BottomSheetPortal>
       </BottomSheet>
 
@@ -659,7 +702,9 @@ export default function HotlinesRoute() {
                         active ? "bg-primary" : "bg-secondary"
                       }`}
                     >
-                      <Text className={`text-xs font-bold ${active ? "text-primary-foreground" : "text-foreground"}`}>
+                      <Text
+                        className={`text-xs font-bold ${active ? "text-primary-foreground" : "text-foreground"}`}
+                      >
                         {category.name}
                       </Text>
                     </Pressable>

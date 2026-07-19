@@ -75,6 +75,8 @@ export function ProfileDetailsSheetContent({
               keyboardType={editingField === "phone" ? "number-pad" : "default"}
               autoCapitalize={editingField === "address" ? "words" : "none"}
               autoCorrect={false}
+              returnKeyType="done"
+              onSubmitEditing={onSave}
               maxLength={
                 editingField === "phone"
                   ? 11
@@ -119,7 +121,7 @@ export function ProfileDetailsSheetContent({
         }}
       >
         <Button
-          variant="outline"
+          variant="ghost"
           onPress={onCancel}
           isDisabled={isUpdating}
           style={{ flex: 1 }}

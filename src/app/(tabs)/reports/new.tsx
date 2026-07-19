@@ -1,4 +1,4 @@
-import { statusBarHeight } from "@/constants";
+import { ChildAppBar } from "@/components/child-app-bar";
 import {
   BottomSheet,
   BottomSheetBackdrop,
@@ -31,6 +31,7 @@ import {
   ModalHeader,
 } from "@/components/ui/modal";
 import { Progress, ProgressFilledTrack } from "@/components/ui/progress";
+import { Pressable } from "@/components/ui/pressable";
 import {
   Select,
   SelectBackdrop,
@@ -44,23 +45,33 @@ import {
 } from "@/components/ui/select";
 import { Text } from "@/components/ui/text";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
-import { aleconnectApiBaseUrl } from "@/constants/api";
+import { aleconnectAssetBaseUrl } from "@/constants/api";
 import { useConsumerProfileContext } from "@/context/consumer-profile-context";
+import { useReportQueue } from "@/context/report-queue-context";
+import {
+  formatResolvedAddress,
+  resolvePsgcAddress,
+  type ResolvedReportAddress,
+} from "@/features/reports/address";
 import {
   emptyComplaintMeta,
   formatComplaintCategoryTitle,
   initialComplaintForm,
   type ComplaintFormState,
   type ComplaintMeta,
-} from "@/features/complaints/data";
+} from "@/features/reports/data";
+import { useAppColors } from "@/hooks/use-app-colors";
+import { useAuthSession } from "@/hooks/use-auth-session";
+import { emitComplaintSubmissionToast } from "@/services/report-submission-events";
 import {
-  createEvidenceUploads,
-  fetchComplaintMeta,
-  submitComplaint,
-  uploadEvidenceToR2,
-} from "@/services/complaints";
-import { emitComplaintSubmissionToast } from "@/services/complaint-submission-events";
-import { compressEvidencePhoto } from "@/utils/evidence-image-processing";
+  createLocalReportId,
+  enqueueReport,
+} from "@/services/report-queue";
+import { fetchComplaintMeta } from "@/services/reports";
+import {
+  deleteEvidencePhoto,
+  prepareEvidencePhoto,
+} from "@/utils/evidence-image-processing";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 import { useFocusEffect, useNavigation, useRouter } from "expo-router";
@@ -68,37 +79,29 @@ import {
   Camera,
   Check,
   ChevronDown,
-  ChevronLeft,
   ChevronRight,
   CircleX,
+  LocateFixed,
   MapPin,
   Navigation,
 } from "lucide-react-native";
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   BackHandler,
   Image,
   Keyboard,
-  KeyboardAvoidingView,
   Platform,
-  Pressable,
   View,
   useWindowDimensions,
 } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import type { KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAppColors } from "@/hooks/use-app-colors";
 
 const minEvidencePhotos = 1;
 const maxEvidencePhotos = 3;
 const albayCenter = { latitude: 13.1775, longitude: 123.528 };
-const albayMapStyle = `${aleconnectApiBaseUrl}/styles/map-bright.json?v=2`;
+const albayMapStyle = `${aleconnectAssetBaseUrl}/styles/map-bright.json?v=2`;
 const albayBounds = {
   minLatitude: 12.9,
   maxLatitude: 13.55,
@@ -136,12 +139,20 @@ function ReportInput({
   isDisabled?: boolean;
 }) {
   return (
-    <FormControl isRequired={isRequired} isInvalid={isInvalid} isDisabled={isDisabled}>
+    <FormControl
+      isRequired={isRequired}
+      isInvalid={isInvalid}
+      isDisabled={isDisabled}
+    >
       <FormControlLabel>
         <FormControlLabelText>{label}</FormControlLabelText>
       </FormControlLabel>
       {multiline ? (
-        <Textarea className="rounded-xl" isDisabled={isDisabled} isInvalid={isInvalid}>
+        <Textarea
+          className="rounded-xl"
+          isDisabled={isDisabled}
+          isInvalid={isInvalid}
+        >
           <TextareaInput
             value={value}
             placeholder={placeholder}
@@ -149,7 +160,11 @@ function ReportInput({
           />
         </Textarea>
       ) : (
-        <Input className="h-12 rounded-xl" isDisabled={isDisabled} isInvalid={isInvalid}>
+        <Input
+          className="h-12 rounded-xl"
+          isDisabled={isDisabled}
+          isInvalid={isInvalid}
+        >
           <InputField
             value={value}
             placeholder={placeholder}
@@ -194,19 +209,28 @@ function SelectField({
   )?.label;
 
   return (
-    <FormControl isRequired={isRequired} isInvalid={isInvalid} isDisabled={isDisabled}>
+    <FormControl
+      isRequired={isRequired}
+      isInvalid={isInvalid}
+      isDisabled={isDisabled}
+    >
       <FormControlLabel>
         <FormControlLabelText>{label}</FormControlLabelText>
       </FormControlLabel>
       <Select
         isDisabled={isDisabled}
         isInvalid={isInvalid}
+        isRequired={isRequired}
         selectedLabel={selectedOptionLabel}
         selectedValue={value}
         onValueChange={(nextValue) => nextValue && onChange(nextValue)}
       >
         <SelectTrigger className="h-12 rounded-xl">
-          <SelectInput placeholder={placeholder} value={selectedOptionLabel} />
+          <SelectInput
+            placeholder={placeholder}
+            value={selectedOptionLabel}
+            className="flex-1"
+          />
           <SelectIcon as={ChevronDown} className="mr-3" />
         </SelectTrigger>
         <SelectPortal>
@@ -294,21 +318,24 @@ function toLngLat(coordinates: Coordinates): [number, number] {
   return [coordinates.longitude, coordinates.latitude];
 }
 
-function formatCoordinate(value: number | null) {
-  return value == null ? "Not set" : value.toFixed(6);
-}
-
 export default function NewComplaintRoute() {
   const router = useRouter();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
+  const { session } = useAuthSession();
+  const { sync: syncQueue } = useReportQueue();
   const scrollRef = useRef<KeyboardAwareScrollViewRef | null>(null);
   const mapSheetRef = useRef<BottomSheetRef>(null);
+  const reportIdRef = useRef(createLocalReportId());
   const isLeavingToParentRef = useRef(false);
   const isMountedRef = useRef(true);
   const submitBackgroundRef = useRef(false);
-  const [accentColor, mutedColor] = useAppColors(["accent", "muted"]);
+  const [accentColor, mutedColor, successColor] = useAppColors([
+    "accent",
+    "muted",
+    "success",
+  ]);
   const { profile } = useConsumerProfileContext();
   const [meta, setMeta] = useState<ComplaintMeta>(emptyComplaintMeta);
   const [isMapSheetOpen, setIsMapSheetOpen] = useState(false);
@@ -316,15 +343,22 @@ export default function NewComplaintRoute() {
   const [attemptedStep, setAttemptedStep] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitProgress, setSubmitProgress] = useState("");
+  const [submitProgressValue, setSubmitProgressValue] = useState(0);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [form, setForm] = useState<ComplaintFormState>(initialComplaintForm);
-  const [keyboardBottomInset, setKeyboardBottomInset] = useState(0);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const [mapModule, setMapModule] = useState<MapLibreModule | null>(null);
-  const [mapCoordinates, setMapCoordinates] = useState<Coordinates | null>(null);
-  const [currentCoordinates, setCurrentCoordinates] = useState<Coordinates | null>(null);
+  const [mapCoordinates, setMapCoordinates] = useState<Coordinates | null>(
+    null,
+  );
+  const [currentCoordinates, setCurrentCoordinates] =
+    useState<Coordinates | null>(null);
+  const [mapAddress, setMapAddress] =
+    useState<ResolvedReportAddress | null>(null);
+  const [isResolvingAddress, setIsResolvingAddress] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
   const childBottomPadding =
-    Math.max(insets.bottom, 16) + (step < 5 ? 112 : 32) + keyboardBottomInset;
+    Math.max(insets.bottom, 16) + (step < 5 ? 112 : 32);
 
   useEffect(() => {
     return () => {
@@ -354,7 +388,7 @@ export default function NewComplaintRoute() {
           setSubmitError(
             error instanceof Error
               ? error.message
-              : "Failed to load complaint form.",
+              : "Failed to load report form.",
           );
         }
       });
@@ -380,14 +414,11 @@ export default function NewComplaintRoute() {
   }, [meta, profile]);
 
   useEffect(() => {
-    const showSubscription = Keyboard.addListener(
-      "keyboardDidShow",
-      (event) => {
-        setKeyboardBottomInset(Math.min(event.endCoordinates.height, 320));
-      },
-    );
+    const showSubscription = Keyboard.addListener("keyboardDidShow", () => {
+      setIsKeyboardVisible(true);
+    });
     const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
-      setKeyboardBottomInset(0);
+      setIsKeyboardVisible(false);
     });
 
     return () => {
@@ -403,6 +434,31 @@ export default function NewComplaintRoute() {
       mapSheetRef.current?.close();
     }
   }, [isMapSheetOpen]);
+
+  useEffect(() => {
+    if (!isMapSheetOpen || !mapCoordinates) return;
+
+    let active = true;
+    const timeout = setTimeout(() => {
+      setIsResolvingAddress(true);
+      void Location.reverseGeocodeAsync(mapCoordinates)
+        .then(([address]) => {
+          if (!active || !address) return;
+          setMapAddress(resolvePsgcAddress(address, meta));
+        })
+        .catch(() => {
+          if (active) setMapAddress(null);
+        })
+        .finally(() => {
+          if (active) setIsResolvingAddress(false);
+        });
+    }, 350);
+
+    return () => {
+      active = false;
+      clearTimeout(timeout);
+    };
+  }, [isMapSheetOpen, mapCoordinates, meta]);
 
   const selectedCategory = meta.categories.find(
     (category) => category.id === form.categoryId,
@@ -456,7 +512,7 @@ export default function NewComplaintRoute() {
               form.description &&
               form.photoUploads.length >= minEvidencePhotos &&
               form.photoUploads.length <= maxEvidencePhotos &&
-              form.photoUploads.every((photo) => photo.status === "uploaded" && photo.key),
+              form.photoUploads.every((photo) => photo.status === "ready"),
             )
           : true;
   const showErrors = attemptedStep === step && !canGoNext;
@@ -468,41 +524,48 @@ export default function NewComplaintRoute() {
     setForm((current) => ({ ...current, [key]: value }));
   };
 
-  const uploadSelectedPhoto = async (uri: string) => {
+  const prepareSelectedPhoto = async (uri: string) => {
+    const photoId = createLocalReportId();
     setForm((current) => ({
       ...current,
       photos: [...current.photos, uri],
       photoUploads: [
         ...current.photoUploads,
-        { uri, key: null, uploadUrl: null, status: "processing" },
+        {
+          id: photoId,
+          uri,
+          size: null,
+          status: "processing",
+        },
       ],
     }));
 
     try {
-      const { uploads } = await createEvidenceUploads(1);
-      const upload = uploads[0];
-      const imageBytes = await compressEvidencePhoto(uri);
-      await uploadEvidenceToR2(upload.uploadUrl, imageBytes);
+      const prepared = await prepareEvidencePhoto(
+        uri,
+        reportIdRef.current,
+        photoId,
+      );
 
       setForm((current) => {
         const photoStillSelected = current.photoUploads.some(
-          (photo) => photo.uri === uri,
+          (photo) => photo.id === photoId,
         );
 
         if (!photoStillSelected) {
+          deleteEvidencePhoto(prepared.uri);
           return current;
         }
 
         return {
           ...current,
-          imageKeys: [...current.imageKeys.filter(Boolean), upload.key],
           photoUploads: current.photoUploads.map((photo) =>
-            photo.uri === uri
+            photo.id === photoId
               ? {
                   ...photo,
-                  key: upload.key,
-                  uploadUrl: upload.uploadUrl,
-                  status: "uploaded",
+                  uri: prepared.uri,
+                  size: prepared.size,
+                  status: "ready",
                 }
               : photo,
           ),
@@ -512,7 +575,7 @@ export default function NewComplaintRoute() {
       setForm((current) => ({
         ...current,
         photoUploads: current.photoUploads.map((photo) =>
-          photo.uri === uri
+          photo.id === photoId
             ? {
                 ...photo,
                 status: "failed",
@@ -527,66 +590,104 @@ export default function NewComplaintRoute() {
     }
   };
 
-  const removePhoto = (uri: string) => {
-    setForm((current) => ({
-      ...current,
-      photos: current.photos.filter((photo) => photo !== uri),
-      photoUploads: current.photoUploads.filter((photo) => photo.uri !== uri),
-      imageKeys: current.photoUploads
-        .filter((photo) => photo.uri !== uri)
-        .map((photo) => photo.key)
-        .filter((key): key is string => Boolean(key)),
-    }));
+  const removePhoto = (photoId: string) => {
+    setForm((current) => {
+      const remaining = current.photoUploads.filter((photo) => {
+        if (photo.id !== photoId) return true;
+        if (photo.status === "ready") deleteEvidencePhoto(photo.uri);
+        return false;
+      });
+      return {
+        ...current,
+        photos: remaining.map((photo) => photo.uri),
+        photoUploads: remaining,
+      };
+    });
   };
 
   const handleSubmit = async () => {
+    if (!session) {
+      isLeavingToParentRef.current = true;
+      router.replace("/sign-in");
+      return;
+    }
+
     setIsSubmitting(true);
     submitBackgroundRef.current = false;
-    setSubmitProgress("Submitting report...");
+    setSubmitProgress("Saving report securely...");
+    setSubmitProgressValue(15);
     setSubmitError(null);
 
     try {
-      const imageKeys = form.photoUploads
-        .map((photo) => photo.key)
-        .filter((key): key is string => Boolean(key));
-      if (imageKeys.length < minEvidencePhotos) {
-        throw new Error("Wait until evidence photos finish uploading.");
+      const evidence = form.photoUploads.filter(
+        (photo) => photo.status === "ready" && photo.size != null,
+      );
+      if (evidence.length < minEvidencePhotos) {
+        throw new Error("Wait until evidence photos finish processing.");
       }
-
-      const ticket = await submitComplaint({
-        typeId: form.typeId,
-        accountNumber: form.accountNumber,
-        barangayPsgc: form.barangayPsgc,
-        purok: form.purok,
-        landmark: form.landmark,
-        description: form.description,
-        actionDesired: form.desiredAction,
-        imageKeys,
-        latitude: form.latitude,
-        longitude: form.longitude,
+      const reportId = reportIdRef.current;
+      await enqueueReport({
+        id: reportId,
+        idempotencyKey: `mobile:${reportId}`,
+        userId: session.user.id,
+        title: selectedType?.title ?? selectedCategory?.title ?? "Report",
+        evidence: evidence.map(({ id, uri, size }) => ({
+          id,
+          uri,
+          size: size ?? 0,
+        })),
+        payload: {
+          typeId: form.typeId,
+          accountNumber: form.accountNumber,
+          barangayPsgc: form.barangayPsgc,
+          purok: form.purok,
+          landmark: form.landmark,
+          description: form.description,
+          actionDesired: form.desiredAction,
+          latitude: form.latitude,
+          longitude: form.longitude,
+        },
       });
+      setSubmitProgressValue(40);
+      setSubmitProgress("Uploading evidence and creating your ticket...");
+      setSubmitProgressValue(65);
+      const results = await syncQueue(false);
+      const result = results.find((item) => item.id === reportId);
 
-      if (submitBackgroundRef.current) {
+      if (result?.status === "submitted") {
+        setSubmitProgressValue(100);
+        if (submitBackgroundRef.current) {
+          emitComplaintSubmissionToast({
+            message: `Report submitted: ${result.ticketNumber}`,
+            status: "success",
+          });
+        } else if (isMountedRef.current) {
+          setForm((current) => ({
+            ...current,
+            ticketId: result.ticketId,
+            ticketNumber: result.ticketNumber,
+          }));
+          setSubmitProgress("");
+          setStep(5);
+        }
+      } else if (result?.status === "failed") {
+        throw new Error(result.lastError ?? "Report submission failed.");
+      } else {
         emitComplaintSubmissionToast({
-          message: `Complaint submitted: ${ticket.ticketNumber}`,
-          status: "success",
+          message: "Report saved. It will submit when your connection returns.",
+          status: "info",
         });
-      } else if (isMountedRef.current) {
-        setForm((current) => ({
-          ...current,
-          imageKeys,
-          ticketId: ticket.ticketId,
-          ticketNumber: ticket.ticketNumber,
-        }));
-        setSubmitProgress("");
-        setStep(5);
+        if (!submitBackgroundRef.current && isMountedRef.current) {
+          isLeavingToParentRef.current = true;
+          router.replace("/reports/queue");
+        }
       }
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Failed to submit complaint.";
+        error instanceof Error ? error.message : "Failed to submit report.";
       if (submitBackgroundRef.current) {
         emitComplaintSubmissionToast({
-          message: `Complaint submission failed: ${message}`,
+          message: `Report submission failed: ${message}`,
           status: "danger",
         });
       } else {
@@ -596,6 +697,7 @@ export default function NewComplaintRoute() {
       if (isMountedRef.current) {
         setIsSubmitting(false);
         setSubmitProgress("");
+        setSubmitProgressValue(0);
       }
       submitBackgroundRef.current = false;
     }
@@ -603,11 +705,12 @@ export default function NewComplaintRoute() {
 
   const navigateToComplaintsParent = useCallback(() => {
     isLeavingToParentRef.current = true;
-    router.replace("/complaints");
+    router.replace("/reports");
   }, [router]);
 
   const waitFromHome = () => {
     submitBackgroundRef.current = true;
+    isLeavingToParentRef.current = true;
     router.replace("/");
   };
 
@@ -617,7 +720,11 @@ export default function NewComplaintRoute() {
       return;
     }
 
-    router.replace({ pathname: "/complaints/[id]", params: { id: form.ticketId } });
+    isLeavingToParentRef.current = true;
+    router.replace({
+      pathname: "/report/[id]",
+      params: { id: form.ticketId },
+    });
   };
 
   const handleBackPress = useCallback(() => {
@@ -725,24 +832,10 @@ export default function NewComplaintRoute() {
 
     result.assets
       .slice(0, availableSlots)
-      .forEach((asset) => void uploadSelectedPhoto(asset.uri));
+      .forEach((asset) => void prepareSelectedPhoto(asset.uri));
   };
 
-  const openMapPicker = async () => {
-    const homeCoordinates = readCoordinates(profile?.homeCoordinates);
-    const initialCoordinates = clampToAlbay(
-      form.latitude != null && form.longitude != null
-        ? { latitude: form.latitude, longitude: form.longitude }
-        : homeCoordinates ?? {
-            latitude: albayCenter.latitude,
-            longitude: albayCenter.longitude,
-          },
-    );
-
-    setMapCoordinates(initialCoordinates);
-    setMapError(null);
-    setIsMapSheetOpen(true);
-
+  const locateCurrentPosition = async () => {
     const permission = await Location.requestForegroundPermissionsAsync();
     if (permission.status !== "granted") {
       setMapError("Location permission denied. Drag the pin manually.");
@@ -763,6 +856,21 @@ export default function NewComplaintRoute() {
     }
   };
 
+  const openMapPicker = async () => {
+    const homeCoordinates = readCoordinates(profile?.homeCoordinates);
+    const initialCoordinates = clampToAlbay(
+      form.latitude != null && form.longitude != null
+        ? { latitude: form.latitude, longitude: form.longitude }
+        : (homeCoordinates ?? albayCenter),
+    );
+
+    setMapCoordinates(initialCoordinates);
+    setMapAddress(null);
+    setMapError(null);
+    setIsMapSheetOpen(true);
+    await locateCurrentPosition();
+  };
+
   const confirmMapCoordinates = () => {
     if (!mapCoordinates) return;
     setForm((current) => ({
@@ -770,17 +878,27 @@ export default function NewComplaintRoute() {
       useHomeAddress: false,
       latitude: mapCoordinates.latitude,
       longitude: mapCoordinates.longitude,
+      municipalityCode: mapAddress?.municipalityCode ?? "",
+      barangayPsgc: mapAddress?.barangayPsgc ?? "",
+      purok: mapAddress?.purok ?? "",
     }));
     setIsMapSheetOpen(false);
   };
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1 bg-background"
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 8 : 0}
-      style={{ width }}
-    >
+    <View className="flex-1 bg-background" style={{ width }}>
+      <ChildAppBar
+        title={title}
+        description={
+          selectedCategory
+            ? formatComplaintCategoryTitle(selectedCategory.title)
+            : "Choose the closest category"
+        }
+        onBack={handleBackPress}
+        backAccessibilityLabel={
+          step > 1 ? "Previous step" : "Back to reports"
+        }
+      />
       <KeyboardAwareScrollView
         ref={scrollRef}
         automaticallyAdjustKeyboardInsets={Platform.OS === "ios"}
@@ -793,36 +911,14 @@ export default function NewComplaintRoute() {
         contentContainerStyle={{
           flexGrow: 1,
           paddingHorizontal: 20,
-          paddingTop: statusBarHeight + 16,
+          paddingTop: 8,
           gap: 16,
           paddingBottom: childBottomPadding,
         }}
         scrollIndicatorInsets={{ bottom: childBottomPadding }}
       >
         <View className="gap-4">
-          <View className="flex-row items-center gap-3">
-            <Button
-              size="icon"
-              variant="ghost"
-              onPress={handleBackPress}
-              accessibilityLabel={
-                step > 1 ? "Previous step" : "Back to complaints"
-              }
-            >
-              <ButtonIcon as={ChevronLeft} height={22} width={22} />
-            </Button>
-            <View className="flex-1">
-              <Heading size="xl">
-                {title}
-              </Heading>
-              <Text className="mt-1 text-sm text-muted-foreground">
-                {selectedCategory
-                  ? formatComplaintCategoryTitle(selectedCategory.title)
-                  : "Choose the closest category"}
-              </Text>
-            </View>
-          </View>
-          <View className="flex-row gap-2 pl-14">
+          <View className="flex-row gap-2 px-1">
             {Array.from({ length: 5 }, (_, index) => (
               <View
                 key={index}
@@ -835,9 +931,7 @@ export default function NewComplaintRoute() {
         </View>
 
         {submitError ? (
-          <Text className="text-sm text-destructive">
-            {submitError}
-          </Text>
+          <Text className="text-sm text-destructive">{submitError}</Text>
         ) : null}
 
         {step === 1 ? (
@@ -863,7 +957,7 @@ export default function NewComplaintRoute() {
                     }}
                     accessibilityRole="button"
                     accessibilityState={{ selected }}
-                    className={`min-h-19 flex-row items-center gap-3 rounded-[20px] border px-4 py-3 ${
+                    className={`min-h-19 flex-row items-center gap-3 rounded-xl border px-4 py-3 ${
                       selected
                         ? "border-primary bg-card"
                         : "border-border bg-card"
@@ -901,17 +995,19 @@ export default function NewComplaintRoute() {
 
         {step === 2 ? (
           <>
-            <Text className="ml-2 text-sm text-muted-foreground">Complaint type</Text>
+            <Text className="ml-2 text-sm text-muted-foreground">
+              Report type
+            </Text>
             <SelectField
               isRequired
-              label="Complaint type"
+              label="Report type"
               value={form.typeId}
-              placeholder="Select complaint type"
+              placeholder="Select report type"
               description={`Choose the issue type under ${selectedCategory?.title ?? "this category"}.`}
               options={reportTypeOptions}
               onChange={(value) => updateForm("typeId", value)}
               isInvalid={showErrors && !form.typeId}
-              error="Select a complaint type."
+              error="Select a report type."
             />
 
             <Text className="ml-2 text-sm text-muted-foreground">Account</Text>
@@ -931,7 +1027,9 @@ export default function NewComplaintRoute() {
               value="home-address"
               isChecked={form.useHomeAddress}
               onChange={(selected) => {
-                const homeCoordinates = readCoordinates(profile?.homeCoordinates);
+                const homeCoordinates = readCoordinates(
+                  profile?.homeCoordinates,
+                );
                 setForm((current) => ({
                   ...current,
                   useHomeAddress: selected,
@@ -939,9 +1037,17 @@ export default function NewComplaintRoute() {
                     ? {
                         ...findHomeAddress(meta, profile),
                         latitude: homeCoordinates?.latitude ?? current.latitude,
-                        longitude: homeCoordinates?.longitude ?? current.longitude,
+                        longitude:
+                          homeCoordinates?.longitude ?? current.longitude,
                       }
-                    : {}),
+                    : {
+                        municipalityCode: "",
+                        barangayPsgc: "",
+                        purok: "",
+                        landmark: "",
+                        latitude: null,
+                        longitude: null,
+                      }),
                 }));
               }}
               className="rounded-lg border border-border bg-card p-4"
@@ -1011,7 +1117,9 @@ export default function NewComplaintRoute() {
 
         {step === 3 ? (
           <>
-            <Text className="ml-2 text-sm text-muted-foreground">Report details</Text>
+            <Text className="ml-2 text-sm text-muted-foreground">
+              Report details
+            </Text>
             <ReportInput
               isRequired
               label="Description"
@@ -1020,7 +1128,7 @@ export default function NewComplaintRoute() {
               multiline
               onChangeText={(value) => updateForm("description", value)}
               isInvalid={showErrors && !form.description}
-              error="Describe the complaint."
+              error="Describe the report."
             />
             <ReportInput
               label="Action desired"
@@ -1039,54 +1147,59 @@ export default function NewComplaintRoute() {
                 </Text>
               </View>
               <Text className="mt-1 text-sm text-muted-foreground">
-                Add 1 to 3 clear photos. Upload starts after selection.
+                Add 1 to 3 clear photos. Photos are compressed and saved for
+                reliable submission.
               </Text>
               <View className="mt-3 flex-row gap-2">
                 {Array.from({ length: maxEvidencePhotos }, (_, index) => {
                   const photo = form.photoUploads[index];
                   return (
-                  <Pressable
-                    key={index}
-                    onPress={photo ? undefined : addPhotos}
-                    className={`h-14 flex-1 items-center justify-center rounded-2xl ${
-                      photo ? "bg-accent" : "bg-background"
-                    }`}
-                  >
-                    {photo ? (
-                      <>
-                        <Image
-                          source={{ uri: photo.uri }}
-                          className="h-full w-full rounded-2xl"
-                        />
-                        <Button
-                          size="icon"
-                          variant="destructive"
-                          className="absolute -right-2 -top-2 h-7 w-7 rounded-full"
-                          onPress={() => removePhoto(photo.uri)}
-                          accessibilityLabel="Remove evidence photo"
-                        >
-                          <ButtonIcon as={CircleX} height={15} width={15} />
-                        </Button>
-                        {photo.status !== "uploaded" ? (
-                          <View className="absolute inset-0 items-center justify-center rounded-2xl bg-black/45">
-                            <Text className="text-xs text-white">
-                              {photo.status === "failed" ? "Failed" : "Uploading"}
-                            </Text>
-                          </View>
-                        ) : null}
-                      </>
-                    ) : (
-                      <Camera size={18} color={mutedColor} />
-                    )}
-                  </Pressable>
+                    <Pressable
+                      key={index}
+                      onPress={photo ? undefined : addPhotos}
+                      className={`h-14 flex-1 items-center justify-center rounded-2xl ${
+                        photo ? "bg-accent" : "bg-background"
+                      }`}
+                    >
+                      {photo ? (
+                        <>
+                          <Image
+                            source={{ uri: photo.uri }}
+                            className="h-full w-full rounded-2xl"
+                          />
+                          <Button
+                            size="icon"
+                            variant="destructive"
+                            className="absolute -right-2 -top-2 h-7 w-7 rounded-full"
+                            onPress={() => removePhoto(photo.id)}
+                            accessibilityLabel="Remove evidence photo"
+                          >
+                            <ButtonIcon as={CircleX} height={15} width={15} />
+                          </Button>
+                          {photo.status !== "ready" ? (
+                            <View className="absolute inset-0 items-center justify-center rounded-2xl bg-black/45">
+                              <Text className="text-xs text-white">
+                                {photo.status === "failed"
+                                  ? "Failed"
+                                  : "Preparing"}
+                              </Text>
+                            </View>
+                          ) : null}
+                        </>
+                      ) : (
+                        <Camera size={18} color={mutedColor} />
+                      )}
+                    </Pressable>
                   );
                 })}
               </View>
               {showErrors &&
               (form.photoUploads.length < minEvidencePhotos ||
-                form.photoUploads.some((photo) => photo.status !== "uploaded")) ? (
+                form.photoUploads.some(
+                  (photo) => photo.status !== "ready",
+                )) ? (
                 <Text className="mt-2 text-xs text-destructive">
-                  Add at least 1 uploaded photo.
+                  Add at least 1 prepared photo.
                 </Text>
               ) : null}
             </View>
@@ -1113,16 +1226,13 @@ export default function NewComplaintRoute() {
               ],
               ["Description", form.description],
               ["Action desired", form.desiredAction || "Not specified"],
-              [
-                "Coordinates",
-                form.latitude != null && form.longitude != null
-                  ? `${formatCoordinate(form.latitude)}, ${formatCoordinate(form.longitude)}`
-                  : "No pin selected",
-              ],
+              ["Pinned location", form.latitude != null ? "Location saved" : "Using address only"],
               ["Photos", `${form.photoUploads.length} attached`],
             ].map(([label, value]) => (
               <View key={label} className="border-border mt-3 border-t pt-3">
-                <Text className="text-xs font-bold text-muted-foreground">{label}</Text>
+                <Text className="text-xs font-bold text-muted-foreground">
+                  {label}
+                </Text>
                 <Text className="mt-1 text-sm font-semibold text-foreground">
                   {value || "Not provided"}
                 </Text>
@@ -1138,14 +1248,14 @@ export default function NewComplaintRoute() {
           <View
             className="items-center justify-center rounded-lg border border-border bg-card p-6"
             style={{
-              minHeight: Math.max(420, height - statusBarHeight - 140),
+              minHeight: Math.max(420, height - insets.top - 180),
             }}
           >
             <View className="h-14 w-14 items-center justify-center rounded-full bg-success/20">
-              <Check size={28} color="#16a34a" />
+              <Check size={28} color={successColor} />
             </View>
             <Heading className="mt-4 text-center" size="lg">
-              We received your complaint.
+              We received your report.
             </Heading>
             <Text className="mt-4 text-xs font-bold text-muted-foreground">
               Reference Number
@@ -1158,11 +1268,8 @@ export default function NewComplaintRoute() {
               crew is assigned.
             </Text>
             <View className="mt-5 w-full flex-row gap-2">
-              <Button
-                className="flex-1"
-                onPress={navigateToComplaintsParent}
-              >
-                <ButtonText>Back to complaints</ButtonText>
+              <Button className="flex-1" onPress={navigateToComplaintsParent}>
+                <ButtonText>Reports</ButtonText>
               </Button>
               <Button
                 variant="secondary"
@@ -1176,7 +1283,7 @@ export default function NewComplaintRoute() {
         ) : null}
       </KeyboardAwareScrollView>
 
-      {step < 5 && keyboardBottomInset === 0 ? (
+      {step < 5 && !isKeyboardVisible ? (
         <View
           className="absolute inset-x-0 bottom-0 flex-row items-end justify-end px-5"
           style={{
@@ -1212,12 +1319,12 @@ export default function NewComplaintRoute() {
             <Text className="text-sm text-muted-foreground">
               {submitProgress || "Submitting report..."}
             </Text>
-            <Progress className="mt-5" value={72}>
+            <Progress className="mt-5" value={submitProgressValue}>
               <ProgressFilledTrack />
             </Progress>
             <Text className="mt-4 text-sm text-muted-foreground">
-              Evidence is already uploaded. ALECO database is creating your
-              ticket number.
+              Your report is saved locally first. Evidence and report details
+              are now being sent securely.
             </Text>
           </ModalBody>
           <ModalFooter>
@@ -1232,126 +1339,165 @@ export default function NewComplaintRoute() {
         <BottomSheetPortal
           snapPoints={["100%"]}
           enableDynamicSizing={false}
+          enableContentPanningGesture={false}
+          enableHandlePanningGesture={false}
+          enablePanDownToClose={false}
+          handleComponent={() => null}
           keyboardBehavior="interactive"
           keyboardBlurBehavior="restore"
           android_keyboardInputMode="adjustResize"
           backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
         >
-          <BottomSheetContent className="flex-1">
-              <View className="flex-row items-start justify-between gap-3 pb-1">
-                <View className="flex-1">
-                  <Heading size="lg">Choose location</Heading>
-                  <Text className="text-sm text-muted-foreground">
-                Drag the pin inside Albay, then confirm the coordinates.
+          <BottomSheetContent
+            className="flex-1"
+            style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+          >
+            <View className="flex-row items-start justify-between gap-3 pb-1">
+              <View className="flex-1">
+                <Heading size="lg">Choose location</Heading>
+                <Text className="text-sm text-muted-foreground">
+                  Move the pin within Albay, then confirm the matched address.
+                </Text>
+              </View>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="rounded-full"
+                onPress={() => setIsMapSheetOpen(false)}
+                accessibilityLabel="Close map picker"
+              >
+                <ButtonIcon as={CircleX} height={20} width={20} />
+              </Button>
+            </View>
+            <View className="flex-1 overflow-hidden rounded-lg border border-border bg-secondary">
+              {Platform.OS === "web" ||
+              !MapLibreMap ||
+              !MapLibreCamera ||
+              !Marker ||
+              !ViewAnnotation ||
+              !mapCoordinates ? (
+                <View className="h-96 items-center justify-center px-6">
+                  <MapPin size={36} color={accentColor} />
+                  <Text className="mt-2 text-center text-sm text-muted-foreground">
+                    {Platform.OS === "web"
+                      ? "Native map picker is available on Android and iOS."
+                      : (mapError ?? "Loading map...")}
                   </Text>
                 </View>
-                <Button
-                  size="icon"
-                  variant="secondary"
-                  onPress={() => setIsMapSheetOpen(false)}
-                  accessibilityLabel="Close map picker"
+              ) : (
+                <MapLibreMap
+                  style={{ flex: 1, minHeight: 420 }}
+                  mapStyle={albayMapStyle}
+                  androidView="texture"
+                  compass
+                  logo={false}
+                  attribution
+                  onDidFailLoadingMap={() => {
+                    setMapError(
+                      "Map style failed to load. Check Aleconnect server.",
+                    );
+                  }}
+                  onPress={(event) => {
+                    const [longitude, latitude] = event.nativeEvent.lngLat;
+                    setMapCoordinates(clampToAlbay({ latitude, longitude }));
+                  }}
                 >
-                  <ButtonIcon as={CircleX} height={20} width={20} />
-                </Button>
-              </View>
-              <View className="flex-1 overflow-hidden rounded-lg border border-border bg-secondary">
-                {Platform.OS === "web" ||
-                !MapLibreMap ||
-                !MapLibreCamera ||
-                !Marker ||
-                !ViewAnnotation ||
-                !mapCoordinates ? (
-                  <View className="h-96 items-center justify-center px-6">
-                    <MapPin size={36} color={accentColor} />
-                    <Text className="mt-2 text-center text-sm text-muted-foreground">
-                      {Platform.OS === "web"
-                        ? "Native map picker is available on Android and iOS."
-                        : mapError ?? "Loading map..."}
-                    </Text>
-                  </View>
-                ) : (
-                  <MapLibreMap
-                    style={{ flex: 1, minHeight: 420 }}
-                    mapStyle={albayMapStyle}
-                    androidView="texture"
-                    compass
-                    logo={false}
-                    attribution
-                    onDidFailLoadingMap={() => {
-                      setMapError("Map style failed to load. Check Aleconnect server.");
-                    }}
-                    onPress={(event) => {
+                  <MapLibreCamera
+                    center={toLngLat(mapCoordinates)}
+                    zoom={13}
+                    maxBounds={[
+                      albayBounds.minLongitude,
+                      albayBounds.minLatitude,
+                      albayBounds.maxLongitude,
+                      albayBounds.maxLatitude,
+                    ]}
+                    duration={250}
+                  />
+                  {NativeUserLocation ? <NativeUserLocation /> : null}
+                  {currentCoordinates ? (
+                    <Marker
+                      id="current-location"
+                      lngLat={toLngLat(currentCoordinates)}
+                    >
+                      <View className="h-5 w-5 rounded-full border-2 border-white bg-blue-500" />
+                    </Marker>
+                  ) : null}
+                  <ViewAnnotation
+                    id="complaint-location"
+                    lngLat={toLngLat(mapCoordinates)}
+                    draggable
+                    onDragEnd={(event) => {
                       const [longitude, latitude] = event.nativeEvent.lngLat;
                       setMapCoordinates(clampToAlbay({ latitude, longitude }));
                     }}
                   >
-                    <MapLibreCamera
-                      center={toLngLat(mapCoordinates)}
-                      zoom={13}
-                      maxBounds={[
-                        albayBounds.minLongitude,
-                        albayBounds.minLatitude,
-                        albayBounds.maxLongitude,
-                        albayBounds.maxLatitude,
-                      ]}
-                      duration={250}
-                    />
-                    {NativeUserLocation ? <NativeUserLocation /> : null}
-                    {currentCoordinates ? (
-                      <Marker
-                        id="current-location"
-                        lngLat={toLngLat(currentCoordinates)}
-                      >
-                        <View className="h-5 w-5 rounded-full border-2 border-white bg-blue-500" />
-                      </Marker>
-                    ) : null}
-                    <ViewAnnotation
-                      id="complaint-location"
-                      lngLat={toLngLat(mapCoordinates)}
-                      draggable
-                      onDragEnd={(event) => {
-                        const [longitude, latitude] = event.nativeEvent.lngLat;
-                        setMapCoordinates(clampToAlbay({ latitude, longitude }));
-                      }}
-                    >
-                      <View className="items-center">
-                        <View className="h-9 w-9 items-center justify-center rounded-full bg-primary shadow-lg">
-                          <MapPin size={20} color="white" />
-                        </View>
-                        <View className="-mt-1 h-3 w-3 rotate-45 bg-primary" />
+                    <View className="items-center">
+                      <View className="h-9 w-9 items-center justify-center rounded-full bg-primary shadow-lg">
+                        <MapPin size={20} color="white" />
                       </View>
-                    </ViewAnnotation>
-                  </MapLibreMap>
-                )}
-              </View>
-              <View className="rounded-lg border border-border bg-card p-4">
-                <Text className="text-xs font-bold text-muted-foreground">
-                  Selected coordinates
-                </Text>
-                <Text className="mt-1 text-sm font-bold text-foreground">
-                  {formatCoordinate(mapCoordinates?.latitude ?? null)},{" "}
-                  {formatCoordinate(mapCoordinates?.longitude ?? null)}
-                </Text>
-                {mapError ? (
-                  <Text className="mt-2 text-xs text-destructive">
-                    {mapError}
+                      <View className="-mt-1 h-3 w-3 rotate-45 bg-primary" />
+                    </View>
+                  </ViewAnnotation>
+                </MapLibreMap>
+              )}
+            </View>
+            <View className="rounded-xl border border-border bg-card p-4">
+              <View className="flex-row items-start gap-3">
+                <View className="mt-0.5 h-9 w-9 items-center justify-center rounded-full bg-accent/15">
+                  <MapPin size={18} color={accentColor} />
+                </View>
+                <View className="min-w-0 flex-1">
+                  <Text className="text-xs font-bold text-muted-foreground">
+                    Selected address
                   </Text>
-                ) : null}
+                  <Text className="mt-1 text-sm font-bold leading-5 text-foreground">
+                    {isResolvingAddress
+                      ? "Finding this address..."
+                      : mapAddress
+                        ? formatResolvedAddress(mapAddress)
+                        : "Move the pin to identify an address."}
+                  </Text>
+                  {mapAddress &&
+                  (!mapAddress.municipalityCode || !mapAddress.barangayPsgc) ? (
+                    <Text className="mt-2 text-xs text-warning">
+                      Municipality or barangay could not be matched. Confirm the
+                      fields after selecting this pin.
+                    </Text>
+                  ) : null}
+                </View>
               </View>
+              {mapError ? (
+                <Text className="mt-2 text-xs text-destructive">
+                  {mapError}
+                </Text>
+              ) : null}
+            </View>
+            <View className="flex-row gap-2">
               <Button
                 size="lg"
+                variant="secondary"
+                className="flex-1"
+                onPress={() => void locateCurrentPosition()}
+              >
+                <ButtonIcon as={LocateFixed} height={18} width={18} />
+                <ButtonText>Use my location</ButtonText>
+              </Button>
+              <Button
+                size="lg"
+                className="flex-1"
                 onPress={confirmMapCoordinates}
-                isDisabled={!mapCoordinates}
+                isDisabled={!mapCoordinates || isResolvingAddress}
               >
                 <ButtonIcon as={Navigation} height={18} width={18} />
-                <ButtonText>Confirm coordinates</ButtonText>
+                <ButtonText>Use this pin</ButtonText>
               </Button>
-              <Text className="text-center text-xs text-muted-foreground">
-                Map is limited to Albay coordinates.
-              </Text>
+            </View>
+            <Text className="text-center text-xs text-muted-foreground">
+              Location selection is limited to Albay.
+            </Text>
           </BottomSheetContent>
         </BottomSheetPortal>
       </BottomSheet>
-    </KeyboardAvoidingView>
+    </View>
   );
 }

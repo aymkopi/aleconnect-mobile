@@ -1,6 +1,6 @@
 export type ComplaintSubmissionToast = {
   message: string;
-  status: "success" | "danger";
+  status: "success" | "danger" | "info";
 };
 
 const listeners = new Set<(toast: ComplaintSubmissionToast) => void>();

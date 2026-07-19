@@ -2,7 +2,7 @@ import {
   formatReportDate,
   formatStatus,
   type Report,
-} from "@/features/complaints/data";
+} from "@/features/reports/data";
 import { ListSection, ListSectionItem } from "@/components/ui/list-section";
 import { Text } from "@/components/ui/text";
 import { useAppColors } from "@/hooks/use-app-colors";

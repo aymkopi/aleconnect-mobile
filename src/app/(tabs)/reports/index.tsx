@@ -4,20 +4,26 @@ import { Heading } from "@/components/ui/heading";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import { statusBarHeight } from "@/constants";
+import { useReportQueue } from "@/context/report-queue-context";
 import {
   emptyComplaintMeta,
   type ComplaintMeta,
   type Report,
-} from "@/features/complaints/data";
-import { ReportListGroup } from "@/features/complaints/report-list";
-import {
-  fetchComplaintMeta,
-  fetchComplaintReports,
-} from "@/services/complaints";
+} from "@/features/reports/data";
+import { ReportListGroup } from "@/features/reports/report-list";
 import { useAppColors } from "@/hooks/use-app-colors";
+import { useAuthSession } from "@/hooks/use-auth-session";
 import { useUnreadNotificationCount } from "@/hooks/use-unread-notification-count";
+import { fetchComplaintMeta, fetchComplaintReports } from "@/services/reports";
 import { useFocusEffect, useRouter } from "expo-router";
-import { Bell, CalendarDays, ChevronRight, FileText, Plus } from "lucide-react-native";
+import {
+  Bell,
+  CalendarDays,
+  ChevronRight,
+  CloudUpload,
+  FileText,
+  Plus,
+} from "lucide-react-native";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   RefreshControl,
@@ -40,7 +46,10 @@ function ReportsSkeleton() {
   return (
     <View className="gap-3">
       {Array.from({ length: 3 }).map((_, index) => (
-        <View key={index} className="rounded-lg border border-border bg-card p-4">
+        <View
+          key={index}
+          className="rounded-lg border border-border bg-card p-4"
+        >
           <View className="flex-row gap-3">
             <Skeleton className="h-12 w-12 rounded-2xl" />
             <View className="flex-1 gap-2">
@@ -64,39 +73,44 @@ export default function ComplaintsRoute() {
   const bottomPadding = appScrollableBottomPadding(insets.bottom);
   const [accentColor] = useAppColors(["accent"]);
   const unreadCount = useUnreadNotificationCount();
+  const { pendingCount } = useReportQueue();
+  const { session } = useAuthSession();
   const [meta, setMeta] = useState<ComplaintMeta>(emptyComplaintMeta);
   const [reports, setReports] = useState<Report[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const loadComplaints = useCallback(async (options?: { force?: boolean }) => {
-    if (options?.force) {
-      setIsRefreshing(true);
-    } else if (!hasLoadedRef.current) {
-      setIsLoading(true);
-    }
+  const loadComplaints = useCallback(
+    async (options?: { force?: boolean }) => {
+      if (options?.force) {
+        setIsRefreshing(true);
+      } else if (!hasLoadedRef.current) {
+        setIsLoading(true);
+      }
 
-    try {
-      const [nextMeta, nextReports] = await Promise.all([
-        fetchComplaintMeta(options),
-        fetchComplaintReports(options),
-      ]);
-      setMeta(nextMeta);
-      setReports(nextReports);
-      setError(null);
-    } catch (nextError) {
-      setError(
-        nextError instanceof Error
-          ? nextError.message
-          : "Failed to load complaints.",
-      );
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-      hasLoadedRef.current = true;
-    }
-  }, []);
+      try {
+        const [nextMeta, nextReports] = await Promise.all([
+          fetchComplaintMeta(options),
+          fetchComplaintReports({ ...options, userId: session?.user.id }),
+        ]);
+        setMeta(nextMeta);
+        setReports(nextReports);
+        setError(null);
+      } catch (nextError) {
+        setError(
+          nextError instanceof Error
+            ? nextError.message
+            : "Failed to load reports.",
+        );
+      } finally {
+        setIsLoading(false);
+        setIsRefreshing(false);
+        hasLoadedRef.current = true;
+      }
+    },
+    [session?.user.id],
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -117,7 +131,7 @@ export default function ComplaintsRoute() {
   );
 
   const openReport = (report: Report) => {
-    router.push({ pathname: "/complaints/[id]", params: { id: report.id } });
+    router.push({ pathname: "/report/[id]", params: { id: report.id } });
   };
 
   return (
@@ -141,7 +155,7 @@ export default function ComplaintsRoute() {
         }
       >
         <View
-          className="bg-accent rounded-b-[28px]"
+          className="rounded-b-xl bg-accent"
           style={{
             marginHorizontal: -20,
             minHeight: 200,
@@ -153,28 +167,56 @@ export default function ComplaintsRoute() {
           <View className="flex-row items-start justify-between">
             <View className="flex-1 pr-4">
               <Heading className="text-white" size="2xl">
-                Complaints
+                Reports
               </Heading>
               <Text className="mt-1 text-sm font-medium text-white/85">
                 File reports and track active service tickets.
               </Text>
             </View>
-            <Button
-              className="relative"
-              size="icon"
-              variant="ghost"
-              accessibilityLabel="Notifications"
-              onPress={() => router.push("/notifications")}
-            >
-              <ButtonIcon as={Bell} className="text-white" height={21} width={21} />
-              {unreadCount > 0 ? (
-                <View className="absolute -right-1 -top-1 min-h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1">
-                  <Text className="text-xs font-bold text-white">
-                    {unreadCount > 9 ? "9+" : unreadCount}
-                  </Text>
-                </View>
-              ) : null}
-            </Button>
+            <View className="flex-row gap-1">
+              <Button
+                className="relative rounded-full"
+                size="icon"
+                variant="ghost"
+                accessibilityLabel="Queued reports"
+                onPress={() => router.push("/reports/queue")}
+              >
+                <ButtonIcon
+                  as={CloudUpload}
+                  className="text-white"
+                  height={21}
+                  width={21}
+                />
+                {pendingCount > 0 ? (
+                  <View className="absolute -right-1 -top-1 min-h-5 min-w-5 items-center justify-center rounded-full bg-warning px-1">
+                    <Text className="text-xs font-bold text-warning-foreground">
+                      {pendingCount > 9 ? "9+" : pendingCount}
+                    </Text>
+                  </View>
+                ) : null}
+              </Button>
+              <Button
+                className="relative rounded-full"
+                size="icon"
+                variant="ghost"
+                accessibilityLabel="Notifications"
+                onPress={() => router.push("/notifications")}
+              >
+                <ButtonIcon
+                  as={Bell}
+                  className="text-white"
+                  height={21}
+                  width={21}
+                />
+                {unreadCount > 0 ? (
+                  <View className="absolute -right-1 -top-1 min-h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1">
+                    <Text className="text-xs font-bold text-white">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </Text>
+                  </View>
+                ) : null}
+              </Button>
+            </View>
           </View>
 
           <View className="flex-row items-end justify-between gap-3">
@@ -196,7 +238,11 @@ export default function ComplaintsRoute() {
                 </Heading>
               </View>
             </View>
-            <Button variant="secondary" onPress={() => router.push("/complaints/new")} size="sm">
+            <Button
+              variant="secondary"
+              onPress={() => router.push("/reports/new")}
+              size="lg"
+            >
               <ButtonIcon as={Plus} height={16} width={16} />
               <ButtonText>New</ButtonText>
             </Button>
@@ -205,9 +251,7 @@ export default function ComplaintsRoute() {
 
         <View className="flex-row items-center justify-between">
           <View>
-            <Heading size="md">
-              Recent this month
-            </Heading>
+            <Heading size="md">Recent this month</Heading>
             <Text className="text-xs font-medium text-muted-foreground">
               Latest reports only. Full history lives in archive.
             </Text>
@@ -215,7 +259,7 @@ export default function ComplaintsRoute() {
           <Button
             variant="ghost"
             size="sm"
-            onPress={() => router.push("/complaints/list")}
+            onPress={() => router.push("/reports/list")}
           >
             <ButtonText>View all</ButtonText>
             <ButtonIcon as={ChevronRight} height={16} width={16} />
@@ -223,9 +267,7 @@ export default function ComplaintsRoute() {
         </View>
 
         {error ? (
-          <Text className="text-sm text-destructive">
-            {error}
-          </Text>
+          <Text className="text-sm text-destructive">{error}</Text>
         ) : null}
 
         {isLoading ? (
@@ -242,7 +284,7 @@ export default function ComplaintsRoute() {
             <Button
               variant="secondary"
               className="mt-4"
-              onPress={() => router.push("/complaints/list")}
+              onPress={() => router.push("/reports/list")}
             >
               <ButtonIcon as={FileText} height={16} width={16} />
               <ButtonText>Open archive</ButtonText>
@@ -252,7 +294,8 @@ export default function ComplaintsRoute() {
           <ReportListGroup
             reports={monthReports.slice(0, 5)}
             getColor={(report) =>
-              meta.categories.find((item) => item.id === report.categoryId)?.color
+              meta.categories.find((item) => item.id === report.categoryId)
+                ?.color
             }
             onPress={openReport}
           />

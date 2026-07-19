@@ -1,8 +1,9 @@
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useAppColors } from "@/hooks/use-app-colors";
 import * as ImagePicker from "expo-image-picker";
-import { useFocusEffect, useRouter } from "expo-router";
+import { Stack, useFocusEffect, useRouter } from "expo-router";
 
+import { ChildAppBar } from "@/components/child-app-bar";
 import {
   Alert,
   AlertText,
@@ -15,13 +16,14 @@ import {
 import {
   BottomSheet,
   BottomSheetBackdrop,
-  BottomSheetContent,
   BottomSheetPortal,
+  BottomSheetScrollView,
   type BottomSheetRef,
 } from "@/components/ui/bottomsheet";
 import { Button, ButtonText } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { ListSection } from "@/components/ui/list-section";
+import { Pressable } from "@/components/ui/pressable";
 import { Text } from "@/components/ui/text";
 import {
   LucideBookUser,
@@ -36,9 +38,9 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   BackHandler,
   Keyboard,
-  Pressable,
   ScrollView,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AccountDetailsBuilder } from "@/features/profile/components/AccountDetailsBuilder";
@@ -62,6 +64,7 @@ type FeedbackMessage = {
 export default function ProfileDetailsRoute() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { height: screenHeight } = useWindowDimensions();
   const [accentColor] = useAppColors(["accent"]);
   const scrollRef = useRef<ScrollView | null>(null);
   const editSheetRef = useRef<BottomSheetRef>(null);
@@ -327,45 +330,61 @@ export default function ProfileDetailsRoute() {
 
   if (!session) {
     return (
-      <ScrollView
-        ref={scrollRef}
-        contentInsetAdjustmentBehavior="automatic"
-        className="flex-1 bg-background"
-        contentContainerStyle={{
-          flexGrow: 1,
-          justifyContent: "center",
-          padding: 20,
-          paddingBottom: bottomPadding,
-        }}
-      >
-        <View className="gap-3 rounded-lg border border-border bg-card p-6">
-          <Heading size="lg">
-            Sign in required
-          </Heading>
-          <Text className="text-sm text-muted-foreground">
-            Account details are only available for signed-in users.
-          </Text>
-          <Button
-            onPress={() => {
-              router.push("/sign-in");
-            }}
-          >
-            <ButtonText>Sign in</ButtonText>
-          </Button>
-        </View>
-      </ScrollView>
+      <View className="flex-1 bg-background">
+        <Stack.Screen options={{ headerShown: false }} />
+        <ChildAppBar
+          title="Account"
+          description="Personal and service details"
+          onBack={handleBackPress}
+          backAccessibilityLabel="Back to profile"
+        />
+        <ScrollView
+          ref={scrollRef}
+          contentInsetAdjustmentBehavior="automatic"
+          className="flex-1 bg-background"
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: "center",
+            padding: 20,
+            paddingTop: 8,
+            paddingBottom: bottomPadding,
+          }}
+        >
+          <View className="gap-3 rounded-lg border border-border bg-card p-6">
+            <Heading size="lg">Sign in required</Heading>
+            <Text className="text-sm text-muted-foreground">
+              Account details are only available for signed-in users.
+            </Text>
+            <Button
+              onPress={() => {
+                router.push("/sign-in");
+              }}
+            >
+              <ButtonText>Sign in</ButtonText>
+            </Button>
+          </View>
+        </ScrollView>
+      </View>
     );
   }
 
   return (
     <View className="flex-1 bg-background">
+      <Stack.Screen options={{ headerShown: false }} />
+      <ChildAppBar
+        title="Account"
+        description="Personal and service details"
+        onBack={handleBackPress}
+        backAccessibilityLabel="Back to profile"
+      />
       <ScrollView
         ref={scrollRef}
         contentInsetAdjustmentBehavior="automatic"
         className="flex-1 bg-background"
         contentContainerStyle={{
           flexGrow: 1,
-          padding: 20,
+          paddingHorizontal: 20,
+          paddingTop: 8,
           gap: 6,
           paddingBottom: bottomPadding,
         }}
@@ -520,9 +539,16 @@ export default function ProfileDetailsRoute() {
         <BottomSheetPortal
           backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
           enableDynamicSizing
-          maxDynamicContentSize={440}
+          keyboardBehavior="fillParent"
+          maxDynamicContentSize={Math.min(520, screenHeight * 0.75)}
         >
-          <BottomSheetContent>
+          <BottomSheetScrollView
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{
+              paddingHorizontal: 20,
+              paddingBottom: Math.max(insets.bottom, 20),
+            }}
+          >
             <ProfileDetailsSheetContent
               editingField={editingField}
               sheetTitle={sheetTitle}
@@ -543,7 +569,7 @@ export default function ProfileDetailsRoute() {
                 void handleSaveUpdate();
               }}
             />
-          </BottomSheetContent>
+          </BottomSheetScrollView>
         </BottomSheetPortal>
       </BottomSheet>
     </View>

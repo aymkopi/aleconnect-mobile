@@ -13,3 +13,8 @@ export const aleconnectApiBaseUrl = (
   getExpoHostBaseUrl() ??
   "http://localhost:5173"
 ).replace(/\/$/, "");
+
+export const aleconnectAssetBaseUrl = aleconnectApiBaseUrl.replace(
+  "://api.aleconnect.app",
+  "://aleconnect.app",
+);

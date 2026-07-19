@@ -1,29 +1,28 @@
-import { appScrollableBottomPadding } from "@/components/floating-app-bar";
+import { ChildAppBar } from "@/components/child-app-bar";
 import { Button, ButtonIcon } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { Menu, MenuItem, MenuItemLabel } from "@/components/ui/menu";
 import { SearchField } from "@/components/ui/search-field";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
-import { statusBarHeight } from "@/constants";
 import {
   emptyComplaintMeta,
   formatComplaintCategoryTitle,
   formatStatus,
   type ComplaintMeta,
   type Report,
-} from "@/features/complaints/data";
-import { ReportListGroup } from "@/features/complaints/report-list";
+} from "@/features/reports/data";
+import { ReportListGroup } from "@/features/reports/report-list";
+import { useAppColors } from "@/hooks/use-app-colors";
+import { useAuthSession } from "@/hooks/use-auth-session";
 import {
   fetchComplaintMeta,
   fetchComplaintReports,
-} from "@/services/complaints";
-import { useAppColors } from "@/hooks/use-app-colors";
+} from "@/services/reports";
 import { useFocusEffect, useRouter } from "expo-router";
 import {
   ArrowDownNarrowWide,
   Check,
-  ChevronLeft,
   Filter,
   Search,
 } from "lucide-react-native";
@@ -59,7 +58,10 @@ function ArchiveSkeleton() {
   return (
     <View className="gap-3">
       {Array.from({ length: 5 }).map((_, index) => (
-        <View key={index} className="rounded-lg border border-border bg-card p-4">
+        <View
+          key={index}
+          className="rounded-lg border border-border bg-card p-4"
+        >
           <View className="flex-row gap-3">
             <Skeleton className="h-12 w-12 rounded-2xl" />
             <View className="flex-1 gap-2">
@@ -80,8 +82,9 @@ export default function ComplaintArchiveRoute() {
   const { width } = useWindowDimensions();
   const scrollRef = useRef<ScrollView | null>(null);
   const hasLoadedRef = useRef(false);
-  const bottomPadding = appScrollableBottomPadding(insets.bottom);
+  const bottomPadding = Math.max(insets.bottom, 16) + 20;
   const [accentColor] = useAppColors(["accent"]);
+  const { session } = useAuthSession();
   const [meta, setMeta] = useState<ComplaintMeta>(emptyComplaintMeta);
   const [reports, setReports] = useState<Report[]>([]);
   const [query, setQuery] = useState("");
@@ -101,7 +104,7 @@ export default function ComplaintArchiveRoute() {
     try {
       const [nextMeta, nextReports] = await Promise.all([
         fetchComplaintMeta(options),
-        fetchComplaintReports(options),
+        fetchComplaintReports({ ...options, userId: session?.user.id }),
       ]);
       setMeta(nextMeta);
       setReports(nextReports);
@@ -110,14 +113,14 @@ export default function ComplaintArchiveRoute() {
       setError(
         nextError instanceof Error
           ? nextError.message
-          : "Failed to load complaints.",
+          : "Failed to load reports.",
       );
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
       hasLoadedRef.current = true;
     }
-  }, []);
+  }, [session?.user.id]);
 
   const handleBack = useCallback(() => {
     if (router.canGoBack()) {
@@ -125,7 +128,7 @@ export default function ComplaintArchiveRoute() {
       return;
     }
 
-    router.replace("/complaints");
+    router.replace("/reports");
   }, [router]);
 
   useFocusEffect(
@@ -167,12 +170,16 @@ export default function ComplaintArchiveRoute() {
       )
       .sort((a, b) => {
         if (sortMode === "oldest") {
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
         }
         if (sortMode === "status") {
           return formatStatus(a.status).localeCompare(formatStatus(b.status));
         }
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
       });
   }, [categoryId, query, reports, sortMode]);
 
@@ -190,11 +197,17 @@ export default function ComplaintArchiveRoute() {
   }, [visibleReports]);
 
   const openReport = (report: Report) => {
-    router.push({ pathname: "/complaints/[id]", params: { id: report.id } });
+    router.push({ pathname: "/report/[id]", params: { id: report.id } });
   };
 
   return (
     <View className="flex-1 bg-background" style={{ width }}>
+      <ChildAppBar
+        title="Report archive"
+        description="Search, filter, and review all tickets"
+        onBack={handleBack}
+        backAccessibilityLabel="Back to reports"
+      />
       <ScrollView
         ref={scrollRef}
         className="bg-background"
@@ -203,7 +216,7 @@ export default function ComplaintArchiveRoute() {
           paddingHorizontal: 20,
           gap: 16,
           paddingBottom: bottomPadding,
-          paddingTop: statusBarHeight + 18,
+          paddingTop: 8,
         }}
         refreshControl={
           <RefreshControl
@@ -214,25 +227,6 @@ export default function ComplaintArchiveRoute() {
           />
         }
       >
-        <View className="flex-row items-center gap-3">
-          <Button
-            size="icon"
-            variant="secondary"
-            onPress={handleBack}
-            accessibilityLabel="Back to complaints"
-          >
-            <ButtonIcon as={ChevronLeft} height={21} width={21} />
-          </Button>
-          <View className="flex-1">
-            <Heading size="xl">
-              Report archive
-            </Heading>
-            <Text className="text-xs font-medium text-muted-foreground">
-              Search, filter, and review all recent tickets.
-            </Text>
-          </View>
-        </View>
-
         <View className="flex-row items-end gap-2">
           <View className="flex-1">
             <SearchField
@@ -246,8 +240,15 @@ export default function ComplaintArchiveRoute() {
           <Menu
             placement="bottom right"
             offset={6}
+            selectionMode="single"
+            selectedKeys={new Set([sortMode])}
             trigger={(triggerProps) => (
-              <Button {...triggerProps} size="icon" variant="secondary" accessibilityLabel="Sort reports">
+              <Button
+                {...triggerProps}
+                size="icon"
+                variant="secondary"
+                accessibilityLabel="Sort reports"
+              >
                 <ButtonIcon as={ArrowDownNarrowWide} height={18} width={18} />
               </Button>
             )}
@@ -260,10 +261,13 @@ export default function ComplaintArchiveRoute() {
               <MenuItem
                 key={value}
                 textValue={label}
+                accessibilityState={{ selected: sortMode === value }}
                 onPress={() => setSortMode(value as SortMode)}
               >
                 <View className="w-5">
-                  {sortMode === value ? <Check size={16} color={accentColor} /> : null}
+                  {sortMode === value ? (
+                    <Check size={16} color={accentColor} />
+                  ) : null}
                 </View>
                 <MenuItemLabel>{label}</MenuItemLabel>
               </MenuItem>
@@ -272,8 +276,15 @@ export default function ComplaintArchiveRoute() {
           <Menu
             placement="bottom right"
             offset={6}
+            selectionMode="single"
+            selectedKeys={new Set([categoryId])}
             trigger={(triggerProps) => (
-              <Button {...triggerProps} size="icon" variant="secondary" accessibilityLabel="Filter reports">
+              <Button
+                {...triggerProps}
+                size="icon"
+                variant="secondary"
+                accessibilityLabel="Filter reports"
+              >
                 <ButtonIcon as={Filter} height={18} width={18} />
               </Button>
             )}
@@ -288,6 +299,7 @@ export default function ComplaintArchiveRoute() {
               <MenuItem
                 key={category.id}
                 textValue={category.title}
+                accessibilityState={{ selected: categoryId === category.id }}
                 onPress={() => setCategoryId(category.id)}
               >
                 <View className="w-5">
@@ -302,15 +314,11 @@ export default function ComplaintArchiveRoute() {
         </View>
 
         <View className="flex-row items-center justify-between">
-          <Heading size="sm">
-            {visibleReports.length} reports
-          </Heading>
+          <Heading size="sm">{visibleReports.length} reports</Heading>
         </View>
 
         {error ? (
-          <Text className="text-sm text-destructive">
-            {error}
-          </Text>
+          <Text className="text-sm text-destructive">{error}</Text>
         ) : null}
 
         {isLoading ? (
@@ -335,8 +343,9 @@ export default function ComplaintArchiveRoute() {
                 <ReportListGroup
                   reports={group.reports}
                   getColor={(report) =>
-                    meta.categories.find((item) => item.id === report.categoryId)
-                      ?.color
+                    meta.categories.find(
+                      (item) => item.id === report.categoryId,
+                    )?.color
                   }
                   onPress={openReport}
                 />

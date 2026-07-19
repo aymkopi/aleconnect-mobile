@@ -1,42 +1,54 @@
+import { Directory, File, Paths } from "expo-file-system";
+import * as ImageManipulator from "expo-image-manipulator";
+
 // Change this value when ALECO/R2 evidence file-size policy changes.
-const evidenceMaxBytes = 5 * 1024 * 1024;
+export const evidenceMaxBytes = 5 * 1024 * 1024;
 const evidenceDimension = 1400;
 const evidenceCompressionSteps = [0.85, 0.75, 0.65, 0.55, 0.45, 0.35];
 
-function base64ToArrayBuffer(base64: string): ArrayBuffer {
-  const binaryString = atob(base64);
-  const bytes = new Uint8Array(binaryString.length);
+export type PreparedEvidencePhoto = {
+  id: string;
+  uri: string;
+  size: number;
+};
 
-  for (let i = 0; i < binaryString.length; i += 1) {
-    bytes[i] = binaryString.charCodeAt(i);
-  }
-
-  return bytes.buffer;
-}
-
-export async function compressEvidencePhoto(uri: string): Promise<ArrayBuffer> {
-  const ImageManipulator = await import("expo-image-manipulator");
+export async function prepareEvidencePhoto(
+  sourceUri: string,
+  reportId: string,
+  photoId: string,
+): Promise<PreparedEvidencePhoto> {
+  const directory = new Directory(Paths.document, "report-evidence", reportId);
+  directory.create({ idempotent: true, intermediates: true });
+  const destination = new File(directory, `${photoId}.webp`);
 
   for (const quality of evidenceCompressionSteps) {
-    const manipulated = await ImageManipulator.manipulateAsync(
-      uri,
+    const result = await ImageManipulator.manipulateAsync(
+      sourceUri,
       [{ resize: { width: evidenceDimension } }],
-      {
-        format: ImageManipulator.SaveFormat.WEBP,
-        compress: quality,
-        base64: true,
-      },
+      { format: ImageManipulator.SaveFormat.WEBP, compress: quality },
     );
+    const compressed = new File(result.uri);
 
-    if (!manipulated.base64) {
-      continue;
-    }
-
-    const imageBytes = base64ToArrayBuffer(manipulated.base64);
-    if (imageBytes.byteLength <= evidenceMaxBytes) {
-      return imageBytes;
+    if (compressed.size <= evidenceMaxBytes) {
+      if (destination.exists) destination.delete();
+      compressed.copy(destination);
+      return { id: photoId, uri: destination.uri, size: destination.size };
     }
   }
 
   throw new Error("Photo is too large. Choose a smaller photo.");
+}
+
+export function readEvidencePhoto(uri: string) {
+  return new File(uri).arrayBuffer();
+}
+
+export function deleteEvidencePhoto(uri: string) {
+  const file = new File(uri);
+  if (file.exists) file.delete();
+}
+
+export function deleteReportEvidence(reportId: string) {
+  const directory = new Directory(Paths.document, "report-evidence", reportId);
+  if (directory.exists) directory.delete();
 }

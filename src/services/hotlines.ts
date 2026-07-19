@@ -31,13 +31,16 @@ type HotlineResponse = {
   readonly categories: HotlineCategory[];
 };
 
-const cacheKey = "hotlines_cache_v2";
+const cacheKey = "hotlines_cache_v3";
 const cacheTtlMs = 24 * 60 * 60 * 1000;
 let memoryCache: { fetchedAt: number; value: HotlineResponse } | null = null;
 let request: Promise<HotlineResponse> | null = null;
 
-async function readCache() {
-  if (memoryCache && Date.now() - memoryCache.fetchedAt <= cacheTtlMs) {
+async function readCache(allowStale = false) {
+  if (
+    memoryCache &&
+    (allowStale || Date.now() - memoryCache.fetchedAt <= cacheTtlMs)
+  ) {
     return memoryCache.value;
   }
 
@@ -46,7 +49,11 @@ async function readCache() {
 
   try {
     const parsed = JSON.parse(raw) as typeof memoryCache;
-    if (!parsed || Date.now() - parsed.fetchedAt > cacheTtlMs) return null;
+    if (
+      !parsed ||
+      (!allowStale && Date.now() - parsed.fetchedAt > cacheTtlMs)
+    )
+      return null;
     memoryCache = parsed;
     return parsed.value;
   } catch {
@@ -71,6 +78,10 @@ export async function fetchHotlines(options?: { force?: boolean }) {
     .then(async (data) => {
       await writeCache(data);
       return data;
+    }, async (error) => {
+      const stale = await readCache(true);
+      if (stale) return stale;
+      throw error;
     })
     .finally(() => {
       request = null;

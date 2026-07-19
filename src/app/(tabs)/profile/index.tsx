@@ -8,11 +8,12 @@ import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { ListSection, ListSectionItem } from "@/components/ui/list-section";
 import { Menu, MenuItem, MenuItemLabel } from "@/components/ui/menu";
+import { Pressable } from "@/components/ui/pressable";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import { statusBarHeight } from "@/constants";
-import { useAuthSession } from "@/hooks/use-auth-session";
 import { useAppColors } from "@/hooks/use-app-colors";
+import { useAuthSession } from "@/hooks/use-auth-session";
 import Feather from "@expo/vector-icons/Feather";
 import { useFocusEffect, useRouter } from "expo-router";
 import {
@@ -34,7 +35,6 @@ import {
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Linking,
-  Pressable,
   RefreshControl,
   ScrollView,
   View,
@@ -71,9 +71,7 @@ function ProfileSection({
   title: string;
   children: ReactNode;
 }) {
-  return (
-    <ListSection title={title}>{children}</ListSection>
-  );
+  return <ListSection title={title}>{children}</ListSection>;
 }
 
 function ProfileRow({
@@ -129,9 +127,7 @@ function QuickAction({
       >
         {icon}
         <View className="gap-1">
-          <Text className="text-sm font-bold text-foreground">
-            {title}
-          </Text>
+          <Text className="text-sm font-bold text-foreground">{title}</Text>
           <Text className="text-xs text-muted-foreground" numberOfLines={2}>
             {description}
           </Text>
@@ -160,7 +156,11 @@ export default function ProfileRoute() {
 
   const activeTheme = hasAdaptiveThemes ? "system" : theme;
   const activeThemeLabel =
-    activeTheme === "system" ? "Auto" : activeTheme === "light" ? "Light" : "Dark";
+    activeTheme === "system"
+      ? "Auto"
+      : activeTheme === "light"
+        ? "Light"
+        : "Dark";
   const initials =
     (profile?.fullName ?? "?")
       .split(/\s+/)
@@ -172,7 +172,7 @@ export default function ProfileRoute() {
 
   useEffect(() => {
     void router.prefetch("/profile/details");
-    void router.prefetch("/profile/push-notifications");
+    void router.prefetch("/notification-settings");
   }, [router]);
 
   useFocusEffect(
@@ -253,7 +253,7 @@ export default function ProfileRoute() {
       }
     >
       <View
-        className="bg-accent rounded-b-[28px]"
+        className="rounded-b-xl bg-accent"
         style={{
           marginHorizontal: -20,
           minHeight: 208,
@@ -266,7 +266,10 @@ export default function ProfileRoute() {
           <Heading size="xl" style={{ color: accentForegroundColor }}>
             Profile
           </Heading>
-          <Text className="text-sm" style={{ color: accentForegroundColor, opacity: 0.76 }}>
+          <Text
+            className="text-sm"
+            style={{ color: accentForegroundColor, opacity: 0.76 }}
+          >
             Account access, alerts, and app preferences.
           </Text>
         </View>
@@ -350,7 +353,7 @@ export default function ProfileRoute() {
           title="Alerts"
           description="Push and feeder alerts"
           onPress={() =>
-            router.push(isGuest ? "/sign-in" : "/profile/push-notifications")
+            router.push(isGuest ? "/sign-in" : "/notification-settings")
           }
         />
       </View>
@@ -368,10 +371,12 @@ export default function ProfileRoute() {
             <Menu
               placement="bottom right"
               offset={6}
+              selectionMode="single"
+              selectedKeys={new Set([activeTheme])}
               trigger={(triggerProps) => (
                 <Button
                   {...triggerProps}
-                  size="sm"
+                  size="default"
                   variant="outline"
                   className="w-28 justify-between"
                   accessibilityLabel="Choose theme"
@@ -389,6 +394,7 @@ export default function ProfileRoute() {
                 <MenuItem
                   key={value}
                   textValue={label}
+                  accessibilityState={{ selected: activeTheme === value }}
                   onPress={() =>
                     Uniwind.setTheme(value as "system" | "light" | "dark")
                   }

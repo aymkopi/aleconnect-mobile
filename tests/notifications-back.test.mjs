@@ -11,5 +11,5 @@ test("notifications uses one parent-safe handler for visible and hardware back",
   assert.match(source, /router\.canGoBack\(\)/);
   assert.match(source, /router\.replace\("\/home"\)/);
   assert.match(source, /BackHandler\.addEventListener/);
-  assert.match(source, /onPress=\{handleBack\}/);
+  assert.match(source, /onBack=\{handleBack\}/);
 });

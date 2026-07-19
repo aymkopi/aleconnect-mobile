@@ -64,10 +64,10 @@ export default function HomeRoute() {
   const quickActions = [
     {
       title: "Report an issue",
-      description: "File a complaint or service request.",
+      description: "Send a report or service request.",
       icon: FileText,
       onPress: () =>
-        router.push(session ? "/complaints/new" : "/sign-in"),
+        router.push(session ? "/reports/new" : "/sign-in"),
     },
     {
       title: "Call support",

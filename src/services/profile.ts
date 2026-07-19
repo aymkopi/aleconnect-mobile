@@ -22,21 +22,6 @@ type MobileProfileResponse = {
   mustChangePassword: boolean;
 };
 
-function parseCoordinates(value: string | null): Record<string, unknown> | null {
-  if (!value) {
-    return null;
-  }
-
-  try {
-    const parsed = JSON.parse(value) as unknown;
-    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
-      ? (parsed as Record<string, unknown>)
-      : null;
-  } catch {
-    return null;
-  }
-}
-
 function toProfileRow(profile: MobileProfileResponse): Record<string, unknown> {
   const fullAddress =
     [profile.purokOrStreet, profile.barangayName, profile.municipalityName]
@@ -57,7 +42,7 @@ function toProfileRow(profile: MobileProfileResponse): Record<string, unknown> {
     meter_serial_num: profile.meterSerialNumber,
     pole_number: profile.poleNumber,
     service_type: profile.customerClass,
-    home_coordinates: parseCoordinates(profile.mapCoordinates),
+    home_coordinates: profile.mapCoordinates,
     is_active: true,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),

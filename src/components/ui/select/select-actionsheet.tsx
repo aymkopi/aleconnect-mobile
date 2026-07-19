@@ -52,7 +52,7 @@ export const UIActionsheet = createActionsheet({
 const actionsheetStyle = tva({ base: 'w-full h-full web:pointer-events-none' });
 
 const actionsheetContentStyle = tva({
-  base: 'mt-auto items-stretch overflow-hidden rounded-t-[28px] border border-border bg-background px-5 pb-safe pt-2 shadow-lg web:pointer-events-auto web:select-none',
+  base: 'mt-auto items-stretch overflow-hidden rounded-t-xl border border-border bg-background px-5 pb-safe pt-2 shadow-lg web:pointer-events-auto web:select-none',
 });
 
 const actionsheetItemStyle = tva({

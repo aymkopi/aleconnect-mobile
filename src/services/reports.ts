@@ -4,7 +4,7 @@ import type {
   ComplaintMeta,
   Report,
   ReportDetail,
-} from "@/features/complaints/data";
+} from "@/features/reports/data";
 import { apiRequest } from "@/services/api";
 
 export type EvidenceUpload = {
@@ -12,14 +12,15 @@ export type EvidenceUpload = {
   uploadUrl: string;
 };
 
-const complaintMetaCacheKey = "complaint_meta_cache_v1";
+const complaintMetaCacheKey = "complaint_meta_cache_v2";
 const complaintMetaCacheTtlMs = 90 * 24 * 60 * 60 * 1000;
 const complaintReportsCacheTtlMs = 60 * 1000;
+const complaintReportsStaleTtlMs = 90 * 24 * 60 * 60 * 1000;
 
 let complaintMetaMemoryCache: ComplaintMetaCache | null = null;
 let complaintMetaRequest: Promise<ComplaintMeta> | null = null;
 let complaintReportsMemoryCache:
-  | { fetchedAt: number; value: Report[] }
+  | { fetchedAt: number; userId: string; value: Report[] }
   | null = null;
 let complaintReportsRequest: Promise<Report[]> | null = null;
 
@@ -28,7 +29,7 @@ type ComplaintMetaCache = {
   value: ComplaintMeta;
 };
 
-async function readComplaintMetaCache(): Promise<ComplaintMeta | null> {
+async function readComplaintMetaCache(allowStale = false): Promise<ComplaintMeta | null> {
   if (
     complaintMetaMemoryCache &&
     Date.now() - complaintMetaMemoryCache.fetchedAt <= complaintMetaCacheTtlMs
@@ -43,7 +44,7 @@ async function readComplaintMetaCache(): Promise<ComplaintMeta | null> {
 
   try {
     const parsed = JSON.parse(raw) as ComplaintMetaCache;
-    if (Date.now() - parsed.fetchedAt > complaintMetaCacheTtlMs) {
+    if (!allowStale && Date.now() - parsed.fetchedAt > complaintMetaCacheTtlMs) {
       return null;
     }
 
@@ -73,6 +74,14 @@ export async function clearComplaintCache(): Promise<void> {
   await clearComplaintMetaCache();
 }
 
+export async function clearReportListCache(userId: string): Promise<void> {
+  if (complaintReportsMemoryCache?.userId === userId) {
+    complaintReportsMemoryCache = null;
+  }
+  complaintReportsRequest = null;
+  await AsyncStorage.removeItem(`report_list_cache_v1:${userId}`);
+}
+
 export async function fetchComplaintMeta(
   options?: { force?: boolean },
 ): Promise<ComplaintMeta> {
@@ -92,6 +101,11 @@ export async function fetchComplaintMeta(
       await writeComplaintMetaCache(meta);
       return meta;
     })
+    .catch(async (error) => {
+      const cached = await readComplaintMetaCache(true);
+      if (cached) return cached;
+      throw error;
+    })
     .finally(() => {
       complaintMetaRequest = null;
     });
@@ -100,15 +114,46 @@ export async function fetchComplaintMeta(
 }
 
 export async function fetchComplaintReports(
-  options?: { force?: boolean },
+  options?: { force?: boolean; userId?: string },
 ): Promise<Report[]> {
+  const userId = options?.userId ?? "";
   if (
     !options?.force &&
+    userId &&
     complaintReportsMemoryCache &&
+    complaintReportsMemoryCache.userId === userId &&
     Date.now() - complaintReportsMemoryCache.fetchedAt <=
       complaintReportsCacheTtlMs
   ) {
     return complaintReportsMemoryCache.value;
+  }
+
+  const storageKey = userId ? `report_list_cache_v1:${userId}` : null;
+  const readStoredReports = async (allowStale: boolean) => {
+    if (!storageKey) return null;
+    const raw = await AsyncStorage.getItem(storageKey);
+    if (!raw) return null;
+    try {
+      const parsed = JSON.parse(raw) as {
+        fetchedAt: number;
+        value: Report[];
+      };
+      if (
+        Date.now() - parsed.fetchedAt >
+        (allowStale ? complaintReportsStaleTtlMs : complaintReportsCacheTtlMs)
+      ) {
+        return null;
+      }
+      complaintReportsMemoryCache = { ...parsed, userId };
+      return parsed.value;
+    } catch {
+      return null;
+    }
+  };
+
+  if (!options?.force) {
+    const stored = await readStoredReports(false);
+    if (stored) return stored;
   }
 
   if (complaintReportsRequest) {
@@ -118,12 +163,27 @@ export async function fetchComplaintReports(
   complaintReportsRequest = apiRequest<{ reports: Report[] }>(
     "/api/mobile/complaints",
   )
-    .then((response) => {
+    .then(async (response) => {
       complaintReportsMemoryCache = {
         fetchedAt: Date.now(),
+        userId,
         value: response.reports,
       };
+      if (storageKey) {
+        await AsyncStorage.setItem(
+          storageKey,
+          JSON.stringify({
+            fetchedAt: complaintReportsMemoryCache.fetchedAt,
+            value: response.reports,
+          }),
+        );
+      }
       return response.reports;
+    })
+    .catch(async (error) => {
+      const stored = await readStoredReports(true);
+      if (stored) return stored;
+      throw error;
     })
     .finally(() => {
       complaintReportsRequest = null;
@@ -161,6 +221,8 @@ export async function uploadEvidenceToR2(uploadUrl: string, imageBytes: ArrayBuf
 }
 
 export type SubmitComplaintInput = {
+  idempotencyKey: string;
+  draftIds: string[];
   typeId: string;
   accountNumber: string;
   barangayPsgc: string;

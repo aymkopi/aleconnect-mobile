@@ -33,7 +33,7 @@ export function FloatingTabsBar({
     : undefined;
 
   if (
-    pathname.endsWith("/complaints/new") ||
+    pathname.endsWith("/reports/new") ||
     pathname.endsWith("/profile/details") ||
     (nestedRouteName && nestedRouteName !== "index")
   ) {

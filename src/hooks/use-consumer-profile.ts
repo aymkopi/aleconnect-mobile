@@ -11,8 +11,8 @@ import {
 import { fetchCurrentConsumerProfileView } from "@/services/profile";
 
 const profileCacheTtlMs = 24 * 60 * 60 * 1000;
-const profileCachePayloadPrefix = "profile_cache_payload_v1";
-const profileCacheFetchedAtPrefix = "profile_cache_fetched_at_v1";
+const profileCachePayloadPrefix = "profile_cache_payload_v2";
+const profileCacheFetchedAtPrefix = "profile_cache_fetched_at_v2";
 const profileMemoryCache = new Map<
   string,
   { fetchedAt: number; value: ConsumerProfileView | null }

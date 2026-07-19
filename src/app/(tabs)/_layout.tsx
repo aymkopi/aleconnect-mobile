@@ -25,10 +25,10 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="complaints"
+        name="reports"
         options={{
           popToTopOnBlur: true,
-          title: "Complaints",
+          title: "Reports",
         }}
       />
       <Tabs.Screen

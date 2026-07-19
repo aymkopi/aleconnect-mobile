@@ -78,7 +78,6 @@ export type ComplaintFormState = {
   desiredAction: string;
   photos: string[];
   photoUploads: ComplaintPhotoUpload[];
-  imageKeys: string[];
   latitude: number | null;
   longitude: number | null;
   ticketId: string | null;
@@ -86,10 +85,10 @@ export type ComplaintFormState = {
 };
 
 export type ComplaintPhotoUpload = {
+  id: string;
   uri: string;
-  key: string | null;
-  uploadUrl: string | null;
-  status: "processing" | "uploaded" | "failed";
+  size: number | null;
+  status: "processing" | "ready" | "failed";
   error?: string;
 };
 
@@ -113,7 +112,6 @@ export const initialComplaintForm: ComplaintFormState = {
   desiredAction: "",
   photos: [],
   photoUploads: [],
-  imageKeys: [],
   latitude: null,
   longitude: null,
   ticketId: null,

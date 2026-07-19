@@ -1,10 +1,11 @@
-import { Redirect, useFocusEffect, useRouter } from "expo-router";
+import { Redirect, Stack, useFocusEffect, useRouter } from "expo-router";
 import { Eye, EyeOff, LockKeyhole } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { BackHandler, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
 import { Alert, AlertText } from "@/components/ui/alert";
+import { ChildAppBar } from "@/components/child-app-bar";
 import {
   Button,
   ButtonSpinner,
@@ -17,9 +18,7 @@ import {
   FormControlLabel,
   FormControlLabelText,
 } from "@/components/ui/form-control";
-import { Heading } from "@/components/ui/heading";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
-import { Text } from "@/components/ui/text";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { changeConsumerPassword } from "@/services/auth";
 
@@ -143,6 +142,16 @@ export default function ChangePasswordRoute() {
 
   return (
     <View className="flex-1 bg-background">
+      <Stack.Screen options={{ headerShown: false }} />
+      <ChildAppBar
+        title={isRequired ? "Secure your account" : "Change password"}
+        description="Use a unique password with at least 8 characters"
+        onBack={() => {
+          if (!isRequired) router.replace("/profile");
+        }}
+        backAccessibilityLabel="Back to profile"
+        showBackButton={!isRequired}
+      />
       <KeyboardAwareScrollView
         bottomOffset={32}
         contentInsetAdjustmentBehavior="automatic"
@@ -154,15 +163,6 @@ export default function ChangePasswordRoute() {
           paddingBottom: 40,
         }}
       >
-        <View className="gap-2">
-          <Heading size="xl">
-            {isRequired ? "Secure your account" : "Change password"}
-          </Heading>
-          <Text className="text-sm leading-5 text-muted-foreground">
-            Use a unique password with at least 8 characters.
-          </Text>
-        </View>
-
         {isRequired ? (
           <Alert className="border-accent/20 bg-accent/10 px-3 py-3">
             <AlertText>

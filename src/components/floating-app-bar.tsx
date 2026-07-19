@@ -35,7 +35,7 @@ interface FloatingAppBarProps {
  */
 const APP_BAR_ITEMS: readonly AppBarItem[] = [
   { title: "Home", icon: Home },
-  { title: "Complaints", icon: AlertTriangle },
+  { title: "Reports", icon: AlertTriangle },
   { title: "Hotlines", icon: Phone },
   { title: "Profile", icon: UserRound },
 ] as const;
@@ -96,7 +96,7 @@ const TabItem: FC<TabItemProps> = ({
  * Floating app bar navigation component
  *
  * A floating bottom navigation bar with rounded corners, semi-transparent background,
- * and smooth tabbing between four main sections (Home, Complaints, Hotlines, Profile).
+ * and smooth tabbing between four main sections (Home, Reports, Hotlines, Profile).
  *
  * Features:
  * - Positions absolutely at the bottom of the screen

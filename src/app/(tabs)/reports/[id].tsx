@@ -1,20 +1,18 @@
-import { appScrollableBottomPadding } from "@/components/floating-app-bar";
-import { Button, ButtonIcon } from "@/components/ui/button";
+import { ChildAppBar } from "@/components/child-app-bar";
 import { Heading } from "@/components/ui/heading";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
-import { statusBarHeight } from "@/constants";
 import {
   formatReportDate,
   formatStatus,
   type ReportDetail,
   type ReportHistoryItem,
-} from "@/features/complaints/data";
-import { ReportStatusBadge } from "@/features/complaints/report-list";
+} from "@/features/reports/data";
+import { ReportStatusBadge } from "@/features/reports/report-list";
 import { useAppColors } from "@/hooks/use-app-colors";
-import { fetchComplaintReportDetail } from "@/services/complaints";
+import { fetchComplaintReportDetail } from "@/services/reports";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
-import { CalendarClock, ChevronLeft, FileText, Image as ImageIcon, MapPin } from "lucide-react-native";
+import { CalendarClock, FileText, Image as ImageIcon, MapPin } from "lucide-react-native";
 import { useCallback, useRef, useState } from "react";
 import {
   BackHandler,
@@ -61,9 +59,7 @@ function TimelineItem({
       </View>
       <View className="flex-1 pb-5">
         <Text className="text-sm font-bold text-foreground">
-          {item.fromStatus
-            ? `${formatStatus(item.fromStatus)} to ${formatStatus(item.toStatus)}`
-            : formatStatus(item.toStatus)}
+          {formatStatus(item.toStatus)}
         </Text>
         <Text className="mt-1 text-xs font-medium text-muted-foreground">
           {formatReportDate(item.changedAt)}
@@ -100,7 +96,7 @@ export default function ComplaintDetailRoute() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const scrollRef = useRef<ScrollView | null>(null);
-  const bottomPadding = appScrollableBottomPadding(insets.bottom);
+  const bottomPadding = Math.max(insets.bottom, 16) + 20;
   const [accentColor] = useAppColors(["accent"]);
   const [report, setReport] = useState<ReportDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -139,7 +135,7 @@ export default function ComplaintDetailRoute() {
       return;
     }
 
-    router.replace("/complaints");
+    router.replace("/reports");
   }, [router]);
 
   useFocusEffect(
@@ -190,6 +186,11 @@ export default function ComplaintDetailRoute() {
 
   return (
     <View className="flex-1 bg-background" style={{ width }}>
+      <ChildAppBar
+        title="Ticket details"
+        description="Status, location, evidence, and report history"
+        onBack={handleBack}
+      />
       <ScrollView
         ref={scrollRef}
         className="bg-background"
@@ -198,7 +199,7 @@ export default function ComplaintDetailRoute() {
           paddingHorizontal: 20,
           gap: 16,
           paddingBottom: bottomPadding,
-          paddingTop: statusBarHeight + 18,
+          paddingTop: 8,
         }}
         refreshControl={
           <RefreshControl
@@ -209,25 +210,6 @@ export default function ComplaintDetailRoute() {
           />
         }
       >
-        <View className="flex-row items-center gap-3">
-          <Button
-            size="icon"
-            variant="secondary"
-            onPress={handleBack}
-            accessibilityLabel="Back to reports"
-          >
-            <ButtonIcon as={ChevronLeft} height={21} width={21} />
-          </Button>
-          <View className="flex-1">
-            <Heading size="xl">
-              Ticket details
-            </Heading>
-            <Text className="text-xs font-medium text-muted-foreground">
-              Necessary report updates only.
-            </Text>
-          </View>
-        </View>
-
         {error ? (
           <Text className="text-sm text-destructive">
             {error}
