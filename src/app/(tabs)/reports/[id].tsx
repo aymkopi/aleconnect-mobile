@@ -9,6 +9,7 @@ import {
   type ReportHistoryItem,
 } from "@/features/reports/data";
 import { ReportStatusBadge } from "@/features/reports/report-list";
+import { ExtendedOutageStatusCard } from "@/features/reports/extended-outage-status-card";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { fetchComplaintReportDetail } from "@/services/reports";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
@@ -252,6 +253,8 @@ export default function ComplaintDetailRoute() {
               <DetailRow label="Address" value={address} />
               <DetailRow label="Coordinates" value={coordinates} />
             </View>
+
+            <ExtendedOutageStatusCard updates={report.publicUpdates ?? []} />
 
             <View className="rounded-lg border border-border bg-card p-5">
               <View className="flex-row items-center gap-2">

@@ -53,6 +53,18 @@ export type ReportHistoryItem = {
   changedAt: string;
 };
 
+export type IncidentPublicUpdate = {
+  id: string;
+  phase: string;
+  publicNote: string;
+  estimateStartAt: string | null;
+  estimateEndAt: string | null;
+  estimateUnavailableReason: string | null;
+  nextUpdateDueAt: string;
+  classification: "standard" | "extended_outage";
+  publishedAt: string;
+};
+
 export type ReportDetail = Report & {
   actionDesired: string | null;
   purok: string | null;
@@ -63,6 +75,7 @@ export type ReportDetail = Report & {
   latitude: number | null;
   longitude: number | null;
   history: ReportHistoryItem[];
+  publicUpdates: IncidentPublicUpdate[];
 };
 
 export type ComplaintFormState = {
