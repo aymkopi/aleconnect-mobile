@@ -1,0 +1,4 @@
+interface:
+  display_name: "ALEConnect Cross-Project Change"
+  short_description: "Coordinate staff and mobile contracts safely"
+  default_prompt: "Use $aleconnect-cross-project-change to coordinate a compatible staff API and mobile consumer change across both repositories."

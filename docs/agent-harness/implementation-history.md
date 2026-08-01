@@ -32,3 +32,14 @@
 - Git/Deployment: local skill commit only; no deployment.
 - Remaining risks: forward test is read-only and did not implement or run a device render; future product work must provide that evidence.
 - Next: use the skill for the next scoped consumer mobile change and preserve unrelated worktree state.
+
+## 2026-08-02 - ALEConnect cross-project change skill
+
+- Repositories: staff and mobile.
+- Scope: copied the validated staff `aleconnect-cross-project-change` skill byte-for-byte; no product or dependency change.
+- Files: `.agents/skills/aleconnect-cross-project-change/SKILL.md`, `.agents/skills/aleconnect-cross-project-change/agents/openai.yaml`, and both repositories' harness handoffs.
+- Contracts: shared API changes require server-owned additive compatibility, consumer-first compatible release ordering, consumer authorization/ownership, private offline-cache checks where affected, rollback, and dual-repository evidence.
+- Verification: staff RED fresh-agent plan omitted dual-field server compatibility, rollback, and both handoffs; GREEN explicitly rejected immediate removal/backend-only rollout and required dual fields, authorization, mobile cache/notification readers, staff/mobile validation, rollback, and both histories. Both `npm run harness:check` commands exited 0. SHA-256 parity: SKILL.md `564C21196B8D3A1DF3179C9E906CC401F95CF2F34EFC27A8E73DA7023C5AE323`; manifest `00E7A4ED009C2D878309C5CD19047FD368375A5522D65909EFCF6154BC5A2FFF`.
+- Git/Deployment: local skill commits only; no deployment.
+- Remaining risks: read-only forward tests did not change a live contract or run a device release; the bundled validator still needs external temporary PyYAML.
+- Next: Task 8 cross-repository verification and final handoff.
