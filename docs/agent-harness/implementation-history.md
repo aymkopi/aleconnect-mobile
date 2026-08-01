@@ -21,3 +21,14 @@
 - Git/Deployment: local commit only; the workflow runs checks only and contains no Expo/EAS publishing or deployment command.
 - Remaining risks: GitHub Actions has not run on the remote yet; the existing cross-project-skill warning remains outside this task.
 - Next: use the harness on the next mobile change and preserve the user-owned worktree.
+
+## 2026-08-02 - ALEConnect mobile workflow skill
+
+- Repositories: mobile; verifies staff-owned consumer API contract at `../aleconnect` before shared changes.
+- Scope: added the reusable `aleconnect-mobile-workflow` skill and its generated agent manifest; no product or dependency changes.
+- Files: `.agents/skills/aleconnect-mobile-workflow/SKILL.md`, `.agents/skills/aleconnect-mobile-workflow/agents/openai.yaml`, and this handoff.
+- Contracts: requires staff-first additive fields, omitted/null mobile compatibility, consumer authorization and ownership boundaries, private offline cache rules, and no mobile MySQL or server secrets.
+- Verification: RED fresh-agent baseline proposed UI-only files and lint, omitting staff contract, cache, auth, handoff, and runtime checks. GREEN fresh-agent forward test inspected `GET /api/mobile/complaints/:id`, found `crew_eta` absent, required server-first addition plus optional/null fallback, consumer ownership, no stale cache after auth failure, focused checks, Expo runtime render, and post-change history/active-work handoff. `quick_validate.py` passed using an external temporary PyYAML target because the bundled interpreter lacked PyYAML; body is 239 words.
+- Git/Deployment: local skill commit only; no deployment.
+- Remaining risks: forward test is read-only and did not implement or run a device render; future product work must provide that evidence.
+- Next: use the skill for the next scoped consumer mobile change and preserve unrelated worktree state.
