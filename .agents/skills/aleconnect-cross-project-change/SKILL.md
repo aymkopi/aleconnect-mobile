@@ -7,7 +7,7 @@ description: Use when an ALEConnect request affects both repositories, changes /
 
 ## Start
 
-Inspect `git status` in `aleconnect` and `aleconnect-mobile`; preserve unrelated work. Read both `AGENTS.md`, the applicable `$aleconnect-staff-workflow` and `$aleconnect-mobile-workflow` skills, active work, and the shared marker block in the staff [cross-project contract](../../../docs/agent-harness/cross-project-contracts.md). The staff repository owns the server contract and deployment order; mobile owns consumer UI, device storage, and release behavior.
+Inspect `git status` in `aleconnect` and `aleconnect-mobile`; preserve unrelated work. Read both `AGENTS.md`, the applicable `$aleconnect-staff-workflow` and `$aleconnect-mobile-workflow` skills, active work, and the shared marker block in the authoritative staff `aleconnect/docs/agent-harness/cross-project-contracts.md` (this checkout in staff, usually `../aleconnect` from mobile). If that staff contract is unavailable, stop and report it. The staff repository owns the server contract and deployment order; mobile owns consumer UI, device storage, and release behavior.
 
 ## Plan
 

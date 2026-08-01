@@ -43,3 +43,14 @@
 - Git/Deployment: local skill commits only; no deployment.
 - Remaining risks: read-only forward tests did not change a live contract or run a device release; the bundled validator still needs external temporary PyYAML.
 - Next: Task 8 cross-repository verification and final handoff.
+
+## 2026-08-02 - ALEConnect cross-project skill portability fix
+
+- Repositories: staff and mobile.
+- Scope: copied the staff fix that replaces a mobile-relative shared-contract link with an explicit authoritative staff-contract lookup; no product or dependency change.
+- Files: both `.agents/skills/aleconnect-cross-project-change/SKILL.md` copies and both harness handoffs.
+- Contracts: the staff `aleconnect/docs/agent-harness/cross-project-contracts.md` is authoritative; mobile uses the sibling `../aleconnect` path when present and stops/reports if it is unavailable.
+- Verification: RED path resolution showed the old identical relative link reached staff docs from staff but mobile docs from mobile. `quick_validate.py` passed with temporary external PyYAML; a fresh forward test named the staff contract as authoritative and retained compatibility, authorization, cache, release, rollback, and dual-handoff requirements. Both `npm run harness:check` commands exited 0. Synchronized SKILL.md SHA-256 is `505CBD16B364C1D6FBAB29CBF04404BF5D20F520F096FE10939146371661FAD1`; manifest SHA-256 remains `00E7A4ED009C2D878309C5CD19047FD368375A5522D65909EFCF6154BC5A2FFF`.
+- Git/Deployment: local fix commits only; no deployment.
+- Remaining risks: validation is documentation-only; the bundled validator still needs external temporary PyYAML.
+- Next: Task 8 cross-repository verification and final handoff.
