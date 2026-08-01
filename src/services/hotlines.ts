@@ -7,6 +7,7 @@ export type HotlineContact = {
   readonly number: string;
   readonly label: string | null;
   readonly type: string | null;
+  readonly group: "Hotline/Emergency" | "Other service contacts";
 };
 
 export type HotlineAgency = {
@@ -17,6 +18,7 @@ export type HotlineAgency = {
   readonly address: string | null;
   readonly logoUrl: string | null;
   readonly websiteLink: string | null;
+  readonly avatarVersion: string | null;
   readonly contacts: HotlineContact[];
 };
 
@@ -31,7 +33,7 @@ type HotlineResponse = {
   readonly categories: HotlineCategory[];
 };
 
-const cacheKey = "hotlines_cache_v3";
+const cacheKey = "hotlines_cache_v4";
 const cacheTtlMs = 24 * 60 * 60 * 1000;
 let memoryCache: { fetchedAt: number; value: HotlineResponse } | null = null;
 let request: Promise<HotlineResponse> | null = null;

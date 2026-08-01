@@ -252,6 +252,7 @@ function EmergencySlider() {
 function AgencyCard({ agency }: { agency: HotlineAgency }) {
   const call = (number: string) => Linking.openURL(`tel:${digits(number)}`);
   const copy = (number: string) => Clipboard.setStringAsync(number);
+  const contactGroups = ["Hotline/Emergency", "Other service contacts"] as const;
 
   return (
     <View className="rounded-lg border border-border bg-card p-4">
@@ -288,37 +289,28 @@ function AgencyCard({ agency }: { agency: HotlineAgency }) {
 
       <View className="mt-4 gap-2">
         {agency.contacts.length ? (
-          agency.contacts.map((contact) => (
-            <View
-              key={contact.id}
-              className="min-h-12 flex-row items-center gap-2 rounded-full bg-secondary px-3"
-            >
-              <Text className="text-xs font-bold text-foreground">
-                {contactLabel(contact)}:
-              </Text>
-              <Text className="flex-1 text-xs text-foreground">
-                {contact.number}
-              </Text>
-              <Button
-                size="icon"
-                onPress={() => call(contact.number)}
-                accessibilityLabel={`Call ${contact.number}`}
-              >
-                <ButtonIcon as={Phone} height={15} width={15} />
-              </Button>
-              <Button
-                size="icon"
-                variant="secondary"
-                onPress={() => copy(contact.number)}
-                accessibilityLabel={`Copy ${contact.number}`}
-              >
-                <ButtonIcon as={Copy} height={15} width={15} />
-              </Button>
-            </View>
-          ))
+          contactGroups.map((group) => {
+            const contacts = agency.contacts.filter((contact) => contact.group === group);
+            if (!contacts.length) return null;
+            return <View key={group} className="gap-2">
+              <Text className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{group}</Text>
+              {contacts.map((contact) => (
+                <View key={contact.id} className="min-h-12 flex-row items-center gap-2 rounded-full bg-secondary px-3">
+                  <Text className="text-xs font-bold text-foreground">{contactLabel(contact)}:</Text>
+                  <Text className="flex-1 text-xs text-foreground">{contact.number}</Text>
+                  <Button size="icon" onPress={() => call(contact.number)} accessibilityLabel={"Call " + contact.number}>
+                    <ButtonIcon as={Phone} height={15} width={15} />
+                  </Button>
+                  <Button size="icon" variant="secondary" onPress={() => copy(contact.number)} accessibilityLabel={"Copy " + contact.number}>
+                    <ButtonIcon as={Copy} height={15} width={15} />
+                  </Button>
+                </View>
+              ))}
+            </View>;
+          })
         ) : (
           <Text className="text-xs text-muted-foreground">
-            No hotline numbers listed.
+            No active public contact numbers listed.
           </Text>
         )}
       </View>
