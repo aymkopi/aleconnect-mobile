@@ -1,6 +1,6 @@
 # ALEConnect mobile harness
 
-Repository role: consumer Expo app, native configuration, device storage, and release behavior. The staff API and authoritative shared contract are in the sibling checkout at `C:\Users\Justine\VSCodeProjects\aleconnect`.
+Repository role: consumer Expo app, native configuration, device storage, and release behavior. The staff API and authoritative shared contract are normally available from the sibling `../aleconnect` checkout.
 
 Read in this order: [AGENTS.md](../../AGENTS.md), [active work](active-work.md), [PRODUCT.md](../../PRODUCT.md), [release hardening plan](../mobile-release-hardening-plan.md), [release hardening tracker](../mobile-release-hardening-tracker.md), and [implementation history](implementation-history.md). Current source and device evidence outrank older documents.
 

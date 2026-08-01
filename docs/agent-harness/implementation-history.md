@@ -65,3 +65,14 @@
 - Git/Deployment: local final docs commit `docs: finalize ALEConnect mobile harness`; no push, merge, deployment, production mutation, or dependency change.
 - Remaining risks: substantial user-owned dirty work, including Graphify outputs, remains intentionally unstaged. Existing Node module-type warnings in mobile tests were not harness failures. The historical WindowsApps interpreter/PyYAML availability issue was not a Graphify failure in this run; do not repair Graphify in harness scope.
 - Next: resume docs/mobile-release-hardening-plan.md and its tracker only after reviewing the preserved worktree.
+
+## 2026-08-02 — ALEConnect agent harness final fix wave
+
+- Repositories: mobile and staff.
+- Scope: fixed standalone mobile tests, repository-neutral shared ownership, complete history parsing, no-base and full-range Git enforcement, finalized skill validation/privacy scans, symmetric sibling parity, portable root guidance, and full-range CI inputs without product or dependency changes.
+- Files: `.github/workflows/agent-harness.yml`, `scripts/validate-agent-harness.mjs`, `tests/agent-harness.test.mjs`, `docs/agent-harness/index.md`, `docs/agent-harness/cross-project-contracts.md`, `docs/agent-harness/implementation-history.md`, `docs/agent-harness/active-work.md`, plus synchronized staff harness files.
+- Contracts: the repository-neutral shared marker block matches at SHA-256 `0b5501b9c14b8a1cca059ea125d1297e121af6ee889ceb7d956e8ead61bdbbab`; cross-project `SKILL.md` remains `505cbd16b364c1d6fbab29cbf04404bf5d20f520f096fe10939146371661fad1`; its manifest remains `00e7a4ed009c2d878309c5cd19047fd368375a5522d65909efcf6154bc5a2fff`.
+- Verification: RED `node --test tests/agent-harness.test.mjs` -> 19/27 passed and 8 expected failures; staff RED `node --test tests/harness/agent-harness.test.mjs` -> 16/24 passed and 8 expected failures. GREEN mobile focused tests -> 28/28 passed; staff focused tests -> 25/25 passed; both `npm run harness:check` -> exit 0; staff `npm run test:deployment` -> 15/15 passed; both `git diff --check` -> exit 0. Focused fixtures cover staged, unstaged, untracked, multi-commit, sibling, skill, history, privacy, and unfinished-marker behavior.
+- Git/Deployment: one selective local fix commit per repository; no push, deployment, dependency install, product mutation, or production-data change.
+- Remaining risks: GitHub Actions has not executed the new event-range branches remotely. Mobile TypeScript/lint and staff build were not rerun because no mobile TypeScript or staff/API/data-route interface changed; focused validator/workflow checks cover this scope. User-owned product, handoff, and Graphify dirt remains unstaged.
+- Next: run committed-range checks on the selective fix commits, record the exact hashes in the local final-fix report, then resume the active product plan only after reviewing preserved worktree state.

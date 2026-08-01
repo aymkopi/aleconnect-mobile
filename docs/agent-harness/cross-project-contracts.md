@@ -1,13 +1,13 @@
 # ALEConnect cross-project contracts
 
 Authoritative source: `../aleconnect/docs/agent-harness/cross-project-contracts.md`
-Last synchronized staff commit: `fb24a80d4237d632a0849ee8eb310783e3a1b97a`
+Last synchronized staff commit: `adfa9c41ad89f33f47f4704743f46499b87485b8`
 
 <!-- shared-contract:start -->
 ## Ownership and routes
 
-- This repository owns staff UI, `/api/*`, `/api/mobile/*`, MySQL, Cloudflare Worker behavior, R2 signing, and deployment order.
-- The sibling mobile repository owns consumer UI, native configuration, device storage, and Expo release behavior. It never connects directly to MySQL or holds server secrets.
+- `aleconnect` owns staff UI, `/api/*`, `/api/mobile/*`, MySQL, Cloudflare Worker behavior, R2 signing, and deployment order.
+- `aleconnect-mobile` owns consumer UI, native configuration, device storage, and Expo release behavior. It never connects directly to MySQL or holds server secrets.
 - Mobile traffic uses the staff-owned `/api/mobile/*` contract. New local API handlers also require Vite registration so localhost behavior remains available.
 
 ## Authorization and response rules
