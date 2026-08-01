@@ -198,3 +198,33 @@ test("mobile shared contract matches the authoritative staff block", async () =>
   const staff = await readFile(new URL("../../aleconnect/docs/agent-harness/cross-project-contracts.md", import.meta.url), "utf8")
   assert.equal(mobile.match(marker)?.[1], staff.match(marker)?.[1])
 })
+
+test("mobile instructions and CI route validation without publishing", async () => {
+  const agents = await readFile(new URL("../AGENTS.md", import.meta.url), "utf8")
+  const workflow = await readFile(new URL("../.github/workflows/agent-harness.yml", import.meta.url), "utf8")
+
+  for (const target of [
+    "PRODUCT.md",
+    "docs/agent-harness/index.md",
+    "docs/mobile-release-hardening-tracker.md",
+    "docs/agent-harness/cross-project-contracts.md",
+    "docs/agent-harness/implementation-history.md",
+    "../aleconnect",
+  ]) {
+    assert.match(agents, new RegExp(target.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")))
+  }
+
+  for (const command of [
+    "npm ci",
+    "npm run harness:check -- --base HEAD~1",
+    "node --test tests/*.test.mjs",
+    "npx tsc --noEmit",
+    "npm run lint",
+  ]) {
+    assert.match(workflow, new RegExp(command.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")))
+  }
+
+  assert.match(workflow, /fetch-depth: 2/)
+  assert.doesNotMatch(workflow, /\beas\s+(?:build|submit)\b/i)
+  assert.doesNotMatch(workflow, /\b(?:wrangler\s+(?:pages\s+)?deploy|npm\s+run\s+(?:deploy|publish)|eas\s+update)\b/i)
+})

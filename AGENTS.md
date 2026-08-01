@@ -1,4 +1,26 @@
-## graphify
+# ALEConnect Mobile Agent Guide
+
+## Start Here
+
+Read [PRODUCT.md](PRODUCT.md), [the harness map](docs/agent-harness/index.md), [active work](docs/agent-harness/active-work.md), and [implementation history](docs/agent-harness/implementation-history.md). Current source and device evidence outrank older docs.
+
+## Authority Map
+
+This repository owns consumer Expo UI, native configuration, device storage, and release behavior. The staff sibling at `../aleconnect` owns `/api/*`, `/api/mobile/*`, MySQL, R2 signing, and deployment order. [Cross-project contracts](docs/agent-harness/cross-project-contracts.md) are authoritative.
+
+## Repository Boundaries
+
+Use the staff-owned `/api/mobile/*` contract; never connect mobile directly to MySQL or put server secrets in the app. Inspect the staff sibling before changing shared API contracts, consumer auth, notifications, media, or coordinated releases.
+
+## Work Rules
+
+Read only task-relevant documents, preserve unrelated working-tree changes, and use focused tests without new dependencies unless required. Verify on a real device only when native or runtime behavior changes. Track release hardening in [the active release tracker](docs/mobile-release-hardening-tracker.md).
+
+## Finish Gate
+
+Run `git status`, relevant focused tests, and `npm run harness:check`; run `npx tsc --noEmit` and `npm run lint` after TypeScript changes. Update [implementation history](docs/agent-harness/implementation-history.md) and [active work](docs/agent-harness/active-work.md) with verified evidence without overwriting unrelated handoff state.
+
+## Graphify
 
 This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
 
