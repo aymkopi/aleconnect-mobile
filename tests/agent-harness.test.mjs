@@ -124,6 +124,48 @@ test("warns when the sibling checkout is absent", async (t) => {
   assert.ok(result.warnings.some((message) => message.includes("sibling")))
 })
 
+test("rejects an existing sibling without cross-project contracts", async (t) => {
+  const root = await createFixture()
+  const siblingRoot = await createFixture()
+  cleanup(t, root)
+  cleanup(t, siblingRoot)
+  await rm(join(siblingRoot, "docs/agent-harness/cross-project-contracts.md"))
+  const result = await validateHarness({ root, siblingRoot })
+  assert.ok(result.errors.some((message) => message.includes("cross-project-contracts.md")))
+})
+
+test("rejects sibling contracts without shared markers", async (t) => {
+  const root = await createFixture()
+  const siblingRoot = await createFixture()
+  cleanup(t, root)
+  cleanup(t, siblingRoot)
+  await write(siblingRoot, "docs/agent-harness/cross-project-contracts.md", "# Contracts\n")
+  const result = await validateHarness({ root, siblingRoot })
+  assert.ok(result.errors.some((message) => message.includes("shared contract markers")))
+})
+
+test("rejects a divergent sibling shared contract", async (t) => {
+  const root = await createFixture()
+  const siblingRoot = await createFixture()
+  cleanup(t, root)
+  cleanup(t, siblingRoot)
+  await write(siblingRoot, "docs/agent-harness/cross-project-contracts.md", "# Contracts\n\n<!-- shared-contract:start -->\ndifferent\n<!-- shared-contract:end -->\n")
+  const result = await validateHarness({ root, siblingRoot })
+  assert.ok(result.errors.some((message) => message.includes("differs from the staff sibling")))
+})
+
+test("rejects a one-sided cross-project skill manifest", async (t) => {
+  const root = await createFixture()
+  const siblingRoot = await createFixture()
+  cleanup(t, root)
+  cleanup(t, siblingRoot)
+  await write(root, ".agents/skills/aleconnect-cross-project-change/SKILL.md", "# Cross-project change\n")
+  await write(siblingRoot, ".agents/skills/aleconnect-cross-project-change/SKILL.md", "# Cross-project change\n")
+  await write(root, ".agents/skills/aleconnect-cross-project-change/agents/openai.yaml", "name: cross-project-change\n")
+  const result = await validateHarness({ root, siblingRoot })
+  assert.ok(result.errors.some((message) => message.includes("agents/openai.yaml")))
+})
+
 test("falls back to file-only validation when the base is unavailable", async (t) => {
   const root = await createFirstCommitFixture()
   cleanup(t, root)

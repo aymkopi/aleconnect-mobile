@@ -52,10 +52,11 @@ const canFallbackForFirstCommit = (root) => {
   }
 }
 
-const compareSiblingFile = async (root, siblingRoot, relativePath, errors) => {
-  if ((await exists(root, relativePath)) && (await exists(siblingRoot, relativePath))) {
-    if (await readText(root, relativePath) !== await readText(siblingRoot, relativePath)) errors.push(`${relativePath} differs from the staff sibling`)
-  }
+const compareRequiredSiblingFile = async (root, siblingRoot, relativePath, errors) => {
+  const localExists = await exists(root, relativePath)
+  const siblingExists = await exists(siblingRoot, relativePath)
+  if (!localExists || !siblingExists) errors.push(`${relativePath} must be present in both repositories`)
+  else if (await readText(root, relativePath) !== await readText(siblingRoot, relativePath)) errors.push(`${relativePath} differs from the staff sibling`)
 }
 
 export const validateHarness = async ({ root = process.cwd(), baseRef, siblingRoot = resolve(root, "..", "aleconnect") } = {}) => {
@@ -118,15 +119,22 @@ export const validateHarness = async ({ root = process.cwd(), baseRef, siblingRo
   if (!(await exists(siblingRoot, "."))) warnings.push(`sibling checkout is absent: ${siblingRoot}`)
   else {
     const mobileContracts = documents.find(([relativePath]) => relativePath === "docs/agent-harness/cross-project-contracts.md")?.[1]
-    if (mobileContracts && await exists(siblingRoot, "docs/agent-harness/cross-project-contracts.md")) {
+    const siblingContractsPath = "docs/agent-harness/cross-project-contracts.md"
+    if (!(await exists(siblingRoot, siblingContractsPath))) errors.push(`sibling checkout is missing ${siblingContractsPath}`)
+    else if (mobileContracts) {
       const staffContracts = await readText(siblingRoot, "docs/agent-harness/cross-project-contracts.md")
-      if (mobileContracts.match(sharedContract)?.[1] !== staffContracts.match(sharedContract)?.[1]) errors.push("shared contract block differs from the staff sibling")
+      const mobileSharedContract = mobileContracts.match(sharedContract)?.[1]
+      const staffSharedContract = staffContracts.match(sharedContract)?.[1]
+      if (!mobileSharedContract || !staffSharedContract) errors.push("shared contract markers are required in both repositories")
+      else if (mobileSharedContract !== staffSharedContract) errors.push("shared contract block differs from the staff sibling")
     }
 
-    if ((await exists(root, crossSkillPath)) && (await exists(siblingRoot, crossSkillPath))) {
-      await compareSiblingFile(root, siblingRoot, crossSkillPath, errors)
-      await compareSiblingFile(root, siblingRoot, crossSkillManifestPath, errors)
-    } else warnings.push(`cross-project skill is not present in both repositories (${repository})`)
+    const crossSkillExists = (await exists(root, crossSkillPath)) || (await exists(siblingRoot, crossSkillPath)) || (await exists(root, crossSkillManifestPath)) || (await exists(siblingRoot, crossSkillManifestPath))
+    if (!crossSkillExists) warnings.push(`cross-project skill is not present in both repositories (${repository})`)
+    else {
+      await compareRequiredSiblingFile(root, siblingRoot, crossSkillPath, errors)
+      await compareRequiredSiblingFile(root, siblingRoot, crossSkillManifestPath, errors)
+    }
   }
 
   return { errors, warnings }
