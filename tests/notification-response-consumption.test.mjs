@@ -16,3 +16,27 @@ test("notification responses are consumed before routing", async () => {
   assert.match(receiver, /clearLastNotificationResponse\(\);\s*onNotificationResponseReceived/);
   assert.doesNotMatch(receiver, /getLastNotificationResponseAsync/);
 });
+
+test("terminated Android notification taps survive process startup", async () => {
+  const service = await readFile(
+    new URL("../src/services/push-notifications.ts", import.meta.url),
+    "utf8",
+  );
+  const entry = await readFile(new URL("../index.ts", import.meta.url), "utf8");
+  const packageJson = JSON.parse(
+    await readFile(new URL("../package.json", import.meta.url), "utf8"),
+  );
+
+  assert.equal(packageJson.main, "./index.ts");
+  assert.match(entry, /import "\.\/src\/services\/push-notifications"/);
+  assert.match(entry, /import "expo-router\/entry"/);
+  assert.match(service, /TaskManager\.defineTask/);
+  assert.match(service, /Notifications\.registerTaskAsync/);
+  assert.match(service, /AsyncStorage\.setItem/);
+  assert.match(service, /AsyncStorage\.getItem/);
+  assert.match(service, /AsyncStorage\.removeItem/);
+  assert.match(
+    service,
+    /const persistedResponse = await consumePersistedNotificationResponseAsync\(\);\s*if \(persistedResponse\)/,
+  );
+});

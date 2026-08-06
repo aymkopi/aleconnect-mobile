@@ -5,7 +5,15 @@ import type {
   Report,
   ReportDetail,
 } from "@/features/reports/data";
-import { apiRequest } from "@/services/api";
+import { parseReportDetailResponse } from "@/features/reports/data";
+import {
+  ApiRequestError,
+  apiRequest,
+  createApiRequestId,
+} from "@/services/api";
+import { requestPhaseFailureMessage } from "@/utils/report-transport";
+import { createPromiseRegistry } from "@/utils/async-coordination";
+import { claimRefresh } from "@/utils/refresh-cooldown";
 
 export type EvidenceUpload = {
   key: string;
@@ -20,9 +28,18 @@ const complaintReportsStaleTtlMs = 90 * 24 * 60 * 60 * 1000;
 let complaintMetaMemoryCache: ComplaintMetaCache | null = null;
 let complaintMetaRequest: Promise<ComplaintMeta> | null = null;
 let complaintReportsMemoryCache:
-  | { fetchedAt: number; userId: string; value: Report[] }
+  | { fetchedAt: number; userId: string; value: ComplaintReportPage }
   | null = null;
-let complaintReportsRequest: Promise<Report[]> | null = null;
+const complaintReportRequests =
+  createPromiseRegistry<string, ComplaintReportPage>();
+
+export type ComplaintReportSort = "newest" | "oldest" | "status";
+
+export type ComplaintReportPage = {
+  reports: Report[];
+  nextCursor: string | null;
+  isStale?: boolean;
+};
 
 type ComplaintMetaCache = {
   fetchedAt: number;
@@ -68,9 +85,12 @@ export async function clearComplaintMetaCache(): Promise<void> {
   await AsyncStorage.removeItem(complaintMetaCacheKey);
 }
 
-export async function clearComplaintCache(): Promise<void> {
+export async function clearComplaintCache(userId?: string): Promise<void> {
   complaintReportsMemoryCache = null;
-  complaintReportsRequest = null;
+  complaintReportRequests.clear();
+  if (userId) {
+    await AsyncStorage.removeItem(`report_list_cache_v1:${userId}`);
+  }
   await clearComplaintMetaCache();
 }
 
@@ -78,14 +98,16 @@ export async function clearReportListCache(userId: string): Promise<void> {
   if (complaintReportsMemoryCache?.userId === userId) {
     complaintReportsMemoryCache = null;
   }
-  complaintReportsRequest = null;
+  complaintReportRequests.clear();
   await AsyncStorage.removeItem(`report_list_cache_v1:${userId}`);
 }
 
 export async function fetchComplaintMeta(
   options?: { force?: boolean },
 ): Promise<ComplaintMeta> {
-  if (!options?.force) {
+  const force =
+    Boolean(options?.force) && claimRefresh("complaint-meta");
+  if (!force) {
     const cached = await readComplaintMetaCache();
     if (cached) {
       return cached;
@@ -96,7 +118,11 @@ export async function fetchComplaintMeta(
     return complaintMetaRequest;
   }
 
-  complaintMetaRequest = apiRequest<ComplaintMeta>("/api/mobile/complaints/meta")
+  complaintMetaRequest = apiRequest<ComplaintMeta>(
+    "/api/mobile/complaints/meta",
+    {},
+    { phase: "metadata", timeoutMs: 15_000 },
+  )
     .then(async (meta) => {
       await writeComplaintMetaCache(meta);
       return meta;
@@ -113,12 +139,32 @@ export async function fetchComplaintMeta(
   return complaintMetaRequest;
 }
 
-export async function fetchComplaintReports(
-  options?: { force?: boolean; userId?: string },
-): Promise<Report[]> {
+export async function fetchComplaintReportPage(options?: {
+  force?: boolean;
+  userId?: string;
+  cursor?: string | null;
+  query?: string;
+  categoryId?: string;
+  sort?: ComplaintReportSort;
+  limit?: number;
+}): Promise<ComplaintReportPage> {
   const userId = options?.userId ?? "";
+  const cursor = options?.cursor ?? null;
+  const query = options?.query?.trim() ?? "";
+  const categoryId =
+    options?.categoryId && options.categoryId !== "all"
+      ? options.categoryId
+      : "";
+  const sort = options?.sort ?? "newest";
+  const limit = Math.min(Math.max(options?.limit ?? 25, 1), 50);
+  const isDefaultPage =
+    !cursor && !query && !categoryId && sort === "newest" && limit === 25;
+  const force =
+    Boolean(options?.force) &&
+    claimRefresh(`reports:${userId}:${query}:${categoryId}:${sort}`);
   if (
-    !options?.force &&
+    !force &&
+    isDefaultPage &&
     userId &&
     complaintReportsMemoryCache &&
     complaintReportsMemoryCache.userId === userId &&
@@ -130,13 +176,13 @@ export async function fetchComplaintReports(
 
   const storageKey = userId ? `report_list_cache_v1:${userId}` : null;
   const readStoredReports = async (allowStale: boolean) => {
-    if (!storageKey) return null;
+    if (!storageKey || !isDefaultPage) return null;
     const raw = await AsyncStorage.getItem(storageKey);
     if (!raw) return null;
     try {
       const parsed = JSON.parse(raw) as {
         fetchedAt: number;
-        value: Report[];
+        value: Report[] | ComplaintReportPage;
       };
       if (
         Date.now() - parsed.fetchedAt >
@@ -144,79 +190,150 @@ export async function fetchComplaintReports(
       ) {
         return null;
       }
-      complaintReportsMemoryCache = { ...parsed, userId };
-      return parsed.value;
+      const value = Array.isArray(parsed.value)
+        ? { reports: parsed.value, nextCursor: null }
+        : parsed.value;
+      complaintReportsMemoryCache = {
+        fetchedAt: parsed.fetchedAt,
+        userId,
+        value,
+      };
+      return {
+        ...value,
+        isStale:
+          allowStale &&
+          Date.now() - parsed.fetchedAt > complaintReportsCacheTtlMs,
+      };
     } catch {
       return null;
     }
   };
 
-  if (!options?.force) {
+  if (!force) {
     const stored = await readStoredReports(false);
     if (stored) return stored;
   }
 
-  if (complaintReportsRequest) {
-    return complaintReportsRequest;
-  }
+  const params = new URLSearchParams({
+    limit: String(limit),
+    sort,
+  });
+  if (cursor) params.set("cursor", cursor);
+  if (query) params.set("query", query);
+  if (categoryId) params.set("categoryId", categoryId);
+  const requestKey = JSON.stringify({
+    userId,
+    cursor,
+    query,
+    categoryId,
+    sort,
+    limit,
+  });
 
-  complaintReportsRequest = apiRequest<{ reports: Report[] }>(
-    "/api/mobile/complaints",
-  )
-    .then(async (response) => {
-      complaintReportsMemoryCache = {
-        fetchedAt: Date.now(),
-        userId,
-        value: response.reports,
-      };
-      if (storageKey) {
-        await AsyncStorage.setItem(
-          storageKey,
-          JSON.stringify({
-            fetchedAt: complaintReportsMemoryCache.fetchedAt,
-            value: response.reports,
-          }),
-        );
-      }
-      return response.reports;
-    })
-    .catch(async (error) => {
-      const stored = await readStoredReports(true);
-      if (stored) return stored;
-      throw error;
-    })
-    .finally(() => {
-      complaintReportsRequest = null;
-    });
-
-  return complaintReportsRequest;
+  return complaintReportRequests.run(requestKey, () =>
+    apiRequest<ComplaintReportPage>(
+      `/api/mobile/complaints?${params.toString()}`,
+    )
+      .then(async (response) => {
+        if (isDefaultPage) {
+          complaintReportsMemoryCache = {
+            fetchedAt: Date.now(),
+            userId,
+            value: response,
+          };
+        }
+        if (storageKey && isDefaultPage && complaintReportsMemoryCache) {
+          await AsyncStorage.setItem(
+            storageKey,
+            JSON.stringify({
+              fetchedAt: complaintReportsMemoryCache.fetchedAt,
+              value: response,
+            }),
+          );
+        }
+        return response;
+      })
+      .catch(async (error) => {
+        const stored = await readStoredReports(true);
+        if (stored) return stored;
+        throw error;
+      }),
+  );
 }
 
-export async function fetchComplaintReportDetail(id: string): Promise<ReportDetail> {
-  return apiRequest<{ report: ReportDetail }>(
-    `/api/mobile/complaints/${encodeURIComponent(id)}`,
-  ).then((response) => response.report);
+export async function fetchComplaintReports(
+  options?: { force?: boolean; userId?: string },
+): Promise<Report[]> {
+  return fetchComplaintReportPage(options).then((page) => page.reports);
 }
 
-export async function createEvidenceUploads(count: number) {
+export async function fetchComplaintReportDetail(
+  id: string,
+  options?: { refreshEvidence?: boolean },
+): Promise<ReportDetail> {
+  const query = options?.refreshEvidence ? "?refreshEvidence=1" : "";
+  return apiRequest<unknown>(
+    `/api/mobile/complaints/${encodeURIComponent(id)}${query}`,
+    {},
+    { phase: "refresh", timeoutMs: 15_000 },
+  ).then(parseReportDetailResponse);
+}
+
+export async function createEvidenceUploads(
+  count: number,
+  authToken?: string | null,
+) {
   return apiRequest<{ draftId: string; uploads: EvidenceUpload[] }>(
     "/api/mobile/complaints/evidence-upload",
     {
       method: "POST",
       body: JSON.stringify({ count }),
     },
+    { authToken, phase: "metadata", timeoutMs: 15_000 },
   );
 }
 
 export async function uploadEvidenceToR2(uploadUrl: string, imageBytes: ArrayBuffer) {
-  const response = await fetch(uploadUrl, {
-    method: "PUT",
-    headers: { "content-type": "image/webp" },
-    body: imageBytes,
-  });
+  const requestId = createApiRequestId();
+  const controller = new AbortController();
+  let didTimeout = false;
+  const timeout = setTimeout(() => {
+    didTimeout = true;
+    controller.abort();
+  }, 30_000);
+  let response: Response;
+  try {
+    response = await fetch(uploadUrl, {
+      method: "PUT",
+      headers: { "content-type": "image/webp" },
+      body: imageBytes,
+      signal: controller.signal,
+    });
+  } catch {
+    throw new ApiRequestError(
+      requestPhaseFailureMessage(
+        "evidence upload",
+        didTimeout ? "timeout" : "network",
+      ),
+      undefined,
+      requestId,
+      "evidence upload",
+      true,
+    );
+  } finally {
+    clearTimeout(timeout);
+  }
 
   if (!response.ok) {
-    throw new Error(`Evidence upload failed with ${response.status}`);
+    throw new ApiRequestError(
+      response.status >= 500
+        ? requestPhaseFailureMessage("evidence upload", "network")
+        : "Evidence upload was rejected; your report is still here. Retry upload.",
+      response.status,
+      requestId,
+      "evidence upload",
+      response.status >= 500,
+    );
   }
 }
 
@@ -228,19 +345,40 @@ export type SubmitComplaintInput = {
   barangayPsgc: string;
   purok: string;
   landmark: string;
-  description: string;
   actionDesired: string;
   imageKeys: string[];
   latitude: number | null;
   longitude: number | null;
+  categoryDescription?: string | null;
+  typeDescription?: string | null;
+  currentRegisteredName?: string | null;
+  requestedRegisteredName?: string | null;
+  reportDetails?: {
+    version: 1;
+    categoryDescription: string | null;
+    typeDescription: string | null;
+    kwhmTransfer: {
+      currentRegisteredName: string;
+      requestedRegisteredName: string;
+    } | null;
+  };
 };
 
-export async function submitComplaint(input: SubmitComplaintInput) {
+export async function submitComplaint(
+  input: SubmitComplaintInput,
+  authToken?: string | null,
+) {
   const response = await apiRequest<{ ticketId: string; ticketNumber: string }>(
     "/api/mobile/complaints",
     {
       method: "POST",
       body: JSON.stringify(input),
+    },
+    {
+      authToken,
+      phase: "final submit",
+      timeoutMs: 30_000,
+      idempotent: true,
     },
   );
   complaintReportsMemoryCache = null;

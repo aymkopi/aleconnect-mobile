@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "aleconnect-mobile",
+    "name": "ALEConnect",
     "slug": "aleconnect-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -11,23 +11,21 @@
       "bundleIdentifier": "com.kapecakes.aleconnectmobile",
       "icon": "./assets/images/icon.png",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Aleconnect uses your location to place complaint map pins."
+        "NSLocationWhenInUseUsageDescription": "ALEConnect uses your location to place complaint map pins."
       }
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "foregroundImage": "./assets/images/aleconnect-icon-foreground.png",
+        "backgroundImage": "./assets/images/aleconnect-icon-background.png",
+        "monochromeImage": "./assets/images/aleconnect-icon-monochrome.png"
       },
       "googleServicesFile": "./google-services.json",
+      "allowBackup": false,
       "predictiveBackGestureEnabled": false,
       "package": "com.kapecakes.aleconnectmobile",
-      "permissions": [
-        "ACCESS_COARSE_LOCATION",
-        "ACCESS_FINE_LOCATION"
-      ]
+      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"]
     },
     "androidStatusBar": {
       "barStyle": "dark-content",
@@ -44,9 +42,9 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#E8F3FF",
           "android": {
-            "image": "./assets/images/splash-icon.png",
+            "image": "./assets/images/aleconnect-icon-white.png",
             "imageWidth": 76
           }
         }
@@ -58,13 +56,15 @@
             "./assets/sounds/high_critical_alert.wav",
             "./assets/sounds/info_alert.wav",
             "./assets/sounds/low_medium_alert.wav"
-          ]
+          ],
+          "icon": "./assets/images/aleconnect-icon-white.png",
+          "color": "#F2F8FF"
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "Aleconnect uses selected photos as complaint evidence and profile images.",
+          "photosPermission": "ALEConnect uses selected photos as complaint evidence and profile images.",
           "cameraPermission": false,
           "microphonePermission": false
         }
@@ -72,7 +72,10 @@
       "expo-location",
       "expo-web-browser",
       "./plugins/with-android-predictive-back-disabled",
-      "@maplibre/maplibre-react-native"
+      "./plugins/with-report-evidence-backup-exclusion",
+      "@maplibre/maplibre-react-native",
+      "expo-secure-store",
+      "expo-background-task"
     ],
     "experiments": {
       "typedRoutes": true,

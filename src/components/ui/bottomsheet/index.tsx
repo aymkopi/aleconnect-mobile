@@ -1,67 +1,81 @@
-'use client';
-import { FocusScope } from '@gluestack-ui/utils/aria';
-import { tva } from '@gluestack-ui/utils/nativewind-utils';
-import { Overlay } from '@gluestack-ui/core/overlay/creator';
+"use client";
+import { Button, ButtonIcon } from "@/components/ui/button";
+import { Heading } from "@/components/ui/heading";
+import { Text as AppText } from "@/components/ui/text";
+import { useAppColors } from "@/hooks/use-app-colors";
+import { Overlay } from "@gluestack-ui/core/overlay/creator";
+import { FocusScope } from "@gluestack-ui/utils/aria";
+import { tva } from "@gluestack-ui/utils/nativewind-utils";
 import GorhomBottomSheet, {
-  BottomSheetBackdrop as GorhomBottomSheetBackdrop,
-  BottomSheetFlatList as GorhomBottomSheetFlatList,
-  BottomSheetFooter as GorhomBottomSheetFooter,
-  BottomSheetHandle as GorhomBottomSheetHandle,
-  BottomSheetTextInput as GorhomBottomSheetInput,
-  BottomSheetScrollView as GorhomBottomSheetScrollView,
-  BottomSheetSectionList as GorhomBottomSheetSectionList,
-  BottomSheetView as GorhomBottomSheetView,
-} from '@gorhom/bottom-sheet';
-import { withUniwind } from 'uniwind';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { X, type LucideIcon } from 'lucide-react-native';
-import { useAppColors } from '@/hooks/use-app-colors';
-import { Button, ButtonIcon } from '@/components/ui/button';
-import { Heading } from '@/components/ui/heading';
-import { Text as AppText } from '@/components/ui/text';
+    BottomSheetBackdrop as GorhomBottomSheetBackdrop,
+    BottomSheetFlatList as GorhomBottomSheetFlatList,
+    BottomSheetFooter as GorhomBottomSheetFooter,
+    BottomSheetHandle as GorhomBottomSheetHandle,
+    BottomSheetTextInput as GorhomBottomSheetInput,
+    BottomSheetScrollView as GorhomBottomSheetScrollView,
+    BottomSheetSectionList as GorhomBottomSheetSectionList,
+    BottomSheetView as GorhomBottomSheetView,
+} from "@gorhom/bottom-sheet";
+import { X, type LucideIcon } from "lucide-react-native";
 import React, {
-  createContext,
-  forwardRef,
-  useCallback,
-  useContext,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import type { PressableProps, TextInputProps, TextProps } from 'react-native';
-import { BackHandler, Keyboard, Platform, Text, View, Pressable as RNPressable } from 'react-native';
+    createContext,
+    forwardRef,
+    useCallback,
+    useContext,
+    useEffect,
+    useImperativeHandle,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
+import type {
+    PressableProps,
+    StyleProp,
+    TextInputProps,
+    TextProps,
+    ViewStyle,
+} from "react-native";
+import {
+    BackHandler,
+    Keyboard,
+    Platform,
+    Pressable as RNPressable,
+    StyleSheet,
+    Text,
+    View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { withUniwind } from "uniwind";
 
 const bottomSheetBackdropStyle = tva({
-  base: 'absolute inset-0 bg-black opacity-50',
+  base: "absolute inset-0 bg-black opacity-50",
 });
 
 const bottomSheetContentStyle = tva({
-  base: 'gap-4 px-5 pb-safe-or-5 pt-0',
+  base: "gap-4 px-5 pb-safe-or-5 pt-0",
 });
 
 const bottomSheetTriggerStyle = tva({
-  base: 'p-4 rounded-lg border border-border/90',
+  base: "p-4 rounded-lg border border-border/90",
 });
 
 const bottomSheetHandleStyle = tva({
-  base: 'w-full items-center rounded-t-xl py-3',
+  base: "w-full items-center rounded-t-xl py-3",
 });
 
 const bottomSheetItemStyle = tva({
-  base: 'p-3 flex-row items-center rounded-sm w-full disabled:opacity-40 web:pointer-events-auto disabled:cursor-not-allowed hover:bg-accent/40 active:bg-accent/50 data-[focus=true]:bg-accent/20 web:data-[focus-visible=true]:bg-accent/40',
+  base: "p-3 flex-row items-center rounded-sm w-full disabled:opacity-40 web:pointer-events-auto disabled:cursor-not-allowed hover:bg-accent/40 active:bg-accent/50 data-[focus=true]:bg-accent/20 web:data-[focus-visible=true]:bg-accent/40",
 });
 const bottomSheetItemTextStyle = tva({
-  base: 'text-foreground font-normal text-sm',
+  base: "text-foreground font-normal text-sm",
 });
 
 const bottomSheetFooterStyle = tva({
-  base: 'border-t border-border/90 bg-background px-5 pb-safe-or-5 pt-4',
+  base: "border-t border-border/90 bg-background px-5 pb-safe-or-5 pt-4",
 });
 
 const bottomSheetTextInputStyle = tva({
-  base: 'h-12 w-full flex-1 flex-row items-center gap-2 overflow-hidden rounded-xl border border-border bg-card px-4 py-1 text-base text-foreground shadow-xs placeholder:text-muted-foreground web:cursor-text web:outline-none ios:leading-[0px]',
+  base: "h-12 w-full flex-1 flex-row items-center gap-2 overflow-hidden rounded-xl border border-border bg-card px-4 py-1 text-base text-foreground shadow-xs placeholder:text-muted-foreground web:cursor-text web:outline-none ios:leading-[0px]",
 });
 
 type BottomSheetContextValue = {
@@ -75,10 +89,10 @@ type BottomSheetContextValue = {
 
 const BottomSheetContext = createContext<BottomSheetContextValue>({
   bottomSheetRef: { current: null! },
-  handleClose: () => { },
-  handleOpen: () => { },
+  handleClose: () => {},
+  handleOpen: () => {},
   isVisible: false,
-  handleSheetChanges: () => { },
+  handleSheetChanges: () => {},
   currentIndex: -1,
 });
 
@@ -111,18 +125,14 @@ export const BottomSheet = forwardRef<BottomSheetRef, IBottomSheetRootProps>(
         setIsVisible(true);
         onOpen?.();
       },
-      [defaultSnapIndex, onOpen]
+      [defaultSnapIndex, onOpen],
     );
 
     const handleClose = useCallback(() => {
       Keyboard.dismiss();
-      if (Platform.OS === 'web') {
-        setCurrentIndex(-1);
-        setIsVisible(false);
-        onClose?.();
-        return;
-      }
-      bottomSheetRef.current?.close();
+      setCurrentIndex(-1);
+      setIsVisible(false);
+      onClose?.();
     }, [onClose]);
 
     const handleSheetChanges = useCallback(
@@ -136,7 +146,7 @@ export const BottomSheet = forwardRef<BottomSheetRef, IBottomSheetRootProps>(
           setIsVisible(true);
         }
       },
-      [onClose, onChange]
+      [onClose, onChange],
     );
 
     const snapToIndex = useCallback((index: number) => {
@@ -165,7 +175,7 @@ export const BottomSheet = forwardRef<BottomSheetRef, IBottomSheetRootProps>(
         expand,
         collapse,
       }),
-      [handleOpen, handleClose, snapToIndex, expand, collapse]
+      [handleOpen, handleClose, snapToIndex, expand, collapse],
     );
 
     const contextValue = useMemo(
@@ -177,7 +187,7 @@ export const BottomSheet = forwardRef<BottomSheetRef, IBottomSheetRootProps>(
         handleSheetChanges,
         currentIndex,
       }),
-      [handleClose, handleOpen, isVisible, handleSheetChanges, currentIndex]
+      [handleClose, handleOpen, isVisible, handleSheetChanges, currentIndex],
     );
 
     return (
@@ -185,16 +195,16 @@ export const BottomSheet = forwardRef<BottomSheetRef, IBottomSheetRootProps>(
         {children}
       </BottomSheetContext.Provider>
     );
-  }
+  },
 );
 
-BottomSheet.displayName = 'BottomSheet';
+BottomSheet.displayName = "BottomSheet";
 
 const StyledGorhomBottomSheet = withUniwind(GorhomBottomSheet);
 
 type IBottomSheetPortalProps = Omit<
   React.ComponentProps<typeof GorhomBottomSheet>,
-  'ref' | 'index'
+  "ref" | "index"
 > & {
   className?: string;
   backgroundClassName?: string;
@@ -207,9 +217,10 @@ export const BottomSheetPortal = ({
   handleIndicatorClassName,
   enablePanDownToClose = true,
   enableDynamicSizing = false,
-  keyboardBehavior = 'interactive',
-  keyboardBlurBehavior = 'restore',
-  android_keyboardInputMode = 'adjustResize',
+  keyboardBehavior = "interactive",
+  keyboardBlurBehavior = "restore",
+  // Gorhom skips its interactive keyboard offset on Android when adjustResize is used.
+  android_keyboardInputMode = "adjustPan",
   enableBlurKeyboardOnGesture = true,
   topInset,
   snapPoints,
@@ -217,20 +228,28 @@ export const BottomSheetPortal = ({
   ...props
 }: IBottomSheetPortalProps) => {
   const insets = useSafeAreaInsets();
-  const { bottomSheetRef, handleClose, handleSheetChanges, isVisible, currentIndex } =
-    useContext(BottomSheetContext);
+  const {
+    bottomSheetRef,
+    handleClose,
+    handleSheetChanges,
+    isVisible,
+    currentIndex,
+  } = useContext(BottomSheetContext);
 
   useEffect(() => {
-    if (!isVisible || Platform.OS !== 'android') return;
+    if (!isVisible || Platform.OS !== "android") return;
 
-    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (Keyboard.isVisible()) {
-        Keyboard.dismiss();
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        if (Keyboard.isVisible()) {
+          Keyboard.dismiss();
+          return true;
+        }
+        handleClose();
         return true;
-      }
-      handleClose();
-      return true;
-    });
+      },
+    );
     return () => subscription.remove();
   }, [handleClose, isVisible]);
 
@@ -241,7 +260,7 @@ export const BottomSheetPortal = ({
   // Defensive index check to prevent Invariant Violation
   const snapPointCount = Array.isArray(memoizedSnapPoints)
     ? memoizedSnapPoints.length
-    : memoizedSnapPoints?.value.length ?? 0;
+    : (memoizedSnapPoints?.value.length ?? 0);
   const validIndex =
     snapPointCount > 0
       ? Math.min(currentIndex, snapPointCount - 1)
@@ -265,11 +284,11 @@ export const BottomSheetPortal = ({
         }}
         enablePanDownToClose={enablePanDownToClose}
         // @ts-ignore
-        className={className ?? ''}
+        className={className ?? ""}
         // @ts-ignore
-        backgroundClassName={`${backgroundClassName ?? ''} rounded-t-xl border border-border/90 bg-background`}
+        backgroundClassName={`${backgroundClassName ?? ""} rounded-t-xl border border-border/90 bg-background`}
         // @ts-ignore
-        handleIndicatorClassName={`${handleIndicatorClassName ?? ''} bg-muted-foreground/60`}
+        handleIndicatorClassName={`${handleIndicatorClassName ?? ""} bg-muted-foreground/60`}
         {...props}
       >
         {props.children}
@@ -310,7 +329,7 @@ export const BottomSheetBackdrop = ({
   appearsOnIndex = 0,
   opacity = 0.5,
   className,
-  pressBehavior = 'close',
+  pressBehavior = "close",
   ...props
 }: IBottomSheetBackdropProps) => {
   return (
@@ -369,10 +388,10 @@ export const BottomSheetContent = ({
   const { handleClose, isVisible } = useContext(BottomSheetContext);
 
   const keyDownHandlers = useMemo(() => {
-    if (Platform.OS !== 'web') return {};
+    if (Platform.OS !== "web") return {};
     return {
       onKeyDown: (e: React.KeyboardEvent) => {
-        if (e.key === 'Escape') {
+        if (e.key === "Escape") {
           e.preventDefault();
           handleClose();
         }
@@ -382,7 +401,7 @@ export const BottomSheetContent = ({
 
   const content = props.children;
   const wrappedContent =
-    Platform.OS === 'web' && isVisible && focusScope ? (
+    Platform.OS === "web" && isVisible && focusScope ? (
       <FocusScope contain={isVisible} autoFocus restoreFocus>
         {content}
       </FocusScope>
@@ -417,11 +436,11 @@ export function BottomSheetHeader({
   description,
   icon: HeaderIcon,
   showCloseButton = true,
-  closeAccessibilityLabel = 'Close sheet',
-  className = '',
+  closeAccessibilityLabel = "Close sheet",
+  className = "",
 }: BottomSheetHeaderProps) {
   const { handleClose } = useContext(BottomSheetContext);
-  const [accentColor, foregroundColor] = useAppColors(['accent', 'foreground']);
+  const [accentColor, foregroundColor] = useAppColors(["accent", "foreground"]);
 
   return (
     <View
@@ -444,16 +463,13 @@ export function BottomSheetHeader({
         <Button
           size="icon"
           variant="ghost"
-          className="shrink-0"
-          onPress={handleClose}
+          className="min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full active:bg-accent"
+          onPress={() => handleClose()}
+          hitSlop={4}
+          accessibilityRole="button"
           accessibilityLabel={closeAccessibilityLabel}
         >
-          <ButtonIcon
-            as={X}
-            color={foregroundColor}
-            height={16}
-            width={16}
-          />
+          <ButtonIcon as={X} color={foregroundColor} height={16} width={16} />
         </Button>
       ) : null}
     </View>
@@ -544,7 +560,45 @@ export const BottomSheetTextInput = ({
   );
 };
 
-// Scrollable components
-export const BottomSheetScrollView = GorhomBottomSheetScrollView;
+type IBottomSheetScrollViewProps = React.ComponentProps<
+  typeof GorhomBottomSheetScrollView
+>;
+
+export const BottomSheetScrollView = forwardRef<
+  React.ComponentRef<typeof GorhomBottomSheetScrollView>,
+  IBottomSheetScrollViewProps
+>(function BottomSheetScrollView(
+  {
+    contentContainerStyle,
+    keyboardDismissMode = Platform.OS === "ios" ? "interactive" : "on-drag",
+    keyboardShouldPersistTaps = "handled",
+    ...props
+  },
+  ref,
+) {
+  const insets = useSafeAreaInsets();
+  const requestedPadding = StyleSheet.flatten(
+    contentContainerStyle as StyleProp<ViewStyle>,
+  )?.paddingBottom;
+  const safePadding = Math.max(
+    insets.bottom,
+    20,
+    typeof requestedPadding === "number" ? requestedPadding : 0,
+  );
+
+  return (
+    <GorhomBottomSheetScrollView
+      {...props}
+      ref={ref}
+      keyboardDismissMode={keyboardDismissMode}
+      keyboardShouldPersistTaps={keyboardShouldPersistTaps}
+      contentContainerStyle={[
+        contentContainerStyle,
+        { paddingBottom: safePadding },
+      ]}
+    />
+  );
+});
+
 export const BottomSheetFlatList = GorhomBottomSheetFlatList;
 export const BottomSheetSectionList = GorhomBottomSheetSectionList;

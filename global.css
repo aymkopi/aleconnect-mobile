@@ -2,7 +2,7 @@
 @import "uniwind";
 
 @theme static {
-  /* Global radius control: standard components use rounded-xl (12px). */
+  /* Global radius control: change these values to resize non-circular surfaces. */
   --radius: 0.75rem;
   --radius-sm: 0.75rem;
   --radius-md: 0.75rem;

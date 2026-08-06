@@ -6,8 +6,11 @@ export interface ConsumerProfileView {
   readonly email: string;
   readonly avatarUrl: string | null;
   readonly purokOrStreet: string | null;
+  readonly barangayPsgc: string | null;
   readonly barangay: string | null;
+  readonly municipalityCode: string | null;
   readonly municipality: string | null;
+  readonly landmark: string | null;
   readonly fullAddress: string | null;
   readonly meterSerialNum: string | null;
   readonly poleNumber: string | null;
@@ -89,8 +92,11 @@ export function toConsumerProfileView(
     email: String(row.email ?? ""),
     avatarUrl: readString(row.avatar_url),
     purokOrStreet: readString(row.purok_or_street),
+    barangayPsgc: readString(row.barangay_psgc),
     barangay: readString(row.barangay),
+    municipalityCode: readString(row.municipality_code),
     municipality: readString(row.municipality),
+    landmark: readString(row.landmark),
     fullAddress: readString(row.full_address),
     meterSerialNum: readString(row.meter_serial_num),
     poleNumber: readString(row.pole_number),

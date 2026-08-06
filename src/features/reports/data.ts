@@ -3,6 +3,8 @@ export type ComplaintCategory = {
   title: string;
   description: string;
   color: string;
+  requiresDescription: boolean;
+  descriptionLabel?: string;
 };
 
 export type ComplaintType = {
@@ -10,6 +12,9 @@ export type ComplaintType = {
   categoryId: string;
   title: string;
   priority: string | null;
+  requiresDescription: boolean;
+  descriptionLabel?: string;
+  requiresKwhmTransfer: boolean;
 };
 
 export type ComplaintMunicipality = {
@@ -66,6 +71,7 @@ export type IncidentPublicUpdate = {
 };
 
 export type ReportDetail = Report & {
+  imageUrlsExpiresAt: string | null;
   actionDesired: string | null;
   purok: string | null;
   barangayPsgc: string | null;
@@ -76,7 +82,66 @@ export type ReportDetail = Report & {
   longitude: number | null;
   history: ReportHistoryItem[];
   publicUpdates: IncidentPublicUpdate[];
+  reportDetails?: {
+    version: number;
+    categoryDescription: string | null;
+    typeDescription: string | null;
+    kwhmTransfer: {
+      currentRegisteredName: string;
+      requestedRegisteredName: string;
+    } | null;
+  } | null;
 };
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function isHttpUrl(value: unknown): value is string {
+  if (typeof value !== "string") return false;
+  try {
+    return ["http:", "https:"].includes(new URL(value).protocol);
+  } catch {
+    return false;
+  }
+}
+
+export function parseReportDetailResponse(value: unknown): ReportDetail {
+  const report = isRecord(value) && isRecord(value.report) ? value.report : null;
+  const requiredStrings = [
+    "id",
+    "ticketNumber",
+    "title",
+    "status",
+    "createdAt",
+    "typeId",
+    "typeTitle",
+    "categoryId",
+    "categoryTitle",
+  ];
+  if (
+    !report ||
+    requiredStrings.some(
+      (key) => typeof report[key] !== "string" || !report[key].trim(),
+    ) ||
+    !Array.isArray(report.history) ||
+    !Array.isArray(report.publicUpdates)
+  ) {
+    throw new Error("Report details response was incomplete.");
+  }
+
+  return {
+    ...(report as unknown as ReportDetail),
+    imageUrls: Array.isArray(report.imageUrls)
+      ? report.imageUrls.filter(isHttpUrl)
+      : [],
+    imageUrlsExpiresAt:
+      typeof report.imageUrlsExpiresAt === "string" &&
+      Number.isFinite(Date.parse(report.imageUrlsExpiresAt))
+        ? report.imageUrlsExpiresAt
+        : null,
+  };
+}
 
 export type ComplaintFormState = {
   categoryId: string;
@@ -87,12 +152,16 @@ export type ComplaintFormState = {
   barangayPsgc: string;
   purok: string;
   landmark: string;
-  description: string;
+  categoryDescription: string;
+  typeDescription: string;
+  currentRegisteredName: string;
+  requestedRegisteredName: string;
   desiredAction: string;
   photos: string[];
   photoUploads: ComplaintPhotoUpload[];
   latitude: number | null;
   longitude: number | null;
+  locationVerified: boolean;
   ticketId: string | null;
   ticketNumber: string | null;
 };
@@ -121,12 +190,16 @@ export const initialComplaintForm: ComplaintFormState = {
   barangayPsgc: "",
   purok: "",
   landmark: "",
-  description: "",
+  categoryDescription: "",
+  typeDescription: "",
+  currentRegisteredName: "",
+  requestedRegisteredName: "",
   desiredAction: "",
   photos: [],
   photoUploads: [],
   latitude: null,
   longitude: null,
+  locationVerified: false,
   ticketId: null,
   ticketNumber: null,
 };

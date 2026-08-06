@@ -4,7 +4,7 @@ import type * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useRef } from "react";
-import { Text, TextInput } from "react-native";
+import { Text, TextInput, useWindowDimensions } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { useUniwind } from "uniwind";
@@ -21,10 +21,16 @@ import { AuthSessionProvider } from "@/context/auth-session-context";
 import { ReportQueueProvider } from "@/context/report-queue-context";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { consumeForcedLogoutReason } from "@/services/api";
+import { clearAdvisoryCache } from "@/services/advisories";
 import { subscribeComplaintSubmissionToast } from "@/services/report-submission-events";
 import { clearComplaintCache } from "@/services/reports";
 import { registerDevicePushToken } from "@/services/notification-settings";
-import { ticketIdFromPushData } from "@/services/notification-navigation";
+import {
+  advisoryIdFromPushData,
+  ticketIdFromPushData,
+} from "@/services/notification-navigation";
+import { invalidateNotifications } from "@/services/notifications";
+import "@/services/report-background-sync";
 import "../../global.css";
 
 void SplashScreen.preventAutoHideAsync();
@@ -40,15 +46,23 @@ function AppToast({
   message: string;
   action: "success" | "error" | "info";
 }) {
+  const { width } = useWindowDimensions();
+
   return (
     <Toast
       nativeID={`app-toast-${id}`}
       action={action}
       variant="solid"
-      className="border-border bg-popover shadow-lg"
-      style={{ width: "90%", maxWidth: 560 }}
+      className="gap-0.5 border-border bg-popover shadow-lg"
+      style={{
+        width: Math.min(width - 32, 420),
+        borderRadius: 12,
+        padding: 12,
+      }}
     >
       <ToastTitle
+        numberOfLines={1}
+        size="sm"
         className={
           action === "error"
             ? "text-destructive"
@@ -59,7 +73,11 @@ function AppToast({
       >
         {title}
       </ToastTitle>
-      <ToastDescription className="text-popover-foreground">
+      <ToastDescription
+        numberOfLines={2}
+        size="xs"
+        className="text-popover-foreground"
+      >
         {message}
       </ToastDescription>
     </Toast>
@@ -69,6 +87,7 @@ function AppToast({
 function PushTokenBridge() {
   const router = useRouter();
   const { session } = useAuthSession();
+  const toast = useToast();
   const pendingToken = useRef<string | null>(null);
 
   const flushToken = useCallback(
@@ -90,17 +109,57 @@ function PushTokenBridge() {
       );
 
       if (ticketId) {
-        void clearComplaintCache();
+        void clearComplaintCache(session?.user.id);
         router.push({
           pathname: "/report/[id]",
-          params: { id: ticketId },
+          params: { id: ticketId, focus: "notification" },
+        });
+        return;
+      }
+
+      const advisoryId = advisoryIdFromPushData(
+        response.notification.request.content.data,
+      );
+      if (advisoryId) {
+        router.push({
+          pathname: "/advisory/[id]",
+          params: { id: advisoryId, focus: "notification" },
         });
         return;
       }
 
       router.push("/notifications");
     },
-    [router],
+    [router, session?.user.id],
+  );
+
+  const handleForegroundNotification = useCallback(
+    (notification: Notifications.Notification) => {
+      if (session) {
+        void Promise.all([
+          clearAdvisoryCache(session.user.id),
+          clearComplaintCache(session.user.id),
+        ]).then(() => invalidateNotifications(session.user.id));
+      }
+
+      const title = notification.request.content.title ?? "New update";
+      const message =
+        notification.request.content.body ??
+        "Open notifications to view the latest update.";
+      toast.show({
+        placement: "top",
+        duration: 5000,
+        render: ({ id }) => (
+          <AppToast
+            id={String(id)}
+            title={title}
+            message={message}
+            action="info"
+          />
+        ),
+      });
+    },
+    [session, toast],
   );
 
   useEffect(() => {
@@ -113,6 +172,7 @@ function PushTokenBridge() {
 
   return (
     <PushNotificationsReceiver
+      onNotificationReceived={handleForegroundNotification}
       onPushTokenReceived={flushToken}
       onNotificationResponseReceived={openNotificationTarget}
     />
@@ -259,6 +319,24 @@ export default function RootLayout() {
                 />
                 <Stack.Screen
                   name="notifications"
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="notification-settings"
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="advisories"
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="advisory/[id]"
                   options={{
                     headerShown: false,
                   }}

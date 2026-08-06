@@ -76,3 +76,48 @@
 - Git/Deployment: one selective local fix commit per repository; no push, deployment, dependency install, product mutation, or production-data change.
 - Remaining risks: GitHub Actions has not executed the new event-range branches remotely. Mobile TypeScript/lint and staff build were not rerun because no mobile TypeScript or staff/API/data-route interface changed; focused validator/workflow checks cover this scope. User-owned product, handoff, and Graphify dirt remains unstaged.
 - Next: run committed-range checks on the selective fix commits, record the exact hashes in the local final-fix report, then resume the active product plan only after reviewing preserved worktree state.
+
+## 2026-08-02 — Structured address and public hotline batches
+
+- Repositories: mobile and sibling staff/API.
+- Scope: replaced the one-field address edit with linked municipality/barangay, purok/street, landmark, and the shared Albay map picker; atomically refreshes the profile cache from the PATCH response. Hotlines now revalidates its retained cache on focus and restores accessibility focus after category-sheet close.
+- Files: `src/app/(tabs)/profile/details.tsx`, `src/features/profile/components/ProfileAddressSheetContent.tsx`, `src/features/maps/albay-location-picker-sheet.tsx`, `src/services/profile.ts`, `src/hooks/use-consumer-profile.ts`, `src/app/(tabs)/hotlines.tsx`, `src/services/hotlines.ts`, models, and focused tests.
+- Contracts: address writes remain server-owned and additive; no raw coordinates are rendered. Hotline cache still supports offline stale data, while the existing cooldown prevents repeated focus refreshes; public contact groups and agency avatar version fields are preserved.
+- Verification: mobile tests passed 84/84, TypeScript and lint passed, Expo Doctor passed 19/19, and Android exports completed. Device `25069PTEBG` verified populated linked selectors, map open, cancel without save, stale hotline replacement, Albay Electric Cooperative under Electricity, and explicit category Close. Sibling API/DB tests and the deployed Hotline response also passed.
+- Git/Deployment: no commit or mobile deployment; Metro remains on port 8081 for the connected wireless device.
+- Remaining risks: G-06/G-07 slow-network submission proof and G-09 physical offline map-style proof remain open; TalkBack was not enabled for audible focus confirmation.
+- Next: G-16–G-19 transport, complaint detail, evidence URL, and retry hardening.
+
+## 2026-08-02 - Mobile report API and transport hardening
+
+- Repositories: mobile and sibling staff/API.
+- Scope: added deterministic detail parsing, retained loading/error UI, cached in-app evidence viewing with one signed-URL refresh, phase-aware request failures, at-most-two concurrent evidence uploads, request diagnostics, and safe idempotent final retry.
+- Files: `src/features/reports/data.ts`, `src/features/reports/components/evidence-photo-viewer.tsx`, `src/app/(tabs)/reports/[id].tsx`, `src/app/(tabs)/reports/list.tsx`, `src/services/api.ts`, `src/services/reports.ts`, `src/services/report-queue.ts`, `src/utils/report-transport.ts`, and focused tests; sibling API/Worker files and tracker were updated with the additive contract.
+- Contracts: the client requires the canonical `{ report }` wrapper and human Ticket Number, filters non-HTTP image values, retains content during refresh, and performs one `refreshEvidence=1` recovery. Evidence metadata, PUT, final submit, and refresh have bounded phases; raw PUTs are not blindly retried; queued payloads/photos and a copyable diagnostic ID survive failure.
+- Verification: mobile tests passed 100/100, TypeScript and lint passed, Expo Doctor passed 19/19, and Android export completed. Android `25069PTEBG` displayed the signed evidence thumbnail and full-screen viewer. A disposable local queue item for account `100002343800221` stalled the evidence PUT beyond 30 seconds, remained saved with the plain retry message and diagnostic control, and was removed afterward; no final ticket POST occurred. Sibling staff focused/API/DB tests, build, and Worker dry-run passed.
+- Git/Deployment: no commit or mobile deployment; Metro was restored on port 8081 with the production API origin.
+- Remaining risks: production still has the prior Worker until G-34; G-06/G-07 and G-09 retain their separate UI/offline acceptance items.
+- Next: G-20-G-25 notification history/navigation and physical Expo push delivery.
+
+## 2026-08-06 - Notification destination focus
+
+- Repositories: mobile and sibling staff/API.
+- Scope: added typed safe notification destinations, awaited no-link read state, one-shot report/advisory focus tokens, and Android device runtime proof while preserving the existing notification response contract.
+- Verification: mobile notification tests 4/4, TypeScript and lint passed; wireless Android device `25069PTEBG` launched `MainActivity`, Metro 8081 and ADB reverse were verified, and the three ALEConnect notification channels were present with bundled sounds.
+- Remaining risks: physical token registration and foreground/background/cold-start response proof remain open for G-24; G-25 receipt/cron proof is tracked in the sibling staff handoff.
+- Next: finish G-24-G-25 physical Expo push delivery proof.
+
+## 2026-08-06 - Notification release validation
+
+- Repositories: mobile and sibling staff/API.
+- Scope: kept notifications on the shared destination helper, fixed its stale route-literal assertion, and verified the device-targeted Expo build path.
+- Verification: mobile full suite 100/100, TypeScript/lint passed, and `npx expo run:android --device 25069PTEBG --no-bundler` completed successfully, installed the debug APK, and opened the Expo development client. Metro 8081 and ADB reverse remained active. Sibling staff notification tests passed 12/12; advisory publication/reactivation DB tests passed 2/2 serially; staff TypeScript/build/lint passed with two pre-existing generated-worktree warnings.
+- Remaining risks: token registration, foreground/background/cold-start push response, and live receipt/cron proof remain open for G-24/G-25.
+- Next: capture authenticated token and end-to-end push delivery evidence without changing the established contracts.
+
+## 2026-08-06 - Physical push proof and deferred terminated-state response
+
+- Scope: verified the authenticated Expo token, Android notification permission/channels, foreground delivery, background tap-to-advisory navigation, Expo receipt success, and advisory revision dedupe on the wireless device.
+- Verification: foreground delivery refreshed the Home badge/advisory immediately; background tapping opened the exact advisory details route; the checked receipt was `ok`. Notification-response regression test, TypeScript, and lint passed.
+- Deferred defect: a notification received after the app process was killed still displayed and launched `MainActivity`, but the app opened Home. Diagnostic boundary logs showed neither an initial response nor a response-listener event. Expo routes Android terminated-state actions through a registered notification task, which this app does not currently register. Per product direction, no task implementation was retained; resume with task persistence plus startup consumption and repeat the physical test.
+- Cleanup: the disposable advisory and related notification/audit/push rows were removed by the sibling API workspace; the real device token was not removed.

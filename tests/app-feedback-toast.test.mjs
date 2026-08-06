@@ -11,6 +11,9 @@ test("global feedback uses the GlueStack toast host", async () => {
   for (const symbol of ["ToastDescription", "ToastTitle", "useToast"]) {
     assert.match(source, new RegExp(`\\b${symbol}\\b`));
   }
-  assert.equal((source.match(/toast\.show\(\{/g) ?? []).length, 2);
+  assert.equal((source.match(/toast\.show\(\{/g) ?? []).length, 3);
+  assert.match(source, /handleForegroundNotification/);
+  assert.match(source, /Math\.min\(width - 32,\s*420\)/);
+  assert.match(source, /numberOfLines=\{2\}/);
   assert.doesNotMatch(source, /setLogoutMessage|setToast\(/);
 });

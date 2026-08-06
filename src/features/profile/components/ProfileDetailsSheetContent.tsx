@@ -11,7 +11,6 @@ import {
   FormControlLabel,
   FormControlLabelText,
 } from "@/components/ui/form-control";
-import { type LucideIcon } from "lucide-react-native";
 import React from "react";
 import { View } from "react-native";
 
@@ -21,7 +20,6 @@ export type ProfileDetailsSheetContentProps = {
   editingField: EditableField | null;
   sheetTitle: string;
   sheetDescription: string;
-  SheetIcon: LucideIcon;
   inputValue: string;
   inputError: string | null;
   currentPhone: string;
@@ -37,7 +35,6 @@ export function ProfileDetailsSheetContent({
   editingField,
   sheetTitle,
   sheetDescription,
-  SheetIcon,
   inputValue,
   inputError,
   currentPhone,
@@ -53,18 +50,17 @@ export function ProfileDetailsSheetContent({
       <BottomSheetHeader
         title={sheetTitle}
         description={sheetDescription}
-        icon={SheetIcon}
         closeAccessibilityLabel={`Close ${sheetTitle.toLowerCase()}`}
       />
       <View className="gap-4 rounded-lg border border-border/90 bg-card p-4">
         <FormControl isInvalid={!!inputError} isRequired>
           <FormControlLabel>
             <FormControlLabelText>
-            {editingField === "phone"
-              ? "New phone number"
-              : editingField === "email"
-                ? "New email address"
-                : "New purok or street"}
+              {editingField === "phone"
+                ? "New phone number"
+                : editingField === "email"
+                  ? "New email address"
+                  : "New purok or street"}
             </FormControlLabelText>
           </FormControlLabel>
           <View className="w-full flex-row items-center">
@@ -92,9 +88,10 @@ export function ProfileDetailsSheetContent({
                     : "Enter purok or street"
               }
             />
-            <View className="absolute left-3.5" style={{ pointerEvents: "none" }}>
-              <SheetIcon size={18} color="#888" />
-            </View>
+            <View
+              className="absolute left-3.5"
+              style={{ pointerEvents: "none" }}
+            ></View>
           </View>
           {inputError ? (
             <FormControlError>
@@ -128,11 +125,7 @@ export function ProfileDetailsSheetContent({
         >
           <ButtonText>Cancel</ButtonText>
         </Button>
-        <Button
-          onPress={onSave}
-          isDisabled={isUpdating}
-          style={{ flex: 1 }}
-        >
+        <Button onPress={onSave} isDisabled={isUpdating} style={{ flex: 1 }}>
           <ButtonText>{isUpdating ? "Saving..." : "Save"}</ButtonText>
         </Button>
       </View>

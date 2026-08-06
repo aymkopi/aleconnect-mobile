@@ -4,7 +4,6 @@ import { Heading } from "@/components/ui/heading";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import { statusBarHeight } from "@/constants";
-import { useReportQueue } from "@/context/report-queue-context";
 import {
   emptyComplaintMeta,
   type ComplaintMeta,
@@ -20,8 +19,6 @@ import {
   Bell,
   CalendarDays,
   ChevronRight,
-  CloudUpload,
-  FileText,
   Plus,
 } from "lucide-react-native";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -51,7 +48,7 @@ function ReportsSkeleton() {
           className="rounded-lg border border-border bg-card p-4"
         >
           <View className="flex-row gap-3">
-            <Skeleton className="h-12 w-12 rounded-2xl" />
+            <Skeleton className="h-12 w-12 rounded-full" />
             <View className="flex-1 gap-2">
               <Skeleton className="h-3 w-24 rounded-full" />
               <Skeleton className="h-5 w-4/5 rounded-full" />
@@ -73,7 +70,6 @@ export default function ComplaintsRoute() {
   const bottomPadding = appScrollableBottomPadding(insets.bottom);
   const [accentColor] = useAppColors(["accent"]);
   const unreadCount = useUnreadNotificationCount();
-  const { pendingCount } = useReportQueue();
   const { session } = useAuthSession();
   const [meta, setMeta] = useState<ComplaintMeta>(emptyComplaintMeta);
   const [reports, setReports] = useState<Report[]>([]);
@@ -178,27 +174,6 @@ export default function ComplaintsRoute() {
                 className="relative rounded-full"
                 size="icon"
                 variant="ghost"
-                accessibilityLabel="Queued reports"
-                onPress={() => router.push("/reports/queue")}
-              >
-                <ButtonIcon
-                  as={CloudUpload}
-                  className="text-white"
-                  height={21}
-                  width={21}
-                />
-                {pendingCount > 0 ? (
-                  <View className="absolute -right-1 -top-1 min-h-5 min-w-5 items-center justify-center rounded-full bg-warning px-1">
-                    <Text className="text-xs font-bold text-warning-foreground">
-                      {pendingCount > 9 ? "9+" : pendingCount}
-                    </Text>
-                  </View>
-                ) : null}
-              </Button>
-              <Button
-                className="relative rounded-full"
-                size="icon"
-                variant="ghost"
                 accessibilityLabel="Notifications"
                 onPress={() => router.push("/notifications")}
               >
@@ -241,7 +216,7 @@ export default function ComplaintsRoute() {
             <Button
               variant="secondary"
               onPress={() => router.push("/reports/new")}
-              size="lg"
+              size="default"
             >
               <ButtonIcon as={Plus} height={16} width={16} />
               <ButtonText>New</ButtonText>
@@ -261,7 +236,7 @@ export default function ComplaintsRoute() {
             size="sm"
             onPress={() => router.push("/reports/list")}
           >
-            <ButtonText>View all</ButtonText>
+            <ButtonText>Archive</ButtonText>
             <ButtonIcon as={ChevronRight} height={16} width={16} />
           </Button>
         </View>
@@ -279,16 +254,8 @@ export default function ComplaintsRoute() {
               No reports this month
             </Heading>
             <Text className="mt-1 text-center text-sm text-muted-foreground">
-              Older tickets are still available in your report archive.
+              Your submitted reports and saved drafts will appear here.
             </Text>
-            <Button
-              variant="secondary"
-              className="mt-4"
-              onPress={() => router.push("/reports/list")}
-            >
-              <ButtonIcon as={FileText} height={16} width={16} />
-              <ButtonText>Open archive</ButtonText>
-            </Button>
           </View>
         ) : (
           <ReportListGroup

@@ -184,7 +184,13 @@ const ButtonIcon = React.forwardRef<
       <UIButton.Icon
         ref={ref}
         {...props}
-        className={buttonIconStyle({ class: className })}
+        className={buttonIconStyle({
+          parentVariants: {
+            size: parentSize,
+            variant: parentVariant,
+          },
+          class: className,
+        })}
         size={size}
       />
     );
@@ -196,7 +202,13 @@ const ButtonIcon = React.forwardRef<
       <UIButton.Icon
         ref={ref}
         {...props}
-        className={buttonIconStyle({ class: className })}
+        className={buttonIconStyle({
+          parentVariants: {
+            size: parentSize,
+            variant: parentVariant,
+          },
+          class: className,
+        })}
       />
     );
   }

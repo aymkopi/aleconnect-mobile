@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { apiRequest } from "@/services/api";
+import { claimRefresh } from "@/utils/refresh-cooldown";
 
 export type HotlineContact = {
   readonly id: string;
@@ -31,6 +32,7 @@ export type HotlineCategory = {
 
 type HotlineResponse = {
   readonly categories: HotlineCategory[];
+  readonly isStale?: boolean;
 };
 
 const cacheKey = "hotlines_cache_v4";
@@ -69,7 +71,9 @@ async function writeCache(value: HotlineResponse) {
 }
 
 export async function fetchHotlines(options?: { force?: boolean }) {
-  if (!options?.force) {
+  const force =
+    Boolean(options?.force) && claimRefresh("hotlines");
+  if (!force) {
     const cached = await readCache();
     if (cached) return cached;
   }
@@ -81,8 +85,14 @@ export async function fetchHotlines(options?: { force?: boolean }) {
       await writeCache(data);
       return data;
     }, async (error) => {
+      if (typeof __DEV__ !== "undefined" && __DEV__) {
+        console.warn(
+          "[hotlines] refresh failed",
+          error instanceof Error ? error.message : "Unknown error",
+        );
+      }
       const stale = await readCache(true);
-      if (stale) return stale;
+      if (stale) return { ...stale, isStale: true };
       throw error;
     })
     .finally(() => {

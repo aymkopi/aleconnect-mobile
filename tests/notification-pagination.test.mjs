@@ -18,6 +18,10 @@ test("consumer notifications paginate, virtualize, and open advisory details", a
   assert.match(page, /SectionList/);
   assert.match(page, /nextCursor/);
   assert.match(page, /entityType === "advisory"/);
+  assert.match(page, /notificationDestinationFromNotification/);
+  assert.match(page, /await markNotificationsRead/);
+  assert.match(navigation, /focus: "notification"/);
   assert.match(navigation, /advisoryIdFromPushData/);
+  assert.match(navigation, /notificationDestinationFromNotification/);
   assert.match(root, /\/advisory\/\[id\]/);
 });

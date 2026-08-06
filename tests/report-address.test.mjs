@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  canUseResolvedPin,
   formatResolvedAddress,
   resolvePsgcAddress,
 } from "../src/features/reports/address.ts";
@@ -53,5 +54,33 @@ test("reverse geocoding resolves Albay municipality and barangay PSGC", () => {
     formatResolvedAddress(resolved),
     "12 Rizal Street, Barangay 1 - Em's Barrio, Legazpi City, Albay",
   );
+  assert.equal(canUseResolvedPin(resolved), true);
 });
 
+test("a verified Albay municipality can use the pin before manual barangay selection", () => {
+  const resolved = resolvePsgcAddress(
+    {
+      city: "City of Legazpi",
+      district: "Legazpi Port District",
+      street: null,
+      streetNumber: null,
+      region: "Albay",
+      subregion: null,
+      country: "Philippines",
+      postalCode: null,
+      name: "4QX4+2H4",
+      isoCountryCode: "PH",
+      timezone: null,
+      formattedAddress: null,
+    },
+    meta,
+  );
+
+  assert.equal(resolved.municipalityCode, "0500500000");
+  assert.equal(resolved.barangayPsgc, "");
+  assert.equal(canUseResolvedPin(resolved), true);
+  assert.equal(
+    canUseResolvedPin({ ...resolved, municipalityCode: "" }),
+    false,
+  );
+});

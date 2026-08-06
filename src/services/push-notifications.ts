@@ -1,8 +1,50 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
+import * as TaskManager from "expo-task-manager";
 import { Platform } from "react-native";
 
 import { expoPushProjectId } from "@/constants";
+
+const notificationResponseTaskName = "aleconnect-notification-response";
+const pendingNotificationResponseKey = "pending_notification_response_v1";
+
+function isNotificationResponse(
+  value: unknown,
+): value is Notifications.NotificationResponse {
+  if (!value || typeof value !== "object") return false;
+  const response = value as Partial<Notifications.NotificationResponse>;
+  return (
+    typeof response.actionIdentifier === "string" &&
+    Boolean(response.notification?.request)
+  );
+}
+
+if (Platform.OS === "android") {
+  if (!TaskManager.isTaskDefined(notificationResponseTaskName)) {
+    TaskManager.defineTask<Notifications.NotificationTaskPayload>(
+      notificationResponseTaskName,
+      async ({ data, error }) => {
+        if (!error && isNotificationResponse(data)) {
+          await AsyncStorage.setItem(
+            pendingNotificationResponseKey,
+            JSON.stringify(data),
+          );
+        }
+      },
+    );
+  }
+
+  void TaskManager.isTaskRegisteredAsync(notificationResponseTaskName)
+    .then((isRegistered) =>
+      isRegistered
+        ? null
+        : Notifications.registerTaskAsync(notificationResponseTaskName),
+    )
+    .catch((error) => {
+      console.warn("Failed to register notification response task", error);
+    });
+}
 
 export const notificationSoundChannels = {
   highCritical: {
@@ -85,12 +127,31 @@ export function clearLastNotificationResponse(): void {
   }
 }
 
+async function consumePersistedNotificationResponseAsync(): Promise<Notifications.NotificationResponse | null> {
+  const raw = await AsyncStorage.getItem(pendingNotificationResponseKey);
+  if (!raw) return null;
+
+  await AsyncStorage.removeItem(pendingNotificationResponseKey);
+  try {
+    const response: unknown = JSON.parse(raw);
+    return isNotificationResponse(response) ? response : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function consumeLastNotificationResponseAsync(): Promise<Notifications.NotificationResponse | null> {
   if (Platform.OS === "web") {
     return null;
   }
 
   try {
+    const persistedResponse = await consumePersistedNotificationResponseAsync();
+    if (persistedResponse) {
+      clearLastNotificationResponse();
+      return persistedResponse;
+    }
+
     const response = Notifications.getLastNotificationResponse();
     if (response) clearLastNotificationResponse();
     return response;

@@ -9,7 +9,12 @@ export type ResolvedReportAddress = {
   barangayName: string;
   purok: string;
   province: string;
+  isInAlbay: boolean;
 };
+
+export function canUseResolvedPin(address: ResolvedReportAddress | null) {
+  return Boolean(address?.isInAlbay && address.municipalityCode);
+}
 
 function normalizePlaceName(value: string | null | undefined) {
   return (value ?? "")
@@ -58,9 +63,10 @@ export function resolvePsgcAddress(
     .filter(Boolean)
     .join(" ")
     .trim();
-  const province = [address.subregion, address.region].find(
-    (value) => normalizePlaceName(value) === "albay",
-  );
+  const province =
+    [address.subregion, address.region].find(
+      (value) => normalizePlaceName(value) === "albay",
+    ) ?? "";
 
   return {
     municipalityCode: municipality?.code ?? "",
@@ -68,7 +74,8 @@ export function resolvePsgcAddress(
     barangayPsgc: barangay?.code ?? "",
     barangayName: barangay?.name ?? address.district ?? "",
     purok: street || address.name || "",
-    province: province ?? "Albay",
+    province,
+    isInAlbay: Boolean(province),
   };
 }
 

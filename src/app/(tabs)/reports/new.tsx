@@ -1,11 +1,4 @@
 import { ChildAppBar } from "@/components/child-app-bar";
-import {
-  BottomSheet,
-  BottomSheetBackdrop,
-  BottomSheetContent,
-  BottomSheetPortal,
-  type BottomSheetRef,
-} from "@/components/ui/bottomsheet";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import {
   Checkbox,
@@ -27,11 +20,10 @@ import {
   ModalBackdrop,
   ModalBody,
   ModalContent,
-  ModalFooter,
   ModalHeader,
 } from "@/components/ui/modal";
-import { Progress, ProgressFilledTrack } from "@/components/ui/progress";
 import { Pressable } from "@/components/ui/pressable";
+import { Progress, ProgressFilledTrack } from "@/components/ui/progress";
 import {
   Select,
   SelectBackdrop,
@@ -45,14 +37,18 @@ import {
 } from "@/components/ui/select";
 import { Text } from "@/components/ui/text";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
-import { aleconnectAssetBaseUrl } from "@/constants/api";
 import { useConsumerProfileContext } from "@/context/consumer-profile-context";
 import { useReportQueue } from "@/context/report-queue-context";
+import { AlbayLocationPickerSheet } from "@/features/maps/albay-location-picker-sheet";
+import { StaticLocationMap } from "@/features/maps/static-location-map";
+import { EvidencePhotoViewer } from "@/features/reports/components/evidence-photo-viewer";
 import {
-  formatResolvedAddress,
-  resolvePsgcAddress,
-  type ResolvedReportAddress,
-} from "@/features/reports/address";
+  conditionalReportPayload,
+  hasCurrentReportContract,
+  isWithinAlbay,
+  reportLimits,
+  validateReportForm,
+} from "@/features/reports/contract";
 import {
   emptyComplaintMeta,
   formatComplaintCategoryTitle,
@@ -62,18 +58,14 @@ import {
 } from "@/features/reports/data";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
+import { createLocalReportId, enqueueReport } from "@/services/report-queue";
 import { emitComplaintSubmissionToast } from "@/services/report-submission-events";
-import {
-  createLocalReportId,
-  enqueueReport,
-} from "@/services/report-queue";
 import { fetchComplaintMeta } from "@/services/reports";
 import {
   deleteEvidencePhoto,
   prepareEvidencePhoto,
 } from "@/utils/evidence-image-processing";
 import * as ImagePicker from "expo-image-picker";
-import * as Location from "expo-location";
 import { useFocusEffect, useNavigation, useRouter } from "expo-router";
 import {
   Camera,
@@ -81,9 +73,7 @@ import {
   ChevronDown,
   ChevronRight,
   CircleX,
-  LocateFixed,
   MapPin,
-  Navigation,
 } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -98,19 +88,8 @@ import type { KeyboardAwareScrollViewRef } from "react-native-keyboard-controlle
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const minEvidencePhotos = 1;
-const maxEvidencePhotos = 3;
-const albayCenter = { latitude: 13.1775, longitude: 123.528 };
-const albayMapStyle = `${aleconnectAssetBaseUrl}/styles/map-bright.json?v=2`;
-const albayBounds = {
-  minLatitude: 12.9,
-  maxLatitude: 13.55,
-  minLongitude: 123.25,
-  maxLongitude: 124.0,
-};
-
-type MapLibreModule = typeof import("@maplibre/maplibre-react-native");
-type Coordinates = { latitude: number; longitude: number };
+const minEvidencePhotos = reportLimits.evidenceMin;
+const maxEvidencePhotos = reportLimits.evidenceMax;
 
 type SelectOption = {
   value: string;
@@ -127,6 +106,7 @@ function ReportInput({
   isInvalid,
   error,
   isDisabled,
+  maxLength,
 }: {
   label: string;
   value: string;
@@ -137,6 +117,7 @@ function ReportInput({
   isInvalid?: boolean;
   error?: string;
   isDisabled?: boolean;
+  maxLength?: number;
 }) {
   return (
     <FormControl
@@ -157,6 +138,7 @@ function ReportInput({
             value={value}
             placeholder={placeholder}
             onChangeText={onChangeText}
+            maxLength={maxLength}
           />
         </Textarea>
       ) : (
@@ -169,6 +151,7 @@ function ReportInput({
             value={value}
             placeholder={placeholder}
             onChangeText={onChangeText}
+            maxLength={maxLength}
           />
         </Input>
       )}
@@ -301,23 +284,6 @@ function readCoordinates(value: Record<string, unknown> | null | undefined) {
   return null;
 }
 
-function clampToAlbay(coordinates: Coordinates) {
-  return {
-    latitude: Math.min(
-      albayBounds.maxLatitude,
-      Math.max(albayBounds.minLatitude, coordinates.latitude),
-    ),
-    longitude: Math.min(
-      albayBounds.maxLongitude,
-      Math.max(albayBounds.minLongitude, coordinates.longitude),
-    ),
-  };
-}
-
-function toLngLat(coordinates: Coordinates): [number, number] {
-  return [coordinates.longitude, coordinates.latitude];
-}
-
 export default function NewComplaintRoute() {
   const router = useRouter();
   const navigation = useNavigation();
@@ -326,16 +292,11 @@ export default function NewComplaintRoute() {
   const { session } = useAuthSession();
   const { sync: syncQueue } = useReportQueue();
   const scrollRef = useRef<KeyboardAwareScrollViewRef | null>(null);
-  const mapSheetRef = useRef<BottomSheetRef>(null);
   const reportIdRef = useRef(createLocalReportId());
   const isLeavingToParentRef = useRef(false);
   const isMountedRef = useRef(true);
-  const submitBackgroundRef = useRef(false);
-  const [accentColor, mutedColor, successColor] = useAppColors([
-    "accent",
-    "muted",
-    "success",
-  ]);
+  const isSubmittingRef = useRef(false);
+  const [mutedColor, successColor] = useAppColors(["muted", "success"]);
   const { profile } = useConsumerProfileContext();
   const [meta, setMeta] = useState<ComplaintMeta>(emptyComplaintMeta);
   const [isMapSheetOpen, setIsMapSheetOpen] = useState(false);
@@ -345,20 +306,10 @@ export default function NewComplaintRoute() {
   const [submitProgress, setSubmitProgress] = useState("");
   const [submitProgressValue, setSubmitProgressValue] = useState(0);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [viewerPhotoIndex, setViewerPhotoIndex] = useState<number | null>(null);
   const [form, setForm] = useState<ComplaintFormState>(initialComplaintForm);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
-  const [mapModule, setMapModule] = useState<MapLibreModule | null>(null);
-  const [mapCoordinates, setMapCoordinates] = useState<Coordinates | null>(
-    null,
-  );
-  const [currentCoordinates, setCurrentCoordinates] =
-    useState<Coordinates | null>(null);
-  const [mapAddress, setMapAddress] =
-    useState<ResolvedReportAddress | null>(null);
-  const [isResolvingAddress, setIsResolvingAddress] = useState(false);
-  const [mapError, setMapError] = useState<string | null>(null);
-  const childBottomPadding =
-    Math.max(insets.bottom, 16) + (step < 5 ? 112 : 32);
+  const childBottomPadding = Math.max(insets.bottom, 16) + (step < 5 ? 50 : 32);
 
   useEffect(() => {
     return () => {
@@ -367,18 +318,15 @@ export default function NewComplaintRoute() {
   }, []);
 
   useEffect(() => {
-    if (Platform.OS === "web") return;
-
-    void import("@maplibre/maplibre-react-native")
-      .then(setMapModule)
-      .catch(() => setMapError("Map is not available on this device."));
-  }, []);
-
-  useEffect(() => {
     let isMounted = true;
 
-    fetchComplaintMeta()
+    fetchComplaintMeta({ force: true })
       .then((nextMeta) => {
+        if (!hasCurrentReportContract(nextMeta)) {
+          throw new Error(
+            "Connect to the internet to update the report form before continuing.",
+          );
+        }
         if (isMounted) {
           setMeta(nextMeta);
         }
@@ -400,14 +348,24 @@ export default function NewComplaintRoute() {
 
   useEffect(() => {
     const homeCoordinates = readCoordinates(profile?.homeCoordinates);
+    const homeAddress = findHomeAddress(meta, profile);
     setForm((current) => ({
       ...current,
       accountNumber: profile?.accountNumber ?? current.accountNumber,
       ...(current.useHomeAddress
         ? {
-            ...findHomeAddress(meta, profile),
+            ...homeAddress,
             latitude: homeCoordinates?.latitude ?? current.latitude,
             longitude: homeCoordinates?.longitude ?? current.longitude,
+            locationVerified: Boolean(
+              homeCoordinates &&
+              isWithinAlbay(
+                homeCoordinates.latitude,
+                homeCoordinates.longitude,
+              ) &&
+              homeAddress.municipalityCode &&
+              homeAddress.barangayPsgc,
+            ),
           }
         : {}),
     }));
@@ -427,39 +385,6 @@ export default function NewComplaintRoute() {
     };
   }, []);
 
-  useEffect(() => {
-    if (isMapSheetOpen) {
-      requestAnimationFrame(() => mapSheetRef.current?.open());
-    } else {
-      mapSheetRef.current?.close();
-    }
-  }, [isMapSheetOpen]);
-
-  useEffect(() => {
-    if (!isMapSheetOpen || !mapCoordinates) return;
-
-    let active = true;
-    const timeout = setTimeout(() => {
-      setIsResolvingAddress(true);
-      void Location.reverseGeocodeAsync(mapCoordinates)
-        .then(([address]) => {
-          if (!active || !address) return;
-          setMapAddress(resolvePsgcAddress(address, meta));
-        })
-        .catch(() => {
-          if (active) setMapAddress(null);
-        })
-        .finally(() => {
-          if (active) setIsResolvingAddress(false);
-        });
-    }, 350);
-
-    return () => {
-      active = false;
-      clearTimeout(timeout);
-    };
-  }, [isMapSheetOpen, mapCoordinates, meta]);
-
   const selectedCategory = meta.categories.find(
     (category) => category.id === form.categoryId,
   );
@@ -470,11 +395,22 @@ export default function NewComplaintRoute() {
   const selectedBarangay = meta.barangays.find(
     (barangay) => barangay.code === form.barangayPsgc,
   );
-  const MapLibreMap = mapModule?.Map;
-  const MapLibreCamera = mapModule?.Camera;
-  const Marker = mapModule?.Marker;
-  const ViewAnnotation = mapModule?.ViewAnnotation;
-  const NativeUserLocation = mapModule?.NativeUserLocation;
+  const formattedAddress = [
+    form.purok,
+    selectedBarangay?.name,
+    selectedMunicipality?.name,
+    form.landmark,
+  ]
+    .filter(Boolean)
+    .join(", ");
+  const displayName = profile?.fullName || session?.user.name || "Consumer";
+  const readyPhotos = form.photoUploads.filter(
+    (photo) => photo.status === "ready",
+  );
+  const mapPickerInitialCoordinates =
+    form.latitude != null && form.longitude != null
+      ? { latitude: form.latitude, longitude: form.longitude }
+      : readCoordinates(profile?.homeCoordinates);
 
   const reportTypeOptions = meta.types
     .filter((type) => type.categoryId === form.categoryId)
@@ -486,6 +422,12 @@ export default function NewComplaintRoute() {
   const barangayOptions = meta.barangays
     .filter((barangay) => barangay.municipalityCode === form.municipalityCode)
     .map((barangay) => ({ value: barangay.code, label: barangay.name }));
+  const formErrors = validateReportForm(
+    form,
+    selectedCategory,
+    selectedType,
+    meta,
+  );
 
   const title =
     step === 1
@@ -499,21 +441,24 @@ export default function NewComplaintRoute() {
             : "To be verified";
   const canGoNext =
     step === 1
-      ? Boolean(form.categoryId)
+      ? !formErrors.categoryId
       : step === 2
-        ? Boolean(
-            form.typeId &&
-            form.accountNumber &&
-            form.municipalityCode &&
-            form.barangayPsgc,
-          )
+        ? ![
+            formErrors.typeId,
+            formErrors.accountNumber,
+            formErrors.municipalityCode,
+            formErrors.barangayPsgc,
+            formErrors.location,
+          ].some(Boolean)
         : step === 3
-          ? Boolean(
-              form.description &&
-              form.photoUploads.length >= minEvidencePhotos &&
-              form.photoUploads.length <= maxEvidencePhotos &&
-              form.photoUploads.every((photo) => photo.status === "ready"),
-            )
+          ? ![
+              formErrors.categoryDescription,
+              formErrors.typeDescription,
+              formErrors.currentRegisteredName,
+              formErrors.requestedRegisteredName,
+              formErrors.desiredAction,
+              formErrors.evidence,
+            ].some(Boolean)
           : true;
   const showErrors = attemptedStep === step && !canGoNext;
 
@@ -606,19 +551,29 @@ export default function NewComplaintRoute() {
   };
 
   const handleSubmit = async () => {
+    if (isSubmittingRef.current) return;
     if (!session) {
       isLeavingToParentRef.current = true;
       router.replace("/sign-in");
       return;
     }
 
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
-    submitBackgroundRef.current = false;
     setSubmitProgress("Saving report securely...");
     setSubmitProgressValue(15);
     setSubmitError(null);
 
     try {
+      const validationErrors = validateReportForm(
+        form,
+        selectedCategory,
+        selectedType,
+        meta,
+      );
+      if (Object.keys(validationErrors).length > 0) {
+        throw new Error("Review the required report fields before submitting.");
+      }
       const evidence = form.photoUploads.filter(
         (photo) => photo.status === "ready" && photo.size != null,
       );
@@ -626,6 +581,7 @@ export default function NewComplaintRoute() {
         throw new Error("Wait until evidence photos finish processing.");
       }
       const reportId = reportIdRef.current;
+      const conditionalDetails = conditionalReportPayload(form);
       await enqueueReport({
         id: reportId,
         idempotencyKey: `mobile:${reportId}`,
@@ -642,10 +598,10 @@ export default function NewComplaintRoute() {
           barangayPsgc: form.barangayPsgc,
           purok: form.purok,
           landmark: form.landmark,
-          description: form.description,
           actionDesired: form.desiredAction,
           latitude: form.latitude,
           longitude: form.longitude,
+          ...conditionalDetails,
         },
       });
       setSubmitProgressValue(40);
@@ -656,12 +612,7 @@ export default function NewComplaintRoute() {
 
       if (result?.status === "submitted") {
         setSubmitProgressValue(100);
-        if (submitBackgroundRef.current) {
-          emitComplaintSubmissionToast({
-            message: `Report submitted: ${result.ticketNumber}`,
-            status: "success",
-          });
-        } else if (isMountedRef.current) {
+        if (isMountedRef.current) {
           setForm((current) => ({
             ...current,
             ticketId: result.ticketId,
@@ -674,10 +625,11 @@ export default function NewComplaintRoute() {
         throw new Error(result.lastError ?? "Report submission failed.");
       } else {
         emitComplaintSubmissionToast({
-          message: "Report saved. It will submit when your connection returns.",
+          message:
+            "Report saved. Ticket Number pending until your connection returns.",
           status: "info",
         });
-        if (!submitBackgroundRef.current && isMountedRef.current) {
+        if (isMountedRef.current) {
           isLeavingToParentRef.current = true;
           router.replace("/reports/queue");
         }
@@ -685,21 +637,14 @@ export default function NewComplaintRoute() {
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Failed to submit report.";
-      if (submitBackgroundRef.current) {
-        emitComplaintSubmissionToast({
-          message: `Report submission failed: ${message}`,
-          status: "danger",
-        });
-      } else {
-        setSubmitError(message);
-      }
+      setSubmitError(message);
     } finally {
       if (isMountedRef.current) {
         setIsSubmitting(false);
         setSubmitProgress("");
         setSubmitProgressValue(0);
       }
-      submitBackgroundRef.current = false;
+      isSubmittingRef.current = false;
     }
   };
 
@@ -707,12 +652,6 @@ export default function NewComplaintRoute() {
     isLeavingToParentRef.current = true;
     router.replace("/reports");
   }, [router]);
-
-  const waitFromHome = () => {
-    submitBackgroundRef.current = true;
-    isLeavingToParentRef.current = true;
-    router.replace("/");
-  };
 
   const viewSubmittedReport = () => {
     if (!form.ticketId) {
@@ -728,6 +667,7 @@ export default function NewComplaintRoute() {
   };
 
   const handleBackPress = useCallback(() => {
+    if (isSubmitting) return;
     if (isMapSheetOpen) {
       if (__DEV__) {
         console.log("[nav] complaints map sheet back");
@@ -757,7 +697,7 @@ export default function NewComplaintRoute() {
       console.log("[nav] complaints child back to parent");
     }
     navigateToComplaintsParent();
-  }, [isMapSheetOpen, navigateToComplaintsParent, step]);
+  }, [isMapSheetOpen, isSubmitting, navigateToComplaintsParent, step]);
 
   useFocusEffect(
     useCallback(() => {
@@ -835,54 +775,8 @@ export default function NewComplaintRoute() {
       .forEach((asset) => void prepareSelectedPhoto(asset.uri));
   };
 
-  const locateCurrentPosition = async () => {
-    const permission = await Location.requestForegroundPermissionsAsync();
-    if (permission.status !== "granted") {
-      setMapError("Location permission denied. Drag the pin manually.");
-      return;
-    }
-
-    const current = await Location.getCurrentPositionAsync({
-      accuracy: Location.Accuracy.Balanced,
-    }).catch(() => null);
-
-    if (current) {
-      const next = clampToAlbay({
-        latitude: current.coords.latitude,
-        longitude: current.coords.longitude,
-      });
-      setCurrentCoordinates(next);
-      setMapCoordinates(next);
-    }
-  };
-
-  const openMapPicker = async () => {
-    const homeCoordinates = readCoordinates(profile?.homeCoordinates);
-    const initialCoordinates = clampToAlbay(
-      form.latitude != null && form.longitude != null
-        ? { latitude: form.latitude, longitude: form.longitude }
-        : (homeCoordinates ?? albayCenter),
-    );
-
-    setMapCoordinates(initialCoordinates);
-    setMapAddress(null);
-    setMapError(null);
+  const openMapPicker = () => {
     setIsMapSheetOpen(true);
-    await locateCurrentPosition();
-  };
-
-  const confirmMapCoordinates = () => {
-    if (!mapCoordinates) return;
-    setForm((current) => ({
-      ...current,
-      useHomeAddress: false,
-      latitude: mapCoordinates.latitude,
-      longitude: mapCoordinates.longitude,
-      municipalityCode: mapAddress?.municipalityCode ?? "",
-      barangayPsgc: mapAddress?.barangayPsgc ?? "",
-      purok: mapAddress?.purok ?? "",
-    }));
-    setIsMapSheetOpen(false);
   };
 
   return (
@@ -895,14 +789,12 @@ export default function NewComplaintRoute() {
             : "Choose the closest category"
         }
         onBack={handleBackPress}
-        backAccessibilityLabel={
-          step > 1 ? "Previous step" : "Back to reports"
-        }
+        backAccessibilityLabel={step > 1 ? "Previous step" : "Back to reports"}
       />
       <KeyboardAwareScrollView
         ref={scrollRef}
         automaticallyAdjustKeyboardInsets={Platform.OS === "ios"}
-        bottomOffset={Math.max(insets.bottom, 20) + 88}
+        bottomOffset={Math.max(insets.bottom, 20) + 10}
         extraKeyboardSpace={16}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
@@ -939,6 +831,11 @@ export default function NewComplaintRoute() {
             <Text className="ml-2 text-sm font-semibold text-muted-foreground">
               Category
             </Text>
+            {showErrors && formErrors.categoryId ? (
+              <Text className="ml-2 text-xs text-destructive">
+                {formErrors.categoryId}
+              </Text>
+            ) : null}
             <View className="gap-3">
               {meta.categories.map((category) => {
                 const selected = form.categoryId === category.id;
@@ -946,13 +843,14 @@ export default function NewComplaintRoute() {
                   <Pressable
                     key={category.id}
                     onPress={() => {
-                      const firstType = meta.types.find(
-                        (type) => type.categoryId === category.id,
-                      );
                       setForm((current) => ({
                         ...current,
                         categoryId: category.id,
-                        typeId: firstType?.id ?? "",
+                        typeId: "",
+                        categoryDescription: "",
+                        typeDescription: "",
+                        currentRegisteredName: "",
+                        requestedRegisteredName: "",
                       }));
                     }}
                     accessibilityRole="button"
@@ -964,7 +862,7 @@ export default function NewComplaintRoute() {
                     }`}
                   >
                     <View
-                      className="h-11 w-11 items-center justify-center rounded-2xl"
+                      className="h-11 w-11 items-center justify-center rounded-full"
                       style={{ backgroundColor: category.color }}
                     >
                       {selected ? (
@@ -1005,9 +903,17 @@ export default function NewComplaintRoute() {
               placeholder="Select report type"
               description={`Choose the issue type under ${selectedCategory?.title ?? "this category"}.`}
               options={reportTypeOptions}
-              onChange={(value) => updateForm("typeId", value)}
-              isInvalid={showErrors && !form.typeId}
-              error="Select a report type."
+              onChange={(value) =>
+                setForm((current) => ({
+                  ...current,
+                  typeId: value,
+                  typeDescription: "",
+                  currentRegisteredName: "",
+                  requestedRegisteredName: "",
+                }))
+              }
+              isInvalid={showErrors && Boolean(formErrors.typeId)}
+              error={formErrors.typeId}
             />
 
             <Text className="ml-2 text-sm text-muted-foreground">Account</Text>
@@ -1030,15 +936,25 @@ export default function NewComplaintRoute() {
                 const homeCoordinates = readCoordinates(
                   profile?.homeCoordinates,
                 );
+                const homeAddress = findHomeAddress(meta, profile);
                 setForm((current) => ({
                   ...current,
                   useHomeAddress: selected,
                   ...(selected
                     ? {
-                        ...findHomeAddress(meta, profile),
+                        ...homeAddress,
                         latitude: homeCoordinates?.latitude ?? current.latitude,
                         longitude:
                           homeCoordinates?.longitude ?? current.longitude,
+                        locationVerified: Boolean(
+                          homeCoordinates &&
+                          isWithinAlbay(
+                            homeCoordinates.latitude,
+                            homeCoordinates.longitude,
+                          ) &&
+                          homeAddress.municipalityCode &&
+                          homeAddress.barangayPsgc,
+                        ),
                       }
                     : {
                         municipalityCode: "",
@@ -1047,6 +963,7 @@ export default function NewComplaintRoute() {
                         landmark: "",
                         latitude: null,
                         longitude: null,
+                        locationVerified: false,
                       }),
                 }));
               }}
@@ -1068,11 +985,17 @@ export default function NewComplaintRoute() {
                   options={municipalityOptions}
                   isDisabled={form.useHomeAddress}
                   onChange={(value) => {
-                    updateForm("municipalityCode", value);
-                    updateForm("barangayPsgc", "");
+                    setForm((current) => ({
+                      ...current,
+                      municipalityCode: value,
+                      barangayPsgc: "",
+                      latitude: null,
+                      longitude: null,
+                      locationVerified: false,
+                    }));
                   }}
-                  isInvalid={showErrors && !form.municipalityCode}
-                  error="Select a municipality."
+                  isInvalid={showErrors && Boolean(formErrors.municipalityCode)}
+                  error={formErrors.municipalityCode}
                 />
               </View>
               <Button
@@ -1093,10 +1016,20 @@ export default function NewComplaintRoute() {
               placeholder="Select barangay"
               description="Choose a barangay within the selected municipality."
               options={barangayOptions}
-              onChange={(value) => updateForm("barangayPsgc", value)}
+              onChange={(value) =>
+                setForm((current) => ({
+                  ...current,
+                  barangayPsgc: value,
+                  locationVerified: Boolean(
+                    current.latitude != null &&
+                    current.longitude != null &&
+                    isWithinAlbay(current.latitude, current.longitude),
+                  ),
+                }))
+              }
               isDisabled={form.useHomeAddress || !form.municipalityCode}
-              isInvalid={showErrors && !form.barangayPsgc}
-              error="Select a barangay."
+              isInvalid={showErrors && Boolean(formErrors.barangayPsgc)}
+              error={formErrors.barangayPsgc}
             />
             <ReportInput
               isDisabled={form.useHomeAddress}
@@ -1112,6 +1045,11 @@ export default function NewComplaintRoute() {
               placeholder="Nearest landmark"
               onChangeText={(value) => updateForm("landmark", value)}
             />
+            {showErrors && formErrors.location ? (
+              <Text className="text-xs text-destructive">
+                {formErrors.location}
+              </Text>
+            ) : null}
           </>
         ) : null}
 
@@ -1120,22 +1058,84 @@ export default function NewComplaintRoute() {
             <Text className="ml-2 text-sm text-muted-foreground">
               Report details
             </Text>
-            <ReportInput
-              isRequired
-              label="Description"
-              value={form.description}
-              placeholder="Describe the issue"
-              multiline
-              onChangeText={(value) => updateForm("description", value)}
-              isInvalid={showErrors && !form.description}
-              error="Describe the report."
-            />
+            {selectedCategory?.requiresDescription ? (
+              <ReportInput
+                isRequired
+                label={selectedCategory.descriptionLabel ?? "Category details"}
+                value={form.categoryDescription}
+                placeholder="Describe why this category applies"
+                multiline
+                maxLength={reportLimits.description}
+                onChangeText={(value) =>
+                  updateForm("categoryDescription", value)
+                }
+                isInvalid={
+                  showErrors && Boolean(formErrors.categoryDescription)
+                }
+                error={formErrors.categoryDescription}
+              />
+            ) : null}
+            {selectedType?.requiresDescription ? (
+              <ReportInput
+                isRequired
+                label={selectedType.descriptionLabel ?? "Report type details"}
+                value={form.typeDescription}
+                placeholder="Describe this specific report type"
+                multiline
+                maxLength={reportLimits.description}
+                onChangeText={(value) => updateForm("typeDescription", value)}
+                isInvalid={showErrors && Boolean(formErrors.typeDescription)}
+                error={formErrors.typeDescription}
+              />
+            ) : null}
+            {selectedType?.requiresKwhmTransfer ? (
+              <View className="gap-3 rounded-lg border border-border bg-card p-4">
+                <View>
+                  <Heading size="sm">Registered name transfer</Heading>
+                  <Text className="mt-1 text-sm text-muted-foreground">
+                    Enter names only. Account records are verified privately by
+                    ALECO staff.
+                  </Text>
+                </View>
+                <ReportInput
+                  isRequired
+                  label="Current registered name"
+                  value={form.currentRegisteredName}
+                  placeholder="Name currently on the account"
+                  maxLength={reportLimits.registeredName}
+                  onChangeText={(value) =>
+                    updateForm("currentRegisteredName", value)
+                  }
+                  isInvalid={
+                    showErrors && Boolean(formErrors.currentRegisteredName)
+                  }
+                  error={formErrors.currentRegisteredName}
+                />
+                <ReportInput
+                  isRequired
+                  label="Requested registered name"
+                  value={form.requestedRegisteredName}
+                  placeholder="New registered name"
+                  maxLength={reportLimits.registeredName}
+                  onChangeText={(value) =>
+                    updateForm("requestedRegisteredName", value)
+                  }
+                  isInvalid={
+                    showErrors && Boolean(formErrors.requestedRegisteredName)
+                  }
+                  error={formErrors.requestedRegisteredName}
+                />
+              </View>
+            ) : null}
             <ReportInput
               label="Action desired"
               value={form.desiredAction}
               placeholder="What action do you want?"
               multiline
+              maxLength={reportLimits.actionDesired}
               onChangeText={(value) => updateForm("desiredAction", value)}
+              isInvalid={showErrors && Boolean(formErrors.desiredAction)}
+              error={formErrors.desiredAction}
             />
             <View className="rounded-lg border border-border bg-secondary p-4">
               <View className="flex-row items-center justify-between">
@@ -1147,8 +1147,8 @@ export default function NewComplaintRoute() {
                 </Text>
               </View>
               <Text className="mt-1 text-sm text-muted-foreground">
-                Add 1 to 3 clear photos. Photos are compressed and saved for
-                reliable submission.
+                Add 1 to 3 clear photos to help us assess the issue and verify
+                your report faster.
               </Text>
               <View className="mt-3 flex-row gap-2">
                 {Array.from({ length: maxEvidencePhotos }, (_, index) => {
@@ -1157,7 +1157,7 @@ export default function NewComplaintRoute() {
                     <Pressable
                       key={index}
                       onPress={photo ? undefined : addPhotos}
-                      className={`h-14 flex-1 items-center justify-center rounded-2xl ${
+                      className={`aspect-square flex-1 items-center justify-center rounded-xl ${
                         photo ? "bg-accent" : "bg-background"
                       }`}
                     >
@@ -1165,7 +1165,7 @@ export default function NewComplaintRoute() {
                         <>
                           <Image
                             source={{ uri: photo.uri }}
-                            className="h-full w-full rounded-2xl"
+                            className="h-full w-full rounded-xl"
                           />
                           <Button
                             size="icon"
@@ -1177,7 +1177,7 @@ export default function NewComplaintRoute() {
                             <ButtonIcon as={CircleX} height={15} width={15} />
                           </Button>
                           {photo.status !== "ready" ? (
-                            <View className="absolute inset-0 items-center justify-center rounded-2xl bg-black/45">
+                            <View className="absolute inset-0 items-center justify-center rounded-xl bg-black/45">
                               <Text className="text-xs text-white">
                                 {photo.status === "failed"
                                   ? "Failed"
@@ -1193,13 +1193,9 @@ export default function NewComplaintRoute() {
                   );
                 })}
               </View>
-              {showErrors &&
-              (form.photoUploads.length < minEvidencePhotos ||
-                form.photoUploads.some(
-                  (photo) => photo.status !== "ready",
-                )) ? (
+              {showErrors && formErrors.evidence ? (
                 <Text className="mt-2 text-xs text-destructive">
-                  Add at least 1 prepared photo.
+                  {formErrors.evidence}
                 </Text>
               ) : null}
             </View>
@@ -1207,29 +1203,28 @@ export default function NewComplaintRoute() {
         ) : null}
 
         {step === 4 ? (
-          <View className="rounded-lg border border-border bg-card p-4">
+          <View className="gap-4 rounded-lg border border-border bg-card p-4">
             <Heading size="md">Preview</Heading>
             {[
+              ["Reported by", displayName],
               ["Category", selectedCategory?.title],
               ["Type", selectedType?.title],
-              ["Account", form.accountNumber],
-              [
-                "Address",
-                [
-                  form.purok,
-                  selectedBarangay?.name,
-                  selectedMunicipality?.name,
-                  form.landmark,
-                ]
-                  .filter(Boolean)
-                  .join(", "),
-              ],
-              ["Description", form.description],
+              ["Address", formattedAddress],
+              ...(selectedCategory?.requiresDescription
+                ? [["Category details", form.categoryDescription]]
+                : []),
+              ...(selectedType?.requiresDescription
+                ? [["Report type details", form.typeDescription]]
+                : []),
+              ...(selectedType?.requiresKwhmTransfer
+                ? [
+                    ["Current registered name", form.currentRegisteredName],
+                    ["Requested registered name", form.requestedRegisteredName],
+                  ]
+                : []),
               ["Action desired", form.desiredAction || "Not specified"],
-              ["Pinned location", form.latitude != null ? "Location saved" : "Using address only"],
-              ["Photos", `${form.photoUploads.length} attached`],
             ].map(([label, value]) => (
-              <View key={label} className="border-border mt-3 border-t pt-3">
+              <View key={label} className="border-border border-t pt-3">
                 <Text className="text-xs font-bold text-muted-foreground">
                   {label}
                 </Text>
@@ -1238,6 +1233,40 @@ export default function NewComplaintRoute() {
                 </Text>
               </View>
             ))}
+            {form.latitude != null && form.longitude != null ? (
+              <View className="gap-2 border-t border-border pt-3">
+                <Text className="text-xs font-bold text-muted-foreground">
+                  Pinned location
+                </Text>
+                <StaticLocationMap
+                  latitude={form.latitude}
+                  longitude={form.longitude}
+                  label={formattedAddress || "selected report location"}
+                />
+              </View>
+            ) : null}
+            <View className="gap-2 border-t border-border pt-3">
+              <Text className="text-xs font-bold text-muted-foreground">
+                Evidence photos
+              </Text>
+              <View className="flex-row gap-2">
+                {readyPhotos.map((photo, index) => (
+                  <Pressable
+                    key={photo.id}
+                    className="aspect-square flex-1 overflow-hidden rounded-lg bg-secondary"
+                    onPress={() => setViewerPhotoIndex(index)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`View evidence photo ${index + 1}`}
+                  >
+                    <Image
+                      source={{ uri: photo.uri }}
+                      className="h-full w-full"
+                      resizeMode="cover"
+                    />
+                  </Pressable>
+                ))}
+              </View>
+            </View>
             <Text className="mt-4 text-xs text-muted-foreground">
               By submitting this form, I agree to all terms and conditions.
             </Text>
@@ -1258,25 +1287,28 @@ export default function NewComplaintRoute() {
               We received your report.
             </Heading>
             <Text className="mt-4 text-xs font-bold text-muted-foreground">
-              Reference Number
+              Ticket Number
             </Text>
             <Text className="mt-2 rounded-full bg-primary px-5 py-3 text-center font-bold text-primary-foreground">
               {form.ticketNumber}
             </Text>
             <Text className="mt-5 text-center text-sm text-muted-foreground">
-              Technicians have been notified. You will receive updates once a
-              crew is assigned.
+              You can follow progress in Reports. We will notify you when the
+              status changes or a crew is assigned.
             </Text>
             <View className="mt-5 w-full flex-row gap-2">
-              <Button className="flex-1" onPress={navigateToComplaintsParent}>
-                <ButtonText>Reports</ButtonText>
+              <Button className="flex-1" onPress={viewSubmittedReport}>
+                <ButtonText>View details</ButtonText>
               </Button>
               <Button
                 variant="secondary"
                 className="flex-1"
-                onPress={viewSubmittedReport}
+                onPress={() => {
+                  isLeavingToParentRef.current = true;
+                  router.replace("/");
+                }}
               >
-                <ButtonText>View details</ButtonText>
+                <ButtonText>Home</ButtonText>
               </Button>
             </View>
           </View>
@@ -1286,13 +1318,13 @@ export default function NewComplaintRoute() {
       {step < 5 && !isKeyboardVisible ? (
         <View
           className="absolute inset-x-0 bottom-0 flex-row items-end justify-end px-5"
+          pointerEvents="box-none"
           style={{
             paddingBottom: Math.max(insets.bottom, 16) + 12,
-            pointerEvents: "box-none",
           }}
         >
           <Button
-            isDisabled={isSubmitting}
+            isDisabled={isSubmitting || (attemptedStep === step && !canGoNext)}
             onPress={handleNext}
             accessibilityLabel={step === 4 ? "Submit report" : "Next"}
             className="rounded-full"
@@ -1316,188 +1348,49 @@ export default function NewComplaintRoute() {
             <Heading size="md">Submitting report</Heading>
           </ModalHeader>
           <ModalBody>
-            <Text className="text-sm text-muted-foreground">
+            <Text
+              className="text-sm text-muted-foreground"
+              accessibilityLiveRegion="polite"
+            >
               {submitProgress || "Submitting report..."}
             </Text>
             <Progress className="mt-5" value={submitProgressValue}>
               <ProgressFilledTrack />
             </Progress>
             <Text className="mt-4 text-sm text-muted-foreground">
-              Your report is saved locally first. Evidence and report details
-              are now being sent securely.
+              Your report is saved. Evidence and report details are now being
+              sent securely.
             </Text>
           </ModalBody>
-          <ModalFooter>
-            <Button variant="secondary" onPress={waitFromHome}>
-              <ButtonText>Go home while submitting</ButtonText>
-            </Button>
-          </ModalFooter>
         </ModalContent>
       </Modal>
 
-      <BottomSheet ref={mapSheetRef} onClose={() => setIsMapSheetOpen(false)}>
-        <BottomSheetPortal
-          snapPoints={["100%"]}
-          enableDynamicSizing={false}
-          enableContentPanningGesture={false}
-          enableHandlePanningGesture={false}
-          enablePanDownToClose={false}
-          handleComponent={() => null}
-          keyboardBehavior="interactive"
-          keyboardBlurBehavior="restore"
-          android_keyboardInputMode="adjustResize"
-          backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
-        >
-          <BottomSheetContent
-            className="flex-1"
-            style={{ paddingBottom: Math.max(insets.bottom, 16) }}
-          >
-            <View className="flex-row items-start justify-between gap-3 pb-1">
-              <View className="flex-1">
-                <Heading size="lg">Choose location</Heading>
-                <Text className="text-sm text-muted-foreground">
-                  Move the pin within Albay, then confirm the matched address.
-                </Text>
-              </View>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="rounded-full"
-                onPress={() => setIsMapSheetOpen(false)}
-                accessibilityLabel="Close map picker"
-              >
-                <ButtonIcon as={CircleX} height={20} width={20} />
-              </Button>
-            </View>
-            <View className="flex-1 overflow-hidden rounded-lg border border-border bg-secondary">
-              {Platform.OS === "web" ||
-              !MapLibreMap ||
-              !MapLibreCamera ||
-              !Marker ||
-              !ViewAnnotation ||
-              !mapCoordinates ? (
-                <View className="h-96 items-center justify-center px-6">
-                  <MapPin size={36} color={accentColor} />
-                  <Text className="mt-2 text-center text-sm text-muted-foreground">
-                    {Platform.OS === "web"
-                      ? "Native map picker is available on Android and iOS."
-                      : (mapError ?? "Loading map...")}
-                  </Text>
-                </View>
-              ) : (
-                <MapLibreMap
-                  style={{ flex: 1, minHeight: 420 }}
-                  mapStyle={albayMapStyle}
-                  androidView="texture"
-                  compass
-                  logo={false}
-                  attribution
-                  onDidFailLoadingMap={() => {
-                    setMapError(
-                      "Map style failed to load. Check Aleconnect server.",
-                    );
-                  }}
-                  onPress={(event) => {
-                    const [longitude, latitude] = event.nativeEvent.lngLat;
-                    setMapCoordinates(clampToAlbay({ latitude, longitude }));
-                  }}
-                >
-                  <MapLibreCamera
-                    center={toLngLat(mapCoordinates)}
-                    zoom={13}
-                    maxBounds={[
-                      albayBounds.minLongitude,
-                      albayBounds.minLatitude,
-                      albayBounds.maxLongitude,
-                      albayBounds.maxLatitude,
-                    ]}
-                    duration={250}
-                  />
-                  {NativeUserLocation ? <NativeUserLocation /> : null}
-                  {currentCoordinates ? (
-                    <Marker
-                      id="current-location"
-                      lngLat={toLngLat(currentCoordinates)}
-                    >
-                      <View className="h-5 w-5 rounded-full border-2 border-white bg-blue-500" />
-                    </Marker>
-                  ) : null}
-                  <ViewAnnotation
-                    id="complaint-location"
-                    lngLat={toLngLat(mapCoordinates)}
-                    draggable
-                    onDragEnd={(event) => {
-                      const [longitude, latitude] = event.nativeEvent.lngLat;
-                      setMapCoordinates(clampToAlbay({ latitude, longitude }));
-                    }}
-                  >
-                    <View className="items-center">
-                      <View className="h-9 w-9 items-center justify-center rounded-full bg-primary shadow-lg">
-                        <MapPin size={20} color="white" />
-                      </View>
-                      <View className="-mt-1 h-3 w-3 rotate-45 bg-primary" />
-                    </View>
-                  </ViewAnnotation>
-                </MapLibreMap>
-              )}
-            </View>
-            <View className="rounded-xl border border-border bg-card p-4">
-              <View className="flex-row items-start gap-3">
-                <View className="mt-0.5 h-9 w-9 items-center justify-center rounded-full bg-accent/15">
-                  <MapPin size={18} color={accentColor} />
-                </View>
-                <View className="min-w-0 flex-1">
-                  <Text className="text-xs font-bold text-muted-foreground">
-                    Selected address
-                  </Text>
-                  <Text className="mt-1 text-sm font-bold leading-5 text-foreground">
-                    {isResolvingAddress
-                      ? "Finding this address..."
-                      : mapAddress
-                        ? formatResolvedAddress(mapAddress)
-                        : "Move the pin to identify an address."}
-                  </Text>
-                  {mapAddress &&
-                  (!mapAddress.municipalityCode || !mapAddress.barangayPsgc) ? (
-                    <Text className="mt-2 text-xs text-warning">
-                      Municipality or barangay could not be matched. Confirm the
-                      fields after selecting this pin.
-                    </Text>
-                  ) : null}
-                </View>
-              </View>
-              {mapError ? (
-                <Text className="mt-2 text-xs text-destructive">
-                  {mapError}
-                </Text>
-              ) : null}
-            </View>
-            <View className="flex-row gap-2">
-              <Button
-                size="lg"
-                variant="secondary"
-                className="flex-1"
-                onPress={() => void locateCurrentPosition()}
-              >
-                <ButtonIcon as={LocateFixed} height={18} width={18} />
-                <ButtonText>Use my location</ButtonText>
-              </Button>
-              <Button
-                size="lg"
-                className="flex-1"
-                onPress={confirmMapCoordinates}
-                isDisabled={!mapCoordinates || isResolvingAddress}
-              >
-                <ButtonIcon as={Navigation} height={18} width={18} />
-                <ButtonText>Use this pin</ButtonText>
-              </Button>
-            </View>
-            <Text className="text-center text-xs text-muted-foreground">
-              Location selection is limited to Albay.
-            </Text>
-          </BottomSheetContent>
-        </BottomSheetPortal>
-      </BottomSheet>
+      <EvidencePhotoViewer
+        photos={readyPhotos}
+        initialIndex={viewerPhotoIndex ?? 0}
+        open={viewerPhotoIndex != null}
+        onClose={() => setViewerPhotoIndex(null)}
+      />
+
+      <AlbayLocationPickerSheet
+        open={isMapSheetOpen}
+        initialCoordinates={mapPickerInitialCoordinates}
+        meta={meta}
+        onClose={() => setIsMapSheetOpen(false)}
+        onConfirm={({ coordinates, address }) => {
+          setForm((current) => ({
+            ...current,
+            useHomeAddress: false,
+            latitude: coordinates.latitude,
+            longitude: coordinates.longitude,
+            municipalityCode: address.municipalityCode ?? "",
+            barangayPsgc: address.barangayPsgc ?? "",
+            purok: address.purok ?? "",
+            locationVerified: Boolean(address.barangayPsgc),
+          }));
+          setIsMapSheetOpen(false);
+        }}
+      />
     </View>
   );
 }

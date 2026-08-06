@@ -62,7 +62,7 @@ function PasswordField({
         <InputSlot
           accessibilityLabel={visible ? `Hide ${label}` : `Show ${label}`}
           accessibilityRole="button"
-          className="h-10 w-10"
+          className="h-11 w-11"
           onPress={onToggleVisibility}
         >
           <InputIcon as={visible ? EyeOff : Eye} />

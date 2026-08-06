@@ -52,37 +52,49 @@ import {
 } from "lucide-react-native";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
+  AccessibilityInfo,
   Animated,
   Linking,
   PanResponder,
   RefreshControl,
   ScrollView,
   View,
+  findNodeHandle,
   useWindowDimensions,
 } from "react-native";
+import { useReducedMotion } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type CategoryVisual = {
   icon: LucideIcon;
-  color: string;
-  soft: string;
+  tone: "accent" | "danger" | "foreground" | "success" | "warning";
+  softClassName: string;
 };
 
 const visuals: [RegExp, CategoryVisual][] = [
-  [/electric|power|aleco/i, { icon: Zap, color: "#0ea5e9", soft: "#e0f2fe" }],
+  [
+    /electric|power|aleco/i,
+    { icon: Zap, tone: "accent", softClassName: "bg-accent/10" },
+  ],
   [
     /medical|health|hospital/i,
-    { icon: Plus, color: "#ef4444", soft: "#fee2e2" },
+    { icon: Plus, tone: "danger", softClassName: "bg-danger/10" },
   ],
-  [/fire|rescue/i, { icon: Flame, color: "#f97316", soft: "#ffedd5" }],
-  [/water/i, { icon: Droplet, color: "#0284c7", soft: "#e0f2fe" }],
+  [
+    /fire|rescue/i,
+    { icon: Flame, tone: "warning", softClassName: "bg-warning/10" },
+  ],
+  [
+    /water/i,
+    { icon: Droplet, tone: "success", softClassName: "bg-success/10" },
+  ],
   [
     /safety|police|public/i,
-    { icon: Shield, color: "#2563eb", soft: "#dbeafe" },
+    { icon: Shield, tone: "foreground", softClassName: "bg-muted/20" },
   ],
   [
     /drrmo|disaster|risk/i,
-    { icon: Building2, color: "#d97706", soft: "#fef3c7" },
+    { icon: Building2, tone: "warning", softClassName: "bg-warning/10" },
   ],
 ];
 
@@ -117,8 +129,8 @@ function visualFor(name: string): CategoryVisual {
   return (
     visuals.find(([pattern]) => pattern.test(name))?.[1] ?? {
       icon: Building2,
-      color: "#64748b",
-      soft: "#f1f5f9",
+      tone: "foreground",
+      softClassName: "bg-muted/20",
     }
   );
 }
@@ -172,6 +184,8 @@ function SheetSearchInput({
   onChangeText: (value: string) => void;
   placeholder: string;
 }) {
+  const [mutedColor] = useAppColors(["muted-foreground"]);
+
   return (
     <View className="flex-row items-center">
       <BottomSheetTextInput
@@ -183,13 +197,13 @@ function SheetSearchInput({
         autoCapitalize="none"
       />
       <View className="absolute left-3" style={{ pointerEvents: "none" }}>
-        <Search size={17} color="#737373" />
+        <Search size={17} color={mutedColor} />
       </View>
       {value ? (
         <Button
           size="icon"
           variant="ghost"
-          className="absolute right-1"
+          className="absolute right-1 min-h-11 min-w-11 rounded-full"
           onPress={() => onChangeText("")}
           accessibilityLabel="Clear search"
         >
@@ -203,6 +217,10 @@ function SheetSearchInput({
 function EmergencySlider() {
   const x = useRef(new Animated.Value(0)).current;
   const [trackWidth, setTrackWidth] = useState(0);
+  const reducedMotion = useReducedMotion();
+  const [mutedColor, dangerColor, foregroundColor, surfaceColor] = useAppColors(
+    ["muted", "destructive", "foreground", "background"],
+  );
   const max = Math.max(trackWidth - 54, 0);
 
   const panResponder = useMemo(
@@ -218,32 +236,55 @@ function EmergencySlider() {
           if (max > 0 && next > max * 0.86) {
             void Linking.openURL("tel:911");
           }
-          Animated.spring(x, { toValue: 0, useNativeDriver: false }).start();
+          const resetAnimation = reducedMotion
+            ? Animated.timing(x, {
+                toValue: 0,
+                duration: 0,
+                useNativeDriver: false,
+              })
+            : Animated.spring(x, {
+                toValue: 0,
+                useNativeDriver: false,
+              });
+          resetAnimation.start();
         },
       }),
-    [max, x],
+    [max, reducedMotion, x],
   );
 
-  const backgroundColor = x.interpolate({
+  const trackBackgroundColor = x.interpolate({
     inputRange: [0, Math.max(max, 1)],
-    outputRange: ["#e5e5e5", "#ef4444"],
+    outputRange: [mutedColor, dangerColor],
   });
 
   return (
     <Animated.View
       onLayout={(event) => setTrackWidth(event.nativeEvent.layout.width)}
       className="h-12 justify-center overflow-hidden rounded-full"
-      style={{ backgroundColor }}
+      style={{ backgroundColor: trackBackgroundColor }}
+      accessible
+      accessibilityRole="button"
+      accessibilityLabel="Slide to call 911"
+      accessibilityHint="Swipe the phone control to the right, or activate to call"
+      accessibilityActions={[{ name: "activate", label: "Call 911" }]}
+      onAccessibilityAction={(event) => {
+        if (event.nativeEvent.actionName === "activate") {
+          void Linking.openURL("tel:911");
+        }
+      }}
     >
-      <Text className="self-center text-xs font-bold text-muted-foreground">
+      <Text className="self-center text-xs font-bold text-foreground">
         {">>> Slide to call"}
       </Text>
       <Animated.View
         {...panResponder.panHandlers}
-        className="absolute left-1 h-10 w-12 items-center justify-center rounded-full bg-white"
-        style={{ transform: [{ translateX: x }] }}
+        className="absolute left-1 h-10 w-12 items-center justify-center rounded-full"
+        style={{
+          backgroundColor: surfaceColor,
+          transform: [{ translateX: x }],
+        }}
       >
-        <Phone size={17} color="#111827" />
+        <Phone size={17} color={foregroundColor} />
       </Animated.View>
     </Animated.View>
   );
@@ -252,7 +293,10 @@ function EmergencySlider() {
 function AgencyCard({ agency }: { agency: HotlineAgency }) {
   const call = (number: string) => Linking.openURL(`tel:${digits(number)}`);
   const copy = (number: string) => Clipboard.setStringAsync(number);
-  const contactGroups = ["Hotline/Emergency", "Other service contacts"] as const;
+  const contactGroups = [
+    "Hotline/Emergency",
+    "Other service contacts",
+  ] as const;
 
   return (
     <View className="rounded-lg border border-border bg-card p-4">
@@ -279,6 +323,7 @@ function AgencyCard({ agency }: { agency: HotlineAgency }) {
           <Button
             size="icon"
             variant="ghost"
+            className="min-h-11 min-w-11 rounded-full"
             onPress={() => Linking.openURL(agency.websiteLink!)}
             accessibilityLabel={`Open ${agency.name} website`}
           >
@@ -290,23 +335,47 @@ function AgencyCard({ agency }: { agency: HotlineAgency }) {
       <View className="mt-4 gap-2">
         {agency.contacts.length ? (
           contactGroups.map((group) => {
-            const contacts = agency.contacts.filter((contact) => contact.group === group);
+            const contacts = agency.contacts.filter(
+              (contact) => contact.group === group,
+            );
             if (!contacts.length) return null;
-            return <View key={group} className="gap-2">
-              <Text className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{group}</Text>
-              {contacts.map((contact) => (
-                <View key={contact.id} className="min-h-12 flex-row items-center gap-2 rounded-full bg-secondary px-3">
-                  <Text className="text-xs font-bold text-foreground">{contactLabel(contact)}:</Text>
-                  <Text className="flex-1 text-xs text-foreground">{contact.number}</Text>
-                  <Button size="icon" onPress={() => call(contact.number)} accessibilityLabel={"Call " + contact.number}>
-                    <ButtonIcon as={Phone} height={15} width={15} />
-                  </Button>
-                  <Button size="icon" variant="secondary" onPress={() => copy(contact.number)} accessibilityLabel={"Copy " + contact.number}>
-                    <ButtonIcon as={Copy} height={15} width={15} />
-                  </Button>
-                </View>
-              ))}
-            </View>;
+            return (
+              <View key={group} className="gap-2">
+                <Text className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                  {group}
+                </Text>
+                {contacts.map((contact) => (
+                  <View
+                    key={contact.id}
+                    className="min-h-12 flex-row items-center gap-2 rounded-full bg-secondary px-3"
+                  >
+                    <Text className="text-xs font-bold text-foreground">
+                      {contactLabel(contact)}:
+                    </Text>
+                    <Text className="flex-1 text-xs text-foreground">
+                      {contact.number}
+                    </Text>
+                    <Button
+                      size="icon"
+                      className="min-h-11 min-w-11 rounded-full"
+                      onPress={() => call(contact.number)}
+                      accessibilityLabel={`Call ${contact.number}`}
+                    >
+                      <ButtonIcon as={Phone} height={15} width={15} />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="secondary"
+                      className="min-h-11 min-w-11 rounded-full"
+                      onPress={() => copy(contact.number)}
+                      accessibilityLabel={`Copy ${contact.number}`}
+                    >
+                      <ButtonIcon as={Copy} height={15} width={15} />
+                    </Button>
+                  </View>
+                ))}
+              </View>
+            );
           })
         ) : (
           <Text className="text-xs text-muted-foreground">
@@ -323,21 +392,39 @@ function CategoryCard({
   onPress,
 }: {
   category: HotlineCategory;
-  onPress: () => void;
+  onPress: (trigger: View) => void;
 }) {
+  const triggerRef = useRef<View>(null);
   const visual = visualFor(category.name);
   const Icon = visual.icon;
+  const [
+    accentColor,
+    dangerColor,
+    foregroundColor,
+    successColor,
+    warningColor,
+  ] = useAppColors(["accent", "danger", "foreground", "success", "warning"]);
+  const iconColor = {
+    accent: accentColor,
+    danger: dangerColor,
+    foreground: foregroundColor,
+    success: successColor,
+    warning: warningColor,
+  }[visual.tone];
+
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      className="min-h-[116px] flex-1 gap-3 rounded-lg border border-border bg-card p-4"
-    >
-      <View
-        className="h-9 w-9 items-center justify-center rounded-2xl"
-        style={{ backgroundColor: visual.soft }}
+    <View ref={triggerRef} collapsable={false} className="flex-1">
+      <Pressable
+        onPress={() => {
+          if (triggerRef.current) onPress(triggerRef.current);
+        }}
+        accessibilityRole="button"
+        className="min-h-[116px] flex-1 gap-3 rounded-lg border border-border bg-card p-4"
       >
-        <Icon size={20} color={visual.color} />
+      <View
+        className={`h-9 w-9 items-center justify-center rounded-full ${visual.softClassName}`}
+      >
+        <Icon size={20} color={iconColor} />
       </View>
       <View className="flex-1 justify-end">
         <Text className="text-sm font-bold text-foreground" numberOfLines={3}>
@@ -348,7 +435,8 @@ function CategoryCard({
           {category.agencies.length === 1 ? "agency" : "agencies"}
         </Text>
       </View>
-    </Pressable>
+      </Pressable>
+    </View>
   );
 }
 
@@ -413,12 +501,14 @@ export default function HotlinesRoute() {
   const unreadCount = useUnreadNotificationCount();
   const categorySheetRef = useRef<BottomSheetRef>(null);
   const allSheetRef = useRef<BottomSheetRef>(null);
+  const categoryTriggerRef = useRef<View | null>(null);
   const [categories, setCategories] = useState<HotlineCategory[]>([]);
   const [query, setQuery] = useState("");
   const [sheetQuery, setSheetQuery] = useState("");
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isUsingSavedData, setIsUsingSavedData] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
     null,
   );
@@ -429,6 +519,7 @@ export default function HotlinesRoute() {
     try {
       const data = await fetchHotlines(options);
       setCategories(data.categories);
+      setIsUsingSavedData("isStale" in data && data.isStale === true);
       setActiveCategoryId((current) =>
         data.categories.some((category) => category.id === current)
           ? current
@@ -447,7 +538,7 @@ export default function HotlinesRoute() {
 
   useFocusEffect(
     useCallback(() => {
-      void loadHotlines();
+      void loadHotlines({ force: true });
     }, [loadHotlines]),
   );
 
@@ -472,7 +563,11 @@ export default function HotlinesRoute() {
     : [];
   const categoryRows = useMemo(() => rowsOf(categories, 2), [categories]);
 
-  const openCategory = (category: HotlineCategory) => {
+  const openCategory = (
+    category: HotlineCategory,
+    trigger: View,
+  ) => {
+    categoryTriggerRef.current = trigger;
     setSelectedCategoryId(category.id);
     setSheetQuery("");
     requestAnimationFrame(() => categorySheetRef.current?.open());
@@ -482,6 +577,20 @@ export default function HotlinesRoute() {
     setActiveCategoryId((current) => current ?? categories[0]?.id ?? null);
     setSheetQuery("");
     requestAnimationFrame(() => allSheetRef.current?.open());
+  };
+
+  const categorySheetClose = () => {
+    categorySheetRef.current?.close();
+  };
+
+  const handleCategorySheetClosed = () => {
+    setSheetQuery("");
+    const trigger = findNodeHandle(categoryTriggerRef.current);
+    if (trigger != null) {
+      requestAnimationFrame(() =>
+        AccessibilityInfo.setAccessibilityFocus(trigger),
+      );
+    }
   };
 
   return (
@@ -511,13 +620,14 @@ export default function HotlinesRoute() {
           <Button
             size="icon"
             variant="secondary"
+            className="min-h-11 min-w-11 rounded-full"
             accessibilityLabel="Notifications"
             onPress={() => router.push(session ? "/notifications" : "/sign-in")}
           >
             <ButtonIcon as={Bell} height={20} width={20} />
             {unreadCount > 0 ? (
               <View className="absolute -right-1 -top-1 min-h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1">
-                <Text className="text-xs font-bold text-white">
+                <Text className="text-xs font-bold text-danger-foreground">
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </Text>
               </View>
@@ -532,6 +642,19 @@ export default function HotlinesRoute() {
           placeholder="Search number, agency, category"
           value={query}
         />
+
+        {isUsingSavedData && !isLoading ? (
+          <Alert className="px-3 py-2">
+            <View className="flex-1">
+              <AlertText className="text-xs font-semibold">
+                Showing saved hotline data
+              </AlertText>
+              <AlertText className="text-xs">
+                Pull down to check for newer contacts when online.
+              </AlertText>
+            </View>
+          </Alert>
+        ) : null}
 
         {isLoading ? <HotlineSkeleton /> : null}
 
@@ -580,7 +703,12 @@ export default function HotlinesRoute() {
                   <Text className="ml-2 text-sm font-semibold text-muted-foreground">
                     Categories
                   </Text>
-                  <Button variant="ghost" size="sm" onPress={openAll}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="min-h-11"
+                    onPress={openAll}
+                  >
                     <ButtonText>View all</ButtonText>
                     <ButtonIcon as={ChevronRight} height={15} width={15} />
                   </Button>
@@ -594,7 +722,7 @@ export default function HotlinesRoute() {
                       <CategoryCard
                         key={category.id}
                         category={category}
-                        onPress={() => openCategory(category)}
+                        onPress={(trigger) => openCategory(category, trigger)}
                       />
                     ))}
                     {row.length === 1 ? <View className="flex-1" /> : null}
@@ -612,7 +740,7 @@ export default function HotlinesRoute() {
         ) : null}
       </ScrollView>
 
-      <BottomSheet ref={categorySheetRef} onClose={() => setSheetQuery("")}>
+      <BottomSheet ref={categorySheetRef} onClose={handleCategorySheetClosed}>
         <BottomSheetPortal
           backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
           enableDynamicSizing
@@ -626,7 +754,7 @@ export default function HotlinesRoute() {
             contentContainerStyle={{
               gap: 12,
               paddingHorizontal: 20,
-              paddingBottom: 24,
+              paddingBottom: Math.max(insets.bottom, 20),
             }}
           >
             <BottomSheetHeader
@@ -637,6 +765,9 @@ export default function HotlinesRoute() {
               }
               closeAccessibilityLabel="Close hotlines"
             />
+            <Button onPress={categorySheetClose}>
+              <ButtonText>Close</ButtonText>
+            </Button>
             <View>
               <SheetSearchInput
                 value={sheetQuery}
@@ -664,6 +795,7 @@ export default function HotlinesRoute() {
           snapPoints={["92%"]}
           enableDynamicSizing={false}
           enableOverDrag={false}
+          keyboardBehavior="interactive"
           backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
         >
           <BottomSheetContent className="h-full">
@@ -690,7 +822,7 @@ export default function HotlinesRoute() {
                     <Pressable
                       key={category.id}
                       onPress={() => setActiveCategoryId(category.id)}
-                      className={`min-h-10 justify-center rounded-full px-4 ${
+                      className={`min-h-11 justify-center rounded-full px-4 ${
                         active ? "bg-primary" : "bg-secondary"
                       }`}
                     >
@@ -707,7 +839,10 @@ export default function HotlinesRoute() {
             <BottomSheetScrollView
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator
-              contentContainerStyle={{ gap: 12, paddingBottom: 24 }}
+              contentContainerStyle={{
+                gap: 12,
+                paddingBottom: Math.max(insets.bottom, 20),
+              }}
             >
               {activeAgencies.length ? (
                 activeAgencies.map((agency) => (

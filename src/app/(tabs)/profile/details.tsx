@@ -1,18 +1,10 @@
-import { useAuthSession } from "@/hooks/use-auth-session";
 import { useAppColors } from "@/hooks/use-app-colors";
+import { useAuthSession } from "@/hooks/use-auth-session";
 import * as ImagePicker from "expo-image-picker";
 import { Stack, useFocusEffect, useRouter } from "expo-router";
 
 import { ChildAppBar } from "@/components/child-app-bar";
-import {
-  Alert,
-  AlertText,
-} from "@/components/ui/alert";
-import {
-  Avatar,
-  AvatarFallbackText,
-  AvatarImage,
-} from "@/components/ui/avatar";
+import { Alert, AlertText } from "@/components/ui/alert";
 import {
   BottomSheet,
   BottomSheetBackdrop,
@@ -25,6 +17,17 @@ import { Heading } from "@/components/ui/heading";
 import { ListSection } from "@/components/ui/list-section";
 import { Pressable } from "@/components/ui/pressable";
 import { Text } from "@/components/ui/text";
+import { AccountDetailsBuilder } from "@/features/profile/components/AccountDetailsBuilder";
+import { AlbayLocationPickerSheet } from "@/features/maps/albay-location-picker-sheet";
+import {
+  ProfileAddressSheetContent,
+  type ProfileAddressDraft,
+} from "@/features/profile/components/ProfileAddressSheetContent";
+import { ProfileAvatar } from "@/features/profile/components/ProfileAvatar";
+import {
+  EditableField,
+  ProfileDetailsSheetContent,
+} from "@/features/profile/components/ProfileDetailsSheetContent";
 import {
   LucideBookUser,
   LucideGauge,
@@ -43,16 +46,17 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { AccountDetailsBuilder } from "@/features/profile/components/AccountDetailsBuilder";
-import {
-  EditableField,
-  ProfileDetailsSheetContent,
-} from "@/features/profile/components/ProfileDetailsSheetContent";
 
 import {
+  emptyComplaintMeta,
+  type ComplaintMeta,
+} from "@/features/reports/data";
+import {
   updateCurrentConsumerProfile,
+  updateCurrentConsumerAddress,
   uploadCurrentUserAvatar,
 } from "@/services/profile";
+import { fetchComplaintMeta } from "@/services/reports";
 import { useConsumerProfileContext } from "../../../context/consumer-profile-context";
 
 type FeedbackMessage = {
@@ -61,16 +65,38 @@ type FeedbackMessage = {
   status: "danger" | "success" | "accent";
 };
 
+const emptyAddressDraft: ProfileAddressDraft = {
+  municipalityCode: "",
+  barangayPsgc: "",
+  purokOrStreet: "",
+  landmark: "",
+  latitude: null,
+  longitude: null,
+};
+
+function readProfileCoordinates(
+  value: Record<string, unknown> | null | undefined,
+) {
+  const latitude = Number(value?.lat ?? value?.latitude);
+  const longitude = Number(value?.lng ?? value?.longitude);
+  return Number.isFinite(latitude) && Number.isFinite(longitude)
+    ? { latitude, longitude }
+    : null;
+}
+
 export default function ProfileDetailsRoute() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { height: screenHeight } = useWindowDimensions();
-  const [accentColor] = useAppColors(["accent"]);
+  const [accentColor, accentForegroundColor] = useAppColors([
+    "accent",
+    "accent-foreground",
+  ]);
   const scrollRef = useRef<ScrollView | null>(null);
   const editSheetRef = useRef<BottomSheetRef>(null);
   const bottomPadding = Math.max(insets.bottom, 16) + 24;
   const { session } = useAuthSession();
-  const { profile, isLoading, error, reload, setAvatarUrl } =
+  const { profile, isLoading, error, reload, setAvatarUrl, setProfileView } =
     useConsumerProfileContext();
   const [editingField, setEditingField] = useState<EditableField | null>(null);
   const [inputValue, setInputValue] = useState("");
@@ -83,6 +109,11 @@ export default function ProfileDetailsRoute() {
   );
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackMessage | null>(null);
+  const [complaintMeta, setComplaintMeta] =
+    useState<ComplaintMeta>(emptyComplaintMeta);
+  const [addressDraft, setAddressDraft] =
+    useState<ProfileAddressDraft>(emptyAddressDraft);
+  const [isAddressMapOpen, setIsAddressMapOpen] = useState(false);
 
   const resetEditSheet = useCallback(() => {
     setEditingField(null);
@@ -141,7 +172,8 @@ export default function ProfileDetailsRoute() {
       setFeedback({
         status: "danger",
         title: "Permission required",
-        description: "Allow photo library access to update your profile picture.",
+        description:
+          "Allow photo library access to update your profile picture.",
       });
       return;
     }
@@ -207,6 +239,48 @@ export default function ProfileDetailsRoute() {
     setEditingField(field);
     setInputError(null);
     setInputValue("");
+    if (field === "address") {
+      const coordinates = readProfileCoordinates(profile?.homeCoordinates);
+      setAddressDraft({
+        municipalityCode: profile?.municipalityCode ?? "",
+        barangayPsgc: profile?.barangayPsgc ?? "",
+        purokOrStreet: profile?.purokOrStreet ?? "",
+        landmark: profile?.landmark ?? "",
+        latitude: coordinates?.latitude ?? null,
+        longitude: coordinates?.longitude ?? null,
+      });
+      void fetchComplaintMeta()
+        .then((meta) => {
+          setComplaintMeta(meta);
+          setAddressDraft((current) => {
+            if (current.municipalityCode && current.barangayPsgc) return current;
+            const municipality = meta.municipalities.find(
+              (item) =>
+                item.name.trim().toLowerCase() ===
+                profile?.municipality?.trim().toLowerCase(),
+            );
+            const barangay = meta.barangays.find(
+              (item) =>
+                item.municipalityCode === municipality?.code &&
+                item.name.trim().toLowerCase() ===
+                  profile?.barangay?.trim().toLowerCase(),
+            );
+            return {
+              ...current,
+              municipalityCode:
+                current.municipalityCode || municipality?.code || "",
+              barangayPsgc: current.barangayPsgc || barangay?.code || "",
+            };
+          });
+        })
+        .catch((nextError) => {
+          setInputError(
+            nextError instanceof Error
+              ? nextError.message
+              : "Location choices could not be loaded.",
+          );
+        });
+    }
     requestAnimationFrame(() => editSheetRef.current?.open());
   };
 
@@ -263,7 +337,9 @@ export default function ProfileDetailsRoute() {
       return "Purok or street must be at most 100 characters.";
     }
 
-    if (profile?.purokOrStreet?.trim().toLowerCase() === trimmed.toLowerCase()) {
+    if (
+      profile?.purokOrStreet?.trim().toLowerCase() === trimmed.toLowerCase()
+    ) {
       return "New purok or street cannot be the same as your current address.";
     }
 
@@ -272,6 +348,53 @@ export default function ProfileDetailsRoute() {
 
   const handleSaveUpdate = async () => {
     if (!editingField) {
+      return;
+    }
+
+    if (editingField === "address") {
+      if (!addressDraft.municipalityCode) {
+        setInputError("Select a municipality.");
+        return;
+      }
+      if (!addressDraft.barangayPsgc) {
+        setInputError("Select a barangay.");
+        return;
+      }
+      if (!addressDraft.purokOrStreet.trim()) {
+        setInputError("Enter a purok or street.");
+        return;
+      }
+      if (addressDraft.latitude == null || addressDraft.longitude == null) {
+        setInputError("Choose the service location on the map.");
+        return;
+      }
+
+      setIsUpdating(true);
+      setInputError(null);
+      try {
+        const updatedProfile = await updateCurrentConsumerAddress({
+          ...addressDraft,
+          purokOrStreet: addressDraft.purokOrStreet.trim(),
+          landmark: addressDraft.landmark.trim(),
+          latitude: addressDraft.latitude,
+          longitude: addressDraft.longitude,
+        });
+        await setProfileView(updatedProfile);
+        closeEditSheet();
+        setFeedback({
+          status: "success",
+          title: "Profile updated",
+          description: "Address was saved.",
+        });
+      } catch (nextError) {
+        setInputError(
+          nextError instanceof Error
+            ? nextError.message
+            : "Address update failed.",
+        );
+      } finally {
+        setIsUpdating(false);
+      }
       return;
     }
 
@@ -285,11 +408,15 @@ export default function ProfileDetailsRoute() {
     setInputError(null);
 
     try {
-      const value = editingField === "phone"
-        ? inputValue.trim().replace(/\D/g, "")
-        : inputValue.trim();
-      await updateCurrentConsumerProfile(editingField, value);
-      await reload({ forceNetwork: true });
+      const value =
+        editingField === "phone"
+          ? inputValue.trim().replace(/\D/g, "")
+          : inputValue.trim();
+      const updatedProfile = await updateCurrentConsumerProfile(
+        editingField,
+        value,
+      );
+      await setProfileView(updatedProfile);
       closeEditSheet();
       setFeedback({
         status: "success",
@@ -298,19 +425,14 @@ export default function ProfileDetailsRoute() {
       });
     } catch (nextError) {
       setInputError(
-        nextError instanceof Error ? nextError.message : "Profile update failed.",
+        nextError instanceof Error
+          ? nextError.message
+          : "Profile update failed.",
       );
     } finally {
       setIsUpdating(false);
     }
   };
-
-  const sheetIcon =
-    editingField === "phone"
-      ? LucidePhone
-      : editingField === "email"
-        ? LucideMail
-        : LucideMapPin;
 
   const sheetTitle =
     editingField === "phone"
@@ -325,8 +447,6 @@ export default function ProfileDetailsRoute() {
       : editingField === "email"
         ? "Enter your new email address to update your account."
         : "Update the purok or street saved to your account.";
-
-  const SheetIcon = sheetIcon;
 
   if (!session) {
     return (
@@ -393,24 +513,22 @@ export default function ProfileDetailsRoute() {
         <View className="rounded-lg border border-border bg-card p-5">
           <View className="flex-row items-center gap-4">
             <View style={{ position: "relative" }}>
-              <Avatar
+              <ProfileAvatar
                 accessibilityLabel="Profile picture"
                 className="h-[84px] w-[84px] border-2"
+                fallback={
+                  displayName
+                    ?.split(/\s+/)
+                    .filter(Boolean)
+                    .map((name) => name[0])
+                    .join("")
+                    .toUpperCase()
+                    .slice(0, 2) || "?"
+                }
+                fallbackClassName="text-lg font-bold text-muted-foreground"
                 style={{ borderColor: accentColor }}
-              >
-                {avatarUri ? <AvatarImage source={{ uri: avatarUri }} /> : null}
-                {!avatarUri ? (
-                  <AvatarFallbackText className="text-lg font-bold text-muted-foreground">
-                      {displayName
-                        ?.split(/\s+/)
-                        .filter(Boolean)
-                        .map((n) => n[0])
-                        .join("")
-                        .toUpperCase()
-                        .slice(0, 2) || "?"}
-                  </AvatarFallbackText>
-                ) : null}
-              </Avatar>
+                uri={avatarUri}
+              />
               <Pressable
                 onPress={handleEditAvatarPress}
                 disabled={isUploadingAvatar}
@@ -420,15 +538,15 @@ export default function ProfileDetailsRoute() {
                   position: "absolute",
                   right: -3,
                   bottom: -3,
-                  width: 36,
-                  height: 36,
-                  borderRadius: 18,
+                  width: 44,
+                  height: 44,
+                  borderRadius: 22,
                   alignItems: "center",
                   justifyContent: "center",
                 }}
                 className="bg-accent border-2 border-background"
               >
-                <LucidePencil size={16} color="white" />
+                <LucidePencil size={17} color={accentForegroundColor} />
               </Pressable>
             </View>
             <View className="flex-1 gap-1">
@@ -439,7 +557,10 @@ export default function ProfileDetailsRoute() {
                 {displayAccountNumber}
               </Text>
               {avatarPhoto ? (
-                <Text className="text-xs text-muted-foreground" numberOfLines={1}>
+                <Text
+                  className="text-xs text-muted-foreground"
+                  numberOfLines={1}
+                >
                   Selected photo: {avatarPhoto.fileName ?? "avatar.jpg"}
                 </Text>
               ) : null}
@@ -469,78 +590,77 @@ export default function ProfileDetailsRoute() {
           </Alert>
         ) : null}
 
-      <ListSection title="Personal details">
-        <AccountDetailsBuilder
-          icon={LucideUserRound}
-          description="Name"
-          title={displayName}
-        />
-        <AccountDetailsBuilder
-          icon={LucidePhone}
-          description="Phone"
-          title={displayPhone}
-          button={{
-            variant: "secondary",
-            name: "Update",
-            onPress: () => {
-              openEditSheet("phone");
-            },
-          }}
-        />
-        <AccountDetailsBuilder
-          icon={LucideMail}
-          description="Email"
-          title={displayEmail}
-          button={{
-            variant: "secondary",
-            name: "Update",
-            onPress: () => {
-              openEditSheet("email");
-            },
-          }}
-        />
-        <AccountDetailsBuilder
-          icon={LucideMapPin}
-          description="Address"
-          title={displayAddress}
-          button={{
-            variant: "secondary",
-            name: "Update",
-            onPress: () => {
-              openEditSheet("address");
-            },
-          }}
-          showDivider={false}
-        />
-      </ListSection>
+        <ListSection title="Personal details">
+          <AccountDetailsBuilder
+            icon={LucideUserRound}
+            description="Name"
+            title={displayName}
+          />
+          <AccountDetailsBuilder
+            icon={LucidePhone}
+            description="Phone"
+            title={displayPhone}
+            button={{
+              variant: "secondary",
+              name: "Update",
+              onPress: () => {
+                openEditSheet("phone");
+              },
+            }}
+          />
+          <AccountDetailsBuilder
+            icon={LucideMail}
+            description="Email"
+            title={displayEmail}
+            button={{
+              variant: "secondary",
+              name: "Update",
+              onPress: () => {
+                openEditSheet("email");
+              },
+            }}
+          />
+          <AccountDetailsBuilder
+            icon={LucideMapPin}
+            description="Address"
+            title={displayAddress}
+            button={{
+              variant: "secondary",
+              name: "Update",
+              onPress: () => {
+                openEditSheet("address");
+              },
+            }}
+            showDivider={false}
+          />
+        </ListSection>
 
-      <ListSection title="Service account">
-        <AccountDetailsBuilder
-          icon={LucideBookUser}
-          description="Account Number"
-          title={displayAccountNumber}
-        />
-        <AccountDetailsBuilder
-          icon={LucideGauge}
-          description="Meter S/N"
-          title={displayMeterSerial}
-        />
-        <AccountDetailsBuilder
-          icon={LucideGauge}
-          description="Service Type"
-          title={displayServiceType}
-          showDivider={false}
-        />
-      </ListSection>
-
+        <ListSection title="Service account">
+          <AccountDetailsBuilder
+            icon={LucideBookUser}
+            description="Account Number"
+            title={displayAccountNumber}
+          />
+          <AccountDetailsBuilder
+            icon={LucideGauge}
+            description="Meter S/N"
+            title={displayMeterSerial}
+          />
+          <AccountDetailsBuilder
+            icon={LucideGauge}
+            description="Service Type"
+            title={displayServiceType}
+            showDivider={false}
+          />
+        </ListSection>
       </ScrollView>
 
       <BottomSheet ref={editSheetRef} onClose={resetEditSheet}>
         <BottomSheetPortal
           backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
           enableDynamicSizing
-          keyboardBehavior="fillParent"
-          maxDynamicContentSize={Math.min(520, screenHeight * 0.75)}
+          keyboardBehavior="interactive"
+          maxDynamicContentSize={screenHeight * 0.55}
         >
           <BottomSheetScrollView
             keyboardShouldPersistTaps="handled"
@@ -549,29 +669,69 @@ export default function ProfileDetailsRoute() {
               paddingBottom: Math.max(insets.bottom, 20),
             }}
           >
-            <ProfileDetailsSheetContent
-              editingField={editingField}
-              sheetTitle={sheetTitle}
-              sheetDescription={sheetDescription}
-              SheetIcon={SheetIcon}
-              inputValue={inputValue}
-              inputError={inputError}
-              currentPhone={profile?.contactNum ?? "No phone on file"}
-              currentEmail={profile?.email ?? "No email on file"}
-              currentAddress={displayAddress}
-              isUpdating={isUpdating}
-              onChangeInput={(nextValue) => {
-                setInputError(null);
-                setInputValue(nextValue);
-              }}
-              onCancel={closeEditSheet}
-              onSave={() => {
-                void handleSaveUpdate();
-              }}
-            />
+            {editingField === "address" ? (
+              <ProfileAddressSheetContent
+                value={addressDraft}
+                meta={complaintMeta}
+                error={inputError}
+                currentAddress={displayAddress}
+                isUpdating={isUpdating}
+                onChange={(value) => {
+                  setInputError(null);
+                  setAddressDraft(value);
+                }}
+                onOpenMap={() => setIsAddressMapOpen(true)}
+                onCancel={closeEditSheet}
+                onSave={() => void handleSaveUpdate()}
+              />
+            ) : (
+              <ProfileDetailsSheetContent
+                editingField={editingField}
+                sheetTitle={sheetTitle}
+                sheetDescription={sheetDescription}
+                inputValue={inputValue}
+                inputError={inputError}
+                currentPhone={profile?.contactNum ?? "No phone on file"}
+                currentEmail={profile?.email ?? "No email on file"}
+                currentAddress={displayAddress}
+                isUpdating={isUpdating}
+                onChangeInput={(nextValue) => {
+                  setInputError(null);
+                  setInputValue(nextValue);
+                }}
+                onCancel={closeEditSheet}
+                onSave={() => void handleSaveUpdate()}
+              />
+            )}
           </BottomSheetScrollView>
         </BottomSheetPortal>
       </BottomSheet>
+
+      <AlbayLocationPickerSheet
+        open={isAddressMapOpen}
+        initialCoordinates={
+          addressDraft.latitude != null && addressDraft.longitude != null
+            ? {
+                latitude: addressDraft.latitude,
+                longitude: addressDraft.longitude,
+              }
+            : null
+        }
+        meta={complaintMeta}
+        onClose={() => setIsAddressMapOpen(false)}
+        onConfirm={({ coordinates, address }) => {
+          setAddressDraft((current) => ({
+            ...current,
+            latitude: coordinates.latitude,
+            longitude: coordinates.longitude,
+            municipalityCode: address.municipalityCode,
+            barangayPsgc: address.barangayPsgc,
+            purokOrStreet: address.purok || current.purokOrStreet,
+          }));
+          setInputError(null);
+          setIsAddressMapOpen(false);
+        }}
+      />
     </View>
   );
 }

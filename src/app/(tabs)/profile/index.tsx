@@ -1,9 +1,4 @@
 import { appScrollableBottomPadding } from "@/components/floating-app-bar";
-import {
-  Avatar,
-  AvatarFallbackText,
-  AvatarImage,
-} from "@/components/ui/avatar";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { ListSection, ListSectionItem } from "@/components/ui/list-section";
@@ -44,6 +39,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Uniwind, useUniwind } from "uniwind";
 
 import { useConsumerProfileContext } from "../../../context/consumer-profile-context";
+import { ProfileAvatar } from "@/features/profile/components/ProfileAvatar";
 
 type ProfileRowProps = {
   icon: ReactNode;
@@ -58,7 +54,7 @@ type ProfileRowProps = {
 
 function IconBubble({ children }: { children: ReactNode }) {
   return (
-    <View className="h-10 w-10 items-center justify-center rounded-2xl bg-accent-soft">
+    <View className="h-10 w-10 items-center justify-center rounded-full bg-accent-soft">
       {children}
     </View>
   );
@@ -275,21 +271,16 @@ export default function ProfileRoute() {
         </View>
 
         <View className="flex-row items-center gap-4">
-          <Avatar
+          <ProfileAvatar
             accessibilityLabel={isGuest ? "Guest profile" : "Profile picture"}
             className="h-[76px] w-[76px] border-2"
+            fallback={isGuest ? "?" : initials}
+            fallbackClassName="text-lg font-bold"
             style={{
               borderColor: accentForegroundColor,
             }}
-          >
-            {!isGuest && profile?.avatarUrl ? (
-              <AvatarImage
-                key={profile.avatarUrl}
-                source={{ uri: profile.avatarUrl }}
-              />
-            ) : null}
-            <AvatarFallbackText>{isGuest ? "?" : initials}</AvatarFallbackText>
-          </Avatar>
+            uri={isGuest ? null : profile?.avatarUrl}
+          />
           <View className="flex-1 gap-1">
             {isLoading && !isGuest ? (
               <View className="gap-2">
@@ -322,6 +313,7 @@ export default function ProfileRoute() {
           {isGuest ? (
             <Button
               size="icon"
+              className="min-h-11 min-w-11 rounded-full"
               onPress={() => {
                 router.push("/sign-in");
               }}
@@ -519,6 +511,7 @@ export default function ProfileRoute() {
               <Button
                 variant="destructive"
                 size="sm"
+                className="min-h-11"
                 onPress={handleSignOut}
                 isDisabled={isSigningOut}
                 accessibilityLabel="Sign out"

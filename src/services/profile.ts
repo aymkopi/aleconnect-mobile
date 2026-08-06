@@ -14,8 +14,11 @@ type MobileProfileResponse = {
   avatarUrl: string | null;
   mapCoordinates: string | null;
   purokOrStreet: string | null;
+  barangayPsgc: string | null;
   barangayName: string | null;
+  municipalityCode: string | null;
   municipalityName: string | null;
+  landmark: string | null;
   customerClass: string | null;
   poleNumber: string | null;
   meterSerialNumber: string | null;
@@ -24,7 +27,12 @@ type MobileProfileResponse = {
 
 function toProfileRow(profile: MobileProfileResponse): Record<string, unknown> {
   const fullAddress =
-    [profile.purokOrStreet, profile.barangayName, profile.municipalityName]
+    [
+      profile.purokOrStreet,
+      profile.barangayName,
+      profile.municipalityName,
+      profile.landmark,
+    ]
       .filter(Boolean)
       .join(", ") || null;
 
@@ -36,8 +44,11 @@ function toProfileRow(profile: MobileProfileResponse): Record<string, unknown> {
     email: profile.email,
     avatar_url: profile.avatarUrl,
     purok_or_street: profile.purokOrStreet,
+    barangay_psgc: profile.barangayPsgc,
     barangay: profile.barangayName,
+    municipality_code: profile.municipalityCode,
     municipality: profile.municipalityName,
+    landmark: profile.landmark,
     full_address: fullAddress,
     meter_serial_num: profile.meterSerialNumber,
     pole_number: profile.poleNumber,
@@ -60,11 +71,37 @@ export async function fetchCurrentConsumerProfileView(): Promise<ConsumerProfile
 export async function updateCurrentConsumerProfile(
   field: "phone" | "email" | "address",
   value: string,
-): Promise<void> {
-  await apiRequest<{ updated: true }>("/api/mobile/profile", {
+): Promise<ConsumerProfileView> {
+  const response = await apiRequest<{
+    updated: true;
+    profile: MobileProfileResponse;
+  }>("/api/mobile/profile", {
     method: "PATCH",
     body: JSON.stringify({ field, value }),
   });
+  return toConsumerProfileView(toProfileRow(response.profile));
+}
+
+export type StructuredProfileAddressInput = {
+  municipalityCode: string;
+  barangayPsgc: string;
+  purokOrStreet: string;
+  landmark: string;
+  latitude: number;
+  longitude: number;
+};
+
+export async function updateCurrentConsumerAddress(
+  value: StructuredProfileAddressInput,
+): Promise<ConsumerProfileView> {
+  const response = await apiRequest<{
+    updated: true;
+    profile: MobileProfileResponse;
+  }>("/api/mobile/profile", {
+    method: "PATCH",
+    body: JSON.stringify({ field: "address", value }),
+  });
+  return toConsumerProfileView(toProfileRow(response.profile));
 }
 
 export type UploadProfileAvatarInput = {

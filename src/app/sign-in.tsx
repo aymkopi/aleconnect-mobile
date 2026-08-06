@@ -1,26 +1,22 @@
 import { Redirect, useRouter } from "expo-router";
 import {
-  LucideEye,
-  LucideEyeOff,
-  LucideLock,
-  LucideUserRound,
+    LucideEye,
+    LucideEyeOff,
+    LucideLock,
+    LucideUserRound,
 } from "lucide-react-native";
 import { useState } from "react";
 import { View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
 import { Alert, AlertText } from "@/components/ui/alert";
+import { Button, ButtonSpinner, ButtonText } from "@/components/ui/button";
 import {
-  Button,
-  ButtonSpinner,
-  ButtonText,
-} from "@/components/ui/button";
-import {
-  FormControl,
-  FormControlError,
-  FormControlErrorText,
-  FormControlLabel,
-  FormControlLabelText,
+    FormControl,
+    FormControlError,
+    FormControlErrorText,
+    FormControlLabel,
+    FormControlLabelText,
 } from "@/components/ui/form-control";
 import { Heading } from "@/components/ui/heading";
 import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
@@ -80,9 +76,7 @@ export default function SignInRoute() {
     return (
       <Redirect
         href={
-          session.user.mustChangePassword
-            ? "/profile/change-password"
-            : "/home"
+          session.user.mustChangePassword ? "/profile/change-password" : "/home"
         }
       />
     );
@@ -113,7 +107,7 @@ export default function SignInRoute() {
           </Text>
         </View>
 
-        <View className="gap-4 rounded-2xl border border-border bg-card p-5">
+        <View className="gap-4 rounded-xl border border-border bg-card p-5">
           <FormControl isInvalid={isAccountNumberInvalid} isRequired>
             <FormControlLabel>
               <FormControlLabelText>Account number</FormControlLabelText>
@@ -173,7 +167,9 @@ export default function SignInRoute() {
             </Input>
             {isPasswordInvalid ? (
               <FormControlError>
-                <FormControlErrorText>Password is required.</FormControlErrorText>
+                <FormControlErrorText>
+                  Password is required.
+                </FormControlErrorText>
               </FormControlError>
             ) : null}
           </FormControl>

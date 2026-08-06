@@ -3,10 +3,18 @@ import { Button, ButtonIcon } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { ListSection, ListSectionItem } from "@/components/ui/list-section";
 import { Text } from "@/components/ui/text";
+import { AdvisoryListItem } from "@/features/advisories/advisory-list-item";
 import { statusBarHeight } from "@/constants";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useAppColors } from "@/hooks/use-app-colors";
-import { fetchNotifications } from "@/services/notifications";
+import {
+  fetchActiveAdvisories,
+  type MobileAdvisory,
+} from "@/services/advisories";
+import {
+  fetchNotifications,
+  subscribeNotificationsChanged,
+} from "@/services/notifications";
 import { useFocusEffect, useRouter } from "expo-router";
 import {
   Bell,
@@ -16,7 +24,7 @@ import {
   UserRound,
   Zap,
 } from "lucide-react-native";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   RefreshControl,
   ScrollView,
@@ -32,6 +40,13 @@ export default function HomeRoute() {
   const { session, refreshSession } = useAuthSession();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [advisories, setAdvisories] = useState<MobileAdvisory[]>([]);
+  const [loadedUserId, setLoadedUserId] = useState<string | null>(null);
+  const activeUserIdRef = useRef(session?.user.id);
+  activeUserIdRef.current = session?.user.id;
+  const hasCurrentUserData = loadedUserId === session?.user.id;
+  const visibleAdvisories = hasCurrentUserData ? advisories : [];
+  const visibleUnreadCount = hasCurrentUserData ? unreadCount : 0;
   const [accentColor, mutedColor] = useAppColors(["accent", "muted"]);
   const bottomPadding = appScrollableBottomPadding(insets.bottom);
 
@@ -39,12 +54,31 @@ export default function HomeRoute() {
     useCallback(() => {
       if (!session) {
         setUnreadCount(0);
+        setAdvisories([]);
+        setLoadedUserId(null);
         return;
       }
 
-      void fetchNotifications()
-        .then((response) => setUnreadCount(response.unreadCount))
-        .catch(() => setUnreadCount(0));
+      const userId = session.user.id;
+      let isActive = true;
+      const load = () =>
+        void Promise.all([
+          fetchNotifications({ userId }),
+          fetchActiveAdvisories({ userId, limit: 3 }),
+        ])
+          .then(([notifications, advisoryPage]) => {
+            if (!isActive || activeUserIdRef.current !== userId) return;
+            setUnreadCount(notifications.unreadCount);
+            setAdvisories(advisoryPage.advisories);
+            setLoadedUserId(userId);
+          })
+          .catch(() => undefined);
+      load();
+      const unsubscribe = subscribeNotificationsChanged(load);
+      return () => {
+        isActive = false;
+        unsubscribe();
+      };
     }, [session]),
   );
 
@@ -52,10 +86,21 @@ export default function HomeRoute() {
     setIsRefreshing(true);
 
     try {
-      await refreshSession({ forceNetwork: true });
-      if (session) {
-        const response = await fetchNotifications();
-        setUnreadCount(response.unreadCount);
+      const nextSession = await refreshSession({ forceNetwork: true });
+      if (nextSession) {
+        const userId = nextSession.user.id;
+        const [notifications, advisoryPage] = await Promise.all([
+          fetchNotifications({ userId, force: true }),
+          fetchActiveAdvisories({
+            userId,
+            limit: 3,
+            force: true,
+          }),
+        ]);
+        if (activeUserIdRef.current !== userId) return;
+        setUnreadCount(notifications.unreadCount);
+        setAdvisories(advisoryPage.advisories);
+        setLoadedUserId(userId);
       }
     } finally {
       setIsRefreshing(false);
@@ -124,10 +169,10 @@ export default function HomeRoute() {
           onPress={() => router.push(session ? "/notifications" : "/sign-in")}
         >
           <ButtonIcon as={Bell} height={20} width={20} />
-          {unreadCount > 0 ? (
+          {visibleUnreadCount > 0 ? (
             <View className="absolute -right-1 -top-1 min-h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1">
               <Text className="text-xs font-bold text-white">
-                {unreadCount > 9 ? "9+" : unreadCount}
+                {visibleUnreadCount > 9 ? "9+" : visibleUnreadCount}
               </Text>
             </View>
           ) : null}
@@ -136,7 +181,7 @@ export default function HomeRoute() {
 
       <View className="rounded-lg border border-border bg-card p-5">
         <View className="flex-row items-center gap-4">
-          <View className="h-12 w-12 items-center justify-center rounded-2xl bg-accent">
+          <View className="h-12 w-12 items-center justify-center rounded-full bg-accent">
             <Zap size={23} color="white" />
           </View>
           <View className="flex-1">
@@ -168,6 +213,46 @@ export default function HomeRoute() {
             );
           })}
       </ListSection>
+
+      {session ? (
+        <ListSection
+          title={
+            <View className="flex-row items-center justify-between px-1">
+              <Heading size="sm">Active advisories</Heading>
+              <Button
+                size="sm"
+                variant="ghost"
+                accessibilityLabel="View all advisories"
+                onPress={() => router.push("/advisories")}
+              >
+                <Text className="font-semibold text-accent">View all</Text>
+              </Button>
+            </View>
+          }
+        >
+          {visibleAdvisories.length > 0 ? (
+            visibleAdvisories.map((advisory, index) => (
+              <AdvisoryListItem
+                key={advisory.id}
+                advisory={advisory}
+                onPress={() =>
+                  router.push({
+                    pathname: "/advisory/[id]",
+                    params: { id: advisory.id },
+                  })
+                }
+                showDivider={index < visibleAdvisories.length - 1}
+              />
+            ))
+          ) : (
+            <ListSectionItem
+              description="New service notices for your area will appear here."
+              showDivider={false}
+              title="No active advisories"
+            />
+          )}
+        </ListSection>
+      ) : null}
     </ScrollView>
   );
 }

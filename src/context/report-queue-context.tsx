@@ -12,7 +12,11 @@ import {
 import { AppState } from "react-native";
 
 import { useAuthSession } from "@/hooks/use-auth-session";
-import { emitComplaintSubmissionToast } from "@/services/report-submission-events";
+import { ensureReportBackgroundSyncRegistered } from "@/services/report-background-sync";
+import {
+  consumeReportSubmissionCompletions,
+  emitComplaintSubmissionToast,
+} from "@/services/report-submission-events";
 import {
   listReportQueue,
   removeQueuedReport,
@@ -85,6 +89,19 @@ export function ReportQueueProvider({ children }: PropsWithChildren) {
     void refresh();
     if (userId) void sync();
   }, [refresh, sync, userId]);
+
+  useEffect(() => {
+    if (!userId) return;
+    void ensureReportBackgroundSyncRegistered();
+    void consumeReportSubmissionCompletions(userId).then((completions) => {
+      completions.forEach((completion) => {
+        emitComplaintSubmissionToast({
+          status: "success",
+          message: `Report submitted: ${completion.ticketNumber}`,
+        });
+      });
+    });
+  }, [userId]);
 
   useEffect(() => subscribeReportQueue(() => void refresh()), [refresh]);
 

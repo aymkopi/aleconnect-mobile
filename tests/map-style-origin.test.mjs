@@ -7,15 +7,15 @@ test("MapLibre loads static styles from the Pages origin in production", async (
     new URL("../src/constants/api.ts", import.meta.url),
     "utf8",
   );
-  const complaintSource = await readFile(
-    new URL("../src/app/(tabs)/reports/new.tsx", import.meta.url),
+  const mapRuntimeSource = await readFile(
+    new URL("../src/features/maps/map-runtime.ts", import.meta.url),
     "utf8",
   );
 
   assert.match(apiSource, /":\/\/api\.aleconnect\.app",\s*"\:\/\/aleconnect\.app"/);
   assert.match(
-    complaintSource,
+    mapRuntimeSource,
     /`\$\{aleconnectAssetBaseUrl\}\/styles\/map-bright\.json\?v=2`/,
   );
-  assert.doesNotMatch(complaintSource, /aleconnectApiBaseUrl/);
+  assert.doesNotMatch(mapRuntimeSource, /aleconnectApiBaseUrl/);
 });

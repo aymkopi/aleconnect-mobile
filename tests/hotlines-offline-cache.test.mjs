@@ -40,6 +40,9 @@ test("failed refresh returns the persisted stale hotline cache", async () => {
           },
         };
       }
+      if (specifier === "@/utils/refresh-cooldown") {
+        return { claimRefresh: () => true };
+      }
       throw new Error(`Unexpected import: ${specifier}`);
     },
     module,
@@ -48,5 +51,14 @@ test("failed refresh returns the persisted stale hotline cache", async () => {
 
   const result = await module.exports.fetchHotlines({ force: true });
 
-  assert.deepEqual(result, cached.value);
+  assert.deepEqual(result, { ...cached.value, isStale: true });
+});
+
+test("the Hotlines tab revalidates its cache on focus", async () => {
+  const source = await readFile(
+    new URL("../src/app/(tabs)/hotlines.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(source, /useFocusEffect[\s\S]*loadHotlines\(\{ force: true \}\)/);
 });

@@ -1,18 +1,34 @@
-import {
-  formatReportDate,
-  formatStatus,
-  type Report,
-} from "@/features/reports/data";
 import { ListSection, ListSectionItem } from "@/components/ui/list-section";
 import { Text } from "@/components/ui/text";
+import {
+    formatReportDate,
+    formatStatus,
+    type Report,
+} from "@/features/reports/data";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { FileText } from "lucide-react-native";
 import { View } from "react-native";
 
 export function ReportStatusBadge({ status }: { status: string }) {
+  const normalized = status.toLowerCase().replace(/[\s-]+/g, "_");
+  const tone =
+    normalized === "resolved" ||
+    normalized === "completed" ||
+    normalized === "closed"
+      ? "bg-success text-success-foreground"
+      : normalized === "cancelled" ||
+          normalized === "canceled" ||
+          normalized === "rejected"
+        ? "bg-danger text-danger-foreground"
+        : normalized === "assigned" ||
+            normalized === "in_progress" ||
+            normalized === "on_hold"
+          ? "bg-warning text-warning-foreground"
+          : "bg-secondary text-secondary-foreground";
+
   return (
-    <View className="rounded-full bg-secondary px-3 py-1">
-      <Text className="text-xs font-bold text-secondary-foreground">
+    <View className={`rounded-full px-3 py-1 ${tone.split(" ")[0]}`}>
+      <Text className={`text-xs font-bold ${tone.split(" ")[1]}`}>
         {formatStatus(status)}
       </Text>
     </View>
@@ -38,12 +54,17 @@ export function ReportListGroup({
           accessibilityLabel={`Open report ${report.ticketNumber}`}
           description={
             <Text className="text-sm text-muted-foreground" numberOfLines={2}>
-              {report.typeTitle} - {formatReportDate(report.createdAt)}
+              {[
+                report.typeTitle !== report.title ? report.typeTitle : null,
+                formatReportDate(report.createdAt),
+              ]
+                .filter(Boolean)
+                .join(" - ")}
             </Text>
           }
           leading={
             <View
-              className="h-11 w-11 items-center justify-center rounded-xl"
+              className="h-11 w-11 items-center justify-center rounded-full"
               style={{ backgroundColor: getColor?.(report) ?? accentColor }}
             >
               <FileText size={18} color="white" />

@@ -13,7 +13,16 @@ import {
   readEvidencePhoto,
   type PreparedEvidencePhoto,
 } from "@/utils/evidence-image-processing";
-import { ApiRequestError } from "@/services/api";
+import { ApiRequestError, getAuthToken } from "@/services/api";
+import {
+  createKeyedSerialExecutor,
+  createPromiseRegistry,
+} from "@/utils/async-coordination";
+import {
+  mapWithConcurrency,
+  requestPhaseFailureMessage,
+  type RequestPhase,
+} from "@/utils/report-transport";
 
 export type ReportQueueStatus =
   | "queued"
@@ -30,6 +39,8 @@ export type ReportQueueItem = {
   status: ReportQueueStatus;
   attempts: number;
   lastError: string | null;
+  lastErrorPhase: RequestPhase | null;
+  diagnosticId: string | null;
   ticketId: string | null;
   ticketNumber: string | null;
   title: string;
@@ -47,7 +58,9 @@ export type ReportQueueInput = Pick<
 
 const queueStorageKey = "report_submission_queue_v1";
 const listeners = new Set<() => void>();
-let syncPromise: Promise<ReportQueueItem[]> | null = null;
+const runQueueMutation = createKeyedSerialExecutor();
+const queueSyncRequests =
+  createPromiseRegistry<string, ReportQueueItem[]>();
 
 function notifyQueueChanged() {
   listeners.forEach((listener) => listener());
@@ -62,6 +75,8 @@ async function readQueue(): Promise<ReportQueueItem[]> {
     return items.map((item) => ({
       ...item,
       status: item.status === "submitting" ? "queued" : item.status,
+      lastErrorPhase: item.lastErrorPhase ?? null,
+      diagnosticId: item.diagnosticId ?? null,
     }));
   } catch {
     return [];
@@ -74,10 +89,12 @@ async function writeQueue(items: ReportQueueItem[]) {
 }
 
 async function replaceQueueItem(nextItem: ReportQueueItem) {
-  const items = await readQueue();
-  await writeQueue(
-    items.map((item) => (item.id === nextItem.id ? nextItem : item)),
-  );
+  await runQueueMutation(queueStorageKey, async () => {
+    const items = await readQueue();
+    await writeQueue(
+      items.map((item) => (item.id === nextItem.id ? nextItem : item)),
+    );
+  });
 }
 
 export function createLocalReportId() {
@@ -100,55 +117,71 @@ export async function listReportQueue(userId?: string) {
 }
 
 export async function enqueueReport(input: ReportQueueInput) {
-  const items = await readQueue();
-  const existing = items.find((item) => item.id === input.id);
-  if (existing) return existing;
+  return runQueueMutation(queueStorageKey, async () => {
+    const items = await readQueue();
+    const existing = items.find((item) => item.id === input.id);
+    if (existing) return existing;
 
-  const now = new Date().toISOString();
-  const item: ReportQueueItem = {
-    ...input,
-    createdAt: now,
-    updatedAt: now,
-    status: "queued",
-    attempts: 0,
-    lastError: null,
-    ticketId: null,
-    ticketNumber: null,
-  };
-  await writeQueue([...items, item]);
-  return item;
+    const now = new Date().toISOString();
+    const item: ReportQueueItem = {
+      ...input,
+      createdAt: now,
+      updatedAt: now,
+      status: "queued",
+      attempts: 0,
+      lastError: null,
+      lastErrorPhase: null,
+      diagnosticId: null,
+      ticketId: null,
+      ticketNumber: null,
+    };
+    await writeQueue([...items, item]);
+    return item;
+  });
 }
 
-async function submitQueuedReport(item: ReportQueueItem) {
+async function submitQueuedReport(
+  item: ReportQueueItem,
+  authToken: string,
+) {
   const submitting: ReportQueueItem = {
     ...item,
     status: "submitting",
     attempts: item.attempts + 1,
     updatedAt: new Date().toISOString(),
     lastError: null,
+    lastErrorPhase: null,
+    diagnosticId: null,
   };
   await replaceQueueItem(submitting);
 
   try {
     const { draftId, uploads } = await createEvidenceUploads(
       item.evidence.length,
+      authToken,
     );
-    await Promise.all(
-      uploads.map(async (upload, index) => {
+    await mapWithConcurrency(
+      uploads,
+      2,
+      async (upload, index) => {
         const photo = item.evidence[index];
         if (!photo) throw new Error("A queued evidence photo is missing.");
         await uploadEvidenceToR2(
           upload.uploadUrl,
           await readEvidencePhoto(photo.uri),
         );
-      }),
+      },
     );
+    // Older queued drafts included the retired generic description field.
+    // Strip it so retries use only the category/type-specific fields.
+    const { description: _legacyDescription, ...payload } = item.payload as
+      typeof item.payload & { description?: unknown };
     const ticket = await submitComplaint({
-      ...item.payload,
+      ...payload,
       idempotencyKey: item.idempotencyKey,
       draftIds: [draftId],
       imageKeys: uploads.map((upload) => upload.key),
-    });
+    }, authToken);
     const submitted: ReportQueueItem = {
       ...submitting,
       status: "submitted",
@@ -156,21 +189,36 @@ async function submitQueuedReport(item: ReportQueueItem) {
       ticketId: ticket.ticketId,
       ticketNumber: ticket.ticketNumber,
     };
-    await replaceQueueItem(submitted);
+    // The authoritative copy now exists in tickets; remove the local draft so it
+    // moves into the normal report archive instead of appearing twice.
+    await runQueueMutation(queueStorageKey, async () => {
+      await writeQueue(
+        (await readQueue()).filter((entry) => entry.id !== item.id),
+      );
+    });
     await clearReportListCache(item.userId);
     deleteReportEvidence(item.id);
     return submitted;
   } catch (error) {
     const retryable =
-      !(error instanceof ApiRequestError) ||
-      error.status == null ||
-      error.status >= 500;
+      !(error instanceof ApiRequestError) || error.retryable;
+    const lastError =
+      error instanceof ApiRequestError &&
+      error.status != null &&
+      error.status >= 500
+        ? requestPhaseFailureMessage(error.phase, "network")
+        : error instanceof Error
+          ? error.message
+          : "Report submission failed.";
     const failed: ReportQueueItem = {
       ...submitting,
       status: retryable ? "queued" : "failed",
       updatedAt: new Date().toISOString(),
-      lastError:
-        error instanceof Error ? error.message : "Report submission failed.",
+      lastError,
+      lastErrorPhase:
+        error instanceof ApiRequestError ? error.phase : null,
+      diagnosticId:
+        error instanceof ApiRequestError ? error.requestId ?? null : null,
     };
     await replaceQueueItem(failed);
     return failed;
@@ -178,47 +226,60 @@ async function submitQueuedReport(item: ReportQueueItem) {
 }
 
 export async function syncReportQueue(userId: string) {
-  if (syncPromise) return syncPromise;
-
-  syncPromise = (async () => {
+  return queueSyncRequests.run(userId, async () => {
     const network = await NetInfo.fetch();
     if (!network.isConnected || network.isInternetReachable === false) {
       return listReportQueue(userId);
     }
 
+    const authToken = await getAuthToken();
+    if (!authToken) return listReportQueue(userId);
+
     const items = await listReportQueue(userId);
     const results: ReportQueueItem[] = [];
     for (const item of items.reverse()) {
       results.push(
-        item.status === "queued" ? await submitQueuedReport(item) : item,
+        item.status === "queued"
+          ? await submitQueuedReport(item, authToken)
+          : item,
       );
     }
     return results;
-  })().finally(() => {
-    syncPromise = null;
   });
-
-  return syncPromise;
 }
 
 export async function retryQueuedReport(id: string) {
-  const items = await readQueue();
-  const item = items.find((entry) => entry.id === id);
-  if (!item || item.status === "submitting" || item.status === "submitted") {
-    return;
-  }
-  await replaceQueueItem({
-    ...item,
-    status: "queued",
-    lastError: null,
-    updatedAt: new Date().toISOString(),
+  await runQueueMutation(queueStorageKey, async () => {
+    const items = await readQueue();
+    const item = items.find((entry) => entry.id === id);
+    if (!item || item.status === "submitting" || item.status === "submitted") {
+      return;
+    }
+    await writeQueue(
+      items.map((entry) =>
+        entry.id === id
+          ? {
+              ...item,
+              status: "queued",
+              lastError: null,
+              lastErrorPhase: null,
+              diagnosticId: null,
+              updatedAt: new Date().toISOString(),
+            }
+          : entry,
+      ),
+    );
   });
 }
 
 export async function removeQueuedReport(id: string) {
-  const items = await readQueue();
-  const item = items.find((entry) => entry.id === id);
-  if (!item || item.status === "submitting") return;
-  if (item.status !== "submitted") deleteReportEvidence(item.id);
-  await writeQueue(items.filter((entry) => entry.id !== id));
+  let evidenceId: string | null = null;
+  await runQueueMutation(queueStorageKey, async () => {
+    const items = await readQueue();
+    const item = items.find((entry) => entry.id === id);
+    if (!item || item.status === "submitting") return;
+    if (item.status !== "submitted") evidenceId = item.id;
+    await writeQueue(items.filter((entry) => entry.id !== id));
+  });
+  if (evidenceId) deleteReportEvidence(evidenceId);
 }

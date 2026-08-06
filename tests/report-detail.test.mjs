@@ -16,3 +16,45 @@ test("report detail presents public phase, estimate, deadline, and history", asy
   assert.match(card, /Public update history/);
   assert.match(data, /publicUpdates: IncidentPublicUpdate\[\]/);
 });
+
+test("report detail parser rejects incomplete wrappers and never exposes object keys", async () => {
+  const { parseReportDetailResponse } = await import(
+    new URL("../src/features/reports/data.ts", import.meta.url)
+  );
+  const base = {
+    id: "ticket-1",
+    ticketNumber: "ALECO-260802-00001",
+    title: "Voltage issue",
+    status: "under_review",
+    createdAt: "2026-08-02T00:00:00.000Z",
+    typeId: "type-1",
+    typeTitle: "Voltage issue",
+    categoryId: "category-1",
+    categoryTitle: "Power quality",
+    history: [],
+    publicUpdates: [],
+    imageUrls: [
+      "ticket-evidence/consumer/draft/1.webp",
+      "https://evidence.example/1.webp",
+    ],
+  };
+
+  assert.deepEqual(parseReportDetailResponse({ report: base }).imageUrls, [
+    "https://evidence.example/1.webp",
+  ]);
+  assert.throws(
+    () => parseReportDetailResponse({ report: { ...base, ticketNumber: "" } }),
+    /incomplete/i,
+  );
+});
+
+test("report detail retains content, exposes retry, and refreshes expired evidence once", async () => {
+  const detail = await read("src/app/(tabs)/reports/[id].tsx");
+
+  assert.match(detail, /EvidencePhotoViewer/);
+  assert.match(detail, /cachePolicy="memory-disk"/);
+  assert.match(detail, /refreshEvidenceOnce/);
+  assert.match(detail, /refreshEvidence: true/);
+  assert.match(detail, /Retry/);
+  assert.doesNotMatch(detail, /isLoading \|\| !report/);
+});

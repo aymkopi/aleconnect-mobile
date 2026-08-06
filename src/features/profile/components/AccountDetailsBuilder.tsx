@@ -31,7 +31,7 @@ export function AccountDetailsBuilder({
     <ListSectionItem
       description={<Text className="text-xs text-muted-foreground">{description}</Text>}
       leading={
-        <View className="h-10 w-10 items-center justify-center rounded-2xl bg-accent-soft">
+        <View className="h-10 w-10 items-center justify-center rounded-full bg-accent-soft">
           <Icon size={19} color={accentIconColor} />
         </View>
       }
@@ -42,6 +42,7 @@ export function AccountDetailsBuilder({
           <Button
             variant={button.variant ?? "secondary"}
             size="sm"
+            className="min-h-11"
             onPress={button.onPress}
           >
             <ButtonText>{button.name}</ButtonText>

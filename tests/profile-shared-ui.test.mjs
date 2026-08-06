@@ -13,13 +13,20 @@ test("profile details uses the shared responsive child UI", async () => {
 
   assert.match(details, /<ChildAppBar/);
   assert.doesNotMatch(details, /containerHeight=/);
-  assert.match(details, /keyboardBehavior="fillParent"/);
-  assert.match(details, /maxDynamicContentSize=\{Math\.min\(520, screenHeight \* 0\.75\)\}/);
+  assert.match(details, /keyboardBehavior="interactive"/);
+  assert.match(details, /maxDynamicContentSize=\{screenHeight \* 0\.55\}/);
   assert.match(details, /<BottomSheetScrollView/);
   assert.match(appBar, /rightActions\?: ReactNode/);
-  assert.match(bottomSheet, /android_keyboardInputMode = 'adjustResize'/);
-  assert.match(bottomSheet, /keyboardBehavior = 'interactive'/);
+  assert.match(bottomSheet, /android_keyboardInputMode = ["']adjustPan["']/);
+  assert.match(bottomSheet, /keyboardBehavior = ["']interactive["']/);
+  assert.match(bottomSheet, /setCurrentIndex\(-1\)/);
+  assert.match(bottomSheet, /keyboardShouldPersistTaps=\{keyboardShouldPersistTaps\}/);
+  assert.match(bottomSheet, /Math\.max\(\s*insets\.bottom,\s*20,/);
+  assert.match(bottomSheet, /min-h-11 min-w-11/);
   assert.match(bottomSheet, /pb-safe-or-5/);
   assert.match(button, /icon: 'min-h-9 min-w-9 rounded-full'/);
-  assert.match(css, /--radius-(?:sm|md|lg|xl): 0\.75rem/g);
+  const radiusValues = [...css.matchAll(/--radius-(?:sm|md|lg|xl): ([\d.]+rem)/g)]
+    .map((match) => match[1]);
+  assert.equal(radiusValues.length, 4);
+  assert.equal(new Set(radiusValues).size, 1);
 });

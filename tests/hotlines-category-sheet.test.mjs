@@ -28,3 +28,28 @@ test("hotline search prioritizes one result list and category names can wrap", a
   assert.match(source, /!query && categories\.length/);
   assert.match(source, /numberOfLines=\{3\}/);
 });
+
+test("hotline sheets keep keyboard and reduced-motion interactions accessible", async () => {
+  const source = await readFile(
+    new URL("../src/app/(tabs)/hotlines.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(source, /useReducedMotion/);
+  assert.match(source, /keyboardBehavior="interactive"/);
+  assert.match(source, /paddingBottom: Math\.max\(insets\.bottom, 20\)/);
+  assert.match(source, /accessibilityLabel="Slide to call 911"/);
+  assert.match(source, /categorySheetRef\.current\?\.close\(\)/);
+  assert.match(source, /AccessibilityInfo\.setAccessibilityFocus/);
+});
+
+test("hotlines identifies stale cache responses and keeps contacts visible", async () => {
+  const source = await readFile(
+    new URL("../src/app/(tabs)/hotlines.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(source, /data\.isStale === true/);
+  assert.match(source, /Showing saved hotline data/);
+  assert.match(source, /Pull down to check for newer contacts when online/);
+});

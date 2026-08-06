@@ -16,6 +16,7 @@ import {
     type MobileNotification,
     type MobileNotificationCategory,
 } from "@/services/notifications";
+import { notificationDestinationFromNotification } from "@/services/notification-navigation";
 import { Redirect, useFocusEffect, useRouter } from "expo-router";
 import {
     CheckCheck,
@@ -496,32 +497,21 @@ export default function NotificationsRoute() {
 
   const openNotification = async (notification: MobileNotification) => {
     if (!notification.isRead) {
-      void markNotificationsRead([notification.id], session!.user.id)
-        .then((next) => {
-          setNotifications((current) =>
-            current.map((item) =>
-              item.id === notification.id ? { ...item, isRead: true } : item,
-            ),
-          );
-          setUnreadCount(next.unreadCount);
-        })
-        .catch(() => undefined);
+      try {
+        const next = await markNotificationsRead([notification.id], session!.user.id);
+        setNotifications((current) =>
+          current.map((item) =>
+            item.id === notification.id ? { ...item, isRead: true } : item,
+          ),
+        );
+        setUnreadCount(next.unreadCount);
+      } catch {
+        // Navigation remains available even when the read-state request is offline.
+      }
     }
 
-    if (notification.ticketId) {
-      router.push({
-        pathname: "/report/[id]",
-        params: { id: notification.ticketId },
-      });
-      return;
-    }
-
-    if (notification.entityType === "advisory" && notification.entityId) {
-      router.push({
-        pathname: "/advisory/[id]",
-        params: { id: notification.entityId },
-      });
-    }
+    const destination = notificationDestinationFromNotification(notification);
+    if (destination) router.push(destination);
   };
 
   if (!isSessionLoading && !session) {

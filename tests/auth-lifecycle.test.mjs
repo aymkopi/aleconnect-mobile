@@ -3,8 +3,17 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 test("login is not blocked by push registration and sign-out waits for session clear", async () => {
-  const [authSource, profileSource] = await Promise.all([
+  const [authSource, contextSource, profileHookSource, profileSource] =
+    await Promise.all([
     readFile(new URL("../src/services/auth.ts", import.meta.url), "utf8"),
+    readFile(
+      new URL("../src/context/auth-session-context.ts", import.meta.url),
+      "utf8",
+    ),
+    readFile(
+      new URL("../src/hooks/use-consumer-profile.ts", import.meta.url),
+      "utf8",
+    ),
     readFile(
       new URL("../src/app/(tabs)/profile/index.tsx", import.meta.url),
       "utf8",
@@ -12,6 +21,10 @@ test("login is not blocked by push registration and sign-out waits for session c
   ]);
 
   assert.doesNotMatch(authSource, /registerForPushNotificationsAsync/);
+  assert.match(contextSource, /authGeneration/);
+  assert.match(contextSource, /authToken:\s*token/);
+  assert.match(contextSource, /authGeneration\.current \+= 1/);
+  assert.match(profileHookSource, /activeUserIdRef/);
   assert.match(profileSource, /shouldRedirectAfterSignOut/);
   assert.match(profileSource, /!shouldRedirectAfterSignOut \|\| session/);
 });
