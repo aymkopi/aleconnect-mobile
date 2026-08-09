@@ -1,19 +1,33 @@
+import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import * as ImagePicker from "expo-image-picker";
-import { useFocusEffect, useRouter } from "expo-router";
+import { Stack, useFocusEffect, useRouter } from "expo-router";
 
+import { ChildAppBar } from "@/components/child-app-bar";
+import { Alert, AlertText } from "@/components/ui/alert";
 import {
-  Alert,
-  Avatar,
   BottomSheet,
-  Button,
-  Label,
-  ListGroup,
-  Separator,
-  Surface,
-  Typography,
-  useThemeColor,
-} from "heroui-native";
+  BottomSheetBackdrop,
+  BottomSheetPortal,
+  BottomSheetScrollView,
+  type BottomSheetRef,
+} from "@/components/ui/bottomsheet";
+import { Button, ButtonText } from "@/components/ui/button";
+import { Heading } from "@/components/ui/heading";
+import { ListSection } from "@/components/ui/list-section";
+import { Pressable } from "@/components/ui/pressable";
+import { Text } from "@/components/ui/text";
+import { AccountDetailsBuilder } from "@/features/profile/components/AccountDetailsBuilder";
+import { AlbayLocationPickerSheet } from "@/features/maps/albay-location-picker-sheet";
+import {
+  ProfileAddressSheetContent,
+  type ProfileAddressDraft,
+} from "@/features/profile/components/ProfileAddressSheetContent";
+import { ProfileAvatar } from "@/features/profile/components/ProfileAvatar";
+import {
+  EditableField,
+  ProfileDetailsSheetContent,
+} from "@/features/profile/components/ProfileDetailsSheetContent";
 import {
   LucideBookUser,
   LucideGauge,
@@ -27,18 +41,22 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   BackHandler,
   Keyboard,
-  Pressable,
   ScrollView,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { AccountDetailsBuilder } from "@/features/profile/components/AccountDetailsBuilder";
-import {
-  EditableField,
-  ProfileDetailsSheetContent,
-} from "@/features/profile/components/ProfileDetailsSheetContent";
 
-import { uploadCurrentUserAvatar } from "@/services/profile";
+import {
+  emptyComplaintMeta,
+  type ComplaintMeta,
+} from "@/features/reports/data";
+import {
+  updateCurrentConsumerProfile,
+  updateCurrentConsumerAddress,
+  uploadCurrentUserAvatar,
+} from "@/services/profile";
+import { fetchComplaintMeta } from "@/services/reports";
 import { useConsumerProfileContext } from "../../../context/consumer-profile-context";
 
 type FeedbackMessage = {
@@ -47,22 +65,43 @@ type FeedbackMessage = {
   status: "danger" | "success" | "accent";
 };
 
+const emptyAddressDraft: ProfileAddressDraft = {
+  municipalityCode: "",
+  barangayPsgc: "",
+  purokOrStreet: "",
+  landmark: "",
+  latitude: null,
+  longitude: null,
+};
+
+function readProfileCoordinates(
+  value: Record<string, unknown> | null | undefined,
+) {
+  const latitude = Number(value?.lat ?? value?.latitude);
+  const longitude = Number(value?.lng ?? value?.longitude);
+  return Number.isFinite(latitude) && Number.isFinite(longitude)
+    ? { latitude, longitude }
+    : null;
+}
+
 export default function ProfileDetailsRoute() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [accentColor] = useThemeColor(["accent"]);
+  const { height: screenHeight } = useWindowDimensions();
+  const [accentColor, accentForegroundColor] = useAppColors([
+    "accent",
+    "accent-foreground",
+  ]);
   const scrollRef = useRef<ScrollView | null>(null);
+  const editSheetRef = useRef<BottomSheetRef>(null);
   const bottomPadding = Math.max(insets.bottom, 16) + 24;
   const { session } = useAuthSession();
-  const { profile, isLoading, error, reload, setAvatarUrl } =
+  const { profile, isLoading, error, reload, setAvatarUrl, setProfileView } =
     useConsumerProfileContext();
   const [editingField, setEditingField] = useState<EditableField | null>(null);
   const [inputValue, setInputValue] = useState("");
   const [inputError, setInputError] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [localPhone, setLocalPhone] = useState<string | null>(null);
-  const [localEmail, setLocalEmail] = useState<string | null>(null);
-  const [localAddress, setLocalAddress] = useState<string | null>(null);
   const [avatarPhoto, setAvatarPhoto] =
     useState<ImagePicker.ImagePickerAsset | null>(null);
   const [avatarUri, setAvatarUri] = useState<string | null>(
@@ -70,13 +109,23 @@ export default function ProfileDetailsRoute() {
   );
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackMessage | null>(null);
+  const [complaintMeta, setComplaintMeta] =
+    useState<ComplaintMeta>(emptyComplaintMeta);
+  const [addressDraft, setAddressDraft] =
+    useState<ProfileAddressDraft>(emptyAddressDraft);
+  const [isAddressMapOpen, setIsAddressMapOpen] = useState(false);
 
-  const closeEditSheet = useCallback(() => {
-    Keyboard.dismiss();
+  const resetEditSheet = useCallback(() => {
     setEditingField(null);
     setInputError(null);
     setInputValue("");
   }, []);
+
+  const closeEditSheet = useCallback(() => {
+    Keyboard.dismiss();
+    editSheetRef.current?.close();
+    resetEditSheet();
+  }, [resetEditSheet]);
 
   useEffect(() => {
     setAvatarUri(profile?.avatarUrl ?? null);
@@ -123,7 +172,8 @@ export default function ProfileDetailsRoute() {
       setFeedback({
         status: "danger",
         title: "Permission required",
-        description: "Allow photo library access to update your profile picture.",
+        description:
+          "Allow photo library access to update your profile picture.",
       });
       return;
     }
@@ -172,10 +222,9 @@ export default function ProfileDetailsRoute() {
   };
 
   const displayName = profile?.fullName ?? "Profile not linked";
-  const displayPhone = localPhone ?? profile?.contactNum ?? "No phone on file";
-  const displayEmail = localEmail ?? profile?.email ?? "No email on file";
+  const displayPhone = profile?.contactNum ?? "No phone on file";
+  const displayEmail = profile?.email ?? "No email on file";
   const displayAddress =
-    localAddress ??
     profile?.fullAddress ??
     ([profile?.purokOrStreet, profile?.barangay, profile?.municipality]
       .filter(Boolean)
@@ -190,6 +239,49 @@ export default function ProfileDetailsRoute() {
     setEditingField(field);
     setInputError(null);
     setInputValue("");
+    if (field === "address") {
+      const coordinates = readProfileCoordinates(profile?.homeCoordinates);
+      setAddressDraft({
+        municipalityCode: profile?.municipalityCode ?? "",
+        barangayPsgc: profile?.barangayPsgc ?? "",
+        purokOrStreet: profile?.purokOrStreet ?? "",
+        landmark: profile?.landmark ?? "",
+        latitude: coordinates?.latitude ?? null,
+        longitude: coordinates?.longitude ?? null,
+      });
+      void fetchComplaintMeta()
+        .then((meta) => {
+          setComplaintMeta(meta);
+          setAddressDraft((current) => {
+            if (current.municipalityCode && current.barangayPsgc) return current;
+            const municipality = meta.municipalities.find(
+              (item) =>
+                item.name.trim().toLowerCase() ===
+                profile?.municipality?.trim().toLowerCase(),
+            );
+            const barangay = meta.barangays.find(
+              (item) =>
+                item.municipalityCode === municipality?.code &&
+                item.name.trim().toLowerCase() ===
+                  profile?.barangay?.trim().toLowerCase(),
+            );
+            return {
+              ...current,
+              municipalityCode:
+                current.municipalityCode || municipality?.code || "",
+              barangayPsgc: current.barangayPsgc || barangay?.code || "",
+            };
+          });
+        })
+        .catch((nextError) => {
+          setInputError(
+            nextError instanceof Error
+              ? nextError.message
+              : "Location choices could not be loaded.",
+          );
+        });
+    }
+    requestAnimationFrame(() => editSheetRef.current?.open());
   };
 
   const validateInput = (
@@ -241,11 +333,68 @@ export default function ProfileDetailsRoute() {
       return null;
     }
 
-    return "Address updates will be available soon.";
+    if (trimmed.length > 100) {
+      return "Purok or street must be at most 100 characters.";
+    }
+
+    if (
+      profile?.purokOrStreet?.trim().toLowerCase() === trimmed.toLowerCase()
+    ) {
+      return "New purok or street cannot be the same as your current address.";
+    }
+
+    return null;
   };
 
   const handleSaveUpdate = async () => {
     if (!editingField) {
+      return;
+    }
+
+    if (editingField === "address") {
+      if (!addressDraft.municipalityCode) {
+        setInputError("Select a municipality.");
+        return;
+      }
+      if (!addressDraft.barangayPsgc) {
+        setInputError("Select a barangay.");
+        return;
+      }
+      if (!addressDraft.purokOrStreet.trim()) {
+        setInputError("Enter a purok or street.");
+        return;
+      }
+      if (addressDraft.latitude == null || addressDraft.longitude == null) {
+        setInputError("Choose the service location on the map.");
+        return;
+      }
+
+      setIsUpdating(true);
+      setInputError(null);
+      try {
+        const updatedProfile = await updateCurrentConsumerAddress({
+          ...addressDraft,
+          purokOrStreet: addressDraft.purokOrStreet.trim(),
+          landmark: addressDraft.landmark.trim(),
+          latitude: addressDraft.latitude,
+          longitude: addressDraft.longitude,
+        });
+        await setProfileView(updatedProfile);
+        closeEditSheet();
+        setFeedback({
+          status: "success",
+          title: "Profile updated",
+          description: "Address was saved.",
+        });
+      } catch (nextError) {
+        setInputError(
+          nextError instanceof Error
+            ? nextError.message
+            : "Address update failed.",
+        );
+      } finally {
+        setIsUpdating(false);
+      }
       return;
     }
 
@@ -259,30 +408,31 @@ export default function ProfileDetailsRoute() {
     setInputError(null);
 
     try {
-      if (editingField === "phone") {
-        setLocalPhone(inputValue.trim().replace(/\D/g, ""));
-      }
-
-      if (editingField === "email") {
-        setLocalEmail(inputValue.trim());
-      }
-
-      if (editingField === "address") {
-        setLocalAddress(inputValue.trim());
-      }
-
+      const value =
+        editingField === "phone"
+          ? inputValue.trim().replace(/\D/g, "")
+          : inputValue.trim();
+      const updatedProfile = await updateCurrentConsumerProfile(
+        editingField,
+        value,
+      );
+      await setProfileView(updatedProfile);
       closeEditSheet();
+      setFeedback({
+        status: "success",
+        title: "Profile updated",
+        description: `${sheetTitle.replace("Update ", "")} was saved.`,
+      });
+    } catch (nextError) {
+      setInputError(
+        nextError instanceof Error
+          ? nextError.message
+          : "Profile update failed.",
+      );
     } finally {
       setIsUpdating(false);
     }
   };
-
-  const sheetIcon =
-    editingField === "phone"
-      ? LucidePhone
-      : editingField === "email"
-        ? LucideMail
-        : LucideMapPin;
 
   const sheetTitle =
     editingField === "phone"
@@ -296,89 +446,89 @@ export default function ProfileDetailsRoute() {
       ? "Enter your new phone number to update your account."
       : editingField === "email"
         ? "Enter your new email address to update your account."
-        : "Address update form preview.";
-
-  const SheetIcon = sheetIcon;
+        : "Update the purok or street saved to your account.";
 
   if (!session) {
     return (
-      <ScrollView
-        ref={scrollRef}
-        contentInsetAdjustmentBehavior="automatic"
-        className="flex-1 bg-background"
-        contentContainerStyle={{
-          flexGrow: 1,
-          justifyContent: "center",
-          padding: 20,
-          paddingBottom: bottomPadding,
-        }}
-      >
-        <Surface className="rounded-3xl p-6" style={{ gap: 12 }}>
-          <Typography.Heading type="h3" weight="bold">
-            Sign in required
-          </Typography.Heading>
-          <Typography.Paragraph type="body-sm" color="muted">
-            Account details are only available for signed-in users.
-          </Typography.Paragraph>
-          <Button
-            variant="primary"
-            size="md"
-            onPress={() => {
-              router.push("/sign-in");
-            }}
-          >
-            <Button.Label>Sign in</Button.Label>
-          </Button>
-        </Surface>
-      </ScrollView>
+      <View className="flex-1 bg-background">
+        <Stack.Screen options={{ headerShown: false }} />
+        <ChildAppBar
+          title="Account"
+          description="Personal and service details"
+          onBack={handleBackPress}
+          backAccessibilityLabel="Back to profile"
+        />
+        <ScrollView
+          ref={scrollRef}
+          contentInsetAdjustmentBehavior="automatic"
+          className="flex-1 bg-background"
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: "center",
+            padding: 20,
+            paddingTop: 8,
+            paddingBottom: bottomPadding,
+          }}
+        >
+          <View className="gap-3 rounded-lg border border-border bg-card p-6">
+            <Heading size="lg">Sign in required</Heading>
+            <Text className="text-sm text-muted-foreground">
+              Account details are only available for signed-in users.
+            </Text>
+            <Button
+              onPress={() => {
+                router.push("/sign-in");
+              }}
+            >
+              <ButtonText>Sign in</ButtonText>
+            </Button>
+          </View>
+        </ScrollView>
+      </View>
     );
   }
 
   return (
     <View className="flex-1 bg-background">
+      <Stack.Screen options={{ headerShown: false }} />
+      <ChildAppBar
+        title="Account"
+        description="Personal and service details"
+        onBack={handleBackPress}
+        backAccessibilityLabel="Back to profile"
+      />
       <ScrollView
         ref={scrollRef}
         contentInsetAdjustmentBehavior="automatic"
         className="flex-1 bg-background"
         contentContainerStyle={{
           flexGrow: 1,
-          padding: 20,
+          paddingHorizontal: 20,
+          paddingTop: 8,
           gap: 6,
           paddingBottom: bottomPadding,
         }}
       >
         {/* Identity card mirrors the profile parent: compact, scannable, first-screen useful. */}
-        <Surface className="rounded-3xl p-5">
+        <View className="rounded-lg border border-border bg-card p-5">
           <View className="flex-row items-center gap-4">
             <View style={{ position: "relative" }}>
-              <Avatar
-                size="lg"
-                alt="Profile picture"
-                style={{
-                  width: 84,
-                  height: 84,
-                  borderRadius: 42,
-                  borderColor: accentColor,
-                  borderWidth: 2,
-                }}
-              >
-                {avatarUri ? <Avatar.Image source={{ uri: avatarUri }} /> : null}
-                {!avatarUri ? (
-                  <Avatar.Fallback
-                    style={{ width: 84, height: 84, borderRadius: 42 }}
-                  >
-                    <Typography type="h3" weight="bold" color="muted">
-                      {displayName
-                        ?.split(/\s+/)
-                        .filter(Boolean)
-                        .map((n) => n[0])
-                        .join("")
-                        .toUpperCase()
-                        .slice(0, 2) || "?"}
-                    </Typography>
-                  </Avatar.Fallback>
-                ) : null}
-              </Avatar>
+              <ProfileAvatar
+                accessibilityLabel="Profile picture"
+                className="h-[84px] w-[84px] border-2"
+                fallback={
+                  displayName
+                    ?.split(/\s+/)
+                    .filter(Boolean)
+                    .map((name) => name[0])
+                    .join("")
+                    .toUpperCase()
+                    .slice(0, 2) || "?"
+                }
+                fallbackClassName="text-lg font-bold text-muted-foreground"
+                style={{ borderColor: accentColor }}
+                uri={avatarUri}
+              />
               <Pressable
                 onPress={handleEditAvatarPress}
                 disabled={isUploadingAvatar}
@@ -388,161 +538,200 @@ export default function ProfileDetailsRoute() {
                   position: "absolute",
                   right: -3,
                   bottom: -3,
-                  width: 36,
-                  height: 36,
-                  borderRadius: 18,
+                  width: 44,
+                  height: 44,
+                  borderRadius: 22,
                   alignItems: "center",
                   justifyContent: "center",
                 }}
                 className="bg-accent border-2 border-background"
               >
-                <LucidePencil size={16} color="white" />
+                <LucidePencil size={17} color={accentForegroundColor} />
               </Pressable>
             </View>
             <View className="flex-1 gap-1">
-              <Typography.Heading type="h5" weight="bold" numberOfLines={2}>
+              <Heading numberOfLines={2} size="md">
                 {isLoading ? "Loading profile..." : displayName}
-              </Typography.Heading>
-              <Typography.Paragraph type="body-xs" color="muted" numberOfLines={2}>
+              </Heading>
+              <Text className="text-xs text-muted-foreground" numberOfLines={2}>
                 {displayAccountNumber}
-              </Typography.Paragraph>
+              </Text>
               {avatarPhoto ? (
-                <Typography type="body-xs" color="muted" numberOfLines={1}>
+                <Text
+                  className="text-xs text-muted-foreground"
+                  numberOfLines={1}
+                >
                   Selected photo: {avatarPhoto.fileName ?? "avatar.jpg"}
-                </Typography>
+                </Text>
               ) : null}
               {isUploadingAvatar ? (
-                <Typography type="body-xs" color="muted">
+                <Text className="text-xs text-muted-foreground">
                   Uploading avatar...
-                </Typography>
+                </Text>
               ) : null}
               {error ? (
-                <Typography.Paragraph type="body-sm" className="text-danger">
+                <Text className="text-sm text-destructive">
                   {error.message}
-                </Typography.Paragraph>
+                </Text>
               ) : null}
             </View>
           </View>
-        </Surface>
+        </View>
 
         {feedback ? (
-          <Alert status={feedback.status} className="mt-2">
-            <Alert.Indicator />
-            <Alert.Content>
-              <Alert.Title>{feedback.title}</Alert.Title>
-              <Alert.Description>{feedback.description}</Alert.Description>
-            </Alert.Content>
+          <Alert
+            className="mt-2"
+            variant={feedback.status === "danger" ? "destructive" : "default"}
+          >
+            <View className="flex-1 gap-1">
+              <AlertText className="font-bold">{feedback.title}</AlertText>
+              <AlertText>{feedback.description}</AlertText>
+            </View>
           </Alert>
         ) : null}
 
-      <Label className="mt-3 text-sm text-muted">Personal details</Label>
-      <ListGroup>
-        <AccountDetailsBuilder
-          icon={LucideUserRound}
-          description="Name"
-          title={displayName}
-        />
-        <Separator className="mx-4" />
-        <AccountDetailsBuilder
-          icon={LucidePhone}
-          description="Phone"
-          title={displayPhone}
-          button={{
-            variant: "primary",
-            name: "Update",
-            onPress: () => {
-              openEditSheet("phone");
-            },
-          }}
-        />
-        <Separator className="mx-4" />
-        <AccountDetailsBuilder
-          icon={LucideMail}
-          description="Email"
-          title={displayEmail}
-          button={{
-            variant: "primary",
-            name: "Update",
-            onPress: () => {
-              openEditSheet("email");
-            },
-          }}
-        />
-        <Separator className="mx-4" />
-        <AccountDetailsBuilder
-          icon={LucideMapPin}
-          description="Address"
-          title={displayAddress}
-          button={{
-            variant: "primary",
-            name: "Update",
-            onPress: () => {
-              openEditSheet("address");
-            },
-          }}
-        />
-      </ListGroup>
-      <Label className="mt-3 text-sm text-muted">Service account</Label>
+        <ListSection title="Personal details">
+          <AccountDetailsBuilder
+            icon={LucideUserRound}
+            description="Name"
+            title={displayName}
+          />
+          <AccountDetailsBuilder
+            icon={LucidePhone}
+            description="Phone"
+            title={displayPhone}
+            button={{
+              variant: "secondary",
+              name: "Update",
+              onPress: () => {
+                openEditSheet("phone");
+              },
+            }}
+          />
+          <AccountDetailsBuilder
+            icon={LucideMail}
+            description="Email"
+            title={displayEmail}
+            button={{
+              variant: "secondary",
+              name: "Update",
+              onPress: () => {
+                openEditSheet("email");
+              },
+            }}
+          />
+          <AccountDetailsBuilder
+            icon={LucideMapPin}
+            description="Address"
+            title={displayAddress}
+            button={{
+              variant: "secondary",
+              name: "Update",
+              onPress: () => {
+                openEditSheet("address");
+              },
+            }}
+            showDivider={false}
+          />
+        </ListSection>
 
-      <ListGroup>
-        <AccountDetailsBuilder
-          icon={LucideBookUser}
-          description="Account Number"
-          title={displayAccountNumber}
-        ></AccountDetailsBuilder>
-        <Separator className="mx-4" />
-        <AccountDetailsBuilder
-          icon={LucideGauge}
-          description="Meter S/N"
-          title={displayMeterSerial}
-        ></AccountDetailsBuilder>
-        <Separator className="mx-4" />
-        <AccountDetailsBuilder
-          icon={LucideGauge}
-          description="Service Type"
-          title={displayServiceType}
-        ></AccountDetailsBuilder>
-      </ListGroup>
-
+        <ListSection title="Service account">
+          <AccountDetailsBuilder
+            icon={LucideBookUser}
+            description="Account Number"
+            title={displayAccountNumber}
+          />
+          <AccountDetailsBuilder
+            icon={LucideGauge}
+            description="Meter S/N"
+            title={displayMeterSerial}
+          />
+          <AccountDetailsBuilder
+            icon={LucideGauge}
+            description="Service Type"
+            title={displayServiceType}
+            showDivider={false}
+          />
+        </ListSection>
       </ScrollView>
 
-      <BottomSheet
-        isOpen={editingField !== null}
-        onOpenChange={(nextOpen) => {
-          if (!nextOpen) {
-            closeEditSheet();
-          }
-        }}
-      >
-        <BottomSheet.Portal>
-          <BottomSheet.Overlay />
-          <BottomSheet.Content
-            keyboardBehavior="interactive"
-            keyboardBlurBehavior="restore"
-            android_keyboardInputMode="adjustResize"
+      <BottomSheet ref={editSheetRef} onClose={resetEditSheet}>
+        <BottomSheetPortal
+          backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
+          enableDynamicSizing
+          keyboardBehavior="interactive"
+          maxDynamicContentSize={screenHeight * 0.55}
+        >
+          <BottomSheetScrollView
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{
+              paddingHorizontal: 20,
+              paddingBottom: Math.max(insets.bottom, 20),
+            }}
           >
-            <ProfileDetailsSheetContent
-              editingField={editingField}
-              sheetTitle={sheetTitle}
-              sheetDescription={sheetDescription}
-              SheetIcon={SheetIcon}
-              inputValue={inputValue}
-              inputError={inputError}
-              currentPhone={profile?.contactNum ?? "No phone on file"}
-              currentEmail={profile?.email ?? "No email on file"}
-              isUpdating={isUpdating}
-              onChangeInput={(nextValue) => {
-                setInputError(null);
-                setInputValue(nextValue);
-              }}
-              onCancel={closeEditSheet}
-              onSave={() => {
-                void handleSaveUpdate();
-              }}
-            />
-          </BottomSheet.Content>
-        </BottomSheet.Portal>
+            {editingField === "address" ? (
+              <ProfileAddressSheetContent
+                value={addressDraft}
+                meta={complaintMeta}
+                error={inputError}
+                currentAddress={displayAddress}
+                isUpdating={isUpdating}
+                onChange={(value) => {
+                  setInputError(null);
+                  setAddressDraft(value);
+                }}
+                onOpenMap={() => setIsAddressMapOpen(true)}
+                onCancel={closeEditSheet}
+                onSave={() => void handleSaveUpdate()}
+              />
+            ) : (
+              <ProfileDetailsSheetContent
+                editingField={editingField}
+                sheetTitle={sheetTitle}
+                sheetDescription={sheetDescription}
+                inputValue={inputValue}
+                inputError={inputError}
+                currentPhone={profile?.contactNum ?? "No phone on file"}
+                currentEmail={profile?.email ?? "No email on file"}
+                currentAddress={displayAddress}
+                isUpdating={isUpdating}
+                onChangeInput={(nextValue) => {
+                  setInputError(null);
+                  setInputValue(nextValue);
+                }}
+                onCancel={closeEditSheet}
+                onSave={() => void handleSaveUpdate()}
+              />
+            )}
+          </BottomSheetScrollView>
+        </BottomSheetPortal>
       </BottomSheet>
+
+      <AlbayLocationPickerSheet
+        open={isAddressMapOpen}
+        initialCoordinates={
+          addressDraft.latitude != null && addressDraft.longitude != null
+            ? {
+                latitude: addressDraft.latitude,
+                longitude: addressDraft.longitude,
+              }
+            : null
+        }
+        meta={complaintMeta}
+        onClose={() => setIsAddressMapOpen(false)}
+        onConfirm={({ coordinates, address }) => {
+          setAddressDraft((current) => ({
+            ...current,
+            latitude: coordinates.latitude,
+            longitude: coordinates.longitude,
+            municipalityCode: address.municipalityCode,
+            barangayPsgc: address.barangayPsgc,
+            purokOrStreet: address.purok || current.purokOrStreet,
+          }));
+          setInputError(null);
+          setIsAddressMapOpen(false);
+        }}
+      />
     </View>
   );
 }

@@ -1,27 +1,38 @@
 import { appScrollableBottomPadding } from "@/components/floating-app-bar";
+import { Alert, AlertText } from "@/components/ui/alert";
+import {
+  Avatar,
+  AvatarFallbackText,
+  AvatarImage,
+} from "@/components/ui/avatar";
+import {
+  BottomSheet,
+  BottomSheetBackdrop,
+  BottomSheetContent,
+  BottomSheetHeader,
+  BottomSheetPortal,
+  BottomSheetScrollView,
+  BottomSheetTextInput,
+  type BottomSheetRef,
+} from "@/components/ui/bottomsheet";
+import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
+import { Heading } from "@/components/ui/heading";
+import { Pressable } from "@/components/ui/pressable";
+import { SearchField } from "@/components/ui/search-field";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Text } from "@/components/ui/text";
 import { statusBarHeight } from "@/constants";
+import { useAppColors } from "@/hooks/use-app-colors";
+import { useAuthSession } from "@/hooks/use-auth-session";
+import { useUnreadNotificationCount } from "@/hooks/use-unread-notification-count";
 import {
   fetchHotlines,
   type HotlineAgency,
   type HotlineCategory,
   type HotlineContact,
 } from "@/services/hotlines";
-import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import * as Clipboard from "expo-clipboard";
-import { useFocusEffect } from "expo-router";
-import {
-  Avatar,
-  BottomSheet,
-  Button,
-  Input,
-  Label,
-  Skeleton,
-  Surface,
-  TextField,
-  Typography,
-  useBottomSheetAwareHandlers,
-  useThemeColor,
-} from "heroui-native";
+import { useFocusEffect, useRouter } from "expo-router";
 import type { LucideIcon } from "lucide-react-native";
 import {
   Bell,
@@ -41,58 +52,50 @@ import {
 } from "lucide-react-native";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
+  AccessibilityInfo,
   Animated,
   Linking,
   PanResponder,
-  Pressable,
   RefreshControl,
   ScrollView,
   View,
+  findNodeHandle,
   useWindowDimensions,
 } from "react-native";
+import { useReducedMotion } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type CategoryVisual = {
   icon: LucideIcon;
-  color: string;
-  soft: string;
+  tone: "accent" | "danger" | "foreground" | "success" | "warning";
+  softClassName: string;
 };
 
-const fallbackCategories: HotlineCategory[] = [
-  {
-    id: "electricity",
-    name: "Electricity",
-    description: "Power interruption, electrical hazards, and ALECO support.",
-    agencies: [
-      {
-        id: "aleco",
-        categoryId: "electricity",
-        name: "Albay Electric Cooperative Inc.",
-        description: "Main Branch",
-        address: "Albay",
-        logoUrl: null,
-        websiteLink: "https://web.alecoinc.com.ph/",
-        contacts: [
-          { id: "globe", number: "09123456789", label: "Globe", type: "mobile" },
-          { id: "smart", number: "09876543210", label: "Smart", type: "mobile" },
-        ],
-      },
-    ],
-  },
-  { id: "medical", name: "Medical", description: null, agencies: [] },
-  { id: "drrmo", name: "DRRMO", description: null, agencies: [] },
-  { id: "public-safety", name: "Public Safety", description: null, agencies: [] },
-  { id: "fire-rescue", name: "Fire & Rescue", description: null, agencies: [] },
-  { id: "water", name: "Water Supply", description: null, agencies: [] },
-];
-
 const visuals: [RegExp, CategoryVisual][] = [
-  [/electric|power|aleco/i, { icon: Zap, color: "#0ea5e9", soft: "#e0f2fe" }],
-  [/medical|health|hospital/i, { icon: Plus, color: "#ef4444", soft: "#fee2e2" }],
-  [/fire|rescue/i, { icon: Flame, color: "#f97316", soft: "#ffedd5" }],
-  [/water/i, { icon: Droplet, color: "#0284c7", soft: "#e0f2fe" }],
-  [/safety|police|public/i, { icon: Shield, color: "#2563eb", soft: "#dbeafe" }],
-  [/drrmo|disaster|risk/i, { icon: Building2, color: "#d97706", soft: "#fef3c7" }],
+  [
+    /electric|power|aleco/i,
+    { icon: Zap, tone: "accent", softClassName: "bg-accent/10" },
+  ],
+  [
+    /medical|health|hospital/i,
+    { icon: Plus, tone: "danger", softClassName: "bg-danger/10" },
+  ],
+  [
+    /fire|rescue/i,
+    { icon: Flame, tone: "warning", softClassName: "bg-warning/10" },
+  ],
+  [
+    /water/i,
+    { icon: Droplet, tone: "success", softClassName: "bg-success/10" },
+  ],
+  [
+    /safety|police|public/i,
+    { icon: Shield, tone: "foreground", softClassName: "bg-muted/20" },
+  ],
+  [
+    /drrmo|disaster|risk/i,
+    { icon: Building2, tone: "warning", softClassName: "bg-warning/10" },
+  ],
 ];
 
 function rowsOf<T>(items: T[], size: number) {
@@ -102,7 +105,10 @@ function rowsOf<T>(items: T[], size: number) {
 }
 
 function normalize(value: string) {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }
 
 function digits(value: string) {
@@ -123,8 +129,8 @@ function visualFor(name: string): CategoryVisual {
   return (
     visuals.find(([pattern]) => pattern.test(name))?.[1] ?? {
       icon: Building2,
-      color: "#64748b",
-      soft: "#f1f5f9",
+      tone: "foreground",
+      softClassName: "bg-muted/20",
     }
   );
 }
@@ -140,18 +146,32 @@ function agencySearchText(agency: HotlineAgency, categoryName: string) {
       agency.description,
       agency.address,
       categoryName,
-      agency.contacts.map((contact) => `${contact.number} ${contact.label ?? ""} ${contact.type ?? ""}`).join(" "),
+      agency.contacts
+        .map(
+          (contact) =>
+            `${contact.number} ${contact.label ?? ""} ${contact.type ?? ""}`,
+        )
+        .join(" "),
     ].join(" "),
   );
 }
 
-function agencyMatches(agency: HotlineAgency, categoryName: string, query: string) {
+function agencyMatches(
+  agency: HotlineAgency,
+  categoryName: string,
+  query: string,
+) {
   const textQuery = normalize(query);
   const digitQuery = digits(query);
   if (!textQuery && !digitQuery) return true;
   return (
     agencySearchText(agency, categoryName).includes(textQuery) ||
-    Boolean(digitQuery && agency.contacts.some((contact) => digits(contact.number).includes(digitQuery)))
+    Boolean(
+      digitQuery &&
+      agency.contacts.some((contact) =>
+        digits(contact.number).includes(digitQuery),
+      ),
+    )
   );
 }
 
@@ -164,44 +184,43 @@ function SheetSearchInput({
   onChangeText: (value: string) => void;
   placeholder: string;
 }) {
-  const { onFocus, onBlur } = useBottomSheetAwareHandlers();
+  const [mutedColor] = useAppColors(["muted-foreground"]);
+
   return (
-    <TextField>
-      <View className="flex-row items-center">
-        <Input
-          value={value}
-          onChangeText={onChangeText}
-          onFocus={onFocus}
-          onBlur={onBlur}
-          placeholder={placeholder}
-          variant="secondary"
-          className="flex-1 px-10"
-          autoCorrect={false}
-          autoCapitalize="none"
-        />
-        <View className="absolute left-3" pointerEvents="none">
-          <Search size={17} color="#737373" />
-        </View>
-        {value ? (
-          <Button
-            isIconOnly
-            size="sm"
-            variant="ghost"
-            className="absolute right-1"
-            onPress={() => onChangeText("")}
-            accessibilityLabel="Clear search"
-          >
-            <X size={16} color="#737373" />
-          </Button>
-        ) : null}
+    <View className="flex-row items-center">
+      <BottomSheetTextInput
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        className="h-12 flex-1 rounded-xl px-10"
+        autoCorrect={false}
+        autoCapitalize="none"
+      />
+      <View className="absolute left-3" style={{ pointerEvents: "none" }}>
+        <Search size={17} color={mutedColor} />
       </View>
-    </TextField>
+      {value ? (
+        <Button
+          size="icon"
+          variant="ghost"
+          className="absolute right-1 min-h-11 min-w-11 rounded-full"
+          onPress={() => onChangeText("")}
+          accessibilityLabel="Clear search"
+        >
+          <ButtonIcon as={X} height={16} width={16} />
+        </Button>
+      ) : null}
+    </View>
   );
 }
 
 function EmergencySlider() {
   const x = useRef(new Animated.Value(0)).current;
   const [trackWidth, setTrackWidth] = useState(0);
+  const reducedMotion = useReducedMotion();
+  const [mutedColor, dangerColor, foregroundColor, surfaceColor] = useAppColors(
+    ["muted", "destructive", "foreground", "background"],
+  );
   const max = Math.max(trackWidth - 54, 0);
 
   const panResponder = useMemo(
@@ -217,119 +236,154 @@ function EmergencySlider() {
           if (max > 0 && next > max * 0.86) {
             void Linking.openURL("tel:911");
           }
-          Animated.spring(x, { toValue: 0, useNativeDriver: false }).start();
+          const resetAnimation = reducedMotion
+            ? Animated.timing(x, {
+                toValue: 0,
+                duration: 0,
+                useNativeDriver: false,
+              })
+            : Animated.spring(x, {
+                toValue: 0,
+                useNativeDriver: false,
+              });
+          resetAnimation.start();
         },
       }),
-    [max, x],
+    [max, reducedMotion, x],
   );
 
-  const backgroundColor = x.interpolate({
+  const trackBackgroundColor = x.interpolate({
     inputRange: [0, Math.max(max, 1)],
-    outputRange: ["#e5e5e5", "#ef4444"],
+    outputRange: [mutedColor, dangerColor],
   });
 
   return (
     <Animated.View
       onLayout={(event) => setTrackWidth(event.nativeEvent.layout.width)}
       className="h-12 justify-center overflow-hidden rounded-full"
-      style={{ backgroundColor }}
+      style={{ backgroundColor: trackBackgroundColor }}
+      accessible
+      accessibilityRole="button"
+      accessibilityLabel="Slide to call 911"
+      accessibilityHint="Swipe the phone control to the right, or activate to call"
+      accessibilityActions={[{ name: "activate", label: "Call 911" }]}
+      onAccessibilityAction={(event) => {
+        if (event.nativeEvent.actionName === "activate") {
+          void Linking.openURL("tel:911");
+        }
+      }}
     >
-      <Typography type="body-xs" weight="bold" className="self-center text-muted">
+      <Text className="self-center text-xs font-bold text-foreground">
         {">>> Slide to call"}
-      </Typography>
+      </Text>
       <Animated.View
         {...panResponder.panHandlers}
-        className="absolute left-1 h-10 w-12 items-center justify-center rounded-full bg-white"
-        style={{ transform: [{ translateX: x }] }}
+        className="absolute left-1 h-10 w-12 items-center justify-center rounded-full"
+        style={{
+          backgroundColor: surfaceColor,
+          transform: [{ translateX: x }],
+        }}
       >
-        <Phone size={17} color="#111827" />
+        <Phone size={17} color={foregroundColor} />
       </Animated.View>
     </Animated.View>
   );
 }
 
 function AgencyCard({ agency }: { agency: HotlineAgency }) {
-  const [accentColor, mutedColor] = useThemeColor(["accent", "muted"]);
-
   const call = (number: string) => Linking.openURL(`tel:${digits(number)}`);
   const copy = (number: string) => Clipboard.setStringAsync(number);
+  const contactGroups = [
+    "Hotline/Emergency",
+    "Other service contacts",
+  ] as const;
 
   return (
-    <Surface className="rounded-[24px] p-4">
+    <View className="rounded-lg border border-border bg-card p-4">
       <View className="flex-row items-start gap-3">
-        <Avatar size="md" alt={agency.name}>
-          {agency.logoUrl ? <Avatar.Image source={{ uri: agency.logoUrl }} /> : null}
+        <Avatar accessibilityLabel={agency.name}>
+          {agency.logoUrl ? (
+            <AvatarImage source={{ uri: agency.logoUrl }} />
+          ) : null}
           {!agency.logoUrl ? (
-            <Avatar.Fallback>
-              <Typography type="body-xs" weight="bold" className="text-accent">
-                {initials(agency.name)}
-              </Typography>
-            </Avatar.Fallback>
+            <AvatarFallbackText className="font-bold text-primary">
+              {initials(agency.name)}
+            </AvatarFallbackText>
           ) : null}
         </Avatar>
         <View className="flex-1">
-          <Typography.Heading type="h6" weight="bold">
-            {agency.name}
-          </Typography.Heading>
+          <Heading size="sm">{agency.name}</Heading>
           {agency.description || agency.address ? (
-            <Typography.Paragraph type="body-xs" color="muted" className="mt-0.5">
+            <Text className="mt-0.5 text-xs text-muted-foreground">
               {agency.description || agency.address}
-            </Typography.Paragraph>
+            </Text>
           ) : null}
         </View>
         {agency.websiteLink ? (
           <Button
-            isIconOnly
-            size="sm"
+            size="icon"
             variant="ghost"
+            className="min-h-11 min-w-11 rounded-full"
             onPress={() => Linking.openURL(agency.websiteLink!)}
             accessibilityLabel={`Open ${agency.name} website`}
           >
-            <Globe2 size={18} color={mutedColor} />
+            <ButtonIcon as={Globe2} height={18} width={18} />
           </Button>
         ) : null}
       </View>
 
       <View className="mt-4 gap-2">
         {agency.contacts.length ? (
-          agency.contacts.map((contact) => (
-            <View
-              key={contact.id}
-              className="min-h-12 flex-row items-center gap-2 rounded-full bg-surface-secondary px-3"
-            >
-              <Typography type="body-xs" weight="bold">
-                {contactLabel(contact)}:
-              </Typography>
-              <Typography type="body-xs" className="flex-1">
-                {contact.number}
-              </Typography>
-              <Button
-                isIconOnly
-                size="sm"
-                variant="primary"
-                onPress={() => call(contact.number)}
-                accessibilityLabel={`Call ${contact.number}`}
-              >
-                <Phone size={15} color="white" />
-              </Button>
-              <Button
-                isIconOnly
-                size="sm"
-                variant="secondary"
-                onPress={() => copy(contact.number)}
-                accessibilityLabel={`Copy ${contact.number}`}
-              >
-                <Copy size={15} color={accentColor} />
-              </Button>
-            </View>
-          ))
+          contactGroups.map((group) => {
+            const contacts = agency.contacts.filter(
+              (contact) => contact.group === group,
+            );
+            if (!contacts.length) return null;
+            return (
+              <View key={group} className="gap-2">
+                <Text className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                  {group}
+                </Text>
+                {contacts.map((contact) => (
+                  <View
+                    key={contact.id}
+                    className="min-h-12 flex-row items-center gap-2 rounded-full bg-secondary px-3"
+                  >
+                    <Text className="text-xs font-bold text-foreground">
+                      {contactLabel(contact)}:
+                    </Text>
+                    <Text className="flex-1 text-xs text-foreground">
+                      {contact.number}
+                    </Text>
+                    <Button
+                      size="icon"
+                      className="min-h-11 min-w-11 rounded-full"
+                      onPress={() => call(contact.number)}
+                      accessibilityLabel={`Call ${contact.number}`}
+                    >
+                      <ButtonIcon as={Phone} height={15} width={15} />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="secondary"
+                      className="min-h-11 min-w-11 rounded-full"
+                      onPress={() => copy(contact.number)}
+                      accessibilityLabel={`Copy ${contact.number}`}
+                    >
+                      <ButtonIcon as={Copy} height={15} width={15} />
+                    </Button>
+                  </View>
+                ))}
+              </View>
+            );
+          })
         ) : (
-          <Typography.Paragraph type="body-xs" color="muted">
-            No hotline numbers listed.
-          </Typography.Paragraph>
+          <Text className="text-xs text-muted-foreground">
+            No active public contact numbers listed.
+          </Text>
         )}
       </View>
-    </Surface>
+    </View>
   );
 }
 
@@ -338,31 +392,51 @@ function CategoryCard({
   onPress,
 }: {
   category: HotlineCategory;
-  onPress: () => void;
+  onPress: (trigger: View) => void;
 }) {
+  const triggerRef = useRef<View>(null);
   const visual = visualFor(category.name);
   const Icon = visual.icon;
+  const [
+    accentColor,
+    dangerColor,
+    foregroundColor,
+    successColor,
+    warningColor,
+  ] = useAppColors(["accent", "danger", "foreground", "success", "warning"]);
+  const iconColor = {
+    accent: accentColor,
+    danger: dangerColor,
+    foreground: foregroundColor,
+    success: successColor,
+    warning: warningColor,
+  }[visual.tone];
+
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      className="min-h-[86px] flex-1 flex-row items-center gap-3 rounded-[22px] border border-border bg-surface p-4"
-    >
-      <View
-        className="h-9 w-9 items-center justify-center rounded-2xl"
-        style={{ backgroundColor: visual.soft }}
+    <View ref={triggerRef} collapsable={false} className="flex-1">
+      <Pressable
+        onPress={() => {
+          if (triggerRef.current) onPress(triggerRef.current);
+        }}
+        accessibilityRole="button"
+        className="min-h-[116px] flex-1 gap-3 rounded-lg border border-border bg-card p-4"
       >
-        <Icon size={20} color={visual.color} />
+      <View
+        className={`h-9 w-9 items-center justify-center rounded-full ${visual.softClassName}`}
+      >
+        <Icon size={20} color={iconColor} />
       </View>
-      <View className="flex-1">
-        <Typography type="body-sm" weight="bold" numberOfLines={2}>
+      <View className="flex-1 justify-end">
+        <Text className="text-sm font-bold text-foreground" numberOfLines={3}>
           {category.name}
-        </Typography>
-        <Typography type="body-xs" color="muted" className="mt-0.5">
-          {category.agencies.length} {category.agencies.length === 1 ? "agency" : "agencies"}
-        </Typography>
+        </Text>
+        <Text className="mt-0.5 text-xs text-muted-foreground">
+          {category.agencies.length}{" "}
+          {category.agencies.length === 1 ? "agency" : "agencies"}
+        </Text>
       </View>
-    </Pressable>
+      </Pressable>
+    </View>
   );
 }
 
@@ -383,17 +457,19 @@ function HotlineResults({
 
   return (
     <View className="gap-2">
-      <Label className="ml-2 text-sm font-semibold text-muted">
+      <Text className="ml-2 text-sm font-semibold text-muted-foreground">
         Matches
-      </Label>
+      </Text>
       {matches.length ? (
-        matches.map(({ agency }) => <AgencyCard key={agency.id} agency={agency} />)
+        matches.map(({ agency }) => (
+          <AgencyCard key={agency.id} agency={agency} />
+        ))
       ) : (
-        <Surface className="rounded-[22px] p-5">
-          <Typography.Paragraph type="body-sm" color="muted">
+        <View className="rounded-lg border border-border bg-card p-5">
+          <Text className="text-sm text-muted-foreground">
             No contacts match your search.
-          </Typography.Paragraph>
-        </Surface>
+          </Text>
+        </View>
       )}
     </View>
   );
@@ -402,42 +478,58 @@ function HotlineResults({
 function HotlineSkeleton() {
   return (
     <View className="gap-4">
-      <Skeleton className="h-28 rounded-[24px]" />
-      <Skeleton className="h-44 rounded-[24px]" />
+      <Skeleton className="h-28 rounded-xl" />
+      <Skeleton className="h-44 rounded-xl" />
       <View className="flex-row gap-3">
-        <Skeleton className="h-24 flex-1 rounded-[22px]" />
-        <Skeleton className="h-24 flex-1 rounded-[22px]" />
+        <Skeleton className="h-24 flex-1 rounded-xl" />
+        <Skeleton className="h-24 flex-1 rounded-xl" />
       </View>
     </View>
   );
 }
 
 export default function HotlinesRoute() {
+  const router = useRouter();
+  const { session } = useAuthSession();
   const insets = useSafeAreaInsets();
-  const { width, height } = useWindowDimensions();
+  const { height, width } = useWindowDimensions();
   const bottomPadding = appScrollableBottomPadding(insets.bottom);
-  const [accentColor, foregroundColor] = useThemeColor(["accent", "foreground"]);
-  const [categories, setCategories] = useState<HotlineCategory[]>(fallbackCategories);
+  const [accentColor, destructiveColor] = useAppColors([
+    "accent",
+    "destructive",
+  ]);
+  const unreadCount = useUnreadNotificationCount();
+  const categorySheetRef = useRef<BottomSheetRef>(null);
+  const allSheetRef = useRef<BottomSheetRef>(null);
+  const categoryTriggerRef = useRef<View | null>(null);
+  const [categories, setCategories] = useState<HotlineCategory[]>([]);
   const [query, setQuery] = useState("");
   const [sheetQuery, setSheetQuery] = useState("");
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
-  const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
-  const [isAllSheetOpen, setIsAllSheetOpen] = useState(false);
+  const [isUsingSavedData, setIsUsingSavedData] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
+    null,
+  );
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
 
   const loadHotlines = useCallback(async (options?: { force?: boolean }) => {
     if (options?.force) setIsRefreshing(true);
     try {
       const data = await fetchHotlines(options);
-      if (data.categories.length) {
-        setCategories(data.categories);
-        setActiveCategoryId((current) => current ?? data.categories[0]?.id ?? null);
-      }
+      setCategories(data.categories);
+      setIsUsingSavedData("isStale" in data && data.isStale === true);
+      setActiveCategoryId((current) =>
+        data.categories.some((category) => category.id === current)
+          ? current
+          : (data.categories[0]?.id ?? null),
+      );
+      setLoadError(null);
     } catch {
-      setCategories((current) => (current.length ? current : fallbackCategories));
-      setActiveCategoryId((current) => current ?? fallbackCategories[0]?.id ?? null);
+      setLoadError(
+        "Hotline contacts could not be loaded. Check your connection and try again.",
+      );
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -446,18 +538,19 @@ export default function HotlinesRoute() {
 
   useFocusEffect(
     useCallback(() => {
-      void loadHotlines();
+      void loadHotlines({ force: true });
     }, [loadHotlines]),
   );
 
-  const aleco =
-    categories
-      .flatMap((category) => category.agencies)
-      .find((agency) => /albay electric|aleco/i.test(agency.name)) ??
-    fallbackCategories[0].agencies[0];
+  const aleco = categories
+    .flatMap((category) => category.agencies)
+    .find((agency) => /albay electric|aleco/i.test(agency.name));
 
-  const selectedCategory = categories.find((category) => category.id === selectedCategoryId) ?? null;
-  const activeCategory = categories.find((category) => category.id === activeCategoryId) ?? categories[0];
+  const selectedCategory =
+    categories.find((category) => category.id === selectedCategoryId) ?? null;
+  const activeCategory =
+    categories.find((category) => category.id === activeCategoryId) ??
+    categories[0];
   const categoryAgencies = selectedCategory
     ? selectedCategory.agencies.filter((agency) =>
         agencyMatches(agency, selectedCategory.name, sheetQuery),
@@ -468,22 +561,36 @@ export default function HotlinesRoute() {
         agencyMatches(agency, activeCategory.name, sheetQuery),
       )
     : [];
-  const categorySnapHeight = Math.min(
-    height * 0.86,
-    Math.max(360, 190 + Math.min(categoryAgencies.length || 1, 3) * 150),
-  );
   const categoryRows = useMemo(() => rowsOf(categories, 2), [categories]);
 
-  const openCategory = (category: HotlineCategory) => {
+  const openCategory = (
+    category: HotlineCategory,
+    trigger: View,
+  ) => {
+    categoryTriggerRef.current = trigger;
     setSelectedCategoryId(category.id);
     setSheetQuery("");
-    setIsCategorySheetOpen(true);
+    requestAnimationFrame(() => categorySheetRef.current?.open());
   };
 
   const openAll = () => {
     setActiveCategoryId((current) => current ?? categories[0]?.id ?? null);
     setSheetQuery("");
-    setIsAllSheetOpen(true);
+    requestAnimationFrame(() => allSheetRef.current?.open());
+  };
+
+  const categorySheetClose = () => {
+    categorySheetRef.current?.close();
+  };
+
+  const handleCategorySheetClosed = () => {
+    setSheetQuery("");
+    const trigger = findNodeHandle(categoryTriggerRef.current);
+    if (trigger != null) {
+      requestAnimationFrame(() =>
+        AccessibilityInfo.setAccessibilityFocus(trigger),
+      );
+    }
   };
 
   return (
@@ -509,181 +616,195 @@ export default function HotlinesRoute() {
         }
       >
         <View className="flex-row items-start justify-between">
-          <Typography.Heading type="h1" weight="bold">
-            Hotlines
-          </Typography.Heading>
-          <Button isIconOnly variant="secondary" accessibilityLabel="Notifications">
-            <Bell size={20} color={foregroundColor} />
-            <View className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-danger" />
+          <Heading size="2xl">Hotlines</Heading>
+          <Button
+            size="icon"
+            variant="secondary"
+            className="min-h-11 min-w-11 rounded-full"
+            accessibilityLabel="Notifications"
+            onPress={() => router.push(session ? "/notifications" : "/sign-in")}
+          >
+            <ButtonIcon as={Bell} height={20} width={20} />
+            {unreadCount > 0 ? (
+              <View className="absolute -right-1 -top-1 min-h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1">
+                <Text className="text-xs font-bold text-danger-foreground">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </Text>
+              </View>
+            ) : null}
           </Button>
         </View>
 
-        <TextField>
-          <View className="flex-row items-center">
-            <Input
-              value={query}
-              onChangeText={setQuery}
-              placeholder="Search number, agency, category"
-              variant="secondary"
-              className="flex-1 px-10"
-              autoCorrect={false}
-              autoCapitalize="none"
-            />
-            <View className="absolute left-3" pointerEvents="none">
-              <Search size={17} color="#737373" />
+        <SearchField
+          accessibilityLabel="Search hotlines"
+          onChangeText={setQuery}
+          onClear={() => setQuery("")}
+          placeholder="Search number, agency, category"
+          value={query}
+        />
+
+        {isUsingSavedData && !isLoading ? (
+          <Alert className="px-3 py-2">
+            <View className="flex-1">
+              <AlertText className="text-xs font-semibold">
+                Showing saved hotline data
+              </AlertText>
+              <AlertText className="text-xs">
+                Pull down to check for newer contacts when online.
+              </AlertText>
             </View>
-            {query ? (
-              <Button
-                isIconOnly
-                size="sm"
-                variant="ghost"
-                className="absolute right-1"
-                onPress={() => setQuery("")}
-                accessibilityLabel="Clear search"
-              >
-                <X size={16} color="#737373" />
-              </Button>
-            ) : null}
-          </View>
-        </TextField>
+          </Alert>
+        ) : null}
 
         {isLoading ? <HotlineSkeleton /> : null}
 
         {!isLoading ? (
           <>
-            <Surface className="rounded-[24px] p-4">
-              <View className="flex-row items-center gap-2">
-                <Siren size={21} color="#111827" />
-                <Typography.Heading type="h5" weight="bold">
-                  Call 911
-                </Typography.Heading>
+            {!query ? (
+              <View className="rounded-lg border border-border bg-card p-4">
+                <View className="flex-row items-center gap-2">
+                  <Siren size={21} color={destructiveColor} />
+                  <Heading size="md">Call 911</Heading>
+                </View>
+                <Text className="mt-1 text-xs text-foreground">
+                  Use for life-threatening situations only.
+                </Text>
+                <View className="mt-3">
+                  <EmergencySlider />
+                </View>
               </View>
-              <Typography.Paragraph type="body-xs" className="mt-1">
-                Use for life-threatening situations only.
-              </Typography.Paragraph>
-              <View className="mt-3">
-                <EmergencySlider />
-              </View>
-            </Surface>
+            ) : null}
 
-            <AgencyCard agency={aleco} />
+            {loadError ? (
+              <Alert variant="destructive" className="items-center p-4">
+                <View className="flex-1 gap-1">
+                  <AlertText className="font-bold">
+                    Directory unavailable
+                  </AlertText>
+                  <AlertText>{loadError}</AlertText>
+                </View>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onPress={() => void loadHotlines({ force: true })}
+                >
+                  <ButtonText>Retry</ButtonText>
+                </Button>
+              </Alert>
+            ) : null}
+
+            {!query && aleco ? <AgencyCard agency={aleco} /> : null}
 
             <HotlineResults categories={categories} query={query} />
 
-            <View className="gap-2">
-              <View className="flex-row items-center justify-between">
-                <Label className="ml-2 text-sm font-semibold text-muted">
-                  Categories
-                </Label>
-                <Button variant="ghost" size="sm" onPress={openAll}>
-                  <Button.Label>View all</Button.Label>
-                  <ChevronRight size={15} color={accentColor} />
-                </Button>
-              </View>
-              {categoryRows.map((row) => (
-                <View key={row.map((category) => category.id).join("-")} className="flex-row gap-3">
-                  {row.map((category) => (
-                    <CategoryCard
-                      key={category.id}
-                      category={category}
-                      onPress={() => openCategory(category)}
-                    />
-                  ))}
-                  {row.length === 1 ? <View className="flex-1" /> : null}
+            {!query && categories.length ? (
+              <View className="gap-2">
+                <View className="flex-row items-center justify-between">
+                  <Text className="ml-2 text-sm font-semibold text-muted-foreground">
+                    Categories
+                  </Text>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="min-h-11"
+                    onPress={openAll}
+                  >
+                    <ButtonText>View all</ButtonText>
+                    <ButtonIcon as={ChevronRight} height={15} width={15} />
+                  </Button>
                 </View>
-              ))}
-            </View>
+                {categoryRows.map((row) => (
+                  <View
+                    key={row.map((category) => category.id).join("-")}
+                    className="flex-row gap-3"
+                  >
+                    {row.map((category) => (
+                      <CategoryCard
+                        key={category.id}
+                        category={category}
+                        onPress={(trigger) => openCategory(category, trigger)}
+                      />
+                    ))}
+                    {row.length === 1 ? <View className="flex-1" /> : null}
+                  </View>
+                ))}
+              </View>
+            ) : !query && !loadError ? (
+              <Alert className="p-4">
+                <AlertText>
+                  No hotline contacts are available right now.
+                </AlertText>
+              </Alert>
+            ) : null}
           </>
         ) : null}
       </ScrollView>
 
-      <BottomSheet isOpen={isCategorySheetOpen} onOpenChange={setIsCategorySheetOpen}>
-        <BottomSheet.Portal>
-          <BottomSheet.Overlay />
-          <BottomSheet.Content
-            snapPoints={[categorySnapHeight]}
-            enableDynamicSizing={false}
-            enableOverDrag={false}
-            contentContainerClassName="h-full"
-            keyboardBehavior="interactive"
-            keyboardBlurBehavior="restore"
-            android_keyboardInputMode="adjustResize"
+      <BottomSheet ref={categorySheetRef} onClose={handleCategorySheetClosed}>
+        <BottomSheetPortal
+          backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
+          enableDynamicSizing
+          maxDynamicContentSize={height * 0.55}
+          enableOverDrag={false}
+          keyboardBehavior="interactive"
+        >
+          <BottomSheetScrollView
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator
+            contentContainerStyle={{
+              gap: 12,
+              paddingHorizontal: 20,
+              paddingBottom: Math.max(insets.bottom, 20),
+            }}
           >
-            <View className="flex-row items-start justify-between gap-3">
-              <View className="flex-1">
-                <BottomSheet.Title>{selectedCategory?.name ?? "Hotlines"}</BottomSheet.Title>
-                <BottomSheet.Description>
-                  {selectedCategory?.description ?? "Search contacts in this category."}
-                </BottomSheet.Description>
-              </View>
-              <Button
-                isIconOnly
-                size="sm"
-                variant="secondary"
-                onPress={() => setIsCategorySheetOpen(false)}
-                accessibilityLabel="Close hotlines"
-              >
-                <X size={16} color="#737373" />
-              </Button>
-            </View>
-            <View className="mt-4">
+            <BottomSheetHeader
+              title={selectedCategory?.name ?? "Hotlines"}
+              description={
+                selectedCategory?.description ??
+                "Search contacts in this category."
+              }
+              closeAccessibilityLabel="Close hotlines"
+            />
+            <Button onPress={categorySheetClose}>
+              <ButtonText>Close</ButtonText>
+            </Button>
+            <View>
               <SheetSearchInput
                 value={sheetQuery}
                 onChangeText={setSheetQuery}
                 placeholder="Search this category"
               />
             </View>
-            <BottomSheetScrollView
-              keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator
-              contentContainerStyle={{ gap: 12, paddingBottom: 24 }}
-            >
-              {categoryAgencies.length ? (
-                categoryAgencies.map((agency) => (
-                  <AgencyCard key={agency.id} agency={agency} />
-                ))
-              ) : (
-                <Surface className="rounded-[22px] p-5">
-                  <Typography.Paragraph type="body-sm" color="muted">
-                    No hotline contacts found.
-                  </Typography.Paragraph>
-                </Surface>
-              )}
-            </BottomSheetScrollView>
-          </BottomSheet.Content>
-        </BottomSheet.Portal>
+            {categoryAgencies.length ? (
+              categoryAgencies.map((agency) => (
+                <AgencyCard key={agency.id} agency={agency} />
+              ))
+            ) : (
+              <View className="rounded-lg border border-border bg-card p-5">
+                <Text className="text-sm text-muted-foreground">
+                  No hotline contacts found.
+                </Text>
+              </View>
+            )}
+          </BottomSheetScrollView>
+        </BottomSheetPortal>
       </BottomSheet>
 
-      <BottomSheet isOpen={isAllSheetOpen} onOpenChange={setIsAllSheetOpen}>
-        <BottomSheet.Portal>
-          <BottomSheet.Overlay />
-          <BottomSheet.Content
-            snapPoints={["92%"]}
-            enableDynamicSizing={false}
-            enableOverDrag={false}
-            contentContainerClassName="h-full"
-            keyboardBehavior="interactive"
-            keyboardBlurBehavior="restore"
-            android_keyboardInputMode="adjustResize"
-          >
-            <View className="flex-row items-start justify-between gap-3">
-              <View className="flex-1">
-                <BottomSheet.Title>All hotlines</BottomSheet.Title>
-                <BottomSheet.Description>
-                  Browse agencies by category.
-                </BottomSheet.Description>
-              </View>
-              <Button
-                isIconOnly
-                size="sm"
-                variant="secondary"
-                onPress={() => setIsAllSheetOpen(false)}
-                accessibilityLabel="Close all hotlines"
-              >
-                <X size={16} color="#737373" />
-              </Button>
-            </View>
-            <View className="mt-4 gap-3">
+      <BottomSheet ref={allSheetRef} onClose={() => setSheetQuery("")}>
+        <BottomSheetPortal
+          snapPoints={["92%"]}
+          enableDynamicSizing={false}
+          enableOverDrag={false}
+          keyboardBehavior="interactive"
+          backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
+        >
+          <BottomSheetContent className="h-full">
+            <BottomSheetHeader
+              title="All hotlines"
+              description="Browse agencies by category."
+              closeAccessibilityLabel="Close all hotlines"
+            />
+            <View className="gap-3">
               <SheetSearchInput
                 value={sheetQuery}
                 onChangeText={setSheetQuery}
@@ -701,17 +822,15 @@ export default function HotlinesRoute() {
                     <Pressable
                       key={category.id}
                       onPress={() => setActiveCategoryId(category.id)}
-                      className={`min-h-10 justify-center rounded-full px-4 ${
-                        active ? "bg-accent" : "bg-surface-secondary"
+                      className={`min-h-11 justify-center rounded-full px-4 ${
+                        active ? "bg-primary" : "bg-secondary"
                       }`}
                     >
-                      <Typography
-                        type="body-xs"
-                        weight="bold"
-                        className={active ? "text-white" : "text-foreground"}
+                      <Text
+                        className={`text-xs font-bold ${active ? "text-primary-foreground" : "text-foreground"}`}
                       >
                         {category.name}
-                      </Typography>
+                      </Text>
                     </Pressable>
                   );
                 })}
@@ -720,22 +839,25 @@ export default function HotlinesRoute() {
             <BottomSheetScrollView
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator
-              contentContainerStyle={{ gap: 12, paddingBottom: 24 }}
+              contentContainerStyle={{
+                gap: 12,
+                paddingBottom: Math.max(insets.bottom, 20),
+              }}
             >
               {activeAgencies.length ? (
                 activeAgencies.map((agency) => (
                   <AgencyCard key={agency.id} agency={agency} />
                 ))
               ) : (
-                <Surface className="rounded-[22px] p-5">
-                  <Typography.Paragraph type="body-sm" color="muted">
+                <View className="rounded-lg border border-border bg-card p-5">
+                  <Text className="text-sm text-muted-foreground">
                     No hotline contacts found.
-                  </Typography.Paragraph>
-                </Surface>
+                  </Text>
+                </View>
               )}
             </BottomSheetScrollView>
-          </BottomSheet.Content>
-        </BottomSheet.Portal>
+          </BottomSheetContent>
+        </BottomSheetPortal>
       </BottomSheet>
     </View>
   );

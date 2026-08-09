@@ -2,9 +2,11 @@ import * as Notifications from "expo-notifications";
 import { useEffect } from "react";
 
 import {
+    clearLastNotificationResponse,
     configurePushNotificationHandler,
-    getLastNotificationResponseAsync,
+    consumeLastNotificationResponseAsync,
     registerForPushNotificationsAsync,
+    subscribeToNotificationResponses,
 } from "@/services/push-notifications";
 
 type PushNotificationsReceiverProps = {
@@ -24,6 +26,15 @@ export function PushNotificationsReceiver({
     configurePushNotificationHandler();
 
     let isMounted = true;
+    const handleNotificationResponse = (
+      response: Notifications.NotificationResponse,
+    ) => {
+      if (!isMounted) return;
+      clearLastNotificationResponse();
+      onNotificationResponseReceived?.(response);
+    };
+    const unsubscribeNotificationResponses =
+      subscribeToNotificationResponses(handleNotificationResponse);
 
     void registerForPushNotificationsAsync().then((token) => {
       if (isMounted && token) {
@@ -31,9 +42,9 @@ export function PushNotificationsReceiver({
       }
     });
 
-    void getLastNotificationResponseAsync().then((response) => {
+    void consumeLastNotificationResponseAsync().then((response) => {
       if (isMounted && response) {
-        onNotificationResponseReceived?.(response);
+        handleNotificationResponse(response);
       }
     });
 
@@ -42,15 +53,10 @@ export function PushNotificationsReceiver({
         onNotificationReceived?.(notification);
       });
 
-    const notificationResponseSubscription =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        onNotificationResponseReceived?.(response);
-      });
-
     return () => {
       isMounted = false;
       notificationReceivedSubscription.remove();
-      notificationResponseSubscription.remove();
+      unsubscribeNotificationResponses();
     };
   }, [
     onNotificationReceived,

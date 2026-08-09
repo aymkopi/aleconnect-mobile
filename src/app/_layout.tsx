@@ -3,25 +3,91 @@ import { Stack, useRouter } from "expo-router";
 import type * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { Alert as HeroAlert, HeroUINativeProvider } from "heroui-native";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Text, TextInput, View } from "react-native";
+import { useCallback, useEffect, useRef } from "react";
+import { Text, TextInput, useWindowDimensions } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
+import { useUniwind } from "uniwind";
 
+import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
+import {
+  Toast,
+  ToastDescription,
+  ToastTitle,
+  useToast,
+} from "@/components/ui/toast";
 import { PushNotificationsReceiver } from "@/components/push-notifications-receiver";
 import { AuthSessionProvider } from "@/context/auth-session-context";
+import { ReportQueueProvider } from "@/context/report-queue-context";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { consumeForcedLogoutReason } from "@/services/api";
-import { subscribeComplaintSubmissionToast } from "@/services/complaint-submission-events";
+import { clearAdvisoryCache } from "@/services/advisories";
+import { subscribeComplaintSubmissionToast } from "@/services/report-submission-events";
+import { clearComplaintCache } from "@/services/reports";
 import { registerDevicePushToken } from "@/services/notification-settings";
+import {
+  advisoryIdFromPushData,
+  ticketIdFromPushData,
+} from "@/services/notification-navigation";
+import { invalidateNotifications } from "@/services/notifications";
+import "@/services/report-background-sync";
 import "../../global.css";
 
 void SplashScreen.preventAutoHideAsync();
 
+function AppToast({
+  id,
+  title,
+  message,
+  action,
+}: {
+  id: string;
+  title: string;
+  message: string;
+  action: "success" | "error" | "info";
+}) {
+  const { width } = useWindowDimensions();
+
+  return (
+    <Toast
+      nativeID={`app-toast-${id}`}
+      action={action}
+      variant="solid"
+      className="gap-0.5 border-border bg-popover shadow-lg"
+      style={{
+        width: Math.min(width - 32, 420),
+        borderRadius: 12,
+        padding: 12,
+      }}
+    >
+      <ToastTitle
+        numberOfLines={1}
+        size="sm"
+        className={
+          action === "error"
+            ? "text-destructive"
+            : action === "info"
+              ? "text-accent"
+              : "text-success"
+        }
+      >
+        {title}
+      </ToastTitle>
+      <ToastDescription
+        numberOfLines={2}
+        size="xs"
+        className="text-popover-foreground"
+      >
+        {message}
+      </ToastDescription>
+    </Toast>
+  );
+}
+
 function PushTokenBridge() {
   const router = useRouter();
   const { session } = useAuthSession();
+  const toast = useToast();
   const pendingToken = useRef<string | null>(null);
 
   const flushToken = useCallback(
@@ -38,28 +104,62 @@ function PushTokenBridge() {
 
   const openNotificationTarget = useCallback(
     (response: Notifications.NotificationResponse) => {
-      const data = response.notification.request.content.data as Record<
-        string,
-        unknown
-      >;
-      const ticketId =
-        typeof data.ticketId === "string"
-          ? data.ticketId
-          : typeof data.entityId === "string" && data.context === "ticket"
-            ? data.entityId
-            : null;
+      const ticketId = ticketIdFromPushData(
+        response.notification.request.content.data,
+      );
 
       if (ticketId) {
+        void clearComplaintCache(session?.user.id);
         router.push({
-          pathname: "/complaints/[id]",
-          params: { id: ticketId },
+          pathname: "/report/[id]",
+          params: { id: ticketId, focus: "notification" },
+        });
+        return;
+      }
+
+      const advisoryId = advisoryIdFromPushData(
+        response.notification.request.content.data,
+      );
+      if (advisoryId) {
+        router.push({
+          pathname: "/advisory/[id]",
+          params: { id: advisoryId, focus: "notification" },
         });
         return;
       }
 
       router.push("/notifications");
     },
-    [router],
+    [router, session?.user.id],
+  );
+
+  const handleForegroundNotification = useCallback(
+    (notification: Notifications.Notification) => {
+      if (session) {
+        void Promise.all([
+          clearAdvisoryCache(session.user.id),
+          clearComplaintCache(session.user.id),
+        ]).then(() => invalidateNotifications(session.user.id));
+      }
+
+      const title = notification.request.content.title ?? "New update";
+      const message =
+        notification.request.content.body ??
+        "Open notifications to view the latest update.";
+      toast.show({
+        placement: "top",
+        duration: 5000,
+        render: ({ id }) => (
+          <AppToast
+            id={String(id)}
+            title={title}
+            message={message}
+            action="info"
+          />
+        ),
+      });
+    },
+    [session, toast],
   );
 
   useEffect(() => {
@@ -72,6 +172,7 @@ function PushTokenBridge() {
 
   return (
     <PushNotificationsReceiver
+      onNotificationReceived={handleForegroundNotification}
       onPushTokenReceived={flushToken}
       onNotificationResponseReceived={openNotificationTarget}
     />
@@ -81,7 +182,7 @@ function PushTokenBridge() {
 function ForcedLogoutRedirect() {
   const router = useRouter();
   const { isLoading, session } = useAuthSession();
-  const [logoutMessage, setLogoutMessage] = useState<string | null>(null);
+  const toast = useToast();
 
   useEffect(() => {
     if (isLoading || session) return;
@@ -90,65 +191,68 @@ function ForcedLogoutRedirect() {
       if (!reason) return;
 
       router.replace("/sign-in");
-      setLogoutMessage(reason);
-      setTimeout(() => setLogoutMessage(null), 5000);
+      toast.show({
+        placement: "top",
+        duration: 5000,
+        render: ({ id }) => (
+          <AppToast
+            id={String(id)}
+            title="Logged out"
+            message={reason}
+            action="error"
+          />
+        ),
+      });
     });
-  }, [isLoading, router, session]);
+  }, [isLoading, router, session, toast]);
 
-  if (!logoutMessage) return null;
-
-  return (
-    <View
-      className="absolute inset-x-0 top-0 z-50 px-5"
-      style={{ paddingTop: 54, pointerEvents: "box-none" }}
-    >
-      <HeroAlert status="danger">
-        <HeroAlert.Indicator />
-        <HeroAlert.Content>
-          <HeroAlert.Title>Logged out</HeroAlert.Title>
-          <HeroAlert.Description>{logoutMessage}</HeroAlert.Description>
-        </HeroAlert.Content>
-      </HeroAlert>
-    </View>
-  );
+  return null;
 }
 
 function ComplaintSubmissionToastHost() {
-  const [toast, setToast] = useState<{
-    message: string;
-    status: "success" | "danger";
-  } | null>(null);
+  const toast = useToast();
 
-  useEffect(
-    () => {
-      const unsubscribe = subscribeComplaintSubmissionToast((nextToast) => {
-        setToast(nextToast);
-        setTimeout(() => setToast(null), 5000);
+  useEffect(() => {
+    const unsubscribe = subscribeComplaintSubmissionToast((nextToast) => {
+      const isSuccess = nextToast.status === "success";
+      const isInfo = nextToast.status === "info";
+      toast.show({
+        placement: "top",
+        duration: 5000,
+        render: ({ id }) => (
+          <AppToast
+            id={String(id)}
+            title={
+              isInfo
+                ? "Report queued"
+                : isSuccess
+                  ? "Report submitted"
+                  : "Report failed"
+            }
+            message={nextToast.message}
+            action={isInfo ? "info" : isSuccess ? "success" : "error"}
+          />
+        ),
       });
-      return () => {
-        unsubscribe();
-      };
-    },
-    [],
-  );
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, [toast]);
 
-  if (!toast) return null;
+  return null;
+}
+
+function AppUIProvider({ children }: { children: React.ReactNode }) {
+  const { theme, hasAdaptiveThemes } = useUniwind();
+  const mode = hasAdaptiveThemes
+    ? "system"
+    : theme === "dark"
+      ? "dark"
+      : "light";
 
   return (
-    <View
-      className="absolute inset-x-0 top-0 z-50 px-5"
-      style={{ paddingTop: 54, pointerEvents: "box-none" }}
-    >
-      <HeroAlert status={toast.status}>
-        <HeroAlert.Indicator />
-        <HeroAlert.Content>
-          <HeroAlert.Title>
-            {toast.status === "success" ? "Report submitted" : "Report failed"}
-          </HeroAlert.Title>
-          <HeroAlert.Description>{toast.message}</HeroAlert.Description>
-        </HeroAlert.Content>
-      </HeroAlert>
-    </View>
+    <GluestackUIProvider mode={mode}>{children}</GluestackUIProvider>
   );
 }
 
@@ -198,29 +302,49 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <KeyboardProvider>
-        <HeroUINativeProvider>
+        <AppUIProvider>
           <AuthSessionProvider>
-            <ForcedLogoutRedirect />
-            <ComplaintSubmissionToastHost />
-            <PushTokenBridge />
-            <StatusBar style="auto" />
-            <Stack>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen
-                name="sign-in"
-                options={{
-                  headerShown: false,
-                }}
-              />
-              <Stack.Screen
-                name="notifications"
-                options={{
-                  headerShown: false,
-                }}
-              />
-            </Stack>
+            <ReportQueueProvider>
+              <ForcedLogoutRedirect />
+              <ComplaintSubmissionToastHost />
+              <PushTokenBridge />
+              <StatusBar style="auto" />
+              <Stack>
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen
+                  name="sign-in"
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="notifications"
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="notification-settings"
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="advisories"
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="advisory/[id]"
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+              </Stack>
+            </ReportQueueProvider>
           </AuthSessionProvider>
-        </HeroUINativeProvider>
+        </AppUIProvider>
       </KeyboardProvider>
     </GestureHandlerRootView>
   );

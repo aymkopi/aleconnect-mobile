@@ -1,0 +1,4 @@
+interface:
+  display_name: "ALEConnect Mobile Workflow"
+  short_description: "Safely change ALEConnect consumer mobile"
+  default_prompt: "Use $aleconnect-mobile-workflow to implement a scoped Expo, consumer API, offline, notification, or native change safely."

@@ -1,14 +1,16 @@
+import { Alert, AlertText } from "@/components/ui/alert";
 import {
-  Alert,
-  BottomSheet,
-  Button,
-  FieldError,
-  Input,
-  Label,
-  TextField,
-  useBottomSheetAwareHandlers,
-} from "heroui-native";
-import { type LucideIcon } from "lucide-react-native";
+  BottomSheetHeader,
+  BottomSheetTextInput,
+} from "@/components/ui/bottomsheet";
+import { Button, ButtonText } from "@/components/ui/button";
+import {
+  FormControl,
+  FormControlError,
+  FormControlErrorText,
+  FormControlLabel,
+  FormControlLabelText,
+} from "@/components/ui/form-control";
 import React from "react";
 import { View } from "react-native";
 
@@ -18,11 +20,11 @@ export type ProfileDetailsSheetContentProps = {
   editingField: EditableField | null;
   sheetTitle: string;
   sheetDescription: string;
-  SheetIcon: LucideIcon;
   inputValue: string;
   inputError: string | null;
   currentPhone: string;
   currentEmail: string;
+  currentAddress: string;
   isUpdating: boolean;
   onChangeInput: (nextValue: string) => void;
   onCancel: () => void;
@@ -33,76 +35,80 @@ export function ProfileDetailsSheetContent({
   editingField,
   sheetTitle,
   sheetDescription,
-  SheetIcon,
   inputValue,
   inputError,
   currentPhone,
   currentEmail,
+  currentAddress,
   isUpdating,
   onChangeInput,
   onCancel,
   onSave,
 }: ProfileDetailsSheetContentProps) {
-  const { onFocus, onBlur } = useBottomSheetAwareHandlers();
-
   return (
-    <View style={{ paddingBottom: 20, paddingHorizontal: 10, gap: 16 }}>
-      <View>
-        <BottomSheet.Title>{sheetTitle}</BottomSheet.Title>
-        <BottomSheet.Description>{sheetDescription}</BottomSheet.Description>
-      </View>
-      <View>
-        <TextField isInvalid={!!inputError}>
-          <Label>
-            {editingField === "phone"
-              ? "New phone number"
-              : editingField === "email"
-                ? "New email address"
-                : "New address"}
-          </Label>
+    <View className="gap-4">
+      <BottomSheetHeader
+        title={sheetTitle}
+        description={sheetDescription}
+        closeAccessibilityLabel={`Close ${sheetTitle.toLowerCase()}`}
+      />
+      <View className="gap-4 rounded-lg border border-border/90 bg-card p-4">
+        <FormControl isInvalid={!!inputError} isRequired>
+          <FormControlLabel>
+            <FormControlLabelText>
+              {editingField === "phone"
+                ? "New phone number"
+                : editingField === "email"
+                  ? "New email address"
+                  : "New purok or street"}
+            </FormControlLabelText>
+          </FormControlLabel>
           <View className="w-full flex-row items-center">
-            <Input
-              className="flex-1 px-10"
-              isInvalid={!!inputError}
-              variant="secondary"
-              onFocus={onFocus}
-              onBlur={onBlur}
+            <BottomSheetTextInput
+              className="h-12 flex-1 rounded-lg bg-background pl-10"
               value={inputValue}
               onChangeText={onChangeInput}
               keyboardType={editingField === "phone" ? "number-pad" : "default"}
-              autoCapitalize="none"
+              autoCapitalize={editingField === "address" ? "words" : "none"}
               autoCorrect={false}
+              returnKeyType="done"
+              onSubmitEditing={onSave}
               maxLength={
                 editingField === "phone"
                   ? 11
                   : editingField === "email"
                     ? 50
-                    : undefined
+                    : 100
               }
               placeholder={
                 editingField === "phone"
                   ? "Enter new phone number"
                   : editingField === "email"
                     ? "Enter new email"
-                    : "Address update coming soon"
+                    : "Enter purok or street"
               }
             />
-            <View className="absolute left-3.5" pointerEvents="none">
-              <SheetIcon size={18} color="#888" />
-            </View>
+            <View
+              className="absolute left-3.5"
+              style={{ pointerEvents: "none" }}
+            ></View>
           </View>
-          {inputError ? <FieldError>{inputError}</FieldError> : null}
-        </TextField>
+          {inputError ? (
+            <FormControlError>
+              <FormControlErrorText>{inputError}</FormControlErrorText>
+            </FormControlError>
+          ) : null}
+        </FormControl>
+        <Alert className="border-accent/20 bg-accent/10 px-3 py-3">
+          <AlertText>
+            {editingField === "phone"
+              ? `Current phone number: ${currentPhone}.`
+              : editingField === "email"
+                ? `Current email: ${currentEmail}.`
+                : `Current address: ${currentAddress}.`}
+          </AlertText>
+        </Alert>
       </View>
-      <Alert className="bg-accent/10 border border-accent/20" status="accent">
-        <Alert.Description>
-          {editingField === "phone"
-            ? `Current phone number: ${currentPhone}.`
-            : editingField === "email"
-              ? `Current email: ${currentEmail}.`
-              : "Address updates will be available soon."}
-        </Alert.Description>
-      </Alert>
 
       <View
         style={{
@@ -112,22 +118,15 @@ export function ProfileDetailsSheetContent({
         }}
       >
         <Button
-          variant="tertiary"
-          size="md"
+          variant="ghost"
           onPress={onCancel}
           isDisabled={isUpdating}
           style={{ flex: 1 }}
         >
-          <Button.Label>Cancel</Button.Label>
+          <ButtonText>Cancel</ButtonText>
         </Button>
-        <Button
-          variant="primary"
-          size="md"
-          onPress={onSave}
-          isDisabled={isUpdating}
-          style={{ flex: 1 }}
-        >
-          <Button.Label>{isUpdating ? "Saving..." : "Save"}</Button.Label>
+        <Button onPress={onSave} isDisabled={isUpdating} style={{ flex: 1 }}>
+          <ButtonText>{isUpdating ? "Saving..." : "Save"}</ButtonText>
         </Button>
       </View>
     </View>

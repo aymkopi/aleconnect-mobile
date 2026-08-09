@@ -1,4 +1,7 @@
-import { Button, ListGroup, useThemeColor } from "heroui-native";
+import { Button, ButtonText } from "@/components/ui/button";
+import { ListSectionItem } from "@/components/ui/list-section";
+import { Text } from "@/components/ui/text";
+import { useAppColors } from "@/hooks/use-app-colors";
 import type { LucideIcon } from "lucide-react-native";
 import type { ComponentProps } from "react";
 import React from "react";
@@ -9,10 +12,11 @@ export type AccountDetailsBuilderProps = {
   description: string;
   title: string;
   button?: {
-    variant: ComponentProps<typeof Button>["variant"];
+    variant?: ComponentProps<typeof Button>["variant"];
     name: string;
     onPress: () => void;
   } | null;
+  showDivider?: boolean;
 };
 
 export function AccountDetailsBuilder({
@@ -20,34 +24,31 @@ export function AccountDetailsBuilder({
   description,
   title,
   button = null,
+  showDivider = true,
 }: AccountDetailsBuilderProps) {
-  const [accentIconColor] = useThemeColor(["accent"]);
+  const [accentIconColor] = useAppColors(["accent"]);
   return (
-    <ListGroup.Item>
-      <ListGroup.ItemPrefix>
-        {/* Icon bubble makes dense account data easier to scan by category. */}
-        <View className="h-10 w-10 items-center justify-center rounded-2xl bg-accent-soft">
+    <ListSectionItem
+      description={<Text className="text-xs text-muted-foreground">{description}</Text>}
+      leading={
+        <View className="h-10 w-10 items-center justify-center rounded-full bg-accent-soft">
           <Icon size={19} color={accentIconColor} />
         </View>
-      </ListGroup.ItemPrefix>
-      <ListGroup.ItemContent>
-        <ListGroup.ItemDescription className="text-xs">
-          {description}
-        </ListGroup.ItemDescription>
-        <ListGroup.ItemTitle className="font-semibold">{title}</ListGroup.ItemTitle>
-      </ListGroup.ItemContent>
-      {button ? (
-        <ListGroup.ItemSuffix>
+      }
+      showDivider={showDivider}
+      title={<Text className="font-semibold text-foreground">{title}</Text>}
+      trailing={
+        button ? (
           <Button
-            feedbackVariant="scale-highlight"
-            variant={button.variant === "primary" ? "secondary" : button.variant}
+            variant={button.variant ?? "secondary"}
             size="sm"
+            className="min-h-11"
             onPress={button.onPress}
           >
-            <Button.Label>{button.name}</Button.Label>
+            <ButtonText>{button.name}</ButtonText>
           </Button>
-        </ListGroup.ItemSuffix>
-      ) : null}
-    </ListGroup.Item>
+        ) : null
+      }
+    />
   );
 }

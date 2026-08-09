@@ -1,7 +1,5 @@
-import { Stack, useRouter } from "expo-router";
-import { Button, useThemeColor } from "heroui-native";
-import { ChevronLeft } from "lucide-react-native";
-
+import { Stack } from "expo-router";
+import { useAppColors } from "@/hooks/use-app-colors";
 import { ConsumerProfileProvider } from "../../../context/consumer-profile-context";
 
 export const unstable_settings = {
@@ -9,12 +7,7 @@ export const unstable_settings = {
 };
 
 export default function ProfileLayout() {
-  const router = useRouter();
-  const [headerTintColor, headerBackgroundColor] = useThemeColor([
-    "foreground",
-    "surface",
-  ]);
-  const [contentBackgroundColor] = useThemeColor(["background"]);
+  const [contentBackgroundColor] = useAppColors(["background"]);
 
   return (
     <ConsumerProfileProvider>
@@ -24,53 +17,13 @@ export default function ProfileLayout() {
             backgroundColor: contentBackgroundColor,
           },
           freezeOnBlur: true,
-          headerTintColor,
-          headerTitleStyle: { color: headerTintColor },
-          headerStyle: { backgroundColor: headerBackgroundColor },
+          headerShown: false,
         }}
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="details"
-          options={{
-            headerBackVisible: false,
-            headerLeft: () => (
-              <Button
-                isIconOnly
-                variant="ghost"
-                onPress={() => {
-                  if (__DEV__) {
-                    console.log("[nav] profile details header back");
-                  }
-                  router.replace("/profile");
-                }}
-                accessibilityLabel="Back to profile"
-              >
-                <ChevronLeft size={22} color={headerTintColor} />
-              </Button>
-            ),
-            title: "Account",
-          }}
-        />
-        <Stack.Screen
-          name="push-notifications"
-          options={{
-            headerBackVisible: false,
-            headerLeft: () => (
-              <Button
-                isIconOnly
-                variant="ghost"
-                onPress={() => {
-                  router.replace("/profile");
-                }}
-                accessibilityLabel="Back to profile"
-              >
-                <ChevronLeft size={22} color={headerTintColor} />
-              </Button>
-            ),
-            title: "Push notifications",
-          }}
-        />
+        <Stack.Screen name="details" />
+        <Stack.Screen name="change-password" />
+        <Stack.Screen name="push-notifications" />
       </Stack>
     </ConsumerProfileProvider>
   );

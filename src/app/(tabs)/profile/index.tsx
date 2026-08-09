@@ -1,34 +1,35 @@
 import { appScrollableBottomPadding } from "@/components/floating-app-bar";
+import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
+import { Heading } from "@/components/ui/heading";
+import { ListSection, ListSectionItem } from "@/components/ui/list-section";
+import { Menu, MenuItem, MenuItemLabel } from "@/components/ui/menu";
+import { Pressable } from "@/components/ui/pressable";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Text } from "@/components/ui/text";
 import { statusBarHeight } from "@/constants";
+import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import Feather from "@expo/vector-icons/Feather";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import {
-  Avatar,
-  Button,
-  Select,
-  Skeleton,
-  Surface,
-  Typography,
-  useThemeColor,
-} from "heroui-native";
-import {
+  Check,
   LucideArrowUpRight,
   LucideBell,
+  LucideChevronDown,
   LucideChevronRight,
   LucideFileText,
   LucideGlobe,
   LucideHeart,
+  LucideKeyRound,
   LucideLanguages,
   LucideLogOut,
   LucideShieldCheck,
   LucideSunMoon,
   LucideUserRound,
 } from "lucide-react-native";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Linking,
-  Pressable,
   RefreshControl,
   ScrollView,
   View,
@@ -38,6 +39,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Uniwind, useUniwind } from "uniwind";
 
 import { useConsumerProfileContext } from "../../../context/consumer-profile-context";
+import { ProfileAvatar } from "@/features/profile/components/ProfileAvatar";
 
 type ProfileRowProps = {
   icon: ReactNode;
@@ -47,11 +49,12 @@ type ProfileRowProps = {
   action?: ReactNode;
   onPress?: () => void;
   accessibilityLabel?: string;
+  showDivider?: boolean;
 };
 
 function IconBubble({ children }: { children: ReactNode }) {
   return (
-    <View className="h-10 w-10 items-center justify-center rounded-2xl bg-accent-soft">
+    <View className="h-10 w-10 items-center justify-center rounded-full bg-accent-soft">
       {children}
     </View>
   );
@@ -64,19 +67,7 @@ function ProfileSection({
   title: string;
   children: ReactNode;
 }) {
-  return (
-    <View className="gap-2">
-      <Typography
-        type="body-xs"
-        color="muted"
-        weight="semibold"
-        className="px-1"
-      >
-        {title}
-      </Typography>
-      <View className="gap-2">{children}</View>
-    </View>
-  );
+  return <ListSection title={title}>{children}</ListSection>;
 }
 
 function ProfileRow({
@@ -87,39 +78,27 @@ function ProfileRow({
   action,
   onPress,
   accessibilityLabel,
+  showDivider = true,
 }: ProfileRowProps) {
   return (
-    <Surface className="rounded-[22px] p-0">
-      <Pressable
-        disabled={!onPress}
-        onPress={onPress}
-        accessibilityRole={onPress ? "button" : undefined}
-        accessibilityLabel={accessibilityLabel ?? title}
-        className="min-h-16 flex-row items-center gap-3 px-4 py-3"
-      >
-        {icon}
-        <View className="flex-1">
-          <Typography type="body-sm" weight="semibold">
-            {title}
-          </Typography>
-          {description ? (
-            <Typography.Paragraph
-              type="body-xs"
-              color="muted"
-              numberOfLines={2}
-            >
-              {description}
-            </Typography.Paragraph>
+    <ListSectionItem
+      accessibilityLabel={accessibilityLabel ?? title}
+      description={description}
+      leading={icon}
+      onPress={onPress}
+      showDivider={showDivider}
+      title={title}
+      trailing={
+        <View className="flex-row items-center gap-2">
+          {value ? (
+            <Text className="text-xs font-medium text-muted-foreground">
+              {value}
+            </Text>
           ) : null}
+          {action}
         </View>
-        {value ? (
-          <Typography type="body-xs" color="muted" weight="medium">
-            {value}
-          </Typography>
-        ) : null}
-        {action}
-      </Pressable>
-    </Surface>
+      }
+    />
   );
 }
 
@@ -135,7 +114,7 @@ function QuickAction({
   onPress: () => void;
 }) {
   return (
-    <Surface className="flex-1 rounded-3xl p-0">
+    <View className="flex-1 rounded-lg border border-border bg-card p-0">
       <Pressable
         onPress={onPress}
         accessibilityRole="button"
@@ -144,44 +123,40 @@ function QuickAction({
       >
         {icon}
         <View className="gap-1">
-          <Typography type="body-sm" weight="bold">
-            {title}
-          </Typography>
-          <Typography.Paragraph type="body-xs" color="muted" numberOfLines={2}>
+          <Text className="text-sm font-bold text-foreground">{title}</Text>
+          <Text className="text-xs text-muted-foreground" numberOfLines={2}>
             {description}
-          </Typography.Paragraph>
+          </Text>
         </View>
       </Pressable>
-    </Surface>
+    </View>
   );
 }
 
 export default function ProfileRoute() {
   const router = useRouter();
+  const scrollRef = useRef<ScrollView | null>(null);
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const { session, signOut } = useAuthSession();
   const { profile, isLoading, reload } = useConsumerProfileContext();
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [shouldRedirectAfterSignOut, setShouldRedirectAfterSignOut] =
+    useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { theme, hasAdaptiveThemes } = useUniwind();
   const [accentColor, mutedColor, accentForegroundColor, dangerColor] =
-    useThemeColor(["accent", "muted", "accent-foreground", "danger"]);
+    useAppColors(["accent", "muted", "accent-foreground", "danger"]);
   const bottomPadding = appScrollableBottomPadding(insets.bottom);
   const isGuest = !session;
 
-  const themeOptions = useMemo(
-    () => [
-      { value: "system", label: "Auto" },
-      { value: "light", label: "Light" },
-      { value: "dark", label: "Dark" },
-    ],
-    [],
-  );
   const activeTheme = hasAdaptiveThemes ? "system" : theme;
-  const selectedTheme =
-    themeOptions.find((option) => option.value === activeTheme) ??
-    themeOptions[0];
+  const activeThemeLabel =
+    activeTheme === "system"
+      ? "Auto"
+      : activeTheme === "light"
+        ? "Light"
+        : "Dark";
   const initials =
     (profile?.fullName ?? "?")
       .split(/\s+/)
@@ -193,8 +168,21 @@ export default function ProfileRoute() {
 
   useEffect(() => {
     void router.prefetch("/profile/details");
-    void router.prefetch("/profile/push-notifications");
+    void router.prefetch("/notification-settings");
   }, [router]);
+
+  useFocusEffect(
+    useCallback(() => {
+      scrollRef.current?.scrollTo({ y: 0, animated: false });
+    }, []),
+  );
+
+  useEffect(() => {
+    if (!shouldRedirectAfterSignOut || session) return;
+
+    setShouldRedirectAfterSignOut(false);
+    router.replace("/sign-in");
+  }, [router, session, shouldRedirectAfterSignOut]);
 
   const openPreferredLink = async ({
     appUrl,
@@ -217,10 +205,10 @@ export default function ProfileRoute() {
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
+    setShouldRedirectAfterSignOut(true);
 
     try {
       await signOut();
-      router.replace("/sign-in");
     } finally {
       setIsSigningOut(false);
     }
@@ -238,6 +226,7 @@ export default function ProfileRoute() {
 
   return (
     <ScrollView
+      ref={scrollRef}
       contentInsetAdjustmentBehavior="automatic"
       style={{ width }}
       className="bg-background"
@@ -260,7 +249,7 @@ export default function ProfileRoute() {
       }
     >
       <View
-        className="bg-accent rounded-b-[28px]"
+        className="rounded-b-xl bg-accent"
         style={{
           marginHorizontal: -20,
           minHeight: 208,
@@ -270,41 +259,28 @@ export default function ProfileRoute() {
         }}
       >
         <View className="gap-1">
-          <Typography.Heading
-            type="h2"
-            weight="bold"
-            style={{ color: accentForegroundColor }}
-          >
+          <Heading size="xl" style={{ color: accentForegroundColor }}>
             Profile
-          </Typography.Heading>
-          <Typography.Paragraph
-            type="body-sm"
+          </Heading>
+          <Text
+            className="text-sm"
             style={{ color: accentForegroundColor, opacity: 0.76 }}
           >
             Account access, alerts, and app preferences.
-          </Typography.Paragraph>
+          </Text>
         </View>
 
         <View className="flex-row items-center gap-4">
-          <Avatar
-            size="lg"
-            alt={isGuest ? "Guest profile" : "Profile picture"}
+          <ProfileAvatar
+            accessibilityLabel={isGuest ? "Guest profile" : "Profile picture"}
+            className="h-[76px] w-[76px] border-2"
+            fallback={isGuest ? "?" : initials}
+            fallbackClassName="text-lg font-bold"
             style={{
-              width: 76,
-              height: 76,
-              borderRadius: 38,
-              borderWidth: 2,
               borderColor: accentForegroundColor,
             }}
-          >
-            {!isGuest && profile?.avatarUrl ? (
-              <Avatar.Image
-                key={profile.avatarUrl}
-                source={{ uri: profile.avatarUrl }}
-              />
-            ) : null}
-            <Avatar.Fallback>{isGuest ? "?" : initials}</Avatar.Fallback>
-          </Avatar>
+            uri={isGuest ? null : profile?.avatarUrl}
+          />
           <View className="flex-1 gap-1">
             {isLoading && !isGuest ? (
               <View className="gap-2">
@@ -313,39 +289,37 @@ export default function ProfileRoute() {
               </View>
             ) : (
               <>
-                <Typography.Heading
-                  type="h4"
-                  weight="bold"
+                <Heading
+                  size="lg"
                   numberOfLines={1}
                   style={{ color: accentForegroundColor }}
                 >
                   {isGuest
                     ? "Guest mode"
                     : (profile?.fullName ?? "Profile not linked")}
-                </Typography.Heading>
-                <Typography.Paragraph
-                  type="body-sm"
+                </Heading>
+                <Text
+                  className="text-sm"
                   numberOfLines={2}
                   style={{ color: accentForegroundColor, opacity: 0.76 }}
                 >
                   {isGuest
                     ? "Sign in to view account data and manage notifications."
                     : (profile?.accountNumber ?? "No account number linked")}
-                </Typography.Paragraph>
+                </Text>
               </>
             )}
           </View>
           {isGuest ? (
             <Button
-              isIconOnly
-              variant="primary"
-              size="md"
+              size="icon"
+              className="min-h-11 min-w-11 rounded-full"
               onPress={() => {
                 router.push("/sign-in");
               }}
               accessibilityLabel="Sign in"
             >
-              <LucideUserRound size={19} color={accentForegroundColor} />
+              <ButtonIcon as={LucideUserRound} height={19} width={19} />
             </Button>
           ) : null}
         </View>
@@ -371,7 +345,7 @@ export default function ProfileRoute() {
           title="Alerts"
           description="Push and feeder alerts"
           onPress={() =>
-            router.push(isGuest ? "/sign-in" : "/profile/push-notifications")
+            router.push(isGuest ? "/sign-in" : "/notification-settings")
           }
         />
       </View>
@@ -385,32 +359,47 @@ export default function ProfileRoute() {
           }
           title="Theme"
           description="Use system mode or choose a fixed appearance."
-          value={
-            themeOptions.find((option) => option.value === activeTheme)?.label
-          }
           action={
-            <Select
-              value={selectedTheme}
-              onValueChange={(option) => {
-                if (!option) return;
-                Uniwind.setTheme(option.value as "system" | "light" | "dark");
-              }}
+            <Menu
+              placement="bottom right"
+              offset={6}
+              selectionMode="single"
+              selectedKeys={new Set([activeTheme])}
+              trigger={(triggerProps) => (
+                <Button
+                  {...triggerProps}
+                  size="default"
+                  variant="outline"
+                  className="w-28 justify-between"
+                  accessibilityLabel="Choose theme"
+                >
+                  <ButtonText>{activeThemeLabel}</ButtonText>
+                  <ButtonIcon as={LucideChevronDown} height={16} width={16} />
+                </Button>
+              )}
             >
-              <Select.Trigger variant="unstyled">
-                <Select.Value placeholder="Theme" />
-                <Select.TriggerIndicator
-                  iconProps={{ size: 16, color: mutedColor }}
-                />
-              </Select.Trigger>
-              <Select.Portal>
-                <Select.Overlay />
-                <Select.Content presentation="popover" width={150} align="end">
-                  <Select.Item value="system" label="Auto" />
-                  <Select.Item value="light" label="Light" />
-                  <Select.Item value="dark" label="Dark" />
-                </Select.Content>
-              </Select.Portal>
-            </Select>
+              {[
+                ["system", "Auto"],
+                ["light", "Light"],
+                ["dark", "Dark"],
+              ].map(([value, label]) => (
+                <MenuItem
+                  key={value}
+                  textValue={label}
+                  accessibilityState={{ selected: activeTheme === value }}
+                  onPress={() =>
+                    Uniwind.setTheme(value as "system" | "light" | "dark")
+                  }
+                >
+                  <View className="w-5">
+                    {activeTheme === value ? (
+                      <Check size={16} color={accentColor} />
+                    ) : null}
+                  </View>
+                  <MenuItemLabel>{label}</MenuItemLabel>
+                </MenuItem>
+              ))}
+            </Menu>
           }
         />
         <ProfileRow
@@ -422,7 +411,7 @@ export default function ProfileRoute() {
           title="Language"
           description="Interface language"
           value="English"
-          action={<LucideChevronRight size={19} color={mutedColor} />}
+          showDivider={false}
         />
       </ProfileSection>
 
@@ -471,6 +460,7 @@ export default function ProfileRoute() {
             })
           }
           action={<LucideArrowUpRight size={18} color={mutedColor} />}
+          showDivider={false}
         />
       </ProfileSection>
 
@@ -483,7 +473,6 @@ export default function ProfileRoute() {
           }
           title="Terms and conditions"
           description="Rules for using Aleconnect"
-          action={<LucideChevronRight size={19} color={mutedColor} />}
         />
         <ProfileRow
           icon={
@@ -493,12 +482,23 @@ export default function ProfileRoute() {
           }
           title="Privacy policy"
           description="How account data is handled"
-          action={<LucideChevronRight size={19} color={mutedColor} />}
+          showDivider={false}
         />
       </ProfileSection>
 
       {!isGuest ? (
         <ProfileSection title="Session">
+          <ProfileRow
+            icon={
+              <IconBubble>
+                <LucideKeyRound size={20} color={accentColor} />
+              </IconBubble>
+            }
+            title="Change password"
+            description="Update your account password."
+            onPress={() => router.push("/profile/change-password")}
+            action={<LucideChevronRight size={19} color={mutedColor} />}
+          />
           <ProfileRow
             icon={
               <IconBubble>
@@ -509,18 +509,19 @@ export default function ProfileRoute() {
             description="End this device session."
             action={
               <Button
-                feedbackVariant="scale-highlight"
-                variant="danger-soft"
+                variant="destructive"
                 size="sm"
+                className="min-h-11"
                 onPress={handleSignOut}
                 isDisabled={isSigningOut}
                 accessibilityLabel="Sign out"
               >
-                <Button.Label>
+                <ButtonText>
                   {isSigningOut ? "Signing out..." : "Sign out"}
-                </Button.Label>
+                </ButtonText>
               </Button>
             }
+            showDivider={false}
           />
         </ProfileSection>
       ) : null}

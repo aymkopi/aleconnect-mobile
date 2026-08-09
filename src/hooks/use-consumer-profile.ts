@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useAuthSession } from "@/hooks/use-auth-session";
 import {
@@ -11,8 +11,8 @@ import {
 import { fetchCurrentConsumerProfileView } from "@/services/profile";
 
 const profileCacheTtlMs = 24 * 60 * 60 * 1000;
-const profileCachePayloadPrefix = "profile_cache_payload_v1";
-const profileCacheFetchedAtPrefix = "profile_cache_fetched_at_v1";
+const profileCachePayloadPrefix = "profile_cache_payload_v2";
+const profileCacheFetchedAtPrefix = "profile_cache_fetched_at_v2";
 const profileMemoryCache = new Map<
   string,
   { fetchedAt: number; value: ConsumerProfileView | null }
@@ -45,10 +45,13 @@ export type UseConsumerProfileState = {
   readonly error: Error | null;
   readonly reload: (options?: { forceNetwork?: boolean }) => Promise<void>;
   readonly setAvatarUrl: (avatarUrl: string | null) => Promise<void>;
+  readonly setProfileView: (profile: ConsumerProfileView) => Promise<void>;
 };
 
 export function useConsumerProfile(): UseConsumerProfileState {
   const { session } = useAuthSession();
+  const activeUserIdRef = useRef(session?.user.id);
+  activeUserIdRef.current = session?.user.id;
   const [profile, setProfile] = useState<ConsumerProfileView | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -72,6 +75,7 @@ export function useConsumerProfile(): UseConsumerProfileState {
           fetchedAt: Date.now(),
           value: nextProfile,
         });
+        if (activeUserIdRef.current !== userId) return;
         setProfile(nextProfile);
         setError(null);
         setIsLoading(false);
@@ -93,6 +97,7 @@ export function useConsumerProfile(): UseConsumerProfileState {
           [fetchedAtKey, String(Date.now())],
         ]);
       } catch (nextError) {
+        if (activeUserIdRef.current !== userId) return;
         setError(
           nextError instanceof Error ? nextError : new Error(String(nextError)),
         );
@@ -137,6 +142,7 @@ export function useConsumerProfile(): UseConsumerProfileState {
         payloadKey,
         fetchedAtKey,
       ]);
+      if (activeUserIdRef.current !== userId) return;
 
       const cachedPayloadText = cachedPayload[1];
       const cachedFetchedAtText = cachedFetchedAt[1];
@@ -207,5 +213,27 @@ export function useConsumerProfile(): UseConsumerProfileState {
     [profile, session?.user.id],
   );
 
-  return { profile, isLoading, error, reload, setAvatarUrl };
+  const setProfileView = useCallback(
+    async (nextProfile: ConsumerProfileView) => {
+      const userId = session?.user.id;
+      if (!userId || nextProfile.profileId !== userId) return;
+
+      setProfile(nextProfile);
+      setError(null);
+      profileMemoryCache.set(userId, {
+        fetchedAt: Date.now(),
+        value: nextProfile,
+      });
+      await AsyncStorage.multiSet([
+        [
+          buildPayloadKey(userId),
+          JSON.stringify(toConsumerProfileViewCachePayload(nextProfile)),
+        ],
+        [buildFetchedAtKey(userId), String(Date.now())],
+      ]);
+    },
+    [session?.user.id],
+  );
+
+  return { profile, isLoading, error, reload, setAvatarUrl, setProfileView };
 }

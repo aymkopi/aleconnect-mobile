@@ -1,16 +1,16 @@
-# Graph Report - aleconnect-mobile  (2026-06-24)
+# Graph Report - aleconnect-mobile  (2026-08-09)
 
 ## Corpus Check
-- 88 files · ~97,806 words
+- 242 files · ~172,540 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 812 nodes · 891 edges · 72 communities (66 shown, 6 thin omitted)
-- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
+- 1834 nodes · 2866 edges · 170 communities (157 shown, 13 thin omitted)
+- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 1 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `5e510cd2`
+- Built from commit: `303aba77`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -61,7 +61,6 @@
 - [[_COMMUNITY_Community 43|Community 43]]
 - [[_COMMUNITY_Community 44|Community 44]]
 - [[_COMMUNITY_Community 45|Community 45]]
-- [[_COMMUNITY_Community 46|Community 46]]
 - [[_COMMUNITY_Community 47|Community 47]]
 - [[_COMMUNITY_Community 48|Community 48]]
 - [[_COMMUNITY_Community 49|Community 49]]
@@ -82,49 +81,108 @@
 - [[_COMMUNITY_Community 64|Community 64]]
 - [[_COMMUNITY_Community 65|Community 65]]
 - [[_COMMUNITY_Community 66|Community 66]]
+- [[_COMMUNITY_Community 68|Community 68]]
 - [[_COMMUNITY_Community 69|Community 69]]
 - [[_COMMUNITY_Community 70|Community 70]]
+- [[_COMMUNITY_Community 72|Community 72]]
+- [[_COMMUNITY_Community 73|Community 73]]
+- [[_COMMUNITY_Community 74|Community 74]]
+- [[_COMMUNITY_Community 75|Community 75]]
+- [[_COMMUNITY_Community 76|Community 76]]
+- [[_COMMUNITY_Community 77|Community 77]]
+- [[_COMMUNITY_Community 78|Community 78]]
+- [[_COMMUNITY_Community 79|Community 79]]
+- [[_COMMUNITY_Community 80|Community 80]]
+- [[_COMMUNITY_Community 81|Community 81]]
+- [[_COMMUNITY_Community 82|Community 82]]
+- [[_COMMUNITY_Community 83|Community 83]]
+- [[_COMMUNITY_Community 84|Community 84]]
+- [[_COMMUNITY_Community 85|Community 85]]
+- [[_COMMUNITY_Community 86|Community 86]]
+- [[_COMMUNITY_Community 87|Community 87]]
+- [[_COMMUNITY_Community 88|Community 88]]
+- [[_COMMUNITY_Community 89|Community 89]]
+- [[_COMMUNITY_Community 90|Community 90]]
+- [[_COMMUNITY_Community 91|Community 91]]
+- [[_COMMUNITY_Community 92|Community 92]]
+- [[_COMMUNITY_Community 93|Community 93]]
+- [[_COMMUNITY_Community 94|Community 94]]
+- [[_COMMUNITY_Community 95|Community 95]]
+- [[_COMMUNITY_Community 96|Community 96]]
+- [[_COMMUNITY_Community 97|Community 97]]
+- [[_COMMUNITY_Community 98|Community 98]]
+- [[_COMMUNITY_Community 99|Community 99]]
+- [[_COMMUNITY_Community 100|Community 100]]
+- [[_COMMUNITY_Community 101|Community 101]]
+- [[_COMMUNITY_Community 102|Community 102]]
+- [[_COMMUNITY_Community 103|Community 103]]
+- [[_COMMUNITY_Community 104|Community 104]]
+- [[_COMMUNITY_Community 105|Community 105]]
+- [[_COMMUNITY_Community 106|Community 106]]
+- [[_COMMUNITY_Community 107|Community 107]]
+- [[_COMMUNITY_Community 108|Community 108]]
+- [[_COMMUNITY_Community 109|Community 109]]
+- [[_COMMUNITY_Community 110|Community 110]]
+- [[_COMMUNITY_Community 111|Community 111]]
+- [[_COMMUNITY_Community 112|Community 112]]
+- [[_COMMUNITY_Community 113|Community 113]]
+- [[_COMMUNITY_Community 137|Community 137]]
+- [[_COMMUNITY_Community 140|Community 140]]
+- [[_COMMUNITY_Community 141|Community 141]]
+- [[_COMMUNITY_Community 151|Community 151]]
+- [[_COMMUNITY_Community 152|Community 152]]
+- [[_COMMUNITY_Community 156|Community 156]]
+- [[_COMMUNITY_Community 160|Community 160]]
+- [[_COMMUNITY_Community 161|Community 161]]
+- [[_COMMUNITY_Community 162|Community 162]]
+- [[_COMMUNITY_Community 163|Community 163]]
+- [[_COMMUNITY_Community 164|Community 164]]
+- [[_COMMUNITY_Community 165|Community 165]]
+- [[_COMMUNITY_Community 166|Community 166]]
+- [[_COMMUNITY_Community 167|Community 167]]
+- [[_COMMUNITY_Community 168|Community 168]]
+- [[_COMMUNITY_Community 169|Community 169]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `Uniwind — Complete Reference` - 29 edges
-2. `Complete Reference` - 23 edges
-3. `Native Tabs` - 21 edges
-4. `WebGPU & Three.js for Expo` - 17 edges
-5. `expo` - 15 edges
-6. `appScrollableBottomPadding()` - 13 edges
-7. `Tailwind CSS Setup for Expo with react-native-css` - 13 edges
-8. `Uniwind Pro` - 13 edges
-9. `useAuthSession()` - 12 edges
-10. `Route Structure` - 12 edges
+1. `useAppColors()` - 64 edges
+2. `useAuthSession()` - 41 edges
+3. `Uniwind — Complete Reference` - 29 edges
+4. `Text` - 27 edges
+5. `apiRequest()` - 27 edges
+6. `Complete Reference` - 23 edges
+7. `Button` - 22 edges
+8. `Native Tabs` - 21 edges
+9. `Heading` - 19 edges
+10. `appScrollableBottomPadding()` - 17 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `ComplaintsRoute()` --calls--> `appScrollableBottomPadding()`  [EXTRACTED]
-  src/app/(tabs)/complaints/index.tsx → src/components/floating-app-bar.tsx
-- `HomeRoute()` --calls--> `appScrollableBottomPadding()`  [EXTRACTED]
-  src/app/(tabs)/home.tsx → src/components/floating-app-bar.tsx
-- `HotlinesRoute()` --calls--> `appScrollableBottomPadding()`  [EXTRACTED]
-  src/app/(tabs)/hotlines.tsx → src/components/floating-app-bar.tsx
-- `SignInRoute()` --calls--> `useAuthSession()`  [EXTRACTED]
-  src/app/sign-in.tsx → src/hooks/use-auth-session.ts
-- `useAuthSession()` --calls--> `useAuthSessionContext()`  [EXTRACTED]
-  src/hooks/use-auth-session.ts → src/context/auth-session-context.ts
+- `TabsLayout()` --calls--> `useAppColors()`  [EXTRACTED]
+  src/app/(tabs)/_layout.tsx → src/hooks/use-app-colors.ts
+- `SheetSearchInput()` --calls--> `useAppColors()`  [EXTRACTED]
+  src/app/(tabs)/hotlines.tsx → src/hooks/use-app-colors.ts
+- `EmergencySlider()` --calls--> `useAppColors()`  [EXTRACTED]
+  src/app/(tabs)/hotlines.tsx → src/hooks/use-app-colors.ts
+- `ComplaintsLayout()` --calls--> `useAuthSession()`  [EXTRACTED]
+  src/app/(tabs)/reports/_layout.tsx → src/hooks/use-auth-session.ts
+- `NotificationDescription()` --calls--> `useAppColors()`  [EXTRACTED]
+  src/app/notifications.tsx → src/hooks/use-app-colors.ts
 
 ## Import Cycles
 - 1-file cycle: `metro.config.js -> metro.config.js`
 
-## Communities (72 total, 6 thin omitted)
+## Communities (170 total, 13 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.04
-Nodes (45): dependencies, expo, expo-blur, expo-constants, expo-dev-client, expo-device, expo-font, expo-glass-effect (+37 more)
+Nodes (54): dependencies, expo, expo-background-task, expo-blur, expo-clipboard, expo-constants, expo-dev-client, expo-device (+46 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.10
-Nodes (28): AuthSessionContext, AuthSessionContextValue, useAuthSessionContext(), BlurTargetContext, BlurTargetRef, UseAuthSessionState, apiRequest(), ApiRequestError (+20 more)
+Cohesion: 0.15
+Nodes (17): PushNotificationsReceiver(), PushNotificationsReceiverProps, clearLastNotificationResponse(), configureAndroidNotificationChannels(), configurePushNotificationHandler(), consumeLastNotificationResponseAsync(), consumePersistedNotificationResponseAsync(), isPermissionGranted() (+9 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.06
-Nodes (35): backgroundColor, backgroundImage, foregroundImage, monochromeImage, adaptiveIcon, googleServicesFile, package, predictiveBackGestureEnabled (+27 more)
+Cohesion: 0.05
+Nodes (40): backgroundColor, backgroundImage, foregroundImage, monochromeImage, adaptiveIcon, allowBackup, googleServicesFile, package (+32 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.06
@@ -155,8 +213,8 @@ Cohesion: 0.10
 Nodes (20): Best Practices, Customization, Customization, Date/Time Picker, Discrete Steps, Display Styles, Keyboard Types, Min/Max Dates (+12 more)
 
 ### Community 10 - "Community 10"
-Cohesion: 0.19
-Nodes (15): parseCachedProfile(), ConsumerProfileView, ConsumerProfileViewCachePayload, fromConsumerProfileViewCachePayload(), readBoolean(), readCoordinates(), readDate(), readString() (+7 more)
+Cohesion: 0.08
+Nodes (28): BlurTargetContext, BlurTargetRef, ConsumerProfileContext, ConsumerProfileProvider(), parseCachedProfile(), profileMemoryCache, profileRequests, useConsumerProfile() (+20 more)
 
 ### Community 11 - "Community 11"
 Cohesion: 0.10
@@ -167,8 +225,8 @@ Cohesion: 0.10
 Nodes (19): AsyncFunction, Constant, Defining a Shared Object, Either Types (Union types), Enums (Enumerable), Events, Exposing via Class DSL, Function (Synchronous) (+11 more)
 
 ### Community 13 - "Community 13"
-Cohesion: 0.16
-Nodes (13): CategoryId, complaintCategories, ComplaintFormState, formatReportDate(), initialComplaintForm, nextTicketNumber(), recentReports, Report (+5 more)
+Cohesion: 0.14
+Nodes (19): apiRequest(), fetchNotificationSettings(), NotificationFeeder, NotificationPreferences, NotificationSettings, NotificationSubstation, registerDevicePushToken(), saveNotificationSettings() (+11 more)
 
 ### Community 14 - "Community 14"
 Cohesion: 0.11
@@ -191,12 +249,12 @@ Cohesion: 0.14
 Nodes (13): Array Routes for Multiple Stacks, Catch-All Routes, Complete App Structure Example, Dynamic Routes, File Conventions, Group Routes, Layout Files, Not Found Routes (+5 more)
 
 ### Community 19 - "Community 19"
-Cohesion: 0.27
-Nodes (9): SignInRoute(), NewComplaintRoute(), appScrollableBottomPadding(), useConsumerProfileContext(), useAuthSession(), ProfileDetailsRoute(), ProfileRoute(), HomeRoute() (+1 more)
+Cohesion: 0.12
+Nodes (15): Avatar, AvatarFallbackText, AvatarImage, ProfileAvatar(), ProfileAvatarProps, ProfileDetailsSheetContent(), Menu, MenuItemLabel (+7 more)
 
 ### Community 20 - "Community 20"
-Cohesion: 0.18
-Nodes (8): APP_BAR_ITEMS, AppBarItem, FloatingAppBar(), FloatingAppBarProps, TabFrame, TabItemProps, FloatingTabsBar(), FloatingTabsBarProps
+Cohesion: 0.15
+Nodes (15): IInputFieldProps, IInputIconProps, IInputProps, IInputSlotProps, Input, InputField, inputFieldStyle, InputIcon (+7 more)
 
 ### Community 21 - "Community 21"
 Cohesion: 0.15
@@ -215,8 +273,8 @@ Cohesion: 0.15
 Nodes (13): Entering & Exiting Animations, Installation, Layout Transitions, Native Insets, Overview, Pricing & Licensing, Reanimated Animations (Requires Reanimated v4.0.0+), Shadow Tree Updates (+5 more)
 
 ### Community 25 - "Community 25"
-Cohesion: 0.24
-Nodes (8): PushNotificationsReceiver(), PushNotificationsReceiverProps, AuthSessionProvider(), configurePushNotificationHandler(), getLastNotificationResponseAsync(), isPermissionGranted(), PermissionLike, registerForPushNotificationsAsync()
+Cohesion: 0.09
+Nodes (25): ComplaintSubmissionToastHost(), ForcedLogoutRedirect(), PushTokenBridge(), AuthSessionProvider(), GluestackUIProvider(), ModeType, consumeForcedLogoutReason(), advisoryIdFromPushData() (+17 more)
 
 ### Community 26 - "Community 26"
 Cohesion: 0.17
@@ -238,13 +296,9 @@ Nodes (9): Button Gradient, Common Patterns, CSS Gradients, Frosted Glass Effect
 Cohesion: 0.20
 Nodes (9): compilerOptions, forceConsistentCasingInFileNames, module, paths, strict, extends, include, @/* (+1 more)
 
-### Community 31 - "Community 31"
-Cohesion: 0.31
-Nodes (6): AccountDetailsBuilder(), AccountDetailsBuilderProps, EditableField, ProfileDetailsSheetContent(), ProfileDetailsSheetContentProps, uploadCurrentUserAvatar()
-
 ### Community 32 - "Community 32"
-Cohesion: 0.22
-Nodes (8): Accessibility & Inclusion, Anti-references, Brand Personality, Design Principles, Product, Product Purpose, Register, Users
+Cohesion: 0.27
+Nodes (4): Active work, ALEConnect mobile harness, Aleconnect Mobile Release Hardening Tracker, Verification Log
 
 ### Community 33 - "Community 33"
 Cohesion: 0.22
@@ -259,8 +313,8 @@ Cohesion: 0.22
 Nodes (9): Expo Router Placement, global.css, Installation, Metro Configuration, Monorepo Support, Setup, Tailwind IntelliSense (VS Code / Cursor / Windsurf), TypeScript (+1 more)
 
 ### Community 36 - "Community 36"
-Cohesion: 0.25
-Nodes (7): devDependencies, @types/react, typescript, main, name, private, version
+Cohesion: 0.18
+Nodes (10): devDependencies, eslint, eslint-config-expo, @react-native-community/cli, @types/react, typescript, main, name (+2 more)
 
 ### Community 37 - "Community 37"
 Cohesion: 0.25
@@ -274,13 +328,9 @@ Nodes (7): AsyncFunction on Views, Defining a View, GroupView (Android), Native 
 Cohesion: 0.25
 Nodes (8): 1. Variable-driven utilities (runtime-injected values), 2. Brand-new utilities (no Tailwind equivalent), 3. Overriding existing Tailwind utilities, Custom CSS Classes, Custom CSS & Utilities, Custom Utilities (@utility), Guidelines for Custom CSS, Mixing Custom CSS with Tailwind
 
-### Community 40 - "Community 40"
-Cohesion: 0.38
-Nodes (4): ConsumerProfileContext, ConsumerProfileProvider(), useConsumerProfile(), UseConsumerProfileState
-
 ### Community 41 - "Community 41"
-Cohesion: 0.29
-Nodes (7): scripts, android, ios, lint, reset-project, start, web
+Cohesion: 0.25
+Nodes (8): scripts, android, harness:check, ios, lint, reset-project, start, web
 
 ### Community 42 - "Community 42"
 Cohesion: 0.29
@@ -366,25 +416,237 @@ Nodes (3): avatarCompressionSteps, base64ToArrayBuffer(), compressAvatarToStrict
 Cohesion: 0.67
 Nodes (3): Correct patterns, Dynamic ClassNames, NEVER do this (Tailwind scans at build time)
 
+### Community 66 - "Community 66"
+Cohesion: 0.11
+Nodes (25): canFallbackForFirstCommit(), compareRequiredSiblingFile(), credentialPatterns, crossSkillPaths, exists(), expectedSkills, gitPaths(), isValidDate() (+17 more)
+
+### Community 68 - "Community 68"
+Cohesion: 0.05
+Nodes (42): Actionsheet, ActionsheetBackdrop, actionsheetBackdropStyle, ActionsheetContent, actionsheetContentStyle, ActionsheetDragIndicator, actionsheetDragIndicatorStyle, ActionsheetDragIndicatorWrapper (+34 more)
+
+### Community 72 - "Community 72"
+Cohesion: 0.05
+Nodes (36): actionsheetBackdropStyle, actionsheetContentStyle, actionsheetDragIndicatorStyle, actionsheetDragIndicatorWrapperStyle, actionsheetFlatListStyle, ActionsheetIcon, actionsheetIconStyle, actionsheetItemStyle (+28 more)
+
+### Community 73 - "Community 73"
+Cohesion: 0.23
+Nodes (16): AdvisoryListItem(), formatDate(), BadgeText, ButtonText, AccountDetailsBuilder(), AccountDetailsBuilderProps, ChildAppBar(), ChildAppBarProps (+8 more)
+
+### Community 74 - "Community 74"
+Cohesion: 0.08
+Nodes (30): BottomSheetBackdrop(), bottomSheetBackdropStyle, BottomSheetContent(), bottomSheetContentStyle, BottomSheetContext, BottomSheetContextValue, BottomSheetDragIndicator(), BottomSheetFooter() (+22 more)
+
+### Community 75 - "Community 75"
+Cohesion: 0.06
+Nodes (30): Approved Decisions, Big-bang replacement, Completion Criteria, Component Mapping, Considered Approaches, Current State, Data and Error Flow, Feature Phases (+22 more)
+
+### Community 76 - "Community 76"
+Cohesion: 0.07
+Nodes (29): AnimatedPressable, AnimatedView, IPopoverArrowProps, IPopoverBackdropProps, IPopoverBodyProps, IPopoverCloseButtonProps, IPopoverContentProps, IPopoverFooterProps (+21 more)
+
+### Community 77 - "Community 77"
+Cohesion: 0.08
+Nodes (24): ISelectContentProps, ISelectIcon, ISelectInputProps, ISelectProps, ISelectTriggerProps, selectIconStyle, selectInputStyle, selectStyle (+16 more)
+
+### Community 78 - "Community 78"
+Cohesion: 0.08
+Nodes (25): AnimatedPressable, AnimatedView, IModalBackdropProps, IModalBodyProps, IModalCloseButtonProps, IModalContentProps, IModalFooterProps, IModalHeaderProps (+17 more)
+
+### Community 79 - "Community 79"
+Cohesion: 0.08
+Nodes (24): FormControlErrorIcon, formControlErrorIconStyle, formControlErrorStyle, formControlErrorTextStyle, FormControlHelper, formControlHelperStyle, FormControlHelperText, formControlHelperTextStyle (+16 more)
+
+### Community 80 - "Community 80"
+Cohesion: 0.14
+Nodes (13): AvatarBadge, avatarBadgeStyle, avatarFallbackTextStyle, AvatarGroup, avatarGroupStyle, avatarImageStyle, avatarStyle, IAvatarBadgeProps (+5 more)
+
+### Community 81 - "Community 81"
+Cohesion: 0.25
+Nodes (7): IProgressFilledTrackProps, IProgressProps, Progress, ProgressFilledTrack, progressFilledTrackStyle, progressStyle, UIProgress
+
+### Community 82 - "Community 82"
+Cohesion: 0.11
+Nodes (19): Button, ButtonGroup, buttonGroupStyle, ButtonIcon, buttonIconStyle, buttonSpinnerStyle, buttonStyle, buttonTextStyle (+11 more)
+
+### Community 83 - "Community 83"
+Cohesion: 0.24
+Nodes (8): ModalHeader, isWithinAlbay(), validateReportForm(), formatComplaintCategoryTitle(), NewComplaintRoute(), readCoordinates(), SelectOption, createLocalReportId()
+
+### Community 84 - "Community 84"
+Cohesion: 0.10
+Nodes (19): Global Constraints, GlueStack UI v5 Migration Implementation Plan, Phase 0: Establish a Clean Dependency Baseline, Phase 1: Install the GlueStack Foundation, Phase 2: Migrate the Root Shell and Authentication, Phase 3: Migrate Complaints, Phase 4: Migrate Home, Notifications, and Hotlines, Phase 5: Migrate Profile and Settings (+11 more)
+
+### Community 85 - "Community 85"
+Cohesion: 0.11
+Nodes (29): AdvisoryDetailsRoute(), formatDate(), AdvisoriesRoute(), NotificationSettingsRoute(), NotificationsRoute(), appScrollableBottomPadding(), useConsumerProfileContext(), useReportQueue() (+21 more)
+
+### Community 86 - "Community 86"
+Cohesion: 0.11
+Nodes (17): Checkbox, CheckboxIcon, checkboxIconStyle, CheckboxIndicator, checkboxIndicatorStyle, CheckboxLabel, checkboxLabelStyle, checkboxStyle (+9 more)
+
+### Community 87 - "Community 87"
+Cohesion: 0.15
+Nodes (13): BottomSheetScrollView, AgencyCard(), agencyMatches(), agencySearchText(), CategoryCard(), CategoryVisual, digits(), EmergencySlider() (+5 more)
+
+### Community 88 - "Community 88"
+Cohesion: 0.23
+Nodes (16): AuthUser, setAuthToken(), assertRateLimit(), clearAttempts(), ConsumerLoginResponse, formatRemainingTime(), getRateLimitKey(), normalizeAccountNumber() (+8 more)
+
+### Community 89 - "Community 89"
+Cohesion: 0.13
+Nodes (14): AnimatedView, BackdropPressable, IMenuItemLabelProps, IMenuItemProps, IMenuProps, Item, menuBackdropStyle, menuItemLabelStyle (+6 more)
+
+### Community 90 - "Community 90"
+Cohesion: 0.13
+Nodes (15): 2026-08-02 — ALEConnect agent harness final fix wave, 2026-08-02 - ALEConnect cross-project change skill, 2026-08-02 - ALEConnect cross-project skill portability fix, 2026-08-02 — ALEConnect mobile agent harness final verification and handoff, 2026-08-02 - ALEConnect mobile workflow skill, 2026-08-02 — Mobile agent harness foundation, 2026-08-02 - Mobile harness enforcement, 2026-08-02 - Mobile report API and transport hardening (+7 more)
+
+### Community 91 - "Community 91"
+Cohesion: 0.40
+Nodes (4): ALEConnect Cross-Project Change, Plan, Start, Verify and record
+
+### Community 92 - "Community 92"
+Cohesion: 0.15
+Nodes (12): Fab, FabIcon, fabIconStyle, FabLabel, fabLabelStyle, fabStyle, IFabIconProps, IFabLabelProps (+4 more)
+
+### Community 93 - "Community 93"
+Cohesion: 0.15
+Nodes (13): Alert, AlertIcon, alertIconStyle, alertStyle, AlertText, alertTextStyle, IAlertIconProps, IAlertProps (+5 more)
+
+### Community 94 - "Community 94"
+Cohesion: 0.14
+Nodes (14): categoryFilters, dayDiff(), EmptyState(), formatTime(), groupTitle(), Notice, NotificationDescription(), NotificationRow() (+6 more)
+
+### Community 95 - "Community 95"
+Cohesion: 0.20
+Nodes (10): Badge(), BadgeIcon, badgeIconStyle, badgeStyle, badgeTextStyle, ContextView, IBadgeIconProps, IBadgeProps (+2 more)
+
+### Community 96 - "Community 96"
+Cohesion: 0.22
+Nodes (8): Aleconnect Mobile Release Hardening Plan, Approved Decisions, Completion Rule, Delivery Phases, Phase 1: Security And Data Integrity, Phase 2: Report Contract, Phase 3: Consumer Experience, Phase 4: Offline, Performance, And Release
+
+### Community 97 - "Community 97"
+Cohesion: 0.18
+Nodes (11): APP_BAR_ITEMS, AppBarItem, CONTENT_FADE_STEPS, FloatingAppBar(), FloatingAppBarProps, TabItem(), TabItemProps, FloatingTabsBar() (+3 more)
+
+### Community 98 - "Community 98"
+Cohesion: 0.14
+Nodes (17): BottomSheet, BottomSheetPortal(), BottomSheetRef, albayBounds, albayCenter, AlbayCoordinates, AlbayLocationPickerSheet(), AlbayLocationSelection (+9 more)
+
+### Community 99 - "Community 99"
+Cohesion: 0.32
+Nodes (8): StaticLocationMap(), formatReportDate(), formatStatus(), ExtendedOutageStatusCard(), relativeTime(), ReportDetailRoute(), TimelineItem(), ReportStatusBadge()
+
+### Community 100 - "Community 100"
+Cohesion: 0.32
+Nodes (5): Box, IBoxProps, Box, IBoxProps, boxStyle
+
+### Community 101 - "Community 101"
+Cohesion: 0.32
+Nodes (5): Card, ICardProps, Card, ICardProps, cardStyle
+
+### Community 102 - "Community 102"
+Cohesion: 0.32
+Nodes (5): HStack, IHStackProps, HStack, IHStackProps, hstackStyle
+
+### Community 103 - "Community 103"
+Cohesion: 0.40
+Nodes (4): Heading, IHeadingProps, MappedHeading, headingStyle
+
+### Community 104 - "Community 104"
+Cohesion: 0.13
+Nodes (17): AdvisoryCache, cacheKey(), clearAdvisoryCache(), fetchActiveAdvisories(), fetchActiveAdvisory(), MobileAdvisoryPage, readCache(), requests (+9 more)
+
+### Community 105 - "Community 105"
+Cohesion: 0.36
+Nodes (5): aleconnectApiBaseUrl, aleconnectAssetBaseUrl, loadMapLibreModule(), MapLibreModule, StaticLocationMapProps
+
+### Community 106 - "Community 106"
+Cohesion: 0.38
+Nodes (4): IVStackProps, IVStackProps, VStack, vstackStyle
+
+### Community 109 - "Community 109"
+Cohesion: 0.50
+Nodes (3): ITextProps, Text, textStyle
+
+### Community 110 - "Community 110"
+Cohesion: 0.50
+Nodes (3): Spinner, spinnerStyle, StyledActivityIndicator
+
+### Community 111 - "Community 111"
+Cohesion: 0.13
+Nodes (17): ReportQueueContext, ReportQueueContextValue, ReportQueueProvider(), ensureReportBackgroundSyncRegistered(), ReportQueueItem, subscribeReportQueue(), syncReportQueue(), mergeReportSubmissionCompletions() (+9 more)
+
+### Community 137 - "Community 137"
+Cohesion: 0.13
+Nodes (18): BottomSheetHeader(), BottomSheetTextInput(), bottomSheetTextInputStyle, ProfileAddressDraft, ProfileAddressSheetContent(), Props, EditableField, ProfileDetailsSheetContentProps (+10 more)
+
+### Community 140 - "Community 140"
+Cohesion: 0.50
+Nodes (3): LegacyMotionProps, MotionSafePressable, MotionSafeView
+
+### Community 156 - "Community 156"
+Cohesion: 0.11
+Nodes (13): emptyComplaintMeta, Report, ArchiveRow, ReportListGroup(), fetchComplaintReportPage(), fetchComplaintReports(), ISkeletonProps, ISkeletonTextProps (+5 more)
+
+### Community 160 - "Community 160"
+Cohesion: 0.14
+Nodes (25): enqueueReport(), listeners, listReportQueue(), notifyQueueChanged(), queueSyncRequests, readQueue(), removeQueuedReport(), replaceQueueItem() (+17 more)
+
+### Community 161 - "Community 161"
+Cohesion: 0.14
+Nodes (15): createApiRequestId(), clearComplaintCache(), clearComplaintMetaCache(), ComplaintMetaCache, ComplaintReportPage, complaintReportRequests, ComplaintReportSort, EvidenceUpload (+7 more)
+
+### Community 162 - "Community 162"
+Cohesion: 0.11
+Nodes (19): albayBounds, conditionalReportPayload(), hasCurrentReportContract(), reportDetails(), ReportFormErrors, reportLimits, ComplaintBarangay, ComplaintCategory (+11 more)
+
+### Community 163 - "Community 163"
+Cohesion: 0.25
+Nodes (8): Accessibility & Inclusion, Anti-references, Brand Personality, Design Principles, Product, Product Purpose, Register, Users
+
+### Community 164 - "Community 164"
+Cohesion: 0.13
+Nodes (15): AuthSessionCache, AuthSessionContext, AuthSessionContextValue, ApiRequestError, authInvalidatedListeners, AuthSession, clearAuthToken(), getAuthToken() (+7 more)
+
+### Community 165 - "Community 165"
+Cohesion: 0.22
+Nodes (8): H1, H2, H3, H4, H5, H6, IHeadingProps, MappedHeading
+
+### Community 166 - "Community 166"
+Cohesion: 0.29
+Nodes (7): ALEConnect Mobile Agent Guide, Authority Map, Finish Gate, Graphify, Repository Boundaries, Start Here, Work Rules
+
+### Community 167 - "Community 167"
+Cohesion: 0.40
+Nodes (5): ALEConnect cross-project contracts, Authorization and response rules, Compatibility and release order, Operational flows, Ownership and routes
+
+### Community 168 - "Community 168"
+Cohesion: 0.25
+Nodes (7): ITextareaInputProps, ITextareaProps, Textarea, TextareaInput, textareaInputStyle, textareaStyle, UITextarea
+
+### Community 169 - "Community 169"
+Cohesion: 0.50
+Nodes (3): Divider, dividerStyle, IUIDividerProps
+
 ## Knowledge Gaps
-- **523 isolated node(s):** `FALLBACK_THEME`, `name`, `slug`, `version`, `orientation` (+518 more)
+- **1025 isolated node(s):** `FALLBACK_THEME`, `name`, `slug`, `version`, `orientation` (+1020 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **6 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **13 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Uniwind — Complete Reference` connect `Community 14` to `Community 65`, `Community 35`, `Community 6`, `Community 39`, `Community 27`, `Community 45`, `Community 49`, `Community 52`, `Community 24`, `Community 59`, `Community 60`, `Community 61`?**
-  _High betweenness centrality (0.019) - this node is a cross-community bridge._
-- **Why does `Component Bindings` connect `Community 6` to `Community 14`?**
+- **Why does `useAuthSession()` connect `Community 85` to `Community 73`, `Community 10`, `Community 111`, `Community 82`, `Community 19`, `Community 83`, `Community 87`, `Community 25`, `Community 156`, `Community 93`, `Community 94`?**
+  _High betweenness centrality (0.012) - this node is a cross-community bridge._
+- **Why does `useAppColors()` connect `Community 85` to `Community 97`, `Community 98`, `Community 99`, `Community 73`, `Community 74`, `Community 137`, `Community 105`, `Community 82`, `Community 19`, `Community 83`, `Community 87`, `Community 156`, `Community 94`?**
+  _High betweenness centrality (0.012) - this node is a cross-community bridge._
+- **Why does `MotionSafeView` connect `Community 140` to `Community 72`, `Community 68`?**
   _High betweenness centrality (0.007) - this node is a cross-community bridge._
 - **What connects `FALLBACK_THEME`, `name`, `slug` to the rest of the system?**
-  _523 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _1025 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.044444444444444446 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.037037037037037035 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.1036036036036036 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.14761904761904762 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.05555555555555555 - nodes in this community are weakly interconnected._
-- **Should `Community 3` be split into smaller, more focused modules?**
-  _Cohesion score 0.06451612903225806 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.04878048780487805 - nodes in this community are weakly interconnected._

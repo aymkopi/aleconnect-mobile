@@ -1,10 +1,15 @@
 @import "tailwindcss";
 @import "uniwind";
-@import "heroui-native/styles";
-
-@source "./node_modules/heroui-native/lib";
 
 @theme static {
+  /* Global radius control: change these values to resize non-circular surfaces. */
+  --radius: 0.75rem;
+  --radius-sm: 0.75rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 0.75rem;
+  --field-radius: 0.75rem;
+
   /* Concrete defaults are required by Uniwind hooks during Expo web SSR. */
   --color-background: hsl(207 11% 96%);
   --color-foreground: hsl(207 3% 10%);
@@ -37,12 +42,23 @@
   --color-danger-foreground: hsl(0 0% 99%);
   --color-focus: hsl(205 100% 71%);
   --color-link: hsl(201 100% 47%);
+  --color-primary: hsl(205 100% 71%);
+  --color-primary-foreground: hsl(208 73% 5%);
+  --color-secondary: hsl(207 6% 92%);
+  --color-secondary-foreground: hsl(207 10% 10%);
+  --color-card: hsl(180 100% 100%);
+  --color-card-foreground: hsl(207 3% 10%);
+  --color-popover: hsl(180 100% 100%);
+  --color-popover-foreground: hsl(207 3% 10%);
+  --color-muted-foreground: hsl(207 2% 45%);
+  --color-destructive: hsl(357 100% 61%);
+  --color-input: hsl(207 3% 87%);
+  --color-ring: hsl(205 100% 71%);
 }
 
 /*
- * HeroUI Native theme overrides.
- * Keep light/dark variable sets in sync to avoid dev-mode warnings.
- * @see https://heroui.com/docs/native/getting-started/theming
+ * Aleconnect semantic theme tokens shared by GlueStack and app-level styles.
+ * Keep light and dark variable sets aligned for native and web rendering.
  */
 
 @layer theme {
@@ -129,10 +145,18 @@
       --color-danger-foreground: var(--danger-foreground);
       --color-focus: var(--focus);
       --color-link: var(--link);
-
-      /* Border Radius */
-      --radius: 0.5rem;
-      --field-radius: 0.5rem;
+      --color-primary: var(--accent);
+      --color-primary-foreground: var(--accent-foreground);
+      --color-secondary: var(--default);
+      --color-secondary-foreground: var(--default-foreground);
+      --color-card: var(--surface);
+      --color-card-foreground: var(--surface-foreground);
+      --color-popover: var(--overlay);
+      --color-popover-foreground: var(--overlay-foreground);
+      --color-muted-foreground: var(--muted);
+      --color-destructive: var(--danger);
+      --color-input: var(--border);
+      --color-ring: var(--focus);
 
       /* Font Family */
       --font-sans: "Satoshi_400Regular";
@@ -219,10 +243,18 @@
       --color-danger-foreground: var(--danger-foreground);
       --color-focus: var(--focus);
       --color-link: var(--link);
-
-      /* Border Radius */
-      --radius: 0.5rem;
-      --field-radius: 0.5rem;
+      --color-primary: var(--accent);
+      --color-primary-foreground: var(--accent-foreground);
+      --color-secondary: var(--default);
+      --color-secondary-foreground: var(--default-foreground);
+      --color-card: var(--surface);
+      --color-card-foreground: var(--surface-foreground);
+      --color-popover: var(--overlay);
+      --color-popover-foreground: var(--overlay-foreground);
+      --color-muted-foreground: var(--muted);
+      --color-destructive: var(--danger);
+      --color-input: var(--border);
+      --color-ring: var(--focus);
 
       /* Font Family */
       --font-sans: "Satoshi_400Regular";

@@ -1,11 +1,13 @@
-import { PressableFeedback, Typography, useThemeColor } from "heroui-native";
 import type { LucideIcon } from "lucide-react-native";
 import { AlertTriangle, Home, Phone, UserRound } from "lucide-react-native";
 import type { FC } from "react";
 import { useMemo } from "react";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import "tailwindcss";
+
+import { Pressable } from "@/components/ui/pressable";
+import { Text } from "@/components/ui/text";
+import { useAppColors } from "@/hooks/use-app-colors";
 
 /**
  * Constants
@@ -33,7 +35,7 @@ interface FloatingAppBarProps {
  */
 const APP_BAR_ITEMS: readonly AppBarItem[] = [
   { title: "Home", icon: Home },
-  { title: "Complaints", icon: AlertTriangle },
+  { title: "Reports", icon: AlertTriangle },
   { title: "Hotlines", icon: Phone },
   { title: "Profile", icon: UserRound },
 ] as const;
@@ -61,14 +63,14 @@ const TabItem: FC<TabItemProps> = ({
   isActive,
   onPress,
 }) => {
-  const [activeIconColor, inactiveIconColor] = useThemeColor([
+  const [activeIconColor, inactiveIconColor] = useAppColors([
     "foreground",
     "muted",
   ]);
   const iconColor = isActive ? activeIconColor : inactiveIconColor;
 
   return (
-    <PressableFeedback
+    <Pressable
       onPress={onPress}
       accessibilityRole="tab"
       accessibilityState={{ selected: isActive }}
@@ -79,16 +81,14 @@ const TabItem: FC<TabItemProps> = ({
       style={{ minHeight: TAB_MIN_HIT_AREA }}
     >
       <Icon size={20} strokeWidth={2.2} color={iconColor} />
-      <Typography
-        type="body-xs"
-        weight={isActive ? "bold" : "semibold"}
-        className={`text-xs ${
+      <Text
+        className={`text-xs ${isActive ? "font-bold" : "font-semibold"} ${
           isActive ? "text-foreground" : "text-muted"
         }`}
       >
         {title}
-      </Typography>
-    </PressableFeedback>
+      </Text>
+    </Pressable>
   );
 };
 
@@ -96,7 +96,7 @@ const TabItem: FC<TabItemProps> = ({
  * Floating app bar navigation component
  *
  * A floating bottom navigation bar with rounded corners, semi-transparent background,
- * and smooth tabbing between four main sections (Home, Complaints, Hotlines, Profile).
+ * and smooth tabbing between four main sections (Home, Reports, Hotlines, Profile).
  *
  * Features:
  * - Positions absolutely at the bottom of the screen
@@ -119,7 +119,7 @@ export const FloatingAppBar: FC<FloatingAppBarProps> = ({
   onSelect,
 }) => {
   const insets = useSafeAreaInsets();
-  const [surfaceColor] = useThemeColor(["surface"]);
+  const [surfaceColor] = useAppColors(["surface"]);
 
   // Memoize bottom inset to prevent unnecessary recalculations
   const bottomInset = useMemo(
@@ -128,8 +128,8 @@ export const FloatingAppBar: FC<FloatingAppBarProps> = ({
   );
 
   return (
-    <View pointerEvents="box-none" className="absolute bottom-0 left-0 right-0">
-      <View pointerEvents="none" className="px-5">
+    <View className="absolute bottom-0 left-0 right-0" style={{ pointerEvents: "box-none" }}>
+      <View className="px-5" style={{ pointerEvents: "none" }}>
         {CONTENT_FADE_STEPS.map((opacity, index) => (
           <View
             key={`${opacity}-${index}`}
@@ -147,20 +147,26 @@ export const FloatingAppBar: FC<FloatingAppBarProps> = ({
         <View
           accessibilityRole="tablist"
           className="relative flex-row items-center justify-around overflow-hidden rounded-full border-[0.5px] border-border px-2"
-          style={{
-            height: APP_BAR_HEIGHT,
-            elevation: 10,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 12 },
-            shadowOpacity: 0.16,
-            shadowRadius: 24,
-            backgroundColor: "transparent",
-          }}
+          style={[
+            { height: APP_BAR_HEIGHT, backgroundColor: "transparent" },
+            Platform.OS === "web"
+              ? { boxShadow: "0 12px 24px rgba(0, 0, 0, 0.16)" }
+              : {
+                  elevation: 10,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 12 },
+                  shadowOpacity: 0.16,
+                  shadowRadius: 24,
+                },
+          ]}
         >
           <View
-            pointerEvents="none"
             className="absolute inset-0"
-            style={{ backgroundColor: surfaceColor, opacity: 0.96 }}
+            style={{
+              backgroundColor: surfaceColor,
+              opacity: 0.96,
+              pointerEvents: "none",
+            }}
           />
 
           {/* Tab items */}

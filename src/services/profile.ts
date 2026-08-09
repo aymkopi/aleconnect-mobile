@@ -14,32 +14,25 @@ type MobileProfileResponse = {
   avatarUrl: string | null;
   mapCoordinates: string | null;
   purokOrStreet: string | null;
+  barangayPsgc: string | null;
   barangayName: string | null;
+  municipalityCode: string | null;
   municipalityName: string | null;
+  landmark: string | null;
   customerClass: string | null;
   poleNumber: string | null;
   meterSerialNumber: string | null;
   mustChangePassword: boolean;
 };
 
-function parseCoordinates(value: string | null): Record<string, unknown> | null {
-  if (!value) {
-    return null;
-  }
-
-  try {
-    const parsed = JSON.parse(value) as unknown;
-    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
-      ? (parsed as Record<string, unknown>)
-      : null;
-  } catch {
-    return null;
-  }
-}
-
 function toProfileRow(profile: MobileProfileResponse): Record<string, unknown> {
   const fullAddress =
-    [profile.purokOrStreet, profile.barangayName, profile.municipalityName]
+    [
+      profile.purokOrStreet,
+      profile.barangayName,
+      profile.municipalityName,
+      profile.landmark,
+    ]
       .filter(Boolean)
       .join(", ") || null;
 
@@ -51,13 +44,16 @@ function toProfileRow(profile: MobileProfileResponse): Record<string, unknown> {
     email: profile.email,
     avatar_url: profile.avatarUrl,
     purok_or_street: profile.purokOrStreet,
+    barangay_psgc: profile.barangayPsgc,
     barangay: profile.barangayName,
+    municipality_code: profile.municipalityCode,
     municipality: profile.municipalityName,
+    landmark: profile.landmark,
     full_address: fullAddress,
     meter_serial_num: profile.meterSerialNumber,
     pole_number: profile.poleNumber,
     service_type: profile.customerClass,
-    home_coordinates: parseCoordinates(profile.mapCoordinates),
+    home_coordinates: profile.mapCoordinates,
     is_active: true,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -70,6 +66,42 @@ export async function fetchCurrentConsumerProfileView(): Promise<ConsumerProfile
   );
 
   return toConsumerProfileView(toProfileRow(profile));
+}
+
+export async function updateCurrentConsumerProfile(
+  field: "phone" | "email" | "address",
+  value: string,
+): Promise<ConsumerProfileView> {
+  const response = await apiRequest<{
+    updated: true;
+    profile: MobileProfileResponse;
+  }>("/api/mobile/profile", {
+    method: "PATCH",
+    body: JSON.stringify({ field, value }),
+  });
+  return toConsumerProfileView(toProfileRow(response.profile));
+}
+
+export type StructuredProfileAddressInput = {
+  municipalityCode: string;
+  barangayPsgc: string;
+  purokOrStreet: string;
+  landmark: string;
+  latitude: number;
+  longitude: number;
+};
+
+export async function updateCurrentConsumerAddress(
+  value: StructuredProfileAddressInput,
+): Promise<ConsumerProfileView> {
+  const response = await apiRequest<{
+    updated: true;
+    profile: MobileProfileResponse;
+  }>("/api/mobile/profile", {
+    method: "PATCH",
+    body: JSON.stringify({ field: "address", value }),
+  });
+  return toConsumerProfileView(toProfileRow(response.profile));
 }
 
 export type UploadProfileAvatarInput = {

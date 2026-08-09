@@ -1,41 +1,44 @@
-import { appScrollableBottomPadding } from "@/components/floating-app-bar";
+import { ChildAppBar } from "@/components/child-app-bar";
+import { Alert, AlertText } from "@/components/ui/alert";
+import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
+import { Heading } from "@/components/ui/heading";
+import { Pressable } from "@/components/ui/pressable";
+import { Progress, ProgressFilledTrack } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Text } from "@/components/ui/text";
 import {
   fetchNotificationSettings,
   saveNotificationSettings,
+  type SaveNotificationSettingsInput,
   type NotificationSettings,
   type NotificationSubstation,
 } from "@/services/notification-settings";
-import {
-  Alert,
-  Button,
-  Label,
-  Skeleton,
-  Surface,
-  Typography,
-  useThemeColor,
-} from "heroui-native";
+import * as Notifications from "expo-notifications";
+import { useFocusEffect, useRouter } from "expo-router";
 import {
   BellRing,
   Check,
+  CheckCheck,
   ChevronDown,
   ChevronRight,
-  CheckCheck,
   Minus,
   RadioTower,
-  Save,
   Zap,
 } from "lucide-react-native";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  Pressable,
+  AppState,
+  BackHandler,
+  Linking,
+  Platform,
   RefreshControl,
   ScrollView,
   View,
   useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useCSSVariable } from "uniwind";
 
+import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
 
 type ParentState = "none" | "partial" | "all";
@@ -44,6 +47,11 @@ type Notice = {
   title: string;
   description: string;
 };
+type OsPermissionState =
+  | "granted"
+  | "denied"
+  | "undetermined"
+  | "unavailable";
 
 function makeInitialSelection(settings: NotificationSettings) {
   const selected = new Set(settings.selectedFeederIds);
@@ -89,6 +97,19 @@ function compactSelection(
   return { selectedSubstationIds, selectedFeederIds: selectedPartialFeederIds };
 }
 
+function buildSavePayload(
+  settings: NotificationSettings,
+  selectedFeederIds: Set<string>,
+  receivePushNotifications: boolean,
+  receiveAdvisories: boolean,
+): SaveNotificationSettingsInput {
+  return {
+    receivePushNotifications,
+    receiveAdvisories,
+    ...compactSelection(settings.substations, selectedFeederIds),
+  };
+}
+
 function TriStateCheckbox({
   state,
   onPress,
@@ -98,7 +119,7 @@ function TriStateCheckbox({
   onPress: () => void;
   accessibilityLabel: string;
 }) {
-  const [accentColor, accentForeground, borderColor] = useThemeColor([
+  const [accentColor, accentForeground, borderColor] = useAppColors([
     "accent",
     "accent-foreground",
     "border",
@@ -130,7 +151,7 @@ function TriStateCheckbox({
 }
 
 function FeederCheckbox({ selected }: { selected: boolean }) {
-  const [accentColor, accentForeground, borderColor] = useThemeColor([
+  const [accentColor, accentForeground, borderColor] = useAppColors([
     "accent",
     "accent-foreground",
     "border",
@@ -155,9 +176,12 @@ function FeederCheckbox({ selected }: { selected: boolean }) {
 }
 
 function ToggleSwitch({ value }: { value: boolean }) {
-  const [accentColor, mutedColor] = useThemeColor(["accent", "muted"]);
+  const [accentColor, mutedColor] = useAppColors(["accent", "muted"]);
   return (
-    <View className="h-11 w-14 justify-center" style={{ pointerEvents: "none" }}>
+    <View
+      className="h-11 w-14 justify-center"
+      style={{ pointerEvents: "none" }}
+    >
       <View
         className="h-8 rounded-full p-1"
         style={{ backgroundColor: value ? accentColor : mutedColor }}
@@ -194,10 +218,8 @@ function PreferenceSwitch({
     >
       <View className="h-11 w-8 items-center justify-center">{icon}</View>
       <View className="flex-1">
-        <Label>{title}</Label>
-        <Typography.Paragraph type="body-xs" color="muted">
-          {description}
-        </Typography.Paragraph>
+        <Text className="font-medium text-foreground">{title}</Text>
+        <Text className="text-xs text-muted-foreground">{description}</Text>
       </View>
       <ToggleSwitch value={value} />
     </Pressable>
@@ -207,20 +229,23 @@ function PreferenceSwitch({
 function LoadingState() {
   return (
     <View className="gap-3">
-      <Skeleton className="h-24 rounded-3xl" />
-      <Skeleton className="h-14 rounded-[20px]" />
-      <Skeleton className="h-28 rounded-3xl" />
-      <Skeleton className="h-28 rounded-3xl" />
+      <Skeleton className="h-24 rounded-xl" />
+      <Skeleton className="h-14 rounded-xl" />
+      <Skeleton className="h-28 rounded-xl" />
+      <Skeleton className="h-28 rounded-xl" />
     </View>
   );
 }
 
 export default function PushNotificationsRoute() {
+  const router = useRouter();
   const { session, isLoading: isSessionLoading } = useAuthSession();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const [accentColor, mutedColor] = useThemeColor(["accent", "muted"]);
-  const floatingShadow = useCSSVariable("--shadow-floating-bar");
+  const [accentColor, mutedColor] = useAppColors([
+    "accent",
+    "muted-foreground",
+  ]);
   const [settings, setSettings] = useState<NotificationSettings | null>(null);
   const [receivePushNotifications, setReceivePushNotifications] =
     useState(true);
@@ -234,8 +259,15 @@ export default function PushNotificationsRoute() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [hasHydrated, setHasHydrated] = useState(false);
+  const [saveRetry, setSaveRetry] = useState(0);
   const [notice, setNotice] = useState<Notice | null>(null);
-  const bottomPadding = appScrollableBottomPadding(insets.bottom);
+  const [osPermission, setOsPermission] =
+    useState<OsPermissionState>("undetermined");
+  const [canAskPermission, setCanAskPermission] = useState(true);
+  const savedSignatureRef = useRef("");
+  const saveRevisionRef = useRef(0);
+  const bottomPadding = Math.max(insets.bottom, 16);
 
   const selectedCount = selectedFeederIds.size;
   const totalFeederCount = useMemo(
@@ -247,7 +279,101 @@ export default function PushNotificationsRoute() {
     [settings],
   );
   const selectionPercent =
-    totalFeederCount > 0 ? Math.round((selectedCount / totalFeederCount) * 100) : 0;
+    totalFeederCount > 0
+      ? Math.round((selectedCount / totalFeederCount) * 100)
+      : 0;
+  const draftPayload = useMemo(
+    () =>
+      settings
+        ? buildSavePayload(
+            settings,
+            selectedFeederIds,
+            receivePushNotifications,
+            receiveAdvisories,
+          )
+        : null,
+    [
+      receiveAdvisories,
+      receivePushNotifications,
+      selectedFeederIds,
+      settings,
+    ],
+  );
+  const draftSignature = draftPayload ? JSON.stringify(draftPayload) : "";
+
+  const refreshOsPermission = useCallback(async () => {
+    if (Platform.OS !== "android" && Platform.OS !== "ios") {
+      setOsPermission("unavailable");
+      return;
+    }
+
+    try {
+      const permission = await Notifications.getPermissionsAsync();
+      setOsPermission(
+        permission.granted
+          ? "granted"
+          : permission.status === "denied"
+            ? "denied"
+            : "undetermined",
+      );
+      setCanAskPermission(permission.canAskAgain);
+    } catch {
+      setOsPermission("unavailable");
+    }
+  }, []);
+
+  const requestOsPermission = useCallback(async () => {
+    if (Platform.OS !== "android" && Platform.OS !== "ios") return;
+
+    try {
+      if (osPermission === "denied" && !canAskPermission) {
+        await Linking.openSettings();
+        return;
+      }
+
+      const permission = await Notifications.requestPermissionsAsync();
+      setOsPermission(
+        permission.granted
+          ? "granted"
+          : permission.status === "denied"
+            ? "denied"
+            : "undetermined",
+      );
+      setCanAskPermission(permission.canAskAgain);
+    } catch {
+      setOsPermission("unavailable");
+      return;
+    }
+  }, [canAskPermission, osPermission]);
+
+  const handleBack = useCallback(() => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+    router.replace("/profile");
+  }, [router]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        () => {
+          handleBack();
+          return true;
+        },
+      );
+      return () => subscription.remove();
+    }, [handleBack]),
+  );
+
+  useEffect(() => {
+    void refreshOsPermission();
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state === "active") void refreshOsPermission();
+    });
+    return () => subscription.remove();
+  }, [refreshOsPermission]);
 
   const load = useCallback(async () => {
     if (!session) {
@@ -255,15 +381,23 @@ export default function PushNotificationsRoute() {
       return;
     }
 
+    setHasHydrated(false);
     const next = await fetchNotificationSettings();
-    setSettings(next);
-    setReceivePushNotifications(next.preferences.receivePushNotifications);
-    setReceiveAdvisories(next.preferences.receiveAdvisories);
     const selected = makeInitialSelection(next);
+    const receivePush = next.preferences.receivePushNotifications;
+    const receiveAdvisoriesNext = next.preferences.receiveAdvisories;
+    savedSignatureRef.current = JSON.stringify(
+      buildSavePayload(next, selected, receivePush, receiveAdvisoriesNext),
+    );
+    setSettings(next);
+    setReceivePushNotifications(receivePush);
+    setReceiveAdvisories(receiveAdvisoriesNext);
     setSelectedFeederIds(selected);
     setExpandedSubstationIds(
       new Set(next.substations.map((substation) => substation.id)),
     );
+    setNotice(null);
+    setHasHydrated(true);
     setIsLoading(false);
   }, [session]);
 
@@ -277,6 +411,42 @@ export default function PushNotificationsRoute() {
       });
     });
   }, [load]);
+
+  useEffect(() => {
+    if (
+      !hasHydrated ||
+      !draftPayload ||
+      draftSignature === savedSignatureRef.current
+    ) {
+      return;
+    }
+
+    const revision = ++saveRevisionRef.current;
+    setIsSaving(true);
+    const timer = setTimeout(() => {
+      void saveNotificationSettings(draftPayload)
+        .then((next) => {
+          if (revision !== saveRevisionRef.current) return;
+          savedSignatureRef.current = draftSignature;
+          setSettings(next);
+          setNotice(null);
+        })
+        .catch((error) => {
+          if (revision !== saveRevisionRef.current) return;
+          setNotice({
+            status: "danger",
+            title: "Autosave failed",
+            description:
+              error instanceof Error ? error.message : "Try saving again.",
+          });
+        })
+        .finally(() => {
+          if (revision === saveRevisionRef.current) setIsSaving(false);
+        });
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, [draftPayload, draftSignature, hasHydrated, saveRetry]);
 
   const refresh = async () => {
     setIsRefreshing(true);
@@ -332,63 +502,46 @@ export default function PushNotificationsRoute() {
     setSelectedFeederIds(new Set());
   };
 
-  const save = async () => {
-    if (!settings) return;
-    setIsSaving(true);
-    try {
-      const compact = compactSelection(settings.substations, selectedFeederIds);
-      const next = await saveNotificationSettings({
-        receivePushNotifications,
-        receiveAdvisories,
-        ...compact,
-      });
-      setSettings(next);
-      setSelectedFeederIds(makeInitialSelection(next));
-      setNotice({
-        status: "success",
-        title: "Saved",
-        description: "Notification settings updated.",
-      });
-    } catch (error) {
-      setNotice({
-        status: "danger",
-        title: "Save failed",
-        description: error instanceof Error ? error.message : "Try again.",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   if (!isSessionLoading && !session) {
     return (
       <View
         className="flex-1 items-center justify-center bg-background px-6"
         style={{ width }}
       >
-        <Surface className="w-full items-center rounded-3xl p-6">
+        <View className="w-full items-center rounded-lg border border-border bg-card p-6">
           <BellRing size={28} color={accentColor} />
-          <Typography.Heading
-            type="h5"
-            weight="bold"
-            className="mt-4 text-center"
-          >
+          <Heading className="mt-4 text-center" size="md">
             Sign in required
-          </Typography.Heading>
-          <Typography.Paragraph
-            type="body-sm"
-            color="muted"
-            className="mt-2 text-center"
-          >
+          </Heading>
+          <Text className="mt-2 text-center text-sm text-muted-foreground">
             Sign in to manage feeder and substation alerts.
-          </Typography.Paragraph>
-        </Surface>
+          </Text>
+        </View>
       </View>
     );
   }
 
   return (
     <View className="flex-1 bg-background" style={{ width }}>
+      <ChildAppBar
+        title="Notification settings"
+        description="Choose which consumer updates reach this device"
+        onBack={handleBack}
+        rightActions={
+          <Text
+            className="text-xs font-semibold text-muted-foreground"
+            accessibilityLiveRegion="polite"
+          >
+            {isLoading
+              ? "Loading..."
+              : isSaving
+                ? "Saving..."
+                : notice?.status === "danger"
+                  ? "Not saved"
+                  : "Saved"}
+          </Text>
+        }
+      />
       <ScrollView
         className="bg-background"
         contentInsetAdjustmentBehavior="automatic"
@@ -407,58 +560,109 @@ export default function PushNotificationsRoute() {
           gap: 12,
           paddingHorizontal: 20,
           paddingTop: 14,
-          paddingBottom: bottomPadding + 120,
+          paddingBottom: bottomPadding + 24,
         }}
       >
-        <Surface className="rounded-3xl p-5">
+        <View className="rounded-lg border border-border bg-card p-5">
           <View className="flex-row items-center gap-3">
-            <View className="h-12 w-12 items-center justify-center rounded-2xl bg-accent-soft">
+            <View className="h-12 w-12 items-center justify-center rounded-full bg-accent-soft">
               <BellRing size={22} color={accentColor} />
             </View>
             <View className="flex-1">
-              <Typography.Heading type="h5" weight="bold">
-                Alert preferences
-              </Typography.Heading>
-              <Typography.Paragraph type="body-xs" color="muted">
-                Choose which grid updates should reach this device.
-              </Typography.Paragraph>
+              <Heading size="md">Alert preferences</Heading>
+              <Text className="text-xs text-muted-foreground">
+                Changes save automatically.
+              </Text>
             </View>
           </View>
           <View className="mt-4 gap-2">
             <View className="flex-row items-center justify-between">
-              <Typography type="body-xs" color="muted" weight="medium">
+              <Text className="text-xs font-medium text-muted-foreground">
                 {selectedCount}/{totalFeederCount} feeders
-              </Typography>
-              <Typography type="body-xs" color="muted" weight="medium">
+              </Text>
+              <Text className="text-xs font-medium text-muted-foreground">
                 {selectionPercent}%
-              </Typography>
+              </Text>
             </View>
-            <View className="h-2 overflow-hidden rounded-full bg-surface-secondary">
-              <View
-                className="h-full rounded-full bg-accent"
-                style={{ width: `${selectionPercent}%` }}
-              />
-            </View>
+            <Progress value={selectionPercent}>
+              <ProgressFilledTrack />
+            </Progress>
           </View>
-        </Surface>
+        </View>
+
+        <View className="flex-row items-center gap-3 rounded-lg border border-border bg-card p-4">
+          <View className="h-11 w-11 items-center justify-center rounded-full bg-accent-soft">
+            <BellRing size={20} color={accentColor} />
+          </View>
+          <View className="flex-1 gap-0.5">
+            <Text className="font-semibold text-foreground">
+              Device permission
+            </Text>
+            <Text className="text-xs text-muted-foreground">
+              {osPermission === "granted"
+                ? "Allowed by this device"
+                : osPermission === "denied"
+                  ? "Blocked by this device"
+                  : osPermission === "unavailable"
+                    ? "Available in the installed mobile app"
+                    : "Permission has not been requested"}
+            </Text>
+          </View>
+          {osPermission !== "granted" && osPermission !== "unavailable" ? (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="min-h-11"
+              onPress={() => void requestOsPermission()}
+              accessibilityLabel={
+                osPermission === "denied" && !canAskPermission
+                  ? "Open notification settings"
+                  : "Allow notification permission"
+              }
+            >
+              <ButtonText>
+                {osPermission === "denied" && !canAskPermission
+                  ? "Settings"
+                  : "Allow"}
+              </ButtonText>
+            </Button>
+          ) : null}
+        </View>
 
         {notice ? (
-          <Alert status={notice.status}>
-            <Alert.Indicator />
-            <Alert.Content>
-              <Alert.Title>{notice.title}</Alert.Title>
-              <Alert.Description>{notice.description}</Alert.Description>
-            </Alert.Content>
+          <Alert
+            variant={notice.status === "danger" ? "destructive" : "default"}
+          >
+            <View className="flex-1 gap-1">
+              <AlertText className="font-bold">{notice.title}</AlertText>
+              <AlertText>{notice.description}</AlertText>
+              {notice.status === "danger" ? (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="mt-1 min-h-11 self-start"
+                  onPress={() => setSaveRetry((current) => current + 1)}
+                  accessibilityLabel="Retry saving notification settings"
+                >
+                  <ButtonText>Retry</ButtonText>
+                </Button>
+              ) : null}
+            </View>
           </Alert>
         ) : null}
 
-        <Surface className="gap-3 rounded-3xl p-4">
+        <View className="gap-3 rounded-lg border border-border bg-card p-4">
           <PreferenceSwitch
             icon={<BellRing size={20} color={accentColor} />}
             title="Push notifications"
             description="Send device notifications when updates are available."
             value={receivePushNotifications}
-            onChange={setReceivePushNotifications}
+            onChange={(value) => {
+              setReceivePushNotifications(value);
+              if (value && osPermission !== "granted") {
+                void requestOsPermission();
+              }
+            }}
           />
           <PreferenceSwitch
             icon={<Zap size={20} color={accentColor} />}
@@ -467,24 +671,28 @@ export default function PushNotificationsRoute() {
             value={receiveAdvisories}
             onChange={setReceiveAdvisories}
           />
-        </Surface>
+        </View>
 
         <View className="gap-2">
           <View className="flex-row items-center justify-between px-2">
-            <Label className="text-sm text-muted">Substations and feeders</Label>
+            <Text className="text-sm text-muted-foreground">
+              Substations and feeders
+            </Text>
             <View className="flex-row gap-2">
               <Button
                 size="sm"
                 variant="ghost"
+                className="min-h-11"
                 onPress={clearAllFeeders}
                 isDisabled={isLoading || !settings || selectedCount === 0}
                 accessibilityLabel="Clear feeder selections"
               >
-                <Button.Label>Clear</Button.Label>
+                <ButtonText>Clear</ButtonText>
               </Button>
               <Button
                 size="sm"
                 variant="secondary"
+                className="min-h-11"
                 onPress={selectAllFeeders}
                 isDisabled={
                   isLoading ||
@@ -494,8 +702,8 @@ export default function PushNotificationsRoute() {
                 }
                 accessibilityLabel="Select all feeders"
               >
-                <CheckCheck size={15} color={accentColor} />
-                <Button.Label>All</Button.Label>
+                <ButtonIcon as={CheckCheck} height={15} width={15} />
+                <ButtonText>All</ButtonText>
               </Button>
             </View>
           </View>
@@ -510,7 +718,10 @@ export default function PushNotificationsRoute() {
                 ).length;
 
                 return (
-                  <Surface key={substation.id} className="rounded-[22px] p-3">
+                  <View
+                    key={substation.id}
+                    className="rounded-lg border border-border bg-card p-3"
+                  >
                     <View className="flex-row items-center gap-3">
                       <TriStateCheckbox
                         state={state}
@@ -523,26 +734,30 @@ export default function PushNotificationsRoute() {
                         accessibilityRole="button"
                         accessibilityLabel={`Toggle ${substation.name}`}
                       >
-                        <Typography type="body-sm" weight="bold">
+                        <Text className="text-sm font-bold text-foreground">
                           {substation.name}
-                        </Typography>
-                        <Typography type="body-xs" color="muted">
+                        </Text>
+                        <Text className="text-xs text-muted-foreground">
                           {selectedInGroup}/{substation.feeders.length} feeders
-                        </Typography>
+                        </Text>
                       </Pressable>
                       <Button
-                        isIconOnly
+                        size="icon"
                         variant="ghost"
-                        size="sm"
+                        className="min-h-11 min-w-11 rounded-full"
                         onPress={() => toggleExpanded(substation.id)}
                         accessibilityLabel={
                           expanded ? "Collapse feeders" : "Expand feeders"
                         }
                       >
                         {expanded ? (
-                          <ChevronDown size={18} color={mutedColor} />
+                          <ButtonIcon as={ChevronDown} height={18} width={18} />
                         ) : (
-                          <ChevronRight size={18} color={mutedColor} />
+                          <ButtonIcon
+                            as={ChevronRight}
+                            height={18}
+                            width={18}
+                          />
                         )}
                       </Button>
                     </View>
@@ -558,20 +773,22 @@ export default function PushNotificationsRoute() {
                               checked: selectedFeederIds.has(feeder.id),
                             }}
                             accessibilityLabel={`Select ${feeder.name}`}
-                            className="min-h-10 flex-row items-center gap-1"
+                            className="min-h-11 flex-row items-center gap-1"
                           >
                             <FeederCheckbox
                               selected={selectedFeederIds.has(feeder.id)}
                             />
                             <View className="flex-1 flex-row items-center gap-2">
                               <RadioTower size={16} color={mutedColor} />
-                              <Label>{feeder.name}</Label>
+                              <Text className="font-medium text-foreground">
+                                {feeder.name}
+                              </Text>
                             </View>
                           </Pressable>
                         ))}
                       </View>
                     ) : null}
-                  </Surface>
+                  </View>
                 );
               })}
             </View>
@@ -579,30 +796,6 @@ export default function PushNotificationsRoute() {
         </View>
       </ScrollView>
 
-      <View
-        className="absolute inset-x-0 bottom-0 items-end px-5"
-        style={{
-          paddingBottom: Math.max(insets.bottom, 14),
-          pointerEvents: "box-none",
-        }}
-      >
-        {/* Floating save button stays above the tab bar and scroll content. */}
-        <Button
-          variant="primary"
-          size="lg"
-          onPress={save}
-          isDisabled={isSaving || isLoading || !settings}
-          className="rounded-full px-5"
-          style={{
-            width: 168,
-            boxShadow:
-              typeof floatingShadow === "string" ? floatingShadow : undefined,
-          }}
-        >
-          <Save size={18} color="white" />
-          <Button.Label>{isSaving ? "Saving..." : "Save"}</Button.Label>
-        </Button>
-      </View>
     </View>
   );
 }

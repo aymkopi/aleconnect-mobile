@@ -5,4 +5,5 @@ const config = getDefaultConfig(__dirname);
 
 module.exports = withUniwindConfig(config, {
   cssEntryFile: "./global.css",
+  extraThemes: ["dark"],
 });

@@ -1,12 +1,14 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { apiRequest } from "@/services/api";
+import { claimRefresh } from "@/utils/refresh-cooldown";
 
 export type HotlineContact = {
   readonly id: string;
   readonly number: string;
   readonly label: string | null;
   readonly type: string | null;
+  readonly group: "Hotline/Emergency" | "Other service contacts";
 };
 
 export type HotlineAgency = {
@@ -17,6 +19,7 @@ export type HotlineAgency = {
   readonly address: string | null;
   readonly logoUrl: string | null;
   readonly websiteLink: string | null;
+  readonly avatarVersion: string | null;
   readonly contacts: HotlineContact[];
 };
 
@@ -29,15 +32,19 @@ export type HotlineCategory = {
 
 type HotlineResponse = {
   readonly categories: HotlineCategory[];
+  readonly isStale?: boolean;
 };
 
-const cacheKey = "hotlines_cache_v2";
+const cacheKey = "hotlines_cache_v4";
 const cacheTtlMs = 24 * 60 * 60 * 1000;
 let memoryCache: { fetchedAt: number; value: HotlineResponse } | null = null;
 let request: Promise<HotlineResponse> | null = null;
 
-async function readCache() {
-  if (memoryCache && Date.now() - memoryCache.fetchedAt <= cacheTtlMs) {
+async function readCache(allowStale = false) {
+  if (
+    memoryCache &&
+    (allowStale || Date.now() - memoryCache.fetchedAt <= cacheTtlMs)
+  ) {
     return memoryCache.value;
   }
 
@@ -46,7 +53,11 @@ async function readCache() {
 
   try {
     const parsed = JSON.parse(raw) as typeof memoryCache;
-    if (!parsed || Date.now() - parsed.fetchedAt > cacheTtlMs) return null;
+    if (
+      !parsed ||
+      (!allowStale && Date.now() - parsed.fetchedAt > cacheTtlMs)
+    )
+      return null;
     memoryCache = parsed;
     return parsed.value;
   } catch {
@@ -60,7 +71,9 @@ async function writeCache(value: HotlineResponse) {
 }
 
 export async function fetchHotlines(options?: { force?: boolean }) {
-  if (!options?.force) {
+  const force =
+    Boolean(options?.force) && claimRefresh("hotlines");
+  if (!force) {
     const cached = await readCache();
     if (cached) return cached;
   }
@@ -71,6 +84,16 @@ export async function fetchHotlines(options?: { force?: boolean }) {
     .then(async (data) => {
       await writeCache(data);
       return data;
+    }, async (error) => {
+      if (typeof __DEV__ !== "undefined" && __DEV__) {
+        console.warn(
+          "[hotlines] refresh failed",
+          error instanceof Error ? error.message : "Unknown error",
+        );
+      }
+      const stale = await readCache(true);
+      if (stale) return { ...stale, isStale: true };
+      throw error;
     })
     .finally(() => {
       request = null;

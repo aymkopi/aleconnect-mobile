@@ -1,9 +1,9 @@
 import { FloatingTabsBar } from "@/components/floating-tabs-bar";
+import { useAppColors } from "@/hooks/use-app-colors";
 import { Tabs } from "expo-router";
-import { useThemeColor } from "heroui-native";
 
 export default function TabsLayout() {
-  const [sceneBackgroundColor] = useThemeColor(["background"]);
+  const [sceneBackgroundColor] = useAppColors(["background"]);
 
   return (
     <Tabs
@@ -25,10 +25,10 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="complaints"
+        name="reports"
         options={{
           popToTopOnBlur: true,
-          title: "Complaints",
+          title: "Reports",
         }}
       />
       <Tabs.Screen
