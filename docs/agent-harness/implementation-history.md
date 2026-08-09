@@ -9,7 +9,7 @@
 - Verification: full `npx expo run:android --device 25069PTEBG` rebuild; a real notification displayed after process termination and its tap opened Advisory Details for `ADUO-260807-00001`. The full mobile test, TypeScript, lint, Expo Doctor, export, and harness gates are the release checks.
 - Git/Deployment: no EAS/store release. The sibling staff API and maintenance Workers were deployed only after G-34.
 - Remaining risks: final consumer behavior still depends on Android/Expo notification delivery policies outside application control.
-- Next: merge the verified mobile branch into `master` after the merged-tree gates pass.
+- Next: verify and push the merged `master` tree; no EAS/store release is included.
 
 ## 2026-08-02 — Mobile agent harness foundation
 

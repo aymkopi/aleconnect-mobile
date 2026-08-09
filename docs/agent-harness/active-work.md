@@ -1,9 +1,9 @@
 # Active work
 
 Last reviewed: 2026-08-09
-Current branch: codex/gluestack-ui-v5-migration
+Current branch: master
 Active plan: ../aleconnect/docs/superpowers/plans/2026-08-02-mobile-report-operations-dashboard.md; G-00-G-05, G-08, G-10-G-25, and G-26-G-34 are complete.
-Next task: merge this verified branch into `master` and verify the merged tree.
+Next task: push `master` after the final merged-tree verification; G-24 has no remaining implementation item.
 Known blockers: none. Preserve Graphify outputs; do not publish an EAS/store release without explicit direction.
 Last verified: 2026-08-09 full Android rebuild on device `25069PTEBG`, terminated-process notification display, and tap-to-exact Advisory Details route passed. Focused notification tests, TypeScript, lint, and Expo Doctor 19/19 passed.
 
