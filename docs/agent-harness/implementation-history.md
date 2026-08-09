@@ -1,5 +1,16 @@
 # Implementation history
 
+## 2026-08-09 - G-24 terminated-process notification routing
+
+- Repositories: mobile with the sibling staff notification contract.
+- Scope: made notification responses survive process termination and dispatch only after navigation is ready.
+- Files: `src/services/push-notifications.ts`, `src/components/push-notifications-receiver.tsx`, focused response tests, and harness handoff documents.
+- Contracts: the background task and visible notification-response listener serialize through one persistence path; startup consumption waits for the receiver bridge and clears the stored response only after dispatch.
+- Verification: full `npx expo run:android --device 25069PTEBG` rebuild; a real notification displayed after process termination and its tap opened Advisory Details for `ADUO-260807-00001`. The full mobile test, TypeScript, lint, Expo Doctor, export, and harness gates are the release checks.
+- Git/Deployment: no EAS/store release. The sibling staff API and maintenance Workers were deployed only after G-34.
+- Remaining risks: final consumer behavior still depends on Android/Expo notification delivery policies outside application control.
+- Next: merge the verified mobile branch into `master` after the merged-tree gates pass.
+
 ## 2026-08-02 — Mobile agent harness foundation
 
 - Repositories: mobile; sibling staff contract at `../aleconnect`.
@@ -103,7 +114,10 @@
 
 - Repositories: mobile and sibling staff/API.
 - Scope: added typed safe notification destinations, awaited no-link read state, one-shot report/advisory focus tokens, and Android device runtime proof while preserving the existing notification response contract.
+- Files: notification navigation/service/screens, focused notification tests, and the cross-project goal tracker.
+- Contracts: notification destinations remain allowlisted and use human references; no-link notifications only update owner-scoped read state.
 - Verification: mobile notification tests 4/4, TypeScript and lint passed; wireless Android device `25069PTEBG` launched `MainActivity`, Metro 8081 and ADB reverse were verified, and the three ALEConnect notification channels were present with bundled sounds.
+- Git/Deployment: no commit, publish, or deployment.
 - Remaining risks: physical token registration and foreground/background/cold-start response proof remain open for G-24; G-25 receipt/cron proof is tracked in the sibling staff handoff.
 - Next: finish G-24-G-25 physical Expo push delivery proof.
 
@@ -111,13 +125,33 @@
 
 - Repositories: mobile and sibling staff/API.
 - Scope: kept notifications on the shared destination helper, fixed its stale route-literal assertion, and verified the device-targeted Expo build path.
+- Files: notification destination tests, mobile harness handoffs, and sibling notification/push verification files.
+- Contracts: the established notification destination helper remains the single routing contract for visible and tapped notifications.
 - Verification: mobile full suite 100/100, TypeScript/lint passed, and `npx expo run:android --device 25069PTEBG --no-bundler` completed successfully, installed the debug APK, and opened the Expo development client. Metro 8081 and ADB reverse remained active. Sibling staff notification tests passed 12/12; advisory publication/reactivation DB tests passed 2/2 serially; staff TypeScript/build/lint passed with two pre-existing generated-worktree warnings.
+- Git/Deployment: no commit, publish, or deployment.
 - Remaining risks: token registration, foreground/background/cold-start push response, and live receipt/cron proof remain open for G-24/G-25.
 - Next: capture authenticated token and end-to-end push delivery evidence without changing the established contracts.
 
 ## 2026-08-06 - Physical push proof and deferred terminated-state response
 
+- Repositories: mobile and sibling staff/API.
 - Scope: verified the authenticated Expo token, Android notification permission/channels, foreground delivery, background tap-to-advisory navigation, Expo receipt success, and advisory revision dedupe on the wireless device.
+- Files: notification startup/response instrumentation, focused tests, and both repositories' goal and harness handoffs.
+- Contracts: foreground and background navigation use the shared allowlisted destination resolver; no terminated-state guarantee was claimed in this entry.
 - Verification: foreground delivery refreshed the Home badge/advisory immediately; background tapping opened the exact advisory details route; the checked receipt was `ok`. Notification-response regression test, TypeScript, and lint passed.
+- Git/Deployment: no commit, publish, or deployment.
 - Deferred defect: a notification received after the app process was killed still displayed and launched `MainActivity`, but the app opened Home. Diagnostic boundary logs showed neither an initial response nor a response-listener event. Expo routes Android terminated-state actions through a registered notification task, which this app does not currently register. Per product direction, no task implementation was retained; resume with task persistence plus startup consumption and repeat the physical test.
 - Cleanup: the disposable advisory and related notification/audit/push rows were removed by the sibling API workspace; the real device token was not removed.
+- Remaining risks: terminated-state routing and the scheduled Worker proof remained incomplete at this point.
+- Next: implement early response persistence and startup consumption, then repeat the physical cold-start test.
+
+## 2026-08-09 - Terminated notification response routing
+
+- Repositories: mobile and sibling staff/API.
+- Scope: completed G-24 by installing the notification-response listener at module startup, serializing background and visible response persistence, and consuming the same response bridge after router startup.
+- Files: `src/services/push-notifications.ts`, `src/components/push-notifications-receiver.tsx`, `tests/notification-response-consumption.test.mjs`, and harness handoffs.
+- Contracts: notification taps continue through the existing allowlisted destination resolver; interactive and TaskManager responses share one serialized persistence path so process startup cannot lose the response or route it twice.
+- Verification: focused notification tests passed; the full mobile suite passed apart from harness records repaired in this entry; TypeScript, lint, and Expo Doctor 19/19 passed. A full `npx expo run:android --device 25069PTEBG` rebuild installed successfully. After process termination, a real Expo notification tap opened the exact consumer-visible Advisory Details screen and loaded its human control number.
+- Git/Deployment: no commit, EAS publish, store upload, or Cloudflare deployment.
+- Remaining risks: G-25 production cron isolation still requires deployment and live tail verification; the app release itself was not published.
+- Next: finish the sibling G-25 Worker release verification, then close the shared goal tracker.

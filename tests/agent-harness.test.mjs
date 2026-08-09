@@ -326,7 +326,10 @@ test("mobile shared contract matches the authoritative staff block", { skip: !st
   const marker = /<!-- shared-contract:start -->([\s\S]*?)<!-- shared-contract:end -->/
   const mobile = await readFile(new URL("../docs/agent-harness/cross-project-contracts.md", import.meta.url), "utf8")
   const staff = await readFile(new URL("../../aleconnect/docs/agent-harness/cross-project-contracts.md", import.meta.url), "utf8")
-  assert.equal(mobile.match(marker)?.[1], staff.match(marker)?.[1])
+  assert.equal(
+    mobile.match(marker)?.[1].replace(/\r\n/g, "\n"),
+    staff.match(marker)?.[1].replace(/\r\n/g, "\n"),
+  )
 })
 
 test("mobile instructions and CI route validation without publishing", async () => {

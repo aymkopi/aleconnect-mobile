@@ -40,8 +40,8 @@
     "semantic_hash": ""
   },
   "app.json": {
-    "mtime": 1785237234.7240057,
-    "ast_hash": "9e6ebaadf065591f457c88448e9067e4",
+    "mtime": 1786054809.7579265,
+    "ast_hash": "f1da206a225617b87938f6c30f0a9cd4",
     "semantic_hash": ""
   },
   "assets/expo.icon/icon.json": {
@@ -70,8 +70,8 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1785605704.8178182,
-    "ast_hash": "da074726ce43bef9dda4998f2961e398",
+    "mtime": 1786054161.2475934,
+    "ast_hash": "50b4d7d15f3ef44cab3bde4d6583ca19",
     "semantic_hash": ""
   },
   "skills-lock.json": {
@@ -110,8 +110,8 @@
     "semantic_hash": ""
   },
   "src/app/_layout.tsx": {
-    "mtime": 1785322482.522527,
-    "ast_hash": "fe51d05da669a5078e00ee490df6615a",
+    "mtime": 1786022226.809049,
+    "ast_hash": "0f936947133810234505e9464125ab02",
     "semantic_hash": ""
   },
   "src/app/index.tsx": {
@@ -135,8 +135,8 @@
     "semantic_hash": ""
   },
   "src/components/push-notifications-receiver.tsx": {
-    "mtime": 1784363840.2029665,
-    "ast_hash": "50d6dd1904f75b0c7e40bb2093c86ba2",
+    "mtime": 1786235712.9398594,
+    "ast_hash": "955e74c8010df2244851c9b7a0328117",
     "semantic_hash": ""
   },
   "src/constants/api.ts": {
@@ -220,8 +220,8 @@
     "semantic_hash": ""
   },
   "src/services/push-notifications.ts": {
-    "mtime": 1784363840.2019653,
-    "ast_hash": "65d3f527da38ce54a7d598a4d70bbddf",
+    "mtime": 1786235712.938855,
+    "ast_hash": "37e666485e3473608248848812da9d70",
     "semantic_hash": ""
   },
   "src/utils/avatar-image-processing.ts": {
@@ -434,21 +434,6 @@
     "ast_hash": "37cdeda9d1af5d7432716d9671b098da",
     "semantic_hash": ""
   },
-  "assets/images/android-icon-background.png": {
-    "mtime": 1775701785.4194763,
-    "ast_hash": "2d65569cc0e2afdcea0af9f9902d4173",
-    "semantic_hash": ""
-  },
-  "assets/images/android-icon-foreground.png": {
-    "mtime": 1775701785.423541,
-    "ast_hash": "72e71a9c846c6aa4ae32476641a00e18",
-    "semantic_hash": ""
-  },
-  "assets/images/android-icon-monochrome.png": {
-    "mtime": 1775701785.423541,
-    "ast_hash": "1e097dab989759fc0b69440092ca22cd",
-    "semantic_hash": ""
-  },
   "assets/images/expo-badge-white.png": {
     "mtime": 1775701785.423541,
     "ast_hash": "02efb8472f161bcf8afc8c8489a28fca",
@@ -555,8 +540,8 @@
     "semantic_hash": ""
   },
   "src/app/notifications.tsx": {
-    "mtime": 1785343134.0150158,
-    "ast_hash": "c7403e56064d8323b562478e656a53e1",
+    "mtime": 1786019184.96482,
+    "ast_hash": "445a60de37342f5684a4b403b582fcb7",
     "semantic_hash": ""
   },
   "src/services/hotlines.ts": {
@@ -565,8 +550,8 @@
     "semantic_hash": ""
   },
   "src/services/notification-navigation.ts": {
-    "mtime": 1785236908.6943693,
-    "ast_hash": "d1d1fd4c802c6cac1eb017235402e6a0",
+    "mtime": 1786019173.162997,
+    "ast_hash": "d070e77d23c2aecf94b093e42c31933d",
     "semantic_hash": ""
   },
   "src/services/notification-settings.ts": {
@@ -585,8 +570,8 @@
     "semantic_hash": ""
   },
   "tests/notification-navigation.test.mjs": {
-    "mtime": 1783789906.394462,
-    "ast_hash": "5899c8629c55db688ef0d3fa7495da31",
+    "mtime": 1786019227.681891,
+    "ast_hash": "3918ce0ed2fa9f28e7557709efa17d7b",
     "semantic_hash": ""
   },
   "docs/gluestack-ui-source.json": {
@@ -925,8 +910,8 @@
     "semantic_hash": ""
   },
   "tests/notification-response-consumption.test.mjs": {
-    "mtime": 1784363840.2039664,
-    "ast_hash": "cd02307f62718d7e730128139e2e5516",
+    "mtime": 1786235750.6258261,
+    "ast_hash": "b625e2199043084a1236e9353c522022",
     "semantic_hash": ""
   },
   "tests/notification-settings-navigation.test.mjs": {
@@ -955,8 +940,8 @@
     "semantic_hash": ""
   },
   "tests/report-detail-navigation.test.mjs": {
-    "mtime": 1784493319.4176486,
-    "ast_hash": "2fbf87377e832ae7727fe95e59deacd3",
+    "mtime": 1786019807.027319,
+    "ast_hash": "4bdfba115ed0b670c56246c179412636",
     "semantic_hash": ""
   },
   "tests/ui-theme-contract.test.mjs": {
@@ -990,8 +975,8 @@
     "semantic_hash": ""
   },
   "src/app/(tabs)/reports/[id].tsx": {
-    "mtime": 1785610985.863004,
-    "ast_hash": "252d2341214851346a76564d2e44020b",
+    "mtime": 1786019204.5720942,
+    "ast_hash": "ec024ac49d1fd6aeadedcc32b215ae46",
     "semantic_hash": ""
   },
   "src/app/(tabs)/reports/_layout.tsx": {
@@ -1010,8 +995,8 @@
     "semantic_hash": ""
   },
   "src/app/(tabs)/reports/new.tsx": {
-    "mtime": 1785608295.7702568,
-    "ast_hash": "19118dc4c97e02edbd982feb97124029",
+    "mtime": 1785894569.5482824,
+    "ast_hash": "1a8104bdad1eb93cd1a9adec31a7ab5d",
     "semantic_hash": ""
   },
   "src/components/child-app-bar.tsx": {
@@ -1090,8 +1075,8 @@
     "semantic_hash": ""
   },
   "src/app/advisory/[id].tsx": {
-    "mtime": 1785236743.2477727,
-    "ast_hash": "b43bec80cae19049efa4a5bb4ada0b58",
+    "mtime": 1786019217.981563,
+    "ast_hash": "502157914901203b21fa6fd87f082bee",
     "semantic_hash": ""
   },
   "src/features/advisories/advisory-list-item.tsx": {
@@ -1170,8 +1155,8 @@
     "semantic_hash": ""
   },
   "tests/notification-pagination.test.mjs": {
-    "mtime": 1785342470.0038016,
-    "ast_hash": "136f370e726708439f531426635a7d18",
+    "mtime": 1786019277.5900385,
+    "ast_hash": "506f2ee3e46f0c335c0618e4926bbc24",
     "semantic_hash": ""
   },
   "tests/notifications.test.mjs": {
@@ -1260,8 +1245,8 @@
     "semantic_hash": ""
   },
   "scripts/validate-agent-harness.mjs": {
-    "mtime": 1785612402.483906,
-    "ast_hash": "c9e1f7f2c016e4710a21f614f42e4690",
+    "mtime": 1786237969.8108912,
+    "ast_hash": "3f4c725d9a01482f6b9229f5f6a583a5",
     "semantic_hash": ""
   },
   "src/features/maps/map-runtime.ts": {
@@ -1270,8 +1255,8 @@
     "semantic_hash": ""
   },
   "tests/agent-harness.test.mjs": {
-    "mtime": 1785612194.0692978,
-    "ast_hash": "7d3daed6bade87f72b340be04e811356",
+    "mtime": 1786237969.81189,
+    "ast_hash": "c27e3a6c739f7bd51f633aa6583ce095",
     "semantic_hash": ""
   },
   "tests/map-runtime.test.mjs": {
@@ -1295,8 +1280,8 @@
     "semantic_hash": ""
   },
   "docs/agent-harness/active-work.md": {
-    "mtime": 1785612668.5369878,
-    "ast_hash": "d0e33f0fe16ae00c36f89d5f126307e6",
+    "mtime": 1786239574.2293143,
+    "ast_hash": "cd539e520d587e909cafc88d8148f470",
     "semantic_hash": ""
   },
   "docs/agent-harness/cross-project-contracts.md": {
@@ -1305,8 +1290,8 @@
     "semantic_hash": ""
   },
   "docs/agent-harness/implementation-history.md": {
-    "mtime": 1785612714.3623693,
-    "ast_hash": "ebe3b91a9a0349df1d98996eb72b680c",
+    "mtime": 1786239574.2283068,
+    "ast_hash": "23300a1dd30e1a3838426cd17fd88930",
     "semantic_hash": ""
   },
   "docs/agent-harness/index.md": {
@@ -1347,6 +1332,31 @@
   "tests/report-transport.test.mjs": {
     "mtime": 1785611341.5491676,
     "ast_hash": "6ced67a9290f885c65e240ca8e9e3969",
+    "semantic_hash": ""
+  },
+  "index.ts": {
+    "mtime": 1786054160.3277388,
+    "ast_hash": "b1e940dcbdad1e765b2b0e00658902de",
+    "semantic_hash": ""
+  },
+  "assets/images/aleconnect-icon-background.png": {
+    "mtime": 1785894311.3859591,
+    "ast_hash": "f7a2ac844c869b6f978d72486ebfe567",
+    "semantic_hash": ""
+  },
+  "assets/images/aleconnect-icon-foreground.png": {
+    "mtime": 1785892534.4243343,
+    "ast_hash": "524463e36afd96c17edcb30205138536",
+    "semantic_hash": ""
+  },
+  "assets/images/aleconnect-icon-monochrome.png": {
+    "mtime": 1785893399.4148448,
+    "ast_hash": "558490af4a2a25de1375cb04c8a10b22",
+    "semantic_hash": ""
+  },
+  "assets/images/aleconnect-icon-white.png": {
+    "mtime": 1785893792.9472175,
+    "ast_hash": "39a413e71e64105f2e1a3884a9196edd",
     "semantic_hash": ""
   }
 }

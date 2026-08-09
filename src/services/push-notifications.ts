@@ -8,6 +8,12 @@ import { expoPushProjectId } from "@/constants";
 
 const notificationResponseTaskName = "aleconnect-notification-response";
 const pendingNotificationResponseKey = "pending_notification_response_v1";
+type NotificationResponseListener = (
+  response: Notifications.NotificationResponse,
+) => void;
+
+const notificationResponseListeners = new Set<NotificationResponseListener>();
+let notificationResponseOperation: Promise<unknown> = Promise.resolve();
 
 function isNotificationResponse(
   value: unknown,
@@ -20,16 +26,53 @@ function isNotificationResponse(
   );
 }
 
+function serializeNotificationResponseOperation<T>(operation: () => Promise<T>) {
+  const result = notificationResponseOperation.then(operation, operation);
+  notificationResponseOperation = result.then(
+    () => undefined,
+    () => undefined,
+  );
+  return result;
+}
+
+function storeNotificationResponseAsync(
+  response: Notifications.NotificationResponse,
+) {
+  return serializeNotificationResponseOperation(async () => {
+    await AsyncStorage.setItem(
+      pendingNotificationResponseKey,
+      JSON.stringify(response),
+    );
+
+    if (notificationResponseListeners.size === 0) return;
+
+    await AsyncStorage.removeItem(pendingNotificationResponseKey);
+    for (const listener of notificationResponseListeners) listener(response);
+  });
+}
+
+export function subscribeToNotificationResponses(
+  listener: NotificationResponseListener,
+) {
+  notificationResponseListeners.add(listener);
+  return () => notificationResponseListeners.delete(listener);
+}
+
+if (Platform.OS !== "web") {
+  Notifications.addNotificationResponseReceivedListener((response) => {
+    void storeNotificationResponseAsync(response).catch((error) => {
+      console.warn("Failed to persist notification response", error);
+    });
+  });
+}
+
 if (Platform.OS === "android") {
   if (!TaskManager.isTaskDefined(notificationResponseTaskName)) {
     TaskManager.defineTask<Notifications.NotificationTaskPayload>(
       notificationResponseTaskName,
       async ({ data, error }) => {
         if (!error && isNotificationResponse(data)) {
-          await AsyncStorage.setItem(
-            pendingNotificationResponseKey,
-            JSON.stringify(data),
-          );
+          await storeNotificationResponseAsync(data);
         }
       },
     );
@@ -128,16 +171,18 @@ export function clearLastNotificationResponse(): void {
 }
 
 async function consumePersistedNotificationResponseAsync(): Promise<Notifications.NotificationResponse | null> {
-  const raw = await AsyncStorage.getItem(pendingNotificationResponseKey);
-  if (!raw) return null;
+  return serializeNotificationResponseOperation(async () => {
+    const raw = await AsyncStorage.getItem(pendingNotificationResponseKey);
+    if (!raw) return null;
 
-  await AsyncStorage.removeItem(pendingNotificationResponseKey);
-  try {
-    const response: unknown = JSON.parse(raw);
-    return isNotificationResponse(response) ? response : null;
-  } catch {
-    return null;
-  }
+    await AsyncStorage.removeItem(pendingNotificationResponseKey);
+    try {
+      const response: unknown = JSON.parse(raw);
+      return isNotificationResponse(response) ? response : null;
+    } catch {
+      return null;
+    }
+  });
 }
 
 export async function consumeLastNotificationResponseAsync(): Promise<Notifications.NotificationResponse | null> {

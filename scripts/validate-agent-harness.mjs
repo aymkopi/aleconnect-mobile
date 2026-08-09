@@ -34,6 +34,7 @@ const expectedSkills = [
 ]
 const requiredArtifacts = expectedSkills.flatMap(({ skillPath, manifestPath }) => [skillPath, manifestPath])
 const readText = (root, relativePath) => readFile(join(root, relativePath), "utf8")
+const normalizeText = (text) => text.replace(/\r\n/g, "\n")
 const requiredHistoryFields = ["Repositories", "Scope", "Files", "Contracts", "Verification", "Git/Deployment", "Remaining risks", "Next"]
 const credentialPatterns = [/mysql:\/\/[^:\s]+:[^@\s]+@/i, /\bsk-[A-Za-z0-9_-]{20,}\b/, /\bBearer\s+[A-Za-z0-9._-]{20,}\b/i]
 const unfinishedMarkers = ["TO" + "DO", "TB" + "D", "FIX" + "ME", "<place" + "holder>"]
@@ -90,7 +91,7 @@ const canFallbackForFirstCommit = (root) => {
 
 const compareRequiredSiblingFile = async (root, siblingRoot, relativePath, errors) => {
   if (!(await exists(siblingRoot, relativePath))) errors.push(`sibling checkout is missing ${relativePath}`)
-  else if (await readText(root, relativePath) !== await readText(siblingRoot, relativePath)) errors.push(`${relativePath} differs from the ${siblingRepository} sibling`)
+  else if (normalizeText(await readText(root, relativePath)) !== normalizeText(await readText(siblingRoot, relativePath))) errors.push(`${relativePath} differs from the ${siblingRepository} sibling`)
 }
 
 export const validateHarness = async ({ root = process.cwd(), baseRef, siblingRoot = resolve(root, "..", "aleconnect") } = {}) => {
@@ -195,7 +196,7 @@ export const validateHarness = async ({ root = process.cwd(), baseRef, siblingRo
       const mobileSharedContract = mobileContracts.match(sharedContract)?.[1]
       const staffSharedContract = staffContracts.match(sharedContract)?.[1]
       if (!mobileSharedContract || !staffSharedContract) errors.push("shared contract markers are required in both repositories")
-      else if (mobileSharedContract !== staffSharedContract) errors.push("shared contract block differs from the staff sibling")
+      else if (normalizeText(mobileSharedContract) !== normalizeText(staffSharedContract)) errors.push("shared contract block differs from the staff sibling")
     }
 
     for (const relativePath of crossSkillPaths) await compareRequiredSiblingFile(root, siblingRoot, relativePath, errors)
