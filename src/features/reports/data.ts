@@ -1,3 +1,6 @@
+// @ts-expect-error Node's direct TypeScript test runner needs the extension.
+import { formatManilaDateTime, parseApiInstant } from "../../utils/manila-time.ts";
+
 export type ComplaintCategory = {
   id: string;
   title: string;
@@ -72,6 +75,7 @@ export type IncidentPublicUpdate = {
 
 export type ReportDetail = Report & {
   imageUrlsExpiresAt: string | null;
+  consumerMessage: string | null;
   actionDesired: string | null;
   purok: string | null;
   barangayPsgc: string | null;
@@ -106,6 +110,58 @@ function isHttpUrl(value: unknown): value is string {
   }
 }
 
+function normalizeConsumerMessage(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+export function buildReportDetailTimeline(
+  history: readonly ReportHistoryItem[],
+  status: string,
+  createdAt: string,
+): ReportHistoryItem[] {
+  if (history.length > 0) return [...history];
+  return [{
+    id: "created",
+    fromStatus: null,
+    toStatus: status,
+    note: "Report received.",
+    changedAt: createdAt,
+  }];
+}
+
+export function consumerMessageTimelineIndex(
+  timeline: readonly Pick<ReportHistoryItem, "toStatus" | "changedAt">[],
+  consumerMessage: string | null,
+) {
+  if (!normalizeConsumerMessage(consumerMessage)) return null;
+
+  let selectedIndex: number | null = null;
+  let selectedChangedAt: number | null = null;
+  let hasValidTimestamp = false;
+  for (const [index, item] of timeline.entries()) {
+    const normalizedStatus = item.toStatus.trim().toLowerCase().replace(/[\s-]+/g, "_");
+    if (normalizedStatus !== "verified") continue;
+
+    const changedAt = parseApiInstant(item.changedAt)?.getTime();
+    if (changedAt === undefined) {
+      if (!hasValidTimestamp) selectedIndex = index;
+      continue;
+    }
+
+    if (
+      !hasValidTimestamp ||
+      selectedChangedAt === null ||
+      changedAt >= selectedChangedAt
+    ) {
+      selectedIndex = index;
+      selectedChangedAt = changedAt;
+      hasValidTimestamp = true;
+    }
+  }
+
+  return selectedIndex;
+}
+
 export function parseReportDetailResponse(value: unknown): ReportDetail {
   const report = isRecord(value) && isRecord(value.report) ? value.report : null;
   const requiredStrings = [
@@ -137,9 +193,10 @@ export function parseReportDetailResponse(value: unknown): ReportDetail {
       : [],
     imageUrlsExpiresAt:
       typeof report.imageUrlsExpiresAt === "string" &&
-      Number.isFinite(Date.parse(report.imageUrlsExpiresAt))
+      parseApiInstant(report.imageUrlsExpiresAt)
         ? report.imageUrlsExpiresAt
         : null,
+    consumerMessage: normalizeConsumerMessage(report.consumerMessage),
   };
 }
 
@@ -217,12 +274,7 @@ export function formatComplaintCategoryTitle(title: string) {
 }
 
 export function formatReportDate(value: string) {
-  return new Intl.DateTimeFormat("en", {
-    month: "short",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(value));
+  return formatManilaDateTime(value);
 }
 
 export function formatStatus(status: string) {

@@ -7,11 +7,14 @@ import { Text } from "@/components/ui/text";
 import { StaticLocationMap } from "@/features/maps/static-location-map";
 import { EvidencePhotoViewer } from "@/features/reports/components/evidence-photo-viewer";
 import {
+  buildReportDetailTimeline,
+  consumerMessageTimelineIndex,
   formatReportDate,
   formatStatus,
   type ReportDetail,
   type ReportHistoryItem,
 } from "@/features/reports/data";
+import { isApiInstantExpired } from "@/utils/manila-time";
 import { ReportStatusBadge } from "@/features/reports/report-list";
 import { ExtendedOutageStatusCard } from "@/features/reports/extended-outage-status-card";
 import { useAppColors } from "@/hooks/use-app-colors";
@@ -52,9 +55,11 @@ function DetailRow({ label, value }: { label: string; value?: string | null }) {
 function TimelineItem({
   item,
   isLast,
+  consumerMessage,
 }: {
   item: ReportHistoryItem;
   isLast: boolean;
+  consumerMessage: string | null;
 }) {
   const [accentColor] = useAppColors(["accent"]);
 
@@ -76,6 +81,12 @@ function TimelineItem({
         </Text>
         {item.note ? (
           <Text className="mt-2 text-sm text-muted-foreground">{item.note}</Text>
+        ) : null}
+        {consumerMessage ? (
+          <View className="mt-3 rounded-md border border-border bg-secondary/40 p-3">
+            <Text className="text-xs font-bold text-muted-foreground">Service Memo update</Text>
+            <Text className="mt-1 text-sm text-foreground">{consumerMessage}</Text>
+          </View>
         ) : null}
       </View>
     </View>
@@ -176,7 +187,7 @@ export default function ReportDetailRoute() {
   useEffect(() => {
     if (
       report?.imageUrlsExpiresAt &&
-      Date.parse(report.imageUrlsExpiresAt) <= Date.now()
+      isApiInstantExpired(report.imageUrlsExpiresAt)
     ) {
       void refreshEvidenceOnce();
     }
@@ -215,25 +226,18 @@ export default function ReportDetailRoute() {
         .filter(Boolean)
         .join(", ")
     : "";
-  const timeline =
-    report && report.history.length > 0
-      ? report.history
-      : report
-        ? [
-            {
-              id: "created",
-              fromStatus: null,
-              toStatus: report.status,
-              note: "Report received.",
-              changedAt: report.createdAt,
-            },
-          ]
-        : [];
+  const timeline = report
+    ? buildReportDetailTimeline(report.history, report.status, report.createdAt)
+    : [];
   const evidencePhotos = (report?.imageUrls ?? []).map((uri, index) => ({
     id: `evidence-${index}`,
     uri,
     status: "ready" as const,
   }));
+  const consumerMessageIndex = consumerMessageTimelineIndex(
+    timeline,
+    report?.consumerMessage ?? null,
+  );
 
   const copyReference = async () => {
     if (!report) return;
@@ -435,6 +439,7 @@ export default function ReportDetailRoute() {
                     key={item.id}
                     item={item}
                     isLast={index === timeline.length - 1}
+                    consumerMessage={index === consumerMessageIndex ? report.consumerMessage : null}
                   />
                 ))}
               </View>

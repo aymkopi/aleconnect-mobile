@@ -14,6 +14,7 @@ import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useUnreadNotificationCount } from "@/hooks/use-unread-notification-count";
 import { fetchComplaintMeta, fetchComplaintReports } from "@/services/reports";
+import { isInManilaMonth, parseApiInstant } from "@/utils/manila-time";
 import { useFocusEffect, useRouter } from "expo-router";
 import {
   Bell,
@@ -29,15 +30,6 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-function isThisMonth(value: string) {
-  const date = new Date(value);
-  const now = new Date();
-  return (
-    date.getFullYear() === now.getFullYear() &&
-    date.getMonth() === now.getMonth()
-  );
-}
 
 function ReportsSkeleton() {
   return (
@@ -118,10 +110,11 @@ export default function ComplaintsRoute() {
   const monthReports = useMemo(
     () =>
       reports
-        .filter((report) => isThisMonth(report.createdAt))
+        .filter((report) => isInManilaMonth(report.createdAt))
         .sort(
           (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+            (parseApiInstant(b.createdAt)?.getTime() ?? Number.NEGATIVE_INFINITY) -
+            (parseApiInstant(a.createdAt)?.getTime() ?? Number.NEGATIVE_INFINITY),
         ),
     [reports],
   );

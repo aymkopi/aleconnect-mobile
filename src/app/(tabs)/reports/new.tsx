@@ -79,7 +79,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   BackHandler,
   Image,
-  Keyboard,
   Platform,
   View,
   useWindowDimensions,
@@ -308,7 +307,6 @@ export default function NewComplaintRoute() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [viewerPhotoIndex, setViewerPhotoIndex] = useState<number | null>(null);
   const [form, setForm] = useState<ComplaintFormState>(initialComplaintForm);
-  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const childBottomPadding = Math.max(insets.bottom, 16) + (step < 5 ? 50 : 32);
 
   useEffect(() => {
@@ -370,20 +368,6 @@ export default function NewComplaintRoute() {
         : {}),
     }));
   }, [meta, profile]);
-
-  useEffect(() => {
-    const showSubscription = Keyboard.addListener("keyboardDidShow", () => {
-      setIsKeyboardVisible(true);
-    });
-    const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
-      setIsKeyboardVisible(false);
-    });
-
-    return () => {
-      showSubscription.remove();
-      hideSubscription.remove();
-    };
-  }, []);
 
   const selectedCategory = meta.categories.find(
     (category) => category.id === form.categoryId,
@@ -1315,7 +1299,7 @@ export default function NewComplaintRoute() {
         ) : null}
       </KeyboardAwareScrollView>
 
-      {step < 5 && !isKeyboardVisible ? (
+      {step < 5 ? (
         <View
           className="absolute inset-x-0 bottom-0 flex-row items-end justify-end px-5"
           pointerEvents="box-none"
