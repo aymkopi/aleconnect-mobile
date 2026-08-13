@@ -39,3 +39,10 @@ test("report review and completion show consumer-safe identity and committed act
   assert.match(route, /accessibilityLiveRegion="polite"/);
   assert.match(route, /Ticket Number pending/);
 });
+
+test("report navigation remains mounted while an Android field opens the keyboard", async () => {
+  const route = await read("src/app/(tabs)/reports/new.tsx");
+
+  assert.match(route, /\{step < 5 \? \(/);
+  assert.doesNotMatch(route, /\{step < 5 && !isKeyboardVisible \? \(/);
+});
