@@ -9,6 +9,7 @@ import { EvidencePhotoViewer } from "@/features/reports/components/evidence-phot
 import {
   formatReportDate,
   formatStatus,
+  shouldDisplayConsumerMessageOnTimelineItem,
   type ReportDetail,
   type ReportHistoryItem,
 } from "@/features/reports/data";
@@ -52,9 +53,11 @@ function DetailRow({ label, value }: { label: string; value?: string | null }) {
 function TimelineItem({
   item,
   isLast,
+  consumerMessage,
 }: {
   item: ReportHistoryItem;
   isLast: boolean;
+  consumerMessage: string | null;
 }) {
   const [accentColor] = useAppColors(["accent"]);
 
@@ -76,6 +79,12 @@ function TimelineItem({
         </Text>
         {item.note ? (
           <Text className="mt-2 text-sm text-muted-foreground">{item.note}</Text>
+        ) : null}
+        {shouldDisplayConsumerMessageOnTimelineItem(item.toStatus, consumerMessage) ? (
+          <View className="mt-3 rounded-md border border-border bg-secondary/40 p-3">
+            <Text className="text-xs font-bold text-muted-foreground">Service Memo update</Text>
+            <Text className="mt-1 text-sm text-foreground">{consumerMessage}</Text>
+          </View>
         ) : null}
       </View>
     </View>
@@ -435,6 +444,7 @@ export default function ReportDetailRoute() {
                     key={item.id}
                     item={item}
                     isLast={index === timeline.length - 1}
+                    consumerMessage={report.consumerMessage}
                   />
                 ))}
               </View>

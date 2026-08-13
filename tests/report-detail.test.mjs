@@ -48,6 +48,47 @@ test("report detail parser rejects incomplete wrappers and never exposes object 
   );
 });
 
+test("report detail normalizes the optional Service Memo message and limits it to verified updates", async () => {
+  const {
+    parseReportDetailResponse,
+    shouldDisplayConsumerMessageOnTimelineItem,
+  } = await import(new URL("../src/features/reports/data.ts", import.meta.url));
+  const base = {
+    id: "ticket-1",
+    ticketNumber: "ALECO-260802-00001",
+    title: "Voltage issue",
+    status: "verified",
+    createdAt: "2026-08-02T00:00:00.000Z",
+    typeId: "type-1",
+    typeTitle: "Voltage issue",
+    categoryId: "category-1",
+    categoryTitle: "Power quality",
+    history: [],
+    publicUpdates: [],
+  };
+
+  assert.equal(
+    parseReportDetailResponse({
+      report: { ...base, consumerMessage: "  Repairs are being coordinated.  " },
+    }).consumerMessage,
+    "Repairs are being coordinated.",
+  );
+  assert.equal(
+    parseReportDetailResponse({ report: { ...base, consumerMessage: { text: "private" } } })
+      .consumerMessage,
+    null,
+  );
+  assert.equal(parseReportDetailResponse({ report: base }).consumerMessage, null);
+  assert.equal(
+    shouldDisplayConsumerMessageOnTimelineItem(" VERIFIED ", "Repairs are being coordinated."),
+    true,
+  );
+  assert.equal(
+    shouldDisplayConsumerMessageOnTimelineItem("in_progress", "Repairs are being coordinated."),
+    false,
+  );
+});
+
 test("report detail retains content, exposes retry, and refreshes expired evidence once", async () => {
   const detail = await read("src/app/(tabs)/reports/[id].tsx");
 

@@ -72,6 +72,7 @@ export type IncidentPublicUpdate = {
 
 export type ReportDetail = Report & {
   imageUrlsExpiresAt: string | null;
+  consumerMessage: string | null;
   actionDesired: string | null;
   purok: string | null;
   barangayPsgc: string | null;
@@ -104,6 +105,18 @@ function isHttpUrl(value: unknown): value is string {
   } catch {
     return false;
   }
+}
+
+function normalizeConsumerMessage(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+export function shouldDisplayConsumerMessageOnTimelineItem(
+  toStatus: string,
+  consumerMessage: string | null,
+) {
+  const normalizedStatus = toStatus.trim().toLowerCase().replace(/[\s-]+/g, "_");
+  return normalizedStatus === "verified" && Boolean(consumerMessage?.trim());
 }
 
 export function parseReportDetailResponse(value: unknown): ReportDetail {
@@ -140,6 +153,7 @@ export function parseReportDetailResponse(value: unknown): ReportDetail {
       Number.isFinite(Date.parse(report.imageUrlsExpiresAt))
         ? report.imageUrlsExpiresAt
         : null,
+    consumerMessage: normalizeConsumerMessage(report.consumerMessage),
   };
 }
 
