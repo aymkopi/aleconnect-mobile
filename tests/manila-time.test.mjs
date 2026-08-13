@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  MANILA_LOCALE,
   formatManilaDateTime,
   formatManilaRelativeTime,
   formatManilaWeekRange,
@@ -11,6 +12,10 @@ import {
   manilaWeekStartKey,
   parseApiInstant,
 } from "../src/utils/manila-time.ts";
+
+test("uses the en-PH locale contract for Manila formatting", () => {
+  assert.equal(MANILA_LOCALE, "en-PH");
+});
 
 test("formats API instants with the Manila clock around a UTC day boundary", () => {
   assert.equal(
@@ -83,4 +88,18 @@ test("does not expire evidence from an ambiguous API timestamp", () => {
 
   assert.equal(isApiInstantExpired("2026-08-12T23:59:00.000Z", reference), true);
   assert.equal(isApiInstantExpired("2026-08-12T23:59:00", reference), false);
+});
+
+test("rejects malformed RFC3339 calendar and numeric-offset boundaries", () => {
+  for (const value of [
+    "2026-02-29T00:00:00Z",
+    "2026-04-31T00:00:00Z",
+    "2026-13-01T00:00:00Z",
+    "2026-01-01T24:00:00Z",
+    "2026-01-01T00:00:00+24:00",
+    "2026-01-01T00:00:00+08:60",
+  ]) {
+    assert.equal(parseApiInstant(value), null);
+  }
+  assert.ok(parseApiInstant("2024-02-29T23:59:59+14:00"));
 });

@@ -1,4 +1,5 @@
 export const MANILA_TIME_ZONE = "Asia/Manila";
+export const MANILA_LOCALE = "en-PH";
 
 type ManilaCalendarParts = {
   year: number;
@@ -9,14 +10,14 @@ type ManilaCalendarParts = {
 const apiInstantPattern = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d{1,9})?)?(Z|[+-](\d{2}):?(\d{2}))$/;
 const calendarKeyPattern = /^(\d{4})-(\d{2})-(\d{2})$/;
 
-const manilaCalendarFormatter = new Intl.DateTimeFormat("en", {
+const manilaCalendarFormatter = new Intl.DateTimeFormat(MANILA_LOCALE, {
   timeZone: MANILA_TIME_ZONE,
   year: "numeric",
   month: "2-digit",
   day: "2-digit",
 });
 
-const manilaDateTimeFormatter = new Intl.DateTimeFormat("en", {
+const manilaDateTimeFormatter = new Intl.DateTimeFormat(MANILA_LOCALE, {
   timeZone: MANILA_TIME_ZONE,
   month: "short",
   day: "2-digit",
@@ -24,7 +25,7 @@ const manilaDateTimeFormatter = new Intl.DateTimeFormat("en", {
   minute: "2-digit",
 });
 
-const utcMonthFormatter = new Intl.DateTimeFormat("en", {
+const utcMonthFormatter = new Intl.DateTimeFormat(MANILA_LOCALE, {
   timeZone: "UTC",
   month: "short",
 });
@@ -148,7 +149,7 @@ export function formatManilaRelativeTime(value: string, reference = new Date()) 
   if (!date || Number.isNaN(reference.getTime())) return "Date unavailable";
 
   const seconds = Math.round((date.getTime() - reference.getTime()) / 1_000);
-  const formatter = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+  const formatter = new Intl.RelativeTimeFormat(MANILA_LOCALE, { numeric: "auto" });
   if (Math.abs(seconds) < 60) return formatter.format(seconds, "second");
   const minutes = Math.round(seconds / 60);
   if (Math.abs(minutes) < 60) return formatter.format(minutes, "minute");

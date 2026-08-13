@@ -153,6 +153,23 @@ test("report detail normalizes the optional Service Memo message and limits it t
   );
 });
 
+test("report detail uses later history order when all verified timestamps are invalid", async () => {
+  const { consumerMessageTimelineIndex } = await import(
+    new URL("../src/features/reports/data.ts", import.meta.url),
+  );
+
+  assert.equal(
+    consumerMessageTimelineIndex(
+      [
+        { toStatus: "verified", changedAt: "not an instant" },
+        { toStatus: "verified", changedAt: "2026-08-14T04:00:00" },
+      ],
+      "Repairs are being coordinated.",
+    ),
+    1,
+  );
+});
+
 test("report detail retains content, exposes retry, and refreshes expired evidence once", async () => {
   const detail = await read("src/app/(tabs)/reports/[id].tsx");
 

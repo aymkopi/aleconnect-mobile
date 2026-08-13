@@ -137,19 +137,25 @@ export function consumerMessageTimelineIndex(
 
   let selectedIndex: number | null = null;
   let selectedChangedAt: number | null = null;
+  let hasValidTimestamp = false;
   for (const [index, item] of timeline.entries()) {
     const normalizedStatus = item.toStatus.trim().toLowerCase().replace(/[\s-]+/g, "_");
     if (normalizedStatus !== "verified") continue;
 
     const changedAt = parseApiInstant(item.changedAt)?.getTime();
     if (changedAt === undefined) {
-      if (selectedIndex === null) selectedIndex = index;
+      if (!hasValidTimestamp) selectedIndex = index;
       continue;
     }
 
-    if (selectedChangedAt === null || changedAt >= selectedChangedAt) {
+    if (
+      !hasValidTimestamp ||
+      selectedChangedAt === null ||
+      changedAt >= selectedChangedAt
+    ) {
       selectedIndex = index;
       selectedChangedAt = changedAt;
+      hasValidTimestamp = true;
     }
   }
 
