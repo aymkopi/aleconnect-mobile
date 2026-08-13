@@ -7,9 +7,10 @@ import { Text } from "@/components/ui/text";
 import { StaticLocationMap } from "@/features/maps/static-location-map";
 import { EvidencePhotoViewer } from "@/features/reports/components/evidence-photo-viewer";
 import {
+  buildReportDetailTimeline,
+  consumerMessageTimelineIndex,
   formatReportDate,
   formatStatus,
-  shouldDisplayConsumerMessageOnTimelineItem,
   type ReportDetail,
   type ReportHistoryItem,
 } from "@/features/reports/data";
@@ -80,7 +81,7 @@ function TimelineItem({
         {item.note ? (
           <Text className="mt-2 text-sm text-muted-foreground">{item.note}</Text>
         ) : null}
-        {shouldDisplayConsumerMessageOnTimelineItem(item.toStatus, consumerMessage) ? (
+        {consumerMessage ? (
           <View className="mt-3 rounded-md border border-border bg-secondary/40 p-3">
             <Text className="text-xs font-bold text-muted-foreground">Service Memo update</Text>
             <Text className="mt-1 text-sm text-foreground">{consumerMessage}</Text>
@@ -224,25 +225,18 @@ export default function ReportDetailRoute() {
         .filter(Boolean)
         .join(", ")
     : "";
-  const timeline =
-    report && report.history.length > 0
-      ? report.history
-      : report
-        ? [
-            {
-              id: "created",
-              fromStatus: null,
-              toStatus: report.status,
-              note: "Report received.",
-              changedAt: report.createdAt,
-            },
-          ]
-        : [];
+  const timeline = report
+    ? buildReportDetailTimeline(report.history, report.status, report.createdAt)
+    : [];
   const evidencePhotos = (report?.imageUrls ?? []).map((uri, index) => ({
     id: `evidence-${index}`,
     uri,
     status: "ready" as const,
   }));
+  const consumerMessageIndex = consumerMessageTimelineIndex(
+    timeline,
+    report?.consumerMessage ?? null,
+  );
 
   const copyReference = async () => {
     if (!report) return;
@@ -444,7 +438,7 @@ export default function ReportDetailRoute() {
                     key={item.id}
                     item={item}
                     isLast={index === timeline.length - 1}
-                    consumerMessage={report.consumerMessage}
+                    consumerMessage={index === consumerMessageIndex ? report.consumerMessage : null}
                   />
                 ))}
               </View>

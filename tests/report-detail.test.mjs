@@ -50,8 +50,9 @@ test("report detail parser rejects incomplete wrappers and never exposes object 
 
 test("report detail normalizes the optional Service Memo message and limits it to verified updates", async () => {
   const {
+    buildReportDetailTimeline,
     parseReportDetailResponse,
-    shouldDisplayConsumerMessageOnTimelineItem,
+    consumerMessageTimelineIndex,
   } = await import(new URL("../src/features/reports/data.ts", import.meta.url));
   const base = {
     id: "ticket-1",
@@ -79,13 +80,64 @@ test("report detail normalizes the optional Service Memo message and limits it t
     null,
   );
   assert.equal(parseReportDetailResponse({ report: base }).consumerMessage, null);
+
+  const timeline = [
+    {
+      id: "verified-earlier",
+      fromStatus: "under_review",
+      toStatus: "verified",
+      note: null,
+      changedAt: "2026-08-13T01:00:00.000Z",
+    },
+    {
+      id: "in-progress",
+      fromStatus: "verified",
+      toStatus: "in_progress",
+      note: null,
+      changedAt: "2026-08-13T02:00:00.000Z",
+    },
+    {
+      id: "verified-latest",
+      fromStatus: "in_progress",
+      toStatus: "verified",
+      note: null,
+      changedAt: "2026-08-13T03:00:00.000Z",
+    },
+  ];
   assert.equal(
-    shouldDisplayConsumerMessageOnTimelineItem(" VERIFIED ", "Repairs are being coordinated."),
-    true,
+    consumerMessageTimelineIndex(timeline, "Repairs are being coordinated."),
+    2,
   );
   assert.equal(
-    shouldDisplayConsumerMessageOnTimelineItem("in_progress", "Repairs are being coordinated."),
-    false,
+    consumerMessageTimelineIndex([timeline[1]], "Repairs are being coordinated."),
+    null,
+  );
+  assert.equal(
+    consumerMessageTimelineIndex(
+      buildReportDetailTimeline([], "verified", base.createdAt),
+      "Repairs are being coordinated.",
+    ),
+    0,
+  );
+  assert.equal(
+    consumerMessageTimelineIndex(
+      [
+        { ...timeline[0], changedAt: "2026-08-13T04:00:00.000Z" },
+        { ...timeline[2], changedAt: "2026-08-13T04:00:00.000Z" },
+      ],
+      "Repairs are being coordinated.",
+    ),
+    1,
+  );
+  assert.equal(
+    consumerMessageTimelineIndex(
+      [
+        { ...timeline[0], changedAt: "invalid" },
+        { ...timeline[2], changedAt: "also invalid" },
+      ],
+      "Repairs are being coordinated.",
+    ),
+    1,
   );
 });
 

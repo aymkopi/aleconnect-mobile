@@ -111,12 +111,50 @@ function normalizeConsumerMessage(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
-export function shouldDisplayConsumerMessageOnTimelineItem(
-  toStatus: string,
+export function buildReportDetailTimeline(
+  history: readonly ReportHistoryItem[],
+  status: string,
+  createdAt: string,
+): ReportHistoryItem[] {
+  if (history.length > 0) return [...history];
+  return [{
+    id: "created",
+    fromStatus: null,
+    toStatus: status,
+    note: "Report received.",
+    changedAt: createdAt,
+  }];
+}
+
+export function consumerMessageTimelineIndex(
+  timeline: readonly Pick<ReportHistoryItem, "toStatus" | "changedAt">[],
   consumerMessage: string | null,
 ) {
-  const normalizedStatus = toStatus.trim().toLowerCase().replace(/[\s-]+/g, "_");
-  return normalizedStatus === "verified" && Boolean(consumerMessage?.trim());
+  if (!normalizeConsumerMessage(consumerMessage)) return null;
+
+  let selectedIndex: number | null = null;
+  let selectedChangedAt = Number.NaN;
+  for (const [index, item] of timeline.entries()) {
+    const normalizedStatus = item.toStatus.trim().toLowerCase().replace(/[\s-]+/g, "_");
+    if (normalizedStatus !== "verified") continue;
+
+    const changedAt = Date.parse(item.changedAt);
+    if (
+      selectedIndex === null
+      || (
+        Number.isFinite(changedAt)
+        && Number.isFinite(selectedChangedAt)
+        && changedAt >= selectedChangedAt
+      )
+      || !Number.isFinite(changedAt)
+      || !Number.isFinite(selectedChangedAt)
+    ) {
+      selectedIndex = index;
+      selectedChangedAt = changedAt;
+    }
+  }
+
+  return selectedIndex;
 }
 
 export function parseReportDetailResponse(value: unknown): ReportDetail {
