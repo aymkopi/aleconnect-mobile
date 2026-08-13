@@ -42,6 +42,18 @@ test("report detail parser rejects incomplete wrappers and never exposes object 
   assert.deepEqual(parseReportDetailResponse({ report: base }).imageUrls, [
     "https://evidence.example/1.webp",
   ]);
+  assert.equal(
+    parseReportDetailResponse({
+      report: { ...base, imageUrlsExpiresAt: "2026-08-13T08:00:00" },
+    }).imageUrlsExpiresAt,
+    null,
+  );
+  assert.equal(
+    parseReportDetailResponse({
+      report: { ...base, imageUrlsExpiresAt: "2026-08-13T08:00:00.000Z" },
+    }).imageUrlsExpiresAt,
+    "2026-08-13T08:00:00.000Z",
+  );
   assert.throws(
     () => parseReportDetailResponse({ report: { ...base, ticketNumber: "" } }),
     /incomplete/i,
@@ -132,12 +144,12 @@ test("report detail normalizes the optional Service Memo message and limits it t
   assert.equal(
     consumerMessageTimelineIndex(
       [
-        { ...timeline[0], changedAt: "invalid" },
-        { ...timeline[2], changedAt: "also invalid" },
+        { ...timeline[0], changedAt: "2026-08-13T03:00:00.000Z" },
+        { ...timeline[2], changedAt: "2026-08-14T04:00:00" },
       ],
       "Repairs are being coordinated.",
     ),
-    1,
+    0,
   );
 });
 

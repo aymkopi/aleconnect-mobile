@@ -1,3 +1,6 @@
+// @ts-expect-error Node's direct TypeScript test runner needs the extension.
+import { formatManilaDateTime, parseApiInstant } from "../../utils/manila-time.ts";
+
 export type ComplaintCategory = {
   id: string;
   title: string;
@@ -133,22 +136,18 @@ export function consumerMessageTimelineIndex(
   if (!normalizeConsumerMessage(consumerMessage)) return null;
 
   let selectedIndex: number | null = null;
-  let selectedChangedAt = Number.NaN;
+  let selectedChangedAt: number | null = null;
   for (const [index, item] of timeline.entries()) {
     const normalizedStatus = item.toStatus.trim().toLowerCase().replace(/[\s-]+/g, "_");
     if (normalizedStatus !== "verified") continue;
 
-    const changedAt = Date.parse(item.changedAt);
-    if (
-      selectedIndex === null
-      || (
-        Number.isFinite(changedAt)
-        && Number.isFinite(selectedChangedAt)
-        && changedAt >= selectedChangedAt
-      )
-      || !Number.isFinite(changedAt)
-      || !Number.isFinite(selectedChangedAt)
-    ) {
+    const changedAt = parseApiInstant(item.changedAt)?.getTime();
+    if (changedAt === undefined) {
+      if (selectedIndex === null) selectedIndex = index;
+      continue;
+    }
+
+    if (selectedChangedAt === null || changedAt >= selectedChangedAt) {
       selectedIndex = index;
       selectedChangedAt = changedAt;
     }
@@ -188,7 +187,7 @@ export function parseReportDetailResponse(value: unknown): ReportDetail {
       : [],
     imageUrlsExpiresAt:
       typeof report.imageUrlsExpiresAt === "string" &&
-      Number.isFinite(Date.parse(report.imageUrlsExpiresAt))
+      parseApiInstant(report.imageUrlsExpiresAt)
         ? report.imageUrlsExpiresAt
         : null,
     consumerMessage: normalizeConsumerMessage(report.consumerMessage),
@@ -269,12 +268,7 @@ export function formatComplaintCategoryTitle(title: string) {
 }
 
 export function formatReportDate(value: string) {
-  return new Intl.DateTimeFormat("en", {
-    month: "short",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(value));
+  return formatManilaDateTime(value);
 }
 
 export function formatStatus(status: string) {

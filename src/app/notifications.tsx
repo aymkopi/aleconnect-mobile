@@ -17,6 +17,10 @@ import {
     type MobileNotificationCategory,
 } from "@/services/notifications";
 import { notificationDestinationFromNotification } from "@/services/notification-navigation";
+import {
+  formatManilaDateTime,
+  manilaNotificationGroupTitle,
+} from "@/utils/manila-time";
 import { Redirect, useFocusEffect, useRouter } from "expo-router";
 import {
     CheckCheck,
@@ -54,37 +58,6 @@ const categoryFilters: {
   { label: "Advisories", value: "advisories" },
   { label: "System", value: "system" },
 ];
-
-function startOfDay(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-}
-
-function dayDiff(value: string) {
-  const today = startOfDay(new Date()).getTime();
-  const target = startOfDay(new Date(value)).getTime();
-  return Math.floor((today - target) / 86_400_000);
-}
-
-function groupTitle(value: string) {
-  const diff = dayDiff(value);
-  const day = new Date(value).getDay();
-  if (diff <= 0) return "Today";
-  if (diff === 1) return "Yesterday";
-  if (diff <= 7 && (day === 0 || day === 6)) return "Last weekend";
-  if (diff <= 7) return "This week";
-  if (diff <= 14) return "Last week";
-  if (diff <= 31) return "Last month";
-  return "Older";
-}
-
-function formatTime(value: string) {
-  return new Intl.DateTimeFormat("en", {
-    month: "short",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(value));
-}
 
 function severityTone(severity: string) {
   const normalized = severity.toLowerCase();
@@ -221,7 +194,7 @@ function NotificationRow({
               </Text>
             </View>
             <Text className="text-xs font-medium text-muted-foreground">
-              {formatTime(notification.createdAt)}
+              {formatManilaDateTime(notification.createdAt)}
             </Text>
             {actionLabel ? (
               <Text className="text-xs font-bold text-primary">
@@ -453,7 +426,7 @@ export default function NotificationsRoute() {
   const groups = useMemo(() => {
     const grouped = new Map<string, MobileNotification[]>();
     for (const notification of visibleNotifications) {
-      const title = groupTitle(notification.createdAt);
+      const title = manilaNotificationGroupTitle(notification.createdAt);
       grouped.set(title, [...(grouped.get(title) ?? []), notification]);
     }
     return Array.from(grouped.entries()).map(([title, data]) => ({

@@ -35,6 +35,7 @@ import {
   fetchComplaintReportPage,
   type ComplaintReportSort,
 } from "@/services/reports";
+import { formatManilaWeekRange, manilaWeekStartKey } from "@/utils/manila-time";
 import * as Clipboard from "expo-clipboard";
 import { useFocusEffect, useRouter } from "expo-router";
 import {
@@ -71,22 +72,6 @@ function queuedReportStatus(item: ReportQueueItem) {
     return { label: "Needs attention", Icon: CloudOff, tone: "danger" as const };
   }
   return { label: "Waiting to submit", Icon: Clock3, tone: "muted" as const };
-}
-
-function weekKey(value: string) {
-  const date = new Date(value);
-  const first = new Date(date);
-  first.setDate(date.getDate() - date.getDay());
-  first.setHours(0, 0, 0, 0);
-  return first.toISOString();
-}
-
-function weekLabel(value: string) {
-  const start = new Date(value);
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6);
-  const month = new Intl.DateTimeFormat("en", { month: "short" });
-  return `${month.format(start)} ${start.getDate()} - ${month.format(end)} ${end.getDate()}`;
 }
 
 function ArchiveSkeleton() {
@@ -259,12 +244,12 @@ export default function ReportArchiveRoute() {
   const archiveRows = useMemo(() => {
     const groups = new Map<string, Report[]>();
     reports.forEach((report) => {
-      const key = weekKey(report.createdAt);
+      const key = manilaWeekStartKey(report.createdAt) ?? "unavailable";
       groups.set(key, [...(groups.get(key) ?? []), report]);
     });
     return Array.from(groups.entries()).flatMap<ArchiveRow>(
       ([key, groupedReports]) => [
-        { kind: "week", key: `week:${key}`, title: weekLabel(key) },
+        { kind: "week", key: `week:${key}`, title: formatManilaWeekRange(key) },
         ...groupedReports.map((report) => ({
           kind: "report" as const,
           key: report.id,

@@ -14,6 +14,7 @@ import {
   type ReportDetail,
   type ReportHistoryItem,
 } from "@/features/reports/data";
+import { isApiInstantExpired } from "@/utils/manila-time";
 import { ReportStatusBadge } from "@/features/reports/report-list";
 import { ExtendedOutageStatusCard } from "@/features/reports/extended-outage-status-card";
 import { useAppColors } from "@/hooks/use-app-colors";
@@ -186,7 +187,7 @@ export default function ReportDetailRoute() {
   useEffect(() => {
     if (
       report?.imageUrlsExpiresAt &&
-      Date.parse(report.imageUrlsExpiresAt) <= Date.now()
+      isApiInstantExpired(report.imageUrlsExpiresAt)
     ) {
       void refreshEvidenceOnce();
     }
