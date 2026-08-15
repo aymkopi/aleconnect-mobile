@@ -39,25 +39,40 @@ type TicketStatusChangedPush = {
 };
 ```
 
+`changedAt` is mandatory for version 1. `revision` is optional and should be preferred when present.
+
 Parsing must be defensive. Invalid or unsupported versions should not mutate report state, though existing navigation may continue using the legacy `context`/`ticketId` fields.
 
 ## Ordering and Idempotency
 Push notifications can be duplicated or reordered.
 
-Maintain the newest applied event marker per ticket for the current runtime and, where practical, persist enough ordering metadata with the cached report list to prevent stale background-delivered events from regressing status after restart.
+Persist the newest applied ordering marker per user/ticket in a small AsyncStorage sidecar separate from the report list cache. This persisted marker prevents a late push from regressing state after an app restart.
 
 Ordering rule:
 
 1. If both current and incoming events have `revision`, accept only a strictly newer revision.
-2. Otherwise compare valid server `changedAt` timestamps and reject an older timestamp.
-3. Duplicate equal revision/timestamp events are idempotent and should not cause extra UI churn.
+2. Otherwise compare valid server `changedAt` timestamps and accept only a newer timestamp.
+3. Equal revision/timestamp events are duplicates and no-op.
+4. If a current marker has a revision but the incoming event does not, fall back to `changedAt` only when both timestamps are valid; otherwise do not project the ambiguous event and let server revalidation resolve it.
 
 Do not attempt to infer lifecycle ordering from status names.
+
+Suggested persisted marker:
+
+```ts
+type ReportEventMarker = {
+  revision?: number;
+  changedAt: string;
+};
+```
+
+Use a user-scoped key/prefix so ordering state cannot leak between accounts.
 
 ## Report Sync Event Service
 Add a focused service, e.g. `src/services/report-sync-events.ts`, responsible for:
 
 - parsing ticket status push data;
+- enforcing persisted ordering/idempotency;
 - publishing accepted report status events;
 - subscribing/unsubscribing mounted consumers;
 - coordinating cache projection and revalidation signals.
@@ -78,7 +93,7 @@ subscribeReportStatusChanged(listener)
 handleReportStatusPush(data, userId)
 ```
 
-`handleReportStatusPush` should validate/order the event, patch report cache, publish it, and request revalidation. Screens only subscribe to accepted events.
+`handleReportStatusPush` should validate/order the event, patch report cache, persist the accepted marker, publish it, and request revalidation. Screens only subscribe to accepted events.
 
 ## Report Cache Projection
 Extend `src/services/reports.ts` with a targeted cache projection operation rather than deleting all complaint data.
@@ -88,8 +103,9 @@ For a matching ticket ID:
 - update `complaintReportsMemoryCache.value.reports`;
 - update the default `report_list_cache_v1:<userId>` AsyncStorage payload if present;
 - preserve all unrelated report fields;
-- preserve the cache's original `fetchedAt` value so a one-field projection does not falsely make the entire list fresh;
-- attach/persist ordering metadata separately if needed rather than changing the public `Report` contract unnecessarily.
+- preserve the cache's original `fetchedAt` value so a one-field projection does not falsely make the entire list fresh.
+
+Ordering metadata lives in the report-event sidecar, not in the public `Report` shape.
 
 Do not clear complaint metadata for ticket status events. Categories, types, barangays, and municipalities are unaffected by a ticket lifecycle update.
 
@@ -120,6 +136,8 @@ Avoid triggering multiple concurrent full refreshes for a burst of ticket pushes
 
 Do not lower the normal 60-second report cache TTL globally. Event-driven invalidation/revalidation solves status freshness without increasing ordinary API/database traffic.
 
+After authoritative revalidation succeeds, keep the newest event marker. It protects against an older delayed push that may still arrive after the API response.
+
 ## Foreground Notification Flow
 Update the global notification bridge so a foreground ticket push does more than clear caches.
 
@@ -140,7 +158,7 @@ A visible push received while the app is backgrounded may not execute foreground
 
 When the app transitions to active:
 
-- if report data may have become stale while backgrounded, mark it for revalidation;
+- report data should be considered eligible for revalidation after a background interval;
 - mounted report screens should show cached data immediately and refresh in the background;
 - opening Reports from the app icon should not require waiting on the API before anything is shown.
 
@@ -163,16 +181,19 @@ If a valid ticket push is received while the foreground app has no usable networ
 
 - apply the local status projection because the event represents a committed server transition;
 - update the cached report list;
+- persist the accepted ordering marker;
 - do not show a destructive sync error solely because revalidation cannot run;
-- retain a pending revalidation marker and retry on connectivity/app resume/manual refresh.
+- retain a pending revalidation signal and retry on connectivity/app resume/manual refresh.
 
-If ordering metadata cannot establish that an incoming event is newer, prefer not to regress the local state; server revalidation resolves ambiguity later.
+If ordering metadata cannot establish that an incoming event is newer, do not project it; server revalidation resolves ambiguity later.
 
 ## Error Handling
 - Invalid push payload: ignore status mutation; retain notification/navigation behavior where safe.
 - Duplicate event: no-op.
 - Older event: no-op.
+- Ambiguous ordering: do not project; request/await authoritative revalidation.
 - Cache write failure: still publish to mounted screens; log non-fatal diagnostic and revalidate.
+- Ordering-marker persistence failure: still allow the current-runtime projection, log non-fatal diagnostic, and rely on revalidation after restart.
 - API revalidation failure: retain projected/cached state and retry on normal lifecycle/manual refresh.
 - API response conflicts with projection: API wins.
 
@@ -180,16 +201,16 @@ If ordering metadata cannot establish that an incoming event is newer, prefer no
 - `src/services/notification-navigation.ts`
   - add typed/validated ticket event parser while preserving navigation helpers.
 - `src/services/report-sync-events.ts`
-  - new report status event bus/coordinator.
+  - new report status event bus/coordinator and persisted ordering markers.
 - `src/services/reports.ts`
-  - targeted report-list cache projection and revalidation marker/helper.
+  - targeted report-list cache projection and revalidation helper/signal.
 - `src/app/_layout.tsx`
   - route foreground ticket pushes into the report sync coordinator instead of clearing all complaint caches.
 - `src/app/(tabs)/reports/index.tsx`
   - subscribe and patch visible recent-report state.
 - `src/app/(tabs)/reports/list.tsx`
   - subscribe and patch archive state.
-- tests covering payload parsing, ordering, cache patching, mounted-screen contract, and resume/revalidation behavior.
+- tests covering payload parsing, persisted ordering, cache patching, mounted-screen contract, and resume/revalidation behavior.
 
 ## Testing Requirements
 At minimum cover:
@@ -198,14 +219,15 @@ At minimum cover:
 2. Unrelated report rows are untouched.
 3. Duplicate event is idempotent.
 4. Older revision/timestamp cannot regress status.
-5. AsyncStorage cache is patched without refreshing its `fetchedAt` age.
-6. Mounted Recent Reports and Archive subscribers receive the event.
-7. A revalidation is requested after projection.
-8. Revalidation failure preserves projected state.
-9. Server response replaces projected state on success.
-10. Ticket notification tap navigation remains compatible.
-11. Ticket push no longer clears complaint metadata.
-12. App foreground/resume causes stale report data to revalidate.
+5. Ordering marker survives restart/storage reload semantics.
+6. AsyncStorage report cache is patched without refreshing its `fetchedAt` age.
+7. Mounted Recent Reports and Archive subscribers receive the event.
+8. A revalidation is requested after projection.
+9. Revalidation failure preserves projected state.
+10. Server response replaces projected state on success.
+11. Ticket notification tap navigation remains compatible.
+12. Ticket push no longer clears complaint metadata.
+13. App foreground/resume causes report data to revalidate while cached UI remains immediately available.
 
 ## Non-Goals
 - No WebSocket/SSE connection.
@@ -218,7 +240,7 @@ At minimum cover:
 ## Acceptance Criteria
 1. If a ticket status push arrives while the report list is visible, the matching row changes status immediately without waiting for the report API.
 2. The server is revalidated asynchronously and remains authoritative.
-3. Report status cannot regress because an older push arrives late.
+3. Report status cannot regress because an older push arrives late, including after app restart when the ordering marker was persisted successfully.
 4. Normal report-list navigation still benefits from the existing cache TTL.
 5. Ticket pushes do not clear unrelated complaint metadata.
 6. If the app missed push execution while backgrounded, opening/resuming the app triggers report revalidation while cached UI remains immediately available.
