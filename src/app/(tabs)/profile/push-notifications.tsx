@@ -7,11 +7,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import {
   fetchNotificationSettings,
+  readCachedNotificationSettings,
   saveNotificationSettings,
   type NotificationSettings,
   type NotificationSubstation,
   type SaveNotificationSettingsInput,
 } from "@/services/notification-settings";
+import NetInfo from "@react-native-community/netinfo";
 import * as Notifications from "expo-notifications";
 import { useFocusEffect, useRouter } from "expo-router";
 import {
@@ -109,10 +111,12 @@ function TriStateCheckbox({
   state,
   onPress,
   accessibilityLabel,
+  disabled = false,
 }: {
   state: ParentState;
   onPress: () => void;
   accessibilityLabel: string;
+  disabled?: boolean;
 }) {
   const [accentColor, accentForeground, borderColor] = useAppColors([
     "accent",
@@ -123,8 +127,12 @@ function TriStateCheckbox({
   return (
     <Pressable
       onPress={onPress}
+      disabled={disabled}
       accessibilityRole="checkbox"
-      accessibilityState={{ checked: state === "partial" ? "mixed" : checked }}
+      accessibilityState={{
+        checked: state === "partial" ? "mixed" : checked,
+        disabled,
+      }}
       accessibilityLabel={accessibilityLabel}
       className="h-11 w-11 items-center justify-center"
     >
@@ -260,8 +268,14 @@ export default function PushNotificationsRoute() {
   const [osPermission, setOsPermission] =
     useState<OsPermissionState>("undetermined");
   const [canAskPermission, setCanAskPermission] = useState(true);
+  const [isOffline, setIsOffline] = useState(true);
+  const [isNetworkKnown, setIsNetworkKnown] = useState(false);
+  const [isUsingCachedSettings, setIsUsingCachedSettings] = useState(false);
+  const [hasReconnectedPendingRefresh, setHasReconnectedPendingRefresh] =
+    useState(false);
   const savedSignatureRef = useRef("");
   const saveRevisionRef = useRef(0);
+  const wasOfflineRef = useRef<boolean | null>(null);
   const bottomPadding = Math.max(insets.bottom, 16);
 
   const selectedCount = selectedFeederIds.size;
@@ -286,6 +300,13 @@ export default function PushNotificationsRoute() {
     [receiveAdvisories, receivePushNotifications, selectedFeederIds, settings],
   );
   const draftSignature = draftPayload ? JSON.stringify(draftPayload) : "";
+  const isFeederEditingDisabled =
+    isLoading ||
+    !settings ||
+    !isNetworkKnown ||
+    isOffline ||
+    hasReconnectedPendingRefresh ||
+    isUsingCachedSettings;
 
   const refreshOsPermission = useCallback(async () => {
     if (Platform.OS !== "android" && Platform.OS !== "ios") {
@@ -362,16 +383,18 @@ export default function PushNotificationsRoute() {
   }, [refreshOsPermission]);
 
   const load = useCallback(async () => {
-    if (!session) {
-      setIsLoading(false);
-      return;
-    }
+  if (!session) {
+    setIsLoading(false);
+    return;
+  }
 
-    setHasHydrated(false);
-    const next = await fetchNotificationSettings();
+  const applySettings = (
+    next: NotificationSettings & { isStale?: boolean },
+  ) => {
     const selected = makeInitialSelection(next);
     const receivePush = next.preferences.receivePushNotifications;
     const receiveAdvisoriesNext = next.preferences.receiveAdvisories;
+
     savedSignatureRef.current = JSON.stringify(
       buildSavePayload(next, selected, receivePush, receiveAdvisoriesNext),
     );
@@ -382,10 +405,37 @@ export default function PushNotificationsRoute() {
     setExpandedSubstationIds(
       new Set(next.substations.map((substation) => substation.id)),
     );
+    setIsUsingCachedSettings(Boolean(next.isStale));
     setNotice(null);
     setHasHydrated(true);
     setIsLoading(false);
-  }, [session]);
+  };
+
+  setHasHydrated(false);
+
+  const networkState = await NetInfo.fetch();
+  const offline =
+    networkState.isConnected === false ||
+    networkState.isInternetReachable === false;
+
+  setIsNetworkKnown(true);
+  setIsOffline(offline);
+
+  if (offline) {
+    const cached = await readCachedNotificationSettings(session.user.id);
+    if (!cached) {
+      throw new Error(
+        "Connect to the internet to load notification settings for the first time.",
+      );
+    }
+
+    applySettings(cached);
+    return;
+  }
+
+  const next = await fetchNotificationSettings(session.user.id);
+  applySettings(next);
+}, [session]);
 
   useEffect(() => {
     void load().catch((error) => {
@@ -399,8 +449,39 @@ export default function PushNotificationsRoute() {
   }, [load]);
 
   useEffect(() => {
+    const networkSubscription = NetInfo.addEventListener((state) => {
+      const nextOffline =
+        state.isConnected === false || state.isInternetReachable === false;
+      const previousOffline = wasOfflineRef.current;
+
+      wasOfflineRef.current = nextOffline;
+      setIsNetworkKnown(true);
+      setIsOffline(nextOffline);
+
+      if (previousOffline === true && !nextOffline) {
+        setHasReconnectedPendingRefresh(true);
+        void load()
+          .catch((error) => {
+            setNotice({
+              status: "danger",
+              title: "Unable to refresh settings",
+              description:
+                error instanceof Error ? error.message : "Try again.",
+            });
+          })
+          .finally(() => {
+            setHasReconnectedPendingRefresh(false);
+          });
+      }
+    });
+
+    return networkSubscription;
+  }, [load]);
+
+  useEffect(() => {
     if (
       !hasHydrated ||
+      !session ||
       !draftPayload ||
       draftSignature === savedSignatureRef.current
     ) {
@@ -410,11 +491,12 @@ export default function PushNotificationsRoute() {
     const revision = ++saveRevisionRef.current;
     setIsSaving(true);
     const timer = setTimeout(() => {
-      void saveNotificationSettings(draftPayload)
+      void saveNotificationSettings(session.user.id, draftPayload)
         .then((next) => {
           if (revision !== saveRevisionRef.current) return;
           savedSignatureRef.current = draftSignature;
           setSettings(next);
+          setIsUsingCachedSettings(Boolean(next.isStale));
           setNotice(null);
         })
         .catch((error) => {
@@ -432,7 +514,7 @@ export default function PushNotificationsRoute() {
     }, 600);
 
     return () => clearTimeout(timer);
-  }, [draftPayload, draftSignature, hasHydrated, saveRetry]);
+  }, [draftPayload, draftSignature, hasHydrated, saveRetry, session]);
 
   const refresh = async () => {
     setIsRefreshing(true);
@@ -444,6 +526,8 @@ export default function PushNotificationsRoute() {
   };
 
   const toggleSubstation = (substation: NotificationSubstation) => {
+    if (isFeederEditingDisabled) return;
+
     setSelectedFeederIds((current) => {
       const next = new Set(current);
       const state = parentState(substation, current);
@@ -456,6 +540,8 @@ export default function PushNotificationsRoute() {
   };
 
   const toggleFeeder = (feederId: string) => {
+    if (isFeederEditingDisabled) return;
+
     setSelectedFeederIds((current) => {
       const next = new Set(current);
       if (next.has(feederId)) next.delete(feederId);
@@ -474,7 +560,9 @@ export default function PushNotificationsRoute() {
   };
 
   const selectAllFeeders = () => {
+    if (isFeederEditingDisabled) return;
     if (!settings) return;
+
     setSelectedFeederIds(
       new Set(
         settings.substations.flatMap((substation) =>
@@ -485,6 +573,7 @@ export default function PushNotificationsRoute() {
   };
 
   const clearAllFeeders = () => {
+    if (isFeederEditingDisabled) return;
     setSelectedFeederIds(new Set());
   };
 
@@ -614,6 +703,28 @@ export default function PushNotificationsRoute() {
           ) : null}
         </View>
 
+        {isNetworkKnown && isOffline && settings ? (
+          <Alert>
+            <View className="flex-1 gap-1">
+              <AlertText className="font-bold">Offline feeder settings</AlertText>
+              <AlertText>
+                Offline — showing your last saved feeder settings. Reconnect to
+                make changes.
+              </AlertText>
+            </View>
+          </Alert>
+        ) : !isOffline && isUsingCachedSettings && settings ? (
+          <Alert>
+            <View className="flex-1 gap-1">
+              <AlertText className="font-bold">Saved feeder settings</AlertText>
+              <AlertText>
+                Showing your last saved feeder settings. Live settings are
+                temporarily unavailable.
+              </AlertText>
+            </View>
+          </Alert>
+        ) : null}
+
         {notice ? (
           <Alert
             variant={notice.status === "danger" ? "destructive" : "default"}
@@ -669,7 +780,7 @@ export default function PushNotificationsRoute() {
                 variant="ghost"
                 className="min-h-11"
                 onPress={clearAllFeeders}
-                isDisabled={isLoading || !settings || selectedCount === 0}
+                isDisabled={isFeederEditingDisabled || selectedCount === 0}
                 accessibilityLabel="Clear feeder selections"
               >
                 <ButtonText>Clear</ButtonText>
@@ -680,8 +791,7 @@ export default function PushNotificationsRoute() {
                 className="min-h-11"
                 onPress={selectAllFeeders}
                 isDisabled={
-                  isLoading ||
-                  !settings ||
+                  isFeederEditingDisabled ||
                   totalFeederCount === 0 ||
                   selectedCount === totalFeederCount
                 }
@@ -712,11 +822,16 @@ export default function PushNotificationsRoute() {
                         state={state}
                         onPress={() => toggleSubstation(substation)}
                         accessibilityLabel={`Select ${substation.name}`}
+                        disabled={isFeederEditingDisabled}
                       />
                       <Pressable
                         className="min-h-12 flex-1 justify-center"
                         onPress={() => toggleSubstation(substation)}
+                        disabled={isFeederEditingDisabled}
                         accessibilityRole="button"
+                        accessibilityState={{
+                          disabled: isFeederEditingDisabled,
+                        }}
                         accessibilityLabel={`Toggle ${substation.name}`}
                       >
                         <Text className="text-sm font-bold text-foreground">
@@ -753,9 +868,11 @@ export default function PushNotificationsRoute() {
                           <Pressable
                             key={feeder.id}
                             onPress={() => toggleFeeder(feeder.id)}
+                            disabled={isFeederEditingDisabled}
                             accessibilityRole="checkbox"
                             accessibilityState={{
                               checked: selectedFeederIds.has(feeder.id),
+                              disabled: isFeederEditingDisabled,
                             }}
                             accessibilityLabel={`Select ${feeder.name}`}
                             className="min-h-11 flex-row items-center gap-1"
