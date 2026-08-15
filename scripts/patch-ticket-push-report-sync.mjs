@@ -1,7 +1,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 
-const path = "src/app/(tabs)/reports/list.tsx";
-let source = await readFile(path, "utf8");
+const archivePath = "src/app/(tabs)/reports/list.tsx";
+let source = await readFile(archivePath, "utf8");
 
 function replaceOnce(from, to) {
   if (!source.includes(from)) {
@@ -151,4 +151,29 @@ replaceOnce(
   }, [userId]);`,
 );
 
-await writeFile(path, source);
+await writeFile(archivePath, source);
+
+const historyPath = "docs/agent-harness/implementation-history.md";
+let history = await readFile(historyPath, "utf8");
+const heading = "# Implementation history\n\n";
+if (!history.startsWith(heading)) {
+  throw new Error("Implementation history heading not found");
+}
+
+const entry = `## 2026-08-15 - Push-driven report status synchronization
+
+- Repositories: mobile \`feature/ticket-push-report-sync\`; coordinated staff/API branch \`feature/ticket-push-report-sync\` owns the versioned ticket-status push contract.
+- Scope: makes Recent Reports and Report Archive reflect accepted ticket status pushes immediately, then revalidates from the authoritative complaint API without polling, WebSockets, or waiting for notification delivery.
+- Files: \`src/app/_layout.tsx\`, both report-list routes, \`src/services/notification-navigation.ts\`, \`src/services/report-sync-ordering.ts\`, \`src/services/report-sync-events.ts\`, \`src/services/reports.ts\`, focused report-sync tests, and this history entry.
+- Contracts: v1 ticket push events require \`context=ticket\`, \`event=ticket.status_changed\`, \`version=1\`, ticket ID, canonical status, and server \`changedAt\`; optional monotonic \`revision\` wins when both compared events provide one. Legacy ticket notification taps retain navigation and trigger authoritative revalidation. The server remains authoritative.
+- Verification: focused report-sync tests, the full Node suite (130 passed, 1 existing sibling-contract skip), TypeScript, and lint completed successfully in the pre-handoff verification run. The final branch gate repeats those checks plus \`npm run harness:check\` and \`git diff --check\` after this required history entry is present.
+- Git/Deployment: feature-branch implementation only; no Expo/EAS/store release, backend deployment, database mutation, or mobile publication is included.
+- Remaining risks: operating systems may delay or omit background push execution, so app/session activation and offline-to-online transitions intentionally request server revalidation. Immediate foreground projection is best-effort cache/UI acceleration, not the consistency source.
+- Next: complete final branch verification, review the cross-repository diffs, then merge/release backend and mobile in a coordinated order.
+
+`;
+
+if (!history.includes("## 2026-08-15 - Push-driven report status synchronization")) {
+  history = heading + entry + history.slice(heading.length);
+  await writeFile(historyPath, history);
+}
