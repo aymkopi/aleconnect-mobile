@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import {
   fetchNotificationSettings,
+  readCachedNotificationSettings,
   saveNotificationSettings,
   type SaveNotificationSettingsInput,
   type NotificationSettings,
@@ -396,16 +397,18 @@ export default function PushNotificationsRoute() {
   }, [refreshOsPermission]);
 
   const load = useCallback(async () => {
-    if (!session) {
-      setIsLoading(false);
-      return;
-    }
+  if (!session) {
+    setIsLoading(false);
+    return;
+  }
 
-    setHasHydrated(false);
-    const next = await fetchNotificationSettings(session.user.id);
+  const applySettings = (
+    next: NotificationSettings & { isStale?: boolean },
+  ) => {
     const selected = makeInitialSelection(next);
     const receivePush = next.preferences.receivePushNotifications;
     const receiveAdvisoriesNext = next.preferences.receiveAdvisories;
+
     savedSignatureRef.current = JSON.stringify(
       buildSavePayload(next, selected, receivePush, receiveAdvisoriesNext),
     );
@@ -420,7 +423,33 @@ export default function PushNotificationsRoute() {
     setNotice(null);
     setHasHydrated(true);
     setIsLoading(false);
-  }, [session]);
+  };
+
+  setHasHydrated(false);
+
+  const networkState = await NetInfo.fetch();
+  const offline =
+    networkState.isConnected === false ||
+    networkState.isInternetReachable === false;
+
+  setIsNetworkKnown(true);
+  setIsOffline(offline);
+
+  if (offline) {
+    const cached = await readCachedNotificationSettings(session.user.id);
+    if (!cached) {
+      throw new Error(
+        "Connect to the internet to load notification settings for the first time.",
+      );
+    }
+
+    applySettings(cached);
+    return;
+  }
+
+  const next = await fetchNotificationSettings(session.user.id);
+  applySettings(next);
+}, [session]);
 
   useEffect(() => {
     void load().catch((error) => {
