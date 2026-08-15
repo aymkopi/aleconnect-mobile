@@ -39,40 +39,15 @@ jobs:
               raise SystemExit("notification settings import block not found")
           source = source.replace(old_import, new_import, 1)
 
-          old_load = '''  const load = useCallback(async () => {
-            if (!session) {
-              setIsLoading(false);
-              return;
-            }
-
-            setHasHydrated(false);
-            const next = await fetchNotificationSettings(session.user.id);
-            const selected = makeInitialSelection(next);
-            const receivePush = next.preferences.receivePushNotifications;
-            const receiveAdvisoriesNext = next.preferences.receiveAdvisories;
-            savedSignatureRef.current = JSON.stringify(
-              buildSavePayload(next, selected, receivePush, receiveAdvisoriesNext),
-            );
-            setSettings(next);
-            setReceivePushNotifications(receivePush);
-            setReceiveAdvisories(receiveAdvisoriesNext);
-            setSelectedFeederIds(selected);
-            setExpandedSubstationIds(
-              new Set(next.substations.map((substation) => substation.id)),
-            );
-            setIsUsingCachedSettings(Boolean(next.isStale));
-            setNotice(null);
-            setHasHydrated(true);
-            setIsLoading(false);
-          }, [session]);'''
-
           new_load = '''  const load = useCallback(async () => {
             if (!session) {
               setIsLoading(false);
               return;
             }
 
-            const applySettings = (next: NotificationSettings & { isStale?: boolean }) => {
+            const applySettings = (
+              next: NotificationSettings & { isStale?: boolean },
+            ) => {
               const selected = makeInitialSelection(next);
               const receivePush = next.preferences.receivePushNotifications;
               const receiveAdvisoriesNext = next.preferences.receiveAdvisories;
@@ -119,9 +94,16 @@ jobs:
             applySettings(next);
           }, [session]);'''
 
-          if old_load not in source:
-              raise SystemExit("notification settings load block not found")
-          source = source.replace(old_load, new_load, 1)
+          start_marker = "  const load = useCallback(async () => {"
+          end_marker = "\n\n  useEffect(() => {\n    void load().catch"
+          start = source.find(start_marker)
+          if start < 0:
+              raise SystemExit("notification settings load start marker not found")
+          end = source.find(end_marker, start)
+          if end < 0:
+              raise SystemExit("notification settings load end marker not found")
+
+          source = source[:start] + new_load + source[end:]
           path.write_text(source)
           PY
 
