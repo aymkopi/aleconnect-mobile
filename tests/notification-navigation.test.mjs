@@ -20,3 +20,75 @@ test("ticket push data resolves a report ID only for ticket context", async () =
     null,
   );
 });
+
+test("ticket status push parser accepts only valid v1 events", async () => {
+  const { ticketStatusChangedEventFromPushData } = await import(
+    "../src/services/notification-navigation.ts"
+  );
+
+  assert.deepEqual(
+    ticketStatusChangedEventFromPushData({
+      context: "ticket",
+      event: "ticket.status_changed",
+      version: 1,
+      ticketId: "ticket-1",
+      ticketNumber: "ALECO-260815-00001",
+      status: "verified",
+      changedAt: "2026-08-15T03:30:45.123Z",
+    }),
+    {
+      context: "ticket",
+      event: "ticket.status_changed",
+      version: 1,
+      ticketId: "ticket-1",
+      ticketNumber: "ALECO-260815-00001",
+      status: "verified",
+      changedAt: "2026-08-15T03:30:45.123Z",
+    },
+  );
+
+  assert.equal(
+    ticketStatusChangedEventFromPushData({
+      context: "ticket",
+      event: "ticket.status_changed",
+      version: 2,
+      ticketId: "ticket-1",
+      status: "verified",
+      changedAt: "2026-08-15T03:30:45.123Z",
+    }),
+    null,
+  );
+
+  assert.equal(
+    ticketStatusChangedEventFromPushData({
+      context: "ticket",
+      event: "ticket.status_changed",
+      version: 1,
+      ticketId: "ticket-1",
+      status: "verified",
+      changedAt: "bad-date",
+    }),
+    null,
+  );
+
+  assert.deepEqual(
+    ticketStatusChangedEventFromPushData({
+      context: "ticket",
+      event: "ticket.status_changed",
+      version: 1,
+      ticketId: "ticket-1",
+      status: "resolved",
+      changedAt: "2026-08-15T03:31:00Z",
+      revision: 7,
+    }),
+    {
+      context: "ticket",
+      event: "ticket.status_changed",
+      version: 1,
+      ticketId: "ticket-1",
+      status: "resolved",
+      changedAt: "2026-08-15T03:31:00.000Z",
+      revision: 7,
+    },
+  );
+});
