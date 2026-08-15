@@ -35,12 +35,14 @@ test("reconnect refreshes server settings before feeder edits resume", async () 
   assert.match(source, /hasReconnectedPendingRefresh/);
   assert.match(source, /NetInfo\.addEventListener/);
   assert.match(source, /void load\(\)/);
+  assert.match(source, /isOffline \|\| hasReconnectedPendingRefresh/);
+});
+
+test("top-level notification preferences keep their existing autosave path", async () => {
+  const source = await read("src/app/(tabs)/profile/push-notifications.tsx");
+
   assert.match(
     source,
-    /isOffline \|\| hasReconnectedPendingRefresh/,
-  );
-  assert.match(
-    source,
-    /!hasHydrated \|\|[\s\S]*isOffline \|\|[\s\S]*hasReconnectedPendingRefresh/,
+    /saveNotificationSettings\(session\.user\.id, draftPayload\)/,
   );
 });
