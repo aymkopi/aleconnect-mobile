@@ -3,15 +3,14 @@ import { Alert, AlertText } from "@/components/ui/alert";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { Pressable } from "@/components/ui/pressable";
-import { Progress, ProgressFilledTrack } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import {
   fetchNotificationSettings,
   saveNotificationSettings,
-  type SaveNotificationSettingsInput,
   type NotificationSettings,
   type NotificationSubstation,
+  type SaveNotificationSettingsInput,
 } from "@/services/notification-settings";
 import * as Notifications from "expo-notifications";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -47,11 +46,7 @@ type Notice = {
   title: string;
   description: string;
 };
-type OsPermissionState =
-  | "granted"
-  | "denied"
-  | "undetermined"
-  | "unavailable";
+type OsPermissionState = "granted" | "denied" | "undetermined" | "unavailable";
 
 function makeInitialSelection(settings: NotificationSettings) {
   const selected = new Set(settings.selectedFeederIds);
@@ -278,10 +273,6 @@ export default function PushNotificationsRoute() {
       ) ?? 0,
     [settings],
   );
-  const selectionPercent =
-    totalFeederCount > 0
-      ? Math.round((selectedCount / totalFeederCount) * 100)
-      : 0;
   const draftPayload = useMemo(
     () =>
       settings
@@ -292,12 +283,7 @@ export default function PushNotificationsRoute() {
             receiveAdvisories,
           )
         : null,
-    [
-      receiveAdvisories,
-      receivePushNotifications,
-      selectedFeederIds,
-      settings,
-    ],
+    [receiveAdvisories, receivePushNotifications, selectedFeederIds, settings],
   );
   const draftSignature = draftPayload ? JSON.stringify(draftPayload) : "";
 
@@ -568,25 +554,24 @@ export default function PushNotificationsRoute() {
             <View className="h-12 w-12 items-center justify-center rounded-full bg-accent-soft">
               <BellRing size={22} color={accentColor} />
             </View>
+
             <View className="flex-1">
               <Heading size="md">Alert preferences</Heading>
+
               <Text className="text-xs text-muted-foreground">
                 Changes save automatically.
               </Text>
             </View>
-          </View>
-          <View className="mt-4 gap-2">
-            <View className="flex-row items-center justify-between">
+
+            <View className="items-end">
+              <Heading className="text-2xl font-bold text-foreground">
+                {selectedCount}/{totalFeederCount}
+              </Heading>
+
               <Text className="text-xs font-medium text-muted-foreground">
-                {selectedCount}/{totalFeederCount} feeders
-              </Text>
-              <Text className="text-xs font-medium text-muted-foreground">
-                {selectionPercent}%
+                feeders
               </Text>
             </View>
-            <Progress value={selectionPercent}>
-              <ProgressFilledTrack />
-            </Progress>
           </View>
         </View>
 
@@ -795,7 +780,6 @@ export default function PushNotificationsRoute() {
           ) : null}
         </View>
       </ScrollView>
-
     </View>
   );
 }

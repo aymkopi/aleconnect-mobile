@@ -118,6 +118,14 @@ function ReportInput({
   isDisabled?: boolean;
   maxLength?: number;
 }) {
+  useEffect(() => {
+    console.log("MOUNT INPUT:", label);
+
+    return () => {
+      console.log("UNMOUNT INPUT:", label);
+    };
+  }, []);
+
   return (
     <FormControl
       isRequired={isRequired}
@@ -368,7 +376,41 @@ export default function NewComplaintRoute() {
         : {}),
     }));
   }, [meta, profile]);
+  function normalizePsgc(value: string | number | null | undefined) {
+    if (value == null) return "";
 
+    return String(value).replace(/\D/g, "");
+  }
+
+  function getPsgcVariants(value: string | number | null | undefined) {
+    const code = normalizePsgc(value);
+
+    const variants = new Set<string>();
+
+    if (!code) return variants;
+
+    variants.add(code);
+
+    if (code.length === 10) {
+      variants.add(code.slice(0, 2) + code.slice(3));
+    }
+
+    if (code.length === 9) {
+      variants.add(code.slice(0, 2) + "0" + code.slice(2));
+    }
+
+    return variants;
+  }
+
+  function psgcMatches(
+    first: string | number | null | undefined,
+    second: string | number | null | undefined,
+  ) {
+    const firstVariants = getPsgcVariants(first);
+    const secondVariants = getPsgcVariants(second);
+
+    return [...firstVariants].some((value) => secondVariants.has(value));
+  }
   const selectedCategory = meta.categories.find(
     (category) => category.id === form.categoryId,
   );
@@ -398,14 +440,31 @@ export default function NewComplaintRoute() {
 
   const reportTypeOptions = meta.types
     .filter((type) => type.categoryId === form.categoryId)
-    .map((type) => ({ value: type.id, label: type.title }));
+    .map((type) => ({
+      value: type.id,
+      label: type.title,
+    }));
+
   const municipalityOptions = meta.municipalities.map((municipality) => ({
     value: municipality.code,
     label: municipality.name,
   }));
+
+  // Complete barangay list.
+  // Used when matching a barangay returned by the map picker.
+  const allBarangayOptions = meta.barangays.map((barangay) => ({
+    value: barangay.code,
+    label: barangay.name,
+  }));
+
+  // Filtered barangay list.
+  // Used only by the Barangay dropdown based on selected municipality.
   const barangayOptions = meta.barangays
     .filter((barangay) => barangay.municipalityCode === form.municipalityCode)
-    .map((barangay) => ({ value: barangay.code, label: barangay.name }));
+    .map((barangay) => ({
+      value: barangay.code,
+      label: barangay.name,
+    }));
   const formErrors = validateReportForm(
     form,
     selectedCategory,
@@ -793,17 +852,13 @@ export default function NewComplaintRoute() {
         }}
         scrollIndicatorInsets={{ bottom: childBottomPadding }}
       >
-        <View className="gap-4">
-          <View className="flex-row gap-2 px-1">
-            {Array.from({ length: 5 }, (_, index) => (
-              <View
-                key={index}
-                className={`h-1.5 flex-1 rounded-full ${
-                  index + 1 <= step ? "bg-primary" : "bg-secondary"
-                }`}
-              />
-            ))}
-          </View>
+        <View className="gap-2">
+          <Text className="ml-2 text-xs font-medium text-muted-foreground">
+            Step {step} of 5
+          </Text>
+          <Progress value={(step / 5) * 100} className="h-2.5">
+            <ProgressFilledTrack className="rounded-full" />
+          </Progress>
         </View>
 
         {submitError ? (
@@ -1355,23 +1410,38 @@ export default function NewComplaintRoute() {
         open={viewerPhotoIndex != null}
         onClose={() => setViewerPhotoIndex(null)}
       />
-
       <AlbayLocationPickerSheet
         open={isMapSheetOpen}
         initialCoordinates={mapPickerInitialCoordinates}
         meta={meta}
         onClose={() => setIsMapSheetOpen(false)}
-        onConfirm={({ coordinates, address }) => {
+        onConfirm={({ coordinates, address, psgc }) => {
+          const matchedMunicipality = municipalityOptions.find((option) =>
+            psgcMatches(option.value, psgc.municipality),
+          );
+
+          const matchedBarangay = allBarangayOptions.find((option) =>
+            psgcMatches(option.value, psgc.barangay),
+          );
+
           setForm((current) => ({
             ...current,
+
             useHomeAddress: false,
+
             latitude: coordinates.latitude,
             longitude: coordinates.longitude,
-            municipalityCode: address.municipalityCode ?? "",
-            barangayPsgc: address.barangayPsgc ?? "",
+
+            municipalityCode:
+              matchedMunicipality?.value ?? address.municipalityCode ?? "",
+
+            barangayPsgc: matchedBarangay?.value ?? address.barangayPsgc ?? "",
+
             purok: address.purok ?? "",
-            locationVerified: Boolean(address.barangayPsgc),
+
+            locationVerified: true,
           }));
+
           setIsMapSheetOpen(false);
         }}
       />

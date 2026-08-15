@@ -20,25 +20,37 @@ import {
   type MapLibreModule,
 } from "@/features/maps/map-runtime";
 import {
-  canUseResolvedPin,
   formatResolvedAddress,
   resolvePsgcAddress,
   type ResolvedReportAddress,
 } from "@/features/reports/address";
+import {
+  findAlbayBarangay,
+  type DetectedBarangay,
+} from "@/features/reports/albay-barangays";
 import { isWithinAlbay } from "@/features/reports/contract";
 import type { ComplaintMeta } from "@/features/reports/data";
 import { useAppColors } from "@/hooks/use-app-colors";
+import type { CameraRef } from "@maplibre/maplibre-react-native";
 import * as Location from "expo-location";
 import { LocateFixed, MapPin, Navigation, X } from "lucide-react-native";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Platform, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export type AlbayCoordinates = { latitude: number; longitude: number };
+export type AlbayCoordinates = {
+  latitude: number;
+  longitude: number;
+};
 
 export type AlbayLocationSelection = {
   coordinates: AlbayCoordinates;
   address: ResolvedReportAddress;
+
+  psgc: {
+    municipality: string;
+    barangay: string;
+  };
 };
 
 type Props = {
@@ -49,7 +61,11 @@ type Props = {
   onConfirm: (selection: AlbayLocationSelection) => void;
 };
 
-const albayCenter = { latitude: 13.1775, longitude: 123.528 };
+const albayCenter: AlbayCoordinates = {
+  latitude: 13.1775,
+  longitude: 123.528,
+};
+
 const albayBounds = {
   minLatitude: 12.9,
   maxLatitude: 13.55,
@@ -57,7 +73,14 @@ const albayBounds = {
   maxLongitude: 124,
 };
 
-function clampToAlbay(coordinates: AlbayCoordinates) {
+const PLUS_CODE_PREFIX =
+  /^[23456789CFGHJMPQRVWX]{4,8}\+[23456789CFGHJMPQRVWX]{2,}\s*,?\s*/i;
+
+type GeocodedAddressWithFormatted = Location.LocationGeocodedAddress & {
+  formattedAddress?: string | null;
+};
+
+function clampToAlbay(coordinates: AlbayCoordinates): AlbayCoordinates {
   return {
     latitude: Math.min(
       albayBounds.maxLatitude,
@@ -74,6 +97,98 @@ function toLngLat(coordinates: AlbayCoordinates): [number, number] {
   return [coordinates.longitude, coordinates.latitude];
 }
 
+function coordinatesAreEqual(
+  left: AlbayCoordinates | null,
+  right: AlbayCoordinates,
+) {
+  if (!left) return false;
+
+  return (
+    Math.abs(left.latitude - right.latitude) < 0.0000001 &&
+    Math.abs(left.longitude - right.longitude) < 0.0000001
+  );
+}
+
+async function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+): Promise<T | null> {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<null>((resolve) => {
+        timeout = setTimeout(() => resolve(null), timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timeout) clearTimeout(timeout);
+  }
+}
+
+function stripLeadingPlusCode(value: string | null | undefined) {
+  if (!value) return null;
+
+  const cleaned = value.trim().replace(PLUS_CODE_PREFIX, "").trim();
+  return cleaned || null;
+}
+
+function createFallbackGeocodedAddress(
+  barangay: DetectedBarangay,
+): GeocodedAddressWithFormatted {
+  return {
+    city: null,
+    country: "Philippines",
+    district: barangay.barangayName,
+    formattedAddress: `${barangay.barangayName}, Albay`,
+    isoCountryCode: "PH",
+    name: null,
+    postalCode: null,
+    region: "Albay",
+    street: null,
+    streetNumber: null,
+    subregion: barangay.barangayName,
+    timezone: null,
+  } as GeocodedAddressWithFormatted;
+}
+
+function sanitizeGeocodedAddress(
+  address: GeocodedAddressWithFormatted,
+  barangay: DetectedBarangay,
+): GeocodedAddressWithFormatted {
+  return {
+    ...address,
+
+    // Do not let a Plus Code become the visible street/purok value.
+    name: stripLeadingPlusCode(address.name),
+    street: stripLeadingPlusCode(address.street),
+    formattedAddress: stripLeadingPlusCode(address.formattedAddress),
+
+    // The polygon boundary is authoritative for the barangay.
+    district: barangay.barangayName,
+    subregion: barangay.barangayName,
+  };
+}
+
+function resolveAddressWithBarangay(
+  nativeAddress: GeocodedAddressWithFormatted | null,
+  barangay: DetectedBarangay,
+  meta: ComplaintMeta,
+): ResolvedReportAddress {
+  const sourceAddress = sanitizeGeocodedAddress(
+    nativeAddress ?? createFallbackGeocodedAddress(barangay),
+    barangay,
+  );
+
+  const resolved = resolvePsgcAddress(sourceAddress, meta);
+
+  return {
+    ...resolved,
+    purok: stripLeadingPlusCode(resolved.purok) ?? "",
+  };
+}
+
 export function AlbayLocationPickerSheet({
   open,
   initialCoordinates,
@@ -82,126 +197,324 @@ export function AlbayLocationPickerSheet({
   onConfirm,
 }: Props) {
   const sheetRef = useRef<BottomSheetRef>(null);
+  const cameraRef = useRef<CameraRef>(null);
+
+  const locatingRef = useRef(false);
   const reverseGeocodeRequestRef = useRef(0);
+
   const insets = useSafeAreaInsets();
+
   const [accentColor, mutedColor] = useAppColors([
     "accent",
     "muted-foreground",
   ]);
+
   const [mapModule, setMapModule] = useState<MapLibreModule | null>(null);
   const [coordinates, setCoordinates] = useState<AlbayCoordinates | null>(null);
   const [currentCoordinates, setCurrentCoordinates] =
     useState<AlbayCoordinates | null>(null);
+
   const [address, setAddress] = useState<ResolvedReportAddress | null>(null);
+  const [detectedBarangay, setDetectedBarangay] =
+    useState<DetectedBarangay | null>(null);
+
   const [isResolvingAddress, setIsResolvingAddress] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
+
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [addressError, setAddressError] = useState<string | null>(null);
+
   const [mapReady, setMapReady] = useState(false);
   const [mapLoadError, setMapLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (Platform.OS === "web") return;
+
     let active = true;
+
     void loadMapLibreModule()
       .then((module) => {
         if (active) setMapModule(module);
       })
       .catch(() => {
-        if (active) setMapLoadError("Map is not available on this device.");
+        if (active) {
+          setMapLoadError("Map is not available on this device.");
+        }
       });
+
     return () => {
       active = false;
     };
   }, []);
 
+  // Important: this effect depends only on `open`.
+  // It no longer closes the sheet again when unrelated form values change.
   useEffect(() => {
     if (!open) {
       reverseGeocodeRequestRef.current += 1;
+
+      setIsResolvingAddress(false);
+
       sheetRef.current?.close();
       return;
     }
 
-    setCoordinates(clampToAlbay(initialCoordinates ?? albayCenter));
-    setAddress(null);
+    const frame = requestAnimationFrame(() => {
+      sheetRef.current?.open();
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    // Only initialize the map position if the picker
+    // does not already have a location.
+    setCoordinates((current) => {
+      if (current) {
+        return current;
+      }
+
+      return clampToAlbay(initialCoordinates ?? albayCenter);
+    });
+
     setLocationError(null);
-    setMapLoadError(null);
-    setMapReady(false);
-    requestAnimationFrame(() => sheetRef.current?.open());
-  }, [initialCoordinates, open]);
+    setAddressError(null);
+  }, [open, initialCoordinates?.latitude, initialCoordinates?.longitude]);
 
   useEffect(() => {
     if (!open || !coordinates) return;
 
+    const barangay = findAlbayBarangay(
+      coordinates.latitude,
+      coordinates.longitude,
+    );
+
+    setDetectedBarangay(barangay);
+
+    if (!barangay) {
+      reverseGeocodeRequestRef.current += 1;
+      setAddress(null);
+      setIsResolvingAddress(false);
+      setAddressError(
+        "No Albay barangay boundary matched this point. Move the map slightly and try again.",
+      );
+      return;
+    }
+
+    setAddressError(null);
+
     const requestId = ++reverseGeocodeRequestRef.current;
+
+    // Mark as updating immediately so the old address
+    // cannot accidentally be confirmed for new coordinates.
+    setIsResolvingAddress(true);
+
     const timeout = setTimeout(() => {
-      setIsResolvingAddress(true);
       void Location.reverseGeocodeAsync(coordinates)
-        .then(([nextAddress]) => {
-          if (requestId !== reverseGeocodeRequestRef.current || !nextAddress) return;
-          setAddress(resolvePsgcAddress(nextAddress, meta));
+        .then(([nativeAddress]) => {
+          if (requestId !== reverseGeocodeRequestRef.current) return;
+
+          setAddress(
+            resolveAddressWithBarangay(nativeAddress ?? null, barangay, meta),
+          );
         })
         .catch(() => {
-          if (requestId === reverseGeocodeRequestRef.current) setAddress(null);
+          if (requestId !== reverseGeocodeRequestRef.current) return;
+
+          // Reverse geocoding is only supplementary now.
+          // The GeoJSON barangay boundary is enough to preserve the
+          // authoritative municipality/barangay identifiers.
+          setAddress(resolveAddressWithBarangay(null, barangay, meta));
         })
         .finally(() => {
           if (requestId === reverseGeocodeRequestRef.current) {
             setIsResolvingAddress(false);
           }
         });
-    }, 350);
+    }, 600); // Debounce to avoid excessive reverse geocoding requests.
 
     return () => {
+      clearTimeout(timeout);
+
       if (requestId === reverseGeocodeRequestRef.current) {
         reverseGeocodeRequestRef.current += 1;
       }
-      clearTimeout(timeout);
     };
   }, [coordinates, meta, open]);
 
-  useEffect(() => {
-    if (!open || !coordinates || !mapModule || mapReady || mapLoadError) return;
-    const timeout = setTimeout(
-      () => setMapLoadError("Map is taking too long to load."),
-      MAP_LOAD_TIMEOUT_MS,
-    );
-    return () => clearTimeout(timeout);
-  }, [coordinates, mapLoadError, mapModule, mapReady, open]);
+  const canLoadMap = open && coordinates != null && mapModule != null;
 
-  const locateCurrentPosition = async () => {
+  useEffect(() => {
+    if (!canLoadMap || mapReady || mapLoadError) return;
+
+    const timeout = setTimeout(() => {
+      setMapLoadError("Map is taking too long to load.");
+    }, MAP_LOAD_TIMEOUT_MS);
+
+    return () => clearTimeout(timeout);
+  }, [canLoadMap, mapLoadError, mapReady]);
+  const animateCameraToLocation = useCallback(
+    async (next: AlbayCoordinates) => {
+      const camera = cameraRef.current;
+
+      // Keep the device marker available while moving.
+      setCurrentCoordinates(next);
+
+      // Fallback if the map/camera is not ready yet.
+      if (!camera || !mapReady) {
+        setCoordinates(next);
+        return;
+      }
+
+      try {
+        // 1. Zoom away from the currently selected location.
+        await camera.zoomTo(10.5, {
+          duration: 250,
+          easing: "ease",
+        });
+
+        // 2. Travel across the map while zoomed out.
+        await camera.flyTo({
+          center: toLngLat(next),
+          zoom: 10.5,
+          duration: 600,
+          easing: "fly",
+        });
+
+        // 3. Zoom into the detected device location.
+        await camera.zoomTo(16, {
+          duration: 350,
+          easing: "ease",
+        });
+      } finally {
+        // Synchronize React state with the final camera position.
+        setCoordinates(next);
+      }
+    },
+    [mapReady],
+  );
+  const locateCurrentPosition = useCallback(async () => {
+    if (locatingRef.current) return;
+
+    locatingRef.current = true;
     setIsLocating(true);
     setLocationError(null);
+
     try {
-      const permission = await Location.requestForegroundPermissionsAsync();
-      if (permission.status !== "granted") {
-        setLocationError("Location permission denied. Drag the pin manually.");
+      let permission = await Location.getForegroundPermissionsAsync();
+
+      if (!permission.granted) {
+        permission = await Location.requestForegroundPermissionsAsync();
+      }
+
+      if (!permission.granted) {
+        setLocationError(
+          "Location permission is required. You can still move the map manually.",
+        );
         return;
       }
-      const current = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
+
+      let servicesEnabled = await Location.hasServicesEnabledAsync();
+
+      if (Platform.OS === "android") {
+        try {
+          const provider = await Location.getProviderStatusAsync();
+
+          if (
+            !provider.locationServicesEnabled ||
+            provider.gpsAvailable === false
+          ) {
+            await Location.enableNetworkProviderAsync();
+          }
+        } catch {
+          // The user may decline Android's improved-accuracy dialog.
+          // Continue and try the providers that are still available.
+        }
+
+        servicesEnabled = await Location.hasServicesEnabledAsync();
+      }
+
+      if (!servicesEnabled) {
+        setLocationError(
+          "Device Location Services are turned off. Turn them on and try again.",
+        );
+        return;
+      }
+
+      // Fast fallback while the device is obtaining a fresh GPS fix.
+      const lastKnown = await Location.getLastKnownPositionAsync({
+        maxAge: 30_000,
+        requiredAccuracy: 100,
       }).catch(() => null);
+
+      let usableLastKnown: AlbayCoordinates | null = null;
+
+      if (lastKnown) {
+        const cachedCoordinates: AlbayCoordinates = {
+          latitude: lastKnown.coords.latitude,
+          longitude: lastKnown.coords.longitude,
+        };
+
+        if (
+          isWithinAlbay(cachedCoordinates.latitude, cachedCoordinates.longitude)
+        ) {
+          usableLastKnown = cachedCoordinates;
+        }
+      }
+
+      const current = await withTimeout(
+        Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+          mayShowUserSettingsDialog: true,
+        }),
+        8_000,
+      );
+
       if (!current) {
-        setLocationError("Current location is unavailable. Drag the pin manually.");
+        if (usableLastKnown) {
+          await animateCameraToLocation(usableLastKnown);
+
+          setLocationError(null);
+
+          return;
+        }
+
+        setLocationError(
+          "Unable to determine your current location. Make sure GPS is enabled and try again.",
+        );
         return;
       }
-      const next = {
+
+      const next: AlbayCoordinates = {
         latitude: current.coords.latitude,
         longitude: current.coords.longitude,
       };
+
       if (!isWithinAlbay(next.latitude, next.longitude)) {
-        setLocationError("Your current location is outside Albay.");
+        setLocationError("Your current device location is outside Albay.");
         return;
       }
-      setCurrentCoordinates(next);
-      setCoordinates(next);
+
+      await animateCameraToLocation(next);
+
+      setLocationError(null);
+    } catch (error) {
+      console.warn("Failed to determine current location:", error);
+
+      setLocationError(
+        "Unable to determine your current location. Check your device location settings and try again.",
+      );
     } finally {
+      locatingRef.current = false;
       setIsLocating(false);
     }
-  };
+  }, [animateCameraToLocation]);
 
   const Map = mapModule?.Map;
   const Camera = mapModule?.Camera;
   const Marker = mapModule?.Marker;
-  const ViewAnnotation = mapModule?.ViewAnnotation;
   const NativeUserLocation = mapModule?.NativeUserLocation;
 
   return (
@@ -219,15 +532,19 @@ export function AlbayLocationPickerSheet({
       >
         <BottomSheetContent
           className="flex-1"
-          style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+          style={{
+            paddingBottom: Math.max(insets.bottom, 16),
+          }}
         >
           <View className="flex-row items-start justify-between gap-3 pb-1">
             <View className="flex-1">
               <Heading size="lg">Choose location</Heading>
+
               <Text className="text-sm text-muted-foreground">
-                Move the pin within Albay, then confirm the matched address.
+                Move the map under the fixed pin, then confirm the location.
               </Text>
             </View>
+
             <Button
               size="icon"
               variant="ghost"
@@ -239,16 +556,16 @@ export function AlbayLocationPickerSheet({
             </Button>
           </View>
 
-          <View className="flex-1 overflow-hidden rounded-lg border border-border bg-secondary">
+          <View className="relative flex-1 overflow-hidden rounded-lg border border-border bg-secondary">
             {Platform.OS === "web" ||
             !Map ||
             !Camera ||
             !Marker ||
-            !ViewAnnotation ||
             !coordinates ||
             mapLoadError ? (
               <View className="h-96 items-center justify-center px-6">
                 <MapPin size={36} color={accentColor} />
+
                 <Text className="mt-2 text-center text-sm text-muted-foreground">
                   {Platform.OS === "web"
                     ? "Native map picker is available on Android and iOS."
@@ -256,56 +573,108 @@ export function AlbayLocationPickerSheet({
                 </Text>
               </View>
             ) : (
-              <Map
-                style={{ flex: 1, minHeight: 420 }}
-                mapStyle={MAP_STYLE_URL}
-                androidView="texture"
-                compass
-                logo={false}
-                attribution
-                onDidFailLoadingMap={() =>
-                  setMapLoadError("Map style failed to load. Check Aleconnect server.")
-                }
-                onDidFinishLoadingMap={() => setMapReady(true)}
-                onPress={(event) => {
-                  const [longitude, latitude] = event.nativeEvent.lngLat;
-                  setCoordinates(clampToAlbay({ latitude, longitude }));
-                }}
-              >
-                <Camera
-                  center={toLngLat(coordinates)}
-                  zoom={13}
-                  maxBounds={[
-                    albayBounds.minLongitude,
-                    albayBounds.minLatitude,
-                    albayBounds.maxLongitude,
-                    albayBounds.maxLatitude,
-                  ]}
-                  duration={0}
-                />
-                {NativeUserLocation ? <NativeUserLocation /> : null}
-                {currentCoordinates ? (
-                  <Marker id="current-location" lngLat={toLngLat(currentCoordinates)}>
-                    <View className="h-5 w-5 rounded-full border-2 border-white bg-blue-500" />
-                  </Marker>
-                ) : null}
-                <ViewAnnotation
-                  id="selected-location"
-                  lngLat={toLngLat(coordinates)}
-                  draggable
-                  onDragEnd={(event) => {
-                    const [longitude, latitude] = event.nativeEvent.lngLat;
-                    setCoordinates(clampToAlbay({ latitude, longitude }));
+              <>
+                <Map
+                  style={{
+                    flex: 1,
+                    minHeight: 420,
+                  }}
+                  mapStyle={MAP_STYLE_URL}
+                  androidView="texture"
+                  dragPan={!isLocating}
+                  touchZoom={!isLocating}
+                  doubleTapZoom={!isLocating}
+                  touchRotate={false}
+                  touchPitch={false}
+                  compass={false}
+                  logo={false}
+                  attribution
+                  onWillStartLoadingMap={() => {
+                    setMapReady(false);
+                    setMapLoadError(null);
+                  }}
+                  onDidFinishLoadingStyle={() => {
+                    setMapReady(true);
+                    setMapLoadError(null);
+                  }}
+                  onDidFinishLoadingMap={() => {
+                    setMapReady(true);
+                    setMapLoadError(null);
+                  }}
+                  onDidFinishRenderingMapFully={() => {
+                    setMapReady(true);
+                    setMapLoadError(null);
+                  }}
+                  onDidFailLoadingMap={() => {
+                    setMapReady(false);
+                    setMapLoadError(
+                      "Map style failed to load. Check Aleconnect server.",
+                    );
+                  }}
+                  onRegionDidChange={(event) => {
+                    const [longitude, latitude] = event.nativeEvent.center;
+
+                    const next = clampToAlbay({
+                      latitude,
+                      longitude,
+                    });
+
+                    setCoordinates((current) =>
+                      coordinatesAreEqual(current, next) ? current : next,
+                    );
                   }}
                 >
-                  <View className="items-center">
+                  <Camera
+                    ref={cameraRef}
+                    center={toLngLat(coordinates)}
+                    bearing={0}
+                    pitch={0}
+                    initialViewState={{
+                      center: toLngLat(coordinates),
+                      zoom: 16,
+                      bearing: 0,
+                      pitch: 0,
+                    }}
+                    maxBounds={[
+                      albayBounds.minLongitude,
+                      albayBounds.minLatitude,
+                      albayBounds.maxLongitude,
+                      albayBounds.maxLatitude,
+                    ]}
+                    duration={0}
+                  />
+
+                  {NativeUserLocation ? (
+                    <NativeUserLocation />
+                  ) : currentCoordinates ? (
+                    <Marker
+                      id="current-location"
+                      lngLat={toLngLat(currentCoordinates)}
+                    >
+                      <View className="h-5 w-5 rounded-full border-2 border-white bg-blue-500" />
+                    </Marker>
+                  ) : null}
+                </Map>
+
+                {/* The pin is visual only. All gestures go to the map below it. */}
+                <View
+                  pointerEvents="none"
+                  className="absolute inset-0 items-center justify-center"
+                >
+                  <View
+                    className="items-center"
+                    style={{
+                      transform: [{ translateY: -22 }],
+                    }}
+                  >
                     <View className="h-9 w-9 items-center justify-center rounded-full bg-primary shadow-lg">
                       <MapPin size={20} color="white" />
                     </View>
+
                     <View className="-mt-1 h-3 w-3 rotate-45 bg-primary" />
                   </View>
-                </ViewAnnotation>
-              </Map>
+                </View>
+              </>
             )}
           </View>
 
@@ -313,24 +682,37 @@ export function AlbayLocationPickerSheet({
             <Text className="text-xs font-bold text-muted-foreground">
               Selected address
             </Text>
+
             <Text className="mt-1 text-sm font-bold leading-5 text-foreground">
-              {isResolvingAddress
-                ? "Finding this address..."
-                : address
-                  ? formatResolvedAddress(address)
-                  : "Move the pin to identify an address."}
+              {address
+                ? formatResolvedAddress(address)
+                : isResolvingAddress
+                  ? "Finding this address..."
+                  : "Move the map to identify an address."}
             </Text>
-            {address && !address.municipalityCode ? (
-              <Text className="mt-2 text-xs text-warning">
-                Municipality could not be matched. Move the pin closer to the address.
-              </Text>
-            ) : address && !address.barangayPsgc ? (
-              <Text className="mt-2 text-xs text-warning">
-                Barangay could not be matched. Select it after using this pin.
+
+            {address && isResolvingAddress ? (
+              <Text className="mt-1 text-xs text-muted-foreground">
+                Updating address...
               </Text>
             ) : null}
+
+            {!isResolvingAddress && addressError ? (
+              <Text className="mt-2 text-xs text-warning">{addressError}</Text>
+            ) : !isResolvingAddress && address && !address.municipalityCode ? (
+              <Text className="mt-2 text-xs text-warning">
+                Municipality could not be matched. Move the map slightly.
+              </Text>
+            ) : !isResolvingAddress && address && !address.barangayPsgc ? (
+              <Text className="mt-2 text-xs text-warning">
+                Barangay could not be matched. Move the map slightly.
+              </Text>
+            ) : null}
+
             {locationError ? (
-              <Text className="mt-2 text-xs text-destructive">{locationError}</Text>
+              <Text className="mt-2 text-xs text-destructive">
+                {locationError}
+              </Text>
             ) : null}
           </View>
 
@@ -339,7 +721,9 @@ export function AlbayLocationPickerSheet({
               size="lg"
               variant="secondary"
               className="flex-1"
-              onPress={() => void locateCurrentPosition()}
+              onPress={() => {
+                void locateCurrentPosition();
+              }}
               isDisabled={isLocating}
             >
               {isLocating ? (
@@ -347,20 +731,41 @@ export function AlbayLocationPickerSheet({
               ) : (
                 <ButtonIcon as={LocateFixed} height={18} width={18} />
               )}
-              <ButtonText>{isLocating ? "Locating..." : "Use my location"}</ButtonText>
+
+              <ButtonText>
+                {isLocating ? "Finding location..." : "Recenter on me"}
+              </ButtonText>
             </Button>
+
             <Button
               size="lg"
               className="flex-1"
               onPress={() => {
-                if (coordinates && address) onConfirm({ coordinates, address });
+                if (coordinates && address && detectedBarangay) {
+                  onConfirm({
+                    coordinates,
+                    address,
+
+                    psgc: {
+                      municipality: detectedBarangay.municipalityPsgc,
+                      barangay: detectedBarangay.barangayPsgc,
+                    },
+                  });
+                }
               }}
-              isDisabled={!coordinates || isResolvingAddress || !canUseResolvedPin(address)}
+              isDisabled={
+                !coordinates ||
+                !detectedBarangay ||
+                !address ||
+                isResolvingAddress
+              }
             >
               <ButtonIcon as={Navigation} height={18} width={18} />
-              <ButtonText>Use this pin</ButtonText>
+
+              <ButtonText>Use this location</ButtonText>
             </Button>
           </View>
+
           <Text className="text-center text-xs text-muted-foreground">
             Location selection is limited to Albay.
           </Text>
