@@ -1,10 +1,16 @@
+import NetInfo from "@react-native-community/netinfo";
 import { useFonts } from "expo-font";
 import { Stack, useRouter } from "expo-router";
 import type * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useRef } from "react";
-import { Text, TextInput, useWindowDimensions } from "react-native";
+import {
+  AppState,
+  Text,
+  TextInput,
+  useWindowDimensions,
+} from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { useUniwind } from "uniwind";
@@ -22,8 +28,6 @@ import { ReportQueueProvider } from "@/context/report-queue-context";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { consumeForcedLogoutReason } from "@/services/api";
 import { clearAdvisoryCache } from "@/services/advisories";
-import { subscribeComplaintSubmissionToast } from "@/services/report-submission-events";
-import { clearComplaintCache } from "@/services/reports";
 import { registerDevicePushToken } from "@/services/notification-settings";
 import {
   advisoryIdFromPushData,
@@ -31,6 +35,11 @@ import {
 } from "@/services/notification-navigation";
 import { invalidateNotifications } from "@/services/notifications";
 import "@/services/report-background-sync";
+import {
+  handleReportStatusPush,
+  requestReportRevalidation,
+} from "@/services/report-sync-events";
+import { subscribeComplaintSubmissionToast } from "@/services/report-submission-events";
 import "../../global.css";
 
 void SplashScreen.preventAutoHideAsync();
@@ -89,27 +98,37 @@ function PushTokenBridge() {
   const { session } = useAuthSession();
   const toast = useToast();
   const pendingToken = useRef<string | null>(null);
+  const appStateRef = useRef(AppState.currentState);
+  const wasOfflineRef = useRef<boolean | null>(null);
+  const userId = session?.user.id;
 
   const flushToken = useCallback(
     (token: string) => {
       pendingToken.current = token;
-      if (!session) return;
+      if (!userId) return;
 
       void registerDevicePushToken(token).catch((error) => {
         console.warn("Failed to save push token", error);
       });
     },
-    [session],
+    [userId],
   );
 
   const openNotificationTarget = useCallback(
     (response: Notifications.NotificationResponse) => {
-      const ticketId = ticketIdFromPushData(
-        response.notification.request.content.data,
-      );
+      const data = response.notification.request.content.data;
+      const ticketId = ticketIdFromPushData(data);
 
       if (ticketId) {
-        void clearComplaintCache(session?.user.id);
+        if (userId) {
+          void handleReportStatusPush(data, userId)
+            .then((handled) => {
+              if (!handled) requestReportRevalidation(userId);
+            })
+            .catch(() => {
+              requestReportRevalidation(userId);
+            });
+        }
         router.push({
           pathname: "/report/[id]",
           params: { id: ticketId, focus: "notification" },
@@ -117,9 +136,7 @@ function PushTokenBridge() {
         return;
       }
 
-      const advisoryId = advisoryIdFromPushData(
-        response.notification.request.content.data,
-      );
+      const advisoryId = advisoryIdFromPushData(data);
       if (advisoryId) {
         router.push({
           pathname: "/advisory/[id]",
@@ -130,16 +147,17 @@ function PushTokenBridge() {
 
       router.push("/notifications");
     },
-    [router, session?.user.id],
+    [router, userId],
   );
 
   const handleForegroundNotification = useCallback(
     (notification: Notifications.Notification) => {
-      if (session) {
+      const data = notification.request.content.data;
+      if (userId) {
         void Promise.all([
-          clearAdvisoryCache(session.user.id),
-          clearComplaintCache(session.user.id),
-        ]).then(() => invalidateNotifications(session.user.id));
+          clearAdvisoryCache(userId),
+          handleReportStatusPush(data, userId),
+        ]).then(() => invalidateNotifications(userId));
       }
 
       const title = notification.request.content.title ?? "New update";
@@ -159,16 +177,51 @@ function PushTokenBridge() {
         ),
       });
     },
-    [session, toast],
+    [toast, userId],
   );
 
   useEffect(() => {
-    if (!session || !pendingToken.current) return;
+    if (!userId || !pendingToken.current) return;
 
     void registerDevicePushToken(pendingToken.current).catch((error) => {
       console.warn("Failed to save push token", error);
     });
-  }, [session]);
+  }, [userId]);
+
+  useEffect(() => {
+    if (!userId) return;
+    requestReportRevalidation(userId);
+  }, [userId]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const subscription = AppState.addEventListener("change", (nextState) => {
+      const previousState = appStateRef.current;
+      appStateRef.current = nextState;
+      if (previousState !== "active" && nextState === "active") {
+        requestReportRevalidation(userId);
+      }
+    });
+
+    return () => subscription.remove();
+  }, [userId]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      const offline =
+        state.isConnected === false || state.isInternetReachable === false;
+      const previousOffline = wasOfflineRef.current;
+      wasOfflineRef.current = offline;
+      if (previousOffline === true && !offline) {
+        requestReportRevalidation(userId);
+      }
+    });
+
+    return unsubscribe;
+  }, [userId]);
 
   return (
     <PushNotificationsReceiver
