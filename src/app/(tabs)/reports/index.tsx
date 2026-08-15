@@ -13,7 +13,14 @@ import { ReportListGroup } from "@/features/reports/report-list";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useUnreadNotificationCount } from "@/hooks/use-unread-notification-count";
-import { fetchComplaintMeta, fetchComplaintReports } from "@/services/reports";
+import {
+  fetchComplaintMeta,
+  fetchComplaintReportPage,
+} from "@/services/reports";
+import {
+  subscribeReportRevalidationRequested,
+  subscribeReportStatusChanged,
+} from "@/services/report-sync-events";
 import { isInManilaMonth, parseApiInstant } from "@/utils/manila-time";
 import { useFocusEffect, useRouter } from "expo-router";
 import {
@@ -22,7 +29,7 @@ import {
   ChevronRight,
   Plus,
 } from "lucide-react-native";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   RefreshControl,
   ScrollView,
@@ -30,6 +37,11 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+type LoadComplaintOptions = {
+  force?: boolean;
+  revalidate?: boolean;
+};
 
 function ReportsSkeleton() {
   return (
@@ -59,10 +71,14 @@ export default function ComplaintsRoute() {
   const { width } = useWindowDimensions();
   const scrollRef = useRef<ScrollView | null>(null);
   const hasLoadedRef = useRef(false);
+  const loadComplaintsRef = useRef<
+    (options?: LoadComplaintOptions) => Promise<void>
+  >(async () => undefined);
   const bottomPadding = appScrollableBottomPadding(insets.bottom);
   const [accentColor] = useAppColors(["accent"]);
   const unreadCount = useUnreadNotificationCount();
   const { session } = useAuthSession();
+  const userId = session?.user.id;
   const [meta, setMeta] = useState<ComplaintMeta>(emptyComplaintMeta);
   const [reports, setReports] = useState<Report[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -70,21 +86,31 @@ export default function ComplaintsRoute() {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const loadComplaints = useCallback(
-    async (options?: { force?: boolean }) => {
+    async (options?: LoadComplaintOptions) => {
       if (options?.force) {
         setIsRefreshing(true);
-      } else if (!hasLoadedRef.current) {
+      } else if (!hasLoadedRef.current && !options?.revalidate) {
         setIsLoading(true);
       }
 
       try {
-        const [nextMeta, nextReports] = await Promise.all([
-          fetchComplaintMeta(options),
-          fetchComplaintReports({ ...options, userId: session?.user.id }),
+        const [nextMeta, page] = await Promise.all([
+          fetchComplaintMeta(options?.force ? { force: true } : undefined),
+          fetchComplaintReportPage({
+            force: options?.force,
+            revalidate: options?.revalidate,
+            userId,
+          }),
         ]);
         setMeta(nextMeta);
-        setReports(nextReports);
+        setReports(page.reports);
         setError(null);
+
+        if (page.isStale && !options?.revalidate && !options?.force) {
+          queueMicrotask(() => {
+            void loadComplaintsRef.current({ revalidate: true });
+          });
+        }
       } catch (nextError) {
         setError(
           nextError instanceof Error
@@ -97,14 +123,45 @@ export default function ComplaintsRoute() {
         hasLoadedRef.current = true;
       }
     },
-    [session?.user.id],
+    [userId],
   );
+
+  useEffect(() => {
+    loadComplaintsRef.current = loadComplaints;
+  }, [loadComplaints]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const unsubscribeStatus = subscribeReportStatusChanged((event) => {
+      if (event.userId !== userId) return;
+      setReports((current) =>
+        current.map((report) =>
+          report.id === event.ticketId
+            ? { ...report, status: event.status }
+            : report,
+        ),
+      );
+    });
+
+    const unsubscribeRevalidation = subscribeReportRevalidationRequested(
+      (changedUserId) => {
+        if (changedUserId !== userId) return;
+        void loadComplaintsRef.current({ revalidate: true });
+      },
+    );
+
+    return () => {
+      unsubscribeStatus();
+      unsubscribeRevalidation();
+    };
+  }, [userId]);
 
   useFocusEffect(
     useCallback(() => {
       scrollRef.current?.scrollTo({ y: 0, animated: false });
-      void loadComplaints();
-    }, [loadComplaints]),
+      void loadComplaintsRef.current();
+    }, []),
   );
 
   const monthReports = useMemo(
