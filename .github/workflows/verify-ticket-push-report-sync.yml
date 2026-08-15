@@ -1,0 +1,36 @@
+name: Verify Ticket Push Report Sync
+
+on:
+  push:
+    branches:
+      - feature/ticket-push-report-sync
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: node scripts/patch-ticket-push-report-sync.mjs
+      - run: rm scripts/patch-ticket-push-report-sync.mjs .github/workflows/verify-ticket-push-report-sync.yml
+      - run: npm ci
+      - run: node --test tests/notification-navigation.test.mjs tests/report-sync-ordering.test.mjs tests/report-status-cache-sync.test.mjs tests/report-sync-events.test.mjs tests/report-status-sync-ui.test.mjs
+      - run: node --test tests/*.test.mjs
+      - run: npx tsc --noEmit
+      - run: npm run lint
+      - run: npm run harness:check
+      - run: git diff --check
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: sync archive status from ticket pushes"
+          git push origin HEAD:feature/ticket-push-report-sync
