@@ -3,8 +3,14 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const layoutUrl = new URL("../src/app/_layout.tsx", import.meta.url);
-const recentUrl = new URL("../src/app/(tabs)/reports/index.tsx", import.meta.url);
-const archiveUrl = new URL("../src/app/(tabs)/reports/list.tsx", import.meta.url);
+const recentUrl = new URL(
+  "../src/app/(tabs)/reports/index.tsx",
+  import.meta.url,
+);
+const archiveUrl = new URL(
+  "../src/app/(tabs)/reports/list.tsx",
+  import.meta.url,
+);
 
 test("root bridge routes ticket pushes and lifecycle recovery into report sync", async () => {
   const source = await readFile(layoutUrl, "utf8");
@@ -22,8 +28,7 @@ test("root bridge routes ticket pushes and lifecycle recovery into report sync",
     /if \(ticketStatusChangedEventFromPushData\(data\)\)[\s\S]*handleReportStatusPush\(data, userId\)[\s\S]*else \{\s*requestReportRevalidation\(userId\)/,
   );
 });
-
-test("recent and archive report surfaces subscribe to immediate status and revalidation events", async () => {
+test("recent and archive report surfaces subscribe to immediate status and fallback revalidation events", async () => {
   for (const url of [recentUrl, archiveUrl]) {
     const source = await readFile(url, "utf8");
     assert.match(source, /subscribeReportStatusChanged/);

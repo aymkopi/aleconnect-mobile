@@ -12,6 +12,7 @@ import {
   ButtonText,
 } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
+import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
 import {
   loadMapLibreModule,
@@ -359,39 +360,32 @@ export function AlbayLocationPickerSheet({
     async (next: AlbayCoordinates) => {
       const camera = cameraRef.current;
 
-      // Keep the device marker available while moving.
+      // Keep device marker available immediately.
       setCurrentCoordinates(next);
 
-      // Fallback if the map/camera is not ready yet.
       if (!camera || !mapReady) {
         setCoordinates(next);
         return;
       }
 
-      try {
-        // 1. Zoom away from the currently selected location.
-        await camera.zoomTo(10.5, {
-          duration: 250,
-          easing: "ease",
-        });
+      const duration = 2500;
 
-        // 2. Travel across the map while zoomed out.
-        await camera.flyTo({
-          center: toLngLat(next),
-          zoom: 10.5,
-          duration: 600,
-          easing: "fly",
-        });
+      // Selected destination is now known.
+      // Because Camera is no longer controlled via `center={coordinates}`,
+      // this state change will not interrupt the animation.
+      setCoordinates(next);
 
-        // 3. Zoom into the detected device location.
-        await camera.zoomTo(16, {
-          duration: 350,
-          easing: "ease",
-        });
-      } finally {
-        // Synchronize React state with the final camera position.
-        setCoordinates(next);
-      }
+      camera.flyTo({
+        center: toLngLat(next),
+        zoom: 16,
+        duration,
+        easing: "fly",
+      });
+
+      // flyTo should not be treated as an animation-completion Promise.
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, duration);
+      });
     },
     [mapReady],
   );
@@ -612,6 +606,11 @@ export function AlbayLocationPickerSheet({
                     );
                   }}
                   onRegionDidChange={(event) => {
+                    // During "Recenter on me", animateCameraToLocation owns the
+                    // selected destination. Don't let camera animation events
+                    // continuously replace it.
+                    if (locatingRef.current) return;
+
                     const [longitude, latitude] = event.nativeEvent.center;
 
                     const next = clampToAlbay({
@@ -626,9 +625,6 @@ export function AlbayLocationPickerSheet({
                 >
                   <Camera
                     ref={cameraRef}
-                    center={toLngLat(coordinates)}
-                    bearing={0}
-                    pitch={0}
                     initialViewState={{
                       center: toLngLat(coordinates),
                       zoom: 16,
@@ -678,12 +674,12 @@ export function AlbayLocationPickerSheet({
             )}
           </View>
 
-          <View className="rounded-xl border border-border bg-card p-4">
-            <Text className="text-xs font-bold text-muted-foreground">
+          <View className="relative rounded-xl border border-border bg-card p-4">
+            <Text className="pr-8 text-xs font-bold text-muted-foreground">
               Selected address
             </Text>
 
-            <Text className="mt-1 text-sm font-bold leading-5 text-foreground">
+            <Text className="mt-1 pr-8 text-sm font-bold leading-5 text-foreground">
               {address
                 ? formatResolvedAddress(address)
                 : isResolvingAddress
@@ -692,9 +688,12 @@ export function AlbayLocationPickerSheet({
             </Text>
 
             {address && isResolvingAddress ? (
-              <Text className="mt-1 text-xs text-muted-foreground">
-                Updating address...
-              </Text>
+              <View
+                pointerEvents="none"
+                className="absolute right-4 top-4 items-center justify-center"
+              >
+                <Spinner size="small" color={mutedColor} />
+              </View>
             ) : null}
 
             {!isResolvingAddress && addressError ? (

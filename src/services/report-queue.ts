@@ -1,23 +1,24 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
 
+import { ApiRequestError, getAuthToken } from "@/services/api";
+import { requestReportRevalidation } from "@/services/report-sync-events";
 import {
-  createEvidenceUploads,
   clearReportListCache,
+  createEvidenceUploads,
   submitComplaint,
   uploadEvidenceToR2,
   type SubmitComplaintInput,
 } from "@/services/reports";
 import {
+  createKeyedSerialExecutor,
+  createPromiseRegistry,
+} from "@/utils/async-coordination";
+import {
   deleteReportEvidence,
   readEvidencePhoto,
   type PreparedEvidencePhoto,
 } from "@/utils/evidence-image-processing";
-import { ApiRequestError, getAuthToken } from "@/services/api";
-import {
-  createKeyedSerialExecutor,
-  createPromiseRegistry,
-} from "@/utils/async-coordination";
 import {
   mapWithConcurrency,
   requestPhaseFailureMessage,
@@ -59,8 +60,7 @@ export type ReportQueueInput = Pick<
 const queueStorageKey = "report_submission_queue_v1";
 const listeners = new Set<() => void>();
 const runQueueMutation = createKeyedSerialExecutor();
-const queueSyncRequests =
-  createPromiseRegistry<string, ReportQueueItem[]>();
+const queueSyncRequests = createPromiseRegistry<string, ReportQueueItem[]>();
 
 function notifyQueueChanged() {
   listeners.forEach((listener) => listener());
@@ -99,7 +99,9 @@ async function replaceQueueItem(nextItem: ReportQueueItem) {
 
 export function createLocalReportId() {
   const uuid = globalThis.crypto?.randomUUID?.();
-  return uuid ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+  return (
+    uuid ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`
+  );
 }
 
 export function subscribeReportQueue(listener: () => void) {
@@ -140,10 +142,7 @@ export async function enqueueReport(input: ReportQueueInput) {
   });
 }
 
-async function submitQueuedReport(
-  item: ReportQueueItem,
-  authToken: string,
-) {
+async function submitQueuedReport(item: ReportQueueItem, authToken: string) {
   const submitting: ReportQueueItem = {
     ...item,
     status: "submitting",
@@ -160,28 +159,27 @@ async function submitQueuedReport(
       item.evidence.length,
       authToken,
     );
-    await mapWithConcurrency(
-      uploads,
-      2,
-      async (upload, index) => {
-        const photo = item.evidence[index];
-        if (!photo) throw new Error("A queued evidence photo is missing.");
-        await uploadEvidenceToR2(
-          upload.uploadUrl,
-          await readEvidencePhoto(photo.uri),
-        );
-      },
-    );
+    await mapWithConcurrency(uploads, 2, async (upload, index) => {
+      const photo = item.evidence[index];
+      if (!photo) throw new Error("A queued evidence photo is missing.");
+      await uploadEvidenceToR2(
+        upload.uploadUrl,
+        await readEvidencePhoto(photo.uri),
+      );
+    });
     // Older queued drafts included the retired generic description field.
     // Strip it so retries use only the category/type-specific fields.
-    const { description: _legacyDescription, ...payload } = item.payload as
-      typeof item.payload & { description?: unknown };
-    const ticket = await submitComplaint({
-      ...payload,
-      idempotencyKey: item.idempotencyKey,
-      draftIds: [draftId],
-      imageKeys: uploads.map((upload) => upload.key),
-    }, authToken);
+    const { description: _legacyDescription, ...payload } =
+      item.payload as typeof item.payload & { description?: unknown };
+    const ticket = await submitComplaint(
+      {
+        ...payload,
+        idempotencyKey: item.idempotencyKey,
+        draftIds: [draftId],
+        imageKeys: uploads.map((upload) => upload.key),
+      },
+      authToken,
+    );
     const submitted: ReportQueueItem = {
       ...submitting,
       status: "submitted",
@@ -189,19 +187,30 @@ async function submitQueuedReport(
       ticketId: ticket.ticketId,
       ticketNumber: ticket.ticketNumber,
     };
+
+    // The ticket is now authoritative on the server.
+    //
+    // Invalidate the report-list cache BEFORE removing the local queue item.
+    // Removing the queue item broadcasts a queue change to mounted report
+    // surfaces, so the cache must already be invalidated when they react.
+    await clearReportListCache(item.userId);
+
+    // Immediately tell mounted report surfaces to revalidate against the
+    // authoritative complaint API instead of waiting for focus/resume/cache expiry.
+    requestReportRevalidation(item.userId);
+
     // The authoritative copy now exists in tickets; remove the local draft so it
-    // moves into the normal report archive instead of appearing twice.
+    // moves into the normal report list instead of appearing twice.
     await runQueueMutation(queueStorageKey, async () => {
       await writeQueue(
         (await readQueue()).filter((entry) => entry.id !== item.id),
       );
     });
-    await clearReportListCache(item.userId);
+
     deleteReportEvidence(item.id);
     return submitted;
   } catch (error) {
-    const retryable =
-      !(error instanceof ApiRequestError) || error.retryable;
+    const retryable = !(error instanceof ApiRequestError) || error.retryable;
     const lastError =
       error instanceof ApiRequestError &&
       error.status != null &&
@@ -215,10 +224,9 @@ async function submitQueuedReport(
       status: retryable ? "queued" : "failed",
       updatedAt: new Date().toISOString(),
       lastError,
-      lastErrorPhase:
-        error instanceof ApiRequestError ? error.phase : null,
+      lastErrorPhase: error instanceof ApiRequestError ? error.phase : null,
       diagnosticId:
-        error instanceof ApiRequestError ? error.requestId ?? null : null,
+        error instanceof ApiRequestError ? (error.requestId ?? null) : null,
     };
     await replaceQueueItem(failed);
     return failed;

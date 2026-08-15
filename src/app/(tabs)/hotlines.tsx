@@ -421,20 +421,20 @@ function CategoryCard({
         accessibilityRole="button"
         className="min-h-[116px] flex-1 gap-3 rounded-lg border border-border bg-card p-4"
       >
-      <View
-        className={`h-9 w-9 items-center justify-center rounded-full ${visual.softClassName}`}
-      >
-        <Icon size={20} color={iconColor} />
-      </View>
-      <View className="flex-1 justify-end">
-        <Text className="text-sm font-bold text-foreground" numberOfLines={3}>
-          {category.name}
-        </Text>
-        <Text className="mt-0.5 text-xs text-muted-foreground">
-          {category.agencies.length}{" "}
-          {category.agencies.length === 1 ? "agency" : "agencies"}
-        </Text>
-      </View>
+        <View
+          className={`h-9 w-9 items-center justify-center rounded-full ${visual.softClassName}`}
+        >
+          <Icon size={20} color={iconColor} />
+        </View>
+        <View className="flex-1 justify-end">
+          <Text className="text-sm font-bold text-foreground" numberOfLines={3}>
+            {category.name}
+          </Text>
+          <Text className="mt-0.5 text-xs text-muted-foreground">
+            {category.agencies.length}{" "}
+            {category.agencies.length === 1 ? "agency" : "agencies"}
+          </Text>
+        </View>
       </Pressable>
     </View>
   );
@@ -563,10 +563,7 @@ export default function HotlinesRoute() {
     : [];
   const categoryRows = useMemo(() => rowsOf(categories, 2), [categories]);
 
-  const openCategory = (
-    category: HotlineCategory,
-    trigger: View,
-  ) => {
+  const openCategory = (category: HotlineCategory, trigger: View) => {
     categoryTriggerRef.current = trigger;
     setSelectedCategoryId(category.id);
     setSheetQuery("");
@@ -642,19 +639,6 @@ export default function HotlinesRoute() {
           placeholder="Search number, agency, category"
           value={query}
         />
-
-        {isUsingSavedData && !isLoading ? (
-          <Alert className="px-3 py-2">
-            <View className="flex-1">
-              <AlertText className="text-xs font-semibold">
-                Showing saved hotline data
-              </AlertText>
-              <AlertText className="text-xs">
-                Pull down to check for newer contacts when online.
-              </AlertText>
-            </View>
-          </Alert>
-        ) : null}
 
         {isLoading ? <HotlineSkeleton /> : null}
 

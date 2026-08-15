@@ -5,14 +5,15 @@ import {
   type TicketStatusChangedPush,
 } from "@/services/notification-navigation";
 import {
-  complaintReportsNeedRevalidation,
-  markComplaintReportsForRevalidation,
-  projectComplaintReportStatus,
-} from "@/services/reports";
-import {
   isIncomingReportStatusEventNewer,
   type ReportStatusEventMarker,
 } from "@/services/report-sync-ordering";
+import {
+  complaintReportsNeedRevalidation,
+  fetchComplaintReportDetail,
+  markComplaintReportsForRevalidation,
+  projectComplaintReportStatus,
+} from "@/services/reports";
 
 export type ReportStatusChangedEvent = TicketStatusChangedPush & {
   userId: string;
@@ -22,10 +23,7 @@ type ReportStatusChangedListener = (event: ReportStatusChangedEvent) => void;
 type ReportRevalidationListener = (userId: string) => void;
 
 const markerPrefix = "report_status_event_markers_v1";
-const markerMemory = new Map<
-  string,
-  Record<string, ReportStatusEventMarker>
->();
+const markerMemory = new Map<string, Record<string, ReportStatusEventMarker>>();
 const markerOperations = new Map<string, Promise<unknown>>();
 const statusListeners = new Set<ReportStatusChangedListener>();
 const revalidationListeners = new Set<ReportRevalidationListener>();
@@ -121,22 +119,70 @@ export async function handleReportStatusPush(
     markerMemory.set(userId, nextMarkers);
 
     const accepted = { ...event, userId } satisfies ReportStatusChangedEvent;
+
+    // Immediately update mounted report screens.
     statusListeners.forEach((listener) => listener(accepted));
-    requestReportRevalidation(userId);
 
-    void AsyncStorage.setItem(markerKey(userId), JSON.stringify(nextMarkers)).catch(
-      (error) => {
-        console.warn("Failed to persist report status event ordering", error);
-      },
-    );
-
-    void projectComplaintReportStatus({
-      userId,
-      ticketId: event.ticketId,
-      status: event.status,
-    }).catch((error) => {
-      console.warn("Failed to project report status into cache", error);
+    // Persist ordering metadata without blocking the visible UI update.
+    void AsyncStorage.setItem(
+      markerKey(userId),
+      JSON.stringify(nextMarkers),
+    ).catch((error) => {
+      console.warn("Failed to persist report status event ordering", error);
     });
+
+    // Patch the matching cached report immediately, then verify only
+    // this ticket against the authoritative detail endpoint.
+    void (async () => {
+      try {
+        await projectComplaintReportStatus({
+          userId,
+          ticketId: event.ticketId,
+          status: event.status,
+        });
+      } catch (error) {
+        console.warn("Failed to project report status into cache", error);
+      }
+
+      try {
+        const detail = await fetchComplaintReportDetail(event.ticketId);
+
+        // A newer push may have arrived while the API request was running.
+        // Do not allow this older request to overwrite the newer event.
+        const latestMarker = markerMemory.get(userId)?.[event.ticketId];
+
+        if (
+          !latestMarker ||
+          latestMarker.changedAt !== nextMarker.changedAt ||
+          latestMarker.revision !== nextMarker.revision
+        ) {
+          return;
+        }
+
+        // Correct the cache from the authoritative server response.
+        await projectComplaintReportStatus({
+          userId,
+          ticketId: event.ticketId,
+          status: detail.status,
+        });
+
+        // Usually the push status and API status will match.
+        // Only publish again when the server returned something different.
+        if (detail.status !== event.status) {
+          statusListeners.forEach((listener) =>
+            listener({
+              ...accepted,
+              status: detail.status,
+            }),
+          );
+        }
+      } catch (error) {
+        // Do not immediately fetch the entire report list.
+        // Mark it stale so resume/reconnect/manual refresh can recover.
+        markComplaintReportsForRevalidation(userId);
+        console.warn("Failed to revalidate report after status push", error);
+      }
+    })();
 
     return true;
   });

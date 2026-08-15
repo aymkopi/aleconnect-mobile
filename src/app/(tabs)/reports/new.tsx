@@ -932,311 +932,355 @@ export default function NewComplaintRoute() {
 
         {step === 2 ? (
           <>
-            <Text className="ml-2 text-sm text-muted-foreground">
-              Report type
-            </Text>
-            <SelectField
-              isRequired
-              label="Report type"
-              value={form.typeId}
-              placeholder="Select report type"
-              description={`Choose the issue type under ${selectedCategory?.title ?? "this category"}.`}
-              options={reportTypeOptions}
-              onChange={(value) =>
-                setForm((current) => ({
-                  ...current,
-                  typeId: value,
-                  typeDescription: "",
-                  currentRegisteredName: "",
-                  requestedRegisteredName: "",
-                }))
-              }
-              isInvalid={showErrors && Boolean(formErrors.typeId)}
-              error={formErrors.typeId}
-            />
+            <View className="flex-1 gap-4 rounded-lg border border-border bg-card p-4">
+              <View className="gap-2">
+                <Text className="text-sm font-semibold text-muted-foreground">
+                  Report type
+                </Text>
 
-            <Text className="ml-2 text-sm text-muted-foreground">Account</Text>
-            <ReportInput
-              isRequired
-              isDisabled
-              label="Account number"
-              value={form.accountNumber}
-              placeholder="100001321412634"
-              onChangeText={() => undefined}
-              isInvalid={showErrors && !form.accountNumber}
-              error="Account number is required."
-            />
-
-            <Text className="ml-2 text-sm text-muted-foreground">Address</Text>
-            <Checkbox
-              value="home-address"
-              isChecked={form.useHomeAddress}
-              onChange={(selected) => {
-                const homeCoordinates = readCoordinates(
-                  profile?.homeCoordinates,
-                );
-                const homeAddress = findHomeAddress(meta, profile);
-                setForm((current) => ({
-                  ...current,
-                  useHomeAddress: selected,
-                  ...(selected
-                    ? {
-                        ...homeAddress,
-                        latitude: homeCoordinates?.latitude ?? current.latitude,
-                        longitude:
-                          homeCoordinates?.longitude ?? current.longitude,
-                        locationVerified: Boolean(
-                          homeCoordinates &&
-                          isWithinAlbay(
-                            homeCoordinates.latitude,
-                            homeCoordinates.longitude,
-                          ) &&
-                          homeAddress.municipalityCode &&
-                          homeAddress.barangayPsgc,
-                        ),
-                      }
-                    : {
-                        municipalityCode: "",
-                        barangayPsgc: "",
-                        purok: "",
-                        landmark: "",
-                        latitude: null,
-                        longitude: null,
-                        locationVerified: false,
-                      }),
-                }));
-              }}
-              className="rounded-lg border border-border bg-card p-4"
-            >
-              <CheckboxIndicator>
-                <CheckboxIcon as={Check} />
-              </CheckboxIndicator>
-              <CheckboxLabel>Use home address</CheckboxLabel>
-            </Checkbox>
-            <View className="flex-row items-end gap-2">
-              <View className="flex-1">
                 <SelectField
                   isRequired
-                  label="Municipality"
-                  value={form.municipalityCode}
-                  placeholder="Select municipality"
-                  description="Choose the municipality where the issue is located."
-                  options={municipalityOptions}
-                  isDisabled={form.useHomeAddress}
-                  onChange={(value) => {
+                  label="Report type"
+                  value={form.typeId}
+                  placeholder="Select report type"
+                  description={`Choose the issue type under ${selectedCategory?.title ?? "this category"}.`}
+                  options={reportTypeOptions}
+                  onChange={(value) =>
                     setForm((current) => ({
                       ...current,
-                      municipalityCode: value,
-                      barangayPsgc: "",
-                      latitude: null,
-                      longitude: null,
-                      locationVerified: false,
-                    }));
-                  }}
-                  isInvalid={showErrors && Boolean(formErrors.municipalityCode)}
-                  error={formErrors.municipalityCode}
+                      typeId: value,
+                      typeDescription: "",
+                      currentRegisteredName: "",
+                      requestedRegisteredName: "",
+                    }))
+                  }
+                  isInvalid={showErrors && Boolean(formErrors.typeId)}
+                  error={formErrors.typeId}
                 />
               </View>
-              <Button
-                className="h-12 w-12"
-                size="icon"
-                variant="secondary"
-                isDisabled={form.useHomeAddress}
-                onPress={() => void openMapPicker()}
-                accessibilityLabel="Open map picker"
-              >
-                <ButtonIcon as={MapPin} height={20} width={20} />
-              </Button>
+
+              <View className="gap-2">
+                <Text className="text-sm font-semibold text-muted-foreground">
+                  Account
+                </Text>
+
+                <ReportInput
+                  isRequired
+                  isDisabled
+                  label="Account number"
+                  value={form.accountNumber}
+                  placeholder="100001321412634"
+                  onChangeText={() => undefined}
+                  isInvalid={showErrors && !form.accountNumber}
+                  error="Account number is required."
+                />
+              </View>
+
+              <View className="gap-3">
+                <Text className="text-sm font-semibold text-muted-foreground">
+                  Address
+                </Text>
+
+                <Checkbox
+                  value="home-address"
+                  isChecked={form.useHomeAddress}
+                  onChange={(selected) => {
+                    const homeCoordinates = readCoordinates(
+                      profile?.homeCoordinates,
+                    );
+                    const homeAddress = findHomeAddress(meta, profile);
+
+                    setForm((current) => ({
+                      ...current,
+                      useHomeAddress: selected,
+                      ...(selected
+                        ? {
+                            ...homeAddress,
+                            latitude:
+                              homeCoordinates?.latitude ?? current.latitude,
+                            longitude:
+                              homeCoordinates?.longitude ?? current.longitude,
+                            locationVerified: Boolean(
+                              homeCoordinates &&
+                              isWithinAlbay(
+                                homeCoordinates.latitude,
+                                homeCoordinates.longitude,
+                              ) &&
+                              homeAddress.municipalityCode &&
+                              homeAddress.barangayPsgc,
+                            ),
+                          }
+                        : {
+                            municipalityCode: "",
+                            barangayPsgc: "",
+                            purok: "",
+                            landmark: "",
+                            latitude: null,
+                            longitude: null,
+                            locationVerified: false,
+                          }),
+                    }));
+                  }}
+                  className="rounded-xl border border-border bg-secondary p-4"
+                >
+                  <CheckboxIndicator>
+                    <CheckboxIcon as={Check} />
+                  </CheckboxIndicator>
+
+                  <CheckboxLabel>Use home address</CheckboxLabel>
+                </Checkbox>
+
+                <View className="flex-row items-end gap-2">
+                  <View className="flex-1">
+                    <SelectField
+                      isRequired
+                      label="Municipality"
+                      value={form.municipalityCode}
+                      placeholder="Select municipality"
+                      description="Choose the municipality where the issue is located."
+                      options={municipalityOptions}
+                      isDisabled={form.useHomeAddress}
+                      onChange={(value) => {
+                        setForm((current) => ({
+                          ...current,
+                          municipalityCode: value,
+                          barangayPsgc: "",
+                          latitude: null,
+                          longitude: null,
+                          locationVerified: false,
+                        }));
+                      }}
+                      isInvalid={
+                        showErrors && Boolean(formErrors.municipalityCode)
+                      }
+                      error={formErrors.municipalityCode}
+                    />
+                  </View>
+
+                  <Button
+                    className="h-12 w-12 rounded-xl"
+                    size="icon"
+                    variant="secondary"
+                    isDisabled={form.useHomeAddress}
+                    onPress={() => void openMapPicker()}
+                    accessibilityLabel="Open map picker"
+                  >
+                    <ButtonIcon as={MapPin} height={20} width={20} />
+                  </Button>
+                </View>
+
+                <SelectField
+                  isRequired
+                  label="Barangay"
+                  value={form.barangayPsgc}
+                  placeholder="Select barangay"
+                  description="Choose a barangay within the selected municipality."
+                  options={barangayOptions}
+                  onChange={(value) =>
+                    setForm((current) => ({
+                      ...current,
+                      barangayPsgc: value,
+                      locationVerified: Boolean(
+                        current.latitude != null &&
+                        current.longitude != null &&
+                        isWithinAlbay(current.latitude, current.longitude),
+                      ),
+                    }))
+                  }
+                  isDisabled={form.useHomeAddress || !form.municipalityCode}
+                  isInvalid={showErrors && Boolean(formErrors.barangayPsgc)}
+                  error={formErrors.barangayPsgc}
+                />
+
+                <ReportInput
+                  isRequired
+                  isDisabled={form.useHomeAddress}
+                  label="Purok/Street"
+                  value={form.purok}
+                  placeholder="Purok or street"
+                  onChangeText={(value) => updateForm("purok", value)}
+                />
+
+                <ReportInput
+                  isDisabled={form.useHomeAddress}
+                  label="Landmark"
+                  value={form.landmark}
+                  placeholder="Nearest landmark"
+                  onChangeText={(value) => updateForm("landmark", value)}
+                />
+
+                {showErrors && formErrors.location ? (
+                  <Text className="text-xs text-destructive">
+                    {formErrors.location}
+                  </Text>
+                ) : null}
+              </View>
             </View>
-            <SelectField
-              isRequired
-              label="Barangay"
-              value={form.barangayPsgc}
-              placeholder="Select barangay"
-              description="Choose a barangay within the selected municipality."
-              options={barangayOptions}
-              onChange={(value) =>
-                setForm((current) => ({
-                  ...current,
-                  barangayPsgc: value,
-                  locationVerified: Boolean(
-                    current.latitude != null &&
-                    current.longitude != null &&
-                    isWithinAlbay(current.latitude, current.longitude),
-                  ),
-                }))
-              }
-              isDisabled={form.useHomeAddress || !form.municipalityCode}
-              isInvalid={showErrors && Boolean(formErrors.barangayPsgc)}
-              error={formErrors.barangayPsgc}
-            />
-            <ReportInput
-              isDisabled={form.useHomeAddress}
-              label="Purok"
-              value={form.purok}
-              placeholder="Purok or street"
-              onChangeText={(value) => updateForm("purok", value)}
-            />
-            <ReportInput
-              isDisabled={form.useHomeAddress}
-              label="Landmark"
-              value={form.landmark}
-              placeholder="Nearest landmark"
-              onChangeText={(value) => updateForm("landmark", value)}
-            />
-            {showErrors && formErrors.location ? (
-              <Text className="text-xs text-destructive">
-                {formErrors.location}
-              </Text>
-            ) : null}
           </>
         ) : null}
 
         {step === 3 ? (
           <>
-            <Text className="ml-2 text-sm text-muted-foreground">
-              Report details
-            </Text>
-            {selectedCategory?.requiresDescription ? (
-              <ReportInput
-                isRequired
-                label={selectedCategory.descriptionLabel ?? "Category details"}
-                value={form.categoryDescription}
-                placeholder="Describe why this category applies"
-                multiline
-                maxLength={reportLimits.description}
-                onChangeText={(value) =>
-                  updateForm("categoryDescription", value)
-                }
-                isInvalid={
-                  showErrors && Boolean(formErrors.categoryDescription)
-                }
-                error={formErrors.categoryDescription}
-              />
-            ) : null}
-            {selectedType?.requiresDescription ? (
-              <ReportInput
-                isRequired
-                label={selectedType.descriptionLabel ?? "Report type details"}
-                value={form.typeDescription}
-                placeholder="Describe this specific report type"
-                multiline
-                maxLength={reportLimits.description}
-                onChangeText={(value) => updateForm("typeDescription", value)}
-                isInvalid={showErrors && Boolean(formErrors.typeDescription)}
-                error={formErrors.typeDescription}
-              />
-            ) : null}
-            {selectedType?.requiresKwhmTransfer ? (
-              <View className="gap-3 rounded-lg border border-border bg-card p-4">
-                <View>
-                  <Heading size="sm">Registered name transfer</Heading>
+            <View className="flex-1 gap-4 rounded-lg border border-border bg-card p-4">
+              <View className="gap-2">
+                <Text className="ml-2 text-sm text-muted-foreground">
+                  Report details
+                </Text>
+                {selectedCategory?.requiresDescription ? (
+                  <ReportInput
+                    isRequired
+                    label={
+                      selectedCategory.descriptionLabel ?? "Category details"
+                    }
+                    value={form.categoryDescription}
+                    placeholder="Describe why this category applies"
+                    multiline
+                    maxLength={reportLimits.description}
+                    onChangeText={(value) =>
+                      updateForm("categoryDescription", value)
+                    }
+                    isInvalid={
+                      showErrors && Boolean(formErrors.categoryDescription)
+                    }
+                    error={formErrors.categoryDescription}
+                  />
+                ) : null}
+                {selectedType?.requiresDescription ? (
+                  <ReportInput
+                    isRequired
+                    label={
+                      selectedType.descriptionLabel ?? "Report type details"
+                    }
+                    value={form.typeDescription}
+                    placeholder="Describe this specific report type"
+                    multiline
+                    maxLength={reportLimits.description}
+                    onChangeText={(value) =>
+                      updateForm("typeDescription", value)
+                    }
+                    isInvalid={
+                      showErrors && Boolean(formErrors.typeDescription)
+                    }
+                    error={formErrors.typeDescription}
+                  />
+                ) : null}
+                {selectedType?.requiresKwhmTransfer ? (
+                  <View className="gap-3 rounded-lg border border-border bg-card p-4">
+                    <View>
+                      <Heading size="sm">Registered name transfer</Heading>
+                      <Text className="mt-1 text-sm text-muted-foreground">
+                        Enter names only. Account records are verified privately
+                        by ALECO staff.
+                      </Text>
+                    </View>
+                    <ReportInput
+                      isRequired
+                      label="Current registered name"
+                      value={form.currentRegisteredName}
+                      placeholder="Name currently on the account"
+                      maxLength={reportLimits.registeredName}
+                      onChangeText={(value) =>
+                        updateForm("currentRegisteredName", value)
+                      }
+                      isInvalid={
+                        showErrors && Boolean(formErrors.currentRegisteredName)
+                      }
+                      error={formErrors.currentRegisteredName}
+                    />
+                    <ReportInput
+                      isRequired
+                      label="Requested registered name"
+                      value={form.requestedRegisteredName}
+                      placeholder="New registered name"
+                      maxLength={reportLimits.registeredName}
+                      onChangeText={(value) =>
+                        updateForm("requestedRegisteredName", value)
+                      }
+                      isInvalid={
+                        showErrors &&
+                        Boolean(formErrors.requestedRegisteredName)
+                      }
+                      error={formErrors.requestedRegisteredName}
+                    />
+                  </View>
+                ) : null}
+                <ReportInput
+                  label="Action desired"
+                  value={form.desiredAction}
+                  placeholder="What action do you want?"
+                  multiline
+                  maxLength={reportLimits.actionDesired}
+                  onChangeText={(value) => updateForm("desiredAction", value)}
+                  isInvalid={showErrors && Boolean(formErrors.desiredAction)}
+                  error={formErrors.desiredAction}
+                />
+                <View className="rounded-lg border border-border bg-secondary p-4">
+                  <View className="flex-row items-center justify-between">
+                    <Text className="text-sm font-bold text-foreground">
+                      Evidence photos *
+                    </Text>
+                    <Text className="text-xs font-bold text-muted-foreground">
+                      {form.photoUploads.length}/{maxEvidencePhotos}
+                    </Text>
+                  </View>
                   <Text className="mt-1 text-sm text-muted-foreground">
-                    Enter names only. Account records are verified privately by
-                    ALECO staff.
+                    Add 1 to 3 clear photos to help us assess the issue and
+                    verify your report faster.
                   </Text>
+                  <View className="mt-3 flex-row gap-2">
+                    {Array.from({ length: maxEvidencePhotos }, (_, index) => {
+                      const photo = form.photoUploads[index];
+                      return (
+                        <Pressable
+                          key={index}
+                          onPress={photo ? undefined : addPhotos}
+                          className={`aspect-square flex-1 items-center justify-center rounded-xl ${
+                            photo ? "bg-accent" : "bg-background"
+                          }`}
+                        >
+                          {photo ? (
+                            <>
+                              <Image
+                                source={{ uri: photo.uri }}
+                                className="h-full w-full rounded-xl"
+                              />
+                              <Button
+                                size="icon"
+                                variant="destructive"
+                                className="absolute -right-2 -top-2 h-7 w-7 rounded-full"
+                                onPress={() => removePhoto(photo.id)}
+                                accessibilityLabel="Remove evidence photo"
+                              >
+                                <ButtonIcon
+                                  as={CircleX}
+                                  height={15}
+                                  width={15}
+                                />
+                              </Button>
+                              {photo.status !== "ready" ? (
+                                <View className="absolute inset-0 items-center justify-center rounded-xl bg-black/45">
+                                  <Text className="text-xs text-white">
+                                    {photo.status === "failed"
+                                      ? "Failed"
+                                      : "Preparing"}
+                                  </Text>
+                                </View>
+                              ) : null}
+                            </>
+                          ) : (
+                            <Camera size={18} color={mutedColor} />
+                          )}
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                  {showErrors && formErrors.evidence ? (
+                    <Text className="mt-2 text-xs text-destructive">
+                      {formErrors.evidence}
+                    </Text>
+                  ) : null}
                 </View>
-                <ReportInput
-                  isRequired
-                  label="Current registered name"
-                  value={form.currentRegisteredName}
-                  placeholder="Name currently on the account"
-                  maxLength={reportLimits.registeredName}
-                  onChangeText={(value) =>
-                    updateForm("currentRegisteredName", value)
-                  }
-                  isInvalid={
-                    showErrors && Boolean(formErrors.currentRegisteredName)
-                  }
-                  error={formErrors.currentRegisteredName}
-                />
-                <ReportInput
-                  isRequired
-                  label="Requested registered name"
-                  value={form.requestedRegisteredName}
-                  placeholder="New registered name"
-                  maxLength={reportLimits.registeredName}
-                  onChangeText={(value) =>
-                    updateForm("requestedRegisteredName", value)
-                  }
-                  isInvalid={
-                    showErrors && Boolean(formErrors.requestedRegisteredName)
-                  }
-                  error={formErrors.requestedRegisteredName}
-                />
               </View>
-            ) : null}
-            <ReportInput
-              label="Action desired"
-              value={form.desiredAction}
-              placeholder="What action do you want?"
-              multiline
-              maxLength={reportLimits.actionDesired}
-              onChangeText={(value) => updateForm("desiredAction", value)}
-              isInvalid={showErrors && Boolean(formErrors.desiredAction)}
-              error={formErrors.desiredAction}
-            />
-            <View className="rounded-lg border border-border bg-secondary p-4">
-              <View className="flex-row items-center justify-between">
-                <Text className="text-sm font-bold text-foreground">
-                  Evidence photos *
-                </Text>
-                <Text className="text-xs font-bold text-muted-foreground">
-                  {form.photoUploads.length}/{maxEvidencePhotos}
-                </Text>
-              </View>
-              <Text className="mt-1 text-sm text-muted-foreground">
-                Add 1 to 3 clear photos to help us assess the issue and verify
-                your report faster.
-              </Text>
-              <View className="mt-3 flex-row gap-2">
-                {Array.from({ length: maxEvidencePhotos }, (_, index) => {
-                  const photo = form.photoUploads[index];
-                  return (
-                    <Pressable
-                      key={index}
-                      onPress={photo ? undefined : addPhotos}
-                      className={`aspect-square flex-1 items-center justify-center rounded-xl ${
-                        photo ? "bg-accent" : "bg-background"
-                      }`}
-                    >
-                      {photo ? (
-                        <>
-                          <Image
-                            source={{ uri: photo.uri }}
-                            className="h-full w-full rounded-xl"
-                          />
-                          <Button
-                            size="icon"
-                            variant="destructive"
-                            className="absolute -right-2 -top-2 h-7 w-7 rounded-full"
-                            onPress={() => removePhoto(photo.id)}
-                            accessibilityLabel="Remove evidence photo"
-                          >
-                            <ButtonIcon as={CircleX} height={15} width={15} />
-                          </Button>
-                          {photo.status !== "ready" ? (
-                            <View className="absolute inset-0 items-center justify-center rounded-xl bg-black/45">
-                              <Text className="text-xs text-white">
-                                {photo.status === "failed"
-                                  ? "Failed"
-                                  : "Preparing"}
-                              </Text>
-                            </View>
-                          ) : null}
-                        </>
-                      ) : (
-                        <Camera size={18} color={mutedColor} />
-                      )}
-                    </Pressable>
-                  );
-                })}
-              </View>
-              {showErrors && formErrors.evidence ? (
-                <Text className="mt-2 text-xs text-destructive">
-                  {formErrors.evidence}
-                </Text>
-              ) : null}
             </View>
           </>
         ) : null}
@@ -1437,7 +1481,7 @@ export default function NewComplaintRoute() {
 
             barangayPsgc: matchedBarangay?.value ?? address.barangayPsgc ?? "",
 
-            purok: address.purok ?? "",
+            purok: address.purok?.trim() || current.purok,
 
             locationVerified: true,
           }));

@@ -2,18 +2,18 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const read = (path) =>
-  readFile(new URL(`../${path}`, import.meta.url), "utf8");
+const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("report queue persists evidence, reuses one idempotency key, and moves submitted reports into the archive", async () => {
-  const [queue, evidence, root, archive, queueRoute, packageJson] = await Promise.all([
-    read("src/services/report-queue.ts"),
-    read("src/utils/evidence-image-processing.ts"),
-    read("src/app/_layout.tsx"),
-    read("src/app/(tabs)/reports/list.tsx"),
-    read("src/app/(tabs)/reports/queue.tsx"),
-    read("package.json"),
-  ]);
+  const [queue, evidence, root, archive, queueRoute, packageJson] =
+    await Promise.all([
+      read("src/services/report-queue.ts"),
+      read("src/utils/evidence-image-processing.ts"),
+      read("src/app/_layout.tsx"),
+      read("src/app/(tabs)/reports/list.tsx"),
+      read("src/app/(tabs)/reports/queue.tsx"),
+      read("package.json"),
+    ]);
 
   assert.match(queue, /AsyncStorage/);
   assert.match(evidence, /Paths\.document/);
@@ -28,4 +28,21 @@ test("report queue persists evidence, reuses one idempotency key, and moves subm
   assert.match(queueRoute, /Redirect href="\/reports\/list"/);
   assert.match(packageJson, /expo-file-system/);
   assert.match(packageJson, /@react-native-community\/netinfo/);
+  assert.match(queue, /requestReportRevalidation/);
+  assert.match(queue, /requestReportRevalidation\(item\.userId\)/);
+
+  const clearCacheIndex = queue.indexOf(
+    "await clearReportListCache(item.userId)",
+  );
+
+  const removeQueueIndex = queue.indexOf(
+    "(await readQueue()).filter((entry) => entry.id !== item.id)",
+  );
+
+  assert.ok(clearCacheIndex >= 0);
+  assert.ok(removeQueueIndex >= 0);
+  assert.ok(
+    clearCacheIndex < removeQueueIndex,
+    "report cache must be cleared before queue removal broadcasts the submission",
+  );
 });

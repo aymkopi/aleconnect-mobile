@@ -185,3 +185,24 @@
 - Git/Deployment: no commit, EAS publish, store upload, or Cloudflare deployment.
 - Remaining risks: G-25 production cron isolation still requires deployment and live tail verification; the app release itself was not published.
 - Next: finish the sibling G-25 Worker release verification, then close the shared goal tracker.
+
+## 2026-08-15 - Targeted ticket push report revalidation
+
+- Repository: mobile `aleconnect-mobile`.
+- Scope: optimized ticket-status push synchronization so an accepted v1 push immediately projects only the matching report, then revalidates only that ticket through `/api/mobile/complaints/:ticketId` instead of immediately refetching the full report list.
+- Files: `src/services/report-sync-events.ts`, focused report-sync tests, and this history entry.
+- Behavior: Recent Reports and Archive retain their existing targeted `ticketId` row projection. The normal v1 push path no longer requests full-list revalidation. The server detail response may correct the projected status when the push and authoritative response differ.
+- Fallbacks: app activation, reconnect, legacy ticket notifications, manual refresh, missed pushes, and targeted-detail failures retain full-list revalidation/recovery.
+- Ordering: targeted responses are ignored when a newer persisted/in-memory ticket event marker has already superseded the push that started the request.
+- Backend: no API, database, Cloudflare Worker, or push-payload contract changes.
+
+## 2026-08-15 - Immediate submitted-report list synchronization
+
+- Repositories: mobile `aleconnect-mobile`; staff/API `Aleconnect` is unchanged.
+- Scope: makes a successfully submitted consumer report appear in the report surfaces without waiting for the normal report-list cache lifetime, focus cycle, or later queue synchronization.
+- Files: `src/services/report-queue.ts`, `tests/report-queue.test.mjs`, and this implementation-history entry.
+- Contracts: a successful `POST /api/mobile/complaints` remains the authoritative creation boundary. After that response, the mobile client invalidates its report-list cache before removing the local queued draft and explicitly requests authoritative report-list revalidation. No report is presented as server-created before the API confirms creation.
+- Verification: focused report queue and report synchronization tests, TypeScript, lint, agent harness validation, and `git diff --check`.
+- Git/Deployment: mobile source change only. No backend deployment, database mutation, Cloudflare Worker change, Expo/EAS publication, or store release is included.
+- Remaining risks: refresh latency still depends on the consumer complaint list API and network availability. Offline submissions remain represented by the existing local queue until the server confirms them.
+- Next: verify immediate consumer-list synchronization, then optimize the staff Report Inbox discovery path separately without increasing global operational polling.
