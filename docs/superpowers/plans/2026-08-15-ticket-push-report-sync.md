@@ -4,44 +4,41 @@
 
 **Goal:** Make visible and cached report statuses update almost immediately from a valid ticket status push, then revalidate against the server without polling, WebSockets, or blocking notification delivery.
 
-**Architecture:** Parse versioned ticket status events defensively, reject duplicate/out-of-order events using a persisted per-user/ticket ordering marker, project accepted status changes into the default report cache and mounted report screens, then request a dedicated authoritative revalidation. Normal navigation keeps the existing 60-second cache; event-driven revalidation bypasses the manual 3-second refresh cooldown but still uses the existing request registry to deduplicate concurrent API calls. App/session foregrounding marks report data for stale-while-revalidate so cached UI remains immediately available even when push JavaScript did not run in the background.
+**Architecture:** Parse versioned ticket status events defensively, reject duplicate/out-of-order events with a persisted per-user/ticket ordering marker, project accepted status changes into the default report cache and mounted screens, and then request authoritative revalidation. Normal navigation keeps the 60-second list cache; event-driven revalidation bypasses the 3-second manual-refresh cooldown but still uses the existing request registry. App/session activation and network reconnection mark report data for stale-while-revalidate so cached UI remains immediately available even when background notification JavaScript did not execute.
 
-**Tech Stack:** Expo SDK 55, React Native 0.83, TypeScript 5.9, Expo Notifications, AsyncStorage, Expo Router, React hooks, Node test runner.
+**Tech Stack:** Expo SDK 55, React Native 0.83, TypeScript 5.9, Expo Notifications, AsyncStorage, NetInfo, Expo Router, React hooks, Node test runner.
 
 ## Global Constraints
 
-- The backend/API remains authoritative; a push payload is a synchronization signal, not permanent report data.
-- Version 1 ticket events require valid `changedAt`; `revision` is optional and preferred when present.
-- Keep legacy `context: "ticket"` / `ticketId` navigation compatible.
+- Backend/API remains authoritative; push is a synchronization signal, not permanent report data.
+- V1 requires valid `changedAt`; `revision` is optional and preferred when present.
+- Preserve legacy `context: "ticket"` / `ticketId` notification navigation.
 - Never infer lifecycle ordering from status names.
-- Persist the newest accepted ordering marker per user/ticket so delayed pushes cannot regress status after app restart.
+- Persist newest accepted ordering marker per user/ticket so delayed pushes cannot regress status after restart.
 - Do not clear complaint metadata for ticket status events.
-- Do not globally lower the existing 60-second report-list cache TTL.
-- Do not add polling, WebSockets/SSE, a new persistent state-management library, or background-push-only correctness.
-- App resume/cold-session activation must mark reports for revalidation; cached report rows should display before authoritative refresh completes when cache exists.
-- Event-driven revalidation must not be blocked by the manual refresh cooldown. Concurrent identical API calls should still be deduplicated by the existing report request registry.
-- Cache projection must preserve the existing `fetchedAt` value; changing one status must not make the whole list appear freshly fetched.
+- Do not globally lower the 60-second report-list cache TTL.
+- Do not add polling, WebSockets/SSE, a new global state library, or background-push-only correctness.
+- Event-driven revalidation must bypass the manual refresh cooldown but retain existing request deduplication.
+- Cache projection must preserve original `fetchedAt`.
+- App/session activation and offline→online transitions must request report revalidation.
+- A legacy tapped ticket push that cannot be parsed as v1 must still navigate and mark report data for revalidation.
 
 ---
 
 ## File Structure
 
-- Modify `src/services/notification-navigation.ts` — add the versioned ticket-status event parser while preserving navigation helpers.
-- Create `src/services/report-sync-ordering.ts` — pure ordering-marker comparison logic with no native dependencies.
-- Modify `src/services/reports.ts` — extract default report-cache helpers, add targeted status projection, revalidation markers, and an event-driven `revalidate` fetch path.
-- Create `src/services/report-sync-events.ts` — persisted ordering sidecar, accepted-event bus, and revalidation-request bus.
-- Modify `src/app/_layout.tsx` — route foreground/tapped ticket pushes into sync handling and mark report data stale on active session/app resume.
-- Modify `src/app/(tabs)/reports/index.tsx` — patch visible rows immediately and perform stale-while-revalidate.
-- Modify `src/app/(tabs)/reports/list.tsx` — patch archive rows immediately and perform stale-while-revalidate.
-- Modify `tests/notification-navigation.test.mjs`.
-- Create `tests/report-sync-ordering.test.mjs`.
-- Create `tests/report-status-cache-sync.test.mjs`.
-- Create `tests/report-sync-events.test.mjs`.
-- Create `tests/report-status-sync-ui.test.mjs`.
+- Modify `src/services/notification-navigation.ts` — v1 parser, legacy navigation unchanged.
+- Create `src/services/report-sync-ordering.ts` — pure marker comparison.
+- Modify `src/services/reports.ts` — targeted cache projection, stale marker, `revalidate` network path.
+- Create `src/services/report-sync-events.ts` — ordering sidecar, status event bus, revalidation bus.
+- Modify `src/app/_layout.tsx` — foreground/tap/session/resume/reconnect bridge.
+- Modify `src/app/(tabs)/reports/index.tsx` — immediate row patch + stale-while-revalidate.
+- Modify `src/app/(tabs)/reports/list.tsx` — immediate archive patch + stale-while-revalidate.
+- Modify/create focused tests under `tests/`.
 
 ---
 
-### Task 1: Parse and order ticket status events safely
+### Task 1: Parse and order ticket status events
 
 **Files:**
 - Modify: `src/services/notification-navigation.ts`
@@ -50,7 +47,6 @@
 - Create: `tests/report-sync-ordering.test.mjs`
 
 **Interfaces:**
-- Produces:
 
 ```ts
 export type TicketStatusChangedPush = {
@@ -81,12 +77,12 @@ export function isIncomingReportStatusEventNewer(
 ): boolean;
 ```
 
-- [ ] **Step 1: Add failing parser tests**
+- [ ] **Step 1: Add failing parser test**
 
-Extend `tests/notification-navigation.test.mjs`:
+In `tests/notification-navigation.test.mjs`, add:
 
 ```js
-test("ticket status push parser accepts only valid version 1 status events", async () => {
+test("ticket status push parser accepts only valid v1 events", async () => {
   const { ticketStatusChangedEventFromPushData } = await import(
     "../src/services/notification-navigation.ts"
   );
@@ -123,6 +119,7 @@ test("ticket status push parser accepts only valid version 1 status events", asy
     }),
     null,
   );
+
   assert.equal(
     ticketStatusChangedEventFromPushData({
       context: "ticket",
@@ -130,33 +127,29 @@ test("ticket status push parser accepts only valid version 1 status events", asy
       version: 1,
       ticketId: "ticket-1",
       status: "verified",
-      changedAt: "not-a-date",
+      changedAt: "bad-date",
     }),
     null,
   );
 });
 ```
 
-Keep the existing `ticketIdFromPushData()` assertions unchanged so legacy navigation remains covered.
+Keep all existing `ticketIdFromPushData()` tests unchanged.
 
-- [ ] **Step 2: Add failing pure ordering tests**
+- [ ] **Step 2: Add failing pure ordering test**
 
 Create `tests/report-sync-ordering.test.mjs`:
 
 ```js
 import assert from "node:assert/strict";
 import test from "node:test";
-
 import { isIncomingReportStatusEventNewer } from "../src/services/report-sync-ordering.ts";
 
 const marker = (changedAt, revision) =>
   revision === undefined ? { changedAt } : { changedAt, revision };
 
-test("report status event ordering rejects duplicates and older events", () => {
-  assert.equal(
-    isIncomingReportStatusEventNewer(null, marker("2026-08-15T03:00:00.000Z")),
-    true,
-  );
+test("status event ordering rejects duplicate and older delivery", () => {
+  assert.equal(isIncomingReportStatusEventNewer(null, marker("2026-08-15T03:00:00.000Z")), true);
   assert.equal(
     isIncomingReportStatusEventNewer(
       marker("2026-08-15T03:00:00.000Z", 4),
@@ -178,108 +171,47 @@ test("report status event ordering rejects duplicates and older events", () => {
     ),
     false,
   );
-  assert.equal(
-    isIncomingReportStatusEventNewer(
-      marker("2026-08-15T03:02:00.000Z"),
-      marker("2026-08-15T03:01:00.000Z"),
-    ),
-    false,
-  );
 });
 ```
 
-- [ ] **Step 3: Run the two focused tests and confirm RED**
+- [ ] **Step 3: Run RED**
 
 ```bash
 node --test tests/notification-navigation.test.mjs tests/report-sync-ordering.test.mjs
 ```
 
-Expected: FAIL because the parser and ordering module do not yet exist.
+Expected: FAIL because parser/ordering module do not exist.
 
-- [ ] **Step 4: Implement the defensive parser**
+- [ ] **Step 4: Implement parser**
 
-In `src/services/notification-navigation.ts`, add:
+In `notification-navigation.ts`, validate exact event/version, non-empty ID/status, parseable `changedAt`, and optional non-negative integer `revision`. Normalize `changedAt` with `new Date(changedAt).toISOString()`. Keep `ticketIdFromPushData()` independent so legacy pushes still navigate.
+
+Core return shape:
 
 ```ts
-export type TicketStatusChangedPush = {
-  context: "ticket";
-  event: "ticket.status_changed";
-  version: 1;
-  ticketId: string;
-  ticketNumber?: string;
-  status: string;
-  changedAt: string;
-  revision?: number;
+return {
+  context: "ticket",
+  event: "ticket.status_changed",
+  version: 1,
+  ticketId,
+  ...(ticketNumber ? { ticketNumber } : {}),
+  status,
+  changedAt: new Date(changedAt).toISOString(),
+  ...(revision === undefined ? {} : { revision }),
 };
-
-function nonEmptyString(value: unknown): string | null {
-  return typeof value === "string" && value.trim() ? value.trim() : null;
-}
-
-export function ticketStatusChangedEventFromPushData(
-  data: unknown,
-): TicketStatusChangedPush | null {
-  if (!data || typeof data !== "object") return null;
-  const value = data as Record<string, unknown>;
-  if (
-    value.context !== "ticket" ||
-    value.event !== "ticket.status_changed" ||
-    value.version !== 1
-  ) {
-    return null;
-  }
-
-  const ticketId = nonEmptyString(value.ticketId);
-  const status = nonEmptyString(value.status);
-  const changedAt = nonEmptyString(value.changedAt);
-  if (!ticketId || !status || !changedAt || Number.isNaN(Date.parse(changedAt))) {
-    return null;
-  }
-
-  const revision = value.revision;
-  if (
-    revision !== undefined &&
-    (!Number.isInteger(revision) || Number(revision) < 0)
-  ) {
-    return null;
-  }
-
-  const ticketNumber = nonEmptyString(value.ticketNumber);
-  return {
-    context: "ticket",
-    event: "ticket.status_changed",
-    version: 1,
-    ticketId,
-    ...(ticketNumber ? { ticketNumber } : {}),
-    status,
-    changedAt: new Date(changedAt).toISOString(),
-    ...(revision === undefined ? {} : { revision: Number(revision) }),
-  };
-}
 ```
-
-Do not make `ticketIdFromPushData()` depend on this parser; legacy ticket pushes must still navigate.
 
 - [ ] **Step 5: Implement pure ordering**
 
-Create `src/services/report-sync-ordering.ts`:
-
 ```ts
-export type ReportStatusEventMarker = {
-  changedAt: string;
-  revision?: number;
-};
-
 export function isIncomingReportStatusEventNewer(
   current: ReportStatusEventMarker | null,
   incoming: ReportStatusEventMarker,
 ) {
   if (!current) return true;
-
   if (current.revision !== undefined && incoming.revision !== undefined) {
     return incoming.revision > current.revision;
   }
-
   const currentMs = Date.parse(current.changedAt);
   const incomingMs = Date.parse(incoming.changedAt);
   if (Number.isNaN(currentMs) || Number.isNaN(incomingMs)) return false;
@@ -287,7 +219,7 @@ export function isIncomingReportStatusEventNewer(
 }
 ```
 
-- [ ] **Step 6: Run focused tests**
+- [ ] **Step 6: Run GREEN**
 
 ```bash
 node --test tests/notification-navigation.test.mjs tests/report-sync-ordering.test.mjs
@@ -295,7 +227,7 @@ node --test tests/notification-navigation.test.mjs tests/report-sync-ordering.te
 
 Expected: PASS.
 
-- [ ] **Step 7: Commit Task 1**
+- [ ] **Step 7: Commit**
 
 ```bash
 git add src/services/notification-navigation.ts src/services/report-sync-ordering.ts tests/notification-navigation.test.mjs tests/report-sync-ordering.test.mjs
@@ -304,14 +236,13 @@ git commit -m "feat: parse and order ticket status push events"
 
 ---
 
-### Task 2: Add targeted report-cache projection and stale-while-revalidate markers
+### Task 2: Add report-cache projection and event-driven revalidation
 
 **Files:**
 - Modify: `src/services/reports.ts`
 - Create: `tests/report-status-cache-sync.test.mjs`
 
 **Interfaces:**
-- Produces:
 
 ```ts
 export type ReportStatusProjection = {
@@ -325,66 +256,30 @@ export async function projectComplaintReportStatus(
 ): Promise<boolean>;
 
 export function markComplaintReportsForRevalidation(userId: string): void;
-
 export function complaintReportsNeedRevalidation(userId: string): boolean;
 ```
 
-- Extend `fetchComplaintReportPage()` options with:
+Extend `fetchComplaintReportPage()` options:
 
 ```ts
 revalidate?: boolean;
 ```
 
-`revalidate: true` bypasses report-list caches and the manual refresh cooldown, but still uses `complaintReportRequests.run(...)` for request deduplication.
+- [ ] **Step 1: Add failing source-contract test**
 
-- [ ] **Step 1: Add a source-contract test for cache projection semantics**
+Create `tests/report-status-cache-sync.test.mjs` and assert the source contains `projectComplaintReportStatus`, `markComplaintReportsForRevalidation`, `complaintReportsNeedRevalidation`, `revalidate?: boolean`, matching `report.id === projection.ticketId`, and writes cached data with the original `parsed.fetchedAt`.
 
-Create `tests/report-status-cache-sync.test.mjs`:
+Also assert event revalidation still goes through `complaintReportRequests.run` and does not depend on `claimRefresh`.
 
-```js
-import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
-import test from "node:test";
-
-test("report status projection patches only report status and preserves cache age", async () => {
-  const source = await readFile(
-    new URL("../src/services/reports.ts", import.meta.url),
-    "utf8",
-  );
-
-  assert.match(source, /projectComplaintReportStatus/);
-  assert.match(source, /markComplaintReportsForRevalidation/);
-  assert.match(source, /complaintReportsNeedRevalidation/);
-  assert.match(source, /revalidate\?: boolean/);
-  assert.match(source, /report\.id === projection\.ticketId/);
-  assert.match(source, /\{ \.\.\.report, status: projection\.status \}/);
-  assert.match(source, /fetchedAt: parsed\.fetchedAt/);
-  assert.doesNotMatch(source, /fetchedAt: Date\.now\(\).*projection/s);
-});
-
-test("event-driven revalidation bypasses manual refresh cooldown but retains request dedupe", async () => {
-  const source = await readFile(
-    new URL("../src/services/reports.ts", import.meta.url),
-    "utf8",
-  );
-
-  assert.match(source, /const revalidate = Boolean\(options\?\.revalidate\)/);
-  assert.match(source, /complaintReportRequests\.run/);
-  assert.match(source, /if \(!revalidate && !force/);
-});
-```
-
-- [ ] **Step 2: Run the focused test and confirm RED**
+- [ ] **Step 2: Run RED**
 
 ```bash
 node --test tests/report-status-cache-sync.test.mjs
 ```
 
-Expected: FAIL because the projection/revalidation interfaces do not exist.
+- [ ] **Step 3: Extract reusable default-list cache helpers**
 
-- [ ] **Step 3: Extract default-list storage helpers from the nested fetch function**
-
-Refactor `src/services/reports.ts` so default report-list cache access is reusable by projection code:
+Move the nested default-page AsyncStorage read logic into module-level helpers:
 
 ```ts
 function complaintReportStorageKey(userId: string) {
@@ -395,61 +290,15 @@ async function readStoredComplaintReportPage(
   userId: string,
   allowStale: boolean,
 ): Promise<ComplaintReportPage | null> {
-  const raw = await AsyncStorage.getItem(complaintReportStorageKey(userId));
-  if (!raw) return null;
-
-  try {
-    const parsed = JSON.parse(raw) as {
-      fetchedAt: number;
-      value: Report[] | ComplaintReportPage;
-    };
-    const maxAge = allowStale
-      ? complaintReportsStaleTtlMs
-      : complaintReportsCacheTtlMs;
-    if (Date.now() - parsed.fetchedAt > maxAge) return null;
-
-    const value = Array.isArray(parsed.value)
-      ? { reports: parsed.value, nextCursor: null }
-      : parsed.value;
-    complaintReportsMemoryCache = {
-      fetchedAt: parsed.fetchedAt,
-      userId,
-      value,
-    };
-    return {
-      ...value,
-      isStale:
-        allowStale && Date.now() - parsed.fetchedAt > complaintReportsCacheTtlMs,
-    };
-  } catch {
-    return null;
-  }
+  // Preserve the current v1 stored shape and stale TTL behavior.
 }
 ```
 
-Keep serialization backward-compatible with the existing cache shape.
+Do not change the storage key or stored schema.
 
-- [ ] **Step 4: Add projection and revalidation markers**
+- [ ] **Step 4: Add targeted cache projection**
 
-Add module state:
-
-```ts
-const complaintReportRevalidationUsers = new Set<string>();
-```
-
-Add:
-
-```ts
-export function markComplaintReportsForRevalidation(userId: string) {
-  if (userId) complaintReportRevalidationUsers.add(userId);
-}
-
-export function complaintReportsNeedRevalidation(userId: string) {
-  return complaintReportRevalidationUsers.has(userId);
-}
-```
-
-Implement projection without changing cache age:
+Use a pure page patch helper:
 
 ```ts
 function patchReportPageStatus(
@@ -466,120 +315,61 @@ function patchReportPageStatus(
   });
   return { changed, page: changed ? { ...page, reports } : page };
 }
-
-export async function projectComplaintReportStatus(
-  projection: ReportStatusProjection,
-) {
-  let changed = false;
-
-  if (complaintReportsMemoryCache?.userId === projection.userId) {
-    const patched = patchReportPageStatus(
-      complaintReportsMemoryCache.value,
-      projection,
-    );
-    changed ||= patched.changed;
-    complaintReportsMemoryCache = {
-      ...complaintReportsMemoryCache,
-      value: patched.page,
-    };
-  }
-
-  const storageKey = complaintReportStorageKey(projection.userId);
-  const raw = await AsyncStorage.getItem(storageKey);
-  if (!raw) return changed;
-
-  const parsed = JSON.parse(raw) as {
-    fetchedAt: number;
-    value: Report[] | ComplaintReportPage;
-  };
-  const value = Array.isArray(parsed.value)
-    ? { reports: parsed.value, nextCursor: null }
-    : parsed.value;
-  const patched = patchReportPageStatus(value, projection);
-  changed ||= patched.changed;
-  if (patched.changed) {
-    await AsyncStorage.setItem(
-      storageKey,
-      JSON.stringify({ fetchedAt: parsed.fetchedAt, value: patched.page }),
-    );
-  }
-  return changed;
-}
 ```
 
-Wrap malformed stored JSON in `try/catch` and return the memory result rather than turning a cache-corruption issue into a push-handler failure.
+Patch both the in-memory default page and `report_list_cache_v1:<userId>` if present. When writing storage, preserve:
 
-- [ ] **Step 5: Add stale-while-revalidate behavior to `fetchComplaintReportPage`**
+```ts
+{ fetchedAt: parsed.fetchedAt, value: patched.page }
+```
 
-Add:
+Malformed stored JSON must be ignored rather than surfaced as a fatal push-sync error.
+
+- [ ] **Step 5: Add revalidation marker and dedicated network path**
+
+```ts
+const complaintReportRevalidationUsers = new Set<string>();
+```
+
+`markComplaintReportsForRevalidation(userId)` adds the user; `complaintReportsNeedRevalidation(userId)` reads it.
+
+In `fetchComplaintReportPage`:
 
 ```ts
 const revalidate = Boolean(options?.revalidate);
+const force = Boolean(options?.force) && claimRefresh(...);
 ```
 
-Behavior:
+Rules:
 
-1. `force` remains the user/manual refresh path and continues using `claimRefresh(...)`.
-2. `revalidate` bypasses both memory/storage fresh-cache returns and does **not** call `claimRefresh`.
-3. If neither `force` nor `revalidate` is requested and the user has a revalidation marker, return the best existing default-page cache immediately with `isStale: true`; do not clear the marker.
-4. On a successful default-page network response, call:
+1. Manual `force` keeps the existing cooldown.
+2. `revalidate: true` bypasses fresh cache and does not call/obey the manual cooldown.
+3. It still uses the existing `complaintReportRequests.run(requestKey, ...)` path.
+4. A normal first-page read for a user marked stale returns the best available cached page immediately with `isStale: true`.
+5. A successful first-page network response clears the user marker.
+6. A failed revalidation keeps the marker and stale fallback.
 
-```ts
-complaintReportRevalidationUsers.delete(userId);
-```
+- [ ] **Step 6: Clean markers when user-specific caches are explicitly cleared**
 
-5. On network failure, keep the marker and return stale cache as today when available.
+Delete the user from the marker set in `clearComplaintCache(userId)` / `clearReportListCache(userId)` when a user ID is provided.
 
-Use this explicit cache decision shape:
-
-```ts
-if (!force && !revalidate && isDefaultPage && userId) {
-  const needsRevalidation = complaintReportsNeedRevalidation(userId);
-  const cached = needsRevalidation
-    ? await readStoredComplaintReportPage(userId, true)
-    : await readStoredComplaintReportPage(userId, false);
-  if (cached) {
-    return needsRevalidation ? { ...cached, isStale: true } : cached;
-  }
-}
-```
-
-Preserve the existing in-memory fast path as well; if it is used while `needsRevalidation` is true, return its page with `isStale: true` rather than claiming it is authoritative.
-
-- [ ] **Step 6: Ensure clear/logout paths clean runtime revalidation state**
-
-In `clearComplaintCache(userId)` and `clearReportListCache(userId)`, delete the user from `complaintReportRevalidationUsers` when a user ID is explicitly being cleared.
-
-- [ ] **Step 7: Run focused test**
+- [ ] **Step 7: Run GREEN and commit**
 
 ```bash
 node --test tests/report-status-cache-sync.test.mjs
-```
-
-Expected: PASS.
-
-- [ ] **Step 8: Commit Task 2**
-
-```bash
 git add src/services/reports.ts tests/report-status-cache-sync.test.mjs
 git commit -m "feat: project report status into cached lists"
 ```
 
 ---
 
-### Task 3: Add the persisted report-status event coordinator
+### Task 3: Add persisted event coordinator
 
 **Files:**
 - Create: `src/services/report-sync-events.ts`
 - Create: `tests/report-sync-events.test.mjs`
 
 **Interfaces:**
-- Consumes:
-  - `ticketStatusChangedEventFromPushData(data)`
-  - `isIncomingReportStatusEventNewer(current, incoming)`
-  - `projectComplaintReportStatus(projection)`
-  - `markComplaintReportsForRevalidation(userId)`
-- Produces:
 
 ```ts
 export type ReportStatusChangedEvent = TicketStatusChangedPush & {
@@ -602,85 +392,28 @@ export async function handleReportStatusPush(
 export function requestReportRevalidation(userId: string): void;
 ```
 
-- [ ] **Step 1: Add a source-contract test for persistence, projection, and event publication**
+- [ ] **Step 1: Add failing source test**
 
-Create `tests/report-sync-events.test.mjs`:
+Create `tests/report-sync-events.test.mjs` asserting the service uses `report_status_event_markers_v1`, `ticketStatusChangedEventFromPushData`, `isIncomingReportStatusEventNewer`, `projectComplaintReportStatus`, `markComplaintReportsForRevalidation`, AsyncStorage persistence, and both subscribe functions.
 
-```js
-import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
-import test from "node:test";
-
-test("report sync coordinator persists ordering and projects accepted pushes", async () => {
-  const source = await readFile(
-    new URL("../src/services/report-sync-events.ts", import.meta.url),
-    "utf8",
-  );
-
-  assert.match(source, /report_status_event_markers_v1/);
-  assert.match(source, /ticketStatusChangedEventFromPushData/);
-  assert.match(source, /isIncomingReportStatusEventNewer/);
-  assert.match(source, /projectComplaintReportStatus/);
-  assert.match(source, /markComplaintReportsForRevalidation/);
-  assert.match(source, /subscribeReportStatusChanged/);
-  assert.match(source, /subscribeReportRevalidationRequested/);
-  assert.match(source, /AsyncStorage\.setItem/);
-});
-```
-
-- [ ] **Step 2: Run the test and confirm RED**
+- [ ] **Step 2: Run RED**
 
 ```bash
 node --test tests/report-sync-events.test.mjs
 ```
 
-Expected: FAIL because the service does not exist.
+- [ ] **Step 3: Implement marker storage and listeners**
 
-- [ ] **Step 3: Implement the ordering sidecar and listeners**
-
-Create `src/services/report-sync-events.ts` with:
+Use one sidecar key per user:
 
 ```ts
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
-import {
-  ticketStatusChangedEventFromPushData,
-  type TicketStatusChangedPush,
-} from "@/services/notification-navigation";
-import {
-  isIncomingReportStatusEventNewer,
-  type ReportStatusEventMarker,
-} from "@/services/report-sync-ordering";
-import {
-  markComplaintReportsForRevalidation,
-  projectComplaintReportStatus,
-} from "@/services/reports";
-
-export type ReportStatusChangedEvent = TicketStatusChangedPush & {
-  userId: string;
-};
-
-type MarkerMap = Record<string, ReportStatusEventMarker>;
-
 const markerPrefix = "report_status_event_markers_v1";
-const markerMemory = new Map<string, MarkerMap>();
-const statusListeners = new Set<(event: ReportStatusChangedEvent) => void>();
-const revalidationListeners = new Set<(userId: string) => void>();
+const markerMemory = new Map<string, Record<string, ReportStatusEventMarker>>();
 ```
 
-Use one user-scoped sidecar key:
+`readMarkers(userId)` must catch AsyncStorage read/JSON failures, warn, and return the current runtime map or `{}`. A storage failure must not prevent visible status projection.
 
-```ts
-function markerKey(userId: string) {
-  return `${markerPrefix}:${userId}`;
-}
-```
-
-Load malformed/missing storage as `{}` and cache it in `markerMemory`.
-
-- [ ] **Step 4: Implement accepted-event handling**
-
-Use this sequence:
+- [ ] **Step 4: Implement accepted-event flow**
 
 ```ts
 export async function handleReportStatusPush(data: unknown, userId: string) {
@@ -691,11 +424,10 @@ export async function handleReportStatusPush(data: unknown, userId: string) {
   const current = markers[event.ticketId] ?? null;
   if (!isIncomingReportStatusEventNewer(current, event)) return false;
 
-  const nextMarker: ReportStatusEventMarker = {
+  markers[event.ticketId] = {
     changedAt: event.changedAt,
     ...(event.revision === undefined ? {} : { revision: event.revision }),
   };
-  markers[event.ticketId] = nextMarker;
   markerMemory.set(userId, markers);
 
   try {
@@ -705,8 +437,6 @@ export async function handleReportStatusPush(data: unknown, userId: string) {
   }
 
   const accepted = { ...event, userId } satisfies ReportStatusChangedEvent;
-
-  // Publish immediately after ordering acceptance; cache I/O failure must not delay visible UI.
   statusListeners.forEach((listener) => listener(accepted));
 
   void projectComplaintReportStatus({
@@ -722,143 +452,68 @@ export async function handleReportStatusPush(data: unknown, userId: string) {
 }
 ```
 
-`requestReportRevalidation` must mark the report service stale before notifying mounted views:
+`requestReportRevalidation` must first call `markComplaintReportsForRevalidation(userId)` and then notify revalidation listeners. Do not add a timer; network request dedupe happens in `reports.ts`.
 
-```ts
-export function requestReportRevalidation(userId: string) {
-  if (!userId) return;
-  markComplaintReportsForRevalidation(userId);
-  revalidationListeners.forEach((listener) => listener(userId));
-}
-```
-
-Do not add a timer here. The report service's request registry deduplicates identical network work; the dedicated `revalidate` path exists specifically so correctness is not suppressed by manual-refresh cooldown.
-
-- [ ] **Step 5: Implement subscribe/unsubscribe functions**
-
-```ts
-export function subscribeReportStatusChanged(
-  listener: (event: ReportStatusChangedEvent) => void,
-) {
-  statusListeners.add(listener);
-  return () => statusListeners.delete(listener);
-}
-
-export function subscribeReportRevalidationRequested(
-  listener: (userId: string) => void,
-) {
-  revalidationListeners.add(listener);
-  return () => revalidationListeners.delete(listener);
-}
-```
-
-- [ ] **Step 6: Run focused tests**
+- [ ] **Step 5: Run GREEN and commit**
 
 ```bash
 node --test tests/report-sync-ordering.test.mjs tests/report-sync-events.test.mjs
-```
-
-Expected: PASS.
-
-- [ ] **Step 7: Commit Task 3**
-
-```bash
 git add src/services/report-sync-events.ts tests/report-sync-events.test.mjs
 git commit -m "feat: coordinate push-driven report status sync"
 ```
 
 ---
 
-### Task 4: Route foreground, tapped, and resumed notifications into report sync
+### Task 4: Wire foreground push, tap, app activation, and reconnect
 
 **Files:**
 - Modify: `src/app/_layout.tsx`
-- Create: `tests/report-status-sync-ui.test.mjs` (initial root-layout assertions; screen assertions added in Task 5)
+- Create: `tests/report-status-sync-ui.test.mjs`
 
-**Interfaces:**
-- Consumes:
-  - `handleReportStatusPush(data, userId)`
-  - `requestReportRevalidation(userId)`
-- Existing advisory cache invalidation and notification-list invalidation remain active.
+- [ ] **Step 1: Add failing root bridge assertions**
 
-- [ ] **Step 1: Add failing root-layout source assertions**
+Create `tests/report-status-sync-ui.test.mjs` asserting `_layout.tsx` imports/uses `handleReportStatusPush`, `requestReportRevalidation`, `AppState.addEventListener`, and `NetInfo.addEventListener`; preserves `clearAdvisoryCache` and `invalidateNotifications`; and no longer calls `clearComplaintCache` from notification handling.
 
-Create `tests/report-status-sync-ui.test.mjs`:
-
-```js
-import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
-import test from "node:test";
-
-test("root notification bridge drives report sync without clearing all complaint metadata", async () => {
-  const source = await readFile(
-    new URL("../src/app/_layout.tsx", import.meta.url),
-    "utf8",
-  );
-
-  assert.match(source, /handleReportStatusPush/);
-  assert.match(source, /requestReportRevalidation/);
-  assert.match(source, /AppState\.addEventListener/);
-  assert.doesNotMatch(source, /clearComplaintCache\(session\?\.user\.id\)/);
-  assert.doesNotMatch(source, /clearComplaintCache\(session\.user\.id\)/);
-  assert.match(source, /clearAdvisoryCache/);
-  assert.match(source, /invalidateNotifications/);
-});
-```
-
-- [ ] **Step 2: Run the test and confirm RED**
+- [ ] **Step 2: Run RED**
 
 ```bash
 node --test tests/report-status-sync-ui.test.mjs
 ```
 
-Expected: FAIL because `_layout.tsx` still clears complaint cache and does not call the sync coordinator.
+- [ ] **Step 3: Route foreground ticket push into sync handling**
 
-- [ ] **Step 3: Replace blanket complaint-cache clearing for foreground pushes**
+Remove the `clearComplaintCache` import. Import report sync functions and NetInfo.
 
-In `src/app/_layout.tsx`:
-
-1. Remove the `clearComplaintCache` import.
-2. Import:
-
-```ts
-import {
-  handleReportStatusPush,
-  requestReportRevalidation,
-} from "@/services/report-sync-events";
-```
-
-3. In `handleForegroundNotification`, capture `data` once:
+In `handleForegroundNotification`:
 
 ```ts
 const data = notification.request.content.data;
+if (session) {
+  void Promise.all([
+    clearAdvisoryCache(session.user.id),
+    handleReportStatusPush(data, session.user.id),
+  ]).then(() => invalidateNotifications(session.user.id));
+}
 ```
 
-4. When `session` exists, run report handling and preserve existing advisory/notification invalidation:
+Do not await this before displaying the existing toast.
+
+- [ ] **Step 4: Handle ticket taps without duplicate revalidation**
+
+For ticket navigation:
 
 ```ts
-void Promise.all([
-  clearAdvisoryCache(session.user.id),
-  handleReportStatusPush(data, session.user.id),
-]).then(() => invalidateNotifications(session.user.id));
-```
-
-Do not wait for this promise before showing the existing foreground toast.
-
-- [ ] **Step 4: Replace ticket-tap complaint clearing with projection/revalidation**
-
-In `openNotificationTarget`, before navigating a ticket:
-
-```ts
-const data = response.notification.request.content.data;
-const ticketId = ticketIdFromPushData(data);
-
 if (ticketId) {
   if (session) {
-    void handleReportStatusPush(data, session.user.id).finally(() => {
-      requestReportRevalidation(session.user.id);
-    });
+    void handleReportStatusPush(data, session.user.id)
+      .then((handled) => {
+        if (!handled) requestReportRevalidation(session.user.id);
+      })
+      .catch(() => {
+        requestReportRevalidation(session.user.id);
+      });
   }
+
   router.push({
     pathname: "/report/[id]",
     params: { id: ticketId, focus: "notification" },
@@ -867,148 +522,89 @@ if (ticketId) {
 }
 ```
 
-Legacy ticket pushes may not satisfy the v1 parser; the unconditional revalidation request still makes the list authoritative later. Report detail navigation remains immediate.
+A valid accepted event already requests revalidation inside the coordinator; only legacy/invalid/error cases need the explicit fallback.
 
-- [ ] **Step 5: Mark reports stale on active session and app resume**
+- [ ] **Step 5: Mark stale on session activation and app resume**
 
-Import `AppState` from `react-native` and add a `previousAppStateRef` in `PushTokenBridge`:
-
-```ts
-const previousAppStateRef = useRef(AppState.currentState);
-```
-
-When a session becomes available, mark report data for revalidation once:
+Use `const userId = session?.user.id` and dependencies on `userId`, not the entire session object.
 
 ```ts
 useEffect(() => {
-  if (!session) return;
-  requestReportRevalidation(session.user.id);
-}, [session]);
+  if (!userId) return;
+  requestReportRevalidation(userId);
+}, [userId]);
 ```
 
-Add resume handling:
+Track `AppState.currentState`, and when state transitions from non-active to `active`, call `requestReportRevalidation(userId)`.
+
+- [ ] **Step 6: Retry on offline→online transition**
+
+Subscribe to NetInfo inside the same bridge. Keep a ref to the previous offline state:
+
+```ts
+const wasOfflineRef = useRef<boolean | null>(null);
+```
 
 ```ts
 useEffect(() => {
-  const subscription = AppState.addEventListener("change", (nextState) => {
-    const previousState = previousAppStateRef.current;
-    previousAppStateRef.current = nextState;
-    if (
-      session &&
-      nextState === "active" &&
-      previousState !== "active"
-    ) {
-      requestReportRevalidation(session.user.id);
+  if (!userId) return;
+
+  const unsubscribe = NetInfo.addEventListener((state) => {
+    const offline =
+      state.isConnected === false || state.isInternetReachable === false;
+    const previous = wasOfflineRef.current;
+    wasOfflineRef.current = offline;
+    if (previous === true && !offline) {
+      requestReportRevalidation(userId);
     }
   });
-  return () => subscription.remove();
-}, [session]);
+
+  return unsubscribe;
+}, [userId]);
 ```
 
-Do not fetch report APIs directly from `_layout.tsx`; mounted report views own their view-specific revalidation.
+This ensures a failed offline revalidation retries without requiring the user to leave the visible Reports screen.
 
-- [ ] **Step 6: Run the root-layout test**
+- [ ] **Step 7: Run GREEN and commit**
 
 ```bash
 node --test tests/report-status-sync-ui.test.mjs
-```
-
-Expected: root-layout assertions PASS.
-
-- [ ] **Step 7: Commit Task 4**
-
-```bash
 git add src/app/_layout.tsx tests/report-status-sync-ui.test.mjs
 git commit -m "feat: route ticket pushes into report sync"
 ```
 
 ---
 
-### Task 5: Patch mounted Recent Reports and Archive immediately, then revalidate
+### Task 5: Patch Recent Reports and Archive immediately, then revalidate
 
 **Files:**
 - Modify: `src/app/(tabs)/reports/index.tsx`
 - Modify: `src/app/(tabs)/reports/list.tsx`
 - Modify: `tests/report-status-sync-ui.test.mjs`
 
-**Interfaces:**
-- Consumes:
-  - `subscribeReportStatusChanged(listener)`
-  - `subscribeReportRevalidationRequested(listener)`
-  - `fetchComplaintReportPage({ ..., revalidate?: boolean })`
-- Both screens patch matching local `Report` rows without touching unrelated fields.
+- [ ] **Step 1: Add failing screen assertions**
 
-- [ ] **Step 1: Add failing screen-subscription assertions**
+Assert both screen sources contain `subscribeReportStatusChanged`, `subscribeReportRevalidationRequested`, a local patch matching `report.id === event.ticketId`, `status: event.status`, and a `revalidate: true` load path.
 
-Extend `tests/report-status-sync-ui.test.mjs`:
-
-```js
-test("recent and archive report screens patch accepted ticket events and revalidate", async () => {
-  const [recent, archive] = await Promise.all([
-    readFile(
-      new URL("../src/app/(tabs)/reports/index.tsx", import.meta.url),
-      "utf8",
-    ),
-    readFile(
-      new URL("../src/app/(tabs)/reports/list.tsx", import.meta.url),
-      "utf8",
-    ),
-  ]);
-
-  for (const source of [recent, archive]) {
-    assert.match(source, /subscribeReportStatusChanged/);
-    assert.match(source, /subscribeReportRevalidationRequested/);
-    assert.match(source, /report\.id === event\.ticketId/);
-    assert.match(source, /status: event\.status/);
-    assert.match(source, /revalidate: true/);
-  }
-});
-```
-
-- [ ] **Step 2: Run the UI test and confirm RED**
+- [ ] **Step 2: Run RED**
 
 ```bash
 node --test tests/report-status-sync-ui.test.mjs
 ```
 
-Expected: FAIL because the report screens do not subscribe yet.
+- [ ] **Step 3: Update Recent Reports loading**
 
-- [ ] **Step 3: Update Recent Reports to preserve cached UI and inspect stale state**
+Replace `fetchComplaintReports` with `fetchComplaintReportPage` so the screen can inspect `page.isStale`.
 
-In `src/app/(tabs)/reports/index.tsx`:
-
-1. Replace `fetchComplaintReports` with `fetchComplaintReportPage`.
-2. Extend `loadComplaints` options:
+Extend load options:
 
 ```ts
 options?: { force?: boolean; revalidate?: boolean }
 ```
 
-3. Fetch:
+Pass both options into the report page call. Do not set the full-screen skeleton during `revalidate: true` if data has already loaded.
 
-```ts
-const [nextMeta, page] = await Promise.all([
-  fetchComplaintMeta(options),
-  fetchComplaintReportPage({
-    force: options?.force,
-    revalidate: options?.revalidate,
-    userId: session?.user.id,
-  }),
-]);
-setMeta(nextMeta);
-setReports(page.reports);
-```
-
-4. Add `loadComplaintsRef` so event subscriptions can call the latest callback without resubscribing:
-
-```ts
-const loadComplaintsRef = useRef(loadComplaints);
-useEffect(() => {
-  loadComplaintsRef.current = loadComplaints;
-}, [loadComplaints]);
-```
-
-5. After applying a cached page marked stale, request background authoritative refresh only when the current load was not already a revalidation:
+Keep a `loadComplaintsRef` pointing to the latest callback. After applying a returned page:
 
 ```ts
 if (page.isStale && !options?.revalidate && !options?.force) {
@@ -1018,18 +614,15 @@ if (page.isStale && !options?.revalidate && !options?.force) {
 }
 ```
 
-Because existing `reports` state remains rendered during revalidation, do not set the full-screen loading skeleton when `options.revalidate` is true.
-
-- [ ] **Step 4: Subscribe Recent Reports to accepted status events and revalidation requests**
-
-Add:
+- [ ] **Step 4: Subscribe Recent Reports**
 
 ```ts
 useEffect(() => {
-  if (!session) return;
+  const userId = session?.user.id;
+  if (!userId) return;
 
   const unsubscribeStatus = subscribeReportStatusChanged((event) => {
-    if (event.userId !== session.user.id) return;
+    if (event.userId !== userId) return;
     setReports((current) =>
       current.map((report) =>
         report.id === event.ticketId
@@ -1040,8 +633,8 @@ useEffect(() => {
   });
 
   const unsubscribeRevalidation = subscribeReportRevalidationRequested(
-    (userId) => {
-      if (userId !== session.user.id) return;
+    (changedUserId) => {
+      if (changedUserId !== userId) return;
       void loadComplaintsRef.current({ revalidate: true });
     },
   );
@@ -1050,71 +643,30 @@ useEffect(() => {
     unsubscribeStatus();
     unsubscribeRevalidation();
   };
-}, [session]);
+}, [session?.user.id]);
 ```
 
-The status event updates React state immediately; the network call follows independently.
+- [ ] **Step 5: Apply the same model to Archive**
 
-- [ ] **Step 5: Add the same semantics to Archive without breaking filtering/pagination**
+Extend `loadReports` with `revalidate?: boolean`, pass it into `fetchComplaintReportPage`, and retain all current query/category/sort values.
 
-In `src/app/(tabs)/reports/list.tsx`:
+A status event patches only a matching row currently in `reports`. A revalidation request refreshes the current first page/view with `{ revalidate: true }`. If the ticket is absent due to filtering/pagination, local patch is a no-op and server revalidation decides inclusion.
 
-1. Extend `loadReports` options with `revalidate?: boolean`.
-2. Pass `revalidate: options?.revalidate` into `fetchComplaintReportPage`.
-3. Do not append during event-driven revalidation; it refreshes the current first page/view.
-4. If a returned first page is stale and the current call is not already revalidation, schedule:
+If a normal load returns `isStale`, render that cached page and schedule one `{ revalidate: true }` request. Never recursively revalidate a result that came from a revalidation attempt.
 
-```ts
-queueMicrotask(() => {
-  void loadReportsRef.current({ revalidate: true });
-});
-```
-
-5. Subscribe to status events and patch only rows currently held in `reports`:
-
-```ts
-const unsubscribeStatus = subscribeReportStatusChanged((event) => {
-  if (event.userId !== session.user.id) return;
-  setReports((current) =>
-    current.map((report) =>
-      report.id === event.ticketId
-        ? { ...report, status: event.status }
-        : report,
-    ),
-  );
-});
-```
-
-6. Subscribe to revalidation requests and call the latest `loadReportsRef.current({ revalidate: true })`.
-
-Keep query/category/sort state intact. If the updated ticket is absent from the current filtered page, the local patch is a no-op and authoritative revalidation handles inclusion/exclusion.
-
-- [ ] **Step 6: Run UI and cache tests**
+- [ ] **Step 6: Run GREEN and commit**
 
 ```bash
 node --test tests/report-status-sync-ui.test.mjs tests/report-status-cache-sync.test.mjs
-```
-
-Expected: PASS.
-
-- [ ] **Step 7: Commit Task 5**
-
-```bash
 git add 'src/app/(tabs)/reports/index.tsx' 'src/app/(tabs)/reports/list.tsx' tests/report-status-sync-ui.test.mjs
 git commit -m "feat: sync visible report status from ticket pushes"
 ```
 
 ---
 
-### Task 6: Verify missed, duplicate, reordered, and offline-safe behavior
+### Task 6: Full verification gate
 
-**Files:**
-- Modify tests only if a genuine uncovered requirement is found.
-
-**Interfaces:**
-- Produces: implementation ready to consume the backend v1 ticket push contract.
-
-- [ ] **Step 1: Run all report/push focused tests**
+- [ ] **Step 1: Focused push/report tests**
 
 ```bash
 node --test \
@@ -1127,7 +679,7 @@ node --test \
 
 Expected: PASS.
 
-- [ ] **Step 2: Run the complete repository Node test suite**
+- [ ] **Step 2: Entire Node suite**
 
 ```bash
 node --test tests/*.test.mjs
@@ -1135,7 +687,7 @@ node --test tests/*.test.mjs
 
 Expected: PASS.
 
-- [ ] **Step 3: Run TypeScript**
+- [ ] **Step 3: TypeScript**
 
 ```bash
 npx tsc --noEmit
@@ -1143,7 +695,7 @@ npx tsc --noEmit
 
 Expected: PASS.
 
-- [ ] **Step 4: Run Expo lint**
+- [ ] **Step 4: Lint**
 
 ```bash
 npm run lint
@@ -1151,7 +703,7 @@ npm run lint
 
 Expected: PASS.
 
-- [ ] **Step 5: Run harness validation**
+- [ ] **Step 5: Harness**
 
 ```bash
 npm run harness:check
@@ -1159,43 +711,42 @@ npm run harness:check
 
 Expected: PASS.
 
-- [ ] **Step 6: Review behavior against the accepted failure cases**
+- [ ] **Step 6: Verify accepted failure cases**
 
-Verify from tests/source that:
+Confirm behavior:
 
 ```text
-foreground valid push
-  -> ordering accepted
+valid foreground push
   -> visible row patches immediately
-  -> default cache patches without resetting fetchedAt
-  -> report list marked for revalidation
-  -> revalidate API request starts independently
+  -> cache patches without refreshing fetchedAt
+  -> authoritative revalidation starts independently
   -> API result wins
 
 duplicate/equal event
-  -> no projection, no UI churn
+  -> no projection or UI churn
 
 older event
-  -> no projection, no regression
+  -> no regression
 
-cache write failure
-  -> mounted UI still receives accepted event
+cache persistence failure
+  -> runtime UI still patches; warning only
 
 revalidation failure/offline
-  -> projected/cached status remains
-  -> stale marker remains for later retry
+  -> projected/cached state remains
+  -> stale marker remains
+  -> reconnect/app resume/manual refresh retries
 
-app resume/cold session
-  -> revalidation marker emitted
-  -> mounted screen refreshes immediately
-  -> unmounted screen later returns cache as stale, renders it, then revalidates
+cold session/app resume
+  -> reports marked stale
+  -> cached list can render immediately
+  -> network revalidation follows
 
 legacy tapped ticket push
-  -> existing ticket navigation works
-  -> report list is marked for revalidation even if v1 parsing is impossible
+  -> existing navigation works
+  -> report list still marked for revalidation
 ```
 
-- [ ] **Step 7: Inspect final diff**
+- [ ] **Step 7: Diff review**
 
 ```bash
 git diff --check
@@ -1203,15 +754,4 @@ git status --short
 git log --oneline --max-count=8
 ```
 
-Expected: no accidental metadata cache clearing, no report TTL reduction, no polling timer, no WebSocket/SSE code, and no unrelated UI changes.
-
-- [ ] **Step 8: Commit any verification-only test correction if required**
-
-Only if necessary:
-
-```bash
-git add tests/*.test.mjs
-git commit -m "test: finalize report status sync coverage"
-```
-
-Do not weaken assertions to make a regression pass.
+Expected: no report TTL reduction, polling, WebSocket/SSE, blanket complaint metadata invalidation, or unrelated UI changes.
