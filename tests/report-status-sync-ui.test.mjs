@@ -11,12 +11,16 @@ test("root bridge routes ticket pushes and lifecycle recovery into report sync",
 
   assert.match(source, /handleReportStatusPush/);
   assert.match(source, /requestReportRevalidation/);
+  assert.match(source, /ticketStatusChangedEventFromPushData/);
   assert.match(source, /AppState\.addEventListener\("change"/);
   assert.match(source, /NetInfo\.addEventListener/);
   assert.match(source, /clearAdvisoryCache/);
   assert.match(source, /invalidateNotifications/);
   assert.doesNotMatch(source, /clearComplaintCache/);
-  assert.match(source, /if \(!handled\) requestReportRevalidation\(userId\)/);
+  assert.match(
+    source,
+    /if \(ticketStatusChangedEventFromPushData\(data\)\)[\s\S]*handleReportStatusPush\(data, userId\)[\s\S]*else \{\s*requestReportRevalidation\(userId\)/,
+  );
 });
 
 test("recent and archive report surfaces subscribe to immediate status and revalidation events", async () => {
