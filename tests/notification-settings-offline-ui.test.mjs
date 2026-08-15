@@ -19,6 +19,16 @@ test("notification feeder controls are read-only offline", async () => {
   assert.match(source, /isDisabled=\{[^}]*isFeederEditingDisabled/s);
 });
 
+test("offline load uses cache directly instead of waiting for the API timeout", async () => {
+  const source = await read("src/app/(tabs)/profile/push-notifications.tsx");
+
+  assert.match(source, /const networkState = await NetInfo\.fetch\(\)/);
+  assert.match(
+    source,
+    /if \(offline\) \{[\s\S]*readCachedNotificationSettings\(session\.user\.id\)[\s\S]*return;[\s\S]*\}[\s\S]*fetchNotificationSettings\(session\.user\.id\)/,
+  );
+});
+
 test("expand collapse remains available offline", async () => {
   const source = await read("src/app/(tabs)/profile/push-notifications.tsx");
 
@@ -35,10 +45,7 @@ test("reconnect refreshes server settings before feeder edits resume", async () 
   assert.match(source, /hasReconnectedPendingRefresh/);
   assert.match(source, /NetInfo\.addEventListener/);
   assert.match(source, /void load\(\)/);
-  assert.match(
-    source,
-    /isOffline\s*\|\|\s*hasReconnectedPendingRefresh/,
-  );
+  assert.match(source, /isOffline\s*\|\|\s*hasReconnectedPendingRefresh/);
 });
 
 test("top-level notification preferences keep their existing autosave path", async () => {
