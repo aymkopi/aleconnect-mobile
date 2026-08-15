@@ -32,6 +32,7 @@ import { registerDevicePushToken } from "@/services/notification-settings";
 import {
   advisoryIdFromPushData,
   ticketIdFromPushData,
+  ticketStatusChangedEventFromPushData,
 } from "@/services/notification-navigation";
 import { invalidateNotifications } from "@/services/notifications";
 import "@/services/report-background-sync";
@@ -121,13 +122,13 @@ function PushTokenBridge() {
 
       if (ticketId) {
         if (userId) {
-          void handleReportStatusPush(data, userId)
-            .then((handled) => {
-              if (!handled) requestReportRevalidation(userId);
-            })
-            .catch(() => {
+          if (ticketStatusChangedEventFromPushData(data)) {
+            void handleReportStatusPush(data, userId).catch(() => {
               requestReportRevalidation(userId);
             });
+          } else {
+            requestReportRevalidation(userId);
+          }
         }
         router.push({
           pathname: "/report/[id]",
