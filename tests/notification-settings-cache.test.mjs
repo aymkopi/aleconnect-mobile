@@ -16,11 +16,22 @@ test("notification settings service caches server-confirmed settings per user", 
   assert.match(source, /saveNotificationSettings\(\s*userId: string/s);
 });
 
+test("notification settings exposes cached state for immediate offline hydration", async () => {
+  const source = await read("src/services/notification-settings.ts");
+
+  assert.match(
+    source,
+    /export async function readCachedNotificationSettings\(\s*userId: string/s,
+  );
+  assert.match(source, /const cached = await readCache\(userId\)/);
+  assert.match(source, /return cached \? \{ \.\.\.cached, isStale: true \} : null/);
+});
+
 test("notification settings fetch falls back to stale cache", async () => {
   const source = await read("src/services/notification-settings.ts");
 
-  assert.match(source, /const cached = await readCache\(userId\)/);
-  assert.match(source, /if \(cached\) return \{ \.\.\.cached, isStale: true \}/);
+  assert.match(source, /readCachedNotificationSettings\(userId\)/);
+  assert.match(source, /if \(cached\) return cached/);
 });
 
 test("notification settings save caches only the server response", async () => {
