@@ -120,14 +120,15 @@ export async function handleReportStatusPush(
     };
     markerMemory.set(userId, nextMarkers);
 
-    try {
-      await AsyncStorage.setItem(markerKey(userId), JSON.stringify(nextMarkers));
-    } catch (error) {
-      console.warn("Failed to persist report status event ordering", error);
-    }
-
     const accepted = { ...event, userId } satisfies ReportStatusChangedEvent;
     statusListeners.forEach((listener) => listener(accepted));
+    requestReportRevalidation(userId);
+
+    void AsyncStorage.setItem(markerKey(userId), JSON.stringify(nextMarkers)).catch(
+      (error) => {
+        console.warn("Failed to persist report status event ordering", error);
+      },
+    );
 
     void projectComplaintReportStatus({
       userId,
@@ -137,7 +138,6 @@ export async function handleReportStatusPush(
       console.warn("Failed to project report status into cache", error);
     });
 
-    requestReportRevalidation(userId);
     return true;
   });
 }
