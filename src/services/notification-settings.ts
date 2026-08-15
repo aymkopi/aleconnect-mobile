@@ -71,6 +71,13 @@ async function writeCache(userId: string, value: NotificationSettings) {
   await AsyncStorage.setItem(cacheKey(userId), JSON.stringify(cached));
 }
 
+export async function readCachedNotificationSettings(
+  userId: string,
+): Promise<NotificationSettingsResult | null> {
+  const cached = await readCache(userId);
+  return cached ? { ...cached, isStale: true } : null;
+}
+
 export async function fetchNotificationSettings(
   userId: string,
 ): Promise<NotificationSettingsResult> {
@@ -81,8 +88,8 @@ export async function fetchNotificationSettings(
     await writeCache(userId, response);
     return { ...response, isStale: false };
   } catch (error) {
-    const cached = await readCache(userId);
-    if (cached) return { ...cached, isStale: true };
+    const cached = await readCachedNotificationSettings(userId);
+    if (cached) return cached;
     throw error;
   }
 }
