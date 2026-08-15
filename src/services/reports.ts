@@ -32,6 +32,7 @@ let complaintReportsMemoryCache:
   | null = null;
 const complaintReportRequests =
   createPromiseRegistry<string, ComplaintReportPage>();
+const complaintReportRevalidationUsers = new Set<string>();
 
 export type ComplaintReportSort = "newest" | "oldest" | "status";
 
@@ -41,10 +42,88 @@ export type ComplaintReportPage = {
   isStale?: boolean;
 };
 
+export type ReportStatusProjection = {
+  userId: string;
+  ticketId: string;
+  status: string;
+};
+
 type ComplaintMetaCache = {
   fetchedAt: number;
   value: ComplaintMeta;
 };
+
+type StoredComplaintReportPage = {
+  fetchedAt: number;
+  value: Report[] | ComplaintReportPage;
+};
+
+function complaintReportStorageKey(userId: string) {
+  return `report_list_cache_v1:${userId}`;
+}
+
+function normalizeStoredComplaintReportPage(
+  value: Report[] | ComplaintReportPage,
+): ComplaintReportPage {
+  return Array.isArray(value)
+    ? { reports: value, nextCursor: null }
+    : value;
+}
+
+function patchReportPageStatus(
+  page: ComplaintReportPage,
+  projection: ReportStatusProjection,
+) {
+  let changed = false;
+  const reports = page.reports.map((report) => {
+    if (
+      report.id !== projection.ticketId ||
+      report.status === projection.status
+    ) {
+      return report;
+    }
+    changed = true;
+    return { ...report, status: projection.status };
+  });
+  return {
+    changed,
+    page: changed ? { ...page, reports } : page,
+  };
+}
+
+async function readStoredComplaintReportPage(
+  userId: string,
+  allowStale: boolean,
+): Promise<ComplaintReportPage | null> {
+  const raw = await AsyncStorage.getItem(complaintReportStorageKey(userId));
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw) as StoredComplaintReportPage;
+    const age = Date.now() - parsed.fetchedAt;
+    if (
+      age >
+      (allowStale ? complaintReportsStaleTtlMs : complaintReportsCacheTtlMs)
+    ) {
+      return null;
+    }
+
+    const value = normalizeStoredComplaintReportPage(parsed.value);
+    complaintReportsMemoryCache = {
+      fetchedAt: parsed.fetchedAt,
+      userId,
+      value,
+    };
+    return {
+      ...value,
+      isStale:
+        complaintReportRevalidationUsers.has(userId) ||
+        (allowStale && age > complaintReportsCacheTtlMs),
+    };
+  } catch {
+    return null;
+  }
+}
 
 async function readComplaintMetaCache(allowStale = false): Promise<ComplaintMeta | null> {
   if (
@@ -80,6 +159,59 @@ async function writeComplaintMetaCache(value: ComplaintMeta): Promise<void> {
   );
 }
 
+export function markComplaintReportsForRevalidation(userId: string): void {
+  if (userId) complaintReportRevalidationUsers.add(userId);
+}
+
+export function complaintReportsNeedRevalidation(userId: string): boolean {
+  return Boolean(userId) && complaintReportRevalidationUsers.has(userId);
+}
+
+export async function projectComplaintReportStatus(
+  projection: ReportStatusProjection,
+): Promise<boolean> {
+  if (!projection.userId || !projection.ticketId || !projection.status) {
+    return false;
+  }
+
+  let changed = false;
+  if (complaintReportsMemoryCache?.userId === projection.userId) {
+    const patched = patchReportPageStatus(
+      complaintReportsMemoryCache.value,
+      projection,
+    );
+    if (patched.changed) {
+      complaintReportsMemoryCache = {
+        ...complaintReportsMemoryCache,
+        value: patched.page,
+      };
+      changed = true;
+    }
+  }
+
+  const storageKey = complaintReportStorageKey(projection.userId);
+  const raw = await AsyncStorage.getItem(storageKey);
+  if (!raw) return changed;
+
+  try {
+    const parsed = JSON.parse(raw) as StoredComplaintReportPage;
+    const page = normalizeStoredComplaintReportPage(parsed.value);
+    const patched = patchReportPageStatus(page, projection);
+    if (!patched.changed) return changed;
+
+    await AsyncStorage.setItem(
+      storageKey,
+      JSON.stringify({
+        fetchedAt: parsed.fetchedAt,
+        value: patched.page,
+      }),
+    );
+    return true;
+  } catch {
+    return changed;
+  }
+}
+
 export async function clearComplaintMetaCache(): Promise<void> {
   complaintMetaMemoryCache = null;
   await AsyncStorage.removeItem(complaintMetaCacheKey);
@@ -89,7 +221,8 @@ export async function clearComplaintCache(userId?: string): Promise<void> {
   complaintReportsMemoryCache = null;
   complaintReportRequests.clear();
   if (userId) {
-    await AsyncStorage.removeItem(`report_list_cache_v1:${userId}`);
+    complaintReportRevalidationUsers.delete(userId);
+    await AsyncStorage.removeItem(complaintReportStorageKey(userId));
   }
   await clearComplaintMetaCache();
 }
@@ -98,8 +231,9 @@ export async function clearReportListCache(userId: string): Promise<void> {
   if (complaintReportsMemoryCache?.userId === userId) {
     complaintReportsMemoryCache = null;
   }
+  complaintReportRevalidationUsers.delete(userId);
   complaintReportRequests.clear();
-  await AsyncStorage.removeItem(`report_list_cache_v1:${userId}`);
+  await AsyncStorage.removeItem(complaintReportStorageKey(userId));
 }
 
 export async function fetchComplaintMeta(
@@ -141,6 +275,7 @@ export async function fetchComplaintMeta(
 
 export async function fetchComplaintReportPage(options?: {
   force?: boolean;
+  revalidate?: boolean;
   userId?: string;
   cursor?: string | null;
   query?: string;
@@ -159,11 +294,16 @@ export async function fetchComplaintReportPage(options?: {
   const limit = Math.min(Math.max(options?.limit ?? 25, 1), 50);
   const isDefaultPage =
     !cursor && !query && !categoryId && sort === "newest" && limit === 25;
+  const revalidate = Boolean(options?.revalidate);
   const force =
     Boolean(options?.force) &&
     claimRefresh(`reports:${userId}:${query}:${categoryId}:${sort}`);
+  const needsRevalidation =
+    Boolean(userId) && complaintReportRevalidationUsers.has(userId);
+
   if (
     !force &&
+    !revalidate &&
     isDefaultPage &&
     userId &&
     complaintReportsMemoryCache &&
@@ -171,46 +311,13 @@ export async function fetchComplaintReportPage(options?: {
     Date.now() - complaintReportsMemoryCache.fetchedAt <=
       complaintReportsCacheTtlMs
   ) {
-    return complaintReportsMemoryCache.value;
+    return needsRevalidation
+      ? { ...complaintReportsMemoryCache.value, isStale: true }
+      : complaintReportsMemoryCache.value;
   }
 
-  const storageKey = userId ? `report_list_cache_v1:${userId}` : null;
-  const readStoredReports = async (allowStale: boolean) => {
-    if (!storageKey || !isDefaultPage) return null;
-    const raw = await AsyncStorage.getItem(storageKey);
-    if (!raw) return null;
-    try {
-      const parsed = JSON.parse(raw) as {
-        fetchedAt: number;
-        value: Report[] | ComplaintReportPage;
-      };
-      if (
-        Date.now() - parsed.fetchedAt >
-        (allowStale ? complaintReportsStaleTtlMs : complaintReportsCacheTtlMs)
-      ) {
-        return null;
-      }
-      const value = Array.isArray(parsed.value)
-        ? { reports: parsed.value, nextCursor: null }
-        : parsed.value;
-      complaintReportsMemoryCache = {
-        fetchedAt: parsed.fetchedAt,
-        userId,
-        value,
-      };
-      return {
-        ...value,
-        isStale:
-          allowStale &&
-          Date.now() - parsed.fetchedAt > complaintReportsCacheTtlMs,
-      };
-    } catch {
-      return null;
-    }
-  };
-
-  if (!force) {
-    const stored = await readStoredReports(false);
+  if (!force && !revalidate && isDefaultPage && userId) {
+    const stored = await readStoredComplaintReportPage(userId, false);
     if (stored) return stored;
   }
 
@@ -241,10 +348,11 @@ export async function fetchComplaintReportPage(options?: {
             userId,
             value: response,
           };
+          if (userId) complaintReportRevalidationUsers.delete(userId);
         }
-        if (storageKey && isDefaultPage && complaintReportsMemoryCache) {
+        if (userId && isDefaultPage && complaintReportsMemoryCache) {
           await AsyncStorage.setItem(
-            storageKey,
+            complaintReportStorageKey(userId),
             JSON.stringify({
               fetchedAt: complaintReportsMemoryCache.fetchedAt,
               value: response,
@@ -254,15 +362,17 @@ export async function fetchComplaintReportPage(options?: {
         return response;
       })
       .catch(async (error) => {
-        const stored = await readStoredReports(true);
-        if (stored) return stored;
+        if (userId && isDefaultPage) {
+          const stored = await readStoredComplaintReportPage(userId, true);
+          if (stored) return { ...stored, isStale: true };
+        }
         throw error;
       }),
   );
 }
 
 export async function fetchComplaintReports(
-  options?: { force?: boolean; userId?: string },
+  options?: { force?: boolean; revalidate?: boolean; userId?: string },
 ): Promise<Report[]> {
   return fetchComplaintReportPage(options).then((page) => page.reports);
 }
