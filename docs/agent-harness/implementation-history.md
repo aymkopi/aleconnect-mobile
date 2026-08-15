@@ -188,13 +188,14 @@
 
 ## 2026-08-15 - Targeted ticket push report revalidation
 
-- Repository: mobile `aleconnect-mobile`.
-- Scope: optimized ticket-status push synchronization so an accepted v1 push immediately projects only the matching report, then revalidates only that ticket through `/api/mobile/complaints/:ticketId` instead of immediately refetching the full report list.
-- Files: `src/services/report-sync-events.ts`, focused report-sync tests, and this history entry.
-- Behavior: Recent Reports and Archive retain their existing targeted `ticketId` row projection. The normal v1 push path no longer requests full-list revalidation. The server detail response may correct the projected status when the push and authoritative response differ.
-- Fallbacks: app activation, reconnect, legacy ticket notifications, manual refresh, missed pushes, and targeted-detail failures retain full-list revalidation/recovery.
-- Ordering: targeted responses are ignored when a newer persisted/in-memory ticket event marker has already superseded the push that started the request.
-- Backend: no API, database, Cloudflare Worker, or push-payload contract changes.
+- Repositories: mobile `aleconnect-mobile`; coordinated staff/API `Aleconnect` owns the ticket-status push and complaint-detail API contracts.
+- Scope: optimize ticket-status push synchronization so an accepted v1 push immediately projects only the matching report, then revalidates only that ticket through `/api/mobile/complaints/:ticketId` instead of immediately refetching the full report list.
+- Files: `src/services/report-sync-events.ts`, focused report-sync tests, and this implementation-history entry.
+- Contracts: Recent Reports and Report Archive retain targeted `ticketId` row projection. Normal v1 ticket-status pushes revalidate the affected ticket through the authoritative complaint-detail endpoint instead of forcing a full-list refresh. App activation, reconnect, legacy ticket notifications, manual refresh, missed pushes, and targeted-detail failures retain full-list recovery. Targeted responses are ignored when a newer persisted or in-memory ticket event marker supersedes the event that initiated the request. No backend API shape, database schema, Cloudflare Worker, or push-payload contract changed.
+- Verification: run the focused report synchronization tests, the full Node test suite, `npx tsc --noEmit`, `npm run lint`, `npm run harness:check`, and `git diff --check`.
+- Git/Deployment: mobile source change only. No backend deployment, database mutation, Cloudflare Worker change, Expo/EAS publication, or store release is included.
+- Remaining risks: targeted revalidation still depends on the authoritative complaint-detail request succeeding. Missed or delayed push events remain possible due to operating-system delivery behavior, so the existing activation, reconnect, manual-refresh, and full-list recovery paths remain necessary.
+- Next: complete verification of targeted push synchronization and preserve the existing full-list recovery paths for activation, reconnect, legacy notifications, and failed targeted detail requests.
 
 ## 2026-08-15 - Immediate submitted-report list synchronization
 
@@ -206,3 +207,14 @@
 - Git/Deployment: mobile source change only. No backend deployment, database mutation, Cloudflare Worker change, Expo/EAS publication, or store release is included.
 - Remaining risks: refresh latency still depends on the consumer complaint list API and network availability. Offline submissions remain represented by the existing local queue until the server confirms them.
 - Next: verify immediate consumer-list synchronization, then optimize the staff Report Inbox discovery path separately without increasing global operational polling.
+
+## 2026-08-15 - Immediate post-submit report list synchronization
+
+- Repositories: mobile `aleconnect-mobile`; staff/API `Aleconnect` remains authoritative for consumer complaint creation and report-list data.
+- Scope: prevent successfully submitted reports from remaining absent from Recent Reports or Report Archive until the existing 60-second application cache expires. Report cache invalidation protects against stale in-flight requests repopulating cleared data, report surfaces explicitly revalidate after submission, and older screen loads cannot overwrite newer results.
+- Files: `src/services/reports.ts`, `src/app/(tabs)/reports/index.tsx`, `src/app/(tabs)/reports/list.tsx`, and `docs/agent-harness/implementation-history.md`.
+- Contracts: the server remains authoritative for report creation and report-list contents. The existing 60-second application cache TTL remains available for normal reads, while successful submission explicitly invalidates that cache and requests authoritative revalidation. Cache generations prevent requests started before invalidation from repopulating current memory or persistent cache state. `cache: "no-store"` is transport-level hardening and does not replace the application's AsyncStorage or memory cache policy.
+- Verification: `npx tsc --noEmit`, `npm run lint`, `npm run harness:check`, and `git diff --check` are required before commit. Runtime Metro/device tracing verified the full post-submit path. With production Hyperdrive query caching enabled, successful submission of `ALECO-260815-00009` was immediately followed by the intended cache invalidation and authoritative report-list GET, but that GET returned the previous list ending at `ALECO-260815-00008`. After query caching was disabled on the production `aleconnect-db` Hyperdrive configuration, submission of `ALECO-260815-00010` was immediately followed by a fresh GET containing `ALECO-260815-00010`, and the Reports screen rendered the 16-report result without manual refresh or cache-expiry delay.
+- Git/Deployment: mobile source change only. No Expo/EAS publication or store release is included. The production staff/API Hyperdrive configuration was separately changed operationally to disable query caching; that infrastructure change is owned and documented by `Aleconnect`.
+- Remaining risks: mobile cache invalidation and stale in-flight request protection are now verified. Operational database reads requiring read-after-write consistency must continue to avoid stale Hyperdrive query results. If Hyperdrive query caching is reintroduced later, stale-tolerant reference data and consistency-sensitive operational data should use separate database access paths.
+- Next: commit the verified mobile synchronization change, preserve the production Hyperdrive cache-disabled consistency requirement, and evaluate a separate cached-versus-fresh database access architecture before selectively reintroducing SQL query caching.

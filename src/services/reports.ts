@@ -11,9 +11,9 @@ import {
   apiRequest,
   createApiRequestId,
 } from "@/services/api";
-import { requestPhaseFailureMessage } from "@/utils/report-transport";
 import { createPromiseRegistry } from "@/utils/async-coordination";
 import { claimRefresh } from "@/utils/refresh-cooldown";
+import { requestPhaseFailureMessage } from "@/utils/report-transport";
 
 export type EvidenceUpload = {
   key: string;
@@ -27,12 +27,18 @@ const complaintReportsStaleTtlMs = 90 * 24 * 60 * 60 * 1000;
 
 let complaintMetaMemoryCache: ComplaintMetaCache | null = null;
 let complaintMetaRequest: Promise<ComplaintMeta> | null = null;
-let complaintReportsMemoryCache:
-  | { fetchedAt: number; userId: string; value: ComplaintReportPage }
-  | null = null;
-const complaintReportRequests =
-  createPromiseRegistry<string, ComplaintReportPage>();
+let complaintReportsMemoryCache: {
+  fetchedAt: number;
+  userId: string;
+  value: ComplaintReportPage;
+} | null = null;
+const complaintReportRequests = createPromiseRegistry<
+  string,
+  ComplaintReportPage
+>();
 const complaintReportRevalidationUsers = new Set<string>();
+
+let complaintReportsCacheGeneration = 0;
 
 export type ComplaintReportSort = "newest" | "oldest" | "status";
 
@@ -65,9 +71,7 @@ function complaintReportStorageKey(userId: string) {
 function normalizeStoredComplaintReportPage(
   value: Report[] | ComplaintReportPage,
 ): ComplaintReportPage {
-  return Array.isArray(value)
-    ? { reports: value, nextCursor: null }
-    : value;
+  return Array.isArray(value) ? { reports: value, nextCursor: null } : value;
 }
 
 function patchReportPageStatus(
@@ -125,7 +129,9 @@ async function readStoredComplaintReportPage(
   }
 }
 
-async function readComplaintMetaCache(allowStale = false): Promise<ComplaintMeta | null> {
+async function readComplaintMetaCache(
+  allowStale = false,
+): Promise<ComplaintMeta | null> {
   if (
     complaintMetaMemoryCache &&
     Date.now() - complaintMetaMemoryCache.fetchedAt <= complaintMetaCacheTtlMs
@@ -140,7 +146,10 @@ async function readComplaintMetaCache(allowStale = false): Promise<ComplaintMeta
 
   try {
     const parsed = JSON.parse(raw) as ComplaintMetaCache;
-    if (!allowStale && Date.now() - parsed.fetchedAt > complaintMetaCacheTtlMs) {
+    if (
+      !allowStale &&
+      Date.now() - parsed.fetchedAt > complaintMetaCacheTtlMs
+    ) {
       return null;
     }
 
@@ -218,29 +227,35 @@ export async function clearComplaintMetaCache(): Promise<void> {
 }
 
 export async function clearComplaintCache(userId?: string): Promise<void> {
+  complaintReportsCacheGeneration += 1;
   complaintReportsMemoryCache = null;
   complaintReportRequests.clear();
+
   if (userId) {
     complaintReportRevalidationUsers.delete(userId);
     await AsyncStorage.removeItem(complaintReportStorageKey(userId));
   }
+
   await clearComplaintMetaCache();
 }
 
 export async function clearReportListCache(userId: string): Promise<void> {
+  complaintReportsCacheGeneration += 1;
+
   if (complaintReportsMemoryCache?.userId === userId) {
     complaintReportsMemoryCache = null;
   }
+
   complaintReportRevalidationUsers.delete(userId);
   complaintReportRequests.clear();
+
   await AsyncStorage.removeItem(complaintReportStorageKey(userId));
 }
 
-export async function fetchComplaintMeta(
-  options?: { force?: boolean },
-): Promise<ComplaintMeta> {
-  const force =
-    Boolean(options?.force) && claimRefresh("complaint-meta");
+export async function fetchComplaintMeta(options?: {
+  force?: boolean;
+}): Promise<ComplaintMeta> {
+  const force = Boolean(options?.force) && claimRefresh("complaint-meta");
   if (!force) {
     const cached = await readComplaintMetaCache();
     if (cached) {
@@ -336,20 +351,42 @@ export async function fetchComplaintReportPage(options?: {
     sort,
     limit,
   });
+  const requestCacheGeneration = complaintReportsCacheGeneration;
 
   return complaintReportRequests.run(requestKey, () =>
     apiRequest<ComplaintReportPage>(
       `/api/mobile/complaints?${params.toString()}`,
+      {
+        cache: "no-store",
+      },
     )
       .then(async (response) => {
+        const isCurrentGeneration =
+          requestCacheGeneration === complaintReportsCacheGeneration;
+
+        // A report mutation invalidated this request while it
+        // was in flight. Never allow the old response to rebuild
+        // the fresh report-list cache or clear the pending
+        // revalidation marker.
+        if (!isCurrentGeneration) {
+          return {
+            ...response,
+            isStale: true,
+          };
+        }
+
         if (isDefaultPage) {
           complaintReportsMemoryCache = {
             fetchedAt: Date.now(),
             userId,
             value: response,
           };
-          if (userId) complaintReportRevalidationUsers.delete(userId);
+
+          if (userId) {
+            complaintReportRevalidationUsers.delete(userId);
+          }
         }
+
         if (userId && isDefaultPage && complaintReportsMemoryCache) {
           await AsyncStorage.setItem(
             complaintReportStorageKey(userId),
@@ -359,6 +396,7 @@ export async function fetchComplaintReportPage(options?: {
             }),
           );
         }
+
         return response;
       })
       .catch(async (error) => {
@@ -371,9 +409,11 @@ export async function fetchComplaintReportPage(options?: {
   );
 }
 
-export async function fetchComplaintReports(
-  options?: { force?: boolean; revalidate?: boolean; userId?: string },
-): Promise<Report[]> {
+export async function fetchComplaintReports(options?: {
+  force?: boolean;
+  revalidate?: boolean;
+  userId?: string;
+}): Promise<Report[]> {
   return fetchComplaintReportPage(options).then((page) => page.reports);
 }
 
@@ -403,7 +443,10 @@ export async function createEvidenceUploads(
   );
 }
 
-export async function uploadEvidenceToR2(uploadUrl: string, imageBytes: ArrayBuffer) {
+export async function uploadEvidenceToR2(
+  uploadUrl: string,
+  imageBytes: ArrayBuffer,
+) {
   const requestId = createApiRequestId();
   const controller = new AbortController();
   let didTimeout = false;

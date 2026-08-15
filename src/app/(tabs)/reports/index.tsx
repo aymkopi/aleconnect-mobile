@@ -14,21 +14,17 @@ import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useUnreadNotificationCount } from "@/hooks/use-unread-notification-count";
 import {
-  fetchComplaintMeta,
-  fetchComplaintReportPage,
-} from "@/services/reports";
-import {
+  hasPendingReportRevalidation,
   subscribeReportRevalidationRequested,
   subscribeReportStatusChanged,
 } from "@/services/report-sync-events";
+import {
+  fetchComplaintMeta,
+  fetchComplaintReportPage,
+} from "@/services/reports";
 import { isInManilaMonth, parseApiInstant } from "@/utils/manila-time";
 import { useFocusEffect, useRouter } from "expo-router";
-import {
-  Bell,
-  CalendarDays,
-  ChevronRight,
-  Plus,
-} from "lucide-react-native";
+import { Bell, CalendarDays, ChevronRight, Plus } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   RefreshControl,
@@ -71,6 +67,7 @@ export default function ComplaintsRoute() {
   const { width } = useWindowDimensions();
   const scrollRef = useRef<ScrollView | null>(null);
   const hasLoadedRef = useRef(false);
+  const loadGenerationRef = useRef(0);
   const loadComplaintsRef = useRef<
     (options?: LoadComplaintOptions) => Promise<void>
   >(async () => undefined);
@@ -87,6 +84,7 @@ export default function ComplaintsRoute() {
 
   const loadComplaints = useCallback(
     async (options?: LoadComplaintOptions) => {
+      const generation = ++loadGenerationRef.current;
       if (options?.force) {
         setIsRefreshing(true);
       } else if (!hasLoadedRef.current && !options?.revalidate) {
@@ -102,6 +100,9 @@ export default function ComplaintsRoute() {
             userId,
           }),
         ]);
+        if (generation !== loadGenerationRef.current) {
+          return;
+        }
         setMeta(nextMeta);
         setReports(page.reports);
         setError(null);
@@ -159,9 +160,19 @@ export default function ComplaintsRoute() {
 
   useFocusEffect(
     useCallback(() => {
-      scrollRef.current?.scrollTo({ y: 0, animated: false });
-      void loadComplaintsRef.current();
-    }, []),
+      scrollRef.current?.scrollTo({
+        y: 0,
+        animated: false,
+      });
+
+      const mustRevalidate = userId
+        ? hasPendingReportRevalidation(userId)
+        : false;
+
+      void loadComplaintsRef.current(
+        mustRevalidate ? { revalidate: true } : undefined,
+      );
+    }, [userId]),
   );
 
   const monthReports = useMemo(
@@ -170,8 +181,10 @@ export default function ComplaintsRoute() {
         .filter((report) => isInManilaMonth(report.createdAt))
         .sort(
           (a, b) =>
-            (parseApiInstant(b.createdAt)?.getTime() ?? Number.NEGATIVE_INFINITY) -
-            (parseApiInstant(a.createdAt)?.getTime() ?? Number.NEGATIVE_INFINITY),
+            (parseApiInstant(b.createdAt)?.getTime() ??
+              Number.NEGATIVE_INFINITY) -
+            (parseApiInstant(a.createdAt)?.getTime() ??
+              Number.NEGATIVE_INFINITY),
         ),
     [reports],
   );

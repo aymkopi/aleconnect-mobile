@@ -1,9 +1,5 @@
 import { ChildAppBar } from "@/components/child-app-bar";
-import {
-  Button,
-  ButtonIcon,
-  ButtonText,
-} from "@/components/ui/button";
+import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { ListSection, ListSectionItem } from "@/components/ui/list-section";
 import { Menu, MenuItem, MenuItemLabel } from "@/components/ui/menu";
@@ -31,23 +27,23 @@ import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import type { ReportQueueItem } from "@/services/report-queue";
 import {
+  subscribeReportRevalidationRequested,
+  subscribeReportStatusChanged,
+} from "@/services/report-sync-events";
+import {
   fetchComplaintMeta,
   fetchComplaintReportPage,
   type ComplaintReportSort,
 } from "@/services/reports";
-import {
-  subscribeReportRevalidationRequested,
-  subscribeReportStatusChanged,
-} from "@/services/report-sync-events";
 import { formatManilaWeekRange, manilaWeekStartKey } from "@/utils/manila-time";
 import * as Clipboard from "expo-clipboard";
 import { useFocusEffect, useRouter } from "expo-router";
 import {
   ArrowDownNarrowWide,
   Check,
+  Clock3,
   CloudOff,
   Copy,
-  Clock3,
   Filter,
   RefreshCw,
   Search,
@@ -73,7 +69,11 @@ function queuedReportStatus(item: ReportQueueItem) {
     return { label: "Sending now", Icon: RefreshCw, tone: "accent" as const };
   }
   if (item.status === "failed") {
-    return { label: "Needs attention", Icon: CloudOff, tone: "danger" as const };
+    return {
+      label: "Needs attention",
+      Icon: CloudOff,
+      tone: "danger" as const,
+    };
   }
   return { label: "Waiting to submit", Icon: Clock3, tone: "muted" as const };
 }
@@ -115,7 +115,13 @@ export default function ReportArchiveRoute() {
   ]);
   const { session } = useAuthSession();
   const userId = session?.user.id;
-  const { items: queuedItems, isSyncing, sync, retry, remove } = useReportQueue();
+  const {
+    items: queuedItems,
+    isSyncing,
+    sync,
+    retry,
+    remove,
+  } = useReportQueue();
   const [meta, setMeta] = useState<ComplaintMeta>(emptyComplaintMeta);
   const [reports, setReports] = useState<Report[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
@@ -254,7 +260,9 @@ export default function ReportArchiveRoute() {
     }
     if (queueSnapshotRef.current !== queueSnapshot) {
       queueSnapshotRef.current = queueSnapshot;
-      void loadReportsRef.current();
+      void loadReportsRef.current({
+        revalidate: true,
+      });
     }
   }, [queueSnapshot]);
 
@@ -405,8 +413,8 @@ export default function ReportArchiveRoute() {
               <Heading size="sm">Saved on this device</Heading>
               <Text className="mt-0.5 text-xs text-muted-foreground">
                 {pendingReports.length} report
-                {pendingReports.length === 1 ? "" : "s"} will send
-                automatically when connected.
+                {pendingReports.length === 1 ? "" : "s"} will send automatically
+                when connected.
               </Text>
             </View>
             <Button
