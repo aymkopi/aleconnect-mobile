@@ -13,7 +13,7 @@ test("notification feeder controls are read-only offline", async () => {
   assert.match(source, /isFeederEditingDisabled/);
   assert.match(
     source,
-    /Offline[^\n]*showing your last saved feeder settings[^\n]*Reconnect to make changes\./,
+    /Offline[\s\S]*showing your last saved feeder settings[\s\S]*Reconnect to\s+make changes\./,
   );
   assert.match(source, /if \(isFeederEditingDisabled\) return;/);
   assert.match(source, /isDisabled=\{[^}]*isFeederEditingDisabled/s);
@@ -35,7 +35,10 @@ test("reconnect refreshes server settings before feeder edits resume", async () 
   assert.match(source, /hasReconnectedPendingRefresh/);
   assert.match(source, /NetInfo\.addEventListener/);
   assert.match(source, /void load\(\)/);
-  assert.match(source, /isOffline \|\| hasReconnectedPendingRefresh/);
+  assert.match(
+    source,
+    /isOffline\s*\|\|\s*hasReconnectedPendingRefresh/,
+  );
 });
 
 test("top-level notification preferences keep their existing autosave path", async () => {
