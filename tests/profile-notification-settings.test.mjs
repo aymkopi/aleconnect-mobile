@@ -15,7 +15,10 @@ test("notification settings autosave and expose OS permission state", async () =
   assert.match(source, /Notifications\.requestPermissionsAsync/);
   assert.match(source, /Linking\.openSettings/);
   assert.match(source, /setTimeout\(\(\) =>/);
-  assert.match(source, /saveNotificationSettings\(draftPayload\)/);
+  assert.match(
+    source,
+    /saveNotificationSettings\(session\.user\.id, draftPayload\)/,
+  );
   assert.match(source, /Changes save automatically/);
   assert.doesNotMatch(source, /onPress=\{save\}/);
 });
