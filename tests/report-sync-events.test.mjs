@@ -27,12 +27,13 @@ test("report sync serializes per-user ordering decisions before publishing", asy
   assert.match(source, /requestReportRevalidation\(userId\)/);
 });
 
-test("report cache persistence failure remains non-fatal to visible projection", async () => {
+test("visible status publishes before best-effort disk persistence", async () => {
   const source = await readFile(sourceUrl, "utf8");
+  const publishIndex = source.indexOf("statusListeners.forEach");
+  const persistIndex = source.indexOf("AsyncStorage.setItem");
 
+  assert.ok(publishIndex >= 0);
+  assert.ok(persistIndex >= 0);
+  assert.ok(publishIndex < persistIndex);
   assert.match(source, /Failed to persist report status event ordering/);
-  assert.match(
-    source,
-    /catch \(error\)[\s\S]*console\.warn\("Failed to persist report status event ordering"[\s\S]*statusListeners\.forEach/,
-  );
 });
