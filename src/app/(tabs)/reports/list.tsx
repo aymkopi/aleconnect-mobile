@@ -35,6 +35,10 @@ import {
   fetchComplaintReportPage,
   type ComplaintReportSort,
 } from "@/services/reports";
+import {
+  subscribeReportRevalidationRequested,
+  subscribeReportStatusChanged,
+} from "@/services/report-sync-events";
 import { formatManilaWeekRange, manilaWeekStartKey } from "@/utils/manila-time";
 import * as Clipboard from "expo-clipboard";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -110,6 +114,7 @@ export default function ReportArchiveRoute() {
     "danger",
   ]);
   const { session } = useAuthSession();
+  const userId = session?.user.id;
   const { items: queuedItems, isSyncing, sync, retry, remove } = useReportQueue();
   const [meta, setMeta] = useState<ComplaintMeta>(emptyComplaintMeta);
   const [reports, setReports] = useState<Report[]>([]);
@@ -127,24 +132,28 @@ export default function ReportArchiveRoute() {
   const loadReports = useCallback(
     async (options?: {
       force?: boolean;
+      revalidate?: boolean;
       append?: boolean;
       cursor?: string | null;
     }) => {
-      if (!session) return;
+      if (!userId) return;
       const append = Boolean(options?.append);
       const generation = append
         ? loadGenerationRef.current
         : ++loadGenerationRef.current;
       if (append) setIsLoadingMore(true);
       else if (options?.force) setIsRefreshing(true);
-      else setIsLoading(true);
+      else if (!options?.revalidate) setIsLoading(true);
 
       try {
         const [nextMeta, page] = await Promise.all([
-          append ? Promise.resolve(null) : fetchComplaintMeta(options),
+          append
+            ? Promise.resolve(null)
+            : fetchComplaintMeta(options?.force ? { force: true } : undefined),
           fetchComplaintReportPage({
-            userId: session.user.id,
+            userId,
             force: options?.force,
+            revalidate: options?.revalidate,
             cursor: options?.cursor,
             query,
             categoryId,
@@ -167,6 +176,16 @@ export default function ReportArchiveRoute() {
         setNextCursor(page.nextCursor);
         setIsStale(Boolean(page.isStale));
         setError(null);
+        if (
+          page.isStale &&
+          !options?.revalidate &&
+          !options?.force &&
+          !append
+        ) {
+          queueMicrotask(() => {
+            void loadReportsRef.current({ revalidate: true });
+          });
+        }
       } catch (nextError) {
         if (generation !== loadGenerationRef.current) return;
         setError(
@@ -182,12 +201,39 @@ export default function ReportArchiveRoute() {
         setIsLoadingMore(false);
       }
     },
-    [categoryId, query, session, sortMode],
+    [categoryId, query, sortMode, userId],
   );
   const loadReportsRef = useRef(loadReports);
   useEffect(() => {
     loadReportsRef.current = loadReports;
   }, [loadReports]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const unsubscribeStatus = subscribeReportStatusChanged((event) => {
+      if (event.userId !== userId) return;
+      setReports((current) =>
+        current.map((report) =>
+          report.id === event.ticketId
+            ? { ...report, status: event.status }
+            : report,
+        ),
+      );
+    });
+
+    const unsubscribeRevalidation = subscribeReportRevalidationRequested(
+      (changedUserId) => {
+        if (changedUserId !== userId) return;
+        void loadReportsRef.current({ revalidate: true });
+      },
+    );
+
+    return () => {
+      unsubscribeStatus();
+      unsubscribeRevalidation();
+    };
+  }, [userId]);
 
   const pendingReports = useMemo(
     () => queuedItems.filter((item) => item.status !== "submitted"),

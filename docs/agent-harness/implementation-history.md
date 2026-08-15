@@ -1,5 +1,16 @@
 # Implementation history
 
+## 2026-08-15 - Push-driven report status synchronization
+
+- Repositories: mobile `feature/ticket-push-report-sync`; coordinated staff/API branch `feature/ticket-push-report-sync` owns the versioned ticket-status push contract.
+- Scope: makes Recent Reports and Report Archive reflect accepted ticket status pushes immediately, then revalidates from the authoritative complaint API without polling, WebSockets, or waiting for notification delivery.
+- Files: `src/app/_layout.tsx`, both report-list routes, `src/services/notification-navigation.ts`, `src/services/report-sync-ordering.ts`, `src/services/report-sync-events.ts`, `src/services/reports.ts`, focused report-sync tests, and this history entry.
+- Contracts: v1 ticket push events require `context=ticket`, `event=ticket.status_changed`, `version=1`, ticket ID, canonical status, and server `changedAt`; optional monotonic `revision` wins when both compared events provide one. Legacy ticket notification taps retain navigation and trigger authoritative revalidation. The server remains authoritative.
+- Verification: focused report-sync tests, the full Node suite (130 passed, 1 existing sibling-contract skip), TypeScript, and lint completed successfully in the pre-handoff verification run. The final branch gate repeats those checks plus `npm run harness:check` and `git diff --check` after this required history entry is present.
+- Git/Deployment: feature-branch implementation only; no Expo/EAS/store release, backend deployment, database mutation, or mobile publication is included.
+- Remaining risks: operating systems may delay or omit background push execution, so app/session activation and offline-to-online transitions intentionally request server revalidation. Immediate foreground projection is best-effort cache/UI acceleration, not the consistency source.
+- Next: complete final branch verification, review the cross-repository diffs, then merge/release backend and mobile in a coordinated order.
+
 ## 2026-08-13 - Mobile operations parity integration handoff
 
 - Repositories: mobile `codex/mobile-operations-parity` from `240bca73692f74135753ee01271ade9434b871e5`; staff/API sibling `codex/mobile-operations-parity` from `634a3558f40d0f9db4b2c6b5d471b6b51fab8172`.
