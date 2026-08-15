@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Device from "expo-device";
 import { Platform } from "react-native";
 
@@ -26,6 +27,10 @@ export type NotificationSettings = {
   readonly substations: NotificationSubstation[];
 };
 
+export type NotificationSettingsResult = NotificationSettings & {
+  readonly isStale?: boolean;
+};
+
 export type SaveNotificationSettingsInput = {
   readonly receivePushNotifications: boolean;
   readonly receiveAdvisories: boolean;
@@ -33,17 +38,68 @@ export type SaveNotificationSettingsInput = {
   readonly selectedFeederIds: string[];
 };
 
-export async function fetchNotificationSettings() {
-  return apiRequest<NotificationSettings>("/api/mobile/push-notifications");
+type NotificationSettingsCache = {
+  readonly fetchedAt: number;
+  readonly value: NotificationSettings;
+};
+
+const cachePrefix = "notification_settings_cache_v1";
+
+function cacheKey(userId: string) {
+  return `${cachePrefix}:${userId}`;
+}
+
+async function readCache(userId: string) {
+  const raw = await AsyncStorage.getItem(cacheKey(userId));
+  if (!raw) return null;
+
+  try {
+    const cached = JSON.parse(raw) as NotificationSettingsCache;
+    if (!cached?.value) return null;
+    return cached.value;
+  } catch {
+    return null;
+  }
+}
+
+async function writeCache(userId: string, value: NotificationSettings) {
+  const cached: NotificationSettingsCache = {
+    fetchedAt: Date.now(),
+    value,
+  };
+
+  await AsyncStorage.setItem(cacheKey(userId), JSON.stringify(cached));
+}
+
+export async function fetchNotificationSettings(
+  userId: string,
+): Promise<NotificationSettingsResult> {
+  try {
+    const response = await apiRequest<NotificationSettings>(
+      "/api/mobile/push-notifications",
+    );
+    await writeCache(userId, response);
+    return { ...response, isStale: false };
+  } catch (error) {
+    const cached = await readCache(userId);
+    if (cached) return { ...cached, isStale: true };
+    throw error;
+  }
 }
 
 export async function saveNotificationSettings(
+  userId: string,
   input: SaveNotificationSettingsInput,
-) {
-  return apiRequest<NotificationSettings>("/api/mobile/push-notifications", {
-    method: "POST",
-    body: JSON.stringify(input),
-  });
+): Promise<NotificationSettingsResult> {
+  const response = await apiRequest<NotificationSettings>(
+    "/api/mobile/push-notifications",
+    {
+      method: "POST",
+      body: JSON.stringify(input),
+    },
+  );
+  await writeCache(userId, response);
+  return { ...response, isStale: false };
 }
 
 export async function registerDevicePushToken(expoPushToken: string) {
