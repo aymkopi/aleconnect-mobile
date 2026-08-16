@@ -13,7 +13,7 @@
 - Staff owns the `/api/mobile/complaints` response contract; mobile must not query MySQL or infer missing address data with extra detail requests.
 - `displayAddress` is additive and nullable on the server and optional/nullable on mobile so either side can roll out independently.
 - Do not change complaint ownership/authentication, pagination cursor semantics, search/sort/filter behavior, queue behavior, status-push contracts, or report-detail UI.
-- Do not add a database migration unless implementation inspection proves existing ticket/location fields are insufficient.
+- No database migration is required: the existing ticket and location tables already expose `purok_or_street`, `barangay_psgc`, barangay name, and municipality name.
 - Keep Manila-time parsing strict: offset-free API timestamps remain invalid.
 - Official report cards remove the category-colored file icon and keep the entire card as one accessible press target.
 - Missing or blank address text is omitted; never render `Unknown address`.
@@ -24,26 +24,20 @@
 ### Task 1: Add the staff-owned `displayAddress` list contract
 
 **Files:**
-- Modify: `../Aleconnect/api/mobile/complaints.ts`
-- Modify: `../Aleconnect/tests/lifecycle/mobile-complaint-page.test.mjs`
+- Modify: `../aleconnect/api/mobile/complaints.ts`
+- Modify: `../aleconnect/tests/lifecycle/mobile-complaint-page.test.mjs`
 
 **Interfaces:**
 - Consumes: existing ticket fields `purok_or_street`, `barangay_psgc`, `barangay_feeders.barangay_name`, and `municipalities.municipality_name`.
 - Produces: `formatConsumerComplaintDisplayAddress(row: JsonRecord): string | null` and `toConsumerComplaintListItem(...).displayAddress: string | null`.
 
-- [ ] **Step 1: Create an isolated staff branch**
+- [ ] **Step 1: Prepare isolated mobile and staff worktrees before product edits**
 
-```powershell
-git -C ..\Aleconnect switch main
-git -C ..\Aleconnect pull --ff-only
-git -C ..\Aleconnect switch -c agent/report-list-card-redesign
-```
-
-Expected: staff work is isolated on `agent/report-list-card-redesign`; do not continue if unrelated worktree changes would be overwritten.
+Use the required `superpowers:using-git-worktrees` workflow at execution time. The mobile work must use `agent/report-list-card-redesign`; create the matching staff branch/worktree from `main`. Stop if either source checkout contains unrelated changes that would be moved, overwritten, or accidentally staged.
 
 - [ ] **Step 2: Write failing staff serializer tests**
 
-Add this test to `../Aleconnect/tests/lifecycle/mobile-complaint-page.test.mjs`:
+Add this test to `../aleconnect/tests/lifecycle/mobile-complaint-page.test.mjs`:
 
 ```js
 test("consumer report list exposes a compact display address", async (t) => {
@@ -116,14 +110,16 @@ test("consumer report list joins one location row per barangay PSGC", async () =
 - [ ] **Step 3: Run the focused staff test and verify RED**
 
 ```powershell
-npm --prefix ..\Aleconnect exec -- node --test tests/lifecycle/mobile-complaint-page.test.mjs
+Push-Location ..\aleconnect
+node --test tests/lifecycle/mobile-complaint-page.test.mjs
+Pop-Location
 ```
 
 Expected: FAIL because `displayAddress` and the deduplicated list location projection do not exist yet.
 
 - [ ] **Step 4: Implement the address formatter and list projection**
 
-In `../Aleconnect/api/mobile/complaints.ts`, add this pure formatter near the other DTO helpers:
+In `../aleconnect/api/mobile/complaints.ts`, add this pure formatter near the other DTO helpers:
 
 ```ts
 function consumerBarangayLabel(value: unknown) {
@@ -171,12 +167,14 @@ Then extend `toConsumerComplaintListItem`:
 displayAddress: formatConsumerComplaintDisplayAddress(row),
 ```
 
-Do not add address columns to cursor comparison or ordering.
+Do not add address columns to cursor comparison, ordering, or search filtering.
 
 - [ ] **Step 5: Run focused staff tests and verify GREEN**
 
 ```powershell
-npm --prefix ..\Aleconnect exec -- node --test tests/lifecycle/mobile-complaint-page.test.mjs
+Push-Location ..\aleconnect
+node --test tests/lifecycle/mobile-complaint-page.test.mjs
+Pop-Location
 ```
 
 Expected: PASS, including the existing timestamp, Service Memo, ownership, cursor, and pagination tests.
@@ -184,8 +182,8 @@ Expected: PASS, including the existing timestamp, Service Memo, ownership, curso
 - [ ] **Step 6: Commit the staff contract change**
 
 ```powershell
-git -C ..\Aleconnect add api/mobile/complaints.ts tests/lifecycle/mobile-complaint-page.test.mjs
-git -C ..\Aleconnect commit -m "feat: expose report display address"
+git -C ..\aleconnect add api/mobile/complaints.ts tests/lifecycle/mobile-complaint-page.test.mjs
+git -C ..\aleconnect commit -m "feat: expose report display address"
 ```
 
 ---
@@ -199,7 +197,7 @@ git -C ..\Aleconnect commit -m "feat: expose report display address"
 - Modify: `tests/report-status-cache-sync.test.mjs`
 
 **Interfaces:**
-- Consumes: staff `displayAddress?: unknown` from current or cached report-list payloads.
+- Consumes: staff `displayAddress` from current or cached report-list payloads, including older rows where the field is absent.
 - Produces: `Report.displayAddress?: string | null` and `normalizeReportListItem(report: Report): Report`.
 
 - [ ] **Step 1: Write failing mobile normalization tests**
@@ -315,7 +313,7 @@ function normalizeStoredComplaintReportPage(
 }
 ```
 
-Inside the network `.then(async (response) => { ... })`, create the normalized page before cache writes:
+At the start of the network `.then(async (response) => { ... })`, create:
 
 ```ts
 const normalizedResponse: ComplaintReportPage = {
@@ -324,7 +322,7 @@ const normalizedResponse: ComplaintReportPage = {
 };
 ```
 
-Use `normalizedResponse` for `complaintReportsMemoryCache.value`, AsyncStorage persistence, and the final successful return. Preserve the existing stale-generation path by returning the normalized page with `isStale: true`.
+Use `normalizedResponse` for the stale-generation return, `complaintReportsMemoryCache.value`, AsyncStorage persistence, and the final successful return. Keep the existing cache generation and stale-marker semantics unchanged.
 
 - [ ] **Step 5: Run focused mobile tests and verify GREEN**
 
@@ -384,7 +382,7 @@ Expected: FAIL because `formatManilaReportListDateTime` is not exported.
 
 - [ ] **Step 3: Implement the compact formatter using the existing strict parser**
 
-In `src/utils/manila-time.ts`, add two formatters:
+In `src/utils/manila-time.ts`, add:
 
 ```ts
 const manilaReportListTimeFormatter = new Intl.DateTimeFormat(MANILA_LOCALE, {
@@ -508,7 +506,7 @@ import { ChevronRight } from "lucide-react-native";
 import { View } from "react-native";
 ```
 
-Update the verified badge branch to:
+Add the verified badge branch:
 
 ```ts
 : normalized === "verified"
@@ -525,7 +523,7 @@ and render badges with:
 </View>
 ```
 
-Replace `ReportListGroup` with this structure:
+Replace `ReportListGroup` with:
 
 ```tsx
 export function ReportListGroup({
@@ -593,11 +591,16 @@ export function ReportListGroup({
 }
 ```
 
-This keeps one accessible press target and positions the chevron with the lower line as in the approved reference.
+- [ ] **Step 4: Remove obsolete color metadata from Recent Reports and obsolete `getColor` props from both routes**
 
-- [ ] **Step 4: Remove obsolete category-color plumbing from both routes**
+In `src/app/(tabs)/reports/index.tsx`:
 
-In `src/app/(tabs)/reports/index.tsx`, remove the `getColor` prop from the `ReportListGroup` call:
+- remove `emptyComplaintMeta` and `ComplaintMeta` imports;
+- remove `fetchComplaintMeta` import;
+- remove the `meta` state;
+- replace the `Promise.all([fetchComplaintMeta(...), fetchComplaintReportPage(...)])` call with a direct `fetchComplaintReportPage(...)` call;
+- keep the existing loading/error/stale revalidation behavior;
+- render:
 
 ```tsx
 <ReportListGroup
@@ -606,7 +609,7 @@ In `src/app/(tabs)/reports/index.tsx`, remove the `getColor` prop from the `Repo
 />
 ```
 
-In `src/app/(tabs)/reports/list.tsx`, replace the archive call with:
+In `src/app/(tabs)/reports/list.tsx`, keep metadata loading because the archive category filter uses `meta.categories`, but replace the card call with:
 
 ```tsx
 <ReportListGroup
@@ -620,11 +623,9 @@ In `src/app/(tabs)/reports/list.tsx`, replace the archive call with:
 />
 ```
 
-Remove any now-unused `getColor`-only imports/state reads. Keep metadata loading because category filters still depend on `meta.categories` in the archive.
-
 - [ ] **Step 5: Align official-report loading skeletons with the new card shape**
 
-In the recent-reports `ReportsSkeleton`, replace the icon-led inner row with:
+In both `ReportsSkeleton` and `ArchiveSkeleton`, use this hierarchy for each official report placeholder:
 
 ```tsx
 <View className="gap-3 rounded-xl border border-border bg-card p-4">
@@ -638,7 +639,7 @@ In the recent-reports `ReportsSkeleton`, replace the icon-led inner row with:
 </View>
 ```
 
-Apply the same hierarchy to `ArchiveSkeleton` in `src/app/(tabs)/reports/list.tsx`. Do not change the queued-draft `ListSectionItem` design.
+Do not change the queued-draft `ListSectionItem` design.
 
 - [ ] **Step 6: Run focused UI and route tests**
 
@@ -662,7 +663,7 @@ git commit -m "feat: redesign report list cards"
 
 **Files:**
 - Modify: `docs/agent-harness/implementation-history.md`
-- Modify: `../Aleconnect/docs/agent-harness/implementation-history.md`
+- Modify: `../aleconnect/docs/agent-harness/implementation-history.md`
 
 **Interfaces:**
 - Consumes: completed staff contract and mobile UI changes from Tasks 1–4.
@@ -672,22 +673,24 @@ git commit -m "feat: redesign report list cards"
 
 Add `## 2026-08-17 - Consumer report list card redesign` near the top of each history file with all required fields: `Repositories`, `Scope`, `Files`, `Contracts`, `Verification`, `Git/Deployment`, `Remaining risks`, and `Next`.
 
-Use these contract facts verbatim in both entries:
+Use these contract facts in both entries:
 
 ```text
 Contracts: staff adds nullable displayAddress to /api/mobile/complaints list rows; mobile treats the field as optional/nullable, normalizes blank values to null, and never performs a detail request solely to populate a list card. Existing complaint ownership, pagination cursors, status-push events, and report-detail contracts are unchanged.
 ```
 
-Set `Verification` initially to the commands about to be run; after they pass, replace prospective wording with the actual passing results before the docs commit.
+Set `Verification` to the commands about to be run; after they pass, replace prospective wording with the actual passing results before the docs commit.
 
 - [ ] **Step 2: Run the staff focused and regression gates**
 
 ```powershell
-npm --prefix ..\Aleconnect exec -- node --test tests/lifecycle/mobile-complaint-page.test.mjs tests/lifecycle/mobile-complaint-intake-contract.test.mjs
-npm --prefix ..\Aleconnect run lint
-npm --prefix ..\Aleconnect run build
-npm --prefix ..\Aleconnect run harness:check
-git -C ..\Aleconnect diff --check
+Push-Location ..\aleconnect
+node --test tests/lifecycle/mobile-complaint-page.test.mjs tests/lifecycle/mobile-complaint-intake-contract.test.mjs
+Pop-Location
+npm --prefix ..\aleconnect run lint
+npm --prefix ..\aleconnect run build
+npm --prefix ..\aleconnect run harness:check
+git -C ..\aleconnect diff --check
 ```
 
 Expected: all commands PASS. If a pre-existing warning is emitted, record it precisely instead of describing the run as warning-free.
@@ -737,17 +740,17 @@ Compatibility:
 git add docs/agent-harness/implementation-history.md
 git commit -m "docs: record report card redesign"
 
-git -C ..\Aleconnect add docs/agent-harness/implementation-history.md
-git -C ..\Aleconnect commit -m "docs: record report card contract"
+git -C ..\aleconnect add docs/agent-harness/implementation-history.md
+git -C ..\aleconnect commit -m "docs: record report card contract"
 ```
 
 - [ ] **Step 6: Review final cross-repo diffs and rollout order**
 
 ```powershell
 git diff master...HEAD --stat
-git -C ..\Aleconnect diff main...HEAD --stat
+git -C ..\aleconnect diff main...HEAD --stat
 git status --short
-git -C ..\Aleconnect status --short
+git -C ..\aleconnect status --short
 ```
 
 Expected: only scoped source, tests, design/plan/history documents are present. Release staff/API support before the mobile build when possible; mobile remains safe against an older server because `displayAddress` is optional.
