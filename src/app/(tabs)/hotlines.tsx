@@ -8,14 +8,13 @@ import {
 import {
   BottomSheet,
   BottomSheetBackdrop,
-  BottomSheetContent,
-  BottomSheetHeader,
   BottomSheetPortal,
   BottomSheetScrollView,
   BottomSheetTextInput,
   type BottomSheetRef,
 } from "@/components/ui/bottomsheet";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
+import { Divider } from "@/components/ui/divider";
 import { Heading } from "@/components/ui/heading";
 import { Pressable } from "@/components/ui/pressable";
 import { SearchField } from "@/components/ui/search-field";
@@ -50,7 +49,7 @@ import {
   X,
   Zap,
 } from "lucide-react-native";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   AccessibilityInfo,
   Animated,
@@ -62,6 +61,7 @@ import {
   findNodeHandle,
   useWindowDimensions,
 } from "react-native";
+import { ScrollView as GestureScrollView } from "react-native-gesture-handler";
 import { useReducedMotion } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -487,7 +487,39 @@ function HotlineSkeleton() {
     </View>
   );
 }
+function HotlineSheetHeader({
+  title,
+  description,
+  onClose,
+}: {
+  title: string;
+  description: string;
+  onClose: () => void;
+}) {
+  return (
+    <View className="flex-row items-start gap-3 border-b border-border/80 pb-4">
+      <View className="min-w-0 flex-1 gap-1">
+        <Heading size="lg">{title}</Heading>
 
+        <Text className="text-sm leading-5 text-muted-foreground">
+          {description}
+        </Text>
+      </View>
+
+      <Button
+        size="icon"
+        variant="ghost"
+        className="min-h-11 min-w-11 shrink-0 rounded-full"
+        onPress={onClose}
+        hitSlop={8}
+        accessibilityRole="button"
+        accessibilityLabel={`Close ${title.toLowerCase()}`}
+      >
+        <ButtonIcon as={X} height={18} width={18} />
+      </Button>
+    </View>
+  );
+}
 export default function HotlinesRoute() {
   const router = useRouter();
   const { session } = useAuthSession();
@@ -501,6 +533,8 @@ export default function HotlinesRoute() {
   const unreadCount = useUnreadNotificationCount();
   const categorySheetRef = useRef<BottomSheetRef>(null);
   const allSheetRef = useRef<BottomSheetRef>(null);
+  const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
+  const [isAllSheetOpen, setIsAllSheetOpen] = useState(false);
   const categoryTriggerRef = useRef<View | null>(null);
   const [categories, setCategories] = useState<HotlineCategory[]>([]);
   const [query, setQuery] = useState("");
@@ -508,7 +542,6 @@ export default function HotlinesRoute() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isUsingSavedData, setIsUsingSavedData] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
     null,
   );
@@ -519,7 +552,6 @@ export default function HotlinesRoute() {
     try {
       const data = await fetchHotlines(options);
       setCategories(data.categories);
-      setIsUsingSavedData("isStale" in data && data.isStale === true);
       setActiveCategoryId((current) =>
         data.categories.some((category) => category.id === current)
           ? current
@@ -548,47 +580,94 @@ export default function HotlinesRoute() {
 
   const selectedCategory =
     categories.find((category) => category.id === selectedCategoryId) ?? null;
-  const activeCategory =
-    categories.find((category) => category.id === activeCategoryId) ??
-    categories[0];
+  const activeCategory = activeCategoryId
+    ? (categories.find((category) => category.id === activeCategoryId) ?? null)
+    : null;
   const categoryAgencies = selectedCategory
     ? selectedCategory.agencies.filter((agency) =>
         agencyMatches(agency, selectedCategory.name, sheetQuery),
       )
     : [];
+  const isAllCategories = activeCategoryId === null;
   const activeAgencies = activeCategory
     ? activeCategory.agencies.filter((agency) =>
         agencyMatches(agency, activeCategory.name, sheetQuery),
       )
     : [];
+  const filteredCategoryGroups = useMemo(
+    () =>
+      categories
+        .map((category) => ({
+          category,
+          agencies: category.agencies.filter((agency) =>
+            agencyMatches(agency, category.name, sheetQuery),
+          ),
+        }))
+        .filter(({ agencies }) => agencies.length > 0),
+    [categories, sheetQuery],
+  );
   const categoryRows = useMemo(() => rowsOf(categories, 2), [categories]);
 
   const openCategory = (category: HotlineCategory, trigger: View) => {
     categoryTriggerRef.current = trigger;
     setSelectedCategoryId(category.id);
     setSheetQuery("");
-    requestAnimationFrame(() => categorySheetRef.current?.open());
+    setIsCategorySheetOpen(true);
   };
 
   const openAll = () => {
-    setActiveCategoryId((current) => current ?? categories[0]?.id ?? null);
+    setActiveCategoryId(null);
     setSheetQuery("");
-    requestAnimationFrame(() => allSheetRef.current?.open());
+    setIsAllSheetOpen(true);
   };
-
-  const categorySheetClose = () => {
-    categorySheetRef.current?.close();
-  };
-
-  const handleCategorySheetClosed = () => {
-    setSheetQuery("");
-    const trigger = findNodeHandle(categoryTriggerRef.current);
-    if (trigger != null) {
-      requestAnimationFrame(() =>
-        AccessibilityInfo.setAccessibilityFocus(trigger),
-      );
+  useEffect(() => {
+    if (!isCategorySheetOpen) {
+      return;
     }
-  };
+
+    const frame = requestAnimationFrame(() => {
+      categorySheetRef.current?.open();
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+    };
+  }, [isCategorySheetOpen]);
+
+  useEffect(() => {
+    if (!isAllSheetOpen) {
+      return;
+    }
+
+    const frame = requestAnimationFrame(() => {
+      allSheetRef.current?.open();
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+    };
+  }, [isAllSheetOpen]);
+
+  const handleCategorySheetClosed = useCallback(() => {
+    setIsCategorySheetOpen(false);
+    setSheetQuery("");
+
+    const trigger = findNodeHandle(categoryTriggerRef.current);
+
+    if (trigger != null) {
+      requestAnimationFrame(() => {
+        AccessibilityInfo.setAccessibilityFocus(trigger);
+      });
+    }
+  }, []);
+  const closeCategorySheet = useCallback(() => {
+    handleCategorySheetClosed();
+  }, [handleCategorySheetClosed]);
+
+  const closeAllSheet = useCallback(() => {
+    setIsAllSheetOpen(false);
+    setSheetQuery("");
+  }, []);
 
   return (
     <View className="flex-1 bg-background" style={{ width }}>
@@ -724,111 +803,169 @@ export default function HotlinesRoute() {
         ) : null}
       </ScrollView>
 
-      <BottomSheet ref={categorySheetRef} onClose={handleCategorySheetClosed}>
-        <BottomSheetPortal
-          backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
-          enableDynamicSizing
-          maxDynamicContentSize={height * 0.55}
-          enableOverDrag={false}
-          keyboardBehavior="interactive"
-        >
-          <BottomSheetScrollView
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator
-            contentContainerStyle={{
-              gap: 12,
-              paddingHorizontal: 20,
-              paddingBottom: Math.max(insets.bottom, 20),
-            }}
+      {isCategorySheetOpen ? (
+        <BottomSheet ref={categorySheetRef} onClose={handleCategorySheetClosed}>
+          <BottomSheetPortal
+            enableDynamicSizing
+            maxDynamicContentSize={height * 0.75}
+            enablePanDownToClose={false}
+            keyboardBehavior="interactive"
+            backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
           >
-            <BottomSheetHeader
-              title={selectedCategory?.name ?? "Hotlines"}
-              description={
-                selectedCategory?.description ??
-                "Search contacts in this category."
-              }
-              closeAccessibilityLabel="Close hotlines"
-            />
-            <Button onPress={categorySheetClose}>
-              <ButtonText>Close</ButtonText>
-            </Button>
-            <View>
-              <SheetSearchInput
-                value={sheetQuery}
-                onChangeText={setSheetQuery}
-                placeholder="Search this category"
-              />
-            </View>
-            {categoryAgencies.length ? (
-              categoryAgencies.map((agency) => (
-                <AgencyCard key={agency.id} agency={agency} />
-              ))
-            ) : (
-              <View className="rounded-lg border border-border bg-card p-5">
-                <Text className="text-sm text-muted-foreground">
-                  No hotline contacts found.
-                </Text>
-              </View>
-            )}
-          </BottomSheetScrollView>
-        </BottomSheetPortal>
-      </BottomSheet>
-
-      <BottomSheet ref={allSheetRef} onClose={() => setSheetQuery("")}>
-        <BottomSheetPortal
-          snapPoints={["92%"]}
-          enableDynamicSizing={false}
-          enableOverDrag={false}
-          keyboardBehavior="interactive"
-          backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
-        >
-          <BottomSheetContent className="h-full">
-            <BottomSheetHeader
-              title="All hotlines"
-              description="Browse agencies by category."
-              closeAccessibilityLabel="Close all hotlines"
-            />
-            <View className="gap-3">
-              <SheetSearchInput
-                value={sheetQuery}
-                onChangeText={setSheetQuery}
-                placeholder="Search all contacts"
-              />
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
-                contentContainerStyle={{ gap: 8 }}
-              >
-                {categories.map((category) => {
-                  const active = activeCategory?.id === category.id;
-                  return (
-                    <Pressable
-                      key={category.id}
-                      onPress={() => setActiveCategoryId(category.id)}
-                      className={`min-h-11 justify-center rounded-full px-4 ${
-                        active ? "bg-primary" : "bg-secondary"
-                      }`}
-                    >
-                      <Text
-                        className={`text-xs font-bold ${active ? "text-primary-foreground" : "text-foreground"}`}
-                      >
-                        {category.name}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
-            </View>
             <BottomSheetScrollView
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator
               contentContainerStyle={{
                 gap: 12,
+                paddingHorizontal: 20,
                 paddingBottom: Math.max(insets.bottom, 20),
               }}
             >
-              {activeAgencies.length ? (
+              <HotlineSheetHeader
+                title={selectedCategory?.name ?? "Hotlines"}
+                description={
+                  selectedCategory?.description ??
+                  "Search contacts in this category."
+                }
+                onClose={closeCategorySheet}
+              />
+
+              <SheetSearchInput
+                value={sheetQuery}
+                onChangeText={setSheetQuery}
+                placeholder="Search this category"
+              />
+
+              {categoryAgencies.length ? (
+                categoryAgencies.map((agency) => (
+                  <AgencyCard key={agency.id} agency={agency} />
+                ))
+              ) : (
+                <View className="rounded-lg border border-border bg-card p-5">
+                  <Text className="text-sm text-muted-foreground">
+                    No hotline contacts found.
+                  </Text>
+                </View>
+              )}
+            </BottomSheetScrollView>
+          </BottomSheetPortal>
+        </BottomSheet>
+      ) : null}
+
+      {isAllSheetOpen ? (
+        <BottomSheet ref={allSheetRef} onClose={closeAllSheet}>
+          <BottomSheetPortal
+            enableDynamicSizing
+            enablePanDownToClose={false}
+            keyboardBehavior="interactive"
+            backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
+          >
+            <BottomSheetScrollView
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator
+              contentContainerStyle={{
+                gap: 16,
+                paddingHorizontal: 20,
+                paddingBottom: Math.max(insets.bottom, 20),
+              }}
+            >
+              <HotlineSheetHeader
+                title="All hotlines"
+                description="Find the right hotline for your concern."
+                onClose={closeAllSheet}
+              />
+
+              <View className="gap-3">
+                <SheetSearchInput
+                  value={sheetQuery}
+                  onChangeText={setSheetQuery}
+                  placeholder="Search all contacts"
+                />
+
+                <GestureScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  keyboardShouldPersistTaps="handled"
+                  contentContainerStyle={{ gap: 8 }}
+                >
+                  <Pressable
+                    onPress={() => setActiveCategoryId(null)}
+                    className={`min-h-11 justify-center rounded-full px-4 ${
+                      isAllCategories ? "bg-primary" : "bg-secondary"
+                    }`}
+                  >
+                    <Text
+                      className={`text-xs font-bold ${
+                        isAllCategories
+                          ? "text-primary-foreground"
+                          : "text-foreground"
+                      }`}
+                    >
+                      All
+                    </Text>
+                  </Pressable>
+
+                  {categories.map((category) => {
+                    const active = activeCategoryId === category.id;
+
+                    return (
+                      <Pressable
+                        key={category.id}
+                        onPress={() => setActiveCategoryId(category.id)}
+                        className={`min-h-11 justify-center rounded-full px-4 ${
+                          active ? "bg-primary" : "bg-secondary"
+                        }`}
+                      >
+                        <Text
+                          className={`text-xs font-bold ${
+                            active
+                              ? "text-primary-foreground"
+                              : "text-foreground"
+                          }`}
+                        >
+                          {category.name}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </GestureScrollView>
+              </View>
+
+              {isAllCategories ? (
+                filteredCategoryGroups.length ? (
+                  filteredCategoryGroups.map(
+                    ({ category, agencies }, index) => (
+                      <View key={category.id} className="gap-3">
+                        {index > 0 ? <Divider className="my-1" /> : null}
+
+                        <View className="gap-0.5">
+                          <Text className="text-sm font-bold text-foreground">
+                            {category.name}
+                          </Text>
+
+                          {category.description ? (
+                            <Text className="text-xs leading-5 text-muted-foreground">
+                              {category.description}
+                            </Text>
+                          ) : null}
+                        </View>
+
+                        <View className="gap-3">
+                          {agencies.map((agency) => (
+                            <AgencyCard key={agency.id} agency={agency} />
+                          ))}
+                        </View>
+                      </View>
+                    ),
+                  )
+                ) : (
+                  <View className="rounded-lg border border-border bg-card p-5">
+                    <Text className="text-sm text-muted-foreground">
+                      No hotline contacts found.
+                    </Text>
+                  </View>
+                )
+              ) : activeAgencies.length ? (
                 activeAgencies.map((agency) => (
                   <AgencyCard key={agency.id} agency={agency} />
                 ))
@@ -840,9 +977,9 @@ export default function HotlinesRoute() {
                 </View>
               )}
             </BottomSheetScrollView>
-          </BottomSheetContent>
-        </BottomSheetPortal>
-      </BottomSheet>
+          </BottomSheetPortal>
+        </BottomSheet>
+      ) : null}
     </View>
   );
 }

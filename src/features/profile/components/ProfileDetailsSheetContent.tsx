@@ -1,8 +1,5 @@
 import { Alert, AlertText } from "@/components/ui/alert";
-import {
-  BottomSheetHeader,
-  BottomSheetTextInput,
-} from "@/components/ui/bottomsheet";
+import { BottomSheetTextInput } from "@/components/ui/bottomsheet";
 import { Button, ButtonText } from "@/components/ui/button";
 import {
   FormControl,
@@ -13,6 +10,7 @@ import {
 } from "@/components/ui/form-control";
 import React from "react";
 import { View } from "react-native";
+import { ProfileEditSheetHeader } from "./ProfileEditSheetHeader";
 
 export type EditableField = "phone" | "email" | "address";
 
@@ -47,10 +45,10 @@ export function ProfileDetailsSheetContent({
 }: ProfileDetailsSheetContentProps) {
   return (
     <View className="gap-4">
-      <BottomSheetHeader
+      <ProfileEditSheetHeader
         title={sheetTitle}
         description={sheetDescription}
-        closeAccessibilityLabel={`Close ${sheetTitle.toLowerCase()}`}
+        onClose={onCancel}
       />
       <View className="gap-4 rounded-lg border border-border/90 bg-card p-4">
         <FormControl isInvalid={!!inputError} isRequired>

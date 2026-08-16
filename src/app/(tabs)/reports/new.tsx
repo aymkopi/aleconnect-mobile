@@ -211,7 +211,7 @@ function SelectField({
         isDisabled={isDisabled}
         isInvalid={isInvalid}
         isRequired={isRequired}
-        selectedLabel={selectedOptionLabel}
+        initialLabel={selectedOptionLabel}
         selectedValue={value}
         onValueChange={(nextValue) => nextValue && onChange(nextValue)}
       >
@@ -853,9 +853,6 @@ export default function NewComplaintRoute() {
         scrollIndicatorInsets={{ bottom: childBottomPadding }}
       >
         <View className="gap-2">
-          <Text className="ml-2 text-xs font-medium text-muted-foreground">
-            Step {step} of 5
-          </Text>
           <Progress value={(step / 5) * 100} className="h-2.5">
             <ProgressFilledTrack className="rounded-full" />
           </Progress>
@@ -877,6 +874,12 @@ export default function NewComplaintRoute() {
             ) : null}
             <View className="gap-3">
               {meta.categories.map((category) => {
+                const categoryTypes = meta.types.filter(
+                  (type) => type.categoryId === category.id,
+                );
+
+                const defaultTypeId =
+                  categoryTypes.length === 1 ? categoryTypes[0].id : "";
                 const selected = form.categoryId === category.id;
                 return (
                   <Pressable
@@ -885,7 +888,7 @@ export default function NewComplaintRoute() {
                       setForm((current) => ({
                         ...current,
                         categoryId: category.id,
-                        typeId: "",
+                        typeId: defaultTypeId,
                         categoryDescription: "",
                         typeDescription: "",
                         currentRegisteredName: "",
@@ -896,7 +899,7 @@ export default function NewComplaintRoute() {
                     accessibilityState={{ selected }}
                     className={`min-h-19 flex-row items-center gap-3 rounded-xl border px-4 py-3 ${
                       selected
-                        ? "border-primary bg-card"
+                        ? "border-primary bg-card border-2"
                         : "border-border bg-card"
                     }`}
                   >
@@ -1099,6 +1102,7 @@ export default function NewComplaintRoute() {
                   value={form.purok}
                   placeholder="Purok or street"
                   onChangeText={(value) => updateForm("purok", value)}
+                  isInvalid={form.purok.trim() === "" && showErrors}
                 />
 
                 <ReportInput

@@ -1,12 +1,12 @@
 import { appScrollableBottomPadding } from "@/components/floating-app-bar";
-import { Button, ButtonIcon } from "@/components/ui/button";
+import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { ListSection, ListSectionItem } from "@/components/ui/list-section";
 import { Text } from "@/components/ui/text";
-import { AdvisoryListItem } from "@/features/advisories/advisory-list-item";
 import { statusBarHeight } from "@/constants";
-import { useAuthSession } from "@/hooks/use-auth-session";
+import { AdvisoryListItem } from "@/features/advisories/advisory-list-item";
 import { useAppColors } from "@/hooks/use-app-colors";
+import { useAuthSession } from "@/hooks/use-auth-session";
 import {
   fetchActiveAdvisories,
   type MobileAdvisory,
@@ -111,8 +111,7 @@ export default function HomeRoute() {
       title: "Report an issue",
       description: "Send a report or service request.",
       icon: FileText,
-      onPress: () =>
-        router.push(session ? "/reports/new" : "/sign-in"),
+      onPress: () => router.push(session ? "/reports/new" : "/sign-in"),
     },
     {
       title: "Call support",
@@ -155,9 +154,7 @@ export default function HomeRoute() {
     >
       <View className="flex-row items-start justify-between">
         <View className="flex-1 pr-4">
-          <Heading size="2xl">
-            Home
-          </Heading>
+          <Heading size="2xl">Home</Heading>
           <Text className="mt-1 text-sm text-muted-foreground">
             Your ALECO account, reports, and support in one place.
           </Text>
@@ -198,20 +195,20 @@ export default function HomeRoute() {
       </View>
 
       <ListSection title="Quick actions">
-          {quickActions.map((action, index) => {
-            const Icon = action.icon;
-            return (
-              <ListSectionItem
-                key={action.title}
-                description={action.description}
-                leading={<Icon size={20} color={accentColor} />}
-                onPress={action.onPress}
-                showDivider={index < quickActions.length - 1}
-                title={action.title}
-                trailing={<ChevronRight size={18} color={mutedColor} />}
-              />
-            );
-          })}
+        {quickActions.map((action, index) => {
+          const Icon = action.icon;
+          return (
+            <ListSectionItem
+              key={action.title}
+              description={action.description}
+              leading={<Icon size={20} color={accentColor} />}
+              onPress={action.onPress}
+              showDivider={index < quickActions.length - 1}
+              title={action.title}
+              trailing={<ChevronRight size={18} color={mutedColor} />}
+            />
+          );
+        })}
       </ListSection>
 
       {session ? (
@@ -225,7 +222,8 @@ export default function HomeRoute() {
                 accessibilityLabel="View all advisories"
                 onPress={() => router.push("/advisories")}
               >
-                <Text className="font-semibold text-accent">View all</Text>
+                <ButtonText>View all</ButtonText>
+                <ButtonIcon as={ChevronRight} height={18} width={18} />
               </Button>
             </View>
           }

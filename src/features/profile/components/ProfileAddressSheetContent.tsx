@@ -1,8 +1,5 @@
 import { Alert, AlertText } from "@/components/ui/alert";
-import {
-  BottomSheetHeader,
-  BottomSheetTextInput,
-} from "@/components/ui/bottomsheet";
+import { BottomSheetTextInput } from "@/components/ui/bottomsheet";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import {
   FormControl,
@@ -26,6 +23,7 @@ import { Text } from "@/components/ui/text";
 import type { ComplaintMeta } from "@/features/reports/data";
 import { ChevronDown, MapPin } from "lucide-react-native";
 import { View } from "react-native";
+import { ProfileEditSheetHeader } from "./ProfileEditSheetHeader";
 
 export type ProfileAddressDraft = {
   municipalityCode: string;
@@ -72,10 +70,10 @@ export function ProfileAddressSheetContent({
 
   return (
     <View className="gap-4">
-      <BottomSheetHeader
+      <ProfileEditSheetHeader
         title="Update Address"
         description="Update your complete service address and verify its Albay map pin."
-        closeAccessibilityLabel="Close update address"
+        onClose={onCancel}
       />
 
       <View className="gap-4 rounded-lg border border-border/90 bg-card p-4">
@@ -84,7 +82,7 @@ export function ProfileAddressSheetContent({
             <FormControlLabelText>Municipality</FormControlLabelText>
           </FormControlLabel>
           <Select
-            selectedLabel={selectedMunicipality?.name}
+            initialLabel={selectedMunicipality?.name}
             selectedValue={value.municipalityCode}
             isDisabled={isUpdating || !meta.municipalities.length}
             onValueChange={(municipalityCode) => {
@@ -95,7 +93,9 @@ export function ProfileAddressSheetContent({
                 ...value,
                 municipalityCode,
                 barangayPsgc:
-                  matchingBarangays.length === 1 ? matchingBarangays[0].code : "",
+                  matchingBarangays.length === 1
+                    ? matchingBarangays[0].code
+                    : "",
               });
             }}
           >
@@ -115,7 +115,11 @@ export function ProfileAddressSheetContent({
               >
                 <SelectScrollView>
                   {meta.municipalities.map((item) => (
-                    <SelectItem key={item.code} label={item.name} value={item.code} />
+                    <SelectItem
+                      key={item.code}
+                      label={item.name}
+                      value={item.code}
+                    />
                   ))}
                 </SelectScrollView>
               </SelectContent>
@@ -128,10 +132,12 @@ export function ProfileAddressSheetContent({
             <FormControlLabelText>Barangay</FormControlLabelText>
           </FormControlLabel>
           <Select
-            selectedLabel={selectedBarangay?.name}
+            initialLabel={selectedBarangay?.name}
             selectedValue={value.barangayPsgc}
             isDisabled={isUpdating || !value.municipalityCode}
-            onValueChange={(barangayPsgc) => onChange({ ...value, barangayPsgc })}
+            onValueChange={(barangayPsgc) =>
+              onChange({ ...value, barangayPsgc })
+            }
           >
             <SelectTrigger className="h-12 rounded-lg">
               <SelectInput
@@ -149,7 +155,11 @@ export function ProfileAddressSheetContent({
               >
                 <SelectScrollView>
                   {barangays.map((item) => (
-                    <SelectItem key={item.code} label={item.name} value={item.code} />
+                    <SelectItem
+                      key={item.code}
+                      label={item.name}
+                      value={item.code}
+                    />
                   ))}
                 </SelectScrollView>
               </SelectContent>
@@ -164,7 +174,9 @@ export function ProfileAddressSheetContent({
           <BottomSheetTextInput
             className="h-12 rounded-lg bg-background"
             value={value.purokOrStreet}
-            onChangeText={(purokOrStreet) => onChange({ ...value, purokOrStreet })}
+            onChangeText={(purokOrStreet) =>
+              onChange({ ...value, purokOrStreet })
+            }
             placeholder="Enter purok or street"
             maxLength={100}
             autoCapitalize="words"
@@ -199,7 +211,9 @@ export function ProfileAddressSheetContent({
             accessibilityLabel="Choose location on map"
           >
             <ButtonIcon as={MapPin} height={18} width={18} />
-            <ButtonText>{hasPin ? "Change pinned location" : "Choose location on map"}</ButtonText>
+            <ButtonText>
+              {hasPin ? "Change pinned location" : "Choose location on map"}
+            </ButtonText>
           </Button>
           <Text className="mt-1 text-xs text-muted-foreground">
             {hasPin ? "Map location selected." : "No map location selected."}
@@ -217,7 +231,12 @@ export function ProfileAddressSheetContent({
       </View>
 
       <View className="flex-row gap-2">
-        <Button variant="ghost" onPress={onCancel} isDisabled={isUpdating} className="flex-1">
+        <Button
+          variant="ghost"
+          onPress={onCancel}
+          isDisabled={isUpdating}
+          className="flex-1"
+        >
           <ButtonText>Cancel</ButtonText>
         </Button>
         <Button onPress={onSave} isDisabled={isUpdating} className="flex-1">

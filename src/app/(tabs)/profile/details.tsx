@@ -17,8 +17,8 @@ import { Heading } from "@/components/ui/heading";
 import { ListSection } from "@/components/ui/list-section";
 import { Pressable } from "@/components/ui/pressable";
 import { Text } from "@/components/ui/text";
-import { AccountDetailsBuilder } from "@/features/profile/components/AccountDetailsBuilder";
 import { AlbayLocationPickerSheet } from "@/features/maps/albay-location-picker-sheet";
+import { AccountDetailsBuilder } from "@/features/profile/components/AccountDetailsBuilder";
 import {
   ProfileAddressSheetContent,
   type ProfileAddressDraft,
@@ -35,6 +35,7 @@ import {
   LucideMapPin,
   LucidePencil,
   LucidePhone,
+  LucideSheet,
   LucideUserRound,
 } from "lucide-react-native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -52,8 +53,8 @@ import {
   type ComplaintMeta,
 } from "@/features/reports/data";
 import {
-  updateCurrentConsumerProfile,
   updateCurrentConsumerAddress,
+  updateCurrentConsumerProfile,
   uploadCurrentUserAvatar,
 } from "@/services/profile";
 import { fetchComplaintMeta } from "@/services/reports";
@@ -94,6 +95,7 @@ export default function ProfileDetailsRoute() {
   ]);
   const scrollRef = useRef<ScrollView | null>(null);
   const editSheetRef = useRef<BottomSheetRef>(null);
+  const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
   const bottomPadding = Math.max(insets.bottom, 16) + 24;
   const { session } = useAuthSession();
   const { profile, isLoading, error, reload, setAvatarUrl, setProfileView } =
@@ -121,11 +123,15 @@ export default function ProfileDetailsRoute() {
     setInputValue("");
   }, []);
 
-  const closeEditSheet = useCallback(() => {
-    Keyboard.dismiss();
-    editSheetRef.current?.close();
+  const handleEditSheetClosed = useCallback(() => {
+    setIsEditSheetOpen(false);
     resetEditSheet();
   }, [resetEditSheet]);
+
+  const closeEditSheet = useCallback(() => {
+    Keyboard.dismiss();
+    handleEditSheetClosed();
+  }, [handleEditSheetClosed]);
 
   useEffect(() => {
     setAvatarUri(profile?.avatarUrl ?? null);
@@ -253,7 +259,8 @@ export default function ProfileDetailsRoute() {
         .then((meta) => {
           setComplaintMeta(meta);
           setAddressDraft((current) => {
-            if (current.municipalityCode && current.barangayPsgc) return current;
+            if (current.municipalityCode && current.barangayPsgc)
+              return current;
             const municipality = meta.municipalities.find(
               (item) =>
                 item.name.trim().toLowerCase() ===
@@ -281,8 +288,21 @@ export default function ProfileDetailsRoute() {
           );
         });
     }
-    requestAnimationFrame(() => editSheetRef.current?.open());
+    setIsEditSheetOpen(true);
   };
+  useEffect(() => {
+    if (!isEditSheetOpen) {
+      return;
+    }
+
+    const frame = requestAnimationFrame(() => {
+      editSheetRef.current?.open();
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+    };
+  }, [isEditSheetOpen]);
 
   const validateInput = (
     field: EditableField,
@@ -647,7 +667,7 @@ export default function ProfileDetailsRoute() {
             title={displayMeterSerial}
           />
           <AccountDetailsBuilder
-            icon={LucideGauge}
+            icon={LucideSheet}
             description="Service Type"
             title={displayServiceType}
             showDivider={false}
@@ -655,57 +675,59 @@ export default function ProfileDetailsRoute() {
         </ListSection>
       </ScrollView>
 
-      <BottomSheet ref={editSheetRef} onClose={resetEditSheet}>
-        <BottomSheetPortal
-          backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
-          enableDynamicSizing
-          keyboardBehavior="interactive"
-          maxDynamicContentSize={screenHeight * 0.55}
-        >
-          <BottomSheetScrollView
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{
-              paddingHorizontal: 20,
-              paddingBottom: Math.max(insets.bottom, 20),
-            }}
+      {isEditSheetOpen ? (
+        <BottomSheet ref={editSheetRef} onClose={handleEditSheetClosed}>
+          <BottomSheetPortal
+            backdropComponent={(props) => <BottomSheetBackdrop {...props} />}
+            enableDynamicSizing
+            keyboardBehavior="interactive"
+            enablePanDownToClose={false}
           >
-            {editingField === "address" ? (
-              <ProfileAddressSheetContent
-                value={addressDraft}
-                meta={complaintMeta}
-                error={inputError}
-                currentAddress={displayAddress}
-                isUpdating={isUpdating}
-                onChange={(value) => {
-                  setInputError(null);
-                  setAddressDraft(value);
-                }}
-                onOpenMap={() => setIsAddressMapOpen(true)}
-                onCancel={closeEditSheet}
-                onSave={() => void handleSaveUpdate()}
-              />
-            ) : (
-              <ProfileDetailsSheetContent
-                editingField={editingField}
-                sheetTitle={sheetTitle}
-                sheetDescription={sheetDescription}
-                inputValue={inputValue}
-                inputError={inputError}
-                currentPhone={profile?.contactNum ?? "No phone on file"}
-                currentEmail={profile?.email ?? "No email on file"}
-                currentAddress={displayAddress}
-                isUpdating={isUpdating}
-                onChangeInput={(nextValue) => {
-                  setInputError(null);
-                  setInputValue(nextValue);
-                }}
-                onCancel={closeEditSheet}
-                onSave={() => void handleSaveUpdate()}
-              />
-            )}
-          </BottomSheetScrollView>
-        </BottomSheetPortal>
-      </BottomSheet>
+            <BottomSheetScrollView
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{
+                paddingHorizontal: 20,
+                paddingBottom: Math.max(insets.bottom, 20),
+              }}
+            >
+              {editingField === "address" ? (
+                <ProfileAddressSheetContent
+                  value={addressDraft}
+                  meta={complaintMeta}
+                  error={inputError}
+                  currentAddress={displayAddress}
+                  isUpdating={isUpdating}
+                  onChange={(value) => {
+                    setInputError(null);
+                    setAddressDraft(value);
+                  }}
+                  onOpenMap={() => setIsAddressMapOpen(true)}
+                  onCancel={closeEditSheet}
+                  onSave={() => void handleSaveUpdate()}
+                />
+              ) : (
+                <ProfileDetailsSheetContent
+                  editingField={editingField}
+                  sheetTitle={sheetTitle}
+                  sheetDescription={sheetDescription}
+                  inputValue={inputValue}
+                  inputError={inputError}
+                  currentPhone={profile?.contactNum ?? "No phone on file"}
+                  currentEmail={profile?.email ?? "No email on file"}
+                  currentAddress={displayAddress}
+                  isUpdating={isUpdating}
+                  onChangeInput={(nextValue) => {
+                    setInputError(null);
+                    setInputValue(nextValue);
+                  }}
+                  onCancel={closeEditSheet}
+                  onSave={() => void handleSaveUpdate()}
+                />
+              )}
+            </BottomSheetScrollView>
+          </BottomSheetPortal>
+        </BottomSheet>
+      ) : null}
 
       <AlbayLocationPickerSheet
         open={isAddressMapOpen}

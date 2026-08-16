@@ -218,3 +218,25 @@
 - Git/Deployment: mobile source change only. No Expo/EAS publication or store release is included. The production staff/API Hyperdrive configuration was separately changed operationally to disable query caching; that infrastructure change is owned and documented by `Aleconnect`.
 - Remaining risks: mobile cache invalidation and stale in-flight request protection are now verified. Operational database reads requiring read-after-write consistency must continue to avoid stale Hyperdrive query results. If Hyperdrive query caching is reintroduced later, stale-tolerant reference data and consistency-sensitive operational data should use separate database access paths.
 - Next: commit the verified mobile synchronization change, preserve the production Hyperdrive cache-disabled consistency requirement, and evaluate a separate cached-versus-fresh database access architecture before selectively reintroducing SQL query caching.
+
+## 2026-08-15 - Single report type automatic selection
+
+- Repositories: mobile `aleconnect-mobile`; staff/API `Aleconnect` remains the authoritative source of consumer complaint categories and report types.
+- Scope: automatically select the report type when the consumer chooses a category containing exactly one available type. Categories containing more than one type continue requiring explicit consumer selection.
+- Files: `src/app/(tabs)/reports/new.tsx` and `docs/agent-harness/implementation-history.md`.
+- Contracts: report category and type IDs continue to come from the existing complaint metadata API. No type is inferred when a category contains zero or multiple types, and changing categories clears any incompatible previously selected type.
+- Verification: verify a category with exactly one type automatically populates Report Type, verify a category with multiple types leaves Report Type unselected, verify switching between categories resets or selects the type correctly, then run `npx tsc --noEmit`, `npm run lint`, `npm run harness:check`, and `git diff --check`.
+- Git/Deployment: mobile source change only. No backend deployment, database mutation, Cloudflare configuration change, Expo/EAS publication, or store release is included.
+- Remaining risks: behavior depends on the complaint metadata accurately associating each report type with its category.
+- Next: verify the category-selection flow on the current Metro/dev-client bundle and commit the scoped mobile form improvement.
+
+## 2026-08-17 - Adaptive bottom-sheet interaction and hotline directory refinements
+
+- Repositories: mobile only; no staff/API contract or backend behavior changed.
+- Scope: resolved unreliable bottom-sheet close interactions in Hotlines and Account editing flows, aligned affected sheets with parent-controlled visibility, restored Gorhom-compatible adaptive sizing, and improved the All Hotlines directory with an explicit All category that groups agencies by category.
+- Files: `src/app/(tabs)/hotlines.tsx`, `src/app/(tabs)/profile/details.tsx`, `src/features/profile/components/ProfileDetailsSheetContent.tsx`, `src/features/profile/components/ProfileAddressSheetContent.tsx`, the profile edit-sheet header component, relevant shared bottom-sheet UI changes retained by the final implementation, and this history entry.
+- Contracts: no consumer API, authentication, database, notification, or persisted-data contract changed. Bottom-sheet behavior remains client-side only. Dynamically sized Hotlines sheets use a single Gorhom measuring scrollable with `enableDynamicSizing` and a 75% screen-height `maxDynamicContentSize`; overflow remains scrollable. Hotlines and Account close controls now use page-owned close state instead of depending on the previously unreliable shared context close path.
+- Verification: before commit, run the focused Node tests, full Node test suite, `npx tsc --noEmit`, `npm run lint`, `npm run harness:check`, and `git diff --check`. Manually verify Hotlines category and All sheets plus Account phone, email, and address sheets on Android: top-right close controls close reliably, adaptive sheets grow with content up to their configured maximum height, long content scrolls, and Hotlines All groups matching agencies under category headings with separators.
+- Git/Deployment: local mobile product change only; no Expo/EAS/store publication, backend deployment, database migration, R2 operation, or secret/configuration rollout is included.
+- Remaining risks: bottom-sheet behavior remains sensitive to nested gesture-enabled controls and future changes that introduce multiple Gorhom measuring containers inside one dynamically sized sheet. New adaptive sheets should keep one Gorhom `BottomSheetView` or integrated scrollable as the dynamic-sizing measurement source.
+- Next: complete the final local verification gates, review the scoped diff for unrelated changes, then commit the mobile bottom-sheet and hotline directory refinements.

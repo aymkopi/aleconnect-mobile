@@ -1,5 +1,4 @@
 "use client";
-import { Button, ButtonIcon } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { Text as AppText } from "@/components/ui/text";
 import { useAppColors } from "@/hooks/use-app-colors";
@@ -7,42 +6,43 @@ import { Overlay } from "@gluestack-ui/core/overlay/creator";
 import { FocusScope } from "@gluestack-ui/utils/aria";
 import { tva } from "@gluestack-ui/utils/nativewind-utils";
 import GorhomBottomSheet, {
-    BottomSheetBackdrop as GorhomBottomSheetBackdrop,
-    BottomSheetFlatList as GorhomBottomSheetFlatList,
-    BottomSheetFooter as GorhomBottomSheetFooter,
-    BottomSheetHandle as GorhomBottomSheetHandle,
-    BottomSheetTextInput as GorhomBottomSheetInput,
-    BottomSheetScrollView as GorhomBottomSheetScrollView,
-    BottomSheetSectionList as GorhomBottomSheetSectionList,
-    BottomSheetView as GorhomBottomSheetView,
+  BottomSheetBackdrop as GorhomBottomSheetBackdrop,
+  BottomSheetFlatList as GorhomBottomSheetFlatList,
+  BottomSheetFooter as GorhomBottomSheetFooter,
+  BottomSheetHandle as GorhomBottomSheetHandle,
+  BottomSheetTextInput as GorhomBottomSheetInput,
+  BottomSheetScrollView as GorhomBottomSheetScrollView,
+  BottomSheetSectionList as GorhomBottomSheetSectionList,
+  TouchableOpacity as GorhomBottomSheetTouchableOpacity,
+  BottomSheetView as GorhomBottomSheetView,
 } from "@gorhom/bottom-sheet";
 import { X, type LucideIcon } from "lucide-react-native";
 import React, {
-    createContext,
-    forwardRef,
-    useCallback,
-    useContext,
-    useEffect,
-    useImperativeHandle,
-    useMemo,
-    useRef,
-    useState,
+  createContext,
+  forwardRef,
+  useCallback,
+  useContext,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
 } from "react";
 import type {
-    PressableProps,
-    StyleProp,
-    TextInputProps,
-    TextProps,
-    ViewStyle,
+  PressableProps,
+  StyleProp,
+  TextInputProps,
+  TextProps,
+  ViewStyle,
 } from "react-native";
 import {
-    BackHandler,
-    Keyboard,
-    Platform,
-    Pressable as RNPressable,
-    StyleSheet,
-    Text,
-    View,
+  BackHandler,
+  Keyboard,
+  Platform,
+  Pressable as RNPressable,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { withUniwind } from "uniwind";
@@ -115,38 +115,72 @@ type IBottomSheetRootProps = {
 export const BottomSheet = forwardRef<BottomSheetRef, IBottomSheetRootProps>(
   ({ defaultSnapIndex = 0, onOpen, onClose, onChange, children }, ref) => {
     const bottomSheetRef = useRef<GorhomBottomSheet>(null);
+    const closeRequestedRef = useRef(false);
+    const closeNotifiedRef = useRef(true);
     const [isVisible, setIsVisible] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(-1);
 
     const handleOpen = useCallback(
       (index?: number) => {
         const targetIndex = index ?? defaultSnapIndex;
+
+        closeRequestedRef.current = false;
+        closeNotifiedRef.current = false;
+
         setCurrentIndex(targetIndex);
         setIsVisible(true);
+
         onOpen?.();
       },
       [defaultSnapIndex, onOpen],
     );
+    const finishClose = useCallback(() => {
+      closeRequestedRef.current = false;
+
+      setCurrentIndex(-1);
+      setIsVisible(false);
+
+      if (!closeNotifiedRef.current) {
+        closeNotifiedRef.current = true;
+        onClose?.();
+      }
+    }, [onClose]);
 
     const handleClose = useCallback(() => {
       Keyboard.dismiss();
-      setCurrentIndex(-1);
-      setIsVisible(false);
-      onClose?.();
-    }, [onClose]);
+
+      closeRequestedRef.current = true;
+
+      const sheet = bottomSheetRef.current;
+
+      if (sheet) {
+        sheet.forceClose();
+        return;
+      }
+
+      finishClose();
+    }, [finishClose]);
 
     const handleSheetChanges = useCallback(
       (index: number) => {
-        setCurrentIndex(index);
         onChange?.(index);
-        if (index === -1) {
-          setIsVisible(false);
-          onClose?.();
-        } else {
-          setIsVisible(true);
+
+        // A close has already been requested.
+        // Ignore stale intermediate index updates until Gorhom
+        // actually reaches its closed state.
+        if (closeRequestedRef.current && index !== -1) {
+          return;
         }
+
+        if (index === -1) {
+          finishClose();
+          return;
+        }
+
+        setCurrentIndex(index);
+        setIsVisible(true);
       },
-      [onClose, onChange],
+      [finishClose, onChange],
     );
 
     const snapToIndex = useCallback((index: number) => {
@@ -201,6 +235,10 @@ export const BottomSheet = forwardRef<BottomSheetRef, IBottomSheetRootProps>(
 BottomSheet.displayName = "BottomSheet";
 
 const StyledGorhomBottomSheet = withUniwind(GorhomBottomSheet);
+
+const StyledGorhomBottomSheetTouchableOpacity = withUniwind(
+  GorhomBottomSheetTouchableOpacity,
+);
 
 type IBottomSheetPortalProps = Omit<
   React.ComponentProps<typeof GorhomBottomSheet>,
@@ -460,17 +498,17 @@ export function BottomSheetHeader({
         ) : null}
       </View>
       {showCloseButton ? (
-        <Button
-          size="icon"
-          variant="ghost"
+        <StyledGorhomBottomSheetTouchableOpacity
+          // @ts-ignore
           className="min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full active:bg-accent"
-          onPress={() => handleClose()}
+          onPress={handleClose}
           hitSlop={4}
+          activeOpacity={0.7}
           accessibilityRole="button"
           accessibilityLabel={closeAccessibilityLabel}
         >
-          <ButtonIcon as={X} color={foregroundColor} height={16} width={16} />
-        </Button>
+          <X size={16} color={foregroundColor} />
+        </StyledGorhomBottomSheetTouchableOpacity>
       ) : null}
     </View>
   );
