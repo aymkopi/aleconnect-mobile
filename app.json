@@ -65,7 +65,7 @@
         "expo-image-picker",
         {
           "photosPermission": "ALEConnect uses selected photos as complaint evidence and profile images.",
-          "cameraPermission": false,
+          "cameraPermission": "ALEConnect uses your camera to take photos for report evidence.",
           "microphonePermission": false
         }
       ],

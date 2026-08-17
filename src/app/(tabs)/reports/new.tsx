@@ -73,6 +73,7 @@ import {
   ChevronDown,
   ChevronRight,
   CircleX,
+  Images,
   MapPin,
 } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -299,6 +300,12 @@ export default function NewComplaintRoute() {
   const { profile } = useConsumerProfileContext();
   const [meta, setMeta] = useState<ComplaintMeta>(emptyComplaintMeta);
   const [isMapSheetOpen, setIsMapSheetOpen] = useState(false);
+  const [isEvidenceSourcePickerOpen, setIsEvidenceSourcePickerOpen] =
+    useState(false);
+
+  const [evidencePickerError, setEvidencePickerError] = useState<string | null>(
+    null,
+  );
   const [step, setStep] = useState(1);
   const [attemptedStep, setAttemptedStep] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -703,6 +710,12 @@ export default function NewComplaintRoute() {
 
   const handleBackPress = useCallback(() => {
     if (isSubmitting) return;
+
+    if (isEvidenceSourcePickerOpen) {
+      setIsEvidenceSourcePickerOpen(false);
+      return;
+    }
+
     if (isMapSheetOpen) {
       if (__DEV__) {
         console.log("[nav] complaints map sheet back");
@@ -732,7 +745,13 @@ export default function NewComplaintRoute() {
       console.log("[nav] complaints child back to parent");
     }
     navigateToComplaintsParent();
-  }, [isMapSheetOpen, isSubmitting, navigateToComplaintsParent, step]);
+  }, [
+    isEvidenceSourcePickerOpen,
+    isMapSheetOpen,
+    isSubmitting,
+    navigateToComplaintsParent,
+    step,
+  ]);
 
   useFocusEffect(
     useCallback(() => {
@@ -784,30 +803,92 @@ export default function NewComplaintRoute() {
     setStep((current) => Math.min(5, current + 1));
   };
 
-  const addPhotos = async () => {
-    const availableSlots = maxEvidencePhotos - form.photoUploads.length;
+  const availableEvidenceSlots = () =>
+    Math.max(0, maxEvidencePhotos - form.photoUploads.length);
+
+  const openEvidenceSourcePicker = () => {
+    if (availableEvidenceSlots() <= 0) return;
+
+    setEvidencePickerError(null);
+    setIsEvidenceSourcePickerOpen(true);
+  };
+
+  const runAfterEvidenceSourcePickerCloses = (action: () => void) => {
+    setIsEvidenceSourcePickerOpen(false);
+
+    setTimeout(() => {
+      action();
+    }, 250);
+  };
+
+  const takeEvidencePhoto = async () => {
+    if (availableEvidenceSlots() <= 0) return;
+
+    setEvidencePickerError(null);
+
+    try {
+      const permission = await ImagePicker.requestCameraPermissionsAsync();
+
+      if (!permission.granted) {
+        setEvidencePickerError(
+          "Camera access is required to take an evidence photo.",
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ["images"],
+        allowsEditing: false,
+        quality: 0.8,
+      });
+
+      if (result.canceled || !result.assets[0]) {
+        return;
+      }
+
+      void prepareSelectedPhoto(result.assets[0].uri);
+    } catch {
+      setEvidencePickerError(
+        "Camera could not be opened. Try again or choose from gallery.",
+      );
+    }
+  };
+
+  const chooseEvidencePhotos = async () => {
+    const availableSlots = availableEvidenceSlots();
+
     if (availableSlots <= 0) return;
 
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    setEvidencePickerError(null);
 
-    if (!permission.granted) {
-      return;
+    try {
+      const permission =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (!permission.granted) {
+        setEvidencePickerError(
+          "Photo library access is required to choose evidence photos.",
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsMultipleSelection: true,
+        selectionLimit: availableSlots,
+        quality: 0.8,
+      });
+
+      if (result.canceled) {
+        return;
+      }
+
+      result.assets
+        .slice(0, availableSlots)
+        .forEach((asset) => void prepareSelectedPhoto(asset.uri));
+    } catch {
+      setEvidencePickerError("Photo library could not be opened. Try again.");
     }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      allowsMultipleSelection: true,
-      selectionLimit: availableSlots,
-      quality: 0.8,
-    });
-
-    if (result.canceled) {
-      return;
-    }
-
-    result.assets
-      .slice(0, availableSlots)
-      .forEach((asset) => void prepareSelectedPhoto(asset.uri));
   };
 
   const openMapPicker = () => {
@@ -1219,17 +1300,25 @@ export default function NewComplaintRoute() {
                       {form.photoUploads.length}/{maxEvidencePhotos}
                     </Text>
                   </View>
-                  <Text className="mt-1 text-sm text-muted-foreground">
-                    Add 1 to 3 clear photos to help us assess the issue and
-                    verify your report faster.
-                  </Text>
+                  {evidencePickerError ? (
+                    <Text
+                      className="mt-2 text-xs text-destructive"
+                      accessibilityLiveRegion="polite"
+                    >
+                      {evidencePickerError}
+                    </Text>
+                  ) : null}
                   <View className="mt-3 flex-row gap-2">
                     {Array.from({ length: maxEvidencePhotos }, (_, index) => {
                       const photo = form.photoUploads[index];
                       return (
                         <Pressable
                           key={index}
-                          onPress={photo ? undefined : addPhotos}
+                          onPress={photo ? undefined : openEvidenceSourcePicker}
+                          accessibilityRole={photo ? undefined : "button"}
+                          accessibilityLabel={
+                            photo ? undefined : "Add evidence photo"
+                          }
                           className={`aspect-square flex-1 items-center justify-center rounded-xl ${
                             photo ? "bg-accent" : "bg-background"
                           }`}
@@ -1420,26 +1509,76 @@ export default function NewComplaintRoute() {
         </View>
       ) : null}
 
-      <Modal isOpen={isSubmitting} onClose={() => undefined} size="sm">
+      <Modal
+        isOpen={isEvidenceSourcePickerOpen}
+        onClose={() => setIsEvidenceSourcePickerOpen(false)}
+        size="sm"
+      >
         <ModalBackdrop />
+
         <ModalContent>
           <ModalHeader>
-            <Heading size="md">Submitting report</Heading>
+            <Heading size="md">Add evidence photo</Heading>
           </ModalHeader>
-          <ModalBody>
-            <Text
-              className="text-sm text-muted-foreground"
-              accessibilityLiveRegion="polite"
+
+          <ModalBody className="mb-0 mt-4 gap-2">
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Take evidence photo"
+              className="flex-row items-center gap-3 rounded-xl border border-border bg-card p-4 active:bg-secondary"
+              onPress={() =>
+                runAfterEvidenceSourcePickerCloses(() => {
+                  void takeEvidencePhoto();
+                })
+              }
             >
-              {submitProgress || "Submitting report..."}
-            </Text>
-            <Progress className="mt-5" value={submitProgressValue}>
-              <ProgressFilledTrack />
-            </Progress>
-            <Text className="mt-4 text-sm text-muted-foreground">
-              Your report is saved. Evidence and report details are now being
-              sent securely.
-            </Text>
+              <View className="h-10 w-10 items-center justify-center rounded-full bg-secondary">
+                <Camera size={19} color={mutedColor} />
+              </View>
+
+              <View className="min-w-0 flex-1">
+                <Text className="text-sm font-semibold text-foreground">
+                  Take photo
+                </Text>
+
+                <Text className="mt-0.5 text-xs text-muted-foreground">
+                  Use your camera to capture the issue
+                </Text>
+              </View>
+            </Pressable>
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Choose evidence photos from gallery"
+              className="flex-row items-center gap-3 rounded-xl border border-border bg-card p-4 active:bg-secondary"
+              onPress={() =>
+                runAfterEvidenceSourcePickerCloses(() => {
+                  void chooseEvidencePhotos();
+                })
+              }
+            >
+              <View className="h-10 w-10 items-center justify-center rounded-full bg-secondary">
+                <Images size={19} color={mutedColor} />
+              </View>
+
+              <View className="min-w-0 flex-1">
+                <Text className="text-sm font-semibold text-foreground">
+                  Choose from gallery
+                </Text>
+
+                <Text className="mt-0.5 text-xs text-muted-foreground">
+                  Select existing photos from your device
+                </Text>
+              </View>
+            </Pressable>
+
+            <Button
+              className="mt-2"
+              variant="secondary"
+              onPress={() => setIsEvidenceSourcePickerOpen(false)}
+            >
+              <ButtonText>Cancel</ButtonText>
+            </Button>
           </ModalBody>
         </ModalContent>
       </Modal>

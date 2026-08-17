@@ -262,3 +262,27 @@
 - Git/Deployment: mobile implementation only; no Expo/EAS/store publication is included.
 - Remaining risks: audience text requires the additive staff API field. Until that backend contract is deployed and cached advisory data refreshes, the audience line is safely omitted.
 - Next: verify the coordinated staff API contract, deploy the additive backend field first, then release the compatible mobile UI.
+
+## 2026-08-17 - Evidence camera and gallery source picker
+
+- Repositories: `aleconnect-mobile`.
+- Scope: tapping an empty report evidence slot now opens a source chooser with `Take photo` and `Choose from gallery`. Camera capture adds one image per launch, while gallery selection remains multi-select up to the existing 3-photo evidence limit.
+- Files: `app.json`, `src/app/(tabs)/reports/new.tsx`, `tests/report-evidence-picker.test.mjs`, and this implementation-history entry.
+- Contracts: both camera and gallery photos continue through the existing `prepareSelectedPhoto()` and `prepareEvidencePhoto()` pipeline. Evidence validation, compression, local queueing, upload, report payload, R2, API, and database contracts are unchanged.
+- Permissions: camera access is requested only when the consumer chooses `Take photo`; photo-library access is requested only when the consumer chooses `Choose from gallery`. `expo-image-picker` now provides the camera usage description, while microphone permission remains disabled.
+- UX: permission denial or native-picker launch failure shows evidence-specific feedback without creating a failed evidence item. Canceling the camera, gallery, or source chooser leaves evidence unchanged.
+- Verification: `tests/report-evidence-picker.test.mjs`, `tests/report-review-preview.test.mjs`, TypeScript, lint, harness validation, and `git diff --check` cover the change. Camera behavior still requires verification on a fresh native development or production build because `app.json` changes native permission configuration.
+- Git/Deployment: mobile-only change; no backend deployment, database migration, R2 change, or API deployment is required.
+- Remaining risks: an already-installed native build that predates the camera permission configuration must be rebuilt before camera capture can be fully tested.
+- Next: complete the verification gates, inspect the final diff, then test camera and gallery evidence capture on a fresh native build.
+
+## 2026-08-17 - Compact consumer advisory cards
+
+- Repositories: mobile with coordinated staff/API support for the additive advisory audience field.
+- Scope: redesigned consumer advisory cards to match the compact report-card system with control number, severity, advisory type and scheduled interruption range, publication time, audience, and trailing navigation chevron. Advisory title and body remain available in Advisory Details but are intentionally omitted from list cards.
+- Files: `src/services/advisories.ts`, `src/utils/manila-time.ts`, `src/features/advisories/advisory-list-item.tsx`, `src/app/advisories.tsx`, `src/app/(tabs)/home.tsx`, focused advisory/time tests, and this implementation-history entry.
+- Contracts: `MobileAdvisory` accepts additive optional/nullable `audience`; older backend responses and cached advisory rows without the field remain valid. Interruption timing uses only `scheduledStartAt` and `scheduledEndAt`. API timestamps remain strict explicit-offset values formatted against `Asia/Manila`.
+- Verification: focused advisory/time tests, TypeScript, lint, harness validation, and `git diff --check` must pass before commit.
+- Git/Deployment: mobile implementation only; no Expo/EAS/store publication is included.
+- Remaining risks: audience text requires the additive staff API field. Until that backend contract is deployed and cached advisory data refreshes, the audience line is safely omitted.
+- Next: verify the coordinated staff API contract, deploy the additive backend field first, then release the compatible mobile UI.
