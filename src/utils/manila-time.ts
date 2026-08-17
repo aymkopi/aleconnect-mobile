@@ -7,7 +7,8 @@ type ManilaCalendarParts = {
   day: number;
 };
 
-const apiInstantPattern = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d{1,9})?)?(Z|[+-](\d{2}):?(\d{2}))$/;
+const apiInstantPattern =
+  /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d{1,9})?)?(Z|[+-](\d{2}):?(\d{2}))$/;
 const calendarKeyPattern = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 const manilaCalendarFormatter = new Intl.DateTimeFormat(MANILA_LOCALE, {
@@ -24,7 +25,18 @@ const manilaDateTimeFormatter = new Intl.DateTimeFormat(MANILA_LOCALE, {
   hour: "2-digit",
   minute: "2-digit",
 });
+const manilaReportListTimeFormatter = new Intl.DateTimeFormat(MANILA_LOCALE, {
+  timeZone: MANILA_TIME_ZONE,
+  hour: "numeric",
+  minute: "2-digit",
+  hour12: true,
+});
 
+const manilaReportListDateFormatter = new Intl.DateTimeFormat(MANILA_LOCALE, {
+  timeZone: MANILA_TIME_ZONE,
+  month: "long",
+  day: "numeric",
+});
 const utcMonthFormatter = new Intl.DateTimeFormat(MANILA_LOCALE, {
   timeZone: "UTC",
   month: "short",
@@ -143,13 +155,29 @@ export function formatManilaDateTime(value: string) {
   const date = parseApiInstant(value);
   return date ? manilaDateTimeFormatter.format(date) : "Date unavailable";
 }
+export function formatManilaReportListDateTime(value: string) {
+  const date = parseApiInstant(value);
 
-export function formatManilaRelativeTime(value: string, reference = new Date()) {
+  if (!date) {
+    return "Date unavailable";
+  }
+
+  return `${manilaReportListTimeFormatter.format(
+    date,
+  )}, ${manilaReportListDateFormatter.format(date)}`;
+}
+
+export function formatManilaRelativeTime(
+  value: string,
+  reference = new Date(),
+) {
   const date = parseApiInstant(value);
   if (!date || Number.isNaN(reference.getTime())) return "Date unavailable";
 
   const seconds = Math.round((date.getTime() - reference.getTime()) / 1_000);
-  const formatter = new Intl.RelativeTimeFormat(MANILA_LOCALE, { numeric: "auto" });
+  const formatter = new Intl.RelativeTimeFormat(MANILA_LOCALE, {
+    numeric: "auto",
+  });
   if (Math.abs(seconds) < 60) return formatter.format(seconds, "second");
   const minutes = Math.round(seconds / 60);
   if (Math.abs(minutes) < 60) return formatter.format(minutes, "minute");
@@ -162,8 +190,8 @@ export function isApiInstantExpired(value: string, reference = new Date()) {
   const date = parseApiInstant(value);
   return Boolean(
     date &&
-      !Number.isNaN(reference.getTime()) &&
-      date.getTime() <= reference.getTime(),
+    !Number.isNaN(reference.getTime()) &&
+    date.getTime() <= reference.getTime(),
   );
 }
 
@@ -172,9 +200,9 @@ export function isInManilaMonth(value: string, reference = new Date()) {
   const current = manilaCalendarParts(reference);
   return Boolean(
     target &&
-      current &&
-      target.year === current.year &&
-      target.month === current.month,
+    current &&
+    target.year === current.year &&
+    target.month === current.month,
   );
 }
 
@@ -195,7 +223,10 @@ export function formatManilaWeekRange(value: string | null) {
   return `${formatMonthDay(start)} - ${formatMonthDay(end)}`;
 }
 
-export function manilaNotificationGroupTitle(value: string, reference = new Date()) {
+export function manilaNotificationGroupTitle(
+  value: string,
+  reference = new Date(),
+) {
   const target = manilaCalendarParts(value);
   const current = manilaCalendarParts(reference);
   if (!target || !current) return "Older";
@@ -209,10 +240,8 @@ export function manilaNotificationGroupTitle(value: string, reference = new Date
     return "Last weekend";
   }
 
-  const weekDifference = calendarDayDifference(
-    weekStart(current),
-    weekStart(target),
-  ) / 7;
+  const weekDifference =
+    calendarDayDifference(weekStart(current), weekStart(target)) / 7;
   if (weekDifference === 0) return "This week";
   if (weekDifference === 1) return "Last week";
   if (dayDifference <= 31) return "Last month";

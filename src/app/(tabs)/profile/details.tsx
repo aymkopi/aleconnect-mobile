@@ -88,7 +88,6 @@ function readProfileCoordinates(
 export default function ProfileDetailsRoute() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { height: screenHeight } = useWindowDimensions();
   const [accentColor, accentForegroundColor] = useAppColors([
     "accent",
     "accent-foreground",

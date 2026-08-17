@@ -5,6 +5,7 @@ import {
   MANILA_LOCALE,
   formatManilaDateTime,
   formatManilaRelativeTime,
+  formatManilaReportListDateTime,
   formatManilaWeekRange,
   isApiInstantExpired,
   isInManilaMonth,
@@ -32,7 +33,10 @@ test("uses Manila calendar days for report month membership and notification lab
   const manilaAugust = new Date("2026-08-13T00:30:00.000Z");
 
   assert.equal(isInManilaMonth("2026-07-31T16:01:00.000Z", manilaAugust), true);
-  assert.equal(isInManilaMonth("2026-08-31T16:00:00.000Z", manilaAugust), false);
+  assert.equal(
+    isInManilaMonth("2026-08-31T16:00:00.000Z", manilaAugust),
+    false,
+  );
   assert.equal(
     manilaNotificationGroupTitle("2026-08-12T16:01:00.000Z", manilaAugust),
     "Today",
@@ -62,7 +66,10 @@ test("rejects offset-free API timestamps and returns safe UI fallbacks", () => {
     assert.equal(parseApiInstant(value), null);
     assert.equal(formatManilaDateTime(value), "Date unavailable");
     assert.equal(manilaWeekStartKey(value), null);
-    assert.equal(isInManilaMonth(value, new Date("2026-08-13T00:30:00.000Z")), false);
+    assert.equal(
+      isInManilaMonth(value, new Date("2026-08-13T00:30:00.000Z")),
+      false,
+    );
     assert.equal(
       manilaNotificationGroupTitle(value, new Date("2026-08-13T00:30:00.000Z")),
       "Older",
@@ -86,7 +93,10 @@ test("keeps invalid report-detail timestamps out of relative-time formatting", (
 test("does not expire evidence from an ambiguous API timestamp", () => {
   const reference = new Date("2026-08-13T00:00:00.000Z");
 
-  assert.equal(isApiInstantExpired("2026-08-12T23:59:00.000Z", reference), true);
+  assert.equal(
+    isApiInstantExpired("2026-08-12T23:59:00.000Z", reference),
+    true,
+  );
   assert.equal(isApiInstantExpired("2026-08-12T23:59:00", reference), false);
 });
 
@@ -102,4 +112,20 @@ test("rejects malformed RFC3339 calendar and numeric-offset boundaries", () => {
     assert.equal(parseApiInstant(value), null);
   }
   assert.ok(parseApiInstant("2024-02-29T23:59:59+14:00"));
+});
+test("formats report list timestamps like the report card", () => {
+  assert.equal(
+    formatManilaReportListDateTime("2026-08-15T01:00:00.000Z"),
+    "9:00 AM, August 15",
+  );
+
+  assert.equal(
+    formatManilaReportListDateTime("2026-08-15T09:05:00+08:00"),
+    "9:05 AM, August 15",
+  );
+
+  assert.equal(
+    formatManilaReportListDateTime("2026-08-15T09:05:00"),
+    "Date unavailable",
+  );
 });

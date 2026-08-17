@@ -240,3 +240,14 @@
 - Git/Deployment: local mobile product change only; no Expo/EAS/store publication, backend deployment, database migration, R2 operation, or secret/configuration rollout is included.
 - Remaining risks: bottom-sheet behavior remains sensitive to nested gesture-enabled controls and future changes that introduce multiple Gorhom measuring containers inside one dynamically sized sheet. New adaptive sheets should keep one Gorhom `BottomSheetView` or integrated scrollable as the dynamic-sizing measurement source.
 - Next: complete the final local verification gates, review the scoped diff for unrelated changes, then commit the mobile bottom-sheet and hotline directory refinements.
+
+## 2026-08-17 - Consumer report list card redesign
+
+- Repositories: mobile with coordinated staff/API support for the additive consumer report-list address field.
+- Scope: redesigned official consumer report cards to match the approved compact card layout with ticket number, status, report title, Manila-local date/time, service location, and trailing navigation chevron. Report-list address data is consumed directly from the complaint list API without per-row detail requests.
+- Files: `src/features/reports/data.ts`, `src/features/reports/report-list.tsx`, `src/services/reports.ts`, `src/utils/manila-time.ts`, `src/app/(tabs)/reports/index.tsx`, `src/app/(tabs)/reports/list.tsx`, focused report-list/time tests, and this implementation-history entry.
+- Contracts: `Report` accepts additive optional/nullable `displayAddress`; older server responses and persisted report-list cache entries without the field remain valid and normalize to `null`. Report status cache projection preserves all existing report fields. API timestamps remain strict explicit-offset/RFC3339 values and are formatted against `Asia/Manila`.
+- Verification: focused report-list and Manila-time tests, TypeScript, lint, harness validation, and `git diff --check` must pass before commit. Manually verify Recent Reports and Report Archive cards render the approved hierarchy, omit the address row when unavailable, keep long addresses to one line, and continue opening the correct report details.
+- Git/Deployment: local mobile implementation only at this stage; no Expo/EAS/store publication is included.
+- Remaining risks: the location line depends on the additive staff `displayAddress` response. Mobile remains compatible with an older backend, but the address is omitted until the backend field is deployed and fresh list data replaces older cached rows.
+- Next: complete mobile verification together with the coordinated staff API change, review both repository diffs, then commit and release the staff contract before or together with the compatible mobile build.

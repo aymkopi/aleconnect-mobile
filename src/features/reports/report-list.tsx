@@ -1,34 +1,37 @@
-import { ListSection, ListSectionItem } from "@/components/ui/list-section";
+import { Pressable } from "@/components/ui/pressable";
 import { Text } from "@/components/ui/text";
-import {
-    formatReportDate,
-    formatStatus,
-    type Report,
-} from "@/features/reports/data";
+import { formatStatus, type Report } from "@/features/reports/data";
 import { useAppColors } from "@/hooks/use-app-colors";
-import { FileText } from "lucide-react-native";
+import { formatManilaReportListDateTime } from "@/utils/manila-time";
+import { ChevronRight } from "lucide-react-native";
 import { View } from "react-native";
 
 export function ReportStatusBadge({ status }: { status: string }) {
   const normalized = status.toLowerCase().replace(/[\s-]+/g, "_");
+
   const tone =
-    normalized === "resolved" ||
-    normalized === "completed" ||
-    normalized === "closed"
-      ? "bg-success text-success-foreground"
-      : normalized === "cancelled" ||
-          normalized === "canceled" ||
-          normalized === "rejected"
-        ? "bg-danger text-danger-foreground"
-        : normalized === "assigned" ||
-            normalized === "in_progress" ||
-            normalized === "on_hold"
-          ? "bg-warning text-warning-foreground"
-          : "bg-secondary text-secondary-foreground";
+    normalized === "verified"
+      ? "bg-accent/10 text-accent"
+      : normalized === "resolved" ||
+          normalized === "completed" ||
+          normalized === "closed"
+        ? "bg-success text-success-foreground"
+        : normalized === "cancelled" ||
+            normalized === "canceled" ||
+            normalized === "rejected"
+          ? "bg-danger text-danger-foreground"
+          : normalized === "assigned" ||
+              normalized === "dispatched" ||
+              normalized === "in_progress" ||
+              normalized === "on_hold"
+            ? "bg-warning text-warning-foreground"
+            : "bg-secondary text-secondary-foreground";
+
+  const [backgroundClass, textClass] = tone.split(" ");
 
   return (
-    <View className={`rounded-full px-3 py-1 ${tone.split(" ")[0]}`}>
-      <Text className={`text-xs font-bold ${tone.split(" ")[1]}`}>
+    <View className={`shrink-0 rounded-md px-2 py-1 ${backgroundClass}`}>
+      <Text className={`text-[11px] font-semibold leading-4 ${textClass}`}>
         {formatStatus(status)}
       </Text>
     </View>
@@ -37,54 +40,81 @@ export function ReportStatusBadge({ status }: { status: string }) {
 
 export function ReportListGroup({
   reports,
-  getColor,
   onPress,
 }: {
   reports: Report[];
-  getColor?: (report: Report) => string | undefined;
   onPress: (report: Report) => void;
 }) {
-  const [accentColor] = useAppColors(["accent"]);
+  const [mutedForegroundColor] = useAppColors(["muted-foreground"]);
 
   return (
-    <ListSection>
-      {reports.map((report, index) => (
-        <ListSectionItem
-          key={report.id}
-          accessibilityLabel={`Open report ${report.ticketNumber}`}
-          description={
-            <Text className="text-sm text-muted-foreground" numberOfLines={2}>
-              {[
-                report.typeTitle !== report.title ? report.typeTitle : null,
-                formatReportDate(report.createdAt),
-              ]
-                .filter(Boolean)
-                .join(" - ")}
-            </Text>
-          }
-          leading={
-            <View
-              className="h-11 w-11 items-center justify-center rounded-full"
-              style={{ backgroundColor: getColor?.(report) ?? accentColor }}
-            >
-              <FileText size={18} color="white" />
-            </View>
-          }
-          onPress={() => onPress(report)}
-          showDivider={index < reports.length - 1}
-          title={
-            <View className="min-w-0 gap-0.5">
-              <Text className="text-xs font-bold text-muted-foreground">
-                {report.ticketNumber}
-              </Text>
-              <Text className="font-semibold text-foreground" numberOfLines={2}>
+    <View className="gap-2">
+      {reports.map((report) => {
+        const displayAddress =
+          typeof report.displayAddress === "string" &&
+          report.displayAddress.trim()
+            ? report.displayAddress.trim()
+            : null;
+
+        return (
+          <Pressable
+            key={report.id}
+            accessibilityLabel={`Open report ${report.ticketNumber}`}
+            accessibilityRole="button"
+            className="rounded-lg border border-border bg-card px-4 py-3 active:bg-secondary"
+            onPress={() => onPress(report)}
+          >
+            <View className="gap-2">
+              {/* Ticket + status */}
+              <View className="flex-row items-center justify-between gap-3">
+                <Text
+                  className="min-w-0 flex-1 text-xs font-medium text-muted-foreground"
+                  numberOfLines={1}
+                >
+                  {report.ticketNumber}
+                </Text>
+
+                <ReportStatusBadge status={report.status} />
+              </View>
+
+              {/* Report title */}
+              <Text
+                className="text-base font-semibold leading-5 text-foreground"
+                numberOfLines={2}
+              >
                 {report.title}
               </Text>
+
+              {/* Metadata */}
+              <View className="flex-row items-center gap-2">
+                <View className="min-w-0 flex-1 gap-0.5">
+                  <Text
+                    className="text-xs leading-4 text-foreground"
+                    numberOfLines={1}
+                  >
+                    {formatManilaReportListDateTime(report.createdAt)}
+                  </Text>
+
+                  {displayAddress ? (
+                    <Text
+                      className="text-xs leading-4 text-muted-foreground"
+                      numberOfLines={1}
+                    >
+                      {displayAddress}
+                    </Text>
+                  ) : null}
+                </View>
+
+                <ChevronRight
+                  size={18}
+                  color={mutedForegroundColor}
+                  strokeWidth={2}
+                />
+              </View>
             </View>
-          }
-          trailing={<ReportStatusBadge status={report.status} />}
-        />
-      ))}
-    </ListSection>
+          </Pressable>
+        );
+      })}
+    </View>
   );
 }

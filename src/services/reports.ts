@@ -1,11 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import type {
-  ComplaintMeta,
-  Report,
-  ReportDetail,
+import {
+  normalizeReportListItem,
+  parseReportDetailResponse,
+  type ComplaintMeta,
+  type Report,
+  type ReportDetail,
 } from "@/features/reports/data";
-import { parseReportDetailResponse } from "@/features/reports/data";
 import {
   ApiRequestError,
   apiRequest,
@@ -71,7 +72,14 @@ function complaintReportStorageKey(userId: string) {
 function normalizeStoredComplaintReportPage(
   value: Report[] | ComplaintReportPage,
 ): ComplaintReportPage {
-  return Array.isArray(value) ? { reports: value, nextCursor: null } : value;
+  const page = Array.isArray(value)
+    ? { reports: value, nextCursor: null }
+    : value;
+
+  return {
+    ...page,
+    reports: page.reports.map(normalizeReportListItem),
+  };
 }
 
 function patchReportPageStatus(
@@ -361,6 +369,11 @@ export async function fetchComplaintReportPage(options?: {
       },
     )
       .then(async (response) => {
+        const normalizedResponse: ComplaintReportPage = {
+          ...response,
+          reports: response.reports.map(normalizeReportListItem),
+        };
+
         const isCurrentGeneration =
           requestCacheGeneration === complaintReportsCacheGeneration;
 
@@ -370,7 +383,7 @@ export async function fetchComplaintReportPage(options?: {
         // revalidation marker.
         if (!isCurrentGeneration) {
           return {
-            ...response,
+            ...normalizedResponse,
             isStale: true,
           };
         }
@@ -379,7 +392,7 @@ export async function fetchComplaintReportPage(options?: {
           complaintReportsMemoryCache = {
             fetchedAt: Date.now(),
             userId,
-            value: response,
+            value: normalizedResponse,
           };
 
           if (userId) {

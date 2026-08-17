@@ -118,14 +118,6 @@ function ReportInput({
   isDisabled?: boolean;
   maxLength?: number;
 }) {
-  useEffect(() => {
-    console.log("MOUNT INPUT:", label);
-
-    return () => {
-      console.log("UNMOUNT INPUT:", label);
-    };
-  }, []);
-
   return (
     <FormControl
       isRequired={isRequired}

@@ -4,11 +4,7 @@ import { Heading } from "@/components/ui/heading";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import { statusBarHeight } from "@/constants";
-import {
-  emptyComplaintMeta,
-  type ComplaintMeta,
-  type Report,
-} from "@/features/reports/data";
+import { type Report } from "@/features/reports/data";
 import { ReportListGroup } from "@/features/reports/report-list";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
@@ -18,10 +14,7 @@ import {
   subscribeReportRevalidationRequested,
   subscribeReportStatusChanged,
 } from "@/services/report-sync-events";
-import {
-  fetchComplaintMeta,
-  fetchComplaintReportPage,
-} from "@/services/reports";
+import { fetchComplaintReportPage } from "@/services/reports";
 import { isInManilaMonth, parseApiInstant } from "@/utils/manila-time";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Bell, CalendarDays, ChevronRight, Plus } from "lucide-react-native";
@@ -41,18 +34,23 @@ type LoadComplaintOptions = {
 
 function ReportsSkeleton() {
   return (
-    <View className="gap-3">
+    <View className="gap-2">
       {Array.from({ length: 3 }).map((_, index) => (
         <View
           key={index}
-          className="rounded-lg border border-border bg-card p-4"
+          className="rounded-lg border border-border bg-card px-4 py-3"
         >
-          <View className="flex-row gap-3">
-            <Skeleton className="h-12 w-12 rounded-full" />
-            <View className="flex-1 gap-2">
-              <Skeleton className="h-3 w-24 rounded-full" />
-              <Skeleton className="h-5 w-4/5 rounded-full" />
-              <Skeleton className="h-3 w-3/5 rounded-full" />
+          <View className="gap-2">
+            <View className="flex-row items-center justify-between gap-3">
+              <Skeleton className="h-3 w-24 rounded-sm" />
+              <Skeleton className="h-6 w-16 rounded-md" />
+            </View>
+
+            <Skeleton className="h-5 w-3/5 rounded-sm" />
+
+            <View className="gap-1">
+              <Skeleton className="h-3 w-32 rounded-sm" />
+              <Skeleton className="h-3 w-4/5 rounded-sm" />
             </View>
           </View>
         </View>
@@ -76,7 +74,6 @@ export default function ComplaintsRoute() {
   const unreadCount = useUnreadNotificationCount();
   const { session } = useAuthSession();
   const userId = session?.user.id;
-  const [meta, setMeta] = useState<ComplaintMeta>(emptyComplaintMeta);
   const [reports, setReports] = useState<Report[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -92,18 +89,16 @@ export default function ComplaintsRoute() {
       }
 
       try {
-        const [nextMeta, page] = await Promise.all([
-          fetchComplaintMeta(options?.force ? { force: true } : undefined),
-          fetchComplaintReportPage({
-            force: options?.force,
-            revalidate: options?.revalidate,
-            userId,
-          }),
-        ]);
+        const page = await fetchComplaintReportPage({
+          force: options?.force,
+          revalidate: options?.revalidate,
+          userId,
+        });
+
         if (generation !== loadGenerationRef.current) {
           return;
         }
-        setMeta(nextMeta);
+
         setReports(page.reports);
         setError(null);
 
@@ -323,10 +318,6 @@ export default function ComplaintsRoute() {
         ) : (
           <ReportListGroup
             reports={monthReports.slice(0, 5)}
-            getColor={(report) =>
-              meta.categories.find((item) => item.id === report.categoryId)
-                ?.color
-            }
             onPress={openReport}
           />
         )}

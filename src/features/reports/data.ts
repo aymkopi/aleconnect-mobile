@@ -1,5 +1,7 @@
-// @ts-expect-error Node's direct TypeScript test runner needs the extension.
-import { formatManilaDateTime, parseApiInstant } from "../../utils/manila-time.ts";
+import {
+  formatManilaDateTime,
+  parseApiInstant,
+} from "../../utils/manila-time.ts";
 
 export type ComplaintCategory = {
   id: string;
@@ -50,6 +52,7 @@ export type Report = {
   status: string;
   ticketNumber: string;
   description?: string | null;
+  displayAddress?: string | null;
   imageUrls?: string[];
 };
 
@@ -113,20 +116,31 @@ function isHttpUrl(value: unknown): value is string {
 function normalizeConsumerMessage(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
+export function normalizeReportDisplayAddress(value: unknown) {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
 
+export function normalizeReportListItem(report: Report): Report {
+  return {
+    ...report,
+    displayAddress: normalizeReportDisplayAddress(report.displayAddress),
+  };
+}
 export function buildReportDetailTimeline(
   history: readonly ReportHistoryItem[],
   status: string,
   createdAt: string,
 ): ReportHistoryItem[] {
   if (history.length > 0) return [...history];
-  return [{
-    id: "created",
-    fromStatus: null,
-    toStatus: status,
-    note: "Report received.",
-    changedAt: createdAt,
-  }];
+  return [
+    {
+      id: "created",
+      fromStatus: null,
+      toStatus: status,
+      note: "Report received.",
+      changedAt: createdAt,
+    },
+  ];
 }
 
 export function consumerMessageTimelineIndex(
@@ -139,7 +153,10 @@ export function consumerMessageTimelineIndex(
   let selectedChangedAt: number | null = null;
   let hasValidTimestamp = false;
   for (const [index, item] of timeline.entries()) {
-    const normalizedStatus = item.toStatus.trim().toLowerCase().replace(/[\s-]+/g, "_");
+    const normalizedStatus = item.toStatus
+      .trim()
+      .toLowerCase()
+      .replace(/[\s-]+/g, "_");
     if (normalizedStatus !== "verified") continue;
 
     const changedAt = parseApiInstant(item.changedAt)?.getTime();
@@ -163,7 +180,8 @@ export function consumerMessageTimelineIndex(
 }
 
 export function parseReportDetailResponse(value: unknown): ReportDetail {
-  const report = isRecord(value) && isRecord(value.report) ? value.report : null;
+  const report =
+    isRecord(value) && isRecord(value.report) ? value.report : null;
   const requiredStrings = [
     "id",
     "ticketNumber",

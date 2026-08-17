@@ -27,23 +27,23 @@ import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import type { ReportQueueItem } from "@/services/report-queue";
 import {
+  subscribeReportRevalidationRequested,
+  subscribeReportStatusChanged,
+} from "@/services/report-sync-events";
+import {
   fetchComplaintMeta,
   fetchComplaintReportPage,
   type ComplaintReportSort,
 } from "@/services/reports";
-import {
-  subscribeReportRevalidationRequested,
-  subscribeReportStatusChanged,
-} from "@/services/report-sync-events";
 import { formatManilaWeekRange, manilaWeekStartKey } from "@/utils/manila-time";
 import * as Clipboard from "expo-clipboard";
 import { useFocusEffect, useRouter } from "expo-router";
 import {
   ArrowDownNarrowWide,
   Check,
+  Clock3,
   CloudOff,
   Copy,
-  Clock3,
   Filter,
   RefreshCw,
   Search,
@@ -571,18 +571,13 @@ export default function ReportArchiveRoute() {
         }
         renderItem={({ item }) =>
           item.kind === "week" ? (
-            <Text className="mb-2 ml-2 mt-1 text-xs font-bold text-muted-foreground">
+            <Text className="mb-1.5 ml-1 mt-1 text-xs font-semibold text-muted-foreground">
               {item.title}
             </Text>
           ) : (
-            <View className="mb-3">
+            <View className="mb-2">
               <ReportListGroup
                 reports={[item.report]}
-                getColor={(report) =>
-                  meta.categories.find(
-                    (category) => category.id === report.categoryId,
-                  )?.color
-                }
                 onPress={(report) =>
                   router.push({
                     pathname: "/report/[id]",
