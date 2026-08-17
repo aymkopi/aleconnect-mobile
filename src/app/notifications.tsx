@@ -8,37 +8,37 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
-import {
-    fetchNotifications,
-    markAllNotificationsRead,
-    markNotificationsRead,
-    subscribeNotificationsChanged,
-    type MobileNotification,
-    type MobileNotificationCategory,
-} from "@/services/notifications";
 import { notificationDestinationFromNotification } from "@/services/notification-navigation";
+import {
+  fetchNotifications,
+  markAllNotificationsRead,
+  markNotificationsRead,
+  subscribeNotificationsChanged,
+  type MobileNotification,
+  type MobileNotificationCategory,
+} from "@/services/notifications";
 import {
   formatManilaDateTime,
   manilaNotificationGroupTitle,
 } from "@/utils/manila-time";
 import { Redirect, useFocusEffect, useRouter } from "expo-router";
 import {
-    CheckCheck,
-    ChevronRight,
-    FileText,
-    Settings,
-    Sparkles,
-    Zap,
+  CheckCheck,
+  ChevronRight,
+  FileText,
+  Settings,
+  Sparkles,
+  Zap,
 } from "lucide-react-native";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    BackHandler,
-    RefreshControl,
-    ScrollView,
-    SectionList,
-    View,
-    useWindowDimensions,
+  ActivityIndicator,
+  BackHandler,
+  RefreshControl,
+  ScrollView,
+  SectionList,
+  View,
+  useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -143,15 +143,21 @@ function NotificationRow({
   onOpen: (notification: MobileNotification) => void;
   showDivider: boolean;
 }) {
-  const [foregroundColor, mutedColor, dangerColor, warningColor, successColor, accentColor] =
-    useAppColors([
-      "foreground",
-      "muted",
-      "danger",
-      "warning",
-      "success",
-      "accent",
-    ]);
+  const [
+    foregroundColor,
+    mutedColor,
+    dangerColor,
+    warningColor,
+    successColor,
+    accentColor,
+  ] = useAppColors([
+    "foreground",
+    "muted",
+    "danger",
+    "warning",
+    "success",
+    "accent",
+  ]);
   const tone = severityTone(notification.severity);
   const toneColor = {
     danger: dangerColor,
@@ -162,15 +168,15 @@ function NotificationRow({
   const Icon = notification.entityType === "advisory" ? Zap : FileText;
   const hasDestination = Boolean(
     notification.ticketId ||
-      (notification.entityType === "advisory" && notification.entityId),
+    (notification.entityType === "advisory" && notification.entityId),
   );
   const actionLabel = notification.ticketId
     ? "View report"
     : notification.entityType === "advisory" && notification.entityId
       ? "View advisory"
-    : !notification.isRead
-      ? "Mark as read"
-      : null;
+      : !notification.isRead
+        ? "Mark as read"
+        : null;
   const isActionable = hasDestination || !notification.isRead;
 
   return (
@@ -187,9 +193,7 @@ function NotificationRow({
           <NotificationDescription notification={notification} />
           <View className="mt-2 flex-row flex-wrap items-center gap-2">
             <View className={`rounded-full px-2 py-1 ${tone.backgroundClass}`}>
-              <Text
-                className={`text-xs font-semibold ${tone.textClass}`}
-              >
+              <Text className={`text-xs font-semibold ${tone.textClass}`}>
                 {tone.label}
               </Text>
             </View>
@@ -304,38 +308,42 @@ export default function NotificationsRoute() {
   activeFilterKeyRef.current = activeFilterKey;
   const bottomPadding = Math.max(insets.bottom, 16) + 20;
 
-  const load = useCallback(async (force = false) => {
-    if (!session) {
+  const load = useCallback(
+    async (force = false) => {
+      if (!session) {
+        setIsLoading(false);
+        return;
+      }
+      const userId = session.user.id;
+      const requestedFilterKey = activeFilterKey;
+      const next = await fetchNotifications({
+        userId,
+        force,
+        unread: showUnreadOnly,
+        categories: selectedCategory ? [selectedCategory] : undefined,
+      });
+      if (
+        activeUserIdRef.current !== userId ||
+        activeFilterKeyRef.current !== requestedFilterKey
+      )
+        return;
+      setNotifications(next.notifications);
+      setLoadedUserId(userId);
+      setNextCursor(next.nextCursor);
+      setUnreadCount(next.unreadCount);
+      setNotice(
+        next.isStale
+          ? {
+              status: "danger",
+              title: "Showing saved notifications",
+              description: "Connect to the internet to check for new updates.",
+            }
+          : null,
+      );
       setIsLoading(false);
-      return;
-    }
-    const userId = session.user.id;
-    const requestedFilterKey = activeFilterKey;
-    const next = await fetchNotifications({
-      userId,
-      force,
-      unread: showUnreadOnly,
-      categories: selectedCategory ? [selectedCategory] : undefined,
-    });
-    if (
-      activeUserIdRef.current !== userId ||
-      activeFilterKeyRef.current !== requestedFilterKey
-    ) return;
-    setNotifications(next.notifications);
-    setLoadedUserId(userId);
-    setNextCursor(next.nextCursor);
-    setUnreadCount(next.unreadCount);
-    setNotice(
-      next.isStale
-        ? {
-            status: "danger",
-            title: "Showing saved notifications",
-            description: "Connect to the internet to check for new updates.",
-          }
-        : null,
-    );
-    setIsLoading(false);
-  }, [activeFilterKey, selectedCategory, session, showUnreadOnly]);
+    },
+    [activeFilterKey, selectedCategory, session, showUnreadOnly],
+  );
 
   const loadMore = useCallback(async () => {
     if (!session || !nextCursor || isLoadingMore || query.trim()) return;
@@ -352,7 +360,8 @@ export default function NotificationsRoute() {
       if (
         activeUserIdRef.current !== userId ||
         activeFilterKeyRef.current !== requestedFilterKey
-      ) return;
+      )
+        return;
       setNotifications((current) => [
         ...current,
         ...next.notifications.filter(
@@ -372,7 +381,15 @@ export default function NotificationsRoute() {
     } finally {
       if (activeUserIdRef.current === userId) setIsLoadingMore(false);
     }
-  }, [activeFilterKey, isLoadingMore, nextCursor, query, selectedCategory, session, showUnreadOnly]);
+  }, [
+    activeFilterKey,
+    isLoadingMore,
+    nextCursor,
+    query,
+    selectedCategory,
+    session,
+    showUnreadOnly,
+  ]);
 
   const handleBack = useCallback(() => {
     if (router.canGoBack()) {
@@ -418,10 +435,18 @@ export default function NotificationsRoute() {
     const normalized = query.trim().toLowerCase();
     return notifications.filter((notification) => {
       if (showUnreadOnly && notification.isRead) return false;
-      if (selectedCategory && notification.category !== selectedCategory) return false;
+      if (selectedCategory && notification.category !== selectedCategory)
+        return false;
       return !normalized || searchableText(notification).includes(normalized);
     });
-  }, [loadedUserId, notifications, query, selectedCategory, session?.user.id, showUnreadOnly]);
+  }, [
+    loadedUserId,
+    notifications,
+    query,
+    selectedCategory,
+    session?.user.id,
+    showUnreadOnly,
+  ]);
 
   const groups = useMemo(() => {
     const grouped = new Map<string, MobileNotification[]>();
@@ -471,7 +496,10 @@ export default function NotificationsRoute() {
   const openNotification = async (notification: MobileNotification) => {
     if (!notification.isRead) {
       try {
-        const next = await markNotificationsRead([notification.id], session!.user.id);
+        const next = await markNotificationsRead(
+          [notification.id],
+          session!.user.id,
+        );
         setNotifications((current) =>
           current.map((item) =>
             item.id === notification.id ? { ...item, isRead: true } : item,
@@ -617,7 +645,9 @@ export default function NotificationsRoute() {
         ListEmptyComponent={
           !isLoading ? (
             <EmptyState
-              filtered={Boolean(query.trim() || showUnreadOnly || selectedCategory)}
+              filtered={Boolean(
+                query.trim() || showUnreadOnly || selectedCategory,
+              )}
               onClear={() => {
                 setQuery("");
                 setShowUnreadOnly(false);

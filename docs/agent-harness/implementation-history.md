@@ -251,3 +251,14 @@
 - Git/Deployment: local mobile implementation only at this stage; no Expo/EAS/store publication is included.
 - Remaining risks: the location line depends on the additive staff `displayAddress` response. Mobile remains compatible with an older backend, but the address is omitted until the backend field is deployed and fresh list data replaces older cached rows.
 - Next: complete mobile verification together with the coordinated staff API change, review both repository diffs, then commit and release the staff contract before or together with the compatible mobile build.
+
+## 2026-08-17 - Compact consumer advisory cards
+
+- Repositories: mobile with coordinated staff/API support for the additive advisory audience field.
+- Scope: redesigned consumer advisory cards to match the compact report-card system with control number, severity, advisory type and scheduled interruption range, publication time, audience, and trailing navigation chevron. Advisory title and body remain available in Advisory Details but are intentionally omitted from list cards.
+- Files: `src/services/advisories.ts`, `src/utils/manila-time.ts`, `src/features/advisories/advisory-list-item.tsx`, `src/app/advisories.tsx`, `src/app/(tabs)/home.tsx`, focused advisory/time tests, and this implementation-history entry.
+- Contracts: `MobileAdvisory` accepts additive optional/nullable `audience`; older backend responses and cached advisory rows without the field remain valid. Interruption timing uses only `scheduledStartAt` and `scheduledEndAt`. API timestamps remain strict explicit-offset values formatted against `Asia/Manila`.
+- Verification: focused advisory/time tests, TypeScript, lint, harness validation, and `git diff --check` must pass before commit.
+- Git/Deployment: mobile implementation only; no Expo/EAS/store publication is included.
+- Remaining risks: audience text requires the additive staff API field. Until that backend contract is deployed and cached advisory data refreshes, the audience line is safely omitted.
+- Next: verify the coordinated staff API contract, deploy the additive backend field first, then release the compatible mobile UI.

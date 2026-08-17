@@ -41,6 +41,20 @@ const utcMonthFormatter = new Intl.DateTimeFormat(MANILA_LOCALE, {
   timeZone: "UTC",
   month: "short",
 });
+const manilaCompactMonthLabels = [
+  "Jan.",
+  "Feb.",
+  "Mar.",
+  "Apr.",
+  "May",
+  "Jun.",
+  "Jul.",
+  "Aug.",
+  "Sep.",
+  "Oct.",
+  "Nov.",
+  "Dec.",
+] as const;
 
 function isValidCalendarDate(year: number, month: number, day: number) {
   if (year < 1 || month < 1 || month > 12 || day < 1) return false;
@@ -165,6 +179,41 @@ export function formatManilaReportListDateTime(value: string) {
   return `${manilaReportListTimeFormatter.format(
     date,
   )}, ${manilaReportListDateFormatter.format(date)}`;
+}
+function formatManilaAdvisoryInterruptionEndpoint(
+  value: string,
+  reference: Date,
+) {
+  const date = parseApiInstant(value);
+  const target = date ? manilaCalendarParts(date) : null;
+  const current = manilaCalendarParts(reference);
+
+  if (!date || !target || !current) {
+    return null;
+  }
+
+  const dateLabel =
+    calendarKey(target) === calendarKey(current)
+      ? "Today"
+      : `${manilaCompactMonthLabels[target.month - 1]} ${target.day}`;
+
+  return `${manilaReportListTimeFormatter.format(date)}, ${dateLabel}`;
+}
+
+export function formatManilaAdvisoryInterruptionRange(
+  start: string | null,
+  end: string | null,
+  reference = new Date(),
+) {
+  if (!start || !end || Number.isNaN(reference.getTime())) {
+    return null;
+  }
+
+  const startLabel = formatManilaAdvisoryInterruptionEndpoint(start, reference);
+
+  const endLabel = formatManilaAdvisoryInterruptionEndpoint(end, reference);
+
+  return startLabel && endLabel ? `${startLabel} – ${endLabel}` : null;
 }
 
 export function formatManilaRelativeTime(

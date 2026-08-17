@@ -14,11 +14,11 @@ import {
   type ReportDetail,
   type ReportHistoryItem,
 } from "@/features/reports/data";
-import { isApiInstantExpired } from "@/utils/manila-time";
-import { ReportStatusBadge } from "@/features/reports/report-list";
 import { ExtendedOutageStatusCard } from "@/features/reports/extended-outage-status-card";
+import { ReportStatusBadge } from "@/features/reports/report-list";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { fetchComplaintReportDetail } from "@/services/reports";
+import { isApiInstantExpired } from "@/utils/manila-time";
 import * as Clipboard from "expo-clipboard";
 import { Image } from "expo-image";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
@@ -28,7 +28,6 @@ import {
   Copy,
   FileText,
   Image as ImageIcon,
-  MapPin,
   RefreshCw,
 } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -47,7 +46,9 @@ function DetailRow({ label, value }: { label: string; value?: string | null }) {
   return (
     <View className="border-border border-t pt-3">
       <Text className="text-xs font-bold text-muted-foreground">{label}</Text>
-      <Text className="mt-1 text-sm font-semibold text-foreground">{value}</Text>
+      <Text className="mt-1 text-sm font-semibold text-foreground">
+        {value}
+      </Text>
     </View>
   );
 }
@@ -80,12 +81,18 @@ function TimelineItem({
           {formatReportDate(item.changedAt)}
         </Text>
         {item.note ? (
-          <Text className="mt-2 text-sm text-muted-foreground">{item.note}</Text>
+          <Text className="mt-2 text-sm text-muted-foreground">
+            {item.note}
+          </Text>
         ) : null}
         {consumerMessage ? (
           <View className="mt-3 rounded-md border border-border bg-secondary/40 p-3">
-            <Text className="text-xs font-bold text-muted-foreground">Service Memo update</Text>
-            <Text className="mt-1 text-sm text-foreground">{consumerMessage}</Text>
+            <Text className="text-xs font-bold text-muted-foreground">
+              Service Memo update
+            </Text>
+            <Text className="mt-1 text-sm text-foreground">
+              {consumerMessage}
+            </Text>
           </View>
         ) : null}
       </View>
@@ -294,7 +301,9 @@ export default function ReportDetailRoute() {
           </View>
         ) : (
           <>
-            <View className={`items-center rounded-lg border border-border bg-card p-6 ${notificationFocus ? "ring-2 ring-primary/60" : ""}`}>
+            <View
+              className={`items-center rounded-lg border border-border bg-card p-6 ${notificationFocus ? "ring-2 ring-primary/60" : ""}`}
+            >
               <View className="h-14 w-14 items-center justify-center rounded-full bg-accent/15">
                 <FileText size={26} color={accentColor} />
               </View>
@@ -368,21 +377,14 @@ export default function ReportDetailRoute() {
               ) : null}
               <DetailRow label="Action desired" value={report.actionDesired} />
               <DetailRow label="Location" value={address} />
-            </View>
-
-            {report.latitude != null && report.longitude != null ? (
-              <View className="gap-3 rounded-lg border border-border bg-card p-5">
-                <View className="flex-row items-center gap-2">
-                  <MapPin size={18} color={accentColor} />
-                  <Heading size="sm">Reported location</Heading>
-                </View>
+              {report.latitude != null && report.longitude != null ? (
                 <StaticLocationMap
                   latitude={report.latitude}
                   longitude={report.longitude}
                   label={address || "reported location"}
                 />
-              </View>
-            ) : null}
+              ) : null}
+            </View>
 
             {report.imageUrls && report.imageUrls.length > 0 ? (
               <View className="rounded-lg border border-border bg-card p-5">
@@ -397,7 +399,7 @@ export default function ReportDetailRoute() {
                   {report.imageUrls.slice(0, 3).map((url, index) => (
                     <Pressable
                       key={url}
-                      className="h-28 flex-1 rounded-lg bg-secondary"
+                      className="h-40 flex-1 rounded-lg bg-secondary"
                       onPress={() => setViewerPhotoIndex(index)}
                       accessibilityRole="button"
                       accessibilityLabel={`View evidence photo ${index + 1}`}
@@ -406,10 +408,16 @@ export default function ReportDetailRoute() {
                         source={{ uri: url }}
                         cachePolicy="memory-disk"
                         contentFit="cover"
-                        style={{ width: "100%", height: "100%", borderRadius: 8 }}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          borderRadius: 8,
+                        }}
                         onError={() => {
                           if (evidenceRefreshAttemptedRef.current) {
-                            setEvidenceError("An evidence photo could not be loaded.");
+                            setEvidenceError(
+                              "An evidence photo could not be loaded.",
+                            );
                           } else {
                             void refreshEvidenceOnce();
                           }
@@ -439,7 +447,11 @@ export default function ReportDetailRoute() {
                     key={item.id}
                     item={item}
                     isLast={index === timeline.length - 1}
-                    consumerMessage={index === consumerMessageIndex ? report.consumerMessage : null}
+                    consumerMessage={
+                      index === consumerMessageIndex
+                        ? report.consumerMessage
+                        : null
+                    }
                   />
                 ))}
               </View>

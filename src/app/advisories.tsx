@@ -1,7 +1,6 @@
 import { ChildAppBar } from "@/components/child-app-bar";
 import { Alert, AlertText } from "@/components/ui/alert";
 import { Button, ButtonText } from "@/components/ui/button";
-import { ListSection } from "@/components/ui/list-section";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import { AdvisoryListItem } from "@/features/advisories/advisory-list-item";
@@ -138,9 +137,26 @@ export default function AdvisoriesRoute() {
         backAccessibilityLabel="Back to home"
       />
       {isLoading ? (
-        <View className="gap-3 px-5 pt-2">
+        <View className="gap-2 px-5 pt-2">
           {Array.from({ length: 4 }).map((_, index) => (
-            <Skeleton key={index} className="h-28 rounded-xl" />
+            <View
+              key={index}
+              className="rounded-lg border border-border bg-card px-4 py-3"
+            >
+              <View className="gap-2">
+                <View className="flex-row items-center justify-between gap-3">
+                  <Skeleton className="h-3 w-24 rounded-sm" />
+                  <Skeleton className="h-6 w-16 rounded-md" />
+                </View>
+
+                <Skeleton className="h-5 w-4/5 rounded-sm" />
+
+                <View className="gap-1">
+                  <Skeleton className="h-3 w-36 rounded-sm" />
+                  <Skeleton className="h-3 w-4/5 rounded-sm" />
+                </View>
+              </View>
+            </View>
           ))}
         </View>
       ) : (
@@ -178,7 +194,10 @@ export default function AdvisoriesRoute() {
               <Text className="text-center text-sm text-muted-foreground">
                 New service notices for your account and area will appear here.
               </Text>
-              <Button variant="secondary" onPress={() => router.replace("/home")}>
+              <Button
+                variant="secondary"
+                onPress={() => router.replace("/home")}
+              >
                 <ButtonText>Back to home</ButtonText>
               </Button>
             </View>
@@ -189,20 +208,17 @@ export default function AdvisoriesRoute() {
             ) : null
           }
           renderItem={({ item }) => (
-            <ListSection>
-              <AdvisoryListItem
-                advisory={item}
-                onPress={() =>
-                  router.push({
-                    pathname: "/advisory/[id]",
-                    params: { id: item.id },
-                  })
-                }
-                showDivider={false}
-              />
-            </ListSection>
+            <AdvisoryListItem
+              advisory={item}
+              onPress={() =>
+                router.push({
+                  pathname: "/advisory/[id]",
+                  params: { id: item.id },
+                })
+              }
+            />
           )}
-          ItemSeparatorComponent={() => <View className="h-3" />}
+          ItemSeparatorComponent={() => <View className="h-2" />}
         />
       )}
     </View>

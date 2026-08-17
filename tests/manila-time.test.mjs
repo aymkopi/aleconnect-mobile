@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   MANILA_LOCALE,
+  formatManilaAdvisoryInterruptionRange,
   formatManilaDateTime,
   formatManilaRelativeTime,
   formatManilaReportListDateTime,
@@ -127,5 +128,53 @@ test("formats report list timestamps like the report card", () => {
   assert.equal(
     formatManilaReportListDateTime("2026-08-15T09:05:00"),
     "Date unavailable",
+  );
+});
+test("formats advisory interruption ranges against the Manila calendar", () => {
+  const reference = new Date("2026-08-17T04:00:00.000Z");
+
+  assert.equal(
+    formatManilaAdvisoryInterruptionRange(
+      "2026-08-17T06:00:00.000Z",
+      "2026-08-17T09:00:00.000Z",
+      reference,
+    ),
+    "2:00 PM, Today – 5:00 PM, Today",
+  );
+
+  assert.equal(
+    formatManilaAdvisoryInterruptionRange(
+      "2026-08-18T06:00:00.000Z",
+      "2026-08-18T09:00:00.000Z",
+      reference,
+    ),
+    "2:00 PM, Aug. 18 – 5:00 PM, Aug. 18",
+  );
+
+  assert.equal(
+    formatManilaAdvisoryInterruptionRange(
+      "2026-08-18T14:00:00.000Z",
+      "2026-08-18T20:00:00.000Z",
+      reference,
+    ),
+    "10:00 PM, Aug. 18 – 4:00 AM, Aug. 19",
+  );
+
+  assert.equal(
+    formatManilaAdvisoryInterruptionRange(
+      null,
+      "2026-08-17T09:00:00.000Z",
+      reference,
+    ),
+    null,
+  );
+
+  assert.equal(
+    formatManilaAdvisoryInterruptionRange(
+      "2026-08-17T14:00:00",
+      "2026-08-17T17:00:00",
+      reference,
+    ),
+    null,
   );
 });

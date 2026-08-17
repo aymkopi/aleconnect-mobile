@@ -10,6 +10,7 @@ export type MobileAdvisory = {
   readonly title: string;
   readonly content: string;
   readonly severity: string;
+  readonly audience?: string | null;
   readonly effectiveAt: string | null;
   readonly expiresAt: string | null;
   readonly scheduledStartAt: string | null;
@@ -80,8 +81,7 @@ export async function fetchActiveAdvisories(options: {
   const limit = Math.min(Math.max(options.limit ?? 25, 1), 50);
   const cursor = options.cursor ?? null;
   const force =
-    Boolean(options.force) &&
-    claimRefresh(`advisories:${options.userId}`);
+    Boolean(options.force) && claimRefresh(`advisories:${options.userId}`);
 
   if (!cursor && !force) {
     const cached = await readCache(options.userId, limit);

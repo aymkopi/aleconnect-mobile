@@ -212,44 +212,49 @@ export default function HomeRoute() {
       </ListSection>
 
       {session ? (
-        <ListSection
-          title={
-            <View className="flex-row items-center justify-between px-1">
-              <Heading size="sm">Active advisories</Heading>
-              <Button
-                size="sm"
-                variant="ghost"
-                accessibilityLabel="View all advisories"
-                onPress={() => router.push("/advisories")}
-              >
-                <ButtonText>View all</ButtonText>
-                <ButtonIcon as={ChevronRight} height={18} width={18} />
-              </Button>
-            </View>
-          }
-        >
+        <View className="gap-2">
+          <View className="flex-row items-center justify-between px-1">
+            <Heading size="sm">Active advisories</Heading>
+
+            <Button
+              size="sm"
+              variant="ghost"
+              accessibilityLabel="View all advisories"
+              onPress={() => router.push("/advisories")}
+            >
+              <ButtonText>View all</ButtonText>
+
+              <ButtonIcon as={ChevronRight} height={18} width={18} />
+            </Button>
+          </View>
+
           {visibleAdvisories.length > 0 ? (
-            visibleAdvisories.map((advisory, index) => (
-              <AdvisoryListItem
-                key={advisory.id}
-                advisory={advisory}
-                onPress={() =>
-                  router.push({
-                    pathname: "/advisory/[id]",
-                    params: { id: advisory.id },
-                  })
-                }
-                showDivider={index < visibleAdvisories.length - 1}
-              />
-            ))
+            <View className="gap-2">
+              {visibleAdvisories.map((advisory) => (
+                <AdvisoryListItem
+                  key={advisory.id}
+                  advisory={advisory}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/advisory/[id]",
+                      params: {
+                        id: advisory.id,
+                      },
+                    })
+                  }
+                />
+              ))}
+            </View>
           ) : (
-            <ListSectionItem
-              description="New service notices for your area will appear here."
-              showDivider={false}
-              title="No active advisories"
-            />
+            <ListSection>
+              <ListSectionItem
+                description="New service notices for your area will appear here."
+                showDivider={false}
+                title="No active advisories"
+              />
+            </ListSection>
           )}
-        </ListSection>
+        </View>
       ) : null}
     </ScrollView>
   );
