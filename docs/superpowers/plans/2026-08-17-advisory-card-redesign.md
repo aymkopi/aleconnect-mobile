@@ -4,52 +4,75 @@
 
 **Goal:** Redesign consumer advisory cards to match the compact report-card system and add authoritative audience text to the mobile advisory API.
 
-**Architecture:** Keep advisory targeting and keyset pagination unchanged. The staff API adds an additive nullable `audience` field assembled after the paginated advisory rows are selected, using batched feeder/substation lookups so target joins cannot multiply list rows. Mobile keeps the field optional for cache/backend compatibility and formats publication/interruption timestamps through the existing strict `Asia/Manila` utility.
+**Architecture:** Keep advisory eligibility and keyset pagination unchanged. The staff API adds an additive nullable `audience` field by loading target names only after the paginated rows are sliced, so target joins cannot multiply advisory rows. Mobile keeps `audience` optional for old-cache/old-backend compatibility and formats interruption/publication timestamps through the strict `Asia/Manila` utility.
 
-**Tech Stack:** React Native + Expo Router + TypeScript + Uniwind/Gluestack UI primitives; Node test runner; Vite SSR lifecycle tests; MySQL/Aiven staff API.
+**Tech Stack:** React Native, Expo Router, TypeScript, Uniwind/Gluestack primitives, Node test runner, Vite SSR lifecycle tests, MySQL/Aiven staff API.
 
 ## Global Constraints
 
 - Do not change advisory eligibility, targeting, publication, notification, or cursor semantics.
 - Do not add a database migration.
-- Do not issue per-card advisory detail requests.
+- Do not issue per-card detail requests.
 - `audience` is additive and optional/nullable on mobile.
-- Interruption timing uses only `scheduledStartAt` + `scheduledEndAt`; if either is missing/invalid, show advisory type only.
-- All timestamps are interpreted/formatted with strict offset-aware parsing and `Asia/Manila`.
-- Advisory title/content stay available in details but are not shown in the list card.
-- Audience is one line and ellipsized.
-- Severity is the only badge.
+- Interruption timing uses only `scheduledStartAt` and `scheduledEndAt`; missing/invalid endpoint means advisory type only.
+- Timestamps remain strict explicit-offset/RFC3339 and are formatted against `Asia/Manila`.
+- Advisory title/content remain detail-only and are not rendered in list cards.
+- Audience is one line with ellipsis.
+- Severity is the only card badge.
 
 ---
 
-### Task 1: Extend the staff mobile advisory contract with audience
+### Task 1: Staff API audience contract
 
 **Files:**
 - Modify: `../Aleconnect/api/mobile/advisories.ts`
 - Modify: `../Aleconnect/tests/lifecycle/consumer-mobile-hardening.test.mjs`
-- Modify: `../Aleconnect/docs/agent-harness/implementation-history.md`
 
 **Interfaces:**
-- Produces: `MobileAdvisory.audience` JSON property as `string | null`.
-- Preserves: existing `GET /api/mobile/advisories` list/detail filtering and cursor order.
+- Produces: `audience: string | null` in each consumer advisory DTO.
+- Produces: `buildConsumerAdvisoryAudience(targetScope, substationNames, feederNames)`.
 
-- [ ] **Step 1: Extend the DTO regression first**
+- [ ] **Step 1: Add failing audience helper/DTO tests**
 
-Add `target_scope: "all"` and `audience: "All consumers"` to the advisory input fixture and expect `audience: "All consumers"` from `toConsumerAdvisory`.
+In `tests/lifecycle/consumer-mobile-hardening.test.mjs`, extend the advisory DTO test fixture with:
 
-- [ ] **Step 2: Run the focused lifecycle test and confirm it fails**
+```js
+target_scope: "selected",
+audience: "Daraga Substation, Bitano Feeder 2",
+```
 
-Run:
+and expected DTO with:
+
+```js
+audience: "Daraga Substation, Bitano Feeder 2",
+```
+
+Add this test:
+
+```js
+test("consumer advisory audience labels global and selected targets", async (t) => {
+  const { buildConsumerAdvisoryAudience } = await loadModule(t, "/api/mobile/advisories.ts")
+
+  assert.equal(buildConsumerAdvisoryAudience("all", [], []), "All consumers")
+  assert.equal(
+    buildConsumerAdvisoryAudience(
+      "selected",
+      ["Daraga Substation", "Daraga Substation"],
+      ["Bitano Feeder 2"],
+    ),
+    "Daraga Substation, Bitano Feeder 2",
+  )
+  assert.equal(buildConsumerAdvisoryAudience("selected", [], []), null)
+})
+```
+
+- [ ] **Step 2: Verify failure**
 
 ```powershell
 node --test tests/lifecycle/consumer-mobile-hardening.test.mjs
 ```
 
-Expected: DTO assertion fails because `audience` is not yet serialized.
-
-- [ ] **Step 3: Add audience to `AdvisorySource` and `toConsumerAdvisory`**
-
-Use:
+- [ ] **Step 3: Replace advisory row types in `api/mobile/advisories.ts`**
 
 ```ts
 type AdvisorySource = {
@@ -65,30 +88,138 @@ type AdvisorySource = {
   scheduled_start_at: string | null
   scheduled_end_at: string | null
   published_at: string
-  cursor_effective_at: string
   audience: string | null
+}
+
+type AdvisoryRow = RowDataPacket & Omit<AdvisorySource, "audience"> & {
+  cursor_effective_at: string
+}
+
+type AdvisoryAudienceRow = RowDataPacket & {
+  advisory_id: string
+  name: string
 }
 ```
 
-and add:
+- [ ] **Step 4: Add audience builder/loader before `toConsumerAdvisory`**
+
+```ts
+export function buildConsumerAdvisoryAudience(
+  targetScope: string,
+  substationNames: string[],
+  feederNames: string[],
+) {
+  if (targetScope === "all") return "All consumers"
+
+  const names = [...substationNames, ...feederNames]
+    .map((value) => value.trim())
+    .filter(Boolean)
+  const uniqueNames = [...new Set(names)]
+  return uniqueNames.length > 0 ? uniqueNames.join(", ") : null
+}
+
+async function loadConsumerAdvisoryAudiences(
+  connection: PoolConnection,
+  rows: AdvisoryRow[],
+) {
+  const audiences = new Map<string, string | null>()
+  const selectedIds: string[] = []
+
+  for (const row of rows) {
+    if (row.target_scope === "all") audiences.set(row.advisory_id, "All consumers")
+    else selectedIds.push(row.advisory_id)
+  }
+
+  if (selectedIds.length === 0) return audiences
+
+  const placeholders = selectedIds.map(() => "?").join(",")
+  const [substationRows, feederRows] = await Promise.all([
+    connection.query<AdvisoryAudienceRow[]>(`
+      SELECT DISTINCT ads.advisory_id, s.substation_name AS name
+      FROM advisory_substations ads
+      JOIN substations s ON s.substation_id = ads.substation_id
+      WHERE ads.advisory_id IN (${placeholders})
+      ORDER BY s.substation_name
+    `, selectedIds),
+    connection.query<AdvisoryAudienceRow[]>(`
+      SELECT DISTINCT af.advisory_id, f.feeder_name AS name
+      FROM advisory_feeders af
+      JOIN feeders f ON f.feeder_id = af.feeder_id
+      WHERE af.advisory_id IN (${placeholders})
+      ORDER BY f.feeder_name
+    `, selectedIds),
+  ])
+
+  const substationsByAdvisory = new Map<string, string[]>()
+  const feedersByAdvisory = new Map<string, string[]>()
+
+  for (const row of substationRows[0]) {
+    const values = substationsByAdvisory.get(row.advisory_id) ?? []
+    values.push(String(row.name ?? ""))
+    substationsByAdvisory.set(row.advisory_id, values)
+  }
+  for (const row of feederRows[0]) {
+    const values = feedersByAdvisory.get(row.advisory_id) ?? []
+    values.push(String(row.name ?? ""))
+    feedersByAdvisory.set(row.advisory_id, values)
+  }
+
+  for (const advisoryId of selectedIds) {
+    audiences.set(
+      advisoryId,
+      buildConsumerAdvisoryAudience(
+        "selected",
+        substationsByAdvisory.get(advisoryId) ?? [],
+        feedersByAdvisory.get(advisoryId) ?? [],
+      ),
+    )
+  }
+
+  return audiences
+}
+```
+
+- [ ] **Step 5: Extend serializer and SELECT**
+
+Add to `toConsumerAdvisory`:
 
 ```ts
 audience: row.audience,
 ```
 
-to `toConsumerAdvisory`.
+Add directly after `a.advisory_type,` in the paginated SELECT:
 
-- [ ] **Step 4: Keep the page query cardinality unchanged and batch-load audience names after pagination**
+```sql
+a.target_scope,
+```
 
-Project `a.target_scope` in the existing SELECT. After `visibleRows` is calculated, derive IDs for only selected-scope rows and query feeder/substation names with `IN (...)` lists. Build a `Map<string, string>` from ordered, deduplicated names. Global advisories map to `All consumers`; selected advisories with no resolvable target names map to `null`.
+- [ ] **Step 6: Load audience after page slicing and serialize it**
 
-The returned mapper should pass each row to `toConsumerAdvisory` with an `audience` property rather than joining target tables into the paginated SELECT.
+Replace:
 
-- [ ] **Step 5: Add a source regression proving target lookup cannot multiply the paginated query**
+```ts
+const visibleRows = rows.slice(0, page.limit)
+const last = visibleRows.at(-1)
+return {
+  advisories: visibleRows.map(toConsumerAdvisory),
+```
 
-In the lifecycle test, read `api/mobile/advisories.ts` and assert the main query still orders/limits directly from `advisories a`, while audience target tables are queried separately after `visibleRows`.
+with:
 
-- [ ] **Step 6: Run staff verification**
+```ts
+const visibleRows = rows.slice(0, page.limit)
+const audiences = await loadConsumerAdvisoryAudiences(connection, visibleRows)
+const last = visibleRows.at(-1)
+return {
+  advisories: visibleRows.map((row) => toConsumerAdvisory({
+    ...row,
+    audience: audiences.get(row.advisory_id) ?? null,
+  })),
+```
+
+Do not join `advisory_feeders` or `advisory_substations` into the main paginated SELECT.
+
+- [ ] **Step 7: Verify staff**
 
 ```powershell
 node --test tests/lifecycle/consumer-mobile-hardening.test.mjs
@@ -98,145 +229,395 @@ npm run harness:check
 git diff --check
 ```
 
-- [ ] **Step 7: Commit staff changes**
-
-```powershell
-git add api/mobile/advisories.ts tests/lifecycle/consumer-mobile-hardening.test.mjs docs/agent-harness/implementation-history.md
-git commit -m "feat: expose advisory audience"
-```
-
 ---
 
-### Task 2: Add Manila advisory card time formatting
+### Task 2: Manila interruption formatter
 
 **Files:**
 - Modify: `src/utils/manila-time.ts`
 - Modify: `tests/manila-time.test.mjs`
 
 **Interfaces:**
-- Produces: `formatManilaAdvisoryInterruptionRange(start: string | null, end: string | null, reference?: Date): string | null`.
-- Reuses: `formatManilaReportListDateTime(value: string): string` for publication timestamps.
+- Produces: `formatManilaAdvisoryInterruptionRange(start, end, reference?)`.
 
-- [ ] **Step 1: Add failing formatter tests**
+- [ ] **Step 1: Add import and failing test**
 
-Test same-day Today, non-today date, cross-day range, missing endpoint, and offset-free endpoint rejection.
+Add `formatManilaAdvisoryInterruptionRange` to the existing import list in `tests/manila-time.test.mjs`, then append:
 
-- [ ] **Step 2: Run focused test and confirm failure**
+```js
+test("formats advisory interruption ranges against the Manila calendar", () => {
+  const reference = new Date("2026-08-17T04:00:00.000Z")
+
+  assert.equal(
+    formatManilaAdvisoryInterruptionRange(
+      "2026-08-17T06:00:00.000Z",
+      "2026-08-17T09:00:00.000Z",
+      reference,
+    ),
+    "2:00 PM, Today – 5:00 PM, Today",
+  )
+  assert.equal(
+    formatManilaAdvisoryInterruptionRange(
+      "2026-08-18T06:00:00.000Z",
+      "2026-08-18T09:00:00.000Z",
+      reference,
+    ),
+    "2:00 PM, Aug. 18 – 5:00 PM, Aug. 18",
+  )
+  assert.equal(
+    formatManilaAdvisoryInterruptionRange(
+      "2026-08-18T14:00:00.000Z",
+      "2026-08-18T20:00:00.000Z",
+      reference,
+    ),
+    "10:00 PM, Aug. 18 – 4:00 AM, Aug. 19",
+  )
+  assert.equal(
+    formatManilaAdvisoryInterruptionRange(null, "2026-08-17T09:00:00.000Z", reference),
+    null,
+  )
+  assert.equal(
+    formatManilaAdvisoryInterruptionRange(
+      "2026-08-17T14:00:00",
+      "2026-08-17T17:00:00",
+      reference,
+    ),
+    null,
+  )
+})
+```
+
+- [ ] **Step 2: Add month labels in `src/utils/manila-time.ts` after formatter declarations**
+
+```ts
+const manilaCompactMonthLabels = [
+  "Jan.",
+  "Feb.",
+  "Mar.",
+  "Apr.",
+  "May",
+  "Jun.",
+  "Jul.",
+  "Aug.",
+  "Sep.",
+  "Oct.",
+  "Nov.",
+  "Dec.",
+] as const;
+```
+
+- [ ] **Step 3: Add formatter after `formatManilaReportListDateTime`**
+
+```ts
+function formatManilaAdvisoryInterruptionEndpoint(
+  value: string,
+  reference: Date,
+) {
+  const date = parseApiInstant(value);
+  const target = date ? manilaCalendarParts(date) : null;
+  const current = manilaCalendarParts(reference);
+
+  if (!date || !target || !current) return null;
+
+  const dateLabel =
+    calendarKey(target) === calendarKey(current)
+      ? "Today"
+      : `${manilaCompactMonthLabels[target.month - 1]} ${target.day}`;
+
+  return `${manilaReportListTimeFormatter.format(date)}, ${dateLabel}`;
+}
+
+export function formatManilaAdvisoryInterruptionRange(
+  start: string | null,
+  end: string | null,
+  reference = new Date(),
+) {
+  if (!start || !end || Number.isNaN(reference.getTime())) return null;
+
+  const startLabel = formatManilaAdvisoryInterruptionEndpoint(start, reference);
+  const endLabel = formatManilaAdvisoryInterruptionEndpoint(end, reference);
+  return startLabel && endLabel ? `${startLabel} – ${endLabel}` : null;
+}
+```
+
+- [ ] **Step 4: Verify**
 
 ```powershell
 node --test tests/manila-time.test.mjs
 ```
-
-- [ ] **Step 3: Implement the formatter**
-
-Use existing `parseApiInstant`, `manilaCalendarParts`, and `manilaReportListTimeFormatter`. Add fixed month abbreviations `Jan.` through `Dec.` so output matches the approved `Aug. 18` copy exactly. Return `null` if either endpoint is absent/invalid.
-
-- [ ] **Step 4: Run the formatter tests**
-
-```powershell
-node --test tests/manila-time.test.mjs
-```
-
-Expected: all pass.
 
 ---
 
-### Task 3: Extend the mobile advisory model safely
+### Task 3: Mobile model and compact shared card
 
 **Files:**
 - Modify: `src/services/advisories.ts`
+- Replace: `src/features/advisories/advisory-list-item.tsx`
 - Modify: `tests/advisory-feed.test.mjs`
 
-**Interfaces:**
-- Produces: `readonly audience?: string | null` on `MobileAdvisory`.
-
-- [ ] **Step 1: Add source-contract assertion for optional audience**
-
-Assert service source contains `readonly audience?: string | null`.
-
-- [ ] **Step 2: Add the property to `MobileAdvisory`**
+- [ ] **Step 1: Add optional field to `MobileAdvisory` after `severity`**
 
 ```ts
 readonly audience?: string | null;
 ```
 
-Do not change the cache key/version; older cached rows without this optional field remain valid.
+Do not change `active_advisories_cache_v1`.
 
-- [ ] **Step 3: Run advisory feed test**
+- [ ] **Step 2: Replace the entire shared card file**
 
-```powershell
-node --test tests/advisory-feed.test.mjs
+```tsx
+import { Pressable } from "@/components/ui/pressable";
+import { Text } from "@/components/ui/text";
+import { useAppColors } from "@/hooks/use-app-colors";
+import type { MobileAdvisory } from "@/services/advisories";
+import {
+  formatManilaAdvisoryInterruptionRange,
+  formatManilaReportListDateTime,
+} from "@/utils/manila-time";
+import { ChevronRight } from "lucide-react-native";
+import { View } from "react-native";
+
+function formatAdvisoryLabel(value: string | null | undefined, fallback: string) {
+  const normalized = value?.trim();
+  if (!normalized) return fallback;
+
+  return normalized
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (character) => character.toUpperCase());
+}
+
+function AdvisorySeverityBadge({ severity }: { severity: string }) {
+  const normalized = severity.trim().toLowerCase().replace(/[\s-]+/g, "_");
+  const tone =
+    normalized === "critical" || normalized === "high"
+      ? "bg-danger text-danger-foreground"
+      : normalized === "medium"
+        ? "bg-warning text-warning-foreground"
+        : normalized === "low"
+          ? "bg-secondary text-secondary-foreground"
+          : normalized === "info"
+            ? "bg-accent/10 text-accent"
+            : "bg-secondary text-secondary-foreground";
+  const [backgroundClass, textClass] = tone.split(" ");
+
+  return (
+    <View className={`shrink-0 rounded-md px-2 py-1 ${backgroundClass}`}>
+      <Text className={`text-[11px] font-semibold leading-4 ${textClass}`}>
+        {formatAdvisoryLabel(severity, "Info")}
+      </Text>
+    </View>
+  );
+}
+
+export function AdvisoryListItem({
+  advisory,
+  onPress,
+}: {
+  readonly advisory: MobileAdvisory;
+  readonly onPress: () => void;
+}) {
+  const [mutedForegroundColor] = useAppColors(["muted-foreground"]);
+  const controlNumber = advisory.controlNumber?.trim() || null;
+  const typeLabel = formatAdvisoryLabel(advisory.type, "Advisory");
+  const interruptionRange = formatManilaAdvisoryInterruptionRange(
+    advisory.scheduledStartAt,
+    advisory.scheduledEndAt,
+  );
+  const audience = advisory.audience?.trim() || null;
+  const primaryText = interruptionRange
+    ? `${typeLabel} · ${interruptionRange}`
+    : typeLabel;
+
+  return (
+    <Pressable
+      accessibilityLabel={`Open advisory ${controlNumber ?? typeLabel}`}
+      accessibilityRole="button"
+      className="rounded-lg border border-border bg-card px-4 py-3 active:bg-secondary"
+      onPress={onPress}
+    >
+      <View className="gap-2">
+        <View className="flex-row items-center justify-between gap-3">
+          {controlNumber ? (
+            <Text
+              className="min-w-0 flex-1 text-xs font-medium text-muted-foreground"
+              numberOfLines={1}
+            >
+              {controlNumber}
+            </Text>
+          ) : (
+            <View className="flex-1" />
+          )}
+
+          <AdvisorySeverityBadge severity={advisory.severity || "info"} />
+        </View>
+
+        <Text
+          className="text-base font-semibold leading-5 text-foreground"
+          numberOfLines={2}
+        >
+          {primaryText}
+        </Text>
+
+        <View className="flex-row items-center gap-2">
+          <View className="min-w-0 flex-1 gap-0.5">
+            <Text className="text-xs leading-4 text-foreground" numberOfLines={1}>
+              Published {formatManilaReportListDateTime(advisory.publishedAt)}
+            </Text>
+
+            {audience ? (
+              <Text
+                className="text-xs leading-4 text-muted-foreground"
+                numberOfLines={1}
+              >
+                {audience}
+              </Text>
+            ) : null}
+          </View>
+
+          <ChevronRight
+            size={18}
+            color={mutedForegroundColor}
+            strokeWidth={2}
+          />
+        </View>
+      </View>
+    </Pressable>
+  );
+}
 ```
+
+- [ ] **Step 3: Replace `tests/advisory-feed.test.mjs` with the exact source-contract test from the implementation handoff**
+
+The test must assert `audience?: string | null`, direct `Pressable` card usage, Manila formatters, control/type/severity/audience fields, one-line audience, no `Megaphone`, no `ListSectionItem`, no rendered `advisory.title`/`advisory.content`, and preserved `/advisory/[id]` navigation in both routes.
 
 ---
 
-### Task 4: Replace the legacy advisory list item with the compact card
-
-**Files:**
-- Modify: `src/features/advisories/advisory-list-item.tsx`
-- Modify: `tests/advisory-feed.test.mjs`
-
-**Interfaces:**
-- Consumes: `MobileAdvisory`, `formatManilaAdvisoryInterruptionRange`, `formatManilaReportListDateTime`.
-- Produces: `AdvisoryListItem({ advisory, onPress })` standalone bordered card.
-
-- [ ] **Step 1: Add failing UI source assertions**
-
-Assert the shared card uses `Pressable`, `ChevronRight`, the two Manila formatters, `controlNumber`, `type`, `severity`, and one-line `audience`; assert it no longer imports `Megaphone` or `ListSectionItem` and no longer renders `advisory.title` / `advisory.content`.
-
-- [ ] **Step 2: Replace the component**
-
-Use report-card-compatible classes: `rounded-lg border border-border bg-card px-4 py-3 active:bg-secondary`, top metadata row, `text-base font-semibold` primary line, `text-xs` metadata, compact severity badge, one-line audience, 18px chevron.
-
-- [ ] **Step 3: Run the advisory source test**
-
-```powershell
-node --test tests/advisory-feed.test.mjs
-```
-
----
-
-### Task 5: Integrate standalone cards into Advisories and Home
+### Task 4: Route integration
 
 **Files:**
 - Modify: `src/app/advisories.tsx`
 - Modify: `src/app/(tabs)/home.tsx`
-- Modify: `tests/advisory-feed.test.mjs`
 
-**Interfaces:**
-- Preserves: `/advisory/[id]` navigation, pagination, refresh, stale notice, empty state.
+- [ ] **Step 1: Dedicated advisories route**
 
-- [ ] **Step 1: Update source assertions**
+Delete:
 
-Assert both routes render `AdvisoryListItem`; assert the dedicated feed no longer wraps each card in `ListSection`; assert both continue routing to `/advisory/[id]`.
-
-- [ ] **Step 2: Update `/advisories`**
-
-Remove `ListSection` import and wrapper. Render `AdvisoryListItem` directly. Change separator to `h-2`. Replace generic skeleton with a compact bordered card skeleton matching the new hierarchy.
-
-- [ ] **Step 3: Update Home Active advisories only**
-
-Keep Quick actions unchanged. Replace the advisory `ListSection` container with a simple `View className="gap-2"` containing the existing heading/action row and a nested `View className="gap-2"` for advisory cards. Keep the existing empty-state list item inside its own `ListSection` so unrelated empty-state styling does not need a redesign.
-
-- [ ] **Step 4: Run focused tests**
-
-```powershell
-node --test tests/advisory-feed.test.mjs tests/manila-time.test.mjs
+```ts
+import { ListSection } from "@/components/ui/list-section";
 ```
+
+Replace the loading skeleton block with compact bordered card skeletons:
+
+```tsx
+<View className="gap-2 px-5 pt-2">
+  {Array.from({ length: 4 }).map((_, index) => (
+    <View
+      key={index}
+      className="rounded-lg border border-border bg-card px-4 py-3"
+    >
+      <View className="gap-2">
+        <View className="flex-row items-center justify-between gap-3">
+          <Skeleton className="h-3 w-24 rounded-sm" />
+          <Skeleton className="h-6 w-16 rounded-md" />
+        </View>
+        <Skeleton className="h-5 w-4/5 rounded-sm" />
+        <View className="gap-1">
+          <Skeleton className="h-3 w-36 rounded-sm" />
+          <Skeleton className="h-3 w-4/5 rounded-sm" />
+        </View>
+      </View>
+    </View>
+  ))}
+</View>
+```
+
+Replace `renderItem` with:
+
+```tsx
+renderItem={({ item }) => (
+  <AdvisoryListItem
+    advisory={item}
+    onPress={() =>
+      router.push({
+        pathname: "/advisory/[id]",
+        params: { id: item.id },
+      })
+    }
+  />
+)}
+```
+
+Replace separator:
+
+```tsx
+ItemSeparatorComponent={() => <View className="h-2" />}
+```
+
+- [ ] **Step 2: Home Active advisories block only**
+
+Replace the existing `{session ? (<ListSection ...>...</ListSection>) : null}` Active advisories block with:
+
+```tsx
+{session ? (
+  <View className="gap-2">
+    <View className="flex-row items-center justify-between px-1">
+      <Heading size="sm">Active advisories</Heading>
+      <Button
+        size="sm"
+        variant="ghost"
+        accessibilityLabel="View all advisories"
+        onPress={() => router.push("/advisories")}
+      >
+        <ButtonText>View all</ButtonText>
+        <ButtonIcon as={ChevronRight} height={18} width={18} />
+      </Button>
+    </View>
+
+    {visibleAdvisories.length > 0 ? (
+      <View className="gap-2">
+        {visibleAdvisories.map((advisory) => (
+          <AdvisoryListItem
+            key={advisory.id}
+            advisory={advisory}
+            onPress={() =>
+              router.push({
+                pathname: "/advisory/[id]",
+                params: { id: advisory.id },
+              })
+            }
+          />
+        ))}
+      </View>
+    ) : (
+      <ListSection>
+        <ListSectionItem
+          description="New service notices for your area will appear here."
+          showDivider={false}
+          title="No active advisories"
+        />
+      </ListSection>
+    )}
+  </View>
+) : null}
+```
+
+Keep `ListSection` imports because Quick actions and the advisory empty state still use it.
 
 ---
 
-### Task 6: Harness history and final verification
+### Task 5: Documentation and verification
 
 **Files:**
 - Modify: `docs/agent-harness/implementation-history.md`
 - Modify: `../Aleconnect/docs/agent-harness/implementation-history.md`
 
-- [ ] **Step 1: Add newest implementation-history entries in both repos**
+- [ ] **Step 1: Add a newest 2026-08-17 entry in each history**
 
-Document additive audience contract, compact card UI, Manila formatting, verification commands, no migration, and backend-first rollout.
+Mobile entry must name the compact advisory card, optional audience contract, Manila formatters, no per-row detail request, focused/full verification, backend-first rollout, and no Expo/EAS publication.
 
-- [ ] **Step 2: Run complete mobile gates**
+Staff entry must name the additive `audience` field, post-pagination target-name lookup, unchanged eligibility/cursor behavior, no migration, and backend deployment before mobile.
+
+- [ ] **Step 2: Verify mobile**
 
 ```powershell
 node --test tests/advisory-feed.test.mjs tests/manila-time.test.mjs
@@ -247,7 +628,7 @@ git diff --check
 git status --short
 ```
 
-- [ ] **Step 3: Run complete staff gates**
+- [ ] **Step 3: Verify staff**
 
 ```powershell
 Push-Location ..\aleconnect
@@ -260,13 +641,22 @@ git status --short
 Pop-Location
 ```
 
-- [ ] **Step 4: Commit mobile changes**
+- [ ] **Step 4: Commit separately**
+
+Staff:
+
+```powershell
+git add api/mobile/advisories.ts tests/lifecycle/consumer-mobile-hardening.test.mjs docs/agent-harness/implementation-history.md
+git commit -m "feat: expose advisory audience"
+```
+
+Mobile:
 
 ```powershell
 git add src/services/advisories.ts src/utils/manila-time.ts src/features/advisories/advisory-list-item.tsx "src/app/(tabs)/home.tsx" src/app/advisories.tsx tests/advisory-feed.test.mjs tests/manila-time.test.mjs docs/agent-harness/implementation-history.md
 git commit -m "feat: redesign advisory cards"
 ```
 
-- [ ] **Step 5: Release order**
+- [ ] **Step 5: Rollout**
 
 Deploy the additive staff API first, then ship the compatible mobile build. Do not apply a database migration.
