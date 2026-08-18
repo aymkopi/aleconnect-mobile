@@ -1,0 +1,44 @@
+name: Unified Service Memo Addenda CI
+
+on:
+  push:
+    branches:
+      - agent/unify-service-memo-addenda
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify consumer Service Memo updates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout mobile repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Report detail tests
+        run: node --test tests/report-detail.test.mjs
+
+      - name: TypeScript
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Validate agent harness
+        run: npm run harness:check -- --base origin/master
