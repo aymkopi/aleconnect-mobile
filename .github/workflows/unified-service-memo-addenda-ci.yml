@@ -13,13 +13,62 @@ permissions:
   contents: read
 
 jobs:
+  apply:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'agent/unify-service-memo-addenda' && github.actor != 'github-actions[bot]'
+    name: Apply consumer Service Memo updates
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout mobile feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/unify-service-memo-addenda
+          fetch-depth: 0
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Apply guarded mobile patch
+        run: python scripts/apply-unified-addenda-green.py
+
+      - name: Report detail tests
+        run: node --test tests/report-detail.test.mjs
+
+      - name: TypeScript
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Commit scoped mobile implementation
+        run: |
+          rm -f scripts/apply-unified-addenda-green.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/report-detail.test.mjs src/features/reports/data.ts \
+            'src/app/(tabs)/reports/[id].tsx' src/features/reports/extended-outage-status-card.tsx \
+            scripts/apply-unified-addenda-green.py
+          git diff --cached --check
+          git commit -m "feat: show consumer Service Memo updates"
+          git push origin HEAD:agent/unify-service-memo-addenda
+
   verify:
+    needs: apply
+    if: always() && (needs.apply.result == 'success' || needs.apply.result == 'skipped')
     name: Verify consumer Service Memo updates
     runs-on: ubuntu-latest
     steps:
       - name: Checkout mobile repository
         uses: actions/checkout@v4
         with:
+          ref: agent/unify-service-memo-addenda
           fetch-depth: 0
 
       - name: Use Node.js
