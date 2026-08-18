@@ -15,7 +15,7 @@ test("report detail presents restoration progress and general Service Memo updat
   assert.match(detail, /consumerUpdates/);
   assert.match(card, /Extended outage — Restoration in progress/);
   assert.match(card, /Next update by/);
-  assert.match(card, /Restoration progress history/);
+  assert.doesNotMatch(card, /Public update history/);
   assert.match(data, /publicUpdates: IncidentPublicUpdate\[\]/);
   assert.match(data, /consumerUpdates: ConsumerServiceMemoUpdate\[\]/);
 });

@@ -1,4 +1,4 @@
-import { CalendarClock, Clock3 } from "lucide-react-native";
+import { Clock3 } from "lucide-react-native";
 import { View } from "react-native";
 
 import { Heading } from "@/components/ui/heading";
@@ -41,24 +41,6 @@ export function ExtendedOutageStatusCard({
         <Text className="text-xs text-muted-foreground">
           Updated {formatManilaRelativeTime(latest.publishedAt)}
         </Text>
-      </View>
-      <View>
-        <View className="mb-3 flex-row items-center gap-2">
-          <CalendarClock size={16} color={accentColor} />
-          <Text className="text-sm font-bold text-foreground">Public update history</Text>
-        </View>
-        {updates.map((update, index) => (
-          <View
-            key={update.id}
-            className={index ? "border-border border-t pt-3" : ""}
-            style={{ marginTop: index ? 12 : 0 }}
-          >
-            <Text className="text-xs font-bold text-muted-foreground">
-              {formatStatus(update.phase)} · {formatReportDate(update.publishedAt)}
-            </Text>
-            <Text className="mt-1 text-sm text-foreground">{update.publicNote}</Text>
-          </View>
-        ))}
       </View>
     </View>
   );
