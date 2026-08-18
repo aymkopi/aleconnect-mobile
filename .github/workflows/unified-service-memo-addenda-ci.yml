@@ -41,20 +41,17 @@ jobs:
           - Scope: consume consumer-published Service Memo addenda as one general update history while preserving the legacy operational `publicUpdates` projection for restoration status compatibility. General corrections/details no longer require fake outage phase or ETA metadata.
           - Files: `src/features/reports/data.ts`, `src/app/(tabs)/reports/[id].tsx`, `src/features/reports/extended-outage-status-card.tsx`, `tests/report-detail.test.mjs`, `.github/workflows/unified-service-memo-addenda-ci.yml`, and this history entry.
           - Contracts: complaint detail accepts additive `consumerUpdates` entries with nullable operational metadata. If that field is absent, the parser derives equivalent operational-note entries from legacy `publicUpdates`. The restoration card continues using only operational `publicUpdates`; the full consumer-visible history is rendered once under Service Memo updates.
-          - Verification: test-first GitHub Actions observed the intended RED state before source edits. The GREEN implementation passed `node --test tests/report-detail.test.mjs`, `npx tsc --noEmit`, and `npm run lint`; final branch CI additionally requires `npm run harness:check -- --base origin/master` after this history record is present.
+          - Verification: test-first GitHub Actions observed RED run `32111142336` before source edits: the app had no `consumerUpdates` parser or Service Memo update history. The GREEN implementation passed focused report-detail tests, `npx tsc --noEmit`, and `npm run lint`; the final read-only branch gate additionally requires `npm run harness:check -- --base origin/master` after this history record is committed.
           - Git/Deployment: feature branch and draft PR only. No Expo/EAS publication, app-store release, backend deployment, database migration, or merge to `master` is included.
           - Remaining risks: rollout relies on the staff/API retaining the legacy operational `publicUpdates` projection for older installed mobile builds while newer builds consume `consumerUpdates`.
-          - Next: complete final mobile and staff branch gates, inspect coordinated diffs, then merge/release in a compatibility-safe order with the API contract available before relying on `consumerUpdates`.
+          - Next: complete final mobile and staff branch gates, inspect coordinated diffs, then keep both PRs draft until migration/release sequencing is explicitly approved.
 
           '''
               text = text.replace('# Implementation history\n', '# Implementation history\n\n' + entry, 1)
               path.write_text(text)
           PY
 
-      - name: Validate harness
-        run: npm run harness:check -- --base origin/master
-
-      - name: Commit history entry
+      - name: Commit history locally
         run: |
           if git diff --quiet -- docs/agent-harness/implementation-history.md; then
             echo "History entry already present."
@@ -65,6 +62,16 @@ jobs:
           git add docs/agent-harness/implementation-history.md
           git diff --cached --check
           git commit -m "docs: record unified Service Memo consumer updates"
+
+      - name: Validate committed harness state
+        run: npm run harness:check -- --base origin/master
+
+      - name: Push history commit
+        run: |
+          if git rev-list --count origin/agent/unify-service-memo-addenda..HEAD | grep -qx '0'; then
+            echo "No new history commit to push."
+            exit 0
+          fi
           git push origin HEAD:agent/unify-service-memo-addenda
 
   verify:
