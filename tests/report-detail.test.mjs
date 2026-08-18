@@ -4,17 +4,87 @@ import test from "node:test";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("report detail presents public phase, estimate, deadline, and history", async () => {
+test("report detail presents restoration progress and general Service Memo updates", async () => {
   const [detail, card, data] = await Promise.all([
     read("src/app/(tabs)/reports/[id].tsx"),
     read("src/features/reports/extended-outage-status-card.tsx"),
     read("src/features/reports/data.ts"),
   ]);
   assert.match(detail, /ExtendedOutageStatusCard/);
+  assert.match(detail, /Service Memo updates/);
+  assert.match(detail, /consumerUpdates/);
   assert.match(card, /Extended outage — Restoration in progress/);
   assert.match(card, /Next update by/);
-  assert.match(card, /Public update history/);
+  assert.doesNotMatch(card, /Public update history/);
   assert.match(data, /publicUpdates: IncidentPublicUpdate\[\]/);
+  assert.match(data, /consumerUpdates: ConsumerServiceMemoUpdate\[\]/);
+});
+
+test("report detail parser supports general consumer updates and legacy public-update fallback", async () => {
+  const { parseReportDetailResponse } = await import(
+    new URL("../src/features/reports/data.ts", import.meta.url)
+  );
+  const base = {
+    id: "ticket-1",
+    ticketNumber: "ALECO-260802-00001",
+    title: "Voltage issue",
+    status: "in_progress",
+    createdAt: "2026-08-02T00:00:00.000Z",
+    typeId: "type-1",
+    typeTitle: "Voltage issue",
+    categoryId: "category-1",
+    categoryTitle: "Power quality",
+    history: [],
+    publicUpdates: [],
+  };
+
+  const general = parseReportDetailResponse({
+    report: {
+      ...base,
+      consumerUpdates: [
+        {
+          id: "addendum-correction",
+          type: "correction",
+          body: "Correction: the affected location is Purok 6.",
+          publishedAt: "2026-08-18T05:00:00.000Z",
+          operationalPhase: null,
+          estimateStartAt: null,
+          estimateEndAt: null,
+          estimateUnavailableReason: null,
+          nextUpdateDueAt: null,
+          classification: null,
+        },
+      ],
+    },
+  });
+  assert.equal(general.consumerUpdates.length, 1);
+  assert.equal(general.consumerUpdates[0].type, "correction");
+  assert.equal(general.consumerUpdates[0].operationalPhase, null);
+  assert.equal(general.consumerUpdates[0].nextUpdateDueAt, null);
+
+  const legacy = parseReportDetailResponse({
+    report: {
+      ...base,
+      publicUpdates: [
+        {
+          id: "legacy-progress",
+          phase: "assessing_damage",
+          publicNote: "Crew is checking the affected line.",
+          estimateStartAt: null,
+          estimateEndAt: null,
+          estimateUnavailableReason: "Awaiting field assessment.",
+          nextUpdateDueAt: "2026-08-18T06:00:00.000Z",
+          classification: "standard",
+          publishedAt: "2026-08-18T05:00:00.000Z",
+        },
+      ],
+    },
+  });
+  assert.equal(legacy.consumerUpdates.length, 1);
+  assert.equal(legacy.consumerUpdates[0].id, "legacy-progress");
+  assert.equal(legacy.consumerUpdates[0].type, "operational_note");
+  assert.equal(legacy.consumerUpdates[0].body, "Crew is checking the affected line.");
+  assert.equal(legacy.consumerUpdates[0].operationalPhase, "assessing_damage");
 });
 
 test("report detail parser rejects incomplete wrappers and never exposes object keys", async () => {
