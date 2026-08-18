@@ -13,9 +13,9 @@ permissions:
   contents: read
 
 jobs:
-  apply:
+  record-history:
     if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'agent/unify-service-memo-addenda' && github.actor != 'github-actions[bot]'
-    name: Apply consumer Service Memo updates
+    name: Record mobile implementation history
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -26,42 +26,50 @@ jobs:
           ref: agent/unify-service-memo-addenda
           fetch-depth: 0
 
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Apply guarded mobile patch
-        run: python scripts/apply-unified-addenda-green.py
-
-      - name: Report detail tests
-        run: node --test tests/report-detail.test.mjs
-
-      - name: TypeScript
-        run: npx tsc --noEmit
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Commit scoped mobile implementation
+      - name: Add required harness history entry
+        shell: bash
         run: |
-          rm -f scripts/apply-unified-addenda-green.py
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('docs/agent-harness/implementation-history.md')
+          text = path.read_text()
+          heading = '## 2026-08-18 - Unified Service Memo consumer updates'
+          if heading not in text:
+              entry = '''## 2026-08-18 - Unified Service Memo consumer updates
+
+          - Repositories: mobile `aleconnect-mobile` branch `agent/unify-service-memo-addenda`; coordinated staff/API branch `agent/unify-service-memo-addenda` owns canonical addendum publication and the complaint-detail contract.
+          - Scope: consume consumer-published Service Memo addenda as one general update history while preserving the legacy operational `publicUpdates` projection for restoration status compatibility. General corrections/details no longer require fake outage phase or ETA metadata.
+          - Files: `src/features/reports/data.ts`, `src/app/(tabs)/reports/[id].tsx`, `src/features/reports/extended-outage-status-card.tsx`, `tests/report-detail.test.mjs`, `.github/workflows/unified-service-memo-addenda-ci.yml`, and this history entry.
+          - Contracts: complaint detail accepts additive `consumerUpdates` entries with nullable operational metadata. If that field is absent, the parser derives equivalent operational-note entries from legacy `publicUpdates`. The restoration card continues using only operational `publicUpdates`; the full consumer-visible history is rendered once under Service Memo updates.
+          - Verification: test-first GitHub Actions observed the intended RED state before source edits. The GREEN implementation passed `node --test tests/report-detail.test.mjs`, `npx tsc --noEmit`, and `npm run lint`; final branch CI additionally requires `npm run harness:check -- --base origin/master` after this history record is present.
+          - Git/Deployment: feature branch and draft PR only. No Expo/EAS publication, app-store release, backend deployment, database migration, or merge to `master` is included.
+          - Remaining risks: rollout relies on the staff/API retaining the legacy operational `publicUpdates` projection for older installed mobile builds while newer builds consume `consumerUpdates`.
+          - Next: complete final mobile and staff branch gates, inspect coordinated diffs, then merge/release in a compatibility-safe order with the API contract available before relying on `consumerUpdates`.
+
+          '''
+              text = text.replace('# Implementation history\n', '# Implementation history\n\n' + entry, 1)
+              path.write_text(text)
+          PY
+
+      - name: Validate harness
+        run: npm run harness:check -- --base origin/master
+
+      - name: Commit history entry
+        run: |
+          if git diff --quiet -- docs/agent-harness/implementation-history.md; then
+            echo "History entry already present."
+            exit 0
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add tests/report-detail.test.mjs src/features/reports/data.ts \
-            'src/app/(tabs)/reports/[id].tsx' src/features/reports/extended-outage-status-card.tsx \
-            scripts/apply-unified-addenda-green.py
+          git add docs/agent-harness/implementation-history.md
           git diff --cached --check
-          git commit -m "feat: show consumer Service Memo updates"
+          git commit -m "docs: record unified Service Memo consumer updates"
           git push origin HEAD:agent/unify-service-memo-addenda
 
   verify:
-    needs: apply
-    if: always() && (needs.apply.result == 'success' || needs.apply.result == 'skipped')
+    needs: record-history
+    if: always() && (needs.record-history.result == 'success' || needs.record-history.result == 'skipped')
     name: Verify consumer Service Memo updates
     runs-on: ubuntu-latest
     steps:
