@@ -11,25 +11,32 @@ import {
   fetchActiveAdvisory,
   type MobileAdvisory,
 } from "@/services/advisories";
-import { Redirect, useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import {
+  Redirect,
+  useFocusEffect,
+  useLocalSearchParams,
+  useRouter,
+} from "expo-router";
 import { CalendarDays, Megaphone } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
-import {
-  BackHandler,
-  RefreshControl,
-  ScrollView,
-  View,
-} from "react-native";
+import { BackHandler, RefreshControl, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function formatDate(value: string | null) {
   if (!value) return "Not specified";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Not specified";
+  }
+
   return new Intl.DateTimeFormat("en-PH", {
+    timeZone: "Asia/Manila",
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(new Date(value));
+  }).format(date);
 }
-
 export default function AdvisoryDetailsRoute() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -132,7 +139,9 @@ export default function AdvisoryDetailsRoute() {
           </Alert>
         ) : (
           <>
-            <VStack className={`gap-4 rounded-xl border border-border bg-card p-5 ${notificationFocus ? "ring-2 ring-primary/60" : ""}`}>
+            <VStack
+              className={`gap-4 rounded-xl border border-border bg-card p-5 ${notificationFocus ? "ring-2 ring-primary/60" : ""}`}
+            >
               <View className="flex-row items-center gap-3">
                 <View className="h-11 w-11 items-center justify-center rounded-full bg-accent/15">
                   <Megaphone size={21} color={accentColor} />
@@ -154,7 +163,9 @@ export default function AdvisoryDetailsRoute() {
                   Reference {advisory.controlNumber}
                 </Text>
               ) : null}
-              <Text className="leading-6 text-foreground">{advisory.content}</Text>
+              <Text className="leading-6 text-foreground">
+                {advisory.content}
+              </Text>
             </VStack>
 
             <VStack className="gap-3 rounded-xl border border-border bg-card p-5">
@@ -163,14 +174,34 @@ export default function AdvisoryDetailsRoute() {
                 <Heading size="sm">Schedule</Heading>
               </View>
               <Text className="text-sm text-muted-foreground">
-                Starts: {formatDate(advisory.effectiveAt ?? advisory.scheduledStartAt)}
-              </Text>
-              <Text className="text-sm text-muted-foreground">
-                Ends: {formatDate(advisory.expiresAt ?? advisory.scheduledEndAt)}
-              </Text>
-              <Text className="text-sm text-muted-foreground">
                 Published: {formatDate(advisory.publishedAt)}
               </Text>
+
+              {advisory.expiresAt ? (
+                <Text className="text-sm text-muted-foreground">
+                  Available until: {formatDate(advisory.expiresAt)}
+                </Text>
+              ) : null}
+
+              {advisory.scheduledStartAt || advisory.scheduledEndAt ? (
+                <VStack className="gap-2 border-t border-border pt-3">
+                  <Text className="text-sm font-semibold text-foreground">
+                    Interruption
+                  </Text>
+
+                  {advisory.scheduledStartAt ? (
+                    <Text className="text-sm text-muted-foreground">
+                      Starts: {formatDate(advisory.scheduledStartAt)}
+                    </Text>
+                  ) : null}
+
+                  {advisory.scheduledEndAt ? (
+                    <Text className="text-sm text-muted-foreground">
+                      Ends: {formatDate(advisory.scheduledEndAt)}
+                    </Text>
+                  ) : null}
+                </VStack>
+              ) : null}
             </VStack>
           </>
         )}

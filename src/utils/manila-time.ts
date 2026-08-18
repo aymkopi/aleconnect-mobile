@@ -205,15 +205,31 @@ export function formatManilaAdvisoryInterruptionRange(
   end: string | null,
   reference = new Date(),
 ) {
-  if (!start || !end || Number.isNaN(reference.getTime())) {
+  if (Number.isNaN(reference.getTime())) {
     return null;
   }
 
-  const startLabel = formatManilaAdvisoryInterruptionEndpoint(start, reference);
+  const startLabel = start
+    ? formatManilaAdvisoryInterruptionEndpoint(start, reference)
+    : null;
 
-  const endLabel = formatManilaAdvisoryInterruptionEndpoint(end, reference);
+  const endLabel = end
+    ? formatManilaAdvisoryInterruptionEndpoint(end, reference)
+    : null;
 
-  return startLabel && endLabel ? `${startLabel} – ${endLabel}` : null;
+  if (startLabel && endLabel) {
+    return `${startLabel} – ${endLabel}`;
+  }
+
+  if (startLabel) {
+    return `Starts ${startLabel}`;
+  }
+
+  if (endLabel) {
+    return `Until ${endLabel}`;
+  }
+
+  return null;
 }
 
 export function formatManilaRelativeTime(

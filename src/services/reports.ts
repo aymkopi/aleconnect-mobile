@@ -405,12 +405,12 @@ export async function fetchComplaintReportPage(options?: {
             complaintReportStorageKey(userId),
             JSON.stringify({
               fetchedAt: complaintReportsMemoryCache.fetchedAt,
-              value: response,
+              value: normalizedResponse,
             }),
           );
         }
 
-        return response;
+        return normalizedResponse;
       })
       .catch(async (error) => {
         if (userId && isDefaultPage) {

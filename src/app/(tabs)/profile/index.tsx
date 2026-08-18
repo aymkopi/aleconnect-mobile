@@ -27,7 +27,13 @@ import {
   LucideSunMoon,
   LucideUserRound,
 } from "lucide-react-native";
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   Linking,
   RefreshControl,
@@ -38,8 +44,8 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Uniwind, useUniwind } from "uniwind";
 
-import { useConsumerProfileContext } from "../../../context/consumer-profile-context";
 import { ProfileAvatar } from "@/features/profile/components/ProfileAvatar";
+import { useConsumerProfileContext } from "../../../context/consumer-profile-context";
 
 type ProfileRowProps = {
   icon: ReactNode;

@@ -65,17 +65,26 @@ export function AdvisoryListItem({
 
   const typeLabel = formatAdvisoryLabel(advisory.type, "Advisory");
 
-  const interruptionRange = formatManilaAdvisoryInterruptionRange(
-    advisory.scheduledStartAt,
-    advisory.scheduledEndAt,
-  );
+  const interruptionRange =
+    advisory.scheduledStartAt && advisory.scheduledEndAt
+      ? formatManilaAdvisoryInterruptionRange(
+          advisory.scheduledStartAt,
+          advisory.scheduledEndAt,
+        )
+      : null;
+
+  const interruptionStart =
+    advisory.scheduledStartAt && !advisory.scheduledEndAt
+      ? formatManilaReportListDateTime(advisory.scheduledStartAt)
+      : null;
 
   const audience = advisory.audience?.trim() || null;
 
   const primaryText = interruptionRange
     ? `${typeLabel} · ${interruptionRange}`
-    : typeLabel;
-
+    : interruptionStart
+      ? `${typeLabel} · Starts ${interruptionStart}`
+      : typeLabel;
   return (
     <Pressable
       accessibilityLabel={`Open advisory ${controlNumber ?? typeLabel}`}

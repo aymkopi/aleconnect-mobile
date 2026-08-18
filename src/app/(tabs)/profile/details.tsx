@@ -39,13 +39,7 @@ import {
   LucideUserRound,
 } from "lucide-react-native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import {
-  BackHandler,
-  Keyboard,
-  ScrollView,
-  View,
-  useWindowDimensions,
-} from "react-native";
+import { BackHandler, Keyboard, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
