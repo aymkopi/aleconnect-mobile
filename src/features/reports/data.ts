@@ -76,6 +76,19 @@ export type IncidentPublicUpdate = {
   publishedAt: string;
 };
 
+export type ConsumerServiceMemoUpdate = {
+  id: string;
+  type: "additional_detail" | "operational_note" | "correction";
+  body: string;
+  publishedAt: string;
+  operationalPhase: string | null;
+  estimateStartAt: string | null;
+  estimateEndAt: string | null;
+  estimateUnavailableReason: string | null;
+  nextUpdateDueAt: string | null;
+  classification: "standard" | "extended_outage" | null;
+};
+
 export type ReportDetail = Report & {
   imageUrlsExpiresAt: string | null;
   consumerMessage: string | null;
@@ -89,6 +102,7 @@ export type ReportDetail = Report & {
   longitude: number | null;
   history: ReportHistoryItem[];
   publicUpdates: IncidentPublicUpdate[];
+  consumerUpdates: ConsumerServiceMemoUpdate[];
   reportDetails?: {
     version: number;
     categoryDescription: string | null;
@@ -179,6 +193,69 @@ export function consumerMessageTimelineIndex(
   return selectedIndex;
 }
 
+const consumerServiceMemoUpdateTypes = new Set([
+  "additional_detail",
+  "operational_note",
+  "correction",
+]);
+
+function optionalInstant(value: unknown) {
+  return typeof value === "string" && parseApiInstant(value) ? value : null;
+}
+
+function parseConsumerServiceMemoUpdate(
+  value: unknown,
+): ConsumerServiceMemoUpdate | null {
+  if (!isRecord(value)) return null;
+  const id = typeof value.id === "string" ? value.id.trim() : "";
+  const type = typeof value.type === "string" ? value.type.trim() : "";
+  const body = typeof value.body === "string" ? value.body.trim() : "";
+  const publishedAt = optionalInstant(value.publishedAt);
+  if (!id || !consumerServiceMemoUpdateTypes.has(type) || !body || !publishedAt) {
+    return null;
+  }
+  const classification = value.classification === "standard"
+    || value.classification === "extended_outage"
+    ? value.classification
+    : null;
+  return {
+    id,
+    type: type as ConsumerServiceMemoUpdate["type"],
+    body,
+    publishedAt,
+    operationalPhase:
+      typeof value.operationalPhase === "string" && value.operationalPhase.trim()
+        ? value.operationalPhase.trim()
+        : null,
+    estimateStartAt: optionalInstant(value.estimateStartAt),
+    estimateEndAt: optionalInstant(value.estimateEndAt),
+    estimateUnavailableReason:
+      typeof value.estimateUnavailableReason === "string"
+      && value.estimateUnavailableReason.trim()
+        ? value.estimateUnavailableReason.trim()
+        : null,
+    nextUpdateDueAt: optionalInstant(value.nextUpdateDueAt),
+    classification,
+  };
+}
+
+function legacyConsumerServiceMemoUpdate(
+  update: IncidentPublicUpdate,
+): ConsumerServiceMemoUpdate {
+  return {
+    id: update.id,
+    type: "operational_note",
+    body: update.publicNote,
+    publishedAt: update.publishedAt,
+    operationalPhase: update.phase,
+    estimateStartAt: update.estimateStartAt,
+    estimateEndAt: update.estimateEndAt,
+    estimateUnavailableReason: update.estimateUnavailableReason,
+    nextUpdateDueAt: update.nextUpdateDueAt,
+    classification: update.classification,
+  };
+}
+
 export function parseReportDetailResponse(value: unknown): ReportDetail {
   const report =
     isRecord(value) && isRecord(value.report) ? value.report : null;
@@ -204,8 +281,17 @@ export function parseReportDetailResponse(value: unknown): ReportDetail {
     throw new Error("Report details response was incomplete.");
   }
 
+  const publicUpdates = report.publicUpdates as IncidentPublicUpdate[];
+  const consumerUpdates = Array.isArray(report.consumerUpdates)
+    ? report.consumerUpdates
+        .map(parseConsumerServiceMemoUpdate)
+        .filter((update): update is ConsumerServiceMemoUpdate => update !== null)
+    : publicUpdates.map(legacyConsumerServiceMemoUpdate);
+
   return {
     ...(report as unknown as ReportDetail),
+    publicUpdates,
+    consumerUpdates,
     imageUrls: Array.isArray(report.imageUrls)
       ? report.imageUrls.filter(isHttpUrl)
       : [],

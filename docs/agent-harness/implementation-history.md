@@ -1,5 +1,17 @@
 # Implementation history
 
+## 2026-08-18 - Unified Service Memo consumer updates
+
+- Repositories: mobile `aleconnect-mobile` branch `agent/unify-service-memo-addenda`; coordinated staff/API branch `agent/unify-service-memo-addenda` owns canonical addendum publication and the complaint-detail contract.
+- Scope: consume consumer-published Service Memo addenda as one general update history while preserving the legacy operational `publicUpdates` projection for restoration status compatibility. General corrections/details no longer require fake outage phase or ETA metadata.
+- Files: `src/features/reports/data.ts`, `src/app/(tabs)/reports/[id].tsx`, `src/features/reports/extended-outage-status-card.tsx`, `tests/report-detail.test.mjs`, `.github/workflows/unified-service-memo-addenda-ci.yml`, and this history entry.
+- Contracts: complaint detail accepts additive `consumerUpdates` entries with nullable operational metadata. If that field is absent, the parser derives equivalent operational-note entries from legacy `publicUpdates`. The restoration card continues using only operational `publicUpdates`; the full consumer-visible history is rendered once under Service Memo updates.
+- Verification: test-first GitHub Actions observed RED run `32111142336` before source edits: the app had no `consumerUpdates` parser or Service Memo update history. The GREEN implementation passed focused report-detail tests, `npx tsc --noEmit`, and `npm run lint`; the final read-only branch gate additionally requires `npm run harness:check -- --base origin/master` after this history record is committed.
+- Git/Deployment: feature branch and draft PR only. No Expo/EAS publication, app-store release, backend deployment, database migration, or merge to `master` is included.
+- Remaining risks: rollout relies on the staff/API retaining the legacy operational `publicUpdates` projection for older installed mobile builds while newer builds consume `consumerUpdates`.
+- Next: complete final mobile and staff branch gates, inspect coordinated diffs, then keep both PRs draft until migration/release sequencing is explicitly approved.
+
+
 ## 2026-08-15 - Push-driven report status synchronization
 
 - Repositories: mobile `feature/ticket-push-report-sync`; coordinated staff/API branch `feature/ticket-push-report-sync` owns the versioned ticket-status push contract.

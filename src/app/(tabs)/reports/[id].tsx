@@ -455,6 +455,36 @@ export default function ReportDetailRoute() {
                   />
                 ))}
               </View>
+              {report.consumerUpdates.length > 0 ? (
+                <View className="mt-1 border-border border-t pt-4">
+                  <Text className="text-sm font-bold text-foreground">
+                    Service Memo updates
+                  </Text>
+                  <Text className="mt-1 text-xs text-muted-foreground">
+                    Updates published by ALECO about the incident linked to your report.
+                  </Text>
+                  <View className="mt-3 gap-3">
+                    {report.consumerUpdates.map((update) => (
+                      <View key={update.id} className="rounded-md bg-secondary/40 p-3">
+                        <View className="flex-row items-center justify-between gap-3">
+                          <Text className="text-xs font-bold text-muted-foreground">
+                            {formatStatus(update.type)}
+                          </Text>
+                          <Text className="text-xs text-muted-foreground">
+                            {formatReportDate(update.publishedAt)}
+                          </Text>
+                        </View>
+                        {update.operationalPhase ? (
+                          <Text className="mt-1 text-xs font-semibold text-primary">
+                            {formatStatus(update.operationalPhase)}
+                          </Text>
+                        ) : null}
+                        <Text className="mt-2 text-sm text-foreground">{update.body}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              ) : null}
             </View>
           </>
         )}
