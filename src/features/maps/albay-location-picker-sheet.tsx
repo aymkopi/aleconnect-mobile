@@ -293,16 +293,11 @@ export function AlbayLocationPickerSheet({
   useEffect(() => {
     if (!open) return;
 
-    // Only initialize the map position if the picker
-    // does not already have a location.
-    setCoordinates((current) => {
-      if (current) {
-        return current;
-      }
+    setCoordinates(clampToAlbay(initialCoordinates ?? albayCenter));
 
-      return clampToAlbay(initialCoordinates ?? albayCenter);
-    });
-
+    setAddress(null);
+    setDetectedBarangay(null);
+    setIsResolvingAddress(false);
     setLocationError(null);
     setAddressError(null);
   }, [open, initialCoordinates?.latitude, initialCoordinates?.longitude]);
@@ -558,7 +553,8 @@ export function AlbayLocationPickerSheet({
               <Heading size="lg">Choose location</Heading>
 
               <Text className="text-sm text-muted-foreground">
-                Move the map under the fixed pin, then confirm the location.
+                Move the map until the pin is on the exact location of the
+                problem.
               </Text>
             </View>
 
@@ -699,7 +695,7 @@ export function AlbayLocationPickerSheet({
 
           <View className="relative rounded-xl border border-border bg-card p-4">
             <Text className="pr-8 text-xs font-bold text-muted-foreground">
-              Selected address
+              Report location
             </Text>
 
             <Text className="mt-1 pr-8 text-sm font-bold leading-5 text-foreground">
@@ -755,7 +751,7 @@ export function AlbayLocationPickerSheet({
               )}
 
               <ButtonText>
-                {isLocating ? "Finding location..." : "Recenter on me"}
+                {isLocating ? "Finding location..." : "Find my location"}
               </ButtonText>
             </Button>
 
@@ -779,12 +775,14 @@ export function AlbayLocationPickerSheet({
                 !coordinates ||
                 !detectedBarangay ||
                 !address ||
+                !address.municipalityCode ||
+                !address.barangayPsgc ||
                 isResolvingAddress
               }
             >
               <ButtonIcon as={Navigation} height={18} width={18} />
 
-              <ButtonText>Use this location</ButtonText>
+              <ButtonText>Confirm location</ButtonText>
             </Button>
           </View>
 

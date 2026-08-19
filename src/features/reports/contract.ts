@@ -85,21 +85,30 @@ export function validateReportForm(
   if (!form.accountNumber.trim()) {
     errors.accountNumber = "Account number is required.";
   }
+  const hasCanonicalAddress = Boolean(
+    form.municipalityCode &&
+    barangay &&
+    barangay.municipalityCode === form.municipalityCode,
+  );
+
   if (!form.municipalityCode) {
-    errors.municipalityCode = "Select a municipality.";
+    errors.municipalityCode = "Report location has no matched municipality.";
   }
+
   if (!barangay || barangay.municipalityCode !== form.municipalityCode) {
-    errors.barangayPsgc = "Select a barangay in this municipality.";
+    errors.barangayPsgc = "Report location has no matched barangay.";
   }
+
   if (
     form.latitude == null ||
     form.longitude == null ||
     !isWithinAlbay(form.latitude, form.longitude) ||
-    !form.locationVerified
+    !form.locationVerified ||
+    !hasCanonicalAddress
   ) {
     errors.location = form.useHomeAddress
-      ? "This home address has no verified Albay pin. Turn it off and choose a location."
-      : "Choose a verified location within Albay.";
+      ? "Your saved home location could not be confirmed. Choose the location on the map."
+      : "Choose the location of the problem on the map.";
   }
 
   if (category?.requiresDescription && !categoryDescription) {
@@ -147,10 +156,12 @@ export function validateReportForm(
     readyEvidence.length > reportLimits.evidenceMax ||
     readyEvidence.length !== form.photoUploads.length
   ) {
-    errors.evidence = "Add 1 to 3 fully prepared photos.";
+    errors.evidence = "A minimum of 1 photo is required for submission.";
   } else if (
     readyEvidence.some(
-      (photo) => (photo.size ?? reportLimits.evidenceMaxBytes + 1) > reportLimits.evidenceMaxBytes,
+      (photo) =>
+        (photo.size ?? reportLimits.evidenceMaxBytes + 1) >
+        reportLimits.evidenceMaxBytes,
     )
   ) {
     errors.evidence = "Each prepared photo must be 5 MB or smaller.";
@@ -161,7 +172,7 @@ export function validateReportForm(
 
 export function reportDetails(form: ComplaintFormState) {
   return {
-      version: 1 as const,
+    version: 1 as const,
     categoryDescription: form.categoryDescription.trim() || null,
     typeDescription: form.typeDescription.trim() || null,
     kwhmTransfer:
@@ -179,8 +190,7 @@ export function conditionalReportPayload(form: ComplaintFormState) {
   return {
     categoryDescription: details.categoryDescription,
     typeDescription: details.typeDescription,
-    currentRegisteredName:
-      details.kwhmTransfer?.currentRegisteredName ?? null,
+    currentRegisteredName: details.kwhmTransfer?.currentRegisteredName ?? null,
     requestedRegisteredName:
       details.kwhmTransfer?.requestedRegisteredName ?? null,
     reportDetails: details,
