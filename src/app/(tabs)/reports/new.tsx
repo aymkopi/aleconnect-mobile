@@ -1,12 +1,6 @@
 import { ChildAppBar } from "@/components/child-app-bar";
 import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import {
-  Checkbox,
-  CheckboxIcon,
-  CheckboxIndicator,
-  CheckboxLabel,
-} from "@/components/ui/checkbox";
-import {
   FormControl,
   FormControlError,
   FormControlErrorText,
@@ -41,6 +35,8 @@ import { useConsumerProfileContext } from "@/context/consumer-profile-context";
 import { useReportQueue } from "@/context/report-queue-context";
 import { AlbayLocationPickerSheet } from "@/features/maps/albay-location-picker-sheet";
 import { StaticLocationMap } from "@/features/maps/static-location-map";
+import { findCanonicalLocationByBarangayPsgc } from "@/features/reports/address";
+import { findAlbayBarangay } from "@/features/reports/albay-barangays";
 import { EvidencePhotoViewer } from "@/features/reports/components/evidence-photo-viewer";
 import {
   conditionalReportPayload,
@@ -95,7 +91,52 @@ type SelectOption = {
   value: string;
   label: string;
 };
+type ReportLocationSnapshot = {
+  municipalityCode: string;
+  barangayPsgc: string;
+  purok: string;
+  landmark: string;
+  latitude: number | null;
+  longitude: number | null;
+  locationVerified: boolean;
+};
 
+const emptyReportLocation: ReportLocationSnapshot = {
+  municipalityCode: "",
+  barangayPsgc: "",
+  purok: "",
+  landmark: "",
+  latitude: null,
+  longitude: null,
+  locationVerified: false,
+};
+
+function snapshotReportLocation(
+  form: ComplaintFormState,
+): ReportLocationSnapshot {
+  return {
+    municipalityCode: form.municipalityCode,
+    barangayPsgc: form.barangayPsgc,
+    purok: form.purok,
+    landmark: form.landmark,
+    latitude: form.latitude,
+    longitude: form.longitude,
+    locationVerified: form.locationVerified,
+  };
+}
+
+function isVerifiedReportLocation(
+  location: ReportLocationSnapshot | null,
+): location is ReportLocationSnapshot {
+  return Boolean(
+    location &&
+    location.locationVerified &&
+    location.latitude != null &&
+    location.longitude != null &&
+    location.municipalityCode &&
+    location.barangayPsgc,
+  );
+}
 function ReportInput({
   label,
   value,
@@ -248,19 +289,42 @@ function findHomeAddress(
   meta: ComplaintMeta,
   profile: ReturnType<typeof useConsumerProfileContext>["profile"],
 ) {
-  const municipality = meta.municipalities.find(
-    (item) =>
-      item.name.toLowerCase() === profile?.municipality?.trim().toLowerCase(),
+  const coordinates = readCoordinates(profile?.homeCoordinates);
+
+  if (
+    !coordinates ||
+    !isWithinAlbay(coordinates.latitude, coordinates.longitude)
+  ) {
+    return {
+      municipalityCode: "",
+      barangayPsgc: "",
+      purok: profile?.purokOrStreet ?? "",
+      landmark: "",
+    };
+  }
+
+  const detectedBarangay = findAlbayBarangay(
+    coordinates.latitude,
+    coordinates.longitude,
   );
-  const barangay = meta.barangays.find(
-    (item) =>
-      item.municipalityCode === municipality?.code &&
-      item.name.toLowerCase() === profile?.barangay?.trim().toLowerCase(),
+
+  if (!detectedBarangay) {
+    return {
+      municipalityCode: "",
+      barangayPsgc: "",
+      purok: profile?.purokOrStreet ?? "",
+      landmark: "",
+    };
+  }
+
+  const canonical = findCanonicalLocationByBarangayPsgc(
+    detectedBarangay.barangayPsgc,
+    meta,
   );
 
   return {
-    municipalityCode: municipality?.code ?? "",
-    barangayPsgc: barangay?.code ?? "",
+    municipalityCode: canonical.municipality?.code ?? "",
+    barangayPsgc: canonical.barangay?.code ?? "",
     purok: profile?.purokOrStreet ?? "",
     landmark: "",
   };
@@ -296,7 +360,12 @@ export default function NewComplaintRoute() {
   const isLeavingToParentRef = useRef(false);
   const isMountedRef = useRef(true);
   const isSubmittingRef = useRef(false);
-  const [mutedColor, successColor] = useAppColors(["muted", "success"]);
+  const lastManualLocationRef = useRef<ReportLocationSnapshot | null>(null);
+  const [mutedColor, successColor, accentColor] = useAppColors([
+    "muted",
+    "success",
+    "primary",
+  ]);
   const { profile } = useConsumerProfileContext();
   const [meta, setMeta] = useState<ComplaintMeta>(emptyComplaintMeta);
   const [isMapSheetOpen, setIsMapSheetOpen] = useState(false);
@@ -360,8 +429,8 @@ export default function NewComplaintRoute() {
       ...(current.useHomeAddress
         ? {
             ...homeAddress,
-            latitude: homeCoordinates?.latitude ?? current.latitude,
-            longitude: homeCoordinates?.longitude ?? current.longitude,
+            latitude: homeCoordinates?.latitude ?? null,
+            longitude: homeCoordinates?.longitude ?? null,
             locationVerified: Boolean(
               homeCoordinates &&
               isWithinAlbay(
@@ -410,19 +479,6 @@ export default function NewComplaintRoute() {
       label: type.title,
     }));
 
-  const municipalityOptions = meta.municipalities.map((municipality) => ({
-    value: municipality.code,
-    label: municipality.name,
-  }));
-
-  // Filtered barangay list.
-  // Used only by the Barangay dropdown based on selected municipality.
-  const barangayOptions = meta.barangays
-    .filter((barangay) => barangay.municipalityCode === form.municipalityCode)
-    .map((barangay) => ({
-      value: barangay.code,
-      label: barangay.name,
-    }));
   const formErrors = validateReportForm(
     form,
     selectedCategory,
@@ -849,6 +905,116 @@ export default function NewComplaintRoute() {
       setEvidencePickerError("Photo library could not be opened. Try again.");
     }
   };
+  const toggleHomeAddress = () => {
+    const homeCoordinates = readCoordinates(profile?.homeCoordinates);
+
+    const homeAddress = findHomeAddress(meta, profile);
+
+    setForm((current) => {
+      const shouldUseHomeAddress = !current.useHomeAddress;
+
+      if (shouldUseHomeAddress) {
+        // Preserve the currently confirmed non-home location
+        // before temporarily switching to Home Address.
+        const currentManualLocation = snapshotReportLocation(current);
+
+        if (isVerifiedReportLocation(currentManualLocation)) {
+          lastManualLocationRef.current = currentManualLocation;
+        }
+
+        return {
+          ...current,
+
+          useHomeAddress: true,
+
+          ...homeAddress,
+
+          latitude: homeCoordinates?.latitude ?? null,
+          longitude: homeCoordinates?.longitude ?? null,
+
+          locationVerified: Boolean(
+            homeCoordinates &&
+            isWithinAlbay(
+              homeCoordinates.latitude,
+              homeCoordinates.longitude,
+            ) &&
+            homeAddress.municipalityCode &&
+            homeAddress.barangayPsgc,
+          ),
+        };
+      }
+
+      const previousManualLocation = lastManualLocationRef.current;
+
+      const restoredManualLocation = isVerifiedReportLocation(
+        previousManualLocation,
+      )
+        ? previousManualLocation
+        : emptyReportLocation;
+
+      return {
+        ...current,
+
+        useHomeAddress: false,
+
+        ...restoredManualLocation,
+      };
+    });
+  };
+  const handleHomeAddressPress = () => {
+    const homeCoordinates = readCoordinates(profile?.homeCoordinates);
+
+    const homeAddress = findHomeAddress(meta, profile);
+
+    setForm((current) => {
+      // HOME IS CURRENTLY OFF:
+      // switch to Home Address.
+      if (!current.useHomeAddress) {
+        // Preserve the current manual location so it can
+        // be restored when Home Address is turned off.
+        const currentManualLocation = snapshotReportLocation(current);
+
+        if (isVerifiedReportLocation(currentManualLocation)) {
+          lastManualLocationRef.current = currentManualLocation;
+        }
+
+        return {
+          ...current,
+
+          useHomeAddress: true,
+
+          ...homeAddress,
+
+          latitude: homeCoordinates?.latitude ?? null,
+          longitude: homeCoordinates?.longitude ?? null,
+
+          locationVerified: Boolean(
+            homeCoordinates &&
+            isWithinAlbay(
+              homeCoordinates.latitude,
+              homeCoordinates.longitude,
+            ) &&
+            homeAddress.municipalityCode &&
+            homeAddress.barangayPsgc,
+          ),
+        };
+      }
+
+      // HOME IS CURRENTLY ON:
+      // return to the last manually confirmed report location.
+      const previousManualLocation = lastManualLocationRef.current;
+
+      return {
+        ...current,
+
+        useHomeAddress: false,
+
+        ...(isVerifiedReportLocation(previousManualLocation)
+          ? previousManualLocation
+          : emptyReportLocation),
+      };
+    });
+  };
 
   const openMapPicker = () => {
     setIsMapSheetOpen(true);
@@ -1016,120 +1182,104 @@ export default function NewComplaintRoute() {
                   Address
                 </Text>
 
-                <Checkbox
-                  value="home-address"
-                  isChecked={form.useHomeAddress}
-                  onChange={(selected) => {
-                    const homeCoordinates = readCoordinates(
-                      profile?.homeCoordinates,
-                    );
-                    const homeAddress = findHomeAddress(meta, profile);
-
-                    setForm((current) => ({
-                      ...current,
-                      useHomeAddress: selected,
-                      ...(selected
-                        ? {
-                            ...homeAddress,
-                            latitude:
-                              homeCoordinates?.latitude ?? current.latitude,
-                            longitude:
-                              homeCoordinates?.longitude ?? current.longitude,
-                            locationVerified: Boolean(
-                              homeCoordinates &&
-                              isWithinAlbay(
-                                homeCoordinates.latitude,
-                                homeCoordinates.longitude,
-                              ) &&
-                              homeAddress.municipalityCode &&
-                              homeAddress.barangayPsgc,
-                            ),
-                          }
-                        : {
-                            municipalityCode: "",
-                            barangayPsgc: "",
-                            purok: "",
-                            landmark: "",
-                            latitude: null,
-                            longitude: null,
-                            locationVerified: false,
-                          }),
-                    }));
+                <Pressable
+                  accessibilityRole="checkbox"
+                  accessibilityState={{
+                    checked: form.useHomeAddress,
                   }}
-                  className="rounded-xl border border-border bg-secondary p-4"
+                  accessibilityLabel="Use home address"
+                  accessibilityHint={
+                    form.useHomeAddress
+                      ? "Turn off to return to your last selected report location"
+                      : "Use the home address saved to your account"
+                  }
+                  onPress={handleHomeAddressPress}
+                  className="flex-row items-center gap-3 rounded-xl border border-border bg-secondary p-4 active:opacity-80"
                 >
-                  <CheckboxIndicator>
-                    <CheckboxIcon as={Check} />
-                  </CheckboxIndicator>
+                  <View
+                    className={
+                      form.useHomeAddress
+                        ? "h-5 w-5 items-center justify-center rounded border border-primary bg-primary"
+                        : "h-5 w-5 items-center justify-center rounded border border-input bg-background"
+                    }
+                  >
+                    {form.useHomeAddress ? (
+                      <Check size={14} color="white" />
+                    ) : null}
+                  </View>
 
-                  <CheckboxLabel>Use home address</CheckboxLabel>
-                </Checkbox>
+                  <View className="min-w-0 flex-1">
+                    <Text className="text-sm font-semibold text-foreground">
+                      Use home address
+                    </Text>
 
-                <View className="flex-row items-end gap-2">
-                  <View className="flex-1">
-                    <SelectField
-                      isRequired
-                      label="Municipality"
-                      value={form.municipalityCode}
-                      placeholder="Select municipality"
-                      description="Choose the municipality where the issue is located."
-                      options={municipalityOptions}
-                      isDisabled={form.useHomeAddress}
-                      onChange={(value) => {
-                        setForm((current) => ({
-                          ...current,
-                          municipalityCode: value,
-                          barangayPsgc: "",
-                          latitude: null,
-                          longitude: null,
-                          locationVerified: false,
-                        }));
-                      }}
-                      isInvalid={
-                        showErrors && Boolean(formErrors.municipalityCode)
-                      }
-                      error={formErrors.municipalityCode}
-                    />
+                    <Text className="mt-0.5 text-xs leading-5 text-muted-foreground">
+                      {form.useHomeAddress
+                        ? "Using the home location saved to your account."
+                        : "Use the home location saved to your account."}
+                    </Text>
+                  </View>
+                </Pressable>
+                <View className="gap-3 rounded-xl border border-border bg-secondary p-4">
+                  <View className="flex-row items-start gap-3">
+                    <View className="h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                      <MapPin size={20} color={accentColor} />
+                    </View>
+
+                    <View className="flex-1">
+                      <Text className="text-xs font-bold text-muted-foreground">
+                        Report location
+                      </Text>
+
+                      {form.locationVerified &&
+                      selectedBarangay &&
+                      selectedMunicipality ? (
+                        <>
+                          <Text className="mt-1 text-base font-bold text-foreground">
+                            {selectedBarangay.name}, {selectedMunicipality.name}
+                          </Text>
+
+                          <View className="mt-2 flex-row items-center gap-1.5">
+                            <Check size={15} color={successColor} />
+
+                            <Text className="text-xs font-semibold text-muted-foreground">
+                              Location confirmed
+                            </Text>
+                          </View>
+                        </>
+                      ) : (
+                        <>
+                          <Text className="mt-1 text-sm font-semibold text-foreground">
+                            Choose where the problem is located
+                          </Text>
+
+                          <Text className="mt-1 text-xs leading-5 text-muted-foreground">
+                            We&apos;ll fill in the municipality and barangay for
+                            you.
+                          </Text>
+                        </>
+                      )}
+                    </View>
                   </View>
 
                   <Button
-                    className="h-12 w-12 rounded-xl"
-                    size="icon"
-                    variant="secondary"
-                    isDisabled={form.useHomeAddress}
+                    size="lg"
+                    variant="default"
+                    className="rounded-xl"
                     onPress={() => void openMapPicker()}
-                    accessibilityLabel="Open map picker"
                   >
-                    <ButtonIcon as={MapPin} height={20} width={20} />
+                    <ButtonIcon as={MapPin} height={18} width={18} />
+
+                    <ButtonText>
+                      {form.locationVerified
+                        ? "Change location"
+                        : "Choose location"}
+                    </ButtonText>
                   </Button>
                 </View>
 
-                <SelectField
-                  isRequired
-                  label="Barangay"
-                  value={form.barangayPsgc}
-                  placeholder="Select barangay"
-                  description="Choose a barangay within the selected municipality."
-                  options={barangayOptions}
-                  onChange={(value) =>
-                    setForm((current) => ({
-                      ...current,
-                      barangayPsgc: value,
-                      locationVerified: Boolean(
-                        current.latitude != null &&
-                        current.longitude != null &&
-                        isWithinAlbay(current.latitude, current.longitude),
-                      ),
-                    }))
-                  }
-                  isDisabled={form.useHomeAddress || !form.municipalityCode}
-                  isInvalid={showErrors && Boolean(formErrors.barangayPsgc)}
-                  error={formErrors.barangayPsgc}
-                />
-
                 <ReportInput
                   isRequired
-                  isDisabled={form.useHomeAddress}
                   label="Purok/Street"
                   value={form.purok}
                   placeholder="Purok or street"
@@ -1138,7 +1288,6 @@ export default function NewComplaintRoute() {
                 />
 
                 <ReportInput
-                  isDisabled={form.useHomeAddress}
                   label="Landmark"
                   value={form.landmark}
                   placeholder="Nearest landmark"
@@ -1159,7 +1308,7 @@ export default function NewComplaintRoute() {
           <>
             <View className="flex-1 gap-4 rounded-lg border border-border bg-card p-4">
               <View className="gap-2">
-                <Text className="ml-2 text-sm text-muted-foreground">
+                <Text className="text-sm font-semibold text-muted-foreground">
                   Report details
                 </Text>
                 {selectedCategory?.requiresDescription ? (
@@ -1331,7 +1480,7 @@ export default function NewComplaintRoute() {
 
         {step === 4 ? (
           <View className="gap-4 rounded-lg border border-border bg-card p-4">
-            <Heading size="md">Preview</Heading>
+            <Heading size="md">Review & Submit</Heading>
             {[
               ["Reported by", displayName],
               ["Category", selectedCategory?.title],
@@ -1471,7 +1620,7 @@ export default function NewComplaintRoute() {
       <Modal
         isOpen={isEvidenceSourcePickerOpen}
         onClose={() => setIsEvidenceSourcePickerOpen(false)}
-        size="sm"
+        size="md"
       >
         <ModalBackdrop />
 
@@ -1505,7 +1654,7 @@ export default function NewComplaintRoute() {
                 </Text>
               </View>
             </Pressable>
-
+            <View className="h-2"></View>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Choose evidence photos from gallery"
@@ -1554,24 +1703,35 @@ export default function NewComplaintRoute() {
         meta={meta}
         onClose={() => setIsMapSheetOpen(false)}
         onConfirm={({ coordinates, address }) => {
-          setForm((current) => ({
-            ...current,
-
-            useHomeAddress: false,
-
+          const nextLocation: ReportLocationSnapshot = {
             latitude: coordinates.latitude,
             longitude: coordinates.longitude,
 
             municipalityCode: address.municipalityCode,
             barangayPsgc: address.barangayPsgc,
 
-            purok: address.purok?.trim() || current.purok,
+            // Don't carry street/landmark information from the old
+            // location into a newly confirmed map point.
+            purok: address.purok?.trim() ?? "",
+            landmark: "",
 
             locationVerified: Boolean(
               address.municipalityCode &&
               address.barangayPsgc &&
               isWithinAlbay(coordinates.latitude, coordinates.longitude),
             ),
+          };
+
+          lastManualLocationRef.current = nextLocation;
+
+          setForm((current) => ({
+            ...current,
+
+            // Choosing another point means this report is no longer
+            // using the saved home location.
+            useHomeAddress: false,
+
+            ...nextLocation,
           }));
 
           setIsMapSheetOpen(false);

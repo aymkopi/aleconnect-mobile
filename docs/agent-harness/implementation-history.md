@@ -1,5 +1,19 @@
 # Implementation history
 
+## 2026-08-19 - Report location integrity and home/manual location switching
+
+- Repository: mobile `aleconnect-mobile`, branch `fix/report-location-integrity`.
+- Previous implementation point: `4b07e18a1a57fa566e27cd2ffda7a448c5f748a1` (`refactor: update image assets and clean up unused code in profile and reports`).
+- Scope: hardened consumer report location selection so latitude/longitude and the Albay barangay GeoJSON boundary are authoritative for report geography. Municipality and barangay are derived from the confirmed map point instead of being independently editable.
+- Location UX: replaced editable Municipality/Barangay controls with a confirmed report-location summary and explicit Change Location action. Purok/Street and Landmark remain supplemental editable details.
+- Home/manual switching: preserves the most recent verified non-home report location while temporarily using the saved Home Address. Returning from Home restores that manual location instead of clearing or redetecting it.
+- Home control: replaced the stateful checkbox implementation with a controlled Pressable using `form.useHomeAddress` as the sole location-source state, preventing programmatic map changes from desynchronizing the Home Address control.
+- Map behavior: every location-picker session initializes from the report's currently active coordinates, clears stale resolved-address state, and resolves canonical Municipality/Barangay again before confirmation.
+- Validation: report submission requires coordinates inside Albay, a verified location, and a canonical barangay-to-municipality metadata relationship.
+- Files: `src/app/(tabs)/reports/new.tsx`, `src/features/maps/albay-location-picker-sheet.tsx`, `src/features/reports/address.ts`, `src/features/reports/contract.ts`, `tests/report-address.test.mjs`, `tests/report-location-integrity.test.mjs`, and this implementation-history entry.
+- Verification: focused report-location tests, TypeScript validation, lint, and manual Home Address/manual-location switching scenarios.
+- Git/Deployment: merged mobile source only; no Expo/EAS publication, app-store release, backend deployment, database migration, or production infrastructure change is included.
+
 ## 2026-08-18 - Unified Service Memo consumer updates
 
 - Repositories: mobile `aleconnect-mobile` branch `agent/unify-service-memo-addenda`; coordinated staff/API branch `agent/unify-service-memo-addenda` owns canonical addendum publication and the complaint-detail contract.
