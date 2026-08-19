@@ -43,6 +43,59 @@ function findPlace<T extends { name: string }>(
   });
 }
 
+function normalizePsgc(value: string | number | null | undefined) {
+  if (value == null) return "";
+  return String(value).replace(/\D/g, "");
+}
+
+function getPsgcVariants(value: string | number | null | undefined) {
+  const code = normalizePsgc(value);
+  const variants = new Set<string>();
+
+  if (!code) return variants;
+
+  variants.add(code);
+
+  if (code.length === 10) {
+    variants.add(code.slice(0, 2) + code.slice(3));
+  }
+
+  if (code.length === 9) {
+    variants.add(code.slice(0, 2) + "0" + code.slice(2));
+  }
+
+  return variants;
+}
+
+export function psgcMatches(
+  first: string | number | null | undefined,
+  second: string | number | null | undefined,
+) {
+  const firstVariants = getPsgcVariants(first);
+  const secondVariants = getPsgcVariants(second);
+
+  return [...firstVariants].some((value) => secondVariants.has(value));
+}
+
+export function findCanonicalLocationByBarangayPsgc(
+  barangayPsgc: string,
+  meta: Pick<ComplaintMeta, "municipalities" | "barangays">,
+) {
+  const barangay = meta.barangays.find((item) =>
+    psgcMatches(item.code, barangayPsgc),
+  );
+
+  const municipality = barangay
+    ? meta.municipalities.find(
+        (item) => item.code === barangay.municipalityCode,
+      )
+    : undefined;
+
+  return {
+    barangay,
+    municipality,
+  };
+}
 export function resolvePsgcAddress(
   address: LocationGeocodedAddress,
   meta: Pick<ComplaintMeta, "municipalities" | "barangays">,

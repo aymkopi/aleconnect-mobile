@@ -44,8 +44,8 @@
         {
           "backgroundColor": "#E8F3FF",
           "android": {
-            "image": "./assets/images/aleconnect-icon-white.png",
-            "imageWidth": 76
+            "image": "./assets/images/aleconnect-icon-foreground.png",
+            "imageWidth": 100
           }
         }
       ],

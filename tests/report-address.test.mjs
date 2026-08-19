@@ -3,30 +3,38 @@ import test from "node:test";
 
 import {
   canUseResolvedPin,
+  findCanonicalLocationByBarangayPsgc,
   formatResolvedAddress,
   resolvePsgcAddress,
 } from "../src/features/reports/address.ts";
 
 const meta = {
   municipalities: [
-    { code: "0500500000", name: "Legazpi City" },
-    { code: "0501700000", name: "Municipality of Daraga" },
+    {
+      code: "11111111-1111-1111-1111-111111111111",
+      name: "Legazpi City",
+    },
   ],
+
   barangays: [
     {
       code: "0500501001",
       name: "Barangay 1 - Em's Barrio",
-      municipalityCode: "0500500000",
+      municipalityCode: "11111111-1111-1111-1111-111111111111",
       municipalityName: "Legazpi City",
-    },
-    {
-      code: "0501701001",
-      name: "Anislag",
-      municipalityCode: "0501700000",
-      municipalityName: "Municipality of Daraga",
     },
   ],
 };
+test("barangay PSGC resolves the internal municipality id without reverse geocoding", () => {
+  const resolved = findCanonicalLocationByBarangayPsgc("0500501001", meta);
+
+  assert.equal(
+    resolved.municipality?.code,
+    "11111111-1111-1111-1111-111111111111",
+  );
+
+  assert.equal(resolved.barangay?.code, "0500501001");
+});
 
 test("reverse geocoding resolves Albay municipality and barangay PSGC", () => {
   const resolved = resolvePsgcAddress(
@@ -47,7 +55,10 @@ test("reverse geocoding resolves Albay municipality and barangay PSGC", () => {
     meta,
   );
 
-  assert.equal(resolved.municipalityCode, "0500500000");
+  assert.equal(
+    resolved.municipalityCode,
+    "11111111-1111-1111-1111-111111111111",
+  );
   assert.equal(resolved.barangayPsgc, "0500501001");
   assert.equal(resolved.purok, "12 Rizal Street");
   assert.equal(
@@ -76,11 +87,11 @@ test("a verified Albay municipality can use the pin before manual barangay selec
     meta,
   );
 
-  assert.equal(resolved.municipalityCode, "0500500000");
+  assert.equal(
+    resolved.municipalityCode,
+    "11111111-1111-1111-1111-111111111111",
+  );
   assert.equal(resolved.barangayPsgc, "");
   assert.equal(canUseResolvedPin(resolved), true);
-  assert.equal(
-    canUseResolvedPin({ ...resolved, municipalityCode: "" }),
-    false,
-  );
+  assert.equal(canUseResolvedPin({ ...resolved, municipalityCode: "" }), false);
 });

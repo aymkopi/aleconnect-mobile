@@ -375,41 +375,7 @@ export default function NewComplaintRoute() {
         : {}),
     }));
   }, [meta, profile]);
-  function normalizePsgc(value: string | number | null | undefined) {
-    if (value == null) return "";
 
-    return String(value).replace(/\D/g, "");
-  }
-
-  function getPsgcVariants(value: string | number | null | undefined) {
-    const code = normalizePsgc(value);
-
-    const variants = new Set<string>();
-
-    if (!code) return variants;
-
-    variants.add(code);
-
-    if (code.length === 10) {
-      variants.add(code.slice(0, 2) + code.slice(3));
-    }
-
-    if (code.length === 9) {
-      variants.add(code.slice(0, 2) + "0" + code.slice(2));
-    }
-
-    return variants;
-  }
-
-  function psgcMatches(
-    first: string | number | null | undefined,
-    second: string | number | null | undefined,
-  ) {
-    const firstVariants = getPsgcVariants(first);
-    const secondVariants = getPsgcVariants(second);
-
-    return [...firstVariants].some((value) => secondVariants.has(value));
-  }
   const selectedCategory = meta.categories.find(
     (category) => category.id === form.categoryId,
   );
@@ -447,13 +413,6 @@ export default function NewComplaintRoute() {
   const municipalityOptions = meta.municipalities.map((municipality) => ({
     value: municipality.code,
     label: municipality.name,
-  }));
-
-  // Complete barangay list.
-  // Used when matching a barangay returned by the map picker.
-  const allBarangayOptions = meta.barangays.map((barangay) => ({
-    value: barangay.code,
-    label: barangay.name,
   }));
 
   // Filtered barangay list.
@@ -1594,15 +1553,7 @@ export default function NewComplaintRoute() {
         initialCoordinates={mapPickerInitialCoordinates}
         meta={meta}
         onClose={() => setIsMapSheetOpen(false)}
-        onConfirm={({ coordinates, address, psgc }) => {
-          const matchedMunicipality = municipalityOptions.find((option) =>
-            psgcMatches(option.value, psgc.municipality),
-          );
-
-          const matchedBarangay = allBarangayOptions.find((option) =>
-            psgcMatches(option.value, psgc.barangay),
-          );
-
+        onConfirm={({ coordinates, address }) => {
           setForm((current) => ({
             ...current,
 
@@ -1611,14 +1562,16 @@ export default function NewComplaintRoute() {
             latitude: coordinates.latitude,
             longitude: coordinates.longitude,
 
-            municipalityCode:
-              matchedMunicipality?.value ?? address.municipalityCode ?? "",
-
-            barangayPsgc: matchedBarangay?.value ?? address.barangayPsgc ?? "",
+            municipalityCode: address.municipalityCode,
+            barangayPsgc: address.barangayPsgc,
 
             purok: address.purok?.trim() || current.purok,
 
-            locationVerified: true,
+            locationVerified: Boolean(
+              address.municipalityCode &&
+              address.barangayPsgc &&
+              isWithinAlbay(coordinates.latitude, coordinates.longitude),
+            ),
           }));
 
           setIsMapSheetOpen(false);

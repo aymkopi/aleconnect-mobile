@@ -569,14 +569,6 @@ export default function ProfileDetailsRoute() {
               <Text className="text-xs text-muted-foreground" numberOfLines={2}>
                 {displayAccountNumber}
               </Text>
-              {avatarPhoto ? (
-                <Text
-                  className="text-xs text-muted-foreground"
-                  numberOfLines={1}
-                >
-                  Selected photo: {avatarPhoto.fileName ?? "avatar.jpg"}
-                </Text>
-              ) : null}
               {isUploadingAvatar ? (
                 <Text className="text-xs text-muted-foreground">
                   Uploading avatar...

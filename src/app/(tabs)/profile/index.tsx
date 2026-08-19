@@ -432,8 +432,6 @@ export default function ProfileRoute() {
           description="ALECO announcements and public updates"
           onPress={() =>
             void openPreferredLink({
-              appUrl:
-                "fb://facewebmodal/f?href=https://www.facebook.com/albayelectric/",
               webUrl: "https://www.facebook.com/albayelectric",
             })
           }

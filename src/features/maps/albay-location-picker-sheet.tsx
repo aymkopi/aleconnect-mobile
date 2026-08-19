@@ -21,6 +21,7 @@ import {
   type MapLibreModule,
 } from "@/features/maps/map-runtime";
 import {
+  findCanonicalLocationByBarangayPsgc,
   formatResolvedAddress,
   resolvePsgcAddress,
   type ResolvedReportAddress,
@@ -149,7 +150,7 @@ function createFallbackGeocodedAddress(
     region: "Albay",
     street: null,
     streetNumber: null,
-    subregion: barangay.barangayName,
+    subregion: null,
     timezone: null,
   } as GeocodedAddressWithFormatted;
 }
@@ -161,14 +162,15 @@ function sanitizeGeocodedAddress(
   return {
     ...address,
 
-    // Do not let a Plus Code become the visible street/purok value.
     name: stripLeadingPlusCode(address.name),
     street: stripLeadingPlusCode(address.street),
     formattedAddress: stripLeadingPlusCode(address.formattedAddress),
 
-    // The polygon boundary is authoritative for the barangay.
+    // GeoJSON is authoritative for barangay.
     district: barangay.barangayName,
-    subregion: barangay.barangayName,
+
+    // Preserve the native municipality/subregion value.
+    subregion: address.subregion,
   };
 }
 
@@ -182,11 +184,32 @@ function resolveAddressWithBarangay(
     barangay,
   );
 
-  const resolved = resolvePsgcAddress(sourceAddress, meta);
+  const reverseGeocoded = resolvePsgcAddress(sourceAddress, meta);
+
+  const canonical = findCanonicalLocationByBarangayPsgc(
+    barangay.barangayPsgc,
+    meta,
+  );
 
   return {
-    ...resolved,
-    purok: stripLeadingPlusCode(resolved.purok) ?? "",
+    ...reverseGeocoded,
+
+    municipalityCode:
+      canonical.municipality?.code ?? reverseGeocoded.municipalityCode,
+
+    municipalityName:
+      canonical.municipality?.name ?? reverseGeocoded.municipalityName,
+
+    barangayPsgc: canonical.barangay?.code ?? reverseGeocoded.barangayPsgc,
+
+    barangayName: canonical.barangay?.name ?? barangay.barangayName,
+
+    // GeoJSON match already establishes that this is an Albay barangay.
+    province: "Albay",
+    isInAlbay: true,
+
+    // Native reverse geocoding is now supplementary only.
+    purok: stripLeadingPlusCode(reverseGeocoded.purok) ?? "",
   };
 }
 
