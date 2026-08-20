@@ -1,7 +1,7 @@
 # Active work
 
 Last reviewed: 2026-08-20
-Current branch: `codex/mobile-operations-parity` (unmerged local integration branch; prior `master` release evidence remains below).
+Current branch: `master` (unused-module cleanup locally merged; prior `codex/mobile-operations-parity` integration context remains below).
 Active plan: `../aleconnect/docs/superpowers/plans/2026-08-13-mobile-operations-parity.md`; Tasks 1–9 are locally implemented/verified, pending controller-owned full-branch review and integration.
 Next task: obtain the fresh whole-branch Sol review, resolve any finding through the designated Terra lane, then repeat the listed gates before merge. Do not publish EAS/store artifacts or deploy staff infrastructure from this handoff.
 Known blockers: no combined reviewed/integrated evidence for the separately owned `codex/push-dispatch-engine`; staff database runtime is intentionally unverified without worktree-local credentials. Preserve Graphify outputs.
@@ -17,10 +17,11 @@ Harness fix evidence: `node --test tests/agent-harness.test.mjs` -> 28/28 passed
 
 Verify branch, worktree, source, and connected device again before relying on this handoff.
 
-## Unused module and dependency cleanup (2026-08-20, local and uncommitted)
+## Unused module and dependency cleanup (2026-08-20, committed and locally merged)
 
 - Scope: removed 14 generated UI/context files with no inbound runtime imports (`actionsheet`, `box`, `card`, `checkbox`, `fab`, `hstack`, `popover`, and the unused context barrel). Removed the no-op `expo-web-browser` config plugin and 11 redundant direct dependencies; transitive navigation/Gluestack/Expo packages required by retained code remain installed.
 - Verification: `npx tsc --noEmit`, `npm run lint`, `npm run harness:check`, and `git diff --check` passed; lint retained five existing warnings in untouched profile/report/map files; serial Node tests reported 141 passed and 6 existing UI contract failures; `npx expo-doctor` passed 19/20 and reported only the pre-existing Expo SDK patch-version drift. Source/config reference scan found no deleted-module or removed-dependency references.
 - Boundary: no API/shared contract, database, deployment, EAS/store release, native source behavior, or device state changed. Graphify was refreshed to 1,917 nodes, 3,083 edges, and 176 communities.
-- Rollback: restore the deleted mobile files, app plugin line, package entries, and lockfile from `HEAD`; no API, database, native artifact, or persisted-data rollback is required.
-- Next: resolve the existing six test failures and Expo patch drift separately before committing or publishing.
+- Rollback: restore the deleted mobile files, app plugin line, package entries, and lockfile from pre-cleanup base commit `8922e56`; no API, database, native artifact, or persisted-data rollback is required.
+- Status: cleanup commit `59f98f6` was created on `codex/unused-module-cleanup` and fast-forwarded locally into `master`; no EAS/native build, device release, backend deployment, database mutation, or secret output occurred.
+- Next: resolve the existing six test failures and Expo patch drift separately; no publishing or deployment is part of this cleanup.

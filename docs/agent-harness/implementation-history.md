@@ -292,17 +292,18 @@
 - Remaining risks: audience text requires the additive staff API field. Until that backend contract is deployed and cached advisory data refreshes, the audience line is safely omitted.
 - Next: verify the coordinated staff API contract, deploy the additive backend field first, then release the compatible mobile UI.
 
-## 2026-08-20 - Mobile unused module and dependency cleanup
+## 2026-08-20 - Mobile unused module and dependency cleanup (committed and locally merged)
 
 - Repositories: `aleconnect-mobile`; no staff/API contract change.
 - Scope: deleted 14 unreferenced generated modules under `src/components/ui/{actionsheet,box,card,checkbox,fab,hstack,popover}` plus `src/context/index.ts`. Removed the no-op `expo-web-browser` app plugin and these unused direct dependencies: `@react-aria/utils`, `@react-navigation/elements`, `@react-navigation/native-stack`, `expo-blur`, `expo-glass-effect`, `expo-linear-gradient`, `expo-symbols`, `expo-system-ui`, `expo-web-browser`, `tailwind-merge`, and `tailwind-variants`. Package lock and local installed dependencies were pruned accordingly.
 - Files: the 14 deleted source files, `app.json`, `package.json`, `package-lock.json`, and this implementation-history entry.
 - Contracts: source/config scans found no references to deleted paths or removed direct packages. Required transitive packages remain owned by Gluestack, Expo Router, or navigation packages; `expo-dev-client` remains because the development-client EAS profile requires it. No API, authentication, notification, persisted-data, database, staff, or native source contract changed.
 - Verification: `npx tsc --noEmit`, `npm run lint`, and `npm run harness:check` passed; lint retained five existing warnings; serial `node --test --test-concurrency=1 tests/*.test.mjs` reported 141 passed and 6 existing failures in hotline sheet, advisory date, image-permission, and profile UI assertions. `npx expo-doctor` passed 19/20, with the sole failure reporting 15 Expo packages one patch behind the SDK-required versions; no unrelated upgrade was applied. `git diff --check` is clean. `graphify update .` rebuilt 1,917 nodes, 3,083 edges, and 176 communities.
-- Git/Deployment: local uncommitted mobile cleanup only; no EAS/native build, device release, backend deployment, database mutation, or secret output occurred.
-- Status: local uncommitted mobile cleanup only. No EAS/native build, device release, backend deployment, database mutation, or secret output occurred.
+- Git/Deployment: cleanup commit `59f98f6` was created on `codex/unused-module-cleanup` and fast-forwarded locally into `master`; no EAS/native build, device release, backend deployment, database mutation, or secret output occurred.
+- Status: local `master` contains `59f98f6`; no EAS/native build, device release, backend deployment, database mutation, or secret output occurred.
+- Rollback: restore the deleted mobile files, app plugin line, package entries, and lockfile from pre-cleanup base commit `8922e56`; no API, database, native artifact, or persisted-data rollback is required.
 - Remaining risks: resolve the six pre-existing test failures and Expo SDK patch drift separately.
-- Next: resolve the six existing test failures and Expo patch drift separately before committing or publishing.
+- Next: resolve the six existing test failures and Expo patch drift separately; no publishing or deployment is part of this cleanup.
 
 ## 2026-08-17 - Evidence camera and gallery source picker
 
