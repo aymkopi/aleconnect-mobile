@@ -70,7 +70,6 @@
         }
       ],
       "expo-location",
-      "expo-web-browser",
       "./plugins/with-android-predictive-back-disabled",
       "./plugins/with-report-evidence-backup-exclusion",
       "@maplibre/maplibre-react-native",

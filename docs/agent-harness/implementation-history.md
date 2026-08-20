@@ -2,7 +2,7 @@
 
 ## 2026-08-19 - Report location integrity and home/manual location switching
 
-- Repository: mobile `aleconnect-mobile`, branch `fix/report-location-integrity`.
+- Repositories: mobile `aleconnect-mobile`, branch `fix/report-location-integrity`; the staff/API sibling remains authoritative for report metadata and submission.
 - Previous implementation point: `4b07e18a1a57fa566e27cd2ffda7a448c5f748a1` (`refactor: update image assets and clean up unused code in profile and reports`).
 - Scope: hardened consumer report location selection so latitude/longitude and the Albay barangay GeoJSON boundary are authoritative for report geography. Municipality and barangay are derived from the confirmed map point instead of being independently editable.
 - Location UX: replaced editable Municipality/Barangay controls with a confirmed report-location summary and explicit Change Location action. Purok/Street and Landmark remain supplemental editable details.
@@ -10,9 +10,12 @@
 - Home control: replaced the stateful checkbox implementation with a controlled Pressable using `form.useHomeAddress` as the sole location-source state, preventing programmatic map changes from desynchronizing the Home Address control.
 - Map behavior: every location-picker session initializes from the report's currently active coordinates, clears stale resolved-address state, and resolves canonical Municipality/Barangay again before confirmation.
 - Validation: report submission requires coordinates inside Albay, a verified location, and a canonical barangay-to-municipality metadata relationship.
+- Contracts: existing complaint metadata and report-submission payload contracts remain in use; no API route, database schema, authentication, notification, or persisted-cache contract changed.
 - Files: `src/app/(tabs)/reports/new.tsx`, `src/features/maps/albay-location-picker-sheet.tsx`, `src/features/reports/address.ts`, `src/features/reports/contract.ts`, `tests/report-address.test.mjs`, `tests/report-location-integrity.test.mjs`, and this implementation-history entry.
 - Verification: focused report-location tests, TypeScript validation, lint, and manual Home Address/manual-location switching scenarios.
 - Git/Deployment: merged mobile source only; no Expo/EAS publication, app-store release, backend deployment, database migration, or production infrastructure change is included.
+- Remaining risks: device-level map confirmation and Android back/keyboard behavior still require verification on the current native build after the source changes.
+- Next: rerun the full mobile gates, inspect the coordinated diff, and verify report-location switching on a current Android build before release.
 
 ## 2026-08-18 - Unified Service Memo consumer updates
 
@@ -288,6 +291,18 @@
 - Git/Deployment: mobile implementation only; no Expo/EAS/store publication is included.
 - Remaining risks: audience text requires the additive staff API field. Until that backend contract is deployed and cached advisory data refreshes, the audience line is safely omitted.
 - Next: verify the coordinated staff API contract, deploy the additive backend field first, then release the compatible mobile UI.
+
+## 2026-08-20 - Mobile unused module and dependency cleanup
+
+- Repositories: `aleconnect-mobile`; no staff/API contract change.
+- Scope: deleted 14 unreferenced generated modules under `src/components/ui/{actionsheet,box,card,checkbox,fab,hstack,popover}` plus `src/context/index.ts`. Removed the no-op `expo-web-browser` app plugin and these unused direct dependencies: `@react-aria/utils`, `@react-navigation/elements`, `@react-navigation/native-stack`, `expo-blur`, `expo-glass-effect`, `expo-linear-gradient`, `expo-symbols`, `expo-system-ui`, `expo-web-browser`, `tailwind-merge`, and `tailwind-variants`. Package lock and local installed dependencies were pruned accordingly.
+- Files: the 14 deleted source files, `app.json`, `package.json`, `package-lock.json`, and this implementation-history entry.
+- Contracts: source/config scans found no references to deleted paths or removed direct packages. Required transitive packages remain owned by Gluestack, Expo Router, or navigation packages; `expo-dev-client` remains because the development-client EAS profile requires it. No API, authentication, notification, persisted-data, database, staff, or native source contract changed.
+- Verification: `npx tsc --noEmit`, `npm run lint`, and `npm run harness:check` passed; lint retained five existing warnings; serial `node --test --test-concurrency=1 tests/*.test.mjs` reported 141 passed and 6 existing failures in hotline sheet, advisory date, image-permission, and profile UI assertions. `npx expo-doctor` passed 19/20, with the sole failure reporting 15 Expo packages one patch behind the SDK-required versions; no unrelated upgrade was applied. `git diff --check` is clean. `graphify update .` rebuilt 1,917 nodes, 3,083 edges, and 176 communities.
+- Git/Deployment: local uncommitted mobile cleanup only; no EAS/native build, device release, backend deployment, database mutation, or secret output occurred.
+- Status: local uncommitted mobile cleanup only. No EAS/native build, device release, backend deployment, database mutation, or secret output occurred.
+- Remaining risks: resolve the six pre-existing test failures and Expo SDK patch drift separately.
+- Next: resolve the six existing test failures and Expo patch drift separately before committing or publishing.
 
 ## 2026-08-17 - Evidence camera and gallery source picker
 
