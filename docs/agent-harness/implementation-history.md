@@ -1,5 +1,18 @@
 # Implementation history
 
+## 2026-08-26 - Consumer multi-account V18 release evidence
+
+- Repositories: coordinated mobile `aleconnect-mobile` is pushed to canonical `master` at `6eed61da65557c04faa878fd2cee3f73b8676087`; staff/API `aleconnect` is live on `main` at `e56731d6bd6b26c74aae1adb1c7e80f4f2cc3700`.
+- Scope: included the final iOS export-compliance metadata declaration without changing the consumer API or persisted-data contract. The obsolete pre-metadata Android build was canceled so only the final source commit remains active.
+- Files: `app.json` and this handoff entry; the multi-account product source is already present in the pushed feature commit.
+- Contracts: the export-compliance declaration is additive; account, report, location, identity, cache, queue, notification, and API contracts are unchanged by this release-only fix.
+- Verification: snapshot behavior passed 6/6; TypeScript, harness, and diff checks passed; full JavaScript coverage remains 172/178 with the same six unrelated baseline failures; lint has 0 errors and four existing warnings. EAS accepted the Android production upload as build `46a1019d-03de-4d16-8824-8a32c95ce4d8` (version code 3), currently in progress.
+- Release limits: automatic Google Play submission stopped because no Google service-account key is configured for non-interactive submission. iOS build/submission stopped because no Apple distribution credentials are configured. No store publication, physical-device verification, or push-tap verification is claimed.
+- Review/boundary: a fresh independent Sol High review was attempted but unavailable because of the platform usage limit, so no fresh approval is claimed. Production flags remain off, real email verification remains unavailable, and generated Graphify output is excluded from release commits.
+- Git/Deployment: mobile `master` is pushed at `6eed61d`; staff/API `main` is pushed and deployed before the Android build was queued. No store submission completed.
+- Remaining risks: Android build completion, Google Play service-account setup, Apple distribution credentials, real email verification, and physical-device/push verification remain outstanding.
+- Next: monitor the final Android build and complete store/device gates only after the required platform credentials are supplied.
+
 ## 2026-08-26 - Consumer multi-account V18 final remediation
 
 - Repositories: coordinated mobile `aleconnect-mobile` with authoritative staff/API sibling `aleconnect`.
