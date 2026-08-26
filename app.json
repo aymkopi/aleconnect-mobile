@@ -11,7 +11,8 @@
       "bundleIdentifier": "com.kapecakes.aleconnectmobile",
       "icon": "./assets/images/icon.png",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "ALEConnect uses your location to place complaint map pins."
+        "NSLocationWhenInUseUsageDescription": "ALEConnect uses your location to place complaint map pins.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
