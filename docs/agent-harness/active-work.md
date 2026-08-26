@@ -1,5 +1,13 @@
 # Active work
 
+## Consumer mock-verification confirmation correction (2026-08-26)
+
+- Status: compatible mobile handling is complete on isolated branch `codex/fix-email-setup-confirmation`; no EAS build, store release, merge, or push is included.
+- Scope: the email-setup screen now creates its durable confirmation key through the shared API request-ID helper and resets only a server-rejected `EMAIL_SETUP_CONFIRMATION_INVALID` key before retrying. The staff API accepts the same stable key from the body or `x-request-id`, so valid details no longer surface a generic retry-metadata error.
+- Contract: successful identity-setup payloads and replacement-token handling are unchanged. Unified email passwords remain identity-only and do not replace linked ALECO account passwords; claims and unlink retain account-password verification. No cache, offline queue, report, notification, permission, or native configuration changed.
+- Evidence: focused auth/account coverage passes 13/13; TypeScript, Android production export, and both project harnesses pass; lint has 0 errors/four existing warnings; the full suite remains 172/178 with exactly the same six unrelated baseline failures. Device confirmation and EAS/store publication are not claimed. Coordinated staff coverage passes lifecycle 404/404 with 2 explicit skips, child workflows 146/146, and deployment topology 34/34.
+- Next: release the backward-compatible staff API first, then include this compatible retry handling in the next mobile build when authorized.
+
 ## Consumer multi-account V18 release evidence (2026-08-26)
 
 - Status: coordinated mobile source is merged to canonical `master` at `6eed61da65557c04faa878fd2cee3f73b8676087`, with the iOS encryption-compliance metadata fix included. Android production build `46a1019d-03de-4d16-8824-8a32c95ce4d8` finished successfully and produced an AAB; automatic store submission stopped because the Google Play service-account key is not configured for non-interactive submission. iOS build/submission is blocked because Apple distribution credentials are not set up.

@@ -24,6 +24,7 @@ import {
   dismissEmailSetup,
   setupConsumerIdentity,
 } from "@/services/consumer-identity";
+import { createApiRequestId } from "@/services/api";
 
 type Step = "details" | "review" | "complete";
 
@@ -69,7 +70,7 @@ export default function EmailSetupRoute() {
     try {
       const normalizedEmail = email.trim().toLowerCase();
       if (setupAttempt.current?.email !== normalizedEmail) {
-        setupAttempt.current = { email: normalizedEmail, idempotencyKey: globalThis.crypto?.randomUUID?.() ?? `email_setup_${Date.now()}_${Math.random().toString(36).slice(2)}` };
+        setupAttempt.current = { email: normalizedEmail, idempotencyKey: createApiRequestId() };
       }
       await setupConsumerIdentity({ email, password, verification: "mock", idempotencyKey: setupAttempt.current.idempotencyKey });
       await refreshSession({ forceNetwork: true });
@@ -79,6 +80,9 @@ export default function EmailSetupRoute() {
       setupAttempt.current = null;
       setStep("complete");
     } catch (error) {
+      if (error && typeof error === "object" && "code" in error && error.code === "EMAIL_SETUP_CONFIRMATION_INVALID") {
+        setupAttempt.current = null;
+      }
       setErrorMessage(error instanceof Error ? error.message : "Email setup could not be completed.");
       setStep("review");
     } finally {

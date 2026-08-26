@@ -1,5 +1,18 @@
 # Implementation history
 
+## 2026-08-26 - Consumer mock-verification confirmation correction
+
+- Repositories: consumer `aleconnect-mobile` and authoritative staff/API sibling `aleconnect`, both isolated on `codex/fix-email-setup-confirmation`.
+- Scope: replaced the email-setup screen's inline UUID/fallback expression with the shared API request-ID generator and discarded only a rejected confirmation key before retry. The coordinated API now accepts the stable body key or matching request header and distinguishes confirmation metadata from incomplete email/password details.
+- Files: `src/app/email-setup.tsx`, `tests/consumer-account-contract.test.mjs`, and the two mobile harness handoffs; coordinated API files are recorded in the staff history.
+- Contracts: successful `/api/mobile/consumer-identity` behavior, replacement-token storage, account-context refresh, and setup dismissal remain unchanged. Unified email credentials remain separate from linked ALECO service-account credentials; no account password is overwritten. The server remains authoritative for identity, ownership, and credential checks.
+- Offline/Permissions: no new storage, private cache, offline queue, report, notification, permission, or native configuration behavior. Existing released clients remain compatible with the server-side fallback.
+- Verification: focused auth/account source coverage passes 13/13; `npx tsc --noEmit`, Android production export, and both project harnesses pass; lint has 0 errors/four existing warnings. The complete JavaScript suite remains 172/178 with the same six unrelated category-sheet, hotline, Manila-date, image-permission, and responsive-profile baselines. Coordinated staff lifecycle passes 404/404 with 2 explicit skips, child workflows 146/146, deployment topology 34/34, TypeScript, lint, and the 4,626-module production build. No emulator or physical-device interaction is claimed.
+- Git/Deployment: no merge, push, EAS build, store submission, staff deployment, database action, or production write occurred.
+- Rollback: revert the scoped mobile commit; no persisted-data rollback is needed.
+- Remaining risks: live consumer confirmation remains unverified until server release and a device/app session are available.
+- Next: ship the compatible staff API first, then release mobile only when separately authorized.
+
 ## 2026-08-26 - Consumer multi-account V18 release evidence
 
 - Repositories: coordinated mobile `aleconnect-mobile` is pushed to canonical `master` at `6eed61da65557c04faa878fd2cee3f73b8676087`; staff/API `aleconnect` is live on `main` at `e56731d6bd6b26c74aae1adb1c7e80f4f2cc3700`.

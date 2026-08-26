@@ -98,7 +98,10 @@ test("email setup preserves one logical idempotency key across confirm retries",
   const source = await readFile(new URL("../src/app/email-setup.tsx", import.meta.url), "utf8");
   assert.match(source, /useRef<\{ email: string; idempotencyKey: string \}/);
   assert.match(source, /setupAttempt\.current\?\.email !== normalizedEmail/);
+  assert.match(source, /idempotencyKey: createApiRequestId\(\)/);
   assert.match(source, /idempotencyKey: setupAttempt\.current\.idempotencyKey/);
+  assert.match(source, /EMAIL_SETUP_CONFIRMATION_INVALID/);
+  assert.match(source, /setupAttempt\.current = null/);
 });
 
 test("email setup dismissal is scoped to the legacy service account rather than globally", async () => {
