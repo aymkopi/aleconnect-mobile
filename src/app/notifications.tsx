@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
+import { useConsumerAccountContext } from "@/context/consumer-account-context";
 import { notificationDestinationFromNotification } from "@/services/notification-navigation";
 import {
   fetchNotifications,
@@ -21,7 +22,7 @@ import {
   formatManilaDateTime,
   manilaNotificationGroupTitle,
 } from "@/utils/manila-time";
-import { Redirect, useFocusEffect, useRouter } from "expo-router";
+import { type Href, Redirect, useFocusEffect, useRouter } from "expo-router";
 import {
   CheckCheck,
   ChevronRight,
@@ -108,8 +109,10 @@ function searchableText(notification: MobileNotification) {
 
 function NotificationDescription({
   notification,
+  showAccountLabel,
 }: {
   notification: MobileNotification;
+  showAccountLabel: boolean;
 }) {
   const [accentColor, mutedColor] = useAppColors(["accent", "muted"]);
   const description =
@@ -130,6 +133,7 @@ function NotificationDescription({
         </Text>
       ) : null}
       {description}
+      {showAccountLabel && !notification.identityLevel && (notification.accountNumber || notification.accountName) ? ` · ${[notification.accountNumber, notification.accountName].filter(Boolean).join(" · ")}` : ""}
     </Text>
   );
 }
@@ -138,10 +142,12 @@ function NotificationRow({
   notification,
   onOpen,
   showDivider,
+  showAccountLabel,
 }: {
   notification: MobileNotification;
   onOpen: (notification: MobileNotification) => void;
   showDivider: boolean;
+  showAccountLabel: boolean;
 }) {
   const [
     foregroundColor,
@@ -168,12 +174,15 @@ function NotificationRow({
   const Icon = notification.entityType === "advisory" ? Zap : FileText;
   const hasDestination = Boolean(
     notification.ticketId ||
-    (notification.entityType === "advisory" && notification.entityId),
+    (notification.entityType === "advisory" && notification.entityId) ||
+    notification.entityType === "account_linking",
   );
   const actionLabel = notification.ticketId
     ? "View report"
     : notification.entityType === "advisory" && notification.entityId
       ? "View advisory"
+      : notification.entityType === "account_linking"
+        ? "View account request"
       : !notification.isRead
         ? "Mark as read"
         : null;
@@ -190,7 +199,7 @@ function NotificationRow({
       }
       description={
         <View className="min-w-0">
-          <NotificationDescription notification={notification} />
+          <NotificationDescription notification={notification} showAccountLabel={showAccountLabel} />
           <View className="mt-2 flex-row flex-wrap items-center gap-2">
             <View className={`rounded-full px-2 py-1 ${tone.backgroundClass}`}>
               <Text className={`text-xs font-semibold ${tone.textClass}`}>
@@ -285,6 +294,7 @@ function LoadingState() {
 export default function NotificationsRoute() {
   const router = useRouter();
   const { session, isLoading: isSessionLoading } = useAuthSession();
+  const { accountContext } = useConsumerAccountContext();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const [accentColor] = useAppColors(["accent"]);
@@ -301,9 +311,11 @@ export default function NotificationsRoute() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isMarkingRead, setIsMarkingRead] = useState(false);
   const [notice, setNotice] = useState<Notice | null>(null);
+  const [serviceAccountId, setServiceAccountId] = useState<string | null>(null);
+  const isMultiAccount = (accountContext?.accounts.length ?? 0) > 1;
   const activeUserIdRef = useRef(session?.user.id);
   activeUserIdRef.current = session?.user.id;
-  const activeFilterKey = `${showUnreadOnly}:${selectedCategory ?? "all"}`;
+  const activeFilterKey = `${showUnreadOnly}:${selectedCategory ?? "all"}:${serviceAccountId ?? "all"}:${accountContext?.accessRevision ?? 0}`;
   const activeFilterKeyRef = useRef(activeFilterKey);
   activeFilterKeyRef.current = activeFilterKey;
   const bottomPadding = Math.max(insets.bottom, 16) + 20;
@@ -318,6 +330,9 @@ export default function NotificationsRoute() {
       const requestedFilterKey = activeFilterKey;
       const next = await fetchNotifications({
         userId,
+        identityUserId: accountContext?.identityUserId,
+        accessRevision: accountContext?.accessRevision,
+        serviceAccountId,
         force,
         unread: showUnreadOnly,
         categories: selectedCategory ? [selectedCategory] : undefined,
@@ -342,7 +357,7 @@ export default function NotificationsRoute() {
       );
       setIsLoading(false);
     },
-    [activeFilterKey, selectedCategory, session, showUnreadOnly],
+    [accountContext?.accessRevision, accountContext?.identityUserId, activeFilterKey, selectedCategory, serviceAccountId, session, showUnreadOnly],
   );
 
   const loadMore = useCallback(async () => {
@@ -353,6 +368,9 @@ export default function NotificationsRoute() {
     try {
       const next = await fetchNotifications({
         userId,
+        identityUserId: accountContext?.identityUserId,
+        accessRevision: accountContext?.accessRevision,
+        serviceAccountId,
         cursor: nextCursor,
         unread: showUnreadOnly,
         categories: selectedCategory ? [selectedCategory] : undefined,
@@ -387,6 +405,9 @@ export default function NotificationsRoute() {
     nextCursor,
     query,
     selectedCategory,
+    serviceAccountId,
+    accountContext?.accessRevision,
+    accountContext?.identityUserId,
     session,
     showUnreadOnly,
   ]);
@@ -472,7 +493,7 @@ export default function NotificationsRoute() {
   const markAllRead = async () => {
     setIsMarkingRead(true);
     try {
-      const next = await markAllNotificationsRead(session!.user.id);
+      const next = await markAllNotificationsRead(session!.user.id, { identityUserId: accountContext?.identityUserId, accessRevision: accountContext?.accessRevision });
       setNotifications((current) =>
         current.map((notification) => ({ ...notification, isRead: true })),
       );
@@ -499,6 +520,7 @@ export default function NotificationsRoute() {
         const next = await markNotificationsRead(
           [notification.id],
           session!.user.id,
+          { identityUserId: accountContext?.identityUserId, accessRevision: accountContext?.accessRevision },
         );
         setNotifications((current) =>
           current.map((item) =>
@@ -512,7 +534,7 @@ export default function NotificationsRoute() {
     }
 
     const destination = notificationDestinationFromNotification(notification);
-    if (destination) router.push(destination);
+    if (destination) router.push(destination as Href);
   };
 
   if (!isSessionLoading && !session) {
@@ -616,6 +638,7 @@ export default function NotificationsRoute() {
                 );
               })}
             </ScrollView>
+            {isMultiAccount ? <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-2" accessibilityLabel="Notification account filter"><Button size="sm" variant={!serviceAccountId ? "secondary" : "outline"} onPress={() => setServiceAccountId(null)}><ButtonText>All accounts</ButtonText></Button>{accountContext!.accounts.map((account) => <Button key={account.id} size="sm" variant={serviceAccountId === account.id ? "secondary" : "outline"} onPress={() => setServiceAccountId(account.id)}><ButtonText>{[account.accountNumber, account.registeredName].filter(Boolean).join(" · ")}</ButtonText></Button>)}</ScrollView> : null}
             {notice ? (
               <Alert
                 variant={notice.status === "danger" ? "destructive" : "default"}
@@ -674,6 +697,7 @@ export default function NotificationsRoute() {
                 notification={item}
                 onOpen={openNotification}
                 showDivider={false}
+                showAccountLabel={isMultiAccount}
               />
             </ListSection>
             {index < section.data.length - 1 ? <View className="h-2" /> : null}

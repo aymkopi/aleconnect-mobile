@@ -1,6 +1,6 @@
 import NetInfo from "@react-native-community/netinfo";
 import { useFonts } from "expo-font";
-import { Stack, useRouter } from "expo-router";
+import { type Href, Stack, useRouter } from "expo-router";
 import type * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -24,17 +24,21 @@ import {
 } from "@/components/ui/toast";
 import { PushNotificationsReceiver } from "@/components/push-notifications-receiver";
 import { AuthSessionProvider } from "@/context/auth-session-context";
+import { ConsumerAccountProvider } from "@/context/consumer-account-context";
 import { ReportQueueProvider } from "@/context/report-queue-context";
 import { useAuthSession } from "@/hooks/use-auth-session";
+import { useConsumerAccount } from "@/hooks/use-consumer-account";
 import { consumeForcedLogoutReason } from "@/services/api";
 import { clearAdvisoryCache } from "@/services/advisories";
 import { registerDevicePushToken } from "@/services/notification-settings";
 import {
   advisoryIdFromPushData,
+  accountLinkingPushFromData,
   ticketIdFromPushData,
   ticketStatusChangedEventFromPushData,
 } from "@/services/notification-navigation";
 import { invalidateNotifications } from "@/services/notifications";
+import { clearReportListCache } from "@/services/reports";
 import "@/services/report-background-sync";
 import {
   handleReportStatusPush,
@@ -96,7 +100,8 @@ function AppToast({
 
 function PushTokenBridge() {
   const router = useRouter();
-  const { session } = useAuthSession();
+  const { session, signOut } = useAuthSession();
+  const { accountContext } = useConsumerAccount();
   const toast = useToast();
   const pendingToken = useRef<string | null>(null);
   const appStateRef = useRef(AppState.currentState);
@@ -118,6 +123,24 @@ function PushTokenBridge() {
   const openNotificationTarget = useCallback(
     (response: Notifications.NotificationResponse) => {
       const data = response.notification.request.content.data;
+      const accountLink = accountLinkingPushFromData(data);
+      if (accountLink) {
+        if (accountLink.decision === "approved") {
+          // The approved link replaces the account session. Use the ordinary
+          // sign-out path so tokens and private providers are invalidated.
+          pendingToken.current = null;
+          void Promise.all([
+            userId ? clearReportListCache(userId) : Promise.resolve(),
+            userId ? clearAdvisoryCache({ userId, identityUserId: accountContext?.identityUserId, accessRevision: accountContext?.accessRevision }) : Promise.resolve(),
+            userId ? invalidateNotifications(userId) : Promise.resolve(),
+          ]).finally(() => signOut().finally(() => router.replace({ pathname: "/sign-in", params: { mode: "email", linked: "1" } })));
+        } else if (userId) {
+          router.push("/profile/accounts" as Href);
+        } else {
+          router.push({ pathname: "/sign-in", params: { mode: "email", accountLinkRequestId: accountLink.requestId } });
+        }
+        return;
+      }
       const ticketId = ticketIdFromPushData(data);
 
       if (ticketId) {
@@ -130,9 +153,10 @@ function PushTokenBridge() {
             requestReportRevalidation(userId);
           }
         }
+        const ticket = ticketStatusChangedEventFromPushData(data);
         router.push({
           pathname: "/report/[id]",
-          params: { id: ticketId, focus: "notification" },
+          params: { id: ticketId, focus: "notification", ...(ticket?.serviceAccountId ? { serviceAccountId: ticket.serviceAccountId } : {}) },
         });
         return;
       }
@@ -148,7 +172,7 @@ function PushTokenBridge() {
 
       router.push("/notifications");
     },
-    [router, userId],
+    [accountContext?.accessRevision, accountContext?.identityUserId, router, signOut, userId],
   );
 
   const handleForegroundNotification = useCallback(
@@ -156,7 +180,7 @@ function PushTokenBridge() {
       const data = notification.request.content.data;
       if (userId) {
         void Promise.all([
-          clearAdvisoryCache(userId),
+          clearAdvisoryCache({ userId, identityUserId: accountContext?.identityUserId, accessRevision: accountContext?.accessRevision }),
           handleReportStatusPush(data, userId),
         ]).then(() => invalidateNotifications(userId));
       }
@@ -178,7 +202,7 @@ function PushTokenBridge() {
         ),
       });
     },
-    [toast, userId],
+    [accountContext?.accessRevision, accountContext?.identityUserId, toast, userId],
   );
 
   useEffect(() => {
@@ -358,15 +382,22 @@ export default function RootLayout() {
       <KeyboardProvider>
         <AppUIProvider>
           <AuthSessionProvider>
-            <ReportQueueProvider>
-              <ForcedLogoutRedirect />
-              <ComplaintSubmissionToastHost />
-              <PushTokenBridge />
-              <StatusBar style="auto" />
-              <Stack>
+            <ConsumerAccountProvider>
+              <ReportQueueProvider>
+                <ForcedLogoutRedirect />
+                <ComplaintSubmissionToastHost />
+                <PushTokenBridge />
+                <StatusBar style="auto" />
+                <Stack>
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                 <Stack.Screen
                   name="sign-in"
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="email-setup"
                   options={{
                     headerShown: false,
                   }}
@@ -395,8 +426,9 @@ export default function RootLayout() {
                     headerShown: false,
                   }}
                 />
-              </Stack>
-            </ReportQueueProvider>
+                </Stack>
+              </ReportQueueProvider>
+            </ConsumerAccountProvider>
           </AuthSessionProvider>
         </AppUIProvider>
       </KeyboardProvider>

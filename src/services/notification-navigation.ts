@@ -1,8 +1,9 @@
 import type { MobileNotification } from "./notifications";
 
 export type MobileNotificationDestination =
-  | { pathname: "/report/[id]"; params: { id: string; focus: "notification" } }
-  | { pathname: "/advisory/[id]"; params: { id: string; focus: "notification" } };
+  | { pathname: "/report/[id]"; params: { id: string; focus: "notification"; serviceAccountId?: string } }
+  | { pathname: "/advisory/[id]"; params: { id: string; focus: "notification" } }
+  | { pathname: "/profile/accounts"; params: { requestId?: string; decision?: string } };
 
 export type TicketStatusChangedPush = {
   context: "ticket";
@@ -13,16 +14,20 @@ export type TicketStatusChangedPush = {
   status: string;
   changedAt: string;
   revision?: number;
+  serviceAccountId?: string;
 };
 
 export function notificationDestinationFromNotification(
-  notification: Pick<MobileNotification, "ticketId" | "entityType" | "entityId">,
+  notification: Pick<MobileNotification, "ticketId" | "entityType" | "entityId" | "serviceAccountId">,
 ): MobileNotificationDestination | null {
   if (notification.ticketId) {
     return {
       pathname: "/report/[id]",
-      params: { id: notification.ticketId, focus: "notification" },
+      params: { id: notification.ticketId, focus: "notification", ...(notification.serviceAccountId ? { serviceAccountId: notification.serviceAccountId } : {}) },
     };
+  }
+  if (notification.entityType === "account_linking") {
+    return { pathname: "/profile/accounts", params: notification.entityId ? { requestId: notification.entityId } : {} };
   }
   if (notification.entityType === "advisory" && notification.entityId) {
     return {
@@ -63,6 +68,7 @@ export function ticketStatusChangedEventFromPushData(
     typeof value.changedAt === "string" ? value.changedAt.trim() : "";
   const changedAtMs = Date.parse(changedAt);
   const revision = value.revision;
+  const serviceAccountId = typeof value.serviceAccountId === "string" ? value.serviceAccountId.trim() : "";
 
   if (!ticketId || !status || !changedAt || Number.isNaN(changedAtMs)) {
     return null;
@@ -83,7 +89,18 @@ export function ticketStatusChangedEventFromPushData(
     status,
     changedAt: new Date(changedAtMs).toISOString(),
     ...(revision === undefined ? {} : { revision: Number(revision) }),
+    ...(serviceAccountId ? { serviceAccountId } : {}),
   };
+}
+
+export type AccountLinkingPush = { context: "account_linking"; requestId: string; decision?: "approved" | "denied" };
+
+export function accountLinkingPushFromData(data: unknown): AccountLinkingPush | null {
+  if (!data || typeof data !== "object" || Array.isArray(data)) return null;
+  const value = data as Record<string, unknown>;
+  if (value.context !== "account_linking" || typeof value.requestId !== "string" || !value.requestId.trim()) return null;
+  const decision = value.decision === "approved" || value.decision === "denied" ? value.decision : undefined;
+  return { context: "account_linking", requestId: value.requestId.trim(), ...(decision ? { decision } : {}) };
 }
 
 export function advisoryIdFromPushData(data: unknown) {

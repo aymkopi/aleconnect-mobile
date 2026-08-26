@@ -17,6 +17,7 @@ import {
 import { ExtendedOutageStatusCard } from "@/features/reports/extended-outage-status-card";
 import { ReportStatusBadge } from "@/features/reports/report-list";
 import { useAppColors } from "@/hooks/use-app-colors";
+import { useConsumerAccountContext } from "@/context/consumer-account-context";
 import { fetchComplaintReportDetail } from "@/services/reports";
 import { isApiInstantExpired } from "@/utils/manila-time";
 import * as Clipboard from "expo-clipboard";
@@ -118,7 +119,8 @@ function DetailSkeleton() {
 
 export default function ReportDetailRoute() {
   const router = useRouter();
-  const { id, focus } = useLocalSearchParams<{ id: string; focus?: string }>();
+  const { id, focus, serviceAccountId } = useLocalSearchParams<{ id: string; focus?: string; serviceAccountId?: string }>();
+  const { accountContext } = useConsumerAccountContext();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const scrollRef = useRef<ScrollView | null>(null);
@@ -155,7 +157,7 @@ export default function ReportDetailRoute() {
       }
 
       try {
-        const nextReport = await fetchComplaintReportDetail(id);
+        const nextReport = await fetchComplaintReportDetail(id, { serviceAccountId, accessRevision: accountContext?.accessRevision });
         setReport(nextReport);
         hasLoadedRef.current = true;
         setError(null);
@@ -170,7 +172,7 @@ export default function ReportDetailRoute() {
         setIsRefreshing(false);
       }
     },
-    [id],
+    [accountContext?.accessRevision, id, serviceAccountId],
   );
 
   const refreshEvidenceOnce = useCallback(async () => {
@@ -178,13 +180,13 @@ export default function ReportDetailRoute() {
     evidenceRefreshAttemptedRef.current = true;
     try {
       setReport(
-        await fetchComplaintReportDetail(id, { refreshEvidence: true }),
+        await fetchComplaintReportDetail(id, { refreshEvidence: true, serviceAccountId, accessRevision: accountContext?.accessRevision }),
       );
       setEvidenceError(null);
     } catch {
       setEvidenceError("Evidence photos could not be refreshed. Try again.");
     }
-  }, [id]);
+  }, [accountContext?.accessRevision, id, serviceAccountId]);
 
   useEffect(() => {
     hasLoadedRef.current = false;

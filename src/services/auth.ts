@@ -13,6 +13,11 @@ type SignInWithAccountNumberParams = {
   password: string;
 };
 
+type SignInWithEmailParams = {
+  email: string;
+  password: string;
+};
+
 type ConsumerLoginResponse = {
   token: string;
   user: AuthUser;
@@ -177,6 +182,31 @@ export async function signInWithAccountNumber({
 
   await setAuthToken(login.token);
   await clearAttempts(normalizedAccountNumber);
+  return login;
+}
+
+export async function signInWithEmail({
+  email,
+  password,
+}: SignInWithEmailParams): Promise<ConsumerLoginResponse> {
+  const normalizedEmail = email.trim().toLowerCase();
+  if (!normalizedEmail || !password) {
+    throw new Error("Email and password are required.");
+  }
+
+  const login = await apiRequest<ConsumerLoginResponse>(
+    "/api/auth/sign-in/username",
+    {
+      method: "POST",
+      body: JSON.stringify({ mode: "email", email: normalizedEmail, password }),
+    },
+  );
+  if (login.user.role !== "consumer") {
+    await clearAuthToken();
+    throw new Error("This app only supports consumer accounts.");
+  }
+
+  await setAuthToken(login.token);
   return login;
 }
 

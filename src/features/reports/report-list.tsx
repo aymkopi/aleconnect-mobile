@@ -41,9 +41,11 @@ export function ReportStatusBadge({ status }: { status: string }) {
 export function ReportListGroup({
   reports,
   onPress,
+  showAccountLabel = false,
 }: {
   reports: Report[];
   onPress: (report: Report) => void;
+  showAccountLabel?: boolean;
 }) {
   const [mutedForegroundColor] = useAppColors(["muted-foreground"]);
 
@@ -84,6 +86,11 @@ export function ReportListGroup({
               >
                 {report.title}
               </Text>
+              {showAccountLabel && report.serviceAccountId && (report.accountNumber || report.accountName) ? (
+                <Text className="text-xs font-semibold text-accent" numberOfLines={1}>
+                  {[report.accountNumber, report.accountName].filter(Boolean).join(" · ")}
+                </Text>
+              ) : null}
 
               {/* Metadata */}
               <View className="flex-row items-center gap-2">

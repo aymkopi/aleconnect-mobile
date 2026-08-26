@@ -10,7 +10,7 @@ import { statusBarHeight } from "@/constants";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import Feather from "@expo/vector-icons/Feather";
-import { useFocusEffect, useRouter } from "expo-router";
+import { type Href, useFocusEffect, useRouter } from "expo-router";
 import {
   Check,
   LucideArrowUpRight,
@@ -21,6 +21,7 @@ import {
   LucideGlobe,
   LucideHeart,
   LucideKeyRound,
+  LucideLink,
   LucideLanguages,
   LucideLogOut,
   LucideShieldCheck,
@@ -45,6 +46,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Uniwind, useUniwind } from "uniwind";
 
 import { ProfileAvatar } from "@/features/profile/components/ProfileAvatar";
+import { useConsumerAccount } from "@/hooks/use-consumer-account";
 import { useConsumerProfileContext } from "../../../context/consumer-profile-context";
 
 type ProfileRowProps = {
@@ -145,6 +147,7 @@ export default function ProfileRoute() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const { session, signOut } = useAuthSession();
+  const { accountContext } = useConsumerAccount();
   const { profile, isLoading, reload } = useConsumerProfileContext();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [shouldRedirectAfterSignOut, setShouldRedirectAfterSignOut] =
@@ -355,6 +358,24 @@ export default function ProfileRoute() {
           }
         />
       </View>
+
+      {!isGuest ? (
+        <ProfileSection title="ALECO accounts">
+          <ProfileRow
+            icon={<IconBubble><LucideLink size={20} color={accentColor} /></IconBubble>}
+            title="ALECO accounts"
+            description={
+              accountContext && accountContext.accounts.length > 1
+                ? `${accountContext.accounts.length} linked accounts. Choose a default or edit service details.`
+                : "Manage this account or link another ALECO account."
+            }
+            value={accountContext?.accounts.length && accountContext.accounts.length > 1 ? `${accountContext.accounts.length}` : "Link another"}
+            onPress={() => router.push("/profile/accounts" as Href)}
+            action={<LucideChevronRight size={19} color={mutedColor} />}
+            showDivider={false}
+          />
+        </ProfileSection>
+      ) : null}
 
       <ProfileSection title="Preferences">
         <ProfileRow

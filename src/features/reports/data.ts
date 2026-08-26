@@ -54,6 +54,9 @@ export type Report = {
   description?: string | null;
   displayAddress?: string | null;
   imageUrls?: string[];
+  serviceAccountId?: string | null;
+  accountNumber?: string | null;
+  accountName?: string | null;
 };
 
 export type ReportHistoryItem = {
@@ -138,6 +141,9 @@ export function normalizeReportListItem(report: Report): Report {
   return {
     ...report,
     displayAddress: normalizeReportDisplayAddress(report.displayAddress),
+    serviceAccountId: typeof report.serviceAccountId === "string" ? report.serviceAccountId : null,
+    accountNumber: typeof report.accountNumber === "string" ? report.accountNumber : null,
+    accountName: typeof report.accountName === "string" ? report.accountName : null,
   };
 }
 export function buildReportDetailTimeline(
@@ -305,6 +311,8 @@ export function parseReportDetailResponse(value: unknown): ReportDetail {
 }
 
 export type ComplaintFormState = {
+  serviceAccountId: string | null;
+  accessRevision: number | null;
   categoryId: string;
   typeId: string;
   accountNumber: string;
@@ -343,6 +351,8 @@ export const emptyComplaintMeta: ComplaintMeta = {
 };
 
 export const initialComplaintForm: ComplaintFormState = {
+  serviceAccountId: null,
+  accessRevision: null,
   categoryId: "",
   typeId: "",
   accountNumber: "",

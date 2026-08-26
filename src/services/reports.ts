@@ -257,7 +257,10 @@ export async function clearReportListCache(userId: string): Promise<void> {
   complaintReportRevalidationUsers.delete(userId);
   complaintReportRequests.clear();
 
-  await AsyncStorage.removeItem(complaintReportStorageKey(userId));
+  const keys = (await AsyncStorage.getAllKeys()).filter((key) =>
+    key === complaintReportStorageKey(userId) || key.startsWith(`${complaintReportStorageKey(userId)}:`),
+  );
+  if (keys.length) await AsyncStorage.multiRemove(keys);
 }
 
 export async function fetchComplaintMeta(options?: {
@@ -300,13 +303,23 @@ export async function fetchComplaintReportPage(options?: {
   force?: boolean;
   revalidate?: boolean;
   userId?: string;
+  identityUserId?: string;
+  accessRevision?: number;
+  serviceAccountId?: string | null;
   cursor?: string | null;
   query?: string;
   categoryId?: string;
   sort?: ComplaintReportSort;
   limit?: number;
 }): Promise<ComplaintReportPage> {
-  const userId = options?.userId ?? "";
+  const identityUserId = options?.identityUserId ?? options?.userId ?? "";
+  const accessRevision = options?.accessRevision ?? 0;
+  const serviceAccountId = options?.serviceAccountId?.trim() ?? "";
+  // The legacy key remains stable for a sole account; unified identities are
+  // isolated by principal, authorization revision, and the selected account.
+  const userId = accessRevision || serviceAccountId || options?.identityUserId
+    ? `${identityUserId}:${accessRevision}:${serviceAccountId || "all"}`
+    : identityUserId;
   const cursor = options?.cursor ?? null;
   const query = options?.query?.trim() ?? "";
   const categoryId =
@@ -351,6 +364,8 @@ export async function fetchComplaintReportPage(options?: {
   if (cursor) params.set("cursor", cursor);
   if (query) params.set("query", query);
   if (categoryId) params.set("categoryId", categoryId);
+  if (serviceAccountId) params.set("serviceAccountId", serviceAccountId);
+  if (accessRevision) params.set("accessRevision", String(accessRevision));
   const requestKey = JSON.stringify({
     userId,
     cursor,
@@ -358,6 +373,8 @@ export async function fetchComplaintReportPage(options?: {
     categoryId,
     sort,
     limit,
+    accessRevision,
+    serviceAccountId,
   });
   const requestCacheGeneration = complaintReportsCacheGeneration;
 
@@ -432,9 +449,13 @@ export async function fetchComplaintReports(options?: {
 
 export async function fetchComplaintReportDetail(
   id: string,
-  options?: { refreshEvidence?: boolean },
+  options?: { refreshEvidence?: boolean; serviceAccountId?: string | null; accessRevision?: number | null },
 ): Promise<ReportDetail> {
-  const query = options?.refreshEvidence ? "?refreshEvidence=1" : "";
+  const params = new URLSearchParams();
+  if (options?.refreshEvidence) params.set("refreshEvidence", "1");
+  if (options?.serviceAccountId) params.set("serviceAccountId", options.serviceAccountId);
+  if (options?.accessRevision !== undefined && options.accessRevision !== null) params.set("accessRevision", String(options.accessRevision));
+  const query = params.size ? `?${params.toString()}` : "";
   return apiRequest<unknown>(
     `/api/mobile/complaints/${encodeURIComponent(id)}${query}`,
     {},
@@ -444,13 +465,14 @@ export async function fetchComplaintReportDetail(
 
 export async function createEvidenceUploads(
   count: number,
+  scope?: { serviceAccountId?: string | null; accessRevision?: number | null },
   authToken?: string | null,
 ) {
   return apiRequest<{ draftId: string; uploads: EvidenceUpload[] }>(
     "/api/mobile/complaints/evidence-upload",
     {
       method: "POST",
-      body: JSON.stringify({ count }),
+      body: JSON.stringify({ count, ...(scope?.serviceAccountId ? { serviceAccountId: scope.serviceAccountId, accessRevision: scope.accessRevision } : {}) }),
     },
     { authToken, phase: "metadata", timeoutMs: 15_000 },
   );
@@ -515,6 +537,8 @@ export type SubmitComplaintInput = {
   imageKeys: string[];
   latitude: number | null;
   longitude: number | null;
+  serviceAccountId?: string;
+  accessRevision?: number;
   categoryDescription?: string | null;
   typeDescription?: string | null;
   currentRegisteredName?: string | null;

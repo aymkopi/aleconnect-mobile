@@ -12,6 +12,7 @@ import {
 import { AppState } from "react-native";
 
 import { useAuthSession } from "@/hooks/use-auth-session";
+import { useConsumerAccount } from "@/hooks/use-consumer-account";
 import { ensureReportBackgroundSyncRegistered } from "@/services/report-background-sync";
 import {
   consumeReportSubmissionCompletions,
@@ -40,27 +41,36 @@ const ReportQueueContext = createContext<ReportQueueContextValue | null>(null);
 
 export function ReportQueueProvider({ children }: PropsWithChildren) {
   const { session } = useAuthSession();
+  const { accountContext } = useConsumerAccount();
   const userId = session?.user.id;
+  const queueScope = useMemo(() => {
+    if (accountContext) return {
+      identityUserId: accountContext.identityUserId,
+      authorizedServiceAccountIds: accountContext.authorizedServiceAccountIds,
+      accessRevision: accountContext.accessRevision,
+    };
+    return userId ? { identityUserId: userId, authorizedServiceAccountIds: [userId], accessRevision: 0 } : null;
+  }, [accountContext, userId]);
   const [items, setItems] = useState<ReportQueueItem[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
   const activeSync = useRef<Promise<ReportQueueItem[]> | null>(null);
 
   const refresh = useCallback(async () => {
-    setItems(userId ? await listReportQueue(userId) : []);
-  }, [userId]);
+    setItems(queueScope ? await listReportQueue(queueScope) : []);
+  }, [queueScope]);
 
   const sync = useCallback(async (announce = true) => {
-    if (!userId) return [];
+    if (!queueScope) return [];
     if (activeSync.current) return activeSync.current;
 
-    const before = await listReportQueue(userId);
+    const before = await listReportQueue(queueScope);
     const submittedBefore = new Set(
       before
         .filter((item) => item.status === "submitted")
         .map((item) => item.id),
     );
     setIsSyncing(true);
-    activeSync.current = syncReportQueue(userId)
+    activeSync.current = syncReportQueue(queueScope)
       .then(async (results) => {
         await refresh();
         if (announce) {
@@ -83,12 +93,12 @@ export function ReportQueueProvider({ children }: PropsWithChildren) {
         setIsSyncing(false);
       });
     return activeSync.current;
-  }, [refresh, userId]);
+  }, [queueScope, refresh]);
 
   useEffect(() => {
     void refresh();
     if (userId) void sync();
-  }, [refresh, sync, userId]);
+  }, [queueScope, refresh, sync, userId]);
 
   useEffect(() => {
     if (!userId) return;

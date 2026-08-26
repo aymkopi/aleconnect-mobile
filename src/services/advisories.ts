@@ -30,17 +30,23 @@ type AdvisoryCache = {
   readonly value: MobileAdvisoryPage;
 };
 
-const cachePrefix = "active_advisories_cache_v1";
+const cachePrefix = "active_advisories_cache_v2";
 const cacheTtlMs = 5 * 60 * 1000;
 const staleTtlMs = 24 * 60 * 60 * 1000;
 const requests = new Map<string, Promise<MobileAdvisoryPage>>();
 
-function cacheKey(userId: string) {
-  return `${cachePrefix}:${userId}`;
+export type AdvisoryScope = { userId: string; identityUserId?: string; accessRevision?: number };
+
+export function advisoryScopeKey(scope: AdvisoryScope) {
+  return `${scope.identityUserId ?? scope.userId}:${scope.accessRevision ?? 0}`;
 }
 
-async function readCache(userId: string, limit: number, allowStale = false) {
-  const raw = await AsyncStorage.getItem(cacheKey(userId));
+function cacheKey(scope: AdvisoryScope) {
+  return `${cachePrefix}:${advisoryScopeKey(scope)}`;
+}
+
+async function readCache(scope: AdvisoryScope, limit: number, allowStale = false) {
+  const raw = await AsyncStorage.getItem(cacheKey(scope));
   if (!raw) return null;
 
   try {
@@ -60,7 +66,7 @@ async function readCache(userId: string, limit: number, allowStale = false) {
 }
 
 async function writeCache(
-  userId: string,
+  scope: AdvisoryScope,
   limit: number,
   value: MobileAdvisoryPage,
 ) {
@@ -69,26 +75,29 @@ async function writeCache(
     limit,
     value,
   };
-  await AsyncStorage.setItem(cacheKey(userId), JSON.stringify(cached));
+  await AsyncStorage.setItem(cacheKey(scope), JSON.stringify(cached));
 }
 
 export async function fetchActiveAdvisories(options: {
   readonly userId: string;
+  readonly identityUserId?: string;
+  readonly accessRevision?: number;
   readonly limit?: number;
   readonly cursor?: string | null;
   readonly force?: boolean;
 }): Promise<MobileAdvisoryPage> {
   const limit = Math.min(Math.max(options.limit ?? 25, 1), 50);
   const cursor = options.cursor ?? null;
-  const force =
-    Boolean(options.force) && claimRefresh(`advisories:${options.userId}`);
+  const scope: AdvisoryScope = options;
+  const scopeKey = advisoryScopeKey(scope);
+  const force = Boolean(options.force) && claimRefresh(`advisories:${scopeKey}`);
 
   if (!cursor && !force) {
-    const cached = await readCache(options.userId, limit);
+    const cached = await readCache(scope, limit);
     if (cached) return cached;
   }
 
-  const requestKey = `${options.userId}:${limit}:${cursor ?? "first"}`;
+  const requestKey = `${scopeKey}:${limit}:${cursor ?? "first"}`;
   const existing = requests.get(requestKey);
   if (existing) return existing;
 
@@ -99,12 +108,12 @@ export async function fetchActiveAdvisories(options: {
     `/api/mobile/advisories?${params.toString()}`,
   )
     .then(async (response) => {
-      if (!cursor) await writeCache(options.userId, limit, response);
+      if (!cursor) await writeCache(scope, limit, response);
       return response;
     })
     .catch(async (error) => {
       if (!cursor) {
-        const stale = await readCache(options.userId, limit, true);
+        const stale = await readCache(scope, limit, true);
         if (stale) return stale;
       }
       throw error;
@@ -117,13 +126,13 @@ export async function fetchActiveAdvisories(options: {
   return request;
 }
 
-export async function clearAdvisoryCache(userId: string) {
-  await AsyncStorage.removeItem(cacheKey(userId));
+export async function clearAdvisoryCache(scope: AdvisoryScope) {
+  await AsyncStorage.removeItem(cacheKey(scope));
 }
 
 export async function fetchActiveAdvisory(
   id: string,
-  userId: string,
+  scope: AdvisoryScope,
 ): Promise<MobileAdvisory> {
   const response = await apiRequest<{ advisory: MobileAdvisory }>(
     `/api/mobile/advisories/${encodeURIComponent(id)}`,

@@ -8,6 +8,7 @@ import { type Report } from "@/features/reports/data";
 import { ReportListGroup } from "@/features/reports/report-list";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
+import { useConsumerAccountContext } from "@/context/consumer-account-context";
 import { useUnreadNotificationCount } from "@/hooks/use-unread-notification-count";
 import {
   hasPendingReportRevalidation,
@@ -73,7 +74,10 @@ export default function ComplaintsRoute() {
   const [accentColor] = useAppColors(["accent"]);
   const unreadCount = useUnreadNotificationCount();
   const { session } = useAuthSession();
+  const { accountContext } = useConsumerAccountContext();
   const userId = session?.user.id;
+  const isMultiAccount = (accountContext?.accounts.length ?? 0) > 1;
+  const [serviceAccountId, setServiceAccountId] = useState<string | null>(null);
   const [reports, setReports] = useState<Report[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -93,6 +97,9 @@ export default function ComplaintsRoute() {
           force: options?.force,
           revalidate: options?.revalidate,
           userId,
+          identityUserId: accountContext?.identityUserId,
+          accessRevision: accountContext?.accessRevision,
+          serviceAccountId,
         });
 
         if (generation !== loadGenerationRef.current) {
@@ -119,7 +126,7 @@ export default function ComplaintsRoute() {
         hasLoadedRef.current = true;
       }
     },
-    [userId],
+    [accountContext?.accessRevision, accountContext?.identityUserId, serviceAccountId, userId],
   );
 
   useEffect(() => {
@@ -185,7 +192,7 @@ export default function ComplaintsRoute() {
   );
 
   const openReport = (report: Report) => {
-    router.push({ pathname: "/report/[id]", params: { id: report.id } });
+    router.push({ pathname: "/report/[id]", params: { id: report.id, ...(report.serviceAccountId ? { serviceAccountId: report.serviceAccountId } : {}) } });
   };
 
   return (
@@ -299,6 +306,13 @@ export default function ComplaintsRoute() {
           </Button>
         </View>
 
+        {isMultiAccount ? (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-2" accessibilityLabel="Report account filter">
+            <Button size="sm" variant={!serviceAccountId ? "secondary" : "outline"} onPress={() => setServiceAccountId(null)}><ButtonText>All accounts</ButtonText></Button>
+            {accountContext!.accounts.map((account) => <Button key={account.id} size="sm" variant={serviceAccountId === account.id ? "secondary" : "outline"} onPress={() => setServiceAccountId(account.id)}><ButtonText>{[account.accountNumber, account.registeredName].filter(Boolean).join(" · ")}</ButtonText></Button>)}
+          </ScrollView>
+        ) : null}
+
         {error ? (
           <Text className="text-sm text-destructive">{error}</Text>
         ) : null}
@@ -319,6 +333,7 @@ export default function ComplaintsRoute() {
           <ReportListGroup
             reports={monthReports.slice(0, 5)}
             onPress={openReport}
+            showAccountLabel={isMultiAccount}
           />
         )}
       </ScrollView>

@@ -13,11 +13,16 @@ test("consumer notifications paginate, virtualize, and open advisory details", a
     read("src/app/_layout.tsx"),
   ]);
 
-  assert.match(service, /notification_list_cache_v2/);
+  assert.match(service, /notification_list_cache_v3/);
+  assert.match(service, /identityUserId/);
+  assert.match(service, /accessRevision/);
+  assert.match(service, /serviceAccountId/);
   assert.match(service, /nextCursor/);
   assert.match(page, /SectionList/);
   assert.match(page, /nextCursor/);
   assert.match(page, /entityType === "advisory"/);
+  assert.match(page, /notification\.entityType === "account_linking"/);
+  assert.match(page, /"View account request"/);
   assert.match(page, /notificationDestinationFromNotification/);
   assert.match(page, /await markNotificationsRead/);
   assert.match(navigation, /focus: "notification"/);

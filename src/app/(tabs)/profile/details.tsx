@@ -1,7 +1,8 @@
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
+import { useConsumerAccount } from "@/hooks/use-consumer-account";
 import * as ImagePicker from "expo-image-picker";
-import { Stack, useFocusEffect, useRouter } from "expo-router";
+import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 
 import { ChildAppBar } from "@/components/child-app-bar";
 import { Alert, AlertText } from "@/components/ui/alert";
@@ -81,6 +82,7 @@ function readProfileCoordinates(
 
 export default function ProfileDetailsRoute() {
   const router = useRouter();
+  const { serviceAccountId } = useLocalSearchParams<{ serviceAccountId?: string }>();
   const insets = useSafeAreaInsets();
   const [accentColor, accentForegroundColor] = useAppColors([
     "accent",
@@ -91,7 +93,9 @@ export default function ProfileDetailsRoute() {
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
   const bottomPadding = Math.max(insets.bottom, 16) + 24;
   const { session } = useAuthSession();
-  const { profile, isLoading, error, reload, setAvatarUrl, setProfileView } =
+  const { accountContext } = useConsumerAccount();
+  const unifiedIdentity = accountContext?.sessionMode === "identity";
+  const { profile, isLoading, error, profileScope, reload, setAvatarUrl, setProfileView, setServiceAccountId } =
     useConsumerProfileContext();
   const [editingField, setEditingField] = useState<EditableField | null>(null);
   const [inputValue, setInputValue] = useState("");
@@ -109,6 +113,11 @@ export default function ProfileDetailsRoute() {
   const [addressDraft, setAddressDraft] =
     useState<ProfileAddressDraft>(emptyAddressDraft);
   const [isAddressMapOpen, setIsAddressMapOpen] = useState(false);
+
+  useEffect(() => {
+    setServiceAccountId(typeof serviceAccountId === "string" ? serviceAccountId : null);
+    return () => setServiceAccountId(null);
+  }, [serviceAccountId, setServiceAccountId]);
 
   const resetEditSheet = useCallback(() => {
     setEditingField(null);
@@ -199,7 +208,7 @@ export default function ProfileDetailsRoute() {
       const nextAvatarUrl = await uploadCurrentUserAvatar({
         imageBytes,
         contentType: "image/webp",
-      });
+      }, profileScope ?? undefined);
 
       setAvatarPhoto(selectedPhoto);
       setAvatarUri(nextAvatarUrl);
@@ -391,7 +400,7 @@ export default function ProfileDetailsRoute() {
           landmark: addressDraft.landmark.trim(),
           latitude: addressDraft.latitude,
           longitude: addressDraft.longitude,
-        });
+        }, profileScope ?? undefined);
         await setProfileView(updatedProfile);
         closeEditSheet();
         setFeedback({
@@ -428,6 +437,7 @@ export default function ProfileDetailsRoute() {
       const updatedProfile = await updateCurrentConsumerProfile(
         editingField,
         value,
+        profileScope ?? undefined,
       );
       await setProfileView(updatedProfile);
       closeEditSheet();
@@ -499,6 +509,10 @@ export default function ProfileDetailsRoute() {
         </ScrollView>
       </View>
     );
+  }
+
+  if (typeof serviceAccountId === "string" && profileScope?.serviceAccountId !== serviceAccountId) {
+    return null;
   }
 
   return (
@@ -615,9 +629,9 @@ export default function ProfileDetailsRoute() {
           />
           <AccountDetailsBuilder
             icon={LucideMail}
-            description="Email"
+            description={unifiedIdentity ? "Email sign-in" : "Email"}
             title={displayEmail}
-            button={{
+            button={unifiedIdentity ? undefined : {
               variant: "secondary",
               name: "Update",
               onPress: () => {

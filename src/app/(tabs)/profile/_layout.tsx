@@ -22,6 +22,8 @@ export default function ProfileLayout() {
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="details" />
+        <Stack.Screen name="accounts" />
+        <Stack.Screen name="link-account" />
         <Stack.Screen name="change-password" />
         <Stack.Screen name="push-notifications" />
       </Stack>

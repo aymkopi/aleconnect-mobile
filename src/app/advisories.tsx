@@ -6,6 +6,7 @@ import { Text } from "@/components/ui/text";
 import { AdvisoryListItem } from "@/features/advisories/advisory-list-item";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
+import { useConsumerAccount } from "@/hooks/use-consumer-account";
 import {
   fetchActiveAdvisories,
   type MobileAdvisory,
@@ -25,18 +26,20 @@ export default function AdvisoriesRoute() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { session, isLoading: isSessionLoading } = useAuthSession();
+  const { accountContext } = useConsumerAccount();
   const [accentColor] = useAppColors(["accent"]);
   const [items, setItems] = useState<MobileAdvisory[]>([]);
-  const [loadedUserId, setLoadedUserId] = useState<string | null>(null);
+  const [loadedScopeKey, setLoadedScopeKey] = useState<string | null>(null);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const hasLoadedRef = useRef(false);
-  const activeUserIdRef = useRef(session?.user.id);
-  activeUserIdRef.current = session?.user.id;
-  const visibleItems = loadedUserId === session?.user.id ? items : [];
+  const scopeKey = accountContext?.cacheKey ?? (session ? `${session.user.id}:0` : null);
+  const activeScopeKeyRef = useRef(scopeKey);
+  activeScopeKeyRef.current = scopeKey;
+  const visibleItems = loadedScopeKey === scopeKey ? items : [];
 
   const handleBack = useCallback(() => {
     if (router.canGoBack()) router.back();
@@ -53,11 +56,13 @@ export default function AdvisoriesRoute() {
       try {
         const response = await fetchActiveAdvisories({
           userId,
+          identityUserId: accountContext?.identityUserId,
+          accessRevision: accountContext?.accessRevision,
           force,
         });
-        if (activeUserIdRef.current !== userId) return;
+        if (activeScopeKeyRef.current !== scopeKey) return;
         setItems(response.advisories);
-        setLoadedUserId(userId);
+        setLoadedScopeKey(scopeKey);
         setNextCursor(response.nextCursor);
         setError(
           response.isStale
@@ -65,20 +70,20 @@ export default function AdvisoriesRoute() {
             : null,
         );
       } catch (nextError) {
-        if (activeUserIdRef.current !== userId) return;
+        if (activeScopeKeyRef.current !== scopeKey) return;
         setError(
           nextError instanceof Error
             ? nextError.message
             : "Unable to load advisories.",
         );
       } finally {
-        if (activeUserIdRef.current !== userId) return;
+        if (activeScopeKeyRef.current !== scopeKey) return;
         hasLoadedRef.current = true;
         setIsLoading(false);
         setIsRefreshing(false);
       }
     },
-    [session],
+    [accountContext?.accessRevision, accountContext?.identityUserId, scopeKey, session],
   );
 
   const loadMore = useCallback(async () => {
@@ -88,28 +93,30 @@ export default function AdvisoriesRoute() {
     try {
       const response = await fetchActiveAdvisories({
         userId,
+        identityUserId: accountContext?.identityUserId,
+        accessRevision: accountContext?.accessRevision,
         cursor: nextCursor,
       });
-      if (activeUserIdRef.current !== userId) return;
+      if (activeScopeKeyRef.current !== scopeKey) return;
       setItems((current) => [
         ...current,
         ...response.advisories.filter(
           (next) => !current.some((item) => item.id === next.id),
         ),
       ]);
-      setLoadedUserId(userId);
+      setLoadedScopeKey(scopeKey);
       setNextCursor(response.nextCursor);
     } catch (nextError) {
-      if (activeUserIdRef.current !== userId) return;
+      if (activeScopeKeyRef.current !== scopeKey) return;
       setError(
         nextError instanceof Error
           ? nextError.message
           : "Unable to load more advisories.",
       );
     } finally {
-      if (activeUserIdRef.current === userId) setIsLoadingMore(false);
+      if (activeScopeKeyRef.current === scopeKey) setIsLoadingMore(false);
     }
-  }, [isLoadingMore, nextCursor, session]);
+  }, [accountContext?.accessRevision, accountContext?.identityUserId, isLoadingMore, nextCursor, scopeKey, session]);
 
   useFocusEffect(
     useCallback(() => {

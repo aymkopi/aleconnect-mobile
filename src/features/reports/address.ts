@@ -1,6 +1,7 @@
 import type { LocationGeocodedAddress } from "expo-location";
 
 import type { ComplaintMeta } from "./data.ts";
+import { isWithinAlbay } from "./contract.ts";
 
 export type ResolvedReportAddress = {
   municipalityCode: string;
@@ -11,6 +12,81 @@ export type ResolvedReportAddress = {
   province: string;
   isInAlbay: boolean;
 };
+
+export type HomeAddressProfile = {
+  municipalityCode?: string | null;
+  barangayPsgc?: string | null;
+  purokOrStreet?: string | null;
+  landmark?: string | null;
+  homeCoordinates?: Record<string, unknown> | null;
+};
+
+export type HomeReportLocation = {
+  municipalityCode: string;
+  barangayPsgc: string;
+  purok: string;
+  landmark: string;
+  latitude: number | null;
+  longitude: number | null;
+  locationVerified: boolean;
+};
+
+export function readReportCoordinates(
+  value: Record<string, unknown> | null | undefined,
+) {
+  const latitude = Number(value?.lat ?? value?.latitude);
+  const longitude = Number(value?.lng ?? value?.longitude);
+
+  if (
+    Number.isFinite(latitude) &&
+    Number.isFinite(longitude) &&
+    latitude >= -90 &&
+    latitude <= 90 &&
+    longitude >= -180 &&
+    longitude <= 180
+  ) {
+    return { latitude, longitude };
+  }
+
+  return null;
+}
+
+export function resolveHomeReportLocation(
+  meta: Pick<ComplaintMeta, "municipalities" | "barangays">,
+  profile: HomeAddressProfile | null | undefined,
+  detectedBarangayPsgc?: string | null,
+): HomeReportLocation {
+  const coordinates = readReportCoordinates(profile?.homeCoordinates);
+  const savedLocation = profile?.barangayPsgc
+    ? findCanonicalLocationByBarangayPsgc(profile.barangayPsgc, meta)
+    : null;
+  const savedLocationIsCanonical = Boolean(
+    savedLocation?.barangay &&
+      savedLocation.municipality &&
+      (!profile?.municipalityCode ||
+        savedLocation.municipality.code === profile.municipalityCode),
+  );
+  const canonical = savedLocationIsCanonical
+    ? savedLocation
+    : detectedBarangayPsgc
+      ? findCanonicalLocationByBarangayPsgc(detectedBarangayPsgc, meta)
+      : null;
+
+  return {
+    municipalityCode: canonical?.municipality?.code ?? "",
+    barangayPsgc: canonical?.barangay?.code ?? "",
+    purok: profile?.purokOrStreet ?? "",
+    landmark: profile?.landmark ?? "",
+    latitude: coordinates?.latitude ?? null,
+    longitude: coordinates?.longitude ?? null,
+    locationVerified: Boolean(
+      coordinates &&
+        isWithinAlbay(coordinates.latitude, coordinates.longitude) &&
+        canonical?.municipality &&
+        canonical.barangay,
+    ),
+  };
+}
 
 export function canUseResolvedPin(address: ResolvedReportAddress | null) {
   return Boolean(address?.isInAlbay && address.municipalityCode);

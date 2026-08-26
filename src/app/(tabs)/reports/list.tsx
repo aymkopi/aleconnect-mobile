@@ -25,6 +25,7 @@ import {
 import { ReportListGroup } from "@/features/reports/report-list";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
+import { useConsumerAccountContext } from "@/context/consumer-account-context";
 import type { ReportQueueItem } from "@/services/report-queue";
 import {
   subscribeReportRevalidationRequested,
@@ -55,6 +56,7 @@ import {
   BackHandler,
   FlatList,
   RefreshControl,
+  ScrollView,
   View,
   useWindowDimensions,
 } from "react-native";
@@ -114,7 +116,10 @@ export default function ReportArchiveRoute() {
     "danger",
   ]);
   const { session } = useAuthSession();
+  const { accountContext } = useConsumerAccountContext();
   const userId = session?.user.id;
+  const isMultiAccount = (accountContext?.accounts.length ?? 0) > 1;
+  const [serviceAccountId, setServiceAccountId] = useState<string | null>(null);
   const {
     items: queuedItems,
     isSyncing,
@@ -158,6 +163,9 @@ export default function ReportArchiveRoute() {
             : fetchComplaintMeta(options?.force ? { force: true } : undefined),
           fetchComplaintReportPage({
             userId,
+            identityUserId: accountContext?.identityUserId,
+            accessRevision: accountContext?.accessRevision,
+            serviceAccountId,
             force: options?.force,
             revalidate: options?.revalidate,
             cursor: options?.cursor,
@@ -207,7 +215,7 @@ export default function ReportArchiveRoute() {
         setIsLoadingMore(false);
       }
     },
-    [categoryId, query, sortMode, userId],
+    [accountContext?.accessRevision, accountContext?.identityUserId, categoryId, query, serviceAccountId, sortMode, userId],
   );
   const loadReportsRef = useRef(loadReports);
   useEffect(() => {
@@ -405,6 +413,7 @@ export default function ReportArchiveRoute() {
           ))}
         </Menu>
       </View>
+      {isMultiAccount ? <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-2" accessibilityLabel="Report account filter"><Button size="sm" variant={!serviceAccountId ? "secondary" : "outline"} onPress={() => setServiceAccountId(null)}><ButtonText>All accounts</ButtonText></Button>{accountContext!.accounts.map((account) => <Button key={account.id} size="sm" variant={serviceAccountId === account.id ? "secondary" : "outline"} onPress={() => setServiceAccountId(account.id)}><ButtonText>{[account.accountNumber, account.registeredName].filter(Boolean).join(" · ")}</ButtonText></Button>)}</ScrollView> : null}
 
       {pendingReports.length > 0 ? (
         <View className="gap-2">
@@ -581,9 +590,10 @@ export default function ReportArchiveRoute() {
                 onPress={(report) =>
                   router.push({
                     pathname: "/report/[id]",
-                    params: { id: report.id },
+                    params: { id: report.id, ...(report.serviceAccountId ? { serviceAccountId: report.serviceAccountId } : {}) },
                   })
                 }
+                showAccountLabel={isMultiAccount}
               />
             </View>
           )

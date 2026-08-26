@@ -35,7 +35,10 @@ import { useConsumerProfileContext } from "@/context/consumer-profile-context";
 import { useReportQueue } from "@/context/report-queue-context";
 import { AlbayLocationPickerSheet } from "@/features/maps/albay-location-picker-sheet";
 import { StaticLocationMap } from "@/features/maps/static-location-map";
-import { findCanonicalLocationByBarangayPsgc } from "@/features/reports/address";
+import {
+  readReportCoordinates,
+  resolveHomeReportLocation,
+} from "@/features/reports/address";
 import { findAlbayBarangay } from "@/features/reports/albay-barangays";
 import { EvidencePhotoViewer } from "@/features/reports/components/evidence-photo-viewer";
 import {
@@ -54,6 +57,7 @@ import {
 } from "@/features/reports/data";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
+import { useConsumerAccount } from "@/hooks/use-consumer-account";
 import { createLocalReportId, enqueueReport } from "@/services/report-queue";
 import { emitComplaintSubmissionToast } from "@/services/report-submission-events";
 import { fetchComplaintMeta } from "@/services/reports";
@@ -72,7 +76,7 @@ import {
   Images,
   MapPin,
 } from "lucide-react-native";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   BackHandler,
   Image,
@@ -289,63 +293,16 @@ function findHomeAddress(
   meta: ComplaintMeta,
   profile: ReturnType<typeof useConsumerProfileContext>["profile"],
 ) {
-  const coordinates = readCoordinates(profile?.homeCoordinates);
+  const coordinates = readReportCoordinates(profile?.homeCoordinates);
+  const detectedBarangay = coordinates
+    ? findAlbayBarangay(coordinates.latitude, coordinates.longitude)
+    : null;
 
-  if (
-    !coordinates ||
-    !isWithinAlbay(coordinates.latitude, coordinates.longitude)
-  ) {
-    return {
-      municipalityCode: "",
-      barangayPsgc: "",
-      purok: profile?.purokOrStreet ?? "",
-      landmark: "",
-    };
-  }
-
-  const detectedBarangay = findAlbayBarangay(
-    coordinates.latitude,
-    coordinates.longitude,
-  );
-
-  if (!detectedBarangay) {
-    return {
-      municipalityCode: "",
-      barangayPsgc: "",
-      purok: profile?.purokOrStreet ?? "",
-      landmark: "",
-    };
-  }
-
-  const canonical = findCanonicalLocationByBarangayPsgc(
-    detectedBarangay.barangayPsgc,
+  return resolveHomeReportLocation(
     meta,
+    profile,
+    detectedBarangay?.barangayPsgc,
   );
-
-  return {
-    municipalityCode: canonical.municipality?.code ?? "",
-    barangayPsgc: canonical.barangay?.code ?? "",
-    purok: profile?.purokOrStreet ?? "",
-    landmark: "",
-  };
-}
-
-function readCoordinates(value: Record<string, unknown> | null | undefined) {
-  const latitude = Number(value?.lat ?? value?.latitude);
-  const longitude = Number(value?.lng ?? value?.longitude);
-
-  if (
-    Number.isFinite(latitude) &&
-    Number.isFinite(longitude) &&
-    latitude >= -90 &&
-    latitude <= 90 &&
-    longitude >= -180 &&
-    longitude <= 180
-  ) {
-    return { latitude, longitude };
-  }
-
-  return null;
 }
 
 export default function NewComplaintRoute() {
@@ -366,7 +323,12 @@ export default function NewComplaintRoute() {
     "success",
     "primary",
   ]);
-  const { profile } = useConsumerProfileContext();
+  const { accountContext } = useConsumerAccount();
+  const { profile, setServiceAccountId } = useConsumerProfileContext();
+  const accounts = useMemo(() => accountContext?.accounts ?? [], [accountContext?.accounts]);
+  const hasMultipleAccounts = accounts.length > 1;
+  const [selectedServiceAccountId, setSelectedServiceAccountId] = useState<string | null>(null);
+  const [isAccountSwitching, setIsAccountSwitching] = useState(false);
   const [meta, setMeta] = useState<ComplaintMeta>(emptyComplaintMeta);
   const [isMapSheetOpen, setIsMapSheetOpen] = useState(false);
   const [isEvidenceSourcePickerOpen, setIsEvidenceSourcePickerOpen] =
@@ -384,6 +346,15 @@ export default function NewComplaintRoute() {
   const [viewerPhotoIndex, setViewerPhotoIndex] = useState<number | null>(null);
   const [form, setForm] = useState<ComplaintFormState>(initialComplaintForm);
   const childBottomPadding = Math.max(insets.bottom, 16) + (step < 5 ? 50 : 32);
+  const activeServiceAccountId = selectedServiceAccountId && accounts.some((account) => account.id === selectedServiceAccountId)
+    ? selectedServiceAccountId
+    : accountContext?.defaultServiceAccountId ?? session?.user.id ?? null;
+
+  useEffect(() => {
+    if (!activeServiceAccountId || selectedServiceAccountId === activeServiceAccountId) return;
+    setSelectedServiceAccountId(activeServiceAccountId);
+    setServiceAccountId(activeServiceAccountId);
+  }, [accounts, activeServiceAccountId, selectedServiceAccountId, setServiceAccountId]);
 
   useEffect(() => {
     return () => {
@@ -421,29 +392,21 @@ export default function NewComplaintRoute() {
   }, []);
 
   useEffect(() => {
-    const homeCoordinates = readCoordinates(profile?.homeCoordinates);
+    if (activeServiceAccountId && profile?.profileId !== activeServiceAccountId) return;
     const homeAddress = findHomeAddress(meta, profile);
     setForm((current) => ({
       ...current,
+      serviceAccountId: activeServiceAccountId,
+      accessRevision: accountContext?.accessRevision ?? 0,
       accountNumber: profile?.accountNumber ?? current.accountNumber,
       ...(current.useHomeAddress
         ? {
             ...homeAddress,
-            latitude: homeCoordinates?.latitude ?? null,
-            longitude: homeCoordinates?.longitude ?? null,
-            locationVerified: Boolean(
-              homeCoordinates &&
-              isWithinAlbay(
-                homeCoordinates.latitude,
-                homeCoordinates.longitude,
-              ) &&
-              homeAddress.municipalityCode &&
-              homeAddress.barangayPsgc,
-            ),
           }
         : {}),
     }));
-  }, [meta, profile]);
+    if (isAccountSwitching && profile?.profileId === activeServiceAccountId) setIsAccountSwitching(false);
+  }, [accountContext?.accessRevision, activeServiceAccountId, isAccountSwitching, meta, profile]);
 
   const selectedCategory = meta.categories.find(
     (category) => category.id === form.categoryId,
@@ -470,7 +433,7 @@ export default function NewComplaintRoute() {
   const mapPickerInitialCoordinates =
     form.latitude != null && form.longitude != null
       ? { latitude: form.latitude, longitude: form.longitude }
-      : readCoordinates(profile?.homeCoordinates);
+      : readReportCoordinates(profile?.homeCoordinates);
 
   const reportTypeOptions = meta.types
     .filter((type) => type.categoryId === form.categoryId)
@@ -496,7 +459,7 @@ export default function NewComplaintRoute() {
           : step === 4
             ? "Review Report"
             : "To be verified";
-  const canGoNext =
+  const canGoNext = !isAccountSwitching &&
     step === 1
       ? !formErrors.categoryId
       : step === 2
@@ -524,6 +487,24 @@ export default function NewComplaintRoute() {
     value: ComplaintFormState[Key],
   ) => {
     setForm((current) => ({ ...current, [key]: value }));
+  };
+
+  const switchReportAccount = (nextServiceAccountId: string) => {
+    if (isSubmitting || nextServiceAccountId === activeServiceAccountId) return;
+    for (const photo of form.photoUploads) deleteEvidencePhoto(photo.uri);
+    reportIdRef.current = createLocalReportId();
+    lastManualLocationRef.current = null;
+    setSelectedServiceAccountId(nextServiceAccountId);
+    setServiceAccountId(nextServiceAccountId);
+    setIsAccountSwitching(true);
+    setIsMapSheetOpen(false);
+    setIsEvidenceSourcePickerOpen(false);
+    setViewerPhotoIndex(null);
+    setEvidencePickerError(null);
+    setSubmitError(null);
+    setAttemptedStep(null);
+    setStep(1);
+    setForm({ ...initialComplaintForm, serviceAccountId: nextServiceAccountId, accessRevision: accountContext?.accessRevision ?? 0 });
   };
 
   const prepareSelectedPhoto = async (uri: string) => {
@@ -614,6 +595,10 @@ export default function NewComplaintRoute() {
       router.replace("/sign-in");
       return;
     }
+    if (isAccountSwitching || !form.serviceAccountId) {
+      setSubmitError("Wait for the selected ALECO account to finish loading before submitting.");
+      return;
+    }
 
     isSubmittingRef.current = true;
     setIsSubmitting(true);
@@ -643,6 +628,9 @@ export default function NewComplaintRoute() {
         id: reportId,
         idempotencyKey: `mobile:${reportId}`,
         userId: session.user.id,
+        identityUserId: accountContext?.identityUserId ?? session.user.id,
+        serviceAccountId: form.serviceAccountId,
+        accessRevision: form.accessRevision ?? accountContext?.accessRevision ?? 0,
         title: selectedType?.title ?? selectedCategory?.title ?? "Report",
         evidence: evidence.map(({ id, uri, size }) => ({
           id,
@@ -658,6 +646,8 @@ export default function NewComplaintRoute() {
           actionDesired: form.desiredAction,
           latitude: form.latitude,
           longitude: form.longitude,
+          serviceAccountId: form.serviceAccountId,
+          accessRevision: form.accessRevision ?? accountContext?.accessRevision ?? 0,
           ...conditionalDetails,
         },
       });
@@ -905,65 +895,7 @@ export default function NewComplaintRoute() {
       setEvidencePickerError("Photo library could not be opened. Try again.");
     }
   };
-  const toggleHomeAddress = () => {
-    const homeCoordinates = readCoordinates(profile?.homeCoordinates);
-
-    const homeAddress = findHomeAddress(meta, profile);
-
-    setForm((current) => {
-      const shouldUseHomeAddress = !current.useHomeAddress;
-
-      if (shouldUseHomeAddress) {
-        // Preserve the currently confirmed non-home location
-        // before temporarily switching to Home Address.
-        const currentManualLocation = snapshotReportLocation(current);
-
-        if (isVerifiedReportLocation(currentManualLocation)) {
-          lastManualLocationRef.current = currentManualLocation;
-        }
-
-        return {
-          ...current,
-
-          useHomeAddress: true,
-
-          ...homeAddress,
-
-          latitude: homeCoordinates?.latitude ?? null,
-          longitude: homeCoordinates?.longitude ?? null,
-
-          locationVerified: Boolean(
-            homeCoordinates &&
-            isWithinAlbay(
-              homeCoordinates.latitude,
-              homeCoordinates.longitude,
-            ) &&
-            homeAddress.municipalityCode &&
-            homeAddress.barangayPsgc,
-          ),
-        };
-      }
-
-      const previousManualLocation = lastManualLocationRef.current;
-
-      const restoredManualLocation = isVerifiedReportLocation(
-        previousManualLocation,
-      )
-        ? previousManualLocation
-        : emptyReportLocation;
-
-      return {
-        ...current,
-
-        useHomeAddress: false,
-
-        ...restoredManualLocation,
-      };
-    });
-  };
   const handleHomeAddressPress = () => {
-    const homeCoordinates = readCoordinates(profile?.homeCoordinates);
-
     const homeAddress = findHomeAddress(meta, profile);
 
     setForm((current) => {
@@ -984,19 +916,6 @@ export default function NewComplaintRoute() {
           useHomeAddress: true,
 
           ...homeAddress,
-
-          latitude: homeCoordinates?.latitude ?? null,
-          longitude: homeCoordinates?.longitude ?? null,
-
-          locationVerified: Boolean(
-            homeCoordinates &&
-            isWithinAlbay(
-              homeCoordinates.latitude,
-              homeCoordinates.longitude,
-            ) &&
-            homeAddress.municipalityCode &&
-            homeAddress.barangayPsgc,
-          ),
         };
       }
 
@@ -1050,6 +969,23 @@ export default function NewComplaintRoute() {
         }}
         scrollIndicatorInsets={{ bottom: childBottomPadding }}
       >
+        {hasMultipleAccounts ? (
+          <View className="rounded-xl border border-border bg-card p-3">
+            <SelectField
+              label="Report for"
+              value={activeServiceAccountId ?? ""}
+              placeholder="Choose an ALECO account"
+              description="Select the ALECO account this report is for. Changing accounts clears this draft to keep its location and evidence private."
+              options={accounts.map((account) => ({
+                value: account.id,
+                label: `${account.accountNumber ?? "Account number unavailable"} — ${account.registeredName}${account.isDefault ? " (Default)" : ""}`,
+              }))}
+              onChange={switchReportAccount}
+              isDisabled={isSubmitting || isAccountSwitching}
+            />
+            {isAccountSwitching ? <Text accessibilityLiveRegion="polite" className="mt-2 text-xs text-muted-foreground">Loading this account&apos;s saved location…</Text> : null}
+          </View>
+        ) : null}
         <View className="gap-2">
           <Progress value={(step / 5) * 100} className="h-2.5">
             <ProgressFilledTrack className="rounded-full" />

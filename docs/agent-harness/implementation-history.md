@@ -1,5 +1,53 @@
 # Implementation history
 
+## 2026-08-26 - Consumer multi-account V18 final remediation
+
+- Repositories: coordinated mobile `aleconnect-mobile` with authoritative staff/API sibling `aleconnect`.
+- Files: mobile linked-account normalization/service type and focused snapshot behavior/contract tests; staff owns the shared canonical access locks, auth verification gate, unlink provenance, and public input limits.
+- Scope: retain `identityUserId` from `/api/mobile/linked-accounts` through normalization so equal-revision snapshots cannot combine the wrong identity; preserve strict identity/account-set/default/revision matching and the legacy revision-zero sole-account fallback.
+- Contracts: a mixed or identity-mismatched account snapshot retries once and then fails closed; no stale linked-account IDs or default can enter report/profile/notification caches or offline queue authorization.
+- Verification: `npx tsx --test --test-concurrency=1 tests/consumer-account-snapshot-behavior.test.ts` passed 6/6; `npx tsc --noEmit` passed; lint exited 0 with four existing warnings; full JavaScript tests remain 172/178 with the same six unrelated established baselines. Both harness and diff checks passed.
+- Git/Deployment: no EAS/native build, device check, store submission, staff deployment, database migration, commit, push, merge, or production write occurred.
+- Remaining risks: the fresh final Sol/High review, physical device/push verification, disposable-schema concurrency execution, and migration-first backend release remain pending.
+- Next: complete the final review, merge staff to `main` and mobile to canonical `master`, deploy staff, then release mobile after backend smoke.
+
+## 2026-08-26 - Consumer multi-account V17 queue and advisory scope remediation
+
+- Repositories: mobile `aleconnect-mobile` with coordinated staff/API authority in sibling `aleconnect`.
+- Files: report queue and queue-access services, consumer account snapshot contract, advisory cache/detail services and routes, root push bridge, focused queue/advisory contracts, the stale cache-version assertion, and both repositories' harness handoffs.
+- Scope: reused the consistent consumer account snapshot for queued-report authorization and evidence submission; scoped advisory cache, in-flight request, stale fallback, detail loading, and rendering by identity/access revision; and passed the same scope from the root push bridge. Late detail responses are discarded when the active scope changes.
+- Contracts: a protected draft must use one authorized identity/account/revision snapshot from evidence signing through submission; advisory storage, in-flight requests, stale fallback, details, and rendered state may not cross identity or access-revision boundaries.
+- Tests: added queue snapshot and advisory identity-cache contracts and preserved the behavioral account-snapshot coverage. Updated one stale advisory-feed assertion from cache v1 to the deliberate scoped v2 contract.
+- Verification: mobile source contracts passed 172/178 with exactly the six unrelated existing UI/date/permission baselines; TypeScript passed; lint exited 0 with four existing warnings. Coordinated staff lifecycle passed 397/397, child workflows 146/146, deployment topology 34/34, adoption behavior 3/3, and guarded DB integration recorded 3 explicit skips without a disposable schema.
+- Git/Deployment: the user authorized merge and immediate deployment after verification, but no merge, push, EAS build, store submission, backend migration, Cloudflare deployment, or production mutation had run at this entry.
+- Remaining risks: no physical-device single/multi-account interaction is claimed; the six unrelated UI/date/permission source-contract baselines remain red and are explicitly excluded from feature-green claims.
+- Next: complete both harness gates and fresh independent review, then publish only after the migration-first backend release is healthy.
+
+## 2026-08-25 - Consumer multi-account linking mobile implementation
+
+- Repositories: mobile `aleconnect-mobile` and authoritative staff/API sibling `aleconnect`, both on `codex/multi-account-linking`.
+- Scope: implemented dual ALECO-account/email sign-in, first-login email setup, linked-account/default/unlink management, per-account profile editing with shared read-only identity email, multi-account report selection and location switching, revision-safe offline submission, unified report/notification feeds, and account-link decision navigation.
+- Files: sign-in and email-setup routes; root provider/push bridge; account/profile/report/notification routes and components; consumer identity, linked-account, profile, report, notification, navigation, queue, background-sync, and API services; identity/account contracts and hooks; focused auth, account, report, notification, and navigation tests.
+- Contracts: single and legacy accounts keep their existing layout and account-login behavior. Multi-account-only controls are conditional. Default account selection is server-synchronized. Every account-targeted request carries an authorized service-account ID and access revision; cache/storage/request keys include identity, revision, and filter scope. Switching report accounts clears prior account location, evidence, idempotency, and draft state. Approval signs out through normal private-cache invalidation and opens Email mode; denial retains staff reason only in the authenticated account manager. Submitted service-account passwords are not persisted.
+- Review remediation: the first independent Sol/High review returned hold across the coordinated implementation. The Terra/High remediation made the identity GET contract expose every authorized service account so background report sync retains valid identity-owned queue items. A second fresh review required the approval guide and password lifecycle to match the design: push-driven and in-app approved requests now sign out into explicit Email mode, and the claim wizard clears its password before awaiting the request. The staff/API sibling records the security, migration, idempotency, restore, revision, session, and notification corrections.
+- Verification: focused auth/account/profile/report/notification/navigation coverage passes; the corrected notification pagination and badge contracts require the revision-scoped v3 cache. `npx tsc --noEmit`, `npm run harness:check`, and `git diff --check` pass. `npm run lint` exits 0 with four existing warnings. The complete serial suite reports 169 tests: 163 passed and the same six unrelated pre-existing UI/date/permission source contracts failed.
+- Git/Deployment: local feature source only. No Expo/EAS/store publication, native release, staff/API deployment, database migration, production mutation, staging, push, merge, or credential output occurred.
+- Remaining risks: no physical-device interaction, native release build, production backend smoke, or disposable-database concurrency evidence was produced. The staff handoff records migration and browser constraints.
+- Next: complete fresh cross-repository review, then perform an explicitly authorized migration-first flagged backend rollout and physical single/multi-account mobile validation before publication.
+
+## 2026-08-25 - Saved home address report selection correction
+
+- Repositories: mobile `aleconnect-mobile` owns the implementation; staff/API `AleConnect` was inspected read-only as the authoritative consumer-profile and complaint contract.
+- Scope: corrected Home Address selection in report creation so the saved structured profile address is used directly instead of being discarded and re-derived only from bundled barangay polygons. Coordinate-derived detection remains a fallback for legacy profiles missing usable structured codes, and manual-location restoration behavior remains unchanged.
+- Root cause: `findHomeAddress` ignored `profile.municipalityCode`, `profile.barangayPsgc`, and `profile.landmark`; it could return blank/different municipality and barangay when GeoJSON detection did not match, and it always replaced the saved landmark with an empty string. The file also retained an unused duplicate `toggleHomeAddress` implementation.
+- Files: `src/features/reports/address.ts`, `src/app/(tabs)/reports/new.tsx`, `tests/report-address.test.mjs`, and the coordinated staff/mobile harness handoffs.
+- Contracts: existing `GET /api/mobile/profile` fields and complaint submission payload are unchanged. The current consumer profile remains private to the authenticated consumer; saved location codes are revalidated against current complaint metadata, coordinates must remain within Albay, and the server retains submission authorization and ownership checks. Existing private profile/metadata cache and auth-failure behavior are unchanged; no permission is added.
+- TDD: RED was the focused address test failing because `resolveHomeReportLocation` did not exist. GREEN proves the resolver preserves the saved municipality, barangay, purok/street, landmark, and coordinates. Additional branch regressions protect saved-code precedence over conflicting detection, mismatched and missing-code fallbacks, and out-of-Albay rejection. Focused report/address/profile coverage passes 20/20, and the staff structured-profile source contract passes 2/2 without a database integration test.
+- Verification: `npx tsc --noEmit` passes; `npm run lint` has zero errors and four existing warnings in profile/report/map files; both project harnesses and both diff checks pass. `graphify update .` rebuilt 1,925 nodes, 3,100 edges, and 178 communities. The Android production export bundles 4,466 modules and writes 42 files. The complete serial mobile suite is 146/152 with the same six unrelated category-sheet, hotline, Manila advisory, permission-manifest, and profile responsive-UI baseline failures. Expo Doctor remains 19/20 because 15 Expo SDK packages are one patch behind. No Android device is attached, so a physical interaction check is not claimed.
+- Git/Deployment: local source and handoff changes only. No commit, push, Expo/EAS/store release, staff/API deployment, database migration, R2 action, production mutation, credential output, or native configuration change occurred.
+- Remaining risks: physical Home Address on/off switching and report review should be checked on a current Android build before publication. Legacy profiles with no structured codes still depend on bundled polygon detection and will require map confirmation if neither source resolves canonically.
+- Next: verify on a connected Android device, then use the normal review/commit/release flow when authorized.
+
 ## 2026-08-19 - Report location integrity and home/manual location switching
 
 - Repositories: mobile `aleconnect-mobile`, branch `fix/report-location-integrity`; the staff/API sibling remains authoritative for report metadata and submission.
@@ -291,6 +339,95 @@
 - Git/Deployment: mobile implementation only; no Expo/EAS/store publication is included.
 - Remaining risks: audience text requires the additive staff API field. Until that backend contract is deployed and cached advisory data refreshes, the audience line is safely omitted.
 - Next: verify the coordinated staff API contract, deploy the additive backend field first, then release the compatible mobile UI.
+
+## 2026-08-26 - Consumer multi-account consolidated aggregate evidence
+
+- Repositories: staff/API `aleconnect` completed the coordinated batch; `aleconnect-mobile` remained read-only.
+- Scope: final cross-repository evidence only; no mobile product source, test, cache, queue, or native configuration changed.
+- Files: consumer multi-account handoff sections in both repositories only.
+- Contracts: staff pre-edit audit dispositioned all nine categories and fixed exactly three defects: ownership notification/Expo dedupe collisions, unset-runtime mock verification acceptance, and unlink omission of exact request locking/revalidation. Mobile payload/readers remain compatible and privacy-safe.
+- Verification: staff full lifecycle passed 388/388 with 0 failures and its guarded DB bundle explicitly skipped 3 tests without a disposable schema. Mobile full suite remains 168/174 with the same six unrelated baselines; `npx tsc --noEmit`, harness, and diff checks passed, and lint has 0 errors with 4 existing warnings.
+- Git/Deployment: no code, tests, Graphify output, database operation, deployment, EAS/device action, staging, commit, push, merge, or release action occurred.
+- Remaining risks: real production email proof and database concurrency/migration execution remain subject to their existing server-side rollout prerequisites; mobile behavior was unchanged in this batch.
+- Next: consolidated multi-account implementation and aggregate evidence are complete.
+
+## 2026-08-26 - Consumer multi-account V13 migration-shape gate compatibility
+
+- Repositories: staff/API `aleconnect` changed migration tooling and focused lifecycle coverage; `aleconnect-mobile` remained read-only.
+- Scope: record the server-only exact-shape gate correction for consumer identity ownership/auth schema invariants.
+- Files: staff migration helper and focused lifecycle test; consumer multi-account handoff sections in both repositories. No mobile product files changed.
+- Contracts: mobile receives no route, payload, notification, account, report, queue, cache, or native contract change. Staff rejects drift across all 33 material migration columns (consumer identities 9, memberships 5, requests 14, limiter 5) instead of accepting a false apply-twice replay.
+- Verification: staff `node --test --test-concurrency=1 tests/lifecycle/consumer-multi-account-migration.test.mjs` passed 8/8; full staff lifecycle passed 392/392 with 0 failures; its guarded migration DB test skipped 1/1 and the full guarded DB bundle remains 3 explicit skips without `CONSUMER_MULTI_ACCOUNT_DISPOSABLE_DATABASE`; staff TypeScript, lint, build (4,589 modules; existing chunk advisory), harness, and scoped diff checks passed. No mobile test or device verification was necessary for this source-unchanged compatibility entry.
+- Git/Deployment: no database operation, deployment, EAS/device action, staging, commit, push, merge, or release occurred.
+- Remaining risks: disposable-schema metadata execution remains guarded; mobile runtime behavior was unchanged.
+- Next: authoritative post-V13 aggregate evidence is complete; this is the thirteenth Sol/High review-remediation wave.
+
+## 2026-08-26 - Consumer multi-account V14 setup replay compatibility
+
+- Repositories: staff/API `aleconnect` owns replay/session/auth enforcement; `aleconnect-mobile` changed only the setup caller.
+- Scope: preserve one UUID-style email-setup idempotency key for the logical attempt, submit it in the existing setup body, and permit the existing request transport retry with that same key. The final coordinated batch includes the staff lint typing correction and stale report-wrapper contract assertion update.
+- Files: mobile consumer identity service/email setup screen and focused setup/auth contract test; staff consumer identity/auth/access/users/Directory work and both handoffs.
+- Contracts: mobile stores the server replacement token before refresh as before. The key changes when the requested normalized email changes, so it cannot turn a different-email attempt into a replay. Private session/account caches remain session-scoped and cannot authorize a failed session.
+- Verification: mobile full aggregate remains 168/174 with the same six unrelated pre-existing baselines: category sheet 55%, hotline keyboard/reduced motion, stale hotline cache visibility, Manila advisory range, image-only permission manifest, and responsive profile child UI. Focused auth/account/linking passed 18/18; TypeScript passed; lint had 0 errors/4 existing warnings; harness/scoped diff checks passed. The staff lifecycle aggregate recorded 394 tests: 393 passed and one transient `ER_NET_READ_INTERRUPTED` timeout in the related-incidents disposable DB test; the exact isolated retry passed 1/1. Child workflows passed 146/146, focused lifecycle passed 27/27, and setup behavioral `tsx` passed 1/1. Guarded disposable identity DB coverage remains explicitly skipped/unexecuted without `CONSUMER_MULTI_ACCOUNT_DISPOSABLE_DATABASE`; staff lint, build (4,589 modules; existing `>1200 kB` chunk advisory), harness, and scoped diff checks passed. Graphify updated to staff 6,795 nodes/12,469 edges and mobile 2,011 nodes/3,379 edges.
+- Git/Deployment: no rollout occurred; browser/device/Expo/EAS/release validation remains pending.
+- Remaining risks: no device render was required because this is a request-retry/state preservation change; disposable-schema identity setup execution remains guarded, and browser/device/release validation remains outstanding.
+- Next: final V14/root aggregate evidence is complete; no rollout is implied.
+
+## 2026-08-26 - Consumer multi-account V15 snapshot consistency and advisory identity-active compatibility
+
+- Repositories: `aleconnect-mobile` owns account-context snapshot/cache scope; staff/API `aleconnect` owns advisory recipient/token authorization.
+- Scope: the mobile reader retries a complete identity/linked-account pair once when their revisions differ and fails closed after the bounded retry, so a mixed pair cannot be returned for cache or offline use. Staff requires a resolved linked identity to be a consumer and unbanned before selecting its identity-owned advisory token.
+- Files: mobile accounts contract and consumer-identity reader with snapshot behavior/contract tests; staff Expo push helper and advisory identity test; consumer multi-account handoffs.
+- Contracts: legacy additive responses retain revision-zero sole-account compatibility. Mismatched revision pairs cannot publish account IDs/default/cache keys. Banned, missing, or non-consumer unified identities cannot receive identity-token advisory delivery, while active linked identities and unlinked legacy service accounts retain their existing behavior.
+- Verification: mobile full remains 168/174 with the same six unrelated pre-existing baselines: category sheet 55%, hotline keyboard/reduced motion, stale hotline cache visibility, Manila advisory range, image-only permission manifest, and responsive profile child UI. `npx tsx --test tests/consumer-account-snapshot-behavior.test.ts` passed 4/4 and `node --test --test-concurrency=1 tests/consumer-account-contract.test.mjs` passed 9/9; TypeScript passed and mobile lint had 0 errors/4 existing warnings. Post-V15 staff full lifecycle exited 0 end-to-end; child workflows passed 146/146, deployment topology 34/34, and staff advisory identity coverage 5/5; staff lint/build passed (4,589 modules; existing `>1200 kB` chunk advisory). Disposable DB integration remains 3 explicit skips without a configured schema. Graphify refreshed to staff 6,797 nodes/12,471 edges/477 communities and mobile 2,022 nodes/3,396 edges/180 communities. Both `npm run harness:check` and scoped `git diff --check` commands passed.
+- Git/Deployment: merge and deployment are newly authorized but have not been performed. No database, Graphify, Expo/EAS, browser/device, staging, commit, push, merge, deployment, or release action occurred in this documentation update.
+- Remaining risks: final fresh Sol review, browser/device validation, and release execution remain pending; disposable DB integration remains guarded by the absent explicit schema.
+- Next: obtain the fresh Sol review, then use the newly authorized merge/deployment process; no execution is recorded here.
+
+## 2026-08-26 - Consumer multi-account staff delivery compatibility
+
+- Repositories: staff/API `aleconnect` changed; `aleconnect-mobile` was read-only.
+- Scope: record staff-only multi-account hardening that is compatible with existing mobile readers.
+- Files: mobile handoffs only; no mobile source files changed.
+- Contract: staff ownership notifications and Expo dedupe keys are now recipient plus concrete mutation scoped; push payload remains unchanged and privacy-safe (`context`, `requestId`, `decision`). Email mock setup is more restrictive server-side, and unlink serialization is server-owned. No mobile persisted-data, account-switch, report queue, notification-reader, or offline-cache contract changed.
+- Contracts: server remains authoritative for ownership and identity setup; cached mobile state does not gain authority from this change.
+- Verification: staff serial owned-surface coverage passed 69/69; no mobile source/test/device/EAS work was performed because no mobile behavior changed.
+- Git/Deployment: no release, deployment, database action, staging, commit, push, merge, or production action occurred.
+- Remaining risks: device behavior was not rerun because mobile runtime behavior did not change.
+- Next: keep the existing mobile consumer release compatible and include the staff remediation in root's aggregate gate.
+
+## 2026-08-25 - Consumer multi-account review remediation
+
+- Repositories: mobile `aleconnect-mobile` with existing staff account-linking API contract.
+- Scope: added safe Email-mode route parsing for account-link approval and immediate password clearing at claim submission. The password is passed only from a local ephemeral variable to the one request.
+- Files: sign-in route, linked-account wizard, focused auth/linked-account tests, and this history entry.
+- Contracts: approval starts email sign-in explicitly; the account password is never cached, restored after failure, logged, or persisted.
+- Verification: focused auth and linked-account tests passed 10/10; `npx tsc --noEmit`, lint with four existing warnings, harness, and diff checks passed. No EAS/native release occurred.
+- Git/Deployment: mobile local source only; no EAS/native release, staff deployment, database operation, staging, or commit occurred.
+- Remaining risks: production setup remains unavailable until server-side verified email proof exists.
+- Next: root owns the aggregate release gates; retain the explicit email-mode route when navigation changes.
+
+## 2026-08-25 - Consumer multi-account v3 queue remediation
+
+- Repositories: `aleconnect-mobile`, consuming the staff-owned identity access contract.
+- Scope: preserve protected queued-report evidence when identity, service account, or access revision changes; block upload and submission before any R2 operation.
+- Files: `src/services/report-queue.ts`, focused multi-account report test, and this history entry.
+- Contracts: scoped queue data is immutable and must exactly match current server access; legacy one-account queued data retains compatible one-time scoping; inaccessible/stale entries are visible non-retryable failures rather than silently pruned.
+- Verification: focused report/auth/linked-account tests passed 12/12; `npx tsc --noEmit`, `npm run lint` (four existing warnings), `npm run harness:check`, and `git diff --check` passed.
+- Git/Deployment: local mobile source only; no Expo/EAS/device release, staff deployment, database action, staging, or commit occurred.
+- Remaining risks: no physical device queue retry was performed; server ownership enforcement remains authoritative.
+- Next: include the safe queue behavior in the aggregate cross-repo release verification.
+
+## 2026-08-25 - Consumer multi-account queue retry guard
+
+- Repositories: `aleconnect-mobile`, verifying the staff-owned identity/revision contract.
+- Scope: prove inaccessible or stale queued reports remain visible as non-retryable records and cannot be resubmitted through the normal queue loop.
+- Files: `src/services/report-queue-access.ts`, its focused behavioral test, queue integration coverage, and this history entry.
+- Contracts: exact identity/account/revision access is evaluated independently before upload; failure replacement retains protected data; queue submission accepts only `queued` items and retry refuses `nonRetryable` entries. A legacy unscoped draft upgrades only when its original account is the sole currently authorized account.
+- Verification: behavioral queue coverage passed 6/6; the complete serial suite reported 168/174 with the same six unrelated baselines.
+- Git/Deployment: no device, Expo/EAS, backend deployment, database operation, staging, or commit occurred.
+- Remaining risks: physical-device retry remains outside this source gate.
+- Next: retain this assertion in aggregate cross-repository verification.
 
 ## 2026-08-20 - Mobile unused module and dependency cleanup (committed and locally merged)
 

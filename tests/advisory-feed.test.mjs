@@ -15,7 +15,7 @@ test("active advisories have a compact shared card, feed, home preview, and deta
   ]);
 
   assert.match(service, /\/api\/mobile\/advisories/);
-  assert.match(service, /active_advisories_cache_v1/);
+  assert.match(service, /active_advisories_cache_v2/);
   assert.match(service, /nextCursor/);
   assert.match(service, /readonly audience\?: string \| null;/);
 

@@ -23,7 +23,16 @@ if (Platform.OS !== "web") {
         {},
         { authToken },
       );
-      const results = await syncReportQueue(session.user.id);
+      const access = await apiRequest<{
+        identityUserId?: string;
+        authorizedServiceAccountIds?: string[];
+        accessRevision?: number;
+      }>("/api/mobile/consumer-identity", {}, { authToken, phase: "metadata" });
+      const results = await syncReportQueue({
+        identityUserId: access.identityUserId ?? session.user.id,
+        authorizedServiceAccountIds: Array.isArray(access.authorizedServiceAccountIds) && access.authorizedServiceAccountIds.length ? access.authorizedServiceAccountIds : [session.user.id],
+        accessRevision: Number.isSafeInteger(access.accessRevision) ? Number(access.accessRevision) : 0,
+      });
       await recordReportSubmissionCompletions(results);
       return BackgroundTask.BackgroundTaskResult.Success;
     } catch {

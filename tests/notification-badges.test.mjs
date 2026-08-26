@@ -18,7 +18,9 @@ test("parent notification badges use the authenticated unread count", async () =
     ),
   ]);
 
-  assert.match(hook, /fetchNotifications\(\{\s*userId:\s*session\.user\.id\s*\}\)/);
+  assert.match(hook, /fetchNotifications\(\{[\s\S]*userId:\s*session\.user\.id/);
+  assert.match(hook, /identityUserId:\s*accountContext\?\.identityUserId/);
+  assert.match(hook, /accessRevision:\s*accountContext\?\.accessRevision/);
   assert.match(hook, /subscribeNotificationsChanged/);
   assert.match(hook, /if \(!session\)/);
   for (const source of [complaints, hotlines]) {

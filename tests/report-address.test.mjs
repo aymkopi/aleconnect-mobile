@@ -5,6 +5,7 @@ import {
   canUseResolvedPin,
   findCanonicalLocationByBarangayPsgc,
   formatResolvedAddress,
+  resolveHomeReportLocation,
   resolvePsgcAddress,
 } from "../src/features/reports/address.ts";
 
@@ -25,6 +26,25 @@ const meta = {
     },
   ],
 };
+
+const fallbackMeta = {
+  municipalities: [
+    ...meta.municipalities,
+    {
+      code: "22222222-2222-2222-2222-222222222222",
+      name: "Daraga",
+    },
+  ],
+  barangays: [
+    ...meta.barangays,
+    {
+      code: "0500501002",
+      name: "Fallback Barangay",
+      municipalityCode: "22222222-2222-2222-2222-222222222222",
+      municipalityName: "Daraga",
+    },
+  ],
+};
 test("barangay PSGC resolves the internal municipality id without reverse geocoding", () => {
   const resolved = findCanonicalLocationByBarangayPsgc("0500501001", meta);
 
@@ -34,6 +54,84 @@ test("barangay PSGC resolves the internal municipality id without reverse geocod
   );
 
   assert.equal(resolved.barangay?.code, "0500501001");
+});
+
+test("home report location uses the user's saved structured address", () => {
+  const resolved = resolveHomeReportLocation(meta, {
+    municipalityCode: "11111111-1111-1111-1111-111111111111",
+    barangayPsgc: "0500501001",
+    purokOrStreet: "Purok 7",
+    landmark: "Beside the covered court",
+    homeCoordinates: { latitude: 13.1391, longitude: 123.7345 },
+  });
+
+  assert.deepEqual(resolved, {
+    municipalityCode: "11111111-1111-1111-1111-111111111111",
+    barangayPsgc: "0500501001",
+    purok: "Purok 7",
+    landmark: "Beside the covered court",
+    latitude: 13.1391,
+    longitude: 123.7345,
+    locationVerified: true,
+  });
+});
+
+test("saved canonical home address wins over a conflicting detected barangay", () => {
+  const resolved = resolveHomeReportLocation(
+    fallbackMeta,
+    {
+      municipalityCode: "11111111-1111-1111-1111-111111111111",
+      barangayPsgc: "0500501001",
+      homeCoordinates: { latitude: 13.1391, longitude: 123.7345 },
+    },
+    "0500501002",
+  );
+
+  assert.equal(resolved.municipalityCode, meta.municipalities[0].code);
+  assert.equal(resolved.barangayPsgc, meta.barangays[0].code);
+  assert.equal(resolved.locationVerified, true);
+});
+
+test("mismatched saved home codes use the detected canonical fallback", () => {
+  const resolved = resolveHomeReportLocation(
+    fallbackMeta,
+    {
+      municipalityCode: "22222222-2222-2222-2222-222222222222",
+      barangayPsgc: "0500501001",
+      homeCoordinates: { latitude: 13.1391, longitude: 123.7345 },
+    },
+    "0500501002",
+  );
+
+  assert.equal(resolved.municipalityCode, fallbackMeta.municipalities[1].code);
+  assert.equal(resolved.barangayPsgc, fallbackMeta.barangays[1].code);
+  assert.equal(resolved.locationVerified, true);
+});
+
+test("legacy home profiles without codes use the detected canonical fallback", () => {
+  const resolved = resolveHomeReportLocation(
+    fallbackMeta,
+    {
+      homeCoordinates: { latitude: 13.1391, longitude: 123.7345 },
+    },
+    "0500501002",
+  );
+
+  assert.equal(resolved.municipalityCode, fallbackMeta.municipalities[1].code);
+  assert.equal(resolved.barangayPsgc, fallbackMeta.barangays[1].code);
+  assert.equal(resolved.locationVerified, true);
+});
+
+test("out-of-Albay saved coordinates cannot verify a report location", () => {
+  const resolved = resolveHomeReportLocation(meta, {
+    municipalityCode: "11111111-1111-1111-1111-111111111111",
+    barangayPsgc: "0500501001",
+    homeCoordinates: { latitude: 14, longitude: 123.7345 },
+  });
+
+  assert.equal(resolved.municipalityCode, meta.municipalities[0].code);
+  assert.equal(resolved.barangayPsgc, meta.barangays[0].code);
+  assert.equal(resolved.locationVerified, false);
 });
 
 test("reverse geocoding resolves Albay municipality and barangay PSGC", () => {

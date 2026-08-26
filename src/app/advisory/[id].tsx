@@ -7,7 +7,9 @@ import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
+import { useConsumerAccount } from "@/hooks/use-consumer-account";
 import {
+  advisoryScopeKey,
   fetchActiveAdvisory,
   type MobileAdvisory,
 } from "@/services/advisories";
@@ -18,7 +20,7 @@ import {
   useRouter,
 } from "expo-router";
 import { CalendarDays, Megaphone } from "lucide-react-native";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BackHandler, RefreshControl, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -42,12 +44,24 @@ export default function AdvisoryDetailsRoute() {
   const insets = useSafeAreaInsets();
   const { id, focus } = useLocalSearchParams<{ id: string; focus?: string }>();
   const { session, isLoading: isSessionLoading } = useAuthSession();
+  const { accountContext } = useConsumerAccount();
   const [accentColor] = useAppColors(["accent"]);
   const [advisory, setAdvisory] = useState<MobileAdvisory | null>(null);
+  const [loadedScopeKey, setLoadedScopeKey] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notificationFocus, setNotificationFocus] = useState(false);
+  const scope = useMemo(
+    () => session
+      ? { userId: session.user.id, identityUserId: accountContext?.identityUserId, accessRevision: accountContext?.accessRevision }
+      : null,
+    [accountContext?.accessRevision, accountContext?.identityUserId, session],
+  );
+  const scopeKey = scope ? advisoryScopeKey(scope) : null;
+  const activeScopeKeyRef = useRef(scopeKey);
+  activeScopeKeyRef.current = scopeKey;
+  const visibleAdvisory = loadedScopeKey === scopeKey ? advisory : null;
 
   useEffect(() => {
     if (focus !== "notification") return;
@@ -66,25 +80,32 @@ export default function AdvisoryDetailsRoute() {
 
   const load = useCallback(
     async (refresh = false) => {
-      if (!session || !id) return;
+      if (!scope || !scopeKey || !id) return;
+      const requestedScopeKey = scopeKey;
       if (refresh) setIsRefreshing(true);
       else setIsLoading(true);
 
       try {
-        setAdvisory(await fetchActiveAdvisory(id, session.user.id));
+        const nextAdvisory = await fetchActiveAdvisory(id, scope);
+        if (activeScopeKeyRef.current !== requestedScopeKey) return;
+        setAdvisory(nextAdvisory);
+        setLoadedScopeKey(requestedScopeKey);
         setError(null);
       } catch (nextError) {
+        if (activeScopeKeyRef.current !== requestedScopeKey) return;
         setError(
           nextError instanceof Error
             ? nextError.message
             : "Unable to load this advisory.",
         );
       } finally {
-        setIsLoading(false);
-        setIsRefreshing(false);
+        if (activeScopeKeyRef.current === requestedScopeKey) {
+          setIsLoading(false);
+          setIsRefreshing(false);
+        }
       }
     },
-    [id, session],
+    [id, scope, scopeKey],
   );
 
   useFocusEffect(
@@ -133,7 +154,7 @@ export default function AdvisoryDetailsRoute() {
             <Skeleton className="h-40 rounded-xl" />
             <Skeleton className="h-28 rounded-xl" />
           </>
-        ) : error || !advisory ? (
+        ) : error || !visibleAdvisory ? (
           <Alert variant="destructive">
             <AlertText>{error ?? "Advisory not found."}</AlertText>
           </Alert>
@@ -149,22 +170,22 @@ export default function AdvisoryDetailsRoute() {
                 <Badge
                   className="rounded-full"
                   variant={
-                    /critical|high/i.test(advisory.severity)
+                    /critical|high/i.test(visibleAdvisory.severity)
                       ? "destructive"
                       : "secondary"
                   }
                 >
-                  <BadgeText>{advisory.severity || "Info"}</BadgeText>
+                  <BadgeText>{visibleAdvisory.severity || "Info"}</BadgeText>
                 </Badge>
               </View>
-              <Heading size="xl">{advisory.title}</Heading>
-              {advisory.controlNumber ? (
+              <Heading size="xl">{visibleAdvisory.title}</Heading>
+              {visibleAdvisory.controlNumber ? (
                 <Text className="text-sm text-muted-foreground">
-                  Reference {advisory.controlNumber}
+                  Reference {visibleAdvisory.controlNumber}
                 </Text>
               ) : null}
               <Text className="leading-6 text-foreground">
-                {advisory.content}
+                {visibleAdvisory.content}
               </Text>
             </VStack>
 
@@ -174,30 +195,30 @@ export default function AdvisoryDetailsRoute() {
                 <Heading size="sm">Schedule</Heading>
               </View>
               <Text className="text-sm text-muted-foreground">
-                Published: {formatDate(advisory.publishedAt)}
+                Published: {formatDate(visibleAdvisory.publishedAt)}
               </Text>
 
-              {advisory.expiresAt ? (
+              {visibleAdvisory.expiresAt ? (
                 <Text className="text-sm text-muted-foreground">
-                  Available until: {formatDate(advisory.expiresAt)}
+                  Available until: {formatDate(visibleAdvisory.expiresAt)}
                 </Text>
               ) : null}
 
-              {advisory.scheduledStartAt || advisory.scheduledEndAt ? (
+              {visibleAdvisory.scheduledStartAt || visibleAdvisory.scheduledEndAt ? (
                 <VStack className="gap-2 border-t border-border pt-3">
                   <Text className="text-sm font-semibold text-foreground">
                     Interruption
                   </Text>
 
-                  {advisory.scheduledStartAt ? (
+                  {visibleAdvisory.scheduledStartAt ? (
                     <Text className="text-sm text-muted-foreground">
-                      Starts: {formatDate(advisory.scheduledStartAt)}
+                      Starts: {formatDate(visibleAdvisory.scheduledStartAt)}
                     </Text>
                   ) : null}
 
-                  {advisory.scheduledEndAt ? (
+                  {visibleAdvisory.scheduledEndAt ? (
                     <Text className="text-sm text-muted-foreground">
-                      Ends: {formatDate(advisory.scheduledEndAt)}
+                      Ends: {formatDate(visibleAdvisory.scheduledEndAt)}
                     </Text>
                   ) : null}
                 </VStack>

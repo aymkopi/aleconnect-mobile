@@ -7,6 +7,7 @@ import { statusBarHeight } from "@/constants";
 import { AdvisoryListItem } from "@/features/advisories/advisory-list-item";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
+import { useConsumerAccount } from "@/hooks/use-consumer-account";
 import {
   fetchActiveAdvisories,
   type MobileAdvisory,
@@ -38,13 +39,15 @@ export default function HomeRoute() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const { session, refreshSession } = useAuthSession();
+  const { accountContext } = useConsumerAccount();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [advisories, setAdvisories] = useState<MobileAdvisory[]>([]);
-  const [loadedUserId, setLoadedUserId] = useState<string | null>(null);
-  const activeUserIdRef = useRef(session?.user.id);
-  activeUserIdRef.current = session?.user.id;
-  const hasCurrentUserData = loadedUserId === session?.user.id;
+  const [loadedScopeKey, setLoadedScopeKey] = useState<string | null>(null);
+  const currentScopeKey = accountContext?.cacheKey ?? (session ? `${session.user.id}:0` : null);
+  const activeScopeKeyRef = useRef(currentScopeKey);
+  activeScopeKeyRef.current = currentScopeKey;
+  const hasCurrentUserData = loadedScopeKey === currentScopeKey;
   const visibleAdvisories = hasCurrentUserData ? advisories : [];
   const visibleUnreadCount = hasCurrentUserData ? unreadCount : 0;
   const [accentColor, mutedColor] = useAppColors(["accent", "muted"]);
@@ -55,22 +58,27 @@ export default function HomeRoute() {
       if (!session) {
         setUnreadCount(0);
         setAdvisories([]);
-        setLoadedUserId(null);
+        setLoadedScopeKey(null);
         return;
       }
 
       const userId = session.user.id;
+      const scopeKey = currentScopeKey;
       let isActive = true;
       const load = () =>
         void Promise.all([
-          fetchNotifications({ userId }),
-          fetchActiveAdvisories({ userId, limit: 3 }),
+          fetchNotifications({
+            userId,
+            identityUserId: accountContext?.identityUserId,
+            accessRevision: accountContext?.accessRevision,
+          }),
+          fetchActiveAdvisories({ userId, identityUserId: accountContext?.identityUserId, accessRevision: accountContext?.accessRevision, limit: 3 }),
         ])
           .then(([notifications, advisoryPage]) => {
-            if (!isActive || activeUserIdRef.current !== userId) return;
+            if (!isActive || activeScopeKeyRef.current !== scopeKey) return;
             setUnreadCount(notifications.unreadCount);
             setAdvisories(advisoryPage.advisories);
-            setLoadedUserId(userId);
+            setLoadedScopeKey(scopeKey);
           })
           .catch(() => undefined);
       load();
@@ -79,7 +87,7 @@ export default function HomeRoute() {
         isActive = false;
         unsubscribe();
       };
-    }, [session]),
+    }, [accountContext?.accessRevision, accountContext?.identityUserId, currentScopeKey, session]),
   );
 
   const handleRefresh = async () => {
@@ -89,18 +97,26 @@ export default function HomeRoute() {
       const nextSession = await refreshSession({ forceNetwork: true });
       if (nextSession) {
         const userId = nextSession.user.id;
+        const scopeKey = accountContext?.cacheKey ?? `${userId}:0`;
         const [notifications, advisoryPage] = await Promise.all([
-          fetchNotifications({ userId, force: true }),
+          fetchNotifications({
+            userId,
+            identityUserId: accountContext?.identityUserId,
+            accessRevision: accountContext?.accessRevision,
+            force: true,
+          }),
           fetchActiveAdvisories({
             userId,
+            identityUserId: accountContext?.identityUserId,
+            accessRevision: accountContext?.accessRevision,
             limit: 3,
             force: true,
           }),
         ]);
-        if (activeUserIdRef.current !== userId) return;
+        if (activeScopeKeyRef.current !== scopeKey) return;
         setUnreadCount(notifications.unreadCount);
         setAdvisories(advisoryPage.advisories);
-        setLoadedUserId(userId);
+        setLoadedScopeKey(scopeKey);
       }
     } finally {
       setIsRefreshing(false);

@@ -8,6 +8,7 @@ import {
   requestPhaseFailureMessage,
   type RequestPhase,
 } from "@/utils/report-transport";
+import type { ConsumerCapabilities } from "@/features/accounts/contract";
 
 const authTokenKey = "aleconnect_auth_token_v1";
 const defaultRequestTimeoutMs = 30_000;
@@ -23,6 +24,7 @@ export class ApiRequestError extends Error {
     readonly requestId?: string,
     readonly phase: RequestPhase = "request",
     readonly retryable = false,
+    readonly code?: string,
   ) {
     super(message);
     this.name = "ApiRequestError";
@@ -44,6 +46,12 @@ export type AuthUser = {
   readonly role: "consumer";
   readonly mustChangePassword?: boolean;
   readonly expoNotificationToken?: string | null;
+  readonly identityUserId?: string;
+  readonly sessionMode?: "legacy" | "identity";
+  readonly authorizedServiceAccountIds?: readonly string[];
+  readonly defaultServiceAccountId?: string;
+  readonly accessRevision?: number;
+  readonly capabilities?: Partial<ConsumerCapabilities>;
 };
 
 export type AuthSession = {
@@ -180,7 +188,7 @@ async function performRequest<T>(
       await markAuthInvalidated();
     }
 
-    const body = await readJson<{ error?: string; message?: string }>(
+    const body = await readJson<{ error?: string; message?: string; code?: string }>(
       response,
     ).catch(() => null);
     throw new ApiRequestError(
@@ -189,6 +197,7 @@ async function performRequest<T>(
       requestId,
       phase,
       shouldRetryHttpRequest("GET", response.status, false),
+      typeof body?.code === "string" ? body.code : undefined,
     );
   }
 

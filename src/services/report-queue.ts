@@ -1,8 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
 
-import { ApiRequestError, getAuthToken } from "@/services/api";
+import { ApiRequestError, apiRequest, getAuthToken } from "@/services/api";
+import { normalizeConsumerIdentity, normalizeLinkedAccounts, readConsistentConsumerAccountSnapshot } from "@/features/accounts/contract";
 import { requestReportRevalidation } from "@/services/report-sync-events";
+import { evaluateQueuedReportAccess, isQueuedReportVisible } from "@/services/report-queue-access";
 import {
   clearReportListCache,
   createEvidenceUploads,
@@ -35,6 +37,10 @@ export type ReportQueueItem = {
   id: string;
   idempotencyKey: string;
   userId: string;
+  identityUserId?: string;
+  serviceAccountId?: string;
+  accessRevision?: number;
+  nonRetryable?: boolean;
   createdAt: string;
   updatedAt: string;
   status: ReportQueueStatus;
@@ -54,8 +60,14 @@ export type ReportQueueItem = {
 
 export type ReportQueueInput = Pick<
   ReportQueueItem,
-  "id" | "idempotencyKey" | "userId" | "title" | "payload" | "evidence"
+  "id" | "idempotencyKey" | "userId" | "identityUserId" | "serviceAccountId" | "accessRevision" | "title" | "payload" | "evidence"
 >;
+
+export type ReportQueueScope = {
+  identityUserId: string;
+  authorizedServiceAccountIds: readonly string[];
+  accessRevision: number;
+};
 
 const queueStorageKey = "report_submission_queue_v1";
 const listeners = new Set<() => void>();
@@ -77,6 +89,7 @@ async function readQueue(): Promise<ReportQueueItem[]> {
       status: item.status === "submitting" ? "queued" : item.status,
       lastErrorPhase: item.lastErrorPhase ?? null,
       diagnosticId: item.diagnosticId ?? null,
+      nonRetryable: item.nonRetryable === true,
     }));
   } catch {
     return [];
@@ -111,10 +124,16 @@ export function subscribeReportQueue(listener: () => void) {
   };
 }
 
-export async function listReportQueue(userId?: string) {
+function queueItemVisibleToScope(item: ReportQueueItem, scope?: string | ReportQueueScope) {
+  if (!scope) return true;
+  if (typeof scope === "string") return item.userId === scope;
+  return isQueuedReportVisible(item, scope);
+}
+
+export async function listReportQueue(scope?: string | ReportQueueScope) {
   const items = await readQueue();
   return items
-    .filter((item) => !userId || item.userId === userId)
+    .filter((item) => queueItemVisibleToScope(item, scope))
     .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
 }
 
@@ -155,12 +174,32 @@ async function submitQueuedReport(item: ReportQueueItem, authToken: string) {
   await replaceQueueItem(submitting);
 
   try {
+    const currentAccess = await readConsistentConsumerAccountSnapshot({
+      readIdentity: async () => normalizeConsumerIdentity(await apiRequest<unknown>("/api/mobile/consumer-identity", {}, { authToken, phase: "metadata", timeoutMs: 15_000 }), { id: item.userId }),
+      readLinkedAccounts: async () => normalizeLinkedAccounts(await apiRequest<unknown>("/api/mobile/linked-accounts", {}, { authToken, phase: "metadata", timeoutMs: 15_000 }), { id: item.userId }),
+    });
+    const accessDecision = evaluateQueuedReportAccess(item, {
+      identityUserId: currentAccess.identityUserId,
+      authorizedServiceAccountIds: currentAccess.authorizedServiceAccountIds,
+      accessRevision: currentAccess.accessRevision,
+    });
+    if (!accessDecision.allowed) {
+      const code = accessDecision.code;
+      const failed = { ...submitting, status: "failed" as const, nonRetryable: true, lastError: `${code}: This protected report draft no longer matches your current account access. Refresh before creating a new report.`, lastErrorPhase: "metadata" as const };
+      await replaceQueueItem(failed);
+      return failed;
+    }
+    const freshItem: ReportQueueItem = accessDecision.legacyUpgraded
+      ? { ...submitting, ...accessDecision.scope }
+      : submitting;
+    if (accessDecision.legacyUpgraded) await replaceQueueItem(freshItem);
     const { draftId, uploads } = await createEvidenceUploads(
-      item.evidence.length,
+      freshItem.evidence.length,
+      { serviceAccountId: freshItem.serviceAccountId, accessRevision: freshItem.accessRevision },
       authToken,
     );
     await mapWithConcurrency(uploads, 2, async (upload, index) => {
-      const photo = item.evidence[index];
+      const photo = freshItem.evidence[index];
       if (!photo) throw new Error("A queued evidence photo is missing.");
       await uploadEvidenceToR2(
         upload.uploadUrl,
@@ -174,6 +213,8 @@ async function submitQueuedReport(item: ReportQueueItem, authToken: string) {
     const ticket = await submitComplaint(
       {
         ...payload,
+        serviceAccountId: freshItem.serviceAccountId,
+        accessRevision: freshItem.accessRevision,
         idempotencyKey: item.idempotencyKey,
         draftIds: [draftId],
         imageKeys: uploads.map((upload) => upload.key),
@@ -181,7 +222,7 @@ async function submitQueuedReport(item: ReportQueueItem, authToken: string) {
       authToken,
     );
     const submitted: ReportQueueItem = {
-      ...submitting,
+      ...freshItem,
       status: "submitted",
       updatedAt: new Date().toISOString(),
       ticketId: ticket.ticketId,
@@ -210,7 +251,8 @@ async function submitQueuedReport(item: ReportQueueItem, authToken: string) {
     deleteReportEvidence(item.id);
     return submitted;
   } catch (error) {
-    const retryable = !(error instanceof ApiRequestError) || error.retryable;
+    const accessFailure = error instanceof ApiRequestError && ["ACCOUNT_NOT_ACCESSIBLE", "STALE_ACCESS_REVISION"].includes(error.code ?? "");
+    const retryable = !accessFailure && (!(error instanceof ApiRequestError) || error.retryable);
     const lastError =
       error instanceof ApiRequestError &&
       error.status != null &&
@@ -222,6 +264,7 @@ async function submitQueuedReport(item: ReportQueueItem, authToken: string) {
     const failed: ReportQueueItem = {
       ...submitting,
       status: retryable ? "queued" : "failed",
+      nonRetryable: accessFailure,
       updatedAt: new Date().toISOString(),
       lastError,
       lastErrorPhase: error instanceof ApiRequestError ? error.phase : null,
@@ -233,17 +276,18 @@ async function submitQueuedReport(item: ReportQueueItem, authToken: string) {
   }
 }
 
-export async function syncReportQueue(userId: string) {
-  return queueSyncRequests.run(userId, async () => {
+export async function syncReportQueue(scope: string | ReportQueueScope) {
+  const identityUserId = typeof scope === "string" ? scope : scope.identityUserId;
+  return queueSyncRequests.run(identityUserId, async () => {
     const network = await NetInfo.fetch();
     if (!network.isConnected || network.isInternetReachable === false) {
-      return listReportQueue(userId);
+      return listReportQueue(scope);
     }
 
     const authToken = await getAuthToken();
-    if (!authToken) return listReportQueue(userId);
+    if (!authToken) return listReportQueue(scope);
 
-    const items = await listReportQueue(userId);
+    const items = await listReportQueue(scope);
     const results: ReportQueueItem[] = [];
     for (const item of items.reverse()) {
       results.push(
@@ -260,7 +304,7 @@ export async function retryQueuedReport(id: string) {
   await runQueueMutation(queueStorageKey, async () => {
     const items = await readQueue();
     const item = items.find((entry) => entry.id === id);
-    if (!item || item.status === "submitting" || item.status === "submitted") {
+    if (!item || item.status === "submitting" || item.status === "submitted" || item.nonRetryable) {
       return;
     }
     await writeQueue(
