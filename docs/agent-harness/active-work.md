@@ -2,9 +2,9 @@
 
 ## Consumer multi-account V18 release evidence (2026-08-26)
 
-- Status: coordinated mobile source is merged to canonical `master` at `6eed61da65557c04faa878fd2cee3f73b8676087`, with the iOS encryption-compliance metadata fix included. Android production build `46a1019d-03de-4d16-8824-8a32c95ce4d8` is in progress; automatic store submission stopped because the Google Play service-account key is not configured for non-interactive submission. iOS build/submission is blocked because Apple distribution credentials are not set up.
+- Status: coordinated mobile source is merged to canonical `master` at `6eed61da65557c04faa878fd2cee3f73b8676087`, with the iOS encryption-compliance metadata fix included. Android production build `46a1019d-03de-4d16-8824-8a32c95ce4d8` finished successfully and produced an AAB; automatic store submission stopped because the Google Play service-account key is not configured for non-interactive submission. iOS build/submission is blocked because Apple distribution credentials are not set up.
 - Backend dependency: staff/API `main` is `e56731d6bd6b26c74aae1adb1c7e80f4f2cc3700`, the live additive schema is applied and verified, and the Cloudflare workflow completed successfully before this mobile release attempt.
-- Verification: snapshot behavior 6/6, TypeScript, harness, diff checks, and EAS upload passed. The full JavaScript suite remains 172/178 with the same six unrelated baseline failures; lint has 0 errors and four existing warnings. No physical Android/iOS device or push-tap flow is claimed.
+- Verification: snapshot behavior 6/6, TypeScript, harness, diff checks, and EAS Android build passed. The full JavaScript suite remains 172/178 with the same six unrelated baseline failures; lint has 0 errors and four existing warnings. No physical Android/iOS device or push-tap flow is claimed.
 - Review/boundary: the fresh independent Sol High review was attempted but unavailable because of the platform usage limit; no fresh approval is claimed. Production rollout flags remain off and real email verification is not wired; generated Graphify output is preserved and excluded from release commits.
 
 ## Consumer multi-account V18 final remediation (2026-08-26)
