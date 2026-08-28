@@ -14,7 +14,9 @@ test("report creation scopes a multi-account draft, evidence intent, and queue r
 
   assert.match(screen, /useConsumerAccount/);
   assert.match(screen, /accounts\.length > 1/);
-  assert.match(screen, /Report for/);
+  assert.doesNotMatch(screen, /label="Report for"/);
+  assert.match(screen, /label="Account number"/);
+  assert.match(screen, /buildReportAccountSelector/);
   assert.match(screen, /setServiceAccountId/);
   assert.match(screen, /serviceAccountId/);
   assert.match(screen, /accessRevision/);
@@ -26,6 +28,14 @@ test("report creation scopes a multi-account draft, evidence intent, and queue r
   assert.match(queue, /ACCOUNT_NOT_ACCESSIBLE/);
   assert.match(queue, /createEvidenceUploads/);
   assert.match(context, /useConsumerAccount/);
+});
+
+test("Recent Reports reloads when its account filter changes", async () => {
+  const screen = await read("src/app/(tabs)/reports/index.tsx");
+
+  assert.match(screen, /shouldReloadReportsForAccountChange/);
+  assert.match(screen, /serviceAccountId/);
+  assert.match(screen, /loadComplaintsRef\.current/);
 });
 
 test("offline report sync fails closed on stale identity, account, or revision without deleting the protected draft", async () => {

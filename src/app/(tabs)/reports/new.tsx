@@ -42,6 +42,7 @@ import {
 import { findAlbayBarangay } from "@/features/reports/albay-barangays";
 import { EvidencePhotoViewer } from "@/features/reports/components/evidence-photo-viewer";
 import {
+  buildReportAccountSelector,
   conditionalReportPayload,
   hasCurrentReportContract,
   isWithinAlbay,
@@ -349,6 +350,11 @@ export default function NewComplaintRoute() {
   const activeServiceAccountId = selectedServiceAccountId && accounts.some((account) => account.id === selectedServiceAccountId)
     ? selectedServiceAccountId
     : accountContext?.defaultServiceAccountId ?? session?.user.id ?? null;
+  const reportAccountSelector = buildReportAccountSelector(
+    accounts,
+    activeServiceAccountId,
+    isSubmitting || isAccountSwitching,
+  );
 
   useEffect(() => {
     if (!activeServiceAccountId || selectedServiceAccountId === activeServiceAccountId) return;
@@ -969,23 +975,6 @@ export default function NewComplaintRoute() {
         }}
         scrollIndicatorInsets={{ bottom: childBottomPadding }}
       >
-        {hasMultipleAccounts ? (
-          <View className="rounded-xl border border-border bg-card p-3">
-            <SelectField
-              label="Report for"
-              value={activeServiceAccountId ?? ""}
-              placeholder="Choose an ALECO account"
-              description="Select the ALECO account this report is for. Changing accounts clears this draft to keep its location and evidence private."
-              options={accounts.map((account) => ({
-                value: account.id,
-                label: `${account.accountNumber ?? "Account number unavailable"} — ${account.registeredName}${account.isDefault ? " (Default)" : ""}`,
-              }))}
-              onChange={switchReportAccount}
-              isDisabled={isSubmitting || isAccountSwitching}
-            />
-            {isAccountSwitching ? <Text accessibilityLiveRegion="polite" className="mt-2 text-xs text-muted-foreground">Loading this account&apos;s saved location…</Text> : null}
-          </View>
-        ) : null}
         <View className="gap-2">
           <Progress value={(step / 5) * 100} className="h-2.5">
             <ProgressFilledTrack className="rounded-full" />
@@ -1101,16 +1090,21 @@ export default function NewComplaintRoute() {
                   Account
                 </Text>
 
-                <ReportInput
+                <SelectField
                   isRequired
-                  isDisabled
                   label="Account number"
-                  value={form.accountNumber}
-                  placeholder="100001321412634"
-                  onChangeText={() => undefined}
+                  value={reportAccountSelector.value}
+                  placeholder="Choose an ALECO account"
+                  description={hasMultipleAccounts
+                    ? "Choose the ALECO account for this report. Changing it clears this draft and loads that account's saved location."
+                    : "This report will use your connected ALECO account."}
+                  options={reportAccountSelector.options}
+                  onChange={switchReportAccount}
+                  isDisabled={reportAccountSelector.isDisabled}
                   isInvalid={showErrors && !form.accountNumber}
                   error="Account number is required."
                 />
+                {isAccountSwitching ? <Text accessibilityLiveRegion="polite" className="text-xs text-muted-foreground">Loading this account&apos;s saved location…</Text> : null}
               </View>
 
               <View className="gap-3">

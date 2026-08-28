@@ -1,5 +1,17 @@
 # Implementation history
 
+## 2026-08-26 - Account recovery, report selector, and immediate filtering UX
+
+- Repositories: consumer client `aleconnect-mobile` and authoritative staff/API sibling `aleconnect`, both isolated on `codex/fix-account-linking-reports-ux`.
+- Scope: Password Reset account claims now show the server-provided recovery state only after valid ALECO credentials are verified, with a guided sign-out, temporary-password account sign-in, required password-change, and email sign-in retry flow. Unlink explicitly requests the per-account ALECO password, clears it before submission, and maps unlink-specific errors instead of reporting a link failure.
+- Files: profile account-link and linked-account routes, report creation/recent/archive routes, account/report contract helpers, focused behavior/source tests, and both repositories' harness handoffs.
+- Report UX: the standalone `Report for` field was removed. `Account number` is now the account selector in the account section; it is visibly non-interactive for one connected account and enabled for multiple accounts. Existing account switching still clears cross-account draft/evidence state and resolves location from the selected account. Recent Reports and Archive account filters now trigger a scoped reload immediately after the initial feed has loaded, without pull-to-refresh.
+- Contracts: unified email credentials remain separate from ALECO account credentials. Single-account consumers retain the existing value and layout path; multi-account labels/defaults remain additive. The API sibling preserves generic non-enumerating errors for invalid claim details and adds only `ACCOUNT_PASSWORD_RESET_REQUIRED` and `UNLINK_PASSWORD_INCORRECT`.
+- Verification: behavior coverage passes 4/4; account/report source contracts pass 10/10; `npx tsc --noEmit` passes; lint exits 0 with the same four established warnings; Android export completes after bundling 4,476 modules. The full serial mobile suite is 173/179 with exactly the same six unrelated established UI/date/permission baselines. Coordinated staff focused coverage passes 18/18, lifecycle 408/408, deployment topology 34/34, TypeScript, lint, and production build.
+- Git/Deployment: local source and tests only on `codex/fix-account-linking-reports-ux`; no commit, push, merge, EAS/store release, staff deployment, database action, or production write occurred.
+- Remaining risks: no physical Android/iOS device was attached, so the interaction states and account-owned location update remain source-, type-, and export-verified only.
+- Next: integrate only under separate release authorization, then validate the single/multi-account selector, reset recovery, immediate feed filtering, and unlink flow on physical devices.
+
 ## 2026-08-26 - Consumer mock-verification confirmation correction
 
 - Repositories: consumer `aleconnect-mobile` and authoritative staff/API sibling `aleconnect`, both isolated on `codex/fix-email-setup-confirmation`.

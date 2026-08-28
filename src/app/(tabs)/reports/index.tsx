@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
 import { statusBarHeight } from "@/constants";
 import { type Report } from "@/features/reports/data";
+import { shouldReloadReportsForAccountChange } from "@/features/reports/contract";
 import { ReportListGroup } from "@/features/reports/report-list";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
@@ -67,6 +68,7 @@ export default function ComplaintsRoute() {
   const scrollRef = useRef<ScrollView | null>(null);
   const hasLoadedRef = useRef(false);
   const loadGenerationRef = useRef(0);
+  const previousServiceAccountIdRef = useRef<string | null>(null);
   const loadComplaintsRef = useRef<
     (options?: LoadComplaintOptions) => Promise<void>
   >(async () => undefined);
@@ -132,6 +134,18 @@ export default function ComplaintsRoute() {
   useEffect(() => {
     loadComplaintsRef.current = loadComplaints;
   }, [loadComplaints]);
+
+  useEffect(() => {
+    const previousServiceAccountId = previousServiceAccountIdRef.current;
+    previousServiceAccountIdRef.current = serviceAccountId;
+    if (!shouldReloadReportsForAccountChange(
+      previousServiceAccountId,
+      serviceAccountId,
+      hasLoadedRef.current,
+    )) return;
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+    void loadComplaintsRef.current();
+  }, [serviceAccountId]);
 
   useEffect(() => {
     if (!userId) return;
@@ -308,8 +322,8 @@ export default function ComplaintsRoute() {
 
         {isMultiAccount ? (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-2" accessibilityLabel="Report account filter">
-            <Button size="sm" variant={!serviceAccountId ? "secondary" : "outline"} onPress={() => setServiceAccountId(null)}><ButtonText>All accounts</ButtonText></Button>
-            {accountContext!.accounts.map((account) => <Button key={account.id} size="sm" variant={serviceAccountId === account.id ? "secondary" : "outline"} onPress={() => setServiceAccountId(account.id)}><ButtonText>{[account.accountNumber, account.registeredName].filter(Boolean).join(" · ")}</ButtonText></Button>)}
+            <Button isDisabled={isLoading} size="sm" variant={!serviceAccountId ? "secondary" : "outline"} onPress={() => setServiceAccountId(null)}><ButtonText>All accounts</ButtonText></Button>
+            {accountContext!.accounts.map((account) => <Button key={account.id} isDisabled={isLoading} size="sm" variant={serviceAccountId === account.id ? "secondary" : "outline"} onPress={() => setServiceAccountId(account.id)}><ButtonText>{[account.accountNumber, account.registeredName].filter(Boolean).join(" · ")}</ButtonText></Button>)}
           </ScrollView>
         ) : null}
 

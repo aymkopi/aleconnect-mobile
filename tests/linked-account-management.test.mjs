@@ -67,7 +67,7 @@ test("approval email transition and claim submission never retain a password", a
   assert.match(accounts, /pathname: "\/sign-in", params: \{ mode: "email", linked: "1" \}/);
   assert.match(signIn, /requestedMode === "email"/);
   assert.match(wizard, /const submittedPassword = password/);
-  assert.match(wizard, /setPassword\(""\); setIsSubmitting/);
+  assert.match(wizard, /setPassword\(""\);\s*setIsSubmitting/);
 });
 
 test("linked-account details keep the unified sign-in email shared and read-only", async () => {

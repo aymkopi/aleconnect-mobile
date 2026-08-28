@@ -9,6 +9,7 @@ import { Button, ButtonSpinner, ButtonText } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { Input, InputField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
+import { presentAccountUnlinkError } from "@/features/accounts/contract";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useConsumerAccount } from "@/hooks/use-consumer-account";
 import { useConsumerProfileContext } from "@/context/consumer-profile-context";
@@ -51,17 +52,18 @@ export default function LinkedAccountsRoute() {
   };
 
   const confirmUnlink = async () => {
-    if (!unlinkId || !password) { setError("Enter the current password for this account."); return; }
+    if (!unlinkId || !password) { setError("Enter this ALECO account's password."); return; }
     const isDefault = unlinkId === accountContext.defaultServiceAccountId;
     if (isDefault && !replacementDefaultServiceAccountId) { setError("Choose a replacement default account first."); return; }
-    setWorkingId(unlinkId); setError(null);
+    const submittedPassword = password;
+    setPassword(""); setWorkingId(unlinkId); setError(null);
     try {
-      const result = await unlinkLinkedAccount({ serviceAccountId: unlinkId, currentAccountPassword: password, accessRevision: accountContext.accessRevision, replacementDefaultServiceAccountId });
-      setPassword(""); setUnlinkId(null);
+      const result = await unlinkLinkedAccount({ serviceAccountId: unlinkId, currentAccountPassword: submittedPassword, accessRevision: accountContext.accessRevision, replacementDefaultServiceAccountId });
+      setUnlinkId(null);
       await clearConsumerProfileCaches();
       if (result.reauthenticationRequired) { clearConsumerAccount(); await signOut(); router.replace("/sign-in"); return; }
       await refreshConsumerAccount();
-    } catch (nextError) { setError(nextError instanceof Error ? nextError.message : "Account could not be unlinked."); }
+    } catch (nextError) { setError(presentAccountUnlinkError(nextError).message); }
     finally { setWorkingId(null); }
   };
 
@@ -86,7 +88,7 @@ export default function LinkedAccountsRoute() {
         ))}
         <Button className="min-h-12" onPress={() => router.push("/profile/link-account" as Href)}><LucideLink size={18} /><ButtonText>Link another account</ButtonText></Button>
         {requests.length ? <View className="gap-3 pt-2"><Heading size="md">Link requests</Heading>{requests.map((request) => <View key={request.requestId} className="gap-1 rounded-lg border border-border bg-card p-3"><Text className="font-bold">{request.accountNumber} · {request.registeredName}</Text><Text className="text-sm capitalize text-muted">{request.status}</Text>{request.status === "denied" && request.consumerReason ? <Text className="text-sm text-destructive">{request.consumerReason}</Text> : null}{request.status === "approved" ? <><Text className="text-sm text-muted">Approved. Sign out and continue with email to refresh account access.</Text><Button onPress={() => void signOut().then(() => router.replace({ pathname: "/sign-in", params: { mode: "email", linked: "1" } }))} size="sm"><ButtonText>Continue with email</ButtonText></Button></> : null}{request.status === "conflict" ? <Text className="text-sm text-muted">This request needs additional staff review.</Text> : null}</View>)}</View> : null}
-        {unlinkAccount ? <View className="gap-3 rounded-xl border border-destructive bg-card p-4"><View className="flex-row gap-2"><LucideShieldAlert size={20} /><View className="flex-1"><Heading size="md">Unlink account</Heading><Text className="text-sm text-muted">Confirm with this account’s current password. You will need to sign in again.</Text></View></View><Input className="h-12 rounded-xl"><InputField accessibilityLabel="Current account password" autoCapitalize="none" autoComplete="current-password" onChangeText={setPassword} placeholder="Current account password" secureTextEntry value={password} /></Input>{unlinkAccount.isDefault ? <View className="gap-2"><Text className="text-sm font-medium">Replacement default account</Text>{accountContext.accounts.filter((account) => account.id !== unlinkAccount.id).map((account) => <Button key={account.id} onPress={() => setReplacementDefaultServiceAccountId(account.id)} variant={replacementDefaultServiceAccountId === account.id ? "default" : "outline"}><ButtonText>{account.accountNumber ?? account.registeredName}</ButtonText></Button>)}</View> : null}<View className="flex-row gap-2"><Button className="flex-1" onPress={() => { setUnlinkId(null); setPassword(""); }} variant="outline"><ButtonText>Cancel</ButtonText></Button><Button className="flex-1" isDisabled={workingId !== null} onPress={() => void confirmUnlink()} variant="destructive">{workingId ? <ButtonSpinner /> : null}<ButtonText>Confirm unlink</ButtonText></Button></View></View> : null}
+        {unlinkAccount ? <View className="gap-3 rounded-xl border border-destructive bg-card p-4"><View className="flex-row gap-2"><LucideShieldAlert size={20} /><View className="flex-1"><Heading size="md">Unlink account</Heading><Text className="text-sm text-muted">Confirm with this ALECO account&apos;s password, not your email sign-in password. If staff reset it, use the temporary password provided. You will need to sign in again.</Text></View></View><Input className="h-12 rounded-xl"><InputField accessibilityLabel="ALECO account password" autoCapitalize="none" autoComplete="current-password" onChangeText={setPassword} placeholder="ALECO account password" secureTextEntry value={password} /></Input>{unlinkAccount.isDefault ? <View className="gap-2"><Text className="text-sm font-medium">Replacement default account</Text>{accountContext.accounts.filter((account) => account.id !== unlinkAccount.id).map((account) => <Button key={account.id} onPress={() => setReplacementDefaultServiceAccountId(account.id)} variant={replacementDefaultServiceAccountId === account.id ? "default" : "outline"}><ButtonText>{account.accountNumber ?? account.registeredName}</ButtonText></Button>)}</View> : null}<View className="flex-row gap-2"><Button className="flex-1" onPress={() => { setUnlinkId(null); setPassword(""); }} variant="outline"><ButtonText>Cancel</ButtonText></Button><Button className="flex-1" isDisabled={workingId !== null} onPress={() => void confirmUnlink()} variant="destructive">{workingId ? <ButtonSpinner /> : null}<ButtonText>Confirm unlink</ButtonText></Button></View></View> : null}
       </ScrollView>
     </View>
   );

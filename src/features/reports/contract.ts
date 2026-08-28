@@ -14,6 +14,36 @@ export const reportLimits = {
   evidenceMaxBytes: 5_000_000,
 } as const;
 
+type ReportAccountSelectorAccount = {
+  id: string;
+  accountNumber: string | null;
+  registeredName: string;
+  isDefault: boolean;
+};
+
+export function buildReportAccountSelector(
+  accounts: ReportAccountSelectorAccount[],
+  activeServiceAccountId: string | null,
+  busy: boolean,
+) {
+  return {
+    value: activeServiceAccountId ?? "",
+    isDisabled: accounts.length <= 1 || busy,
+    options: accounts.map((account) => ({
+      value: account.id,
+      label: `${account.accountNumber ?? "Account number unavailable"} — ${account.registeredName}${account.isDefault ? " (Default)" : ""}`,
+    })),
+  };
+}
+
+export function shouldReloadReportsForAccountChange(
+  previousServiceAccountId: string | null,
+  nextServiceAccountId: string | null,
+  hasLoaded: boolean,
+) {
+  return hasLoaded && previousServiceAccountId !== nextServiceAccountId;
+}
+
 const albayBounds = {
   minLatitude: 12.9,
   maxLatitude: 13.55,

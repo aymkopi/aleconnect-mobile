@@ -1,5 +1,13 @@
 # Active work
 
+## Account recovery and multi-account report UX correction (2026-08-26)
+
+- Status: coordinated mobile and staff/API implementation is complete on `codex/fix-account-linking-reports-ux`; integration and release are not included.
+- Behavior: valid temporary reset credentials produce a dedicated recovery guide instead of creating a claim that bypasses Secure your account. Incorrect claim details remain generic. Unlink now distinguishes the ALECO account password from the unified email password and reports unlink-specific failures.
+- Report UX: `Account number` replaces the separate `Report for` control, is disabled for one connected account and enabled for multiple accounts, and still updates account-owned location/draft state. Recent Reports and Archive account filters reload immediately after selection, so pull-to-refresh is no longer required.
+- Evidence: behavior 4/4 and focused source contracts 10/10 pass; TypeScript, lint, and the 4,476-module Android export pass. Full mobile coverage remains 173/179 with the same six unrelated baseline failures; coordinated staff lifecycle is 408/408 and deployment topology is 34/34. No device is attached.
+- Next: after a separately authorized coordinated release, verify single/multi-account selector states, account-owned location changes, immediate feed filtering, reset recovery, and unlink on physical devices.
+
 ## Consumer mock-verification confirmation correction (2026-08-26)
 
 - Status: compatible mobile handling is complete on isolated branch `codex/fix-email-setup-confirmation`; no EAS build, store release, merge, or push is included.

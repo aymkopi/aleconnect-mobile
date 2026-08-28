@@ -23,6 +23,7 @@ import {
   type Report,
 } from "@/features/reports/data";
 import { ReportListGroup } from "@/features/reports/report-list";
+import { shouldReloadReportsForAccountChange } from "@/features/reports/contract";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useConsumerAccountContext } from "@/context/consumer-account-context";
@@ -110,6 +111,7 @@ export default function ReportArchiveRoute() {
   const hasLoadedRef = useRef(false);
   const queueSnapshotRef = useRef<string | null>(null);
   const loadGenerationRef = useRef(0);
+  const previousServiceAccountIdRef = useRef<string | null>(null);
   const [accentColor, mutedColor, dangerColor] = useAppColors([
     "accent",
     "muted",
@@ -223,6 +225,18 @@ export default function ReportArchiveRoute() {
   }, [loadReports]);
 
   useEffect(() => {
+    const previousServiceAccountId = previousServiceAccountIdRef.current;
+    previousServiceAccountIdRef.current = serviceAccountId;
+    if (!shouldReloadReportsForAccountChange(
+      previousServiceAccountId,
+      serviceAccountId,
+      hasLoadedRef.current,
+    )) return;
+    listRef.current?.scrollToOffset({ offset: 0, animated: false });
+    void loadReportsRef.current();
+  }, [serviceAccountId]);
+
+  useEffect(() => {
     if (!userId) return;
 
     const unsubscribeStatus = subscribeReportStatusChanged((event) => {
@@ -278,10 +292,10 @@ export default function ReportArchiveRoute() {
     if (!hasLoadedRef.current) return;
     const timer = setTimeout(() => {
       listRef.current?.scrollToOffset({ offset: 0, animated: false });
-      void loadReports();
+      void loadReportsRef.current();
     }, 350);
     return () => clearTimeout(timer);
-  }, [categoryId, loadReports, query, sortMode]);
+  }, [categoryId, query, sortMode]);
 
   const handleBack = useCallback(() => {
     if (router.canGoBack()) router.back();
@@ -413,7 +427,7 @@ export default function ReportArchiveRoute() {
           ))}
         </Menu>
       </View>
-      {isMultiAccount ? <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-2" accessibilityLabel="Report account filter"><Button size="sm" variant={!serviceAccountId ? "secondary" : "outline"} onPress={() => setServiceAccountId(null)}><ButtonText>All accounts</ButtonText></Button>{accountContext!.accounts.map((account) => <Button key={account.id} size="sm" variant={serviceAccountId === account.id ? "secondary" : "outline"} onPress={() => setServiceAccountId(account.id)}><ButtonText>{[account.accountNumber, account.registeredName].filter(Boolean).join(" · ")}</ButtonText></Button>)}</ScrollView> : null}
+      {isMultiAccount ? <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-2" accessibilityLabel="Report account filter"><Button isDisabled={isLoading} size="sm" variant={!serviceAccountId ? "secondary" : "outline"} onPress={() => setServiceAccountId(null)}><ButtonText>All accounts</ButtonText></Button>{accountContext!.accounts.map((account) => <Button key={account.id} isDisabled={isLoading} size="sm" variant={serviceAccountId === account.id ? "secondary" : "outline"} onPress={() => setServiceAccountId(account.id)}><ButtonText>{[account.accountNumber, account.registeredName].filter(Boolean).join(" · ")}</ButtonText></Button>)}</ScrollView> : null}
 
       {pendingReports.length > 0 ? (
         <View className="gap-2">

@@ -35,6 +35,50 @@ export type ConsumerLinkedAccountsSnapshot = {
   accessRevision: number;
 };
 
+export type AccountActionErrorPresentation = {
+  kind: "error" | "password-reset-required";
+  message: string;
+};
+
+function accountActionError(error: unknown) {
+  return error && typeof error === "object"
+    ? error as { code?: unknown; message?: unknown }
+    : {};
+}
+
+function accountActionErrorMessage(error: unknown, fallback: string) {
+  const value = accountActionError(error).message;
+  return typeof value === "string" && value.trim() ? value : fallback;
+}
+
+export function presentAccountLinkError(error: unknown): AccountActionErrorPresentation {
+  const value = accountActionError(error);
+  if (value.code === "ACCOUNT_PASSWORD_RESET_REQUIRED") {
+    return {
+      kind: "password-reset-required",
+      message: "Complete this ALECO account's required password change before linking it.",
+    };
+  }
+  return {
+    kind: "error",
+    message: accountActionErrorMessage(error, "Your link request could not be sent."),
+  };
+}
+
+export function presentAccountUnlinkError(error: unknown): AccountActionErrorPresentation {
+  const value = accountActionError(error);
+  if (value.code === "UNLINK_PASSWORD_INCORRECT") {
+    return {
+      kind: "error",
+      message: "That ALECO account password is incorrect. Use this account's password, not your email sign-in password.",
+    };
+  }
+  return {
+    kind: "error",
+    message: accountActionErrorMessage(error, "Account could not be unlinked."),
+  };
+}
+
 export const CONSUMER_ACCOUNT_SNAPSHOT_MAX_ATTEMPTS = 2;
 
 export class ConsumerAccountSnapshotMismatchError extends Error {
