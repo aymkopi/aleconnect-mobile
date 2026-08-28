@@ -1,5 +1,13 @@
 # Active work
 
+## Account-linking/report UX local integration (2026-08-28)
+
+- Status: complete locally on canonical `master`; coordinated staff/API is on canonical `main`. Both feature branches and the temporary baseline worktree are removed.
+- Behavior: valid reset credentials guide required ALECO password recovery without submitting a claim; invalid details remain generic. Unlink asks for the ALECO password. `Account number` is non-interactive for one account and selectable for multiple accounts, and report filters reload immediately.
+- Evidence: mobile focused coverage, TypeScript, Android export, harness, and diff checks pass; lint has 0 errors/four existing warnings. Full coverage remains 173/179 with the exact same six failures reproduced on base. Coordinated staff passes lifecycle 410/410, focused fixture repair 17/17, deployment 34/34, TypeScript, lint, build, harness, and diff checks.
+- Boundary: no push, EAS/store publication, staff deployment, database mutation, production request, or device interaction occurred.
+- Next: keep release/deployment separately authorized and verify all affected interaction states on a physical device.
+
 ## Account recovery and multi-account report UX correction (2026-08-26)
 
 - Status: coordinated mobile and staff/API implementation is complete on `codex/fix-account-linking-reports-ux`; integration and release are not included.

@@ -1,5 +1,16 @@
 # Implementation history
 
+## 2026-08-28 - Account-linking/report UX canonical integration and cleanup
+
+- Repositories: consumer client `aleconnect-mobile` integrated into canonical remote-default `master`; authoritative staff/API sibling `aleconnect` integrated into canonical `main`.
+- Scope: integrate the guided Password Reset account-claim recovery, unlink-specific ALECO password messaging, account-number report selector, and immediate Recent Reports/Archive account filtering.
+- Files: profile account-link/linked-account routes, report creation/recent/archive routes, account/report contract helpers, focused tests, and both repositories' append-only handoffs; the staff sibling also repaired two advanced-`main` disposable comparison fixtures found by merged-result verification.
+- Contracts: invalid claims remain privacy-safe and generic. Reset state is returned only after exact account-number/name/password verification, and a temporary password cannot bypass the mandatory ALECO password change. Unified email credentials remain independent. Single-account selection is non-interactive, multi-account selection remains account/location scoped, and existing successful API payloads and private-cache/offline authorization boundaries are preserved.
+- Verification: mobile behavior/source coverage passes; `npx tsc --noEmit`, Android export, harness, and diff checks pass; lint exits 0 with four established warnings. The full suite is 173/179 with the exact same six category-sheet, hotline, Manila range, permission-manifest, and responsive-profile failures reproduced on the pre-feature `master` base. Coordinated staff passes lifecycle 410/410, focused repaired fixtures 17/17, deployment 34/34, TypeScript, lint, production build, harness, and diff checks.
+- Git/Deployment: mobile `master` fast-forwarded from `bae8115` to `d2f6fa3`; staff feature `32369a8` merged through `9449607`, followed by fixture correction `f370f29`. Both local feature branches were deleted non-forcibly after ancestry verification. These are normal canonical workspaces, so no feature worktree existed; the temporary detached mobile baseline worktree was removed cleanly. No push, backend deployment, database action, EAS/store release, or production write occurred.
+- Remaining risks: no physical Android/iOS device was attached, so runtime interaction and account-owned location rendering are not claimed. The six established mobile baseline failures remain outside this feature.
+- Next: push/release only under separate authorization, then validate reset recovery, single/multi-account selector states, immediate filtering, and unlink on physical devices.
+
 ## 2026-08-26 - Account recovery, report selector, and immediate filtering UX
 
 - Repositories: consumer client `aleconnect-mobile` and authoritative staff/API sibling `aleconnect`, both isolated on `codex/fix-account-linking-reports-ux`.
