@@ -1,5 +1,16 @@
 # Implementation history
 
+## 2026-08-30 - Consumer status GitHub integration
+
+- Repositories: consumer `aleconnect-mobile` canonical `master`, coordinated with staff/API release commit `0cebf36` and reviewed consumer source tip `0b400e1`.
+- Scope: integrate the seven-state consumer ticket projection, safe account-link labels, notification guards, and bounded last-valid-status recovery after the compatible server deployment.
+- Files: the reviewed status-normalization source and tests plus this release handoff; no native configuration or release artifact changed.
+- Contracts: Mobile continues to accept only `under_review|verified|rejected|dispatched|in_progress|resolved|closed`; unsupported internal or future-version status remains hidden and triggers authoritative recovery.
+- Verification: focused coverage passes 13/13; fresh TypeScript and coordinated harness checks pass; lint has 0 errors/four unchanged warnings. The broad 190/197 result remains the six established unrelated baselines plus the isolated original-sibling assertion. Staff workflow `33264823059` deployed commit `0cebf36`; Pages and API smoke checks passed.
+- Git/Deployment: source is integrated to GitHub `master` only. No Expo/EAS update, build, submit, store publication, provider action, device interaction, or native release occurred.
+- Remaining risks: physical report-detail, background/cold-start push, and account-link recovery remain unverified; Expo SDK patch drift and established broad-suite baselines remain separate work.
+- Next: keep native publication blocked until controlled device verification and an independently authorized release.
+
 ## 2026-08-29 - Consumer status final review remediation
 
 - Repositories: `aleconnect-mobile` with the authoritative status contract in the coordinated staff `aleconnect` worktree.

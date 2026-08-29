@@ -2,11 +2,11 @@
 
 ## Consumer-safe status normalization (2026-08-28)
 
-- Status: Phase A consumer compatibility is complete on `codex/status-normalization`; backend migration/deployment and native release remain separate, unexecuted rollout phases.
+- Status: Phase A consumer compatibility is integrated for canonical `master` after the compatible staff/API release. GitHub source integration is complete; no Expo, EAS, store, or native publication occurred.
 - Scope: reports accept only the seven public Ticket statuses, notification navigation rejects internal/unknown lifecycle values, and absent-or-v1 API envelopes are the only trusted status models. Unsupported push, row, detail, or envelope versions preserve the last valid memory-or-persistent cached status and schedule one authoritative revalidation. Account-link requests use the approved consumer labels and unknown values fail closed.
-- Evidence: post-review report/account coverage passes 13/13; `npx tsc --noEmit` passes; lint has 0 errors and four unchanged warnings. The broad suite remains 190/197: the same six unrelated baseline source-contract failures plus the isolated-worktree assertion against the original staff sibling. Coordinated harness, Graphify, and diff checks pass; fresh independent review reports no remaining P0-P2 findings. Expo Doctor remains an unchanged separate SDK patch-drift gate.
-- Boundary: no server authority, API mutation semantics, database, token, notification provider, native configuration, EAS/store release, or device state changed.
-- Next: integrate only with the reviewed staff contract, retain backend-first release order, and perform physical report-detail, push, and account-link status verification before any consumer release. Handle Expo patch upgrades separately.
+- Evidence: post-review report/account coverage passes 13/13; fresh `npx tsc --noEmit` passes; lint has 0 errors and four unchanged warnings. The broad suite remains 190/197: the same six unrelated baseline source-contract failures plus the isolated-worktree assertion against the original staff sibling. The corrected coordinated harness against staff release tip `0cebf36` and diff checks pass. Staff Cloudflare workflow `33264823059` deployed the compatible API/Workers and Pages successfully; production Pages and public/mobile API smoke checks passed. Expo Doctor remains an unchanged separate SDK patch-drift gate.
+- Boundary: no server authority, API mutation semantics, database, token, notification provider, native configuration, EAS update/build/submit, store release, or device state changed. This rollout publishes source to GitHub only.
+- Next: retain the compatibility readers and perform physical report-detail, push, and account-link status verification before any future consumer release. Handle Expo patch upgrades separately.
 
 ## Account-linking/report UX local integration (2026-08-28)
 
