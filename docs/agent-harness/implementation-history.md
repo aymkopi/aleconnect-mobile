@@ -1,5 +1,16 @@
 # Implementation history
 
+## 2026-08-29 - Consumer status final review remediation
+
+- Repositories: `aleconnect-mobile` with the authoritative status contract in the coordinated staff `aleconnect` worktree.
+- Scope: align account-link labels to the approved consumer projection and make report-detail refresh preserve the last valid seven-state ticket status while one bounded authoritative revalidation handles an unsupported row or status-model version.
+- Files: account-link status presentation, report data/service/detail merge helpers, focused tests, and active implementation records.
+- Contracts: consumer ticket visibility remains `under_review|verified|rejected|dispatched|in_progress|resolved|closed`; no Service Memo, dispatch, delivery, or raw unknown value is displayed. Account linking shows Under review, Needs staff review, Linked, Declined, or Removed only for its approved states.
+- Verification: post-review coverage passes 13/13; TypeScript passes; lint has 0 errors/four unchanged warnings. The broad suite remains 190/197 with the same six established unrelated UI/date/permission baselines plus the isolated assertion against the original staff sibling rather than this coordinated worktree.
+- Git/Deployment: local follow-up changes only on `codex/status-normalization`; no backend deployment, EAS build/update/submit, store release, provider action, or device interaction occurred.
+- Remaining risks: device rendering, background/cold-start push handling, and authoritative recovery after a real future-version payload are not physically verified. Expo SDK patch drift and the six broad-suite baselines are unchanged and outside this status fix.
+- Next: complete coordinated harness/Graphify/diff gates and independent review, then commit the focused compatibility fix. Release only after the compatible staff API and controlled device verification.
+
 ## 2026-08-28 - Consumer-safe canonical status projection
 
 - Repositories: `aleconnect-mobile` consuming the coordinated staff-owned `/api/mobile/*` status contract.

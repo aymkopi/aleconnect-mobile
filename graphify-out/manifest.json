@@ -905,8 +905,8 @@
     "semantic_hash": ""
   },
   "src/app/(tabs)/reports/[id].tsx": {
-    "mtime": 1787897903.3791962,
-    "ast_hash": "f46f20e4c9e1706453eac8aba9c9d3a2",
+    "mtime": 1787999876.6564155,
+    "ast_hash": "1f970393576314741e086e26e8822531",
     "semantic_hash": ""
   },
   "src/app/(tabs)/reports/_layout.tsx": {
@@ -940,8 +940,8 @@
     "semantic_hash": ""
   },
   "src/features/reports/data.ts": {
-    "mtime": 1787995300.4905815,
-    "ast_hash": "b99ef4062fadcfd7c9ff9eb595da3c02",
+    "mtime": 1787999876.65187,
+    "ast_hash": "fc193096adf672eec6a05eb0e4829359",
     "semantic_hash": ""
   },
   "src/features/reports/report-list.tsx": {
@@ -955,8 +955,8 @@
     "semantic_hash": ""
   },
   "src/services/reports.ts": {
-    "mtime": 1787995300.4968443,
-    "ast_hash": "8c8a903ee7dc2b65514d6ef61bf67c28",
+    "mtime": 1787999876.653381,
+    "ast_hash": "a851d6fd8962e3933f9d543c22b1667a",
     "semantic_hash": ""
   },
   "tests/hotlines-offline-cache.test.mjs": {
@@ -1150,8 +1150,8 @@
     "semantic_hash": ""
   },
   "tests/report-detail.test.mjs": {
-    "mtime": 1787897903.4903584,
-    "ast_hash": "1228e4ea412040f549db8dd475143af0",
+    "mtime": 1787999855.2263517,
+    "ast_hash": "8cda7a80bfdfe20cd073193fc3289073",
     "semantic_hash": ""
   },
   "tests/hotlines.test.mjs": {
@@ -1210,18 +1210,18 @@
     "semantic_hash": ""
   },
   "docs/agent-harness/active-work.md": {
-    "mtime": 1787994244.941955,
-    "ast_hash": "ca0e316388d45aa5b8d054c13f2320ea",
+    "mtime": 1788000905.6511307,
+    "ast_hash": "07962bdbc1aee6149c024063923b6964",
     "semantic_hash": ""
   },
   "docs/agent-harness/cross-project-contracts.md": {
-    "mtime": 1787996836.9279113,
-    "ast_hash": "d1be8d930fb455165b33b1e58b778617",
+    "mtime": 1787997831.1471279,
+    "ast_hash": "8d8d43c2fdec13f1f5f57c2c32fe34ee",
     "semantic_hash": ""
   },
   "docs/agent-harness/implementation-history.md": {
-    "mtime": 1787994244.943959,
-    "ast_hash": "a516963d0c27cd52ae46195434ba1148",
+    "mtime": 1788000905.6648161,
+    "ast_hash": "885eb39ca7239716d2df20e37bfb2fad",
     "semantic_hash": ""
   },
   "docs/agent-harness/index.md": {
@@ -1430,8 +1430,8 @@
     "semantic_hash": ""
   },
   "src/features/accounts/status.ts": {
-    "mtime": 1787900415.4289248,
-    "ast_hash": "bd77796433b2f5f05f3d2461dd0930a1",
+    "mtime": 1787998874.0363472,
+    "ast_hash": "1465ad08002592e11374b2f5606e1e2f",
     "semantic_hash": ""
   },
   "src/features/reports/status.ts": {
@@ -1465,8 +1465,8 @@
     "semantic_hash": ""
   },
   "tests/account-link-status.test.ts": {
-    "mtime": 1787900415.4479427,
-    "ast_hash": "41a1987af80e3c53af7feb4569c26e51",
+    "mtime": 1787998792.037308,
+    "ast_hash": "7d679c44b4dad8ece8276eb44543ab96",
     "semantic_hash": ""
   },
   "tests/account-linking-report-ux.test.ts": {
@@ -1500,8 +1500,8 @@
     "semantic_hash": ""
   },
   "tests/report-public-status.test.mjs": {
-    "mtime": 1787995240.261097,
-    "ast_hash": "dc3496c2905f02f10a855c5194870d50",
+    "mtime": 1787999855.2232788,
+    "ast_hash": "f2440c81ead0a64fa9d27e7adcbe34b9",
     "semantic_hash": ""
   },
   "tests/report-queue-access.test.mjs": {

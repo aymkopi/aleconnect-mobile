@@ -18,6 +18,9 @@ test("report detail presents restoration progress and general Service Memo updat
   assert.doesNotMatch(card, /Public update history/);
   assert.match(data, /publicUpdates: IncidentPublicUpdate\[\]/);
   assert.match(data, /consumerUpdates: ConsumerServiceMemoUpdate\[\]/);
+  assert.match(detail, /preserveKnownConsumerReportDetailStatus/);
+  const service = await read("src/services/reports.ts");
+  assert.match(service, /statusRevalidationAttempted/);
 });
 
 test("report detail parser supports general consumer updates and legacy public-update fallback", async () => {

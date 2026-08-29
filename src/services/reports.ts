@@ -483,18 +483,27 @@ export async function fetchComplaintReports(options?: {
 
 export async function fetchComplaintReportDetail(
   id: string,
-  options?: { refreshEvidence?: boolean; serviceAccountId?: string | null; accessRevision?: number | null },
+  options?: { refreshEvidence?: boolean; serviceAccountId?: string | null; accessRevision?: number | null; statusRevalidationAttempted?: boolean },
 ): Promise<ReportDetail> {
   const params = new URLSearchParams();
   if (options?.refreshEvidence) params.set("refreshEvidence", "1");
   if (options?.serviceAccountId) params.set("serviceAccountId", options.serviceAccountId);
   if (options?.accessRevision !== undefined && options.accessRevision !== null) params.set("accessRevision", String(options.accessRevision));
   const query = params.size ? `?${params.toString()}` : "";
-  return apiRequest<unknown>(
+  const report = await apiRequest<unknown>(
     `/api/mobile/complaints/${encodeURIComponent(id)}${query}`,
     {},
     { phase: "refresh", timeoutMs: 15_000 },
   ).then(parseReportDetailResponse);
+  if (report.status || options?.statusRevalidationAttempted) return report;
+  try {
+    return await fetchComplaintReportDetail(id, {
+      ...options,
+      statusRevalidationAttempted: true,
+    });
+  } catch {
+    return report;
+  }
 }
 
 export async function createEvidenceUploads(

@@ -11,6 +11,7 @@ import {
   consumerMessageTimelineIndex,
   formatReportDate,
   formatStatus,
+  preserveKnownConsumerReportDetailStatus,
   type ReportDetail,
   type ReportHistoryItem,
 } from "@/features/reports/data";
@@ -158,7 +159,7 @@ export default function ReportDetailRoute() {
 
       try {
         const nextReport = await fetchComplaintReportDetail(id, { serviceAccountId, accessRevision: accountContext?.accessRevision });
-        setReport(nextReport);
+        setReport((previous) => preserveKnownConsumerReportDetailStatus(nextReport, previous).report);
         hasLoadedRef.current = true;
         setError(null);
       } catch (nextError) {
@@ -179,9 +180,8 @@ export default function ReportDetailRoute() {
     if (!id || evidenceRefreshAttemptedRef.current) return;
     evidenceRefreshAttemptedRef.current = true;
     try {
-      setReport(
-        await fetchComplaintReportDetail(id, { refreshEvidence: true, serviceAccountId, accessRevision: accountContext?.accessRevision }),
-      );
+      const nextReport = await fetchComplaintReportDetail(id, { refreshEvidence: true, serviceAccountId, accessRevision: accountContext?.accessRevision });
+      setReport((previous) => preserveKnownConsumerReportDetailStatus(nextReport, previous).report);
       setEvidenceError(null);
     } catch {
       setEvidenceError("Evidence photos could not be refreshed. Try again.");

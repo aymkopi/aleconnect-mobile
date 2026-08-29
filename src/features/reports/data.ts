@@ -91,6 +91,19 @@ export function preserveKnownConsumerReportStatuses(
   return { reports: preserved, hasUnsupportedStatus };
 }
 
+export function preserveKnownConsumerReportDetailStatus<
+  T extends Pick<Report, "id" | "status">,
+>(report: T, previous: Pick<Report, "id" | "status"> | null | undefined) {
+  const hasUnsupportedStatus = report.status === null;
+  if (!hasUnsupportedStatus || previous?.id !== report.id || !previous.status) {
+    return { report, hasUnsupportedStatus };
+  }
+  return {
+    report: { ...report, status: previous.status },
+    hasUnsupportedStatus,
+  };
+}
+
 export type ReportHistoryItem = {
   id: string;
   fromStatus: ConsumerTicketStatus | null;

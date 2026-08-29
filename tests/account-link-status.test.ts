@@ -17,6 +17,10 @@ test("consumer account-link statuses are explicit and unknown values fail closed
   ]);
   assert.equal(parseConsumerAccountLinkRequestStatus("pending"), "pending");
   assert.equal(parseConsumerAccountLinkRequestStatus("escalated"), null);
+  assert.equal(consumerAccountLinkRequestStatusLabel("pending"), "Under review");
   assert.equal(consumerAccountLinkRequestStatusLabel("conflict"), "Needs staff review");
+  assert.equal(consumerAccountLinkRequestStatusLabel("approved"), "Linked");
+  assert.equal(consumerAccountLinkRequestStatusLabel("denied"), "Declined");
+  assert.equal(consumerAccountLinkRequestStatusLabel("superseded"), "Removed");
   assert.equal(consumerAccountLinkRequestStatusLabel("escalated"), "Status unavailable");
 });

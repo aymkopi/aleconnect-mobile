@@ -9,11 +9,11 @@ export const CONSUMER_ACCOUNT_LINK_REQUEST_STATUSES = [
 export type ConsumerAccountLinkRequestStatus = (typeof CONSUMER_ACCOUNT_LINK_REQUEST_STATUSES)[number];
 
 const labels: Record<ConsumerAccountLinkRequestStatus, string> = {
-  pending: "Pending review",
+  pending: "Under review",
   conflict: "Needs staff review",
-  approved: "Approved",
-  denied: "Denied",
-  superseded: "No longer active",
+  approved: "Linked",
+  denied: "Declined",
+  superseded: "Removed",
 };
 
 export function parseConsumerAccountLinkRequestStatus(value: unknown): ConsumerAccountLinkRequestStatus | null {

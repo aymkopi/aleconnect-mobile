@@ -2,11 +2,11 @@
 
 ## Consumer-safe status normalization (2026-08-28)
 
-- Status: local source implementation is complete on `codex/status-normalization`; no native release or backend deployment occurred.
-- Scope: reports accept only the seven public Ticket statuses, notification navigation rejects internal/unknown lifecycle values, and absent-or-v1 API envelopes are the only trusted status models. Unsupported push, row, or envelope versions preserve the last valid memory-or-persistent cached status and schedule authoritative revalidation; account-link requests use a bounded consumer status vocabulary with safe labels.
-- Evidence: focused changed-surface coverage passes 25/25; `npx tsc --noEmit` passes; lint has 0 errors and four unchanged warnings. The broad suite is 190/197: the same six unrelated baseline source-contract failures plus the isolated-worktree sibling-contract path mismatch. The coordinated staff-worktree harness and Graphify refresh pass. Expo Doctor is 19/20 because installed Expo packages are one or two patch releases behind its current SDK recommendations.
+- Status: Phase A consumer compatibility is complete on `codex/status-normalization`; backend migration/deployment and native release remain separate, unexecuted rollout phases.
+- Scope: reports accept only the seven public Ticket statuses, notification navigation rejects internal/unknown lifecycle values, and absent-or-v1 API envelopes are the only trusted status models. Unsupported push, row, detail, or envelope versions preserve the last valid memory-or-persistent cached status and schedule one authoritative revalidation. Account-link requests use the approved consumer labels and unknown values fail closed.
+- Evidence: post-review report/account coverage passes 13/13; `npx tsc --noEmit` passes; lint has 0 errors and four unchanged warnings. The broad suite remains 190/197: the same six unrelated baseline source-contract failures plus the isolated-worktree assertion against the original staff sibling. Coordinated harness, Graphify, and diff checks pass; fresh independent review reports no remaining P0-P2 findings. Expo Doctor remains an unchanged separate SDK patch-drift gate.
 - Boundary: no server authority, API mutation semantics, database, token, notification provider, native configuration, EAS/store release, or device state changed.
-- Next: review with the staff contract, keep backend-first release order, update Expo patch packages separately, and perform device verification before a consumer release.
+- Next: integrate only with the reviewed staff contract, retain backend-first release order, and perform physical report-detail, push, and account-link status verification before any consumer release. Handle Expo patch upgrades separately.
 
 ## Account-linking/report UX local integration (2026-08-28)
 

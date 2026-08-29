@@ -82,6 +82,17 @@ test("authoritative lists preserve the last valid public status when a row is un
   )
 })
 
+test("report detail refresh preserves the last valid status and marks revalidation", async () => {
+  const reports = await import("../src/features/reports/data.ts")
+  const previous = { id: "ticket-1", status: "verified" }
+  const unsupported = { id: "ticket-1", status: null }
+
+  assert.deepEqual(
+    reports.preserveKnownConsumerReportDetailStatus(unsupported, previous),
+    { report: { id: "ticket-1", status: "verified" }, hasUnsupportedStatus: true },
+  )
+})
+
 test("future response status models fail closed even when their status spelling is recognizable", async () => {
   const reports = await import("../src/features/reports/data.ts")
   const base = {
