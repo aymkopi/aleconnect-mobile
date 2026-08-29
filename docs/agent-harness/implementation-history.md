@@ -1,5 +1,17 @@
 # Implementation history
 
+## 2026-08-30 - Compact human-reference canonical source integration
+
+- Repositories: consumer `aleconnect-mobile` coordinated with staff/API and Lineman releases.
+- Scope: fast-forward and push mixed-format display compatibility while preserving UUID routes, caches, queues, and DTO ownership.
+- Files: the previously reviewed mixed-format reader implementation and the canonical active-work and implementation-history handoffs; this release record adds no consumer product-source change.
+- Contracts: compact and legacy references remain presentation values; UUID routes, identity-scoped caches, queue keys, and existing DTO fields remain authoritative and backward compatible.
+- Verification: focused human-reference coverage passes 1/1; TypeScript, coordinated harness, and clean Android export pass. The broad suite remains 174/180 with six pre-existing failures, while lint remains blocked by 25 resolver errors and four existing warnings.
+- Git/Deployment: commit `cf66e32` is on canonical GitHub `master`. Local TypeScript, harness, focused coverage, and clean Android export pass; no push CI was created because the existing harness workflow is scoped to `main`.
+- Boundary: no EAS build/update/submit, store release, physical-device action, or database operation occurred. Staff remains in legacy generation mode.
+- Remaining risks: native/device release remains unverified; the six broad assertion failures and resolver/lint failures remain separate baseline work; staff compact cutover is separately gated.
+- Next: correct branch-scoped CI and baseline failures separately, then publish a compatible native release before the separately authorized staff compact cutover.
+
 ## 2026-08-30 - Compact human-reference verification refresh
 
 - Repositories: isolated consumer client `aleconnect-mobile`; staff/API remains the authoritative migration owner.
