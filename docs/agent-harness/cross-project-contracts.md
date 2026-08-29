@@ -1,7 +1,7 @@
 # ALEConnect cross-project contracts
 
 Authoritative source: `../aleconnect/docs/agent-harness/cross-project-contracts.md`
-Last synchronized staff commit: `adfa9c41ad89f33f47f4704743f46499b87485b8`
+Last synchronized staff commit: `9596dad254ef74d2477010f8e24c5080efbff76e`
 
 <!-- shared-contract:start -->
 ## Ownership and routes
@@ -20,6 +20,9 @@ Last synchronized staff commit: `adfa9c41ad89f33f47f4704743f46499b87485b8`
 
 - Consumer reports enter through `/api/mobile/*`; evidence uses validated R2 object keys and presigned upload flow, never mobile database access.
 - Notifications and advisories are selected server-side from consumer scope, subscriptions, and preferences. Push/SMS work records must remain idempotent and replay-safe.
+- Status contracts are domain-specific. Ticket consumer projection v1 exposes only `under_review`, `verified`, `rejected`, `dispatched`, `in_progress`, `resolved`, and `closed`; unknown or internal values fail closed and are never shown raw. Mobile accepts response-envelope `statusModelVersion` only when absent or `1`; unsupported ticket push, row, or envelope versions preserve the last valid memory-or-persistent cached status and mark the report list for authoritative revalidation.
+- During the canonical rollout, Service Memo readers accept `open|draft|ready|dispatched|in_progress|resolved|closed|cancelled`, trip readers accept `planned|sent|assigned|acknowledged|in_progress|completed|denied|declined|cancelled|handed_off`, and field-item readers accept `pending|en_route|arrived|in_progress|paused|completed|skipped|cancelled|handed_off`. Server writers switch only behind the staff-owned rollout gate.
+- Advisory publication, user access/password security, directory lifecycle/public visibility, account-link review, notification read state, delivery processing, and provider receipts remain separate status axes. A transport acceptance or read receipt never advances a business lifecycle.
 - Tickets, Service Memos, dispatch trips, public updates, agency media, avatars, and report media retain server validation, authorization, and audit boundaries.
 - Cache invalidation is bounded to committed affected families. Mobile private caches are consumer-scoped and may provide a bounded last-successful offline view, never an authorization bypass.
 

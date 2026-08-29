@@ -37,6 +37,7 @@ test("account-link requests preserve consumer reasons and never persist a submit
 
   assert.match(source, /consumerReason/);
   assert.match(source, /idempotencyKey/);
+  assert.match(source, /parseConsumerAccountLinkRequestStatus/);
   assert.doesNotMatch(source, /AsyncStorage/);
 });
 

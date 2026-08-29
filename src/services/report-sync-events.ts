@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {
-  ticketStatusChangedEventFromPushData,
+  classifyTicketStatusChangedPushData,
   type TicketStatusChangedPush,
 } from "@/services/notification-navigation";
 import {
@@ -100,8 +100,14 @@ export async function handleReportStatusPush(
   data: unknown,
   userId: string,
 ): Promise<boolean> {
-  const event = ticketStatusChangedEventFromPushData(data);
-  if (!event || !userId) return false;
+  if (!userId) return false;
+  const classification = classifyTicketStatusChangedPushData(data);
+  if (classification.kind === "unsupported") {
+    requestReportRevalidation(userId);
+    return true;
+  }
+  if (classification.kind !== "valid") return false;
+  const event = classification.event;
 
   return serializeMarkerOperation(userId, async () => {
     const markers = await readMarkers(userId);
@@ -159,20 +165,26 @@ export async function handleReportStatusPush(
           return;
         }
 
+        const authoritativeStatus = detail.status;
+        if (!authoritativeStatus) {
+          markComplaintReportsForRevalidation(userId);
+          return;
+        }
+
         // Correct the cache from the authoritative server response.
         await projectComplaintReportStatus({
           userId,
           ticketId: event.ticketId,
-          status: detail.status,
+          status: authoritativeStatus,
         });
 
         // Usually the push status and API status will match.
         // Only publish again when the server returned something different.
-        if (detail.status !== event.status) {
+        if (authoritativeStatus !== event.status) {
           statusListeners.forEach((listener) =>
             listener({
               ...accepted,
-              status: detail.status,
+              status: authoritativeStatus,
             }),
           );
         }

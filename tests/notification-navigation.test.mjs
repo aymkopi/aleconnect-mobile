@@ -64,6 +64,19 @@ test("ticket status push parser accepts only valid v1 events", async () => {
       context: "ticket",
       event: "ticket.status_changed",
       version: 1,
+      statusModelVersion: 1,
+      ticketId: "ticket-1",
+      status: "arrived",
+      changedAt: "2026-08-15T03:30:45.123Z",
+    }),
+    null,
+  );
+
+  assert.equal(
+    ticketStatusChangedEventFromPushData({
+      context: "ticket",
+      event: "ticket.status_changed",
+      version: 1,
       ticketId: "ticket-1",
       status: "verified",
       changedAt: "bad-date",
@@ -90,5 +103,51 @@ test("ticket status push parser accepts only valid v1 events", async () => {
       changedAt: "2026-08-15T03:31:00.000Z",
       revision: 7,
     },
+  );
+});
+
+test("ticket status push classifier separates unsupported ticket events from unrelated pushes", async () => {
+  const { classifyTicketStatusChangedPushData } = await import(
+    "../src/services/notification-navigation.ts"
+  );
+
+  assert.deepEqual(
+    classifyTicketStatusChangedPushData({
+      context: "ticket",
+      event: "ticket.status_changed",
+      version: 2,
+      ticketId: "ticket-1",
+      status: "verified",
+      changedAt: "2026-08-15T03:30:45.123Z",
+    }),
+    { kind: "unsupported", ticketId: "ticket-1" },
+  );
+  assert.deepEqual(
+    classifyTicketStatusChangedPushData({
+      context: "ticket",
+      event: "ticket.status_changed",
+      version: 1,
+      statusModelVersion: 2,
+      ticketId: "ticket-1",
+      status: "verified",
+      changedAt: "2026-08-15T03:30:45.123Z",
+    }),
+    { kind: "unsupported", ticketId: "ticket-1" },
+  );
+  assert.deepEqual(
+    classifyTicketStatusChangedPushData({
+      context: "ticket",
+      event: "ticket.status_changed",
+      version: 1,
+      statusModelVersion: 1,
+      ticketId: "ticket-1",
+      status: "arrived",
+      changedAt: "2026-08-15T03:30:45.123Z",
+    }),
+    { kind: "unsupported", ticketId: "ticket-1" },
+  );
+  assert.deepEqual(
+    classifyTicketStatusChangedPushData({ context: "advisory", event: "published" }),
+    { kind: "unrelated" },
   );
 });

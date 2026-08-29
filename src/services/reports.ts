@@ -3,10 +3,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   normalizeReportListItem,
   parseReportDetailResponse,
+  preserveKnownConsumerReportStatuses,
+  isSupportedConsumerStatusModelVersion,
   type ComplaintMeta,
   type Report,
   type ReportDetail,
 } from "@/features/reports/data";
+import { parseConsumerTicketStatus, type ConsumerTicketStatus } from "@/features/reports/status";
 import {
   ApiRequestError,
   apiRequest,
@@ -46,13 +49,14 @@ export type ComplaintReportSort = "newest" | "oldest" | "status";
 export type ComplaintReportPage = {
   reports: Report[];
   nextCursor: string | null;
+  statusModelVersion?: number;
   isStale?: boolean;
 };
 
 export type ReportStatusProjection = {
   userId: string;
   ticketId: string;
-  status: string;
+  status: ConsumerTicketStatus;
 };
 
 type ComplaintMetaCache = {
@@ -187,9 +191,11 @@ export function complaintReportsNeedRevalidation(userId: string): boolean {
 export async function projectComplaintReportStatus(
   projection: ReportStatusProjection,
 ): Promise<boolean> {
-  if (!projection.userId || !projection.ticketId || !projection.status) {
+  const status = parseConsumerTicketStatus(projection.status);
+  if (!projection.userId || !projection.ticketId || !status) {
     return false;
   }
+  projection = { ...projection, status };
 
   let changed = false;
   if (complaintReportsMemoryCache?.userId === projection.userId) {
@@ -357,6 +363,13 @@ export async function fetchComplaintReportPage(options?: {
     if (stored) return stored;
   }
 
+  let statusPreservationBaseline = complaintReportsMemoryCache?.userId === userId
+    ? complaintReportsMemoryCache.value
+    : null;
+  if (!statusPreservationBaseline && isDefaultPage && userId) {
+    statusPreservationBaseline = await readStoredComplaintReportPage(userId, true);
+  }
+
   const params = new URLSearchParams({
     limit: String(limit),
     sort,
@@ -386,9 +399,26 @@ export async function fetchComplaintReportPage(options?: {
       },
     )
       .then(async (response) => {
+        const supportsStatusModel = isSupportedConsumerStatusModelVersion(
+          response.statusModelVersion,
+        );
+        const normalizedReports = response.reports.map((report) =>
+          normalizeReportListItem(
+            supportsStatusModel ? report : { ...report, status: null },
+          ),
+        );
+        const statusProjection = preserveKnownConsumerReportStatuses(
+          normalizedReports,
+          statusPreservationBaseline?.reports ?? [],
+        );
+        const hasUnsupportedStatus =
+          !supportsStatusModel || statusProjection.hasUnsupportedStatus;
         const normalizedResponse: ComplaintReportPage = {
           ...response,
-          reports: response.reports.map(normalizeReportListItem),
+          reports: statusProjection.reports,
+          statusModelVersion:
+            supportsStatusModel && response.statusModelVersion === 1 ? 1 : undefined,
+          ...(hasUnsupportedStatus ? { isStale: true } : {}),
         };
 
         const isCurrentGeneration =
@@ -413,7 +443,11 @@ export async function fetchComplaintReportPage(options?: {
           };
 
           if (userId) {
-            complaintReportRevalidationUsers.delete(userId);
+            if (hasUnsupportedStatus) {
+              complaintReportRevalidationUsers.add(userId);
+            } else {
+              complaintReportRevalidationUsers.delete(userId);
+            }
           }
         }
 

@@ -19,3 +19,11 @@ test("report archive uses server filters, opaque cursors, and a virtualized list
   assert.match(archive, /nextCursor/);
   assert.match(archive, /setTimeout/);
 });
+
+test("forced default-page refresh loads the stored page as a status-preservation baseline", async () => {
+  const service = await read("src/services/reports.ts");
+
+  assert.match(service, /statusPreservationBaseline[\s\S]*readStoredComplaintReportPage\(userId, true\)/);
+  assert.match(service, /preserveKnownConsumerReportStatuses\([\s\S]*statusPreservationBaseline/);
+  assert.match(service, /isSupportedConsumerStatusModelVersion\([\s\S]*response\.statusModelVersion[\s\S]*\)/);
+});

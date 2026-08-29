@@ -1,17 +1,28 @@
 import { createApiRequestId, apiRequest } from "@/services/api";
+import {
+  parseConsumerAccountLinkRequestStatus,
+  type ConsumerAccountLinkRequestStatus,
+} from "@/features/accounts/status";
 
 export type AccountLinkRequest = {
   requestId: string;
   accountNumber: string;
   registeredName: string;
-  status: "pending" | "conflict" | "denied" | "approved" | string;
+  status: ConsumerAccountLinkRequestStatus | null;
   consumerReason: string | null;
   createdAt: string;
   decidedAt: string | null;
 };
 
 export async function fetchAccountLinkRequests() {
-  return apiRequest<{ requests: AccountLinkRequest[]; accessRevision: number }>("/api/mobile/account-link-requests");
+  const result = await apiRequest<{ requests: (Omit<AccountLinkRequest, "status"> & { status: unknown })[]; accessRevision: number }>("/api/mobile/account-link-requests");
+  return {
+    ...result,
+    requests: result.requests.map((request) => ({
+      ...request,
+      status: parseConsumerAccountLinkRequestStatus(request.status),
+    })),
+  };
 }
 
 export async function submitAccountLinkRequest(input: {
@@ -20,7 +31,7 @@ export async function submitAccountLinkRequest(input: {
   password: string;
   idempotencyKey?: string;
 }) {
-  return apiRequest<AccountLinkRequest>("/api/mobile/account-link-requests", {
+  const result = await apiRequest<{ requestId: string; status: unknown; replayed: boolean }>("/api/mobile/account-link-requests", {
     method: "POST",
     body: JSON.stringify({
       accountNumber: input.accountNumber.trim(),
@@ -29,4 +40,5 @@ export async function submitAccountLinkRequest(input: {
       idempotencyKey: input.idempotencyKey ?? createApiRequestId(),
     }),
   }, { idempotent: true });
+  return { ...result, status: parseConsumerAccountLinkRequestStatus(result.status) };
 }

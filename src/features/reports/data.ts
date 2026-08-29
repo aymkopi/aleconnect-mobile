@@ -2,6 +2,19 @@ import {
   formatManilaDateTime,
   parseApiInstant,
 } from "../../utils/manila-time.ts";
+import {
+  consumerTicketStatusLabel,
+  isSupportedConsumerStatusModelVersion,
+  parseConsumerTicketStatus,
+  type ConsumerTicketStatus,
+} from "./status.ts";
+export {
+  consumerTicketStatusLabel,
+  consumerTicketStatusTone,
+  isSupportedConsumerStatusModelVersion,
+  parseConsumerTicketStatus,
+} from "./status.ts";
+export type { ConsumerTicketStatus } from "./status.ts";
 
 export type ComplaintCategory = {
   id: string;
@@ -49,7 +62,7 @@ export type Report = {
   typeId: string;
   typeTitle: string;
   createdAt: string;
-  status: string;
+  status: ConsumerTicketStatus | null;
   ticketNumber: string;
   description?: string | null;
   displayAddress?: string | null;
@@ -59,10 +72,29 @@ export type Report = {
   accountName?: string | null;
 };
 
+export function preserveKnownConsumerReportStatuses(
+  reports: readonly Report[],
+  previousReports: readonly Report[],
+) {
+  const previousStatuses = new Map(
+    previousReports
+      .filter((report) => report.status)
+      .map((report) => [report.id, report.status]),
+  );
+  let hasUnsupportedStatus = false;
+  const preserved = reports.map((report) => {
+    if (report.status) return report;
+    hasUnsupportedStatus = true;
+    const previousStatus = previousStatuses.get(report.id) ?? null;
+    return previousStatus ? { ...report, status: previousStatus } : report;
+  });
+  return { reports: preserved, hasUnsupportedStatus };
+}
+
 export type ReportHistoryItem = {
   id: string;
-  fromStatus: string | null;
-  toStatus: string;
+  fromStatus: ConsumerTicketStatus | null;
+  toStatus: ConsumerTicketStatus | null;
   note: string | null;
   changedAt: string;
 };
@@ -137,9 +169,12 @@ export function normalizeReportDisplayAddress(value: unknown) {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
-export function normalizeReportListItem(report: Report): Report {
+export function normalizeReportListItem(
+  report: Omit<Report, "status"> & { status: unknown },
+): Report {
   return {
     ...report,
+    status: parseConsumerTicketStatus(report.status),
     displayAddress: normalizeReportDisplayAddress(report.displayAddress),
     serviceAccountId: typeof report.serviceAccountId === "string" ? report.serviceAccountId : null,
     accountNumber: typeof report.accountNumber === "string" ? report.accountNumber : null,
@@ -148,7 +183,7 @@ export function normalizeReportListItem(report: Report): Report {
 }
 export function buildReportDetailTimeline(
   history: readonly ReportHistoryItem[],
-  status: string,
+  status: ConsumerTicketStatus | null,
   createdAt: string,
 ): ReportHistoryItem[] {
   if (history.length > 0) return [...history];
@@ -173,11 +208,7 @@ export function consumerMessageTimelineIndex(
   let selectedChangedAt: number | null = null;
   let hasValidTimestamp = false;
   for (const [index, item] of timeline.entries()) {
-    const normalizedStatus = item.toStatus
-      .trim()
-      .toLowerCase()
-      .replace(/[\s-]+/g, "_");
-    if (normalizedStatus !== "verified") continue;
+    if (item.toStatus !== "verified") continue;
 
     const changedAt = parseApiInstant(item.changedAt)?.getTime();
     if (changedAt === undefined) {
@@ -245,6 +276,24 @@ function parseConsumerServiceMemoUpdate(
   };
 }
 
+function parseReportHistoryItem(value: unknown): ReportHistoryItem | null {
+  if (!isRecord(value)) return null;
+  const id = typeof value.id === "string" ? value.id.trim() : "";
+  const toStatus = parseConsumerTicketStatus(value.toStatus);
+  const fromStatus = value.fromStatus === null || value.fromStatus === undefined
+    ? null
+    : parseConsumerTicketStatus(value.fromStatus);
+  const changedAt = typeof value.changedAt === "string" ? value.changedAt : "";
+  if (!id || !toStatus || !changedAt || (value.fromStatus != null && !fromStatus)) return null;
+  return {
+    id,
+    fromStatus,
+    toStatus,
+    note: typeof value.note === "string" ? value.note : null,
+    changedAt,
+  };
+}
+
 function legacyConsumerServiceMemoUpdate(
   update: IncidentPublicUpdate,
 ): ConsumerServiceMemoUpdate {
@@ -269,7 +318,6 @@ export function parseReportDetailResponse(value: unknown): ReportDetail {
     "id",
     "ticketNumber",
     "title",
-    "status",
     "createdAt",
     "typeId",
     "typeTitle",
@@ -288,6 +336,15 @@ export function parseReportDetailResponse(value: unknown): ReportDetail {
   }
 
   const publicUpdates = report.publicUpdates as IncidentPublicUpdate[];
+  const supportsStatusModel = isSupportedConsumerStatusModelVersion(
+    isRecord(value) ? value.statusModelVersion : undefined,
+  );
+  const status = supportsStatusModel ? parseConsumerTicketStatus(report.status) : null;
+  const history = supportsStatusModel
+    ? report.history
+        .map(parseReportHistoryItem)
+        .filter((item): item is ReportHistoryItem => item !== null)
+    : [];
   const consumerUpdates = Array.isArray(report.consumerUpdates)
     ? report.consumerUpdates
         .map(parseConsumerServiceMemoUpdate)
@@ -296,6 +353,8 @@ export function parseReportDetailResponse(value: unknown): ReportDetail {
 
   return {
     ...(report as unknown as ReportDetail),
+    status,
+    history,
     publicUpdates,
     consumerUpdates,
     imageUrls: Array.isArray(report.imageUrls)
@@ -391,8 +450,6 @@ export function formatReportDate(value: string) {
   return formatManilaDateTime(value);
 }
 
-export function formatStatus(status: string) {
-  return status
-    .replace(/[_-]+/g, " ")
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+export function formatStatus(status: unknown) {
+  return consumerTicketStatusLabel(status);
 }

@@ -1,5 +1,16 @@
 # Implementation history
 
+## 2026-08-28 - Consumer-safe canonical status projection
+
+- Repositories: `aleconnect-mobile` consuming the coordinated staff-owned `/api/mobile/*` status contract.
+- Scope: replaced raw string Ticket status handling with the seven approved consumer states, added safe unknown copy/tone behavior, validated versioned push and API-envelope statuses, preserved the last valid memory-or-persistent cached status when a server row or future envelope is unsupported, scheduled authoritative recovery for unsupported push/status-model versions, and normalized account-link request presentation without exposing raw unknown values.
+- Files: report status/data/list/cache/sync modules, notification navigation, account-link request service/UI/status helper, focused tests, and the synchronized cross-project contract.
+- Contracts: Mobile accepts `under_review|verified|rejected|dispatched|in_progress|resolved|closed` only. Internal Service Memo/trip/item states never become report labels. Unsupported ticket event or status-model versions mark the private report list stale without replacing a last-known valid status. Account-link requests accept `pending|conflict|approved|denied|superseded`; unknown values become unavailable rather than raw UI text.
+- Verification: focused changed-surface tests pass 25/25; TypeScript passes; lint has 0 errors and four pre-existing warnings. The broad suite records 190/197 with the same six unrelated baseline source assertions and one expected isolated-worktree comparison against the original staff sibling. The coordinated harness against the staff worktree and Graphify refresh pass. Expo Doctor reports 19/20 because fifteen installed Expo packages trail current SDK 55 patch recommendations.
+- Git/Deployment: local branch `codex/status-normalization` only. No push, merge, API deployment, EAS update/build/submit, store release, or device action occurred.
+- Remaining risks: an older backend can still send an unrecognized value, which now intentionally renders safe fallback copy and schedules authoritative refresh. Device presentation and notification handling are not physically verified in this change.
+- Next: release only after the compatible staff API contract is reviewed/deployed; update Expo patch dependencies and run physical-device report/push/account-link checks separately.
+
 ## 2026-08-28 - Account-linking/report UX canonical integration and cleanup
 
 - Repositories: consumer client `aleconnect-mobile` integrated into canonical remote-default `master`; authoritative staff/API sibling `aleconnect` integrated into canonical `main`.

@@ -11,7 +11,7 @@ test("report sync coordinator persists ordering and projects accepted events", a
   const source = await readFile(sourceUrl, "utf8");
 
   assert.match(source, /report_status_event_markers_v1/);
-  assert.match(source, /ticketStatusChangedEventFromPushData/);
+  assert.match(source, /classifyTicketStatusChangedPushData/);
   assert.match(source, /isIncomingReportStatusEventNewer/);
   assert.match(source, /projectComplaintReportStatus/);
   assert.match(source, /fetchComplaintReportDetail/);
@@ -52,7 +52,9 @@ test("accepted v1 ticket push does not trigger immediate full-list revalidation"
 
   assert.ok(handleStart >= 0);
 
-  const handleSource = source.slice(handleStart);
+  const acceptedStart = source.indexOf("const event = classification.event", handleStart);
+  assert.ok(acceptedStart >= 0);
+  const handleSource = source.slice(acceptedStart);
 
   assert.match(handleSource, /fetchComplaintReportDetail\(event\.ticketId\)/);
 
@@ -64,10 +66,10 @@ test("targeted revalidation corrects only the matching report status", async () 
 
   assert.match(
     source,
-    /ticketId: event\.ticketId,[\s\S]*status: detail\.status/,
+    /const authoritativeStatus = detail\.status;[\s\S]*ticketId: event\.ticketId,[\s\S]*status: authoritativeStatus/,
   );
 
-  assert.match(source, /detail\.status !== event\.status/);
+  assert.match(source, /authoritativeStatus !== event\.status/);
 });
 
 test("stale targeted responses cannot overwrite newer push events", async () => {

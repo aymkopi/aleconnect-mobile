@@ -1,29 +1,21 @@
 import { Pressable } from "@/components/ui/pressable";
 import { Text } from "@/components/ui/text";
-import { formatStatus, type Report } from "@/features/reports/data";
+import { consumerTicketStatusTone, formatStatus, type Report } from "@/features/reports/data";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { formatManilaReportListDateTime } from "@/utils/manila-time";
 import { ChevronRight } from "lucide-react-native";
 import { View } from "react-native";
 
-export function ReportStatusBadge({ status }: { status: string }) {
-  const normalized = status.toLowerCase().replace(/[\s-]+/g, "_");
-
+export function ReportStatusBadge({ status }: { status: Report["status"] }) {
+  const statusTone = consumerTicketStatusTone(status);
   const tone =
-    normalized === "verified"
+    statusTone === "accent"
       ? "bg-accent/10 text-accent"
-      : normalized === "resolved" ||
-          normalized === "completed" ||
-          normalized === "closed"
+      : statusTone === "success"
         ? "bg-success text-success-foreground"
-        : normalized === "cancelled" ||
-            normalized === "canceled" ||
-            normalized === "rejected"
+        : statusTone === "danger"
           ? "bg-danger text-danger-foreground"
-          : normalized === "assigned" ||
-              normalized === "dispatched" ||
-              normalized === "in_progress" ||
-              normalized === "on_hold"
+          : statusTone === "warning"
             ? "bg-warning text-warning-foreground"
             : "bg-secondary text-secondary-foreground";
 
