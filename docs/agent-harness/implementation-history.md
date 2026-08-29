@@ -1,5 +1,28 @@
 # Implementation history
 
+## 2026-08-30 - Compact human-reference verification refresh
+
+- Repositories: isolated consumer client `aleconnect-mobile`; staff/API remains the authoritative migration owner.
+- Scope: refresh the compact human-reference compatibility evidence without changing UUID route, cache, queue, or DTO ownership.
+- Files: compact top-of-file active-work and implementation-history handoff entries only.
+- Contracts: compact and legacy references remain presentation values; opaque UUIDs remain authoritative for navigation, cache identity, and API interaction.
+- Verification: focused human-reference coverage passes 1/1; TypeScript, coordinated harness, and a clean Android export pass. The broad suite remains 174/180 with the same 6 pre-existing failures. Lint remains blocked by 25 resolver errors and 4 existing warnings.
+- Boundary: no staff migration, database operation, deployment, EAS/store action, native publication, or physical-device verification occurred.
+- Git/Deployment: local isolated feature branch only; no merge, push, EAS update/build/submit, store action, or device verification occurred.
+- Remaining risks: the six broad source assertion failures and 25 resolver errors remain pre-existing; staff maintenance/cutover and mobile device release gates remain separate.
+- Next: retain opaque UUID-based routing and cache identity until the separately authorized staff maintenance/apply/compact cutover and coordinated device release gates.
+
+## 2026-08-30 - Compact human-reference compatibility
+
+- Repositories: consumer client `aleconnect-mobile`; authoritative staff/API and field clients are coordinated separately.
+- Scope: added a mixed-format human-reference classifier/normalizer for display and advisory/report response hydration. Compact `TK/SM/DT/ADYYMMDD-NNNN` and legacy values remain accepted; values are never parsed for UUID routing or cache identity.
+- Files: `src/utils/human-reference.ts`, report/advisory response normalizers, focused contract coverage, and this append-only handoff.
+- Contracts: notification/report navigation remains UUID-based, Advisory type and publication revision remain separate, and legacy offline values refresh naturally for the same entity UUID. No response key was removed.
+- Verification: focused human-reference contract passes 1/1; `npm test` records 180 tests with 174 passed and the same 6 established baseline failures (category-sheet sizing/scroll, hotline keyboard/reduced-motion, hotline stale cache, advisory Manila-range interruption, image-only upload permission, and profile responsive child UI). `npm run harness:check` passes. TypeScript remains baseline-blocked by declaration/className errors, lint records 29 baseline failures (25 unresolved Gluestack creator imports plus 4 existing warnings), and Expo export remains baseline-blocked by Metro's unresolved `uniwind/src/components/native/ActivityIndicator`; no device evidence.
+- Git/Deployment: source-only isolated branch `codex/compact-human-references`; no staff migration, production data, backend deployment, native build, store release, or device verification occurred.
+- Remaining risks: coordinated staff cutover, full dependency-backed mobile gates, and physical device verification remain outstanding.
+- Next: consume the released staff contract only after the staged maintenance/compact rollout and rerun the mobile release gates.
+
 ## 2026-08-30 - Consumer status GitHub integration
 
 - Repositories: consumer `aleconnect-mobile` canonical `master`, coordinated with staff/API release commit `0cebf36` and reviewed consumer source tip `0b400e1`.

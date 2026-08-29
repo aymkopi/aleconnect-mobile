@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { apiRequest } from "@/services/api";
 import { claimRefresh } from "@/utils/refresh-cooldown";
+import { normalizeHumanReference } from "@/utils/human-reference";
 
 export type MobileAdvisory = {
   readonly id: string;
@@ -29,6 +30,14 @@ type AdvisoryCache = {
   readonly limit: number;
   readonly value: MobileAdvisoryPage;
 };
+
+function normalizeAdvisory(value: MobileAdvisory): MobileAdvisory {
+  return { ...value, controlNumber: normalizeHumanReference(value.controlNumber) };
+}
+
+function normalizePage(value: MobileAdvisoryPage): MobileAdvisoryPage {
+  return { ...value, advisories: value.advisories.map(normalizeAdvisory) };
+}
 
 const cachePrefix = "active_advisories_cache_v2";
 const cacheTtlMs = 5 * 60 * 1000;
@@ -108,8 +117,9 @@ export async function fetchActiveAdvisories(options: {
     `/api/mobile/advisories?${params.toString()}`,
   )
     .then(async (response) => {
-      if (!cursor) await writeCache(scope, limit, response);
-      return response;
+      const normalized = normalizePage(response);
+      if (!cursor) await writeCache(scope, limit, normalized);
+      return normalized;
     })
     .catch(async (error) => {
       if (!cursor) {
@@ -137,5 +147,5 @@ export async function fetchActiveAdvisory(
   const response = await apiRequest<{ advisory: MobileAdvisory }>(
     `/api/mobile/advisories/${encodeURIComponent(id)}`,
   );
-  return response.advisory;
+  return normalizeAdvisory(response.advisory);
 }

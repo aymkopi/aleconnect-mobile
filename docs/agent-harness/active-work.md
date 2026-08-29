@@ -1,5 +1,13 @@
 # Active work
 
+## Compact human-reference compatibility (2026-08-30)
+
+- Status: source compatibility work is complete on isolated branch `codex/compact-human-references`; staff schema migration, deployment, native release, and device verification are separate and not performed.
+- Scope: mobile treats Ticket and Advisory references as opaque presentation values, accepts compact `TK/SM/DT/ADYYMMDD-NNNN` and legacy shapes, preserves UUID routes, identity-scoped caches, queue keys, and existing DTO fields.
+- Evidence: focused human-reference coverage passes 1/1; TypeScript, harness, and a clean Android export pass. The broad suite remains 174/180 with 6 pre-existing failures. Lint remains blocked by 25 resolver errors and 4 existing warnings; no device evidence.
+- Boundary: no production request, migration, EAS/store action, push delivery, or device interaction occurred.
+- Next: consume the staff contract only after staged maintenance/compact rollout and rerun mobile release gates.
+
 ## Consumer-safe status normalization (2026-08-28)
 
 - Status: Phase A consumer compatibility is integrated for canonical `master` after the compatible staff/API release. GitHub source integration is complete; no Expo, EAS, store, or native publication occurred.

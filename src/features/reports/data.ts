@@ -2,6 +2,7 @@ import {
   formatManilaDateTime,
   parseApiInstant,
 } from "../../utils/manila-time.ts";
+import { normalizeHumanReference } from "../../utils/human-reference.ts";
 import {
   consumerTicketStatusLabel,
   isSupportedConsumerStatusModelVersion,
@@ -188,6 +189,7 @@ export function normalizeReportListItem(
   return {
     ...report,
     status: parseConsumerTicketStatus(report.status),
+    ticketNumber: normalizeHumanReference(report.ticketNumber) ?? "",
     displayAddress: normalizeReportDisplayAddress(report.displayAddress),
     serviceAccountId: typeof report.serviceAccountId === "string" ? report.serviceAccountId : null,
     accountNumber: typeof report.accountNumber === "string" ? report.accountNumber : null,
@@ -337,7 +339,9 @@ export function parseReportDetailResponse(value: unknown): ReportDetail {
     "categoryId",
     "categoryTitle",
   ];
+  const ticketNumber = normalizeHumanReference(report?.ticketNumber);
   if (
+    !ticketNumber ||
     !report ||
     requiredStrings.some(
       (key) => typeof report[key] !== "string" || !report[key].trim(),
@@ -366,6 +370,7 @@ export function parseReportDetailResponse(value: unknown): ReportDetail {
 
   return {
     ...(report as unknown as ReportDetail),
+    ticketNumber,
     status,
     history,
     publicUpdates,
