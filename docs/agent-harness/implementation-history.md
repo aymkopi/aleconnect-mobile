@@ -494,6 +494,22 @@
 - Remaining risks: audience text requires the additive staff API field. Until that backend contract is deployed and cached advisory data refreshes, the audience line is safely omitted.
 - Next: verify the coordinated staff API contract, deploy the additive backend field first, then release the compatible mobile UI.
 
+## 2026-08-30 - Compact human-reference rollout physical compatibility evidence
+
+- Repository: `aleconnect-mobile`, canonical `master` at `3813d49a176afc5bac58fce5af31c8c8185ed9b9`; no Mobile source/config behavior changed.
+- Device/package: `adb devices -l` resolved one physical target `192.168.1.31:39101` (`25040RP0AG`). Configured package `com.kapecakes.aleconnectmobile` was present at `versionName=1.0.0`, `versionCode=1`, `targetSdk=36`, `apkSigningVersion=2`, with `firstInstallTime=2026-08-06 08:03:24`, `lastUpdateTime=2026-08-30 16:50:52`, valid `pm path`, data directory, and live PID. The unchanged first-install timestamp supports an in-place package upgrade; persisted app records were not inspected.
+- Build/artifact: `npx expo run:android --device 25040RP0AG --no-bundler` completed `BUILD SUCCESSFUL in 4m 6s`; local debug APK size was 145,901,501 bytes and SHA-256 `A5C0E15DCDD49C39089712E49F685CF0977848AA35FAB6686E0D7CC6F3E5`. It was installed without uninstalling, clearing data, or changing package identity.
+- Physical runtime: Guest Home showed the expected guest copy and quick actions; public Hotlines rendered; Reports routed to the sign-in gate; force-stop/relaunch returned to Guest Home. The immediate crash-focused logcat tail after a bounded launch was empty. No safe credential or fixture was available for authenticated flows.
+- Unverified/boundary: legacy/compact reference rendering/copy, UUID notification routing, authenticated logout, report submission/replay/history, offline queue refresh, and production distribution/adoption remain unverified. Existing EAS preview inspection was read-only; no new EAS build/submission, store release, backend/Cloudflare/DB mutation, backup, manifest, or compact cutover occurred. Local debug evidence is not production release/adoption evidence.
+- Repositories: `aleconnect-mobile`; staff/API and Lineman were inspected only for the coordinated device evidence.
+- Scope: append the physical compatibility evidence without changing Mobile product behavior or API contracts.
+- Files: `docs/agent-harness/active-work.md` and `docs/agent-harness/implementation-history.md` only.
+- Contracts: existing UUID routing, mixed legacy/compact readers, permanent aliases, queues, and report DTO names remain unchanged; no client contract was broadened.
+- Verification: bounded ADB package inspection and relaunch, local Expo build, Guest Home/Hotlines/sign-in/restart observation, immediate crash-focused logcat, and scoped `git diff --check` were recorded; authenticated and offline flows remain unverified.
+- Git/Deployment: no EAS build/submission, store release, backend/Cloudflare/DB mutation, or production cutover occurred; this is a docs-only evidence record.
+- Remaining risks: authenticated reference compatibility, notification routing, report queue/replay, and real production distribution/adoption require separate safe fixtures and release evidence.
+- Next: complete only the separately authorized native production distribution/adoption gate, then prepare fresh target-bound production evidence; do not infer readiness from this local debug build.
+
 ## 2026-08-26 - Consumer multi-account consolidated aggregate evidence
 
 - Repositories: staff/API `aleconnect` completed the coordinated batch; `aleconnect-mobile` remained read-only.
