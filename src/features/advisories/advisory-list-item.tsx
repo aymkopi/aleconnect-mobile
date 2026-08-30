@@ -64,23 +64,42 @@ export function AdvisoryListItem({
   const controlNumber = advisory.controlNumber?.trim() || null;
 
   const typeLabel = formatAdvisoryLabel(advisory.type, "Advisory");
+  const type = advisory.type?.trim().toLowerCase() || null;
+  const hidesInterruption = type === "general" || type === "weather_advisory";
 
   const interruptionRange =
-    advisory.scheduledStartAt && advisory.scheduledEndAt
+    !hidesInterruption && type !== "restoration" &&
+    (advisory.scheduledStartAt || advisory.scheduledEndAt)
       ? formatManilaAdvisoryInterruptionRange(
-          advisory.scheduledStartAt,
-          advisory.scheduledEndAt,
+          advisory.scheduledStartAt ?? null,
+          advisory.scheduledEndAt ?? null,
         )
       : null;
 
+  const interruptionEndOnly =
+    !hidesInterruption && type !== "restoration" && !advisory.scheduledStartAt && interruptionRange
+      ? `Until ${interruptionRange.replace(/^Until\s+/i, "")}`
+      : null;
+
   const interruptionStart =
-    advisory.scheduledStartAt && !advisory.scheduledEndAt
+    !hidesInterruption && type !== "restoration" && advisory.scheduledStartAt
       ? formatManilaReportListDateTime(advisory.scheduledStartAt)
+      : null;
+
+  const restoredAt =
+    !hidesInterruption && type === "restoration"
+      ? advisory.scheduledEndAt
+        ? formatManilaReportListDateTime(advisory.scheduledEndAt)
+        : "To be confirmed"
       : null;
 
   const audience = advisory.audience?.trim() || null;
 
-  const primaryText = interruptionRange
+  const primaryText = restoredAt
+    ? `Restored at · ${restoredAt}`
+    : interruptionEndOnly
+    ? `${typeLabel} · ${interruptionEndOnly}`
+    : interruptionRange
     ? `${typeLabel} · ${interruptionRange}`
     : interruptionStart
       ? `${typeLabel} · Starts ${interruptionStart}`

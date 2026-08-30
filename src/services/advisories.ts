@@ -30,6 +30,45 @@ type AdvisoryCache = {
   readonly value: MobileAdvisoryPage;
 };
 
+type UnknownRecord = Record<string, unknown>;
+
+function nullableString(value: unknown) {
+  return typeof value === "string" && value.length > 0 ? value : null;
+}
+
+/** Keep old cache entries usable when optional API fields were absent. */
+export function normalizeMobileAdvisory(value: unknown): MobileAdvisory {
+  const record = value && typeof value === "object" ? value as UnknownRecord : {};
+  return {
+    id: typeof record.id === "string" ? record.id : "",
+    controlNumber: nullableString(record.controlNumber),
+    type: nullableString(record.type),
+    title: typeof record.title === "string" ? record.title : "",
+    content: typeof record.content === "string" ? record.content : "",
+    severity: typeof record.severity === "string" ? record.severity : "",
+    audience: nullableString(record.audience),
+    effectiveAt: nullableString(record.effectiveAt),
+    expiresAt: nullableString(record.expiresAt),
+    scheduledStartAt: nullableString(record.scheduledStartAt),
+    scheduledEndAt: nullableString(record.scheduledEndAt),
+    // publishedAt remains a required API field; an old cache missing it is
+    // still readable and will be replaced by the next successful fetch.
+    publishedAt: typeof record.publishedAt === "string" ? record.publishedAt : "",
+  };
+}
+
+export function normalizeMobileAdvisoryPage(value: unknown): MobileAdvisoryPage {
+  const record = value && typeof value === "object" ? value as UnknownRecord : {};
+  const advisories = Array.isArray(record.advisories)
+    ? record.advisories.map(normalizeMobileAdvisory)
+    : [];
+  return {
+    advisories,
+    nextCursor: nullableString(record.nextCursor),
+    isStale: record.isStale === true ? true : undefined,
+  };
+}
+
 const cachePrefix = "active_advisories_cache_v2";
 const cacheTtlMs = 5 * 60 * 1000;
 const staleTtlMs = 24 * 60 * 60 * 1000;
@@ -50,14 +89,18 @@ async function readCache(scope: AdvisoryScope, limit: number, allowStale = false
   if (!raw) return null;
 
   try {
-    const cached = JSON.parse(raw) as AdvisoryCache;
-    const age = Date.now() - cached.fetchedAt;
+    const cached = JSON.parse(raw) as Partial<AdvisoryCache>;
+    if (!Number.isFinite(cached.fetchedAt) || !Number.isFinite(cached.limit)) return null;
+    const fetchedAt = Number(cached.fetchedAt);
+    const cachedLimit = Number(cached.limit);
+    const age = Date.now() - fetchedAt;
     const maxAge = allowStale ? staleTtlMs : cacheTtlMs;
-    if (cached.limit < limit || age > maxAge) return null;
+    if (cachedLimit < limit || age > maxAge) return null;
+    const value = normalizeMobileAdvisoryPage(cached.value);
 
     return {
-      ...cached.value,
-      advisories: cached.value.advisories.slice(0, limit),
+      ...value,
+      advisories: value.advisories.slice(0, limit),
       isStale: allowStale && age > cacheTtlMs,
     };
   } catch {
@@ -73,7 +116,7 @@ async function writeCache(
   const cached: AdvisoryCache = {
     fetchedAt: Date.now(),
     limit,
-    value,
+    value: normalizeMobileAdvisoryPage(value),
   };
   await AsyncStorage.setItem(cacheKey(scope), JSON.stringify(cached));
 }
@@ -108,8 +151,9 @@ export async function fetchActiveAdvisories(options: {
     `/api/mobile/advisories?${params.toString()}`,
   )
     .then(async (response) => {
-      if (!cursor) await writeCache(scope, limit, response);
-      return response;
+      const normalized = normalizeMobileAdvisoryPage(response);
+      if (!cursor) await writeCache(scope, limit, normalized);
+      return normalized;
     })
     .catch(async (error) => {
       if (!cursor) {
@@ -137,5 +181,5 @@ export async function fetchActiveAdvisory(
   const response = await apiRequest<{ advisory: MobileAdvisory }>(
     `/api/mobile/advisories/${encodeURIComponent(id)}`,
   );
-  return response.advisory;
+  return normalizeMobileAdvisory(response.advisory);
 }

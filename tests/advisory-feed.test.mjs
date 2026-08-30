@@ -39,6 +39,8 @@ test("active advisories have a compact shared card, feed, home preview, and deta
   assert.match(card, /advisory\.severity/);
   assert.match(card, /advisory\.audience/);
   assert.match(card, /numberOfLines=\{1\}/);
+  assert.match(card, /Restored at/);
+  assert.match(card, /Until/);
 
   assert.doesNotMatch(card, /Megaphone/);
   assert.doesNotMatch(card, /ListSectionItem/);
@@ -46,5 +48,17 @@ test("active advisories have a compact shared card, feed, home preview, and deta
   assert.doesNotMatch(card, /advisory\.content/);
 
   assert.match(detail, /Advisory details/);
+  assert.match(detail, /RESTORED AT|Restored at/);
+  assert.match(detail, /scheduledEndAt/);
   assert.match(root, /name="advisories"/);
+});
+
+test("mobile advisory readers keep nullable legacy dates and normalize older cached records", async () => {
+  const service = await read("src/services/advisories.ts");
+  assert.match(service, /scheduledStartAt: string \| null/);
+  assert.match(service, /scheduledEndAt: string \| null/);
+  assert.match(service, /normalize.*Advisory|normaliz/);
+  assert.match(service, /scheduledStartAt.*null|scheduledEndAt.*null/);
+  assert.doesNotMatch(service, /scheduledStartAt: string;/);
+  assert.doesNotMatch(service, /scheduledEndAt: string;/);
 });
