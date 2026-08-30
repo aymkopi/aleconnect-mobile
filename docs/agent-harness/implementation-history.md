@@ -1,5 +1,17 @@
 # Implementation history
 
+## 2026-08-30 - Compact-reference Android preview build
+
+- Repositories: consumer `aleconnect-mobile` on canonical `master`; Staff and Lineman source remained unchanged.
+- Scope: create an internal Android preview artifact from the green compact-reference-compatible source without store submission.
+- Files: no product-source change; this handoff records external EAS build evidence only.
+- Contracts: Ticket and Advisory references remain opaque display values, UUID routes remain authoritative, and no production API/database behavior changes.
+- Verification: EAS build `af113285-8a62-48ea-b6be-e8a857520c58` finished successfully for Android SDK 55 from commit `5a33428`; canonical GitHub run `33295762850` already passed harness, all 189 tests, TypeScript, and lint.
+- Git/Deployment: internal preview APK produced; no EAS Update, store submission, rollout, or production deployment occurred.
+- Boundary: no device was attached, so installation, rendering, sign-in, compact-reference display, notification routing, report routing, and upgrade behavior remain unverified physically.
+- Remaining risks: physical-device acceptance is still required before staff compact cutover.
+- Next: install the preview APK on a representative Android device and execute the compact-reference smoke checklist.
+
 ## 2026-08-30 - Mobile baseline contract correction
 
 - Repositories: consumer `aleconnect-mobile` on canonical `master`; source/test/graph correction commit `df59f9d` is based on CI fix `f2e1e25`. Staff and Lineman remained untouched.

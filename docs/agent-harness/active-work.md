@@ -6,9 +6,10 @@
 - Scope: preserve the shipped 75% adaptive Hotlines sheet and page-owned close state, restore visible stale-hotline messaging, keep profile sheets dynamically sized, retain the camera rationale required by the shipped evidence picker while disabling microphone permission, and align the Manila interruption-range test with the shipped open-ended formatter.
 - Files: `src/app/(tabs)/hotlines.tsx`, `tests/hotlines-category-sheet.test.mjs`, `tests/manila-time.test.mjs`, `tests/native-permissions.test.mjs`, `tests/profile-shared-ui.test.mjs`, plus this handoff.
 - Evidence: GitHub run `33294641797` and local pre-edit reproduction initially showed 189 tests with 182 passed and the six established source-contract failures. The focused correction suite passes 16/16; the full serial suite passes 189/189; `npx tsc --noEmit`, `npm run lint` (0 errors, 4 existing warnings), `npm run harness:check`, `git diff --check`, and `npx expo export --platform android --output-dir .expo\\luna-baseline-correction-export` (4,479 modules) all exit 0. The temporary export directory was removed; no device evidence.
-- Boundary: no API, database, network, EAS/store action, native build, deployment, push, or device interaction occurred.
+- Native evidence: internal Android preview build `af113285-8a62-48ea-b6be-e8a857520c58` finished successfully from canonical commit `5a33428`; it was not submitted to a store or installed on a device.
+- Boundary: no API, database, store submission, push delivery, or device interaction occurred.
 - CI: canonical GitHub run `33295762850` passes the harness, all 189 tests, TypeScript, and lint.
-- Next: keep physical-device and native-release verification as explicit gates before staff compact cutover.
+- Next: install and physically verify the preview APK before staff compact cutover.
 
 ## Consumer-safe status normalization (2026-08-28)
 
