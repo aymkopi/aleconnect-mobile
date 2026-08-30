@@ -364,3 +364,8 @@ test("mobile instructions and CI route validation without publishing", async () 
   assert.doesNotMatch(workflow, /\beas\s+(?:build|submit)\b/i)
   assert.doesNotMatch(workflow, /\b(?:wrangler\s+(?:pages\s+)?deploy|npm\s+run\s+(?:deploy|publish)|eas\s+update)\b/i)
 })
+
+test("mobile harness workflow validates pushes to canonical master and retains main coverage", async () => {
+  const workflow = await readFile(new URL("../.github/workflows/agent-harness.yml", import.meta.url), "utf8")
+  assert.match(workflow, /branches:\s*\[main,\s*master\]/)
+})

@@ -1,5 +1,17 @@
 # Implementation history
 
+## 2026-08-30 - Compact-reference native release CI hardening
+
+- Repositories: isolated consumer `aleconnect-mobile-human-reference-cutover`, coordinated with Staff cutover safety hardening and read-only Lineman verification.
+- Scope: run the existing non-publishing agent-harness workflow for pushes to canonical `master` while retaining `main` coverage; no consumer runtime behavior changes.
+- Files: `.github/workflows/agent-harness.yml`, `tests/agent-harness.test.mjs`, and compact-reference handoff records.
+- Contracts: CI remains validation-only and contains no EAS build/update/submit or deployment command. Mixed-format references remain opaque display values and UUIDs remain authoritative.
+- Verification: focused harness coverage passes 29/29. Full branch coverage is 183/189 versus canonical base 182/188, with exactly the same six established category-sheet, hotline, Manila-range, permission-manifest, and responsive-profile failures; the added CI test passes. `npx tsc --noEmit` and a 4,479-module Android export pass. Lint exits with 0 errors and the same four warnings. Coordinated Staff passes lifecycle 480/482 with two explicit skips, child 155/155, data tables 49/49, deployment 38/38, TypeScript, lint, and build; Lineman passes 41/42 with one expected skip plus TypeScript, lint, and Android export.
+- Git/Deployment: local isolated branch only at this evidence point. No commit, merge, push, EAS build/update/submit, store publication, or provider action occurred.
+- Boundary: no database operation, production cutover, mobile runtime source change, or physical-device verification occurred. No Android device is attached.
+- Remaining risks: compatible Mobile and Lineman EAS artifacts and physical refresh/offline/reference-display checks remain mandatory before Staff switches production generation to compact mode.
+- Next: pass the coordinated harness/diff gates, integrate and push the CI correction, then create and physically verify the compatible native release before production cutover.
+
 ## 2026-08-30 - Compact human-reference canonical source integration
 
 - Repositories: consumer `aleconnect-mobile` coordinated with staff/API and Lineman releases.

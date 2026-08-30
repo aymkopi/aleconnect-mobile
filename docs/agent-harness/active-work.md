@@ -2,12 +2,12 @@
 
 ## Compact human-reference compatibility (2026-08-30)
 
-- Status: compatibility source is integrated and pushed on canonical `master`; staff is deployed in legacy compatibility mode, while native release and device verification remain separate and not performed.
+- Status: compatibility source is integrated and pushed on canonical `master`; the isolated release-hardening branch now fixes harness CI coverage for canonical `master`. Staff remains deployed in legacy compatibility mode, while native release and device verification remain separate and not performed.
 - Scope: mobile treats Ticket and Advisory references as opaque presentation values, accepts compact `TK/SM/DT/ADYYMMDD-NNNN` and legacy shapes, preserves UUID routes, identity-scoped caches, queue keys, and existing DTO fields.
-- Evidence: focused human-reference coverage passes 1/1; TypeScript, harness, and a clean Android export pass. The broad suite remains 174/180 with 6 pre-existing failures. Lint remains blocked by 25 resolver errors and 4 existing warnings; no device evidence.
+- Evidence: the CI contract passes 29/29. The broad branch suite is 183/189 and canonical `master` is 182/188, with exactly the same six established UI/date/permission failures; the added branch test passes. TypeScript and a clean 4,479-module Android export pass. Lint exits with 0 errors and four established warnings; no device evidence.
 - Release evidence: commit `cf66e32` is on GitHub `master`; focused coverage, TypeScript, harness, and clean Android export pass. No push CI ran because the existing harness workflow targets `main`, not canonical `master`.
-- Boundary: no human-reference migration, EAS/store action, push delivery, or device interaction occurred.
-- Next: fix the branch-scoped CI and existing baseline assertions/resolver lint separately, then publish a compatible native release before staff compact cutover.
+- Boundary: no human-reference migration, EAS/store action, push delivery, or device interaction occurred. `adb devices -l` is empty.
+- Next: integrate the canonical-branch CI correction, then publish and physically verify a compatible native release before staff compact cutover. Keep the six unrelated source-contract baselines separate.
 
 ## Consumer-safe status normalization (2026-08-28)
 
