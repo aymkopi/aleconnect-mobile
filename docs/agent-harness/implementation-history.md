@@ -1,5 +1,18 @@
 # Implementation history
 
+## 2026-08-30 - Mobile baseline contract correction
+
+- Repositories: consumer `aleconnect-mobile` on canonical `master`; source/test/graph correction commit `df59f9d` is based on CI fix `f2e1e25`. Staff and Lineman remained untouched.
+- Scope: preserve the reviewed adaptive-sheet behavior, restore stale hotline cache visibility, align the Manila interruption-range assertion with the shipped open-ended formatter, and align the native permission/profile contracts with the shipped camera and responsive UI behavior.
+- Files: `src/app/(tabs)/hotlines.tsx`, `tests/hotlines-category-sheet.test.mjs`, `tests/manila-time.test.mjs`, `tests/native-permissions.test.mjs`, `tests/profile-shared-ui.test.mjs`, and the active-work handoff.
+- Contracts: adaptive Hotlines sheets retain dynamic sizing, a 75% content cap, scrollability, keyboard interaction, and page-owned close state; stale cache data remains visible with an explicit notice; advisory interruption ranges preserve complete pairs and intentional `Starts`/`Until` open-ended formatting; camera capture retains its rationale while microphone access stays disabled; profile details retains shared dynamic child-sheet behavior.
+- Decisions: the category 55% cap, direct category-ref close, profile 55% cap, and camera-permission-false assertions were stale after the adaptive-sheet and camera-picker commits; the current 75% cap, page-owned close state, dynamic profile sizing, and camera rationale are retained. Commit `2d01432` intentionally added `Starts`/`Until` output and the advisory consumer’s partial-range handling, so the end-only null assertion was stale. The stale marker remained in the service contract but was no longer surfaced by the Hotlines route, so the route now restores that notice.
+- Verification: GitHub run `33294641797` and local pre-edit reproduction recorded 189 tests with 182 passed and six failures. The focused correction suite passes 16/16; the full serial suite passes 189/189; `npx tsc --noEmit`, `npm run lint` (0 errors, 4 existing warnings), `npm run harness:check`, `git diff --check`, and `npx expo export --platform android --output-dir .expo\\luna-baseline-correction-export` (4,479 modules) all exit 0. The temporary export directory was removed afterward.
+- Git/Deployment: source, focused contracts, and refreshed Graphify output are committed locally as `df59f9d`; this evidence entry records the pre-push state. No deployment, EAS/store operation, or native publication occurred.
+- Boundary: no API, database, EAS/store action, native deployment, push delivery, or device interaction occurred.
+- Remaining risks: no physical-device rendering or native permission prompt was verified; release/integration remains separately authorized.
+- Next: push the source and evidence commits, require green canonical CI, and run device/release gates separately before publication.
+
 ## 2026-08-30 - Compact-reference native release CI hardening
 
 - Repositories: isolated consumer `aleconnect-mobile-human-reference-cutover`, coordinated with Staff cutover safety hardening and read-only Lineman verification.

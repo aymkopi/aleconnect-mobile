@@ -1,13 +1,13 @@
 # Active work
 
-## Compact human-reference compatibility (2026-08-30)
+## Mobile baseline contract correction (2026-08-30)
 
-- Status: compatibility source is integrated and pushed on canonical `master`; the isolated release-hardening branch now fixes harness CI coverage for canonical `master`. Staff remains deployed in legacy compatibility mode, while native release and device verification remain separate and not performed.
-- Scope: mobile treats Ticket and Advisory references as opaque presentation values, accepts compact `TK/SM/DT/ADYYMMDD-NNNN` and legacy shapes, preserves UUID routes, identity-scoped caches, queue keys, and existing DTO fields.
-- Evidence: the CI contract passes 29/29. The broad branch suite is 183/189 and canonical `master` is 182/188, with exactly the same six established UI/date/permission failures; the added branch test passes. TypeScript and a clean 4,479-module Android export pass. Lint exits with 0 errors and four established warnings; no device evidence.
-- Release evidence: commit `cf66e32` is on GitHub `master`; focused coverage, TypeScript, harness, and clean Android export pass. No push CI ran because the existing harness workflow targets `main`, not canonical `master`.
-- Boundary: no human-reference migration, EAS/store action, push delivery, or device interaction occurred. `adb devices -l` is empty.
-- Next: integrate the canonical-branch CI correction, then publish and physically verify a compatible native release before staff compact cutover. Keep the six unrelated source-contract baselines separate.
+- Status: the reviewed correction is committed on canonical `master` as `df59f9d`, on top of the branch-CI fix `f2e1e25`. No staff or Lineman files changed.
+- Scope: preserve the shipped 75% adaptive Hotlines sheet and page-owned close state, restore visible stale-hotline messaging, keep profile sheets dynamically sized, retain the camera rationale required by the shipped evidence picker while disabling microphone permission, and align the Manila interruption-range test with the shipped open-ended formatter.
+- Files: `src/app/(tabs)/hotlines.tsx`, `tests/hotlines-category-sheet.test.mjs`, `tests/manila-time.test.mjs`, `tests/native-permissions.test.mjs`, `tests/profile-shared-ui.test.mjs`, plus this handoff.
+- Evidence: GitHub run `33294641797` and local pre-edit reproduction initially showed 189 tests with 182 passed and the six established source-contract failures. The focused correction suite passes 16/16; the full serial suite passes 189/189; `npx tsc --noEmit`, `npm run lint` (0 errors, 4 existing warnings), `npm run harness:check`, `git diff --check`, and `npx expo export --platform android --output-dir .expo\\luna-baseline-correction-export` (4,479 modules) all exit 0. The temporary export directory was removed; no device evidence.
+- Boundary: no API, database, network, EAS/store action, native build, deployment, push, or device interaction occurred.
+- Next: publish the commits and require a green canonical `master` CI run before any native release action.
 
 ## Consumer-safe status normalization (2026-08-28)
 
