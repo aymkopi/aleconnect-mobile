@@ -23,6 +23,20 @@
 - Git/Deployment: source, focused contracts, and refreshed Graphify output were published as `df59f9d`; evidence commit `2fd3020` followed. Canonical GitHub run `33295762850` passed the harness, all 189 tests, TypeScript, and lint. No deployment, EAS/store operation, or native publication occurred.
 - Boundary: no API, database, EAS/store action, native deployment, push delivery, or device interaction occurred.
 - Remaining risks: no physical-device rendering or native permission prompt was verified; release/integration remains separately authorized.
+- Next: install and physically verify the compatible Android build before staff compact cutover.
+
+## 2026-08-30 - Fail-closed Android production-signing guard
+
+- Repositories: consumer `aleconnect-mobile` on canonical `master`; Lineman has the corresponding package-scoped guard. Production staff/API behavior remains unchanged; the staff disposable local fixture schema was extended for verification.
+- Scope: add an Expo config plugin and `android:sync` script so generated release Gradle cannot silently select `signingConfigs.debug`. Local signing is app-scoped under `ALECONNECT_MOBILE_*`; legacy Gradle properties remain `MYAPP_UPLOAD_*`; verified EAS injection requires `EAS_BUILD=true`, the expected `eas-build.gradle` hooks, and project-root `../credentials.json`; debug behavior and package identity are unchanged.
+- Files: `plugins/with-android-production-signing-guard.js`, `tests/android-production-signing-guard.test.mjs`, `app.json`, `package.json`, and the active-work and implementation-history handoffs.
+- Contracts: package ID remains `com.kapecakes.aleconnectmobile`; release signing requires a complete app-scoped or legacy managed property set, or verified EAS injection (`EAS_BUILD=true` plus the expected `eas-build.gradle` hooks and `../credentials.json`) at Gradle runtime, while debug signing and all API/reference/UUID contracts remain unchanged.
+- Verification: the signing-guard contract was RED before implementation and is GREEN at 7/7 afterward. The full serial mobile suite passes 196/196; `npx tsc --noEmit` and `npm run lint` exit 0 with four existing warnings; generated Android sync exits 0; `git diff --check` is clean.
+- Native evidence: generated `android/app/build.gradle` contains the guard, preserves debug signing, maps release to `signingConfigs.release`, and checks the verified EAS shape without reading or logging credential contents; generated `android/app/google-services.json` is present and nonzero (692 bytes). Running `:app:assembleRelease --no-daemon` without either local/legacy signing source fails at the guard with the sanitized expected message `ALEConnect release signing is unavailable...`; `:app:assembleDebug --no-daemon` completed `BUILD SUCCESSFUL in 19m 20s` before this guard-only correction.
+- Git/Deployment: scoped source/config, signing tests, and handoff changes were committed locally; no push, EAS build/submission, store publication, or deployment occurred.
+- Boundary: no EAS build/submission, store publication, device mutation, staff/API or Cloudflare deployment, database/backup/manifest work, or compact-mode change occurred.
+- Remaining risks: production signing material, release/device compatibility, authenticated mixed-reference/offline/notification coverage, and measurable production distribution/adoption remain pending.
+- Next: staff disposable authenticated API replay is verified; finish the remaining native authenticated Mobile/Lineman UI, offline queue/reconnect, evidence, and push-provider gates, then obtain separately authorized production signing, distribution/adoption, and compact-cutover evidence.
 - Next: run physical-device and native-release gates separately before staff compact cutover.
 
 ## 2026-08-30 - Compact-reference native release CI hardening

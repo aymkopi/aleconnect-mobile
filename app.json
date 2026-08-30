@@ -73,6 +73,12 @@
       "expo-location",
       "./plugins/with-android-predictive-back-disabled",
       "./plugins/with-report-evidence-backup-exclusion",
+      [
+        "./plugins/with-android-production-signing-guard",
+        {
+          "prefix": "ALECONNECT_MOBILE"
+        }
+      ],
       "@maplibre/maplibre-react-native",
       "expo-secure-store",
       "expo-background-task"

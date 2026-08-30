@@ -1,5 +1,15 @@
 # Active work
 
+## Android production-signing guard (2026-08-30)
+
+- Status: the native-generation hardening is implemented locally on canonical `master`; production distribution and compact cutover remain separately blocked.
+- Cross-project boundary: production staff/API behavior remains unchanged; the staff disposable local fixture schema was extended for verification.
+- Scope: the Expo config plugin `plugins/with-android-production-signing-guard.js` keeps release builds on `signingConfigs.release`, accepts app-scoped `ALECONNECT_MOBILE_*` local properties, legacy `MYAPP_UPLOAD_*` Gradle properties, or verified EAS injection (`EAS_BUILD=true` plus the expected `eas-build.gradle` hooks and `../credentials.json`), fails closed when a release task has neither complete source, and leaves debug builds on the existing debug keystore. `npm run android:sync` is the reproducible ignored-native regeneration command.
+- TDD: the signing-guard contract was RED before implementation and is GREEN at 7/7 after implementation; the full mobile suite is 196/196, TypeScript and lint pass (four existing warnings), and no secret value is embedded in the generated Gradle.
+- Native evidence: `npm run android:sync` exited 0; generated `android/app/build.gradle` maps release to `signingConfigs.release` while debug remains debug-signed, checks `rootProject.file("../credentials.json")` for verified EAS injection, and `android/app/google-services.json` exists with nonzero size (692 bytes). The no-signing-source release Gradle check fails closed with `ALEConnect release signing is unavailable...`; `:app:assembleDebug --no-daemon` completed `BUILD SUCCESSFUL in 19m 20s` before this guard-only correction.
+- Boundary: no EAS build/submission, store distribution, device install, staff/API deployment, Cloudflare action, database operation, production backup/manifest, or compact-mode change occurred in this implementation slice.
+- Remaining: staff disposable authenticated API replay is verified, while native authenticated Mobile/Lineman UI, offline queue/reconnect, evidence, and push-provider gates remain. Production signing, distribution, and adoption are still pending; authenticated compact-reference, UUID notification, and report flows remain unverified.
+
 ## Mobile baseline contract correction (2026-08-30)
 
 - Status: the reviewed correction is published on canonical `master` as `df59f9d`, on top of the branch-CI fix `f2e1e25`; evidence commit `2fd3020` is also published. No staff or Lineman files changed.
