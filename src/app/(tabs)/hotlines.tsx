@@ -540,6 +540,7 @@ export default function HotlinesRoute() {
   const [query, setQuery] = useState("");
   const [sheetQuery, setSheetQuery] = useState("");
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [isUsingSavedData, setIsUsingSavedData] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
@@ -552,6 +553,7 @@ export default function HotlinesRoute() {
     try {
       const data = await fetchHotlines(options);
       setCategories(data.categories);
+      setIsUsingSavedData(data.isStale === true);
       setActiveCategoryId((current) =>
         data.categories.some((category) => category.id === current)
           ? current
@@ -753,6 +755,19 @@ export default function HotlinesRoute() {
                 >
                   <ButtonText>Retry</ButtonText>
                 </Button>
+              </Alert>
+            ) : null}
+
+            {isUsingSavedData ? (
+              <Alert className="p-4">
+                <View className="gap-1">
+                  <AlertText className="font-bold">
+                    Showing saved hotline data
+                  </AlertText>
+                  <AlertText>
+                    Pull down to check for newer contacts when online.
+                  </AlertText>
+                </View>
               </Alert>
             ) : null}
 

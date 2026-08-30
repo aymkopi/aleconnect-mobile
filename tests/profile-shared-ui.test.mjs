@@ -14,7 +14,7 @@ test("profile details uses the shared responsive child UI", async () => {
   assert.match(details, /<ChildAppBar/);
   assert.doesNotMatch(details, /containerHeight=/);
   assert.match(details, /keyboardBehavior="interactive"/);
-  assert.match(details, /maxDynamicContentSize=\{screenHeight \* 0\.55\}/);
+  assert.match(details, /enableDynamicSizing/);
   assert.match(details, /<BottomSheetScrollView/);
   assert.match(appBar, /rightActions\?: ReactNode/);
   assert.match(bottomSheet, /android_keyboardInputMode = ["']adjustPan["']/);

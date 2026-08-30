@@ -166,7 +166,7 @@ test("formats advisory interruption ranges against the Manila calendar", () => {
       "2026-08-17T09:00:00.000Z",
       reference,
     ),
-    null,
+    "Until 5:00 PM, Today",
   );
 
   assert.equal(

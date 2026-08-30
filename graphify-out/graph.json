@@ -1630,7 +1630,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tabs_home",
-      "community": 85,
+      "community": 32,
       "norm_label": "home.tsx"
     },
     {
@@ -1840,7 +1840,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "profile_layout",
-      "community": 82,
+      "community": 85,
       "norm_label": "_layout.tsx"
     },
     {
@@ -1850,7 +1850,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "profile_layout_unstable_settings",
-      "community": 82,
+      "community": 85,
       "norm_label": "unstable_settings"
     },
     {
@@ -1860,7 +1860,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "profile_layout_profilelayout",
-      "community": 82,
+      "community": 85,
       "norm_label": "profilelayout()"
     },
     {
@@ -1870,7 +1870,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "profile_accounts",
-      "community": 176,
+      "community": 30,
       "norm_label": "accounts.tsx"
     },
     {
@@ -2030,7 +2030,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "profile_push_notifications",
-      "community": 163,
+      "community": 156,
       "norm_label": "push-notifications.tsx"
     },
     {
@@ -2040,7 +2040,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "profile_push_notifications_parentstate",
-      "community": 163,
+      "community": 156,
       "norm_label": "parentstate"
     },
     {
@@ -2050,7 +2050,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "profile_push_notifications_notice",
-      "community": 163,
+      "community": 156,
       "norm_label": "notice"
     },
     {
@@ -2060,7 +2060,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "profile_push_notifications_ospermissionstate",
-      "community": 163,
+      "community": 156,
       "norm_label": "ospermissionstate"
     },
     {
@@ -2070,7 +2070,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "profile_push_notifications_makeinitialselection",
-      "community": 163,
+      "community": 156,
       "norm_label": "makeinitialselection()"
     },
     {
@@ -2080,7 +2080,7 @@
       "source_location": "L75",
       "_origin": "ast",
       "id": "profile_push_notifications_compactselection",
-      "community": 163,
+      "community": 156,
       "norm_label": "compactselection()"
     },
     {
@@ -2090,7 +2090,7 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "profile_push_notifications_buildsavepayload",
-      "community": 163,
+      "community": 156,
       "norm_label": "buildsavepayload()"
     },
     {
@@ -2100,7 +2100,7 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "profile_push_notifications_tristatecheckbox",
-      "community": 163,
+      "community": 156,
       "norm_label": "tristatecheckbox()"
     },
     {
@@ -2110,7 +2110,7 @@
       "source_location": "L156",
       "_origin": "ast",
       "id": "profile_push_notifications_feedercheckbox",
-      "community": 163,
+      "community": 156,
       "norm_label": "feedercheckbox()"
     },
     {
@@ -2120,7 +2120,7 @@
       "source_location": "L181",
       "_origin": "ast",
       "id": "profile_push_notifications_toggleswitch",
-      "community": 163,
+      "community": 156,
       "norm_label": "toggleswitch()"
     },
     {
@@ -2130,7 +2130,7 @@
       "source_location": "L201",
       "_origin": "ast",
       "id": "profile_push_notifications_preferenceswitch",
-      "community": 163,
+      "community": 156,
       "norm_label": "preferenceswitch()"
     },
     {
@@ -2140,7 +2140,7 @@
       "source_location": "L232",
       "_origin": "ast",
       "id": "profile_push_notifications_loadingstate",
-      "community": 163,
+      "community": 156,
       "norm_label": "loadingstate()"
     },
     {
@@ -2150,7 +2150,7 @@
       "source_location": "L243",
       "_origin": "ast",
       "id": "profile_push_notifications_pushnotificationsroute",
-      "community": 163,
+      "community": 85,
       "norm_label": "pushnotificationsroute()"
     },
     {
@@ -2210,7 +2210,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "reports_layout",
-      "community": 10,
+      "community": 85,
       "norm_label": "_layout.tsx"
     },
     {
@@ -2220,7 +2220,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "reports_layout_unstable_settings",
-      "community": 10,
+      "community": 85,
       "norm_label": "unstable_settings"
     },
     {
@@ -2230,7 +2230,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "reports_layout_complaintslayout",
-      "community": 10,
+      "community": 85,
       "norm_label": "complaintslayout()"
     },
     {
@@ -2240,7 +2240,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "reports_index",
-      "community": 85,
+      "community": 73,
       "norm_label": "index.tsx"
     },
     {
@@ -2250,7 +2250,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "reports_index_loadcomplaintoptions",
-      "community": 85,
+      "community": 73,
       "norm_label": "loadcomplaintoptions"
     },
     {
@@ -2260,7 +2260,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "reports_index_reportsskeleton",
-      "community": 85,
+      "community": 73,
       "norm_label": "reportsskeleton()"
     },
     {
@@ -2320,7 +2320,7 @@
       "source_location": "L106",
       "_origin": "ast",
       "id": "reports_list_reportarchiveroute",
-      "community": 73,
+      "community": 85,
       "norm_label": "reportarchiveroute()"
     },
     {
@@ -2420,7 +2420,7 @@
       "source_location": "L309",
       "_origin": "ast",
       "id": "reports_new_newcomplaintroute",
-      "community": 85,
+      "community": 105,
       "norm_label": "newcomplaintroute()"
     },
     {
@@ -2430,7 +2430,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "reports_queue",
-      "community": 73,
+      "community": 32,
       "norm_label": "queue.tsx"
     },
     {
@@ -2520,7 +2520,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_advisories",
-      "community": 73,
+      "community": 32,
       "norm_label": "advisories.tsx"
     },
     {
@@ -2550,7 +2550,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "advisory_id_formatdate",
-      "community": 32,
+      "community": 85,
       "norm_label": "formatdate()"
     },
     {
@@ -2560,7 +2560,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "advisory_id_advisorydetailsroute",
-      "community": 32,
+      "community": 85,
       "norm_label": "advisorydetailsroute()"
     },
     {
@@ -2570,7 +2570,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_email_setup",
-      "community": 20,
+      "community": 30,
       "norm_label": "email-setup.tsx"
     },
     {
@@ -2580,7 +2580,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "app_email_setup_step",
-      "community": 20,
+      "community": 30,
       "norm_label": "step"
     },
     {
@@ -2620,7 +2620,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_notification_settings",
-      "community": 163,
+      "community": 85,
       "norm_label": "notification-settings.tsx"
     },
     {
@@ -2630,7 +2630,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "app_notification_settings_notificationsettingsroute",
-      "community": 163,
+      "community": 85,
       "norm_label": "notificationsettingsroute()"
     },
     {
@@ -2760,7 +2760,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_sign_in",
-      "community": 20,
+      "community": 30,
       "norm_label": "sign-in.tsx"
     },
     {
@@ -2770,7 +2770,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "app_sign_in_signinmode",
-      "community": 20,
+      "community": 30,
       "norm_label": "signinmode"
     },
     {
@@ -2780,7 +2780,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "app_sign_in_signinroute",
-      "community": 20,
+      "community": 30,
       "norm_label": "signinroute()"
     },
     {
@@ -2790,7 +2790,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_child_app_bar",
-      "community": 73,
+      "community": 36,
       "norm_label": "child-app-bar.tsx"
     },
     {
@@ -2800,7 +2800,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "components_child_app_bar_childappbarprops",
-      "community": 73,
+      "community": 36,
       "norm_label": "childappbarprops"
     },
     {
@@ -2810,7 +2810,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "components_child_app_bar_childappbar",
-      "community": 73,
+      "community": 36,
       "norm_label": "childappbar()"
     },
     {
@@ -2820,7 +2820,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_floating_app_bar",
-      "community": 163,
+      "community": 32,
       "norm_label": "floating-app-bar.tsx"
     },
     {
@@ -2830,7 +2830,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "components_floating_app_bar_content_fade_steps",
-      "community": 163,
+      "community": 32,
       "norm_label": "content_fade_steps"
     },
     {
@@ -2840,7 +2840,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "components_floating_app_bar_appbaritem",
-      "community": 163,
+      "community": 32,
       "norm_label": "appbaritem"
     },
     {
@@ -2850,7 +2850,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "components_floating_app_bar_floatingappbarprops",
-      "community": 163,
+      "community": 32,
       "norm_label": "floatingappbarprops"
     },
     {
@@ -2860,7 +2860,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "components_floating_app_bar_app_bar_items",
-      "community": 163,
+      "community": 32,
       "norm_label": "app_bar_items"
     },
     {
@@ -2880,7 +2880,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "components_floating_app_bar_tabitemprops",
-      "community": 163,
+      "community": 32,
       "norm_label": "tabitemprops"
     },
     {
@@ -2890,7 +2890,7 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "components_floating_app_bar_tabitem",
-      "community": 163,
+      "community": 32,
       "norm_label": "tabitem()"
     },
     {
@@ -2900,7 +2900,7 @@
       "source_location": "L117",
       "_origin": "ast",
       "id": "components_floating_app_bar_floatingappbar",
-      "community": 163,
+      "community": 32,
       "norm_label": "floatingappbar()"
     },
     {
@@ -2980,7 +2980,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "alert_index",
-      "community": 80,
+      "community": 30,
       "norm_label": "index.tsx"
     },
     {
@@ -2990,7 +2990,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "alert_index_alertstyle",
-      "community": 80,
+      "community": 30,
       "norm_label": "alertstyle"
     },
     {
@@ -3000,7 +3000,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "alert_index_alerttextstyle",
-      "community": 80,
+      "community": 30,
       "norm_label": "alerttextstyle"
     },
     {
@@ -3010,7 +3010,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "alert_index_alerticonstyle",
-      "community": 80,
+      "community": 30,
       "norm_label": "alerticonstyle"
     },
     {
@@ -3020,7 +3020,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "alert_index_styleduiicon",
-      "community": 80,
+      "community": 30,
       "norm_label": "styleduiicon"
     },
     {
@@ -3030,7 +3030,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "alert_index_uialert",
-      "community": 80,
+      "community": 30,
       "norm_label": "uialert"
     },
     {
@@ -3040,7 +3040,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "alert_index_ialertprops",
-      "community": 80,
+      "community": 30,
       "norm_label": "ialertprops"
     },
     {
@@ -3050,7 +3050,7 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "alert_index_alert",
-      "community": 80,
+      "community": 30,
       "norm_label": "alert"
     },
     {
@@ -3060,7 +3060,7 @@
       "source_location": "L69",
       "_origin": "ast",
       "id": "alert_index_ialerttextprops",
-      "community": 80,
+      "community": 30,
       "norm_label": "ialerttextprops"
     },
     {
@@ -3070,7 +3070,7 @@
       "source_location": "L72",
       "_origin": "ast",
       "id": "alert_index_alerttext",
-      "community": 20,
+      "community": 30,
       "norm_label": "alerttext"
     },
     {
@@ -3080,7 +3080,7 @@
       "source_location": "L91",
       "_origin": "ast",
       "id": "alert_index_ialerticonprops",
-      "community": 80,
+      "community": 30,
       "norm_label": "ialerticonprops"
     },
     {
@@ -3090,7 +3090,7 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "alert_index_alerticon",
-      "community": 80,
+      "community": 30,
       "norm_label": "alerticon"
     },
     {
@@ -3100,7 +3100,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "avatar_index",
-      "community": 87,
+      "community": 80,
       "norm_label": "index.tsx"
     },
     {
@@ -3110,7 +3110,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "avatar_index_uiavatar",
-      "community": 87,
+      "community": 80,
       "norm_label": "uiavatar"
     },
     {
@@ -3120,7 +3120,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "avatar_index_avatarstyle",
-      "community": 87,
+      "community": 80,
       "norm_label": "avatarstyle"
     },
     {
@@ -3130,7 +3130,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "avatar_index_avatarfallbacktextstyle",
-      "community": 87,
+      "community": 80,
       "norm_label": "avatarfallbacktextstyle"
     },
     {
@@ -3140,7 +3140,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "avatar_index_avatargroupstyle",
-      "community": 87,
+      "community": 80,
       "norm_label": "avatargroupstyle"
     },
     {
@@ -3150,7 +3150,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "avatar_index_avatarbadgestyle",
-      "community": 87,
+      "community": 80,
       "norm_label": "avatarbadgestyle"
     },
     {
@@ -3160,7 +3160,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "avatar_index_avatarimagestyle",
-      "community": 87,
+      "community": 80,
       "norm_label": "avatarimagestyle"
     },
     {
@@ -3170,7 +3170,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "avatar_index_iavatarprops",
-      "community": 87,
+      "community": 80,
       "norm_label": "iavatarprops"
     },
     {
@@ -3190,7 +3190,7 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "avatar_index_iavatarbadgeprops",
-      "community": 87,
+      "community": 80,
       "norm_label": "iavatarbadgeprops"
     },
     {
@@ -3200,7 +3200,7 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "avatar_index_avatarbadge",
-      "community": 87,
+      "community": 80,
       "norm_label": "avatarbadge"
     },
     {
@@ -3210,7 +3210,7 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "avatar_index_iavatarfallbacktextprops",
-      "community": 87,
+      "community": 80,
       "norm_label": "iavatarfallbacktextprops"
     },
     {
@@ -3230,7 +3230,7 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "avatar_index_iavatarimageprops",
-      "community": 87,
+      "community": 80,
       "norm_label": "iavatarimageprops"
     },
     {
@@ -3250,7 +3250,7 @@
       "source_location": "L109",
       "_origin": "ast",
       "id": "avatar_index_iavatargroupprops",
-      "community": 87,
+      "community": 80,
       "norm_label": "iavatargroupprops"
     },
     {
@@ -3260,7 +3260,7 @@
       "source_location": "L112",
       "_origin": "ast",
       "id": "avatar_index_avatargroup",
-      "community": 87,
+      "community": 80,
       "norm_label": "avatargroup"
     },
     {
@@ -3470,7 +3470,7 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "bottomsheet_index_bottomsheettextinputstyle",
-      "community": 74,
+      "community": 20,
       "norm_label": "bottomsheettextinputstyle"
     },
     {
@@ -3750,7 +3750,7 @@
       "source_location": "L588",
       "_origin": "ast",
       "id": "bottomsheet_index_bottomsheettextinput",
-      "community": 74,
+      "community": 20,
       "norm_label": "bottomsheettextinput()"
     },
     {
@@ -3880,7 +3880,7 @@
       "source_location": "L128",
       "_origin": "ast",
       "id": "button_index_button",
-      "community": 73,
+      "community": 30,
       "norm_label": "button"
     },
     {
@@ -3900,7 +3900,7 @@
       "source_location": "L143",
       "_origin": "ast",
       "id": "button_index_buttontext",
-      "community": 73,
+      "community": 30,
       "norm_label": "buttontext"
     },
     {
@@ -3910,7 +3910,7 @@
       "source_location": "L163",
       "_origin": "ast",
       "id": "button_index_buttonspinner",
-      "community": 20,
+      "community": 30,
       "norm_label": "buttonspinner"
     },
     {
@@ -3930,7 +3930,7 @@
       "source_location": "L177",
       "_origin": "ast",
       "id": "button_index_buttonicon",
-      "community": 82,
+      "community": 36,
       "norm_label": "buttonicon"
     },
     {
@@ -4380,7 +4380,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "heading_index",
-      "community": 187,
+      "community": 36,
       "norm_label": "index.tsx"
     },
     {
@@ -4390,7 +4390,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "heading_index_iheadingprops",
-      "community": 187,
+      "community": 36,
       "norm_label": "iheadingprops"
     },
     {
@@ -4400,7 +4400,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "heading_index_h1",
-      "community": 187,
+      "community": 36,
       "norm_label": "h1"
     },
     {
@@ -4410,7 +4410,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "heading_index_h2",
-      "community": 187,
+      "community": 36,
       "norm_label": "h2"
     },
     {
@@ -4420,7 +4420,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "heading_index_h3",
-      "community": 187,
+      "community": 36,
       "norm_label": "h3"
     },
     {
@@ -4430,7 +4430,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "heading_index_h4",
-      "community": 187,
+      "community": 36,
       "norm_label": "h4"
     },
     {
@@ -4440,7 +4440,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "heading_index_h5",
-      "community": 187,
+      "community": 36,
       "norm_label": "h5"
     },
     {
@@ -4450,7 +4450,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "heading_index_h6",
-      "community": 187,
+      "community": 36,
       "norm_label": "h6"
     },
     {
@@ -4460,7 +4460,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "heading_index_mappedheading",
-      "community": 187,
+      "community": 36,
       "norm_label": "mappedheading"
     },
     {
@@ -4470,7 +4470,7 @@
       "source_location": "L185",
       "_origin": "ast",
       "id": "heading_index_heading",
-      "community": 165,
+      "community": 30,
       "norm_label": "heading"
     },
     {
@@ -4690,7 +4690,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_list_section",
-      "community": 165,
+      "community": 32,
       "norm_label": "list-section.tsx"
     },
     {
@@ -4700,7 +4700,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "ui_list_section_listsection",
-      "community": 73,
+      "community": 32,
       "norm_label": "listsection()"
     },
     {
@@ -4710,7 +4710,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "ui_list_section_listsectionitem",
-      "community": 73,
+      "community": 32,
       "norm_label": "listsectionitem()"
     },
     {
@@ -4870,7 +4870,7 @@
       "source_location": "L121",
       "_origin": "ast",
       "id": "menu_index_menu",
-      "community": 73,
+      "community": 179,
       "norm_label": "menu"
     },
     {
@@ -4880,7 +4880,7 @@
       "source_location": "L142",
       "_origin": "ast",
       "id": "menu_index_menuitemlabel",
-      "community": 73,
+      "community": 179,
       "norm_label": "menuitemlabel"
     },
     {
@@ -5200,7 +5200,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "pressable_index",
-      "community": 165,
+      "community": 32,
       "norm_label": "index.tsx"
     },
     {
@@ -5210,7 +5210,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "pressable_index_uipressable",
-      "community": 165,
+      "community": 32,
       "norm_label": "uipressable"
     },
     {
@@ -5220,7 +5220,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "pressable_index_pressablestyle",
-      "community": 165,
+      "community": 32,
       "norm_label": "pressablestyle"
     },
     {
@@ -5230,7 +5230,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "pressable_index_ipressableprops",
-      "community": 165,
+      "community": 32,
       "norm_label": "ipressableprops"
     },
     {
@@ -5240,7 +5240,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "pressable_index_pressable",
-      "community": 165,
+      "community": 32,
       "norm_label": "pressable"
     },
     {
@@ -5250,7 +5250,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "progress_index",
-      "community": 192,
+      "community": 156,
       "norm_label": "index.tsx"
     },
     {
@@ -5260,7 +5260,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "progress_index_uiprogress",
-      "community": 192,
+      "community": 156,
       "norm_label": "uiprogress"
     },
     {
@@ -5270,7 +5270,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "progress_index_progressstyle",
-      "community": 192,
+      "community": 156,
       "norm_label": "progressstyle"
     },
     {
@@ -5280,7 +5280,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "progress_index_progressfilledtrackstyle",
-      "community": 192,
+      "community": 156,
       "norm_label": "progressfilledtrackstyle"
     },
     {
@@ -5290,7 +5290,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "progress_index_iprogressprops",
-      "community": 192,
+      "community": 156,
       "norm_label": "iprogressprops"
     },
     {
@@ -5300,7 +5300,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "progress_index_iprogressfilledtrackprops",
-      "community": 192,
+      "community": 156,
       "norm_label": "iprogressfilledtrackprops"
     },
     {
@@ -5310,7 +5310,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "progress_index_progress",
-      "community": 192,
+      "community": 156,
       "norm_label": "progress"
     },
     {
@@ -5320,7 +5320,7 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "progress_index_progressfilledtrack",
-      "community": 192,
+      "community": 156,
       "norm_label": "progressfilledtrack"
     },
     {
@@ -5350,7 +5350,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "ui_search_field_searchfield",
-      "community": 36,
+      "community": 87,
       "norm_label": "searchfield()"
     },
     {
@@ -6030,7 +6030,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "skeleton_index",
-      "community": 179,
+      "community": 73,
       "norm_label": "index.tsx"
     },
     {
@@ -6040,7 +6040,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "skeleton_index_iskeletonprops",
-      "community": 179,
+      "community": 73,
       "norm_label": "iskeletonprops"
     },
     {
@@ -6050,7 +6050,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "skeleton_index_iskeletontextprops",
-      "community": 179,
+      "community": 73,
       "norm_label": "iskeletontextprops"
     },
     {
@@ -6060,7 +6060,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "skeleton_index_skeleton",
-      "community": 179,
+      "community": 73,
       "norm_label": "skeleton"
     },
     {
@@ -6070,7 +6070,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "skeleton_index_skeletontext",
-      "community": 179,
+      "community": 73,
       "norm_label": "skeletontext"
     },
     {
@@ -6080,7 +6080,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "skeleton_styles",
-      "community": 179,
+      "community": 73,
       "norm_label": "styles.tsx"
     },
     {
@@ -6090,7 +6090,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "skeleton_styles_skeletonstyle",
-      "community": 179,
+      "community": 73,
       "norm_label": "skeletonstyle"
     },
     {
@@ -6100,7 +6100,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "skeleton_styles_skeletontextstyle",
-      "community": 179,
+      "community": 73,
       "norm_label": "skeletontextstyle"
     },
     {
@@ -6150,7 +6150,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "text_index",
-      "community": 165,
+      "community": 32,
       "norm_label": "index.tsx"
     },
     {
@@ -6160,7 +6160,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "text_index_itextprops",
-      "community": 165,
+      "community": 32,
       "norm_label": "itextprops"
     },
     {
@@ -6170,7 +6170,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "text_index_text",
-      "community": 165,
+      "community": 32,
       "norm_label": "text"
     },
     {
@@ -6570,7 +6570,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "constants_index",
-      "community": 36,
+      "community": 73,
       "norm_label": "index.ts"
     },
     {
@@ -6580,7 +6580,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "constants_push_notifications",
-      "community": 36,
+      "community": 73,
       "norm_label": "push-notifications.ts"
     },
     {
@@ -6590,7 +6590,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "constants_system",
-      "community": 36,
+      "community": 73,
       "norm_label": "system.ts"
     },
     {
@@ -6680,7 +6680,7 @@
       "source_location": "L163",
       "_origin": "ast",
       "id": "context_auth_session_context_useauthsessioncontext",
-      "community": 164,
+      "community": 85,
       "norm_label": "useauthsessioncontext()"
     },
     {
@@ -6740,7 +6740,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "context_consumer_account_context",
-      "community": 83,
+      "community": 85,
       "norm_label": "consumer-account-context.tsx"
     },
     {
@@ -6750,7 +6750,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "context_consumer_account_context_consumeraccountcontextvalue",
-      "community": 83,
+      "community": 85,
       "norm_label": "consumeraccountcontextvalue"
     },
     {
@@ -6760,7 +6760,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "context_consumer_account_context_consumeraccountcontext",
-      "community": 83,
+      "community": 85,
       "norm_label": "consumeraccountcontext"
     },
     {
@@ -6770,7 +6770,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "context_consumer_account_context_consumeraccountprovider",
-      "community": 83,
+      "community": 85,
       "norm_label": "consumeraccountprovider()"
     },
     {
@@ -6790,7 +6790,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "context_consumer_profile_context",
-      "community": 10,
+      "community": 85,
       "norm_label": "consumer-profile-context.ts"
     },
     {
@@ -6800,7 +6800,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "context_consumer_profile_context_consumerprofilecontext",
-      "community": 10,
+      "community": 85,
       "norm_label": "consumerprofilecontext"
     },
     {
@@ -6810,7 +6810,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "context_consumer_profile_context_consumerprofileprovider",
-      "community": 10,
+      "community": 85,
       "norm_label": "consumerprofileprovider()"
     },
     {
@@ -7380,7 +7380,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "maps_static_location_map",
-      "community": 105,
+      "community": 165,
       "norm_label": "static-location-map.tsx"
     },
     {
@@ -7390,7 +7390,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "maps_static_location_map_staticlocationmapprops",
-      "community": 105,
+      "community": 165,
       "norm_label": "staticlocationmapprops"
     },
     {
@@ -7400,7 +7400,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "maps_static_location_map_staticlocationmap",
-      "community": 105,
+      "community": 165,
       "norm_label": "staticlocationmap()"
     },
     {
@@ -7410,7 +7410,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_accountdetailsbuilder",
-      "community": 73,
+      "community": 32,
       "norm_label": "accountdetailsbuilder.tsx"
     },
     {
@@ -7420,7 +7420,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "components_accountdetailsbuilder_accountdetailsbuilderprops",
-      "community": 73,
+      "community": 32,
       "norm_label": "accountdetailsbuilderprops"
     },
     {
@@ -7430,7 +7430,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "components_accountdetailsbuilder_accountdetailsbuilder",
-      "community": 73,
+      "community": 179,
       "norm_label": "accountdetailsbuilder()"
     },
     {
@@ -7520,7 +7520,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "components_profiledetailssheetcontent_editablefield",
-      "community": 179,
+      "community": 20,
       "norm_label": "editablefield"
     },
     {
@@ -7550,7 +7550,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_profileeditsheetheader",
-      "community": 82,
+      "community": 36,
       "norm_label": "profileeditsheetheader.tsx"
     },
     {
@@ -7560,7 +7560,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "components_profileeditsheetheader_props",
-      "community": 82,
+      "community": 36,
       "norm_label": "props"
     },
     {
@@ -7880,7 +7880,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "reports_contract_buildreportaccountselector",
-      "community": 111,
+      "community": 105,
       "norm_label": "buildreportaccountselector()"
     },
     {
@@ -7890,7 +7890,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "reports_contract_shouldreloadreportsforaccountchange",
-      "community": 111,
+      "community": 73,
       "norm_label": "shouldreloadreportsforaccountchange()"
     },
     {
@@ -7940,7 +7940,7 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "reports_contract_validatereportform",
-      "community": 89,
+      "community": 105,
       "norm_label": "validatereportform()"
     },
     {
@@ -8020,7 +8020,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "reports_data_complaintmeta",
-      "community": 111,
+      "community": 89,
       "norm_label": "complaintmeta"
     },
     {
@@ -8040,7 +8040,7 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "reports_data_preserveknownconsumerreportstatuses",
-      "community": 161,
+      "community": 81,
       "norm_label": "preserveknownconsumerreportstatuses()"
     },
     {
@@ -8090,7 +8090,7 @@
       "source_location": "L141",
       "_origin": "ast",
       "id": "reports_data_reportdetail",
-      "community": 161,
+      "community": 81,
       "norm_label": "reportdetail"
     },
     {
@@ -8150,7 +8150,7 @@
       "source_location": "L199",
       "_origin": "ast",
       "id": "reports_data_buildreportdetailtimeline",
-      "community": 81,
+      "community": 165,
       "norm_label": "buildreportdetailtimeline()"
     },
     {
@@ -8250,7 +8250,7 @@
       "source_location": "L423",
       "_origin": "ast",
       "id": "reports_data_emptycomplaintmeta",
-      "community": 81,
+      "community": 73,
       "norm_label": "emptycomplaintmeta"
     },
     {
@@ -8280,7 +8280,7 @@
       "source_location": "L463",
       "_origin": "ast",
       "id": "reports_data_formatcomplaintcategorytitle",
-      "community": 81,
+      "community": 105,
       "norm_label": "formatcomplaintcategorytitle()"
     },
     {
@@ -8330,7 +8330,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "reports_report_list",
-      "community": 165,
+      "community": 32,
       "norm_label": "report-list.tsx"
     },
     {
@@ -8380,7 +8380,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "reports_status_consumerticketstatus",
-      "community": 177,
+      "community": 162,
       "norm_label": "consumerticketstatus"
     },
     {
@@ -8440,7 +8440,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "hooks_use_app_colors",
-      "community": 73,
+      "community": 32,
       "norm_label": "use-app-colors.ts"
     },
     {
@@ -8450,7 +8450,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "hooks_use_app_colors_appcolortoken",
-      "community": 73,
+      "community": 32,
       "norm_label": "appcolortoken"
     },
     {
@@ -8460,7 +8460,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "hooks_use_app_colors_useappcolors",
-      "community": 163,
+      "community": 85,
       "norm_label": "useappcolors()"
     },
     {
@@ -8470,7 +8470,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "hooks_use_auth_session",
-      "community": 164,
+      "community": 85,
       "norm_label": "use-auth-session.ts"
     },
     {
@@ -8480,7 +8480,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "hooks_use_auth_session_useauthsessionstate",
-      "community": 164,
+      "community": 85,
       "norm_label": "useauthsessionstate"
     },
     {
@@ -8610,7 +8610,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "hooks_use_consumer_profile_useconsumerprofile",
-      "community": 10,
+      "community": 85,
       "norm_label": "useconsumerprofile()"
     },
     {
@@ -8970,7 +8970,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "services_api_createapirequestid",
-      "community": 164,
+      "community": 176,
       "norm_label": "createapirequestid()"
     },
     {
@@ -8990,7 +8990,7 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "services_api_authsession",
-      "community": 164,
+      "community": 93,
       "norm_label": "authsession"
     },
     {
@@ -9350,7 +9350,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "services_consumer_identity_fetchconsumeraccountcontext",
-      "community": 83,
+      "community": 85,
       "norm_label": "fetchconsumeraccountcontext()"
     },
     {
@@ -9360,7 +9360,7 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "services_consumer_identity_setupconsumeridentity",
-      "community": 83,
+      "community": 94,
       "norm_label": "setupconsumeridentity()"
     },
     {
@@ -9500,7 +9500,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_notification_navigation",
-      "community": 177,
+      "community": 162,
       "norm_label": "notification-navigation.ts"
     },
     {
@@ -9510,7 +9510,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "services_notification_navigation_mobilenotificationdestination",
-      "community": 177,
+      "community": 162,
       "norm_label": "mobilenotificationdestination"
     },
     {
@@ -9520,7 +9520,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "services_notification_navigation_ticketstatuschangedpush",
-      "community": 177,
+      "community": 162,
       "norm_label": "ticketstatuschangedpush"
     },
     {
@@ -9530,7 +9530,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "services_notification_navigation_ticketstatuschangedpushclassification",
-      "community": 177,
+      "community": 162,
       "norm_label": "ticketstatuschangedpushclassification"
     },
     {
@@ -9540,7 +9540,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "services_notification_navigation_notificationdestinationfromnotification",
-      "community": 177,
+      "community": 162,
       "norm_label": "notificationdestinationfromnotification()"
     },
     {
@@ -9580,7 +9580,7 @@
       "source_location": "L113",
       "_origin": "ast",
       "id": "services_notification_navigation_accountlinkingpush",
-      "community": 177,
+      "community": 162,
       "norm_label": "accountlinkingpush"
     },
     {
@@ -9590,7 +9590,7 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "services_notification_navigation_accountlinkingpushfromdata",
-      "community": 177,
+      "community": 162,
       "norm_label": "accountlinkingpushfromdata()"
     },
     {
@@ -9600,7 +9600,7 @@
       "source_location": "L123",
       "_origin": "ast",
       "id": "services_notification_navigation_advisoryidfrompushdata",
-      "community": 177,
+      "community": 162,
       "norm_label": "advisoryidfrompushdata()"
     },
     {
@@ -9850,7 +9850,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "services_notifications_subscribenotificationschanged",
-      "community": 85,
+      "community": 36,
       "norm_label": "subscribenotificationschanged()"
     },
     {
@@ -9890,7 +9890,7 @@
       "source_location": "L109",
       "_origin": "ast",
       "id": "services_notifications_fetchnotifications",
-      "community": 85,
+      "community": 36,
       "norm_label": "fetchnotifications()"
     },
     {
@@ -10310,7 +10310,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "services_report_queue_reportqueueitem",
-      "community": 73,
+      "community": 93,
       "norm_label": "reportqueueitem"
     },
     {
@@ -10740,7 +10740,7 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "services_report_sync_events_subscribereportstatuschanged",
-      "community": 13,
+      "community": 73,
       "norm_label": "subscribereportstatuschanged()"
     },
     {
@@ -10750,7 +10750,7 @@
       "source_location": "L86",
       "_origin": "ast",
       "id": "services_report_sync_events_subscribereportrevalidationrequested",
-      "community": 13,
+      "community": 73,
       "norm_label": "subscribereportrevalidationrequested()"
     },
     {
@@ -11510,7 +11510,7 @@
       "source_location": "L172",
       "_origin": "ast",
       "id": "utils_manila_time_formatmanilareportlistdatetime",
-      "community": 32,
+      "community": 19,
       "norm_label": "formatmanilareportlistdatetime()"
     },
     {
@@ -11530,7 +11530,7 @@
       "source_location": "L203",
       "_origin": "ast",
       "id": "utils_manila_time_formatmanilaadvisoryinterruptionrange",
-      "community": 32,
+      "community": 19,
       "norm_label": "formatmanilaadvisoryinterruptionrange()"
     },
     {
@@ -13119,7 +13119,7 @@
       "source_file": ".agents/skills/building-native-ui/SKILL.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_skill_md",
+      "id": "building_native_ui_skill",
       "community": 7,
       "norm_label": "skill.md"
     },
@@ -13359,7 +13359,7 @@
       "source_file": ".agents/skills/building-native-ui/references/animations.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_animations_md",
+      "id": "references_animations",
       "community": 16,
       "norm_label": "animations.md"
     },
@@ -13509,7 +13509,7 @@
       "source_file": ".agents/skills/building-native-ui/references/controls.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_controls_md",
+      "id": "references_controls",
       "community": 9,
       "norm_label": "controls.md"
     },
@@ -13719,7 +13719,7 @@
       "source_file": ".agents/skills/building-native-ui/references/form-sheet.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_form_sheet_md",
+      "id": "references_form_sheet",
       "community": 21,
       "norm_label": "form-sheet.md"
     },
@@ -13849,7 +13849,7 @@
       "source_file": ".agents/skills/building-native-ui/references/gradients.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_gradients_md",
+      "id": "references_gradients",
       "community": 29,
       "norm_label": "gradients.md"
     },
@@ -13949,7 +13949,7 @@
       "source_file": ".agents/skills/building-native-ui/references/icons.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_icons_md",
+      "id": "references_icons",
       "community": 11,
       "norm_label": "icons.md"
     },
@@ -14149,7 +14149,7 @@
       "source_file": ".agents/skills/building-native-ui/references/media.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_media_md",
+      "id": "references_media",
       "community": 37,
       "norm_label": "media.md"
     },
@@ -14229,7 +14229,7 @@
       "source_file": ".agents/skills/building-native-ui/references/route-structure.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_route_structure_md",
+      "id": "references_route_structure",
       "community": 18,
       "norm_label": "route-structure.md"
     },
@@ -14369,7 +14369,7 @@
       "source_file": ".agents/skills/building-native-ui/references/search.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_search_md",
+      "id": "references_search",
       "community": 22,
       "norm_label": "search.md"
     },
@@ -14499,7 +14499,7 @@
       "source_file": ".agents/skills/building-native-ui/references/storage.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_storage_md",
+      "id": "references_storage",
       "community": 44,
       "norm_label": "storage.md"
     },
@@ -14569,7 +14569,7 @@
       "source_file": ".agents/skills/building-native-ui/references/tabs.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_tabs_md",
+      "id": "references_tabs",
       "community": 3,
       "norm_label": "tabs.md"
     },
@@ -14879,7 +14879,7 @@
       "source_file": ".agents/skills/building-native-ui/references/toolbar-and-headers.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_toolbar_and_headers_md",
+      "id": "references_toolbar_and_headers",
       "community": 23,
       "norm_label": "toolbar-and-headers.md"
     },
@@ -15009,7 +15009,7 @@
       "source_file": ".agents/skills/building-native-ui/references/visual-effects.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_visual_effects_md",
+      "id": "references_visual_effects",
       "community": 17,
       "norm_label": "visual-effects.md"
     },
@@ -15159,7 +15159,7 @@
       "source_file": ".agents/skills/building-native-ui/references/webgpu-three.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_webgpu_three_md",
+      "id": "references_webgpu_three",
       "community": 5,
       "norm_label": "webgpu-three.md"
     },
@@ -15409,7 +15409,7 @@
       "source_file": ".agents/skills/building-native-ui/references/zoom-transitions.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_zoom_transitions_md",
+      "id": "references_zoom_transitions",
       "community": 26,
       "norm_label": "zoom-transitions.md"
     },
@@ -15529,7 +15529,7 @@
       "source_file": ".agents/skills/expo-module/SKILL.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_expo_module_skill_md",
+      "id": "expo_module_skill",
       "community": 28,
       "norm_label": "skill.md"
     },
@@ -15639,7 +15639,7 @@
       "source_file": ".agents/skills/expo-module/references/config-plugin.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_expo_module_references_config_plugin_md",
+      "id": "references_config_plugin",
       "community": 43,
       "norm_label": "config-plugin.md"
     },
@@ -15709,7 +15709,7 @@
       "source_file": ".agents/skills/expo-module/references/lifecycle.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_expo_module_references_lifecycle_md",
+      "id": "references_lifecycle",
       "community": 34,
       "norm_label": "lifecycle.md"
     },
@@ -15799,7 +15799,7 @@
       "source_file": ".agents/skills/expo-module/references/module-config.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_expo_module_references_module_config_md",
+      "id": "references_module_config",
       "community": 47,
       "norm_label": "module-config.md"
     },
@@ -15859,7 +15859,7 @@
       "source_file": ".agents/skills/expo-module/references/native-module.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_expo_module_references_native_module_md",
+      "id": "references_native_module",
       "community": 12,
       "norm_label": "native-module.md"
     },
@@ -16059,7 +16059,7 @@
       "source_file": ".agents/skills/expo-module/references/native-view.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_expo_module_references_native_view_md",
+      "id": "references_native_view",
       "community": 38,
       "norm_label": "native-view.md"
     },
@@ -16139,7 +16139,7 @@
       "source_file": ".agents/skills/expo-tailwind-setup/SKILL.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_expo_tailwind_setup_skill_md",
+      "id": "expo_tailwind_setup_skill",
       "community": 8,
       "norm_label": "skill.md"
     },
@@ -16369,7 +16369,7 @@
       "source_file": ".agents/skills/heroui-native/SKILL.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_heroui_native_skill_md",
+      "id": "heroui_native_skill",
       "community": 15,
       "norm_label": "skill.md"
     },
@@ -16519,7 +16519,7 @@
       "source_file": ".agents/skills/uniwind/SKILL.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_uniwind_skill_md",
+      "id": "uniwind_skill",
       "community": 14,
       "norm_label": "skill.md"
     },
@@ -17709,7 +17709,7 @@
       "source_file": ".codex/skills/graphify/SKILL.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_codex_skills_graphify_skill_md",
+      "id": "graphify_skill",
       "community": 4,
       "norm_label": "skill.md"
     },
@@ -17959,7 +17959,7 @@
       "source_file": ".codex/skills/graphify/references/add-watch.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_codex_skills_graphify_references_add_watch_md",
+      "id": "references_add_watch",
       "community": 54,
       "norm_label": "add-watch.md"
     },
@@ -17999,7 +17999,7 @@
       "source_file": ".codex/skills/graphify/references/exports.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_codex_skills_graphify_references_exports_md",
+      "id": "references_exports",
       "community": 33,
       "norm_label": "exports.md"
     },
@@ -18089,7 +18089,7 @@
       "source_file": ".codex/skills/graphify/references/extraction-spec.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_codex_skills_graphify_references_extraction_spec_md",
+      "id": "references_extraction_spec",
       "community": 69,
       "norm_label": "extraction-spec.md"
     },
@@ -18109,7 +18109,7 @@
       "source_file": ".codex/skills/graphify/references/github-and-merge.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_codex_skills_graphify_references_github_and_merge_md",
+      "id": "references_github_and_merge",
       "community": 63,
       "norm_label": "github-and-merge.md"
     },
@@ -18139,7 +18139,7 @@
       "source_file": ".codex/skills/graphify/references/hooks.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_codex_skills_graphify_references_hooks_md",
+      "id": "references_hooks",
       "community": 55,
       "norm_label": "hooks.md"
     },
@@ -18179,7 +18179,7 @@
       "source_file": ".codex/skills/graphify/references/query.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_codex_skills_graphify_references_query_md",
+      "id": "references_query",
       "community": 48,
       "norm_label": "query.md"
     },
@@ -18239,7 +18239,7 @@
       "source_file": ".codex/skills/graphify/references/transcribe.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_codex_skills_graphify_references_transcribe_md",
+      "id": "references_transcribe",
       "community": 64,
       "norm_label": "transcribe.md"
     },
@@ -18269,7 +18269,7 @@
       "source_file": ".codex/skills/graphify/references/update.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_codex_skills_graphify_references_update_md",
+      "id": "references_update",
       "community": 56,
       "norm_label": "update.md"
     },
@@ -18389,8 +18389,8 @@
       "source_file": "PRODUCT.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_product_md",
-      "community": 178,
+      "id": "product",
+      "community": 100,
       "norm_label": "product.md"
     },
     {
@@ -18399,8 +18399,8 @@
       "source_file": "PRODUCT.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "aleconnect_mobile_product_product",
-      "community": 178,
+      "id": "product_product",
+      "community": 100,
       "norm_label": "product"
     },
     {
@@ -18409,8 +18409,8 @@
       "source_file": "PRODUCT.md",
       "source_location": "L3",
       "_origin": "ast",
-      "id": "aleconnect_mobile_product_register",
-      "community": 178,
+      "id": "product_register",
+      "community": 100,
       "norm_label": "register"
     },
     {
@@ -18419,8 +18419,8 @@
       "source_file": "PRODUCT.md",
       "source_location": "L7",
       "_origin": "ast",
-      "id": "aleconnect_mobile_product_users",
-      "community": 178,
+      "id": "product_users",
+      "community": 100,
       "norm_label": "users"
     },
     {
@@ -18429,8 +18429,8 @@
       "source_file": "PRODUCT.md",
       "source_location": "L11",
       "_origin": "ast",
-      "id": "aleconnect_mobile_product_product_purpose",
-      "community": 178,
+      "id": "product_product_purpose",
+      "community": 100,
       "norm_label": "product purpose"
     },
     {
@@ -18439,8 +18439,8 @@
       "source_file": "PRODUCT.md",
       "source_location": "L15",
       "_origin": "ast",
-      "id": "aleconnect_mobile_product_brand_personality",
-      "community": 178,
+      "id": "product_brand_personality",
+      "community": 100,
       "norm_label": "brand personality"
     },
     {
@@ -18449,8 +18449,8 @@
       "source_file": "PRODUCT.md",
       "source_location": "L19",
       "_origin": "ast",
-      "id": "aleconnect_mobile_product_anti_references",
-      "community": 178,
+      "id": "product_anti_references",
+      "community": 100,
       "norm_label": "anti-references"
     },
     {
@@ -18459,8 +18459,8 @@
       "source_file": "PRODUCT.md",
       "source_location": "L23",
       "_origin": "ast",
-      "id": "aleconnect_mobile_product_design_principles",
-      "community": 178,
+      "id": "product_design_principles",
+      "community": 100,
       "norm_label": "design principles"
     },
     {
@@ -18469,8 +18469,8 @@
       "source_file": "PRODUCT.md",
       "source_location": "L31",
       "_origin": "ast",
-      "id": "aleconnect_mobile_product_accessibility_inclusion",
-      "community": 178,
+      "id": "product_accessibility_inclusion",
+      "community": 100,
       "norm_label": "accessibility & inclusion"
     },
     {
@@ -18479,8 +18479,8 @@
       "source_file": "README.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "c_users_justine_vscodeprojects_aleconnect_mobile_readme_md",
-      "community": 180,
+      "id": "readme",
+      "community": 166,
       "norm_label": "readme.md"
     },
     {
@@ -18489,8 +18489,8 @@
       "source_file": "README.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "aleconnect_mobile_readme_welcome_to_your_expo_app",
-      "community": 180,
+      "id": "readme_welcome_to_your_expo_app",
+      "community": 166,
       "norm_label": "welcome to your expo app \ud83d\udc4b"
     },
     {
@@ -18499,8 +18499,8 @@
       "source_file": "README.md",
       "source_location": "L5",
       "_origin": "ast",
-      "id": "aleconnect_mobile_readme_get_started",
-      "community": 180,
+      "id": "readme_get_started",
+      "community": 166,
       "norm_label": "get started"
     },
     {
@@ -18509,8 +18509,8 @@
       "source_file": "README.md",
       "source_location": "L28",
       "_origin": "ast",
-      "id": "aleconnect_mobile_readme_get_a_fresh_project",
-      "community": 180,
+      "id": "readme_get_a_fresh_project",
+      "community": 166,
       "norm_label": "get a fresh project"
     },
     {
@@ -18519,8 +18519,8 @@
       "source_file": "README.md",
       "source_location": "L38",
       "_origin": "ast",
-      "id": "aleconnect_mobile_readme_other_setup_steps",
-      "community": 180,
+      "id": "readme_other_setup_steps",
+      "community": 166,
       "norm_label": "other setup steps"
     },
     {
@@ -18529,8 +18529,8 @@
       "source_file": "README.md",
       "source_location": "L44",
       "_origin": "ast",
-      "id": "aleconnect_mobile_readme_learn_more",
-      "community": 180,
+      "id": "readme_learn_more",
+      "community": 166,
       "norm_label": "learn more"
     },
     {
@@ -18539,8 +18539,8 @@
       "source_file": "README.md",
       "source_location": "L51",
       "_origin": "ast",
-      "id": "aleconnect_mobile_readme_join_the_community",
-      "community": 180,
+      "id": "readme_join_the_community",
+      "community": 166,
       "norm_label": "join the community"
     },
     {
@@ -18564,14 +18564,14 @@
       "norm_label": "active work"
     },
     {
-      "label": "Compact human-reference compatibility (2026-08-30)",
+      "label": "Mobile baseline contract correction (2026-08-30)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
       "source_location": "L3",
       "_origin": "ast",
-      "id": "agent_harness_active_work_compact_human_reference_compatibility_2026_08_30",
+      "id": "agent_harness_active_work_mobile_baseline_contract_correction_2026_08_30",
       "community": 99,
-      "norm_label": "compact human-reference compatibility (2026-08-30)"
+      "norm_label": "mobile baseline contract correction (2026-08-30)"
     },
     {
       "label": "Consumer-safe status normalization (2026-08-28)",
@@ -18844,10 +18844,20 @@
       "norm_label": "implementation history"
     },
     {
-      "label": "2026-08-30 - Compact-reference native release CI hardening",
+      "label": "2026-08-30 - Mobile baseline contract correction",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
       "source_location": "L3",
+      "_origin": "ast",
+      "id": "agent_harness_implementation_history_2026_08_30_mobile_baseline_contract_correction",
+      "community": 90,
+      "norm_label": "2026-08-30 - mobile baseline contract correction"
+    },
+    {
+      "label": "2026-08-30 - Compact-reference native release CI hardening",
+      "file_type": "document",
+      "source_file": "docs/agent-harness/implementation-history.md",
+      "source_location": "L16",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_30_compact_reference_native_release_ci_hardening",
       "community": 90,
@@ -18857,7 +18867,7 @@
       "label": "2026-08-30 - Compact human-reference canonical source integration",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L15",
+      "source_location": "L28",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_30_compact_human_reference_canonical_source_integration",
       "community": 90,
@@ -18867,7 +18877,7 @@
       "label": "2026-08-30 - Compact human-reference verification refresh",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L27",
+      "source_location": "L40",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_30_compact_human_reference_verification_refresh",
       "community": 90,
@@ -18877,7 +18887,7 @@
       "label": "2026-08-30 - Compact human-reference compatibility",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L39",
+      "source_location": "L52",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_30_compact_human_reference_compatibility",
       "community": 90,
@@ -18887,7 +18897,7 @@
       "label": "2026-08-30 - Consumer status GitHub integration",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L50",
+      "source_location": "L63",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_30_consumer_status_github_integration",
       "community": 90,
@@ -18897,7 +18907,7 @@
       "label": "2026-08-29 - Consumer status final review remediation",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L61",
+      "source_location": "L74",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_29_consumer_status_final_review_remediation",
       "community": 90,
@@ -18907,7 +18917,7 @@
       "label": "2026-08-28 - Consumer-safe canonical status projection",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L72",
+      "source_location": "L85",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_28_consumer_safe_canonical_status_projection",
       "community": 90,
@@ -18917,7 +18927,7 @@
       "label": "2026-08-28 - Account-linking/report UX canonical integration and cleanup",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L83",
+      "source_location": "L96",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_28_account_linking_report_ux_canonical_integration_and_cleanup",
       "community": 90,
@@ -18927,7 +18937,7 @@
       "label": "2026-08-26 - Account recovery, report selector, and immediate filtering UX",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L94",
+      "source_location": "L107",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_26_account_recovery_report_selector_and_immediate_filtering_ux",
       "community": 90,
@@ -18937,7 +18947,7 @@
       "label": "2026-08-26 - Consumer mock-verification confirmation correction",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L106",
+      "source_location": "L119",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_26_consumer_mock_verification_confirmation_correction",
       "community": 90,
@@ -18947,7 +18957,7 @@
       "label": "2026-08-26 - Consumer multi-account V18 release evidence",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L119",
+      "source_location": "L132",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_26_consumer_multi_account_v18_release_evidence",
       "community": 90,
@@ -18957,7 +18967,7 @@
       "label": "2026-08-26 - Consumer multi-account V18 final remediation",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L132",
+      "source_location": "L145",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_26_consumer_multi_account_v18_final_remediation",
       "community": 90,
@@ -18967,7 +18977,7 @@
       "label": "2026-08-26 - Consumer multi-account V17 queue and advisory scope remediation",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L143",
+      "source_location": "L156",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_26_consumer_multi_account_v17_queue_and_advisory_scope_remediation",
       "community": 90,
@@ -18977,7 +18987,7 @@
       "label": "2026-08-25 - Consumer multi-account linking mobile implementation",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L155",
+      "source_location": "L168",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_25_consumer_multi_account_linking_mobile_implementation",
       "community": 90,
@@ -18987,7 +18997,7 @@
       "label": "2026-08-25 - Saved home address report selection correction",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L167",
+      "source_location": "L180",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_25_saved_home_address_report_selection_correction",
       "community": 90,
@@ -18997,7 +19007,7 @@
       "label": "2026-08-19 - Report location integrity and home/manual location switching",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L180",
+      "source_location": "L193",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_19_report_location_integrity_and_home_manual_location_switching",
       "community": 90,
@@ -19007,7 +19017,7 @@
       "label": "2026-08-18 - Unified Service Memo consumer updates",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L197",
+      "source_location": "L210",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_18_unified_service_memo_consumer_updates",
       "community": 90,
@@ -19017,7 +19027,7 @@
       "label": "2026-08-15 - Push-driven report status synchronization",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L209",
+      "source_location": "L222",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_15_push_driven_report_status_synchronization",
       "community": 90,
@@ -19027,7 +19037,7 @@
       "label": "2026-08-13 - Mobile operations parity integration handoff",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L220",
+      "source_location": "L233",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_13_mobile_operations_parity_integration_handoff",
       "community": 90,
@@ -19037,7 +19047,7 @@
       "label": "2026-08-09 - G-24 terminated-process notification routing",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L239",
+      "source_location": "L252",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_09_g_24_terminated_process_notification_routing",
       "community": 90,
@@ -19047,7 +19057,7 @@
       "label": "2026-08-02 \u2014 Mobile agent harness foundation",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L250",
+      "source_location": "L263",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_02_mobile_agent_harness_foundation",
       "community": 90,
@@ -19057,7 +19067,7 @@
       "label": "2026-08-02 - Mobile harness enforcement",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L261",
+      "source_location": "L274",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_02_mobile_harness_enforcement",
       "community": 90,
@@ -19067,7 +19077,7 @@
       "label": "2026-08-02 - ALEConnect mobile workflow skill",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L272",
+      "source_location": "L285",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_02_aleconnect_mobile_workflow_skill",
       "community": 90,
@@ -19077,7 +19087,7 @@
       "label": "2026-08-02 - ALEConnect cross-project change skill",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L283",
+      "source_location": "L296",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_02_aleconnect_cross_project_change_skill",
       "community": 90,
@@ -19087,7 +19097,7 @@
       "label": "2026-08-02 - ALEConnect cross-project skill portability fix",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L294",
+      "source_location": "L307",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_02_aleconnect_cross_project_skill_portability_fix",
       "community": 90,
@@ -19097,7 +19107,7 @@
       "label": "2026-08-02 \u2014 ALEConnect mobile agent harness final verification and handoff",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L305",
+      "source_location": "L318",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_02_aleconnect_mobile_agent_harness_final_verification_and_handoff",
       "community": 90,
@@ -19107,7 +19117,7 @@
       "label": "2026-08-02 \u2014 ALEConnect agent harness final fix wave",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L316",
+      "source_location": "L329",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_02_aleconnect_agent_harness_final_fix_wave",
       "community": 90,
@@ -19117,7 +19127,7 @@
       "label": "2026-08-02 \u2014 Structured address and public hotline batches",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L327",
+      "source_location": "L340",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_02_structured_address_and_public_hotline_batches",
       "community": 90,
@@ -19127,7 +19137,7 @@
       "label": "2026-08-02 - Mobile report API and transport hardening",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L338",
+      "source_location": "L351",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_02_mobile_report_api_and_transport_hardening",
       "community": 90,
@@ -19137,7 +19147,7 @@
       "label": "2026-08-06 - Notification destination focus",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L349",
+      "source_location": "L362",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_06_notification_destination_focus",
       "community": 90,
@@ -19147,7 +19157,7 @@
       "label": "2026-08-06 - Notification release validation",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L360",
+      "source_location": "L373",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_06_notification_release_validation",
       "community": 90,
@@ -19157,7 +19167,7 @@
       "label": "2026-08-06 - Physical push proof and deferred terminated-state response",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L371",
+      "source_location": "L384",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_06_physical_push_proof_and_deferred_terminated_state_response",
       "community": 90,
@@ -19167,7 +19177,7 @@
       "label": "2026-08-09 - Terminated notification response routing",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L384",
+      "source_location": "L397",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_09_terminated_notification_response_routing",
       "community": 90,
@@ -19177,7 +19187,7 @@
       "label": "2026-08-15 - Targeted ticket push report revalidation",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L395",
+      "source_location": "L408",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_15_targeted_ticket_push_report_revalidation",
       "community": 90,
@@ -19187,7 +19197,7 @@
       "label": "2026-08-15 - Immediate submitted-report list synchronization",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L406",
+      "source_location": "L419",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_15_immediate_submitted_report_list_synchronization",
       "community": 90,
@@ -19197,7 +19207,7 @@
       "label": "2026-08-15 - Immediate post-submit report list synchronization",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L417",
+      "source_location": "L430",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_15_immediate_post_submit_report_list_synchronization",
       "community": 90,
@@ -19207,7 +19217,7 @@
       "label": "2026-08-15 - Single report type automatic selection",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L428",
+      "source_location": "L441",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_15_single_report_type_automatic_selection",
       "community": 90,
@@ -19217,7 +19227,7 @@
       "label": "2026-08-17 - Adaptive bottom-sheet interaction and hotline directory refinements",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L439",
+      "source_location": "L452",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_17_adaptive_bottom_sheet_interaction_and_hotline_directory_refinements",
       "community": 90,
@@ -19227,7 +19237,7 @@
       "label": "2026-08-17 - Consumer report list card redesign",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L450",
+      "source_location": "L463",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_17_consumer_report_list_card_redesign",
       "community": 90,
@@ -19237,7 +19247,7 @@
       "label": "2026-08-17 - Compact consumer advisory cards",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L461",
+      "source_location": "L474",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_17_compact_consumer_advisory_cards",
       "community": 90,
@@ -19247,7 +19257,7 @@
       "label": "2026-08-26 - Consumer multi-account consolidated aggregate evidence",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L472",
+      "source_location": "L485",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_26_consumer_multi_account_consolidated_aggregate_evidence",
       "community": 90,
@@ -19257,7 +19267,7 @@
       "label": "2026-08-26 - Consumer multi-account V13 migration-shape gate compatibility",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L483",
+      "source_location": "L496",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_26_consumer_multi_account_v13_migration_shape_gate_compatibility",
       "community": 90,
@@ -19267,7 +19277,7 @@
       "label": "2026-08-26 - Consumer multi-account V14 setup replay compatibility",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L494",
+      "source_location": "L507",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_26_consumer_multi_account_v14_setup_replay_compatibility",
       "community": 90,
@@ -19277,7 +19287,7 @@
       "label": "2026-08-26 - Consumer multi-account V15 snapshot consistency and advisory identity-active compatibility",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L505",
+      "source_location": "L518",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_26_consumer_multi_account_v15_snapshot_consistency_and_advisory_identity_active_compatibility",
       "community": 90,
@@ -19287,7 +19297,7 @@
       "label": "2026-08-26 - Consumer multi-account staff delivery compatibility",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L516",
+      "source_location": "L529",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_26_consumer_multi_account_staff_delivery_compatibility",
       "community": 90,
@@ -19297,7 +19307,7 @@
       "label": "2026-08-25 - Consumer multi-account review remediation",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L528",
+      "source_location": "L541",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_25_consumer_multi_account_review_remediation",
       "community": 90,
@@ -19307,7 +19317,7 @@
       "label": "2026-08-25 - Consumer multi-account v3 queue remediation",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L539",
+      "source_location": "L552",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_25_consumer_multi_account_v3_queue_remediation",
       "community": 90,
@@ -19317,7 +19327,7 @@
       "label": "2026-08-25 - Consumer multi-account queue retry guard",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L550",
+      "source_location": "L563",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_25_consumer_multi_account_queue_retry_guard",
       "community": 90,
@@ -19327,7 +19337,7 @@
       "label": "2026-08-20 - Mobile unused module and dependency cleanup (committed and locally merged)",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L561",
+      "source_location": "L574",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_20_mobile_unused_module_and_dependency_cleanup_committed_and_locally_merged",
       "community": 90,
@@ -19337,7 +19347,7 @@
       "label": "2026-08-17 - Evidence camera and gallery source picker",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L574",
+      "source_location": "L587",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_17_evidence_camera_and_gallery_source_picker",
       "community": 90,
@@ -19347,9 +19357,9 @@
       "label": "2026-08-17 - Compact consumer advisory cards",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L587",
+      "source_location": "L600",
       "_origin": "ast",
-      "id": "agent_harness_implementation_history_2026_08_17_compact_consumer_advisory_cards_587",
+      "id": "agent_harness_implementation_history_2026_08_17_compact_consumer_advisory_cards_600",
       "community": 90,
       "norm_label": "2026-08-17 - compact consumer advisory cards"
     },
@@ -21170,9 +21180,9 @@
       "source_file": "app.json",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_app_json",
-      "target": "aleconnect_mobile_human_references_app_expo",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_expo"
     },
     {
       "relation": "contains",
@@ -21180,9 +21190,9 @@
       "source_file": "app.json",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo",
-      "target": "aleconnect_mobile_human_references_app_expo_android",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_expo_android"
     },
     {
       "relation": "contains",
@@ -21190,9 +21200,9 @@
       "source_file": "app.json",
       "source_location": "L31",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo",
-      "target": "aleconnect_mobile_human_references_app_expo_androidstatusbar",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_expo_androidstatusbar"
     },
     {
       "relation": "contains",
@@ -21200,9 +21210,9 @@
       "source_file": "app.json",
       "source_location": "L80",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo",
-      "target": "aleconnect_mobile_human_references_app_expo_experiments",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_expo_experiments"
     },
     {
       "relation": "contains",
@@ -21210,9 +21220,9 @@
       "source_file": "app.json",
       "source_location": "L84",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo",
-      "target": "aleconnect_mobile_human_references_app_expo_extra",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_expo_extra"
     },
     {
       "relation": "contains",
@@ -21220,9 +21230,9 @@
       "source_file": "app.json",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo",
-      "target": "aleconnect_mobile_human_references_app_expo_icon",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_expo_icon"
     },
     {
       "relation": "contains",
@@ -21230,9 +21240,9 @@
       "source_file": "app.json",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo",
-      "target": "aleconnect_mobile_human_references_app_expo_ios",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_expo_ios"
     },
     {
       "relation": "contains",
@@ -21240,9 +21250,9 @@
       "source_file": "app.json",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo",
-      "target": "aleconnect_mobile_human_references_app_expo_name",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_expo_name"
     },
     {
       "relation": "contains",
@@ -21250,9 +21260,9 @@
       "source_file": "app.json",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo",
-      "target": "aleconnect_mobile_human_references_app_expo_orientation",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_expo_orientation"
     },
     {
       "relation": "contains",
@@ -21260,9 +21270,9 @@
       "source_file": "app.json",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo",
-      "target": "aleconnect_mobile_human_references_app_expo_plugins",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_expo_plugins"
     },
     {
       "relation": "contains",
@@ -21270,9 +21280,9 @@
       "source_file": "app.json",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo",
-      "target": "aleconnect_mobile_human_references_app_expo_scheme",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_expo_scheme"
     },
     {
       "relation": "contains",
@@ -21280,9 +21290,9 @@
       "source_file": "app.json",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo",
-      "target": "aleconnect_mobile_human_references_app_expo_slug",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_expo_slug"
     },
     {
       "relation": "contains",
@@ -21290,9 +21300,9 @@
       "source_file": "app.json",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo",
-      "target": "aleconnect_mobile_human_references_app_expo_userinterfacestyle",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_expo_userinterfacestyle"
     },
     {
       "relation": "contains",
@@ -21300,9 +21310,9 @@
       "source_file": "app.json",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo",
-      "target": "aleconnect_mobile_human_references_app_expo_version",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_expo_version"
     },
     {
       "relation": "contains",
@@ -21310,9 +21320,9 @@
       "source_file": "app.json",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo",
-      "target": "aleconnect_mobile_human_references_app_expo_web",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_expo_web"
     },
     {
       "relation": "contains",
@@ -21320,9 +21330,9 @@
       "source_file": "app.json",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo_ios",
-      "target": "aleconnect_mobile_human_references_app_ios_bundleidentifier",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_ios_bundleidentifier"
     },
     {
       "relation": "contains",
@@ -21330,9 +21340,9 @@
       "source_file": "app.json",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo_ios",
-      "target": "aleconnect_mobile_human_references_app_ios_icon",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_ios_icon"
     },
     {
       "relation": "contains",
@@ -21340,9 +21350,9 @@
       "source_file": "app.json",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo_ios",
-      "target": "aleconnect_mobile_human_references_app_ios_infoplist",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_ios_infoplist"
     },
     {
       "relation": "contains",
@@ -21350,9 +21360,9 @@
       "source_file": "app.json",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_ios_infoplist",
-      "target": "aleconnect_mobile_human_references_app_infoplist_itsappusesnonexemptencryption",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_infoplist_itsappusesnonexemptencryption"
     },
     {
       "relation": "contains",
@@ -21360,9 +21370,9 @@
       "source_file": "app.json",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_ios_infoplist",
-      "target": "aleconnect_mobile_human_references_app_infoplist_nslocationwheninuseusagedescription",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_infoplist_nslocationwheninuseusagedescription"
     },
     {
       "relation": "contains",
@@ -21370,9 +21380,9 @@
       "source_file": "app.json",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo_android",
-      "target": "aleconnect_mobile_human_references_app_android_adaptiveicon",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_android_adaptiveicon"
     },
     {
       "relation": "contains",
@@ -21380,9 +21390,9 @@
       "source_file": "app.json",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo_android",
-      "target": "aleconnect_mobile_human_references_app_android_allowbackup",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_android_allowbackup"
     },
     {
       "relation": "contains",
@@ -21390,9 +21400,9 @@
       "source_file": "app.json",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo_android",
-      "target": "aleconnect_mobile_human_references_app_android_googleservicesfile",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_android_googleservicesfile"
     },
     {
       "relation": "contains",
@@ -21400,9 +21410,9 @@
       "source_file": "app.json",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo_android",
-      "target": "aleconnect_mobile_human_references_app_android_package",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_android_package"
     },
     {
       "relation": "contains",
@@ -21410,9 +21420,9 @@
       "source_file": "app.json",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo_android",
-      "target": "aleconnect_mobile_human_references_app_android_permissions",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_android_permissions"
     },
     {
       "relation": "contains",
@@ -21420,9 +21430,9 @@
       "source_file": "app.json",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo_android",
-      "target": "aleconnect_mobile_human_references_app_android_predictivebackgestureenabled",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_android_predictivebackgestureenabled"
     },
     {
       "relation": "contains",
@@ -21430,9 +21440,9 @@
       "source_file": "app.json",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_android_adaptiveicon",
-      "target": "aleconnect_mobile_human_references_app_adaptiveicon_backgroundcolor",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_adaptiveicon_backgroundcolor"
     },
     {
       "relation": "contains",
@@ -21440,9 +21450,9 @@
       "source_file": "app.json",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_android_adaptiveicon",
-      "target": "aleconnect_mobile_human_references_app_adaptiveicon_backgroundimage",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_adaptiveicon_backgroundimage"
     },
     {
       "relation": "contains",
@@ -21450,9 +21460,9 @@
       "source_file": "app.json",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_android_adaptiveicon",
-      "target": "aleconnect_mobile_human_references_app_adaptiveicon_foregroundimage",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_adaptiveicon_foregroundimage"
     },
     {
       "relation": "contains",
@@ -21460,9 +21470,9 @@
       "source_file": "app.json",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_android_adaptiveicon",
-      "target": "aleconnect_mobile_human_references_app_adaptiveicon_monochromeimage",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_adaptiveicon_monochromeimage"
     },
     {
       "relation": "contains",
@@ -21470,9 +21480,9 @@
       "source_file": "app.json",
       "source_location": "L33",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo_androidstatusbar",
-      "target": "aleconnect_mobile_human_references_app_androidstatusbar_backgroundcolor",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_androidstatusbar_backgroundcolor"
     },
     {
       "relation": "contains",
@@ -21480,9 +21490,9 @@
       "source_file": "app.json",
       "source_location": "L32",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo_androidstatusbar",
-      "target": "aleconnect_mobile_human_references_app_androidstatusbar_barstyle",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_androidstatusbar_barstyle"
     },
     {
       "relation": "contains",
@@ -21490,9 +21500,9 @@
       "source_file": "app.json",
       "source_location": "L35",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo_androidstatusbar",
-      "target": "aleconnect_mobile_human_references_app_androidstatusbar_hidden",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_androidstatusbar_hidden"
     },
     {
       "relation": "contains",
@@ -21500,9 +21510,9 @@
       "source_file": "app.json",
       "source_location": "L34",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo_androidstatusbar",
-      "target": "aleconnect_mobile_human_references_app_androidstatusbar_translucent",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_androidstatusbar_translucent"
     },
     {
       "relation": "contains",
@@ -21510,9 +21520,9 @@
       "source_file": "app.json",
       "source_location": "L39",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo_web",
-      "target": "aleconnect_mobile_human_references_app_web_favicon",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_web_favicon"
     },
     {
       "relation": "contains",
@@ -21520,9 +21530,9 @@
       "source_file": "app.json",
       "source_location": "L38",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo_web",
-      "target": "aleconnect_mobile_human_references_app_web_output",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_web_output"
     },
     {
       "relation": "contains",
@@ -21530,9 +21540,9 @@
       "source_file": "app.json",
       "source_location": "L82",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo_experiments",
-      "target": "aleconnect_mobile_human_references_app_experiments_reactcompiler",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_experiments_reactcompiler"
     },
     {
       "relation": "contains",
@@ -21540,9 +21550,9 @@
       "source_file": "app.json",
       "source_location": "L81",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo_experiments",
-      "target": "aleconnect_mobile_human_references_app_experiments_typedroutes",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_experiments_typedroutes"
     },
     {
       "relation": "contains",
@@ -21550,9 +21560,9 @@
       "source_file": "app.json",
       "source_location": "L86",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo_extra",
-      "target": "aleconnect_mobile_human_references_app_extra_eas",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_extra_eas"
     },
     {
       "relation": "contains",
@@ -21560,9 +21570,9 @@
       "source_file": "app.json",
       "source_location": "L85",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_expo_extra",
-      "target": "aleconnect_mobile_human_references_app_extra_router",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_extra_router"
     },
     {
       "relation": "contains",
@@ -21570,9 +21580,9 @@
       "source_file": "app.json",
       "source_location": "L87",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_app_extra_eas",
-      "target": "aleconnect_mobile_human_references_app_eas_projectid",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_app_eas_projectid"
     },
     {
       "relation": "contains",
@@ -21652,9 +21662,9 @@
       "source_file": "package.json",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_package_json",
-      "target": "aleconnect_mobile_human_references_package_dependencies",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies"
     },
     {
       "relation": "contains",
@@ -21662,9 +21672,9 @@
       "source_file": "package.json",
       "source_location": "L59",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_package_json",
-      "target": "aleconnect_mobile_human_references_package_devdependencies",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_devdependencies"
     },
     {
       "relation": "contains",
@@ -21672,9 +21682,9 @@
       "source_file": "package.json",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_package_json",
-      "target": "aleconnect_mobile_human_references_package_main",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_main"
     },
     {
       "relation": "contains",
@@ -21682,9 +21692,9 @@
       "source_file": "package.json",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_package_json",
-      "target": "aleconnect_mobile_human_references_package_name",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_name"
     },
     {
       "relation": "contains",
@@ -21692,9 +21702,9 @@
       "source_file": "package.json",
       "source_location": "L66",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_package_json",
-      "target": "aleconnect_mobile_human_references_package_private",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_private"
     },
     {
       "relation": "contains",
@@ -21702,9 +21712,9 @@
       "source_file": "package.json",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_package_json",
-      "target": "aleconnect_mobile_human_references_package_scripts",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_scripts"
     },
     {
       "relation": "contains",
@@ -21712,9 +21722,9 @@
       "source_file": "package.json",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_package_json",
-      "target": "aleconnect_mobile_human_references_package_version",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_version"
     },
     {
       "relation": "contains",
@@ -21722,9 +21732,9 @@
       "source_file": "package.json",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_scripts",
-      "target": "aleconnect_mobile_human_references_package_scripts_android",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_scripts_android"
     },
     {
       "relation": "contains",
@@ -21732,9 +21742,9 @@
       "source_file": "package.json",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_scripts",
-      "target": "aleconnect_mobile_human_references_package_scripts_harness_check",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_scripts_harness_check"
     },
     {
       "relation": "contains",
@@ -21742,9 +21752,9 @@
       "source_file": "package.json",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_scripts",
-      "target": "aleconnect_mobile_human_references_package_scripts_ios",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_scripts_ios"
     },
     {
       "relation": "contains",
@@ -21752,9 +21762,9 @@
       "source_file": "package.json",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_scripts",
-      "target": "aleconnect_mobile_human_references_package_scripts_lint",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_scripts_lint"
     },
     {
       "relation": "contains",
@@ -21762,9 +21772,9 @@
       "source_file": "package.json",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_scripts",
-      "target": "aleconnect_mobile_human_references_package_scripts_reset_project",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_scripts_reset_project"
     },
     {
       "relation": "contains",
@@ -21772,9 +21782,9 @@
       "source_file": "package.json",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_scripts",
-      "target": "aleconnect_mobile_human_references_package_scripts_start",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_scripts_start"
     },
     {
       "relation": "contains",
@@ -21782,9 +21792,9 @@
       "source_file": "package.json",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_scripts",
-      "target": "aleconnect_mobile_human_references_package_scripts_web",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_scripts_web"
     },
     {
       "relation": "contains",
@@ -21792,9 +21802,9 @@
       "source_file": "package.json",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_expo",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_expo"
     },
     {
       "relation": "contains",
@@ -21802,9 +21812,9 @@
       "source_file": "package.json",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_expo_background_task",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_expo_background_task"
     },
     {
       "relation": "contains",
@@ -21812,9 +21822,9 @@
       "source_file": "package.json",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_expo_clipboard",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_expo_clipboard"
     },
     {
       "relation": "contains",
@@ -21822,9 +21832,9 @@
       "source_file": "package.json",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_expo_constants",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_expo_constants"
     },
     {
       "relation": "contains",
@@ -21832,9 +21842,9 @@
       "source_file": "package.json",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_expo_dev_client",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_expo_dev_client"
     },
     {
       "relation": "contains",
@@ -21842,9 +21852,9 @@
       "source_file": "package.json",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_expo_device",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_expo_device"
     },
     {
       "relation": "contains",
@@ -21852,9 +21862,9 @@
       "source_file": "package.json",
       "source_location": "L31",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_expo_file_system",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_expo_file_system"
     },
     {
       "relation": "contains",
@@ -21862,9 +21872,9 @@
       "source_file": "package.json",
       "source_location": "L32",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_expo_font",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_expo_font"
     },
     {
       "relation": "contains",
@@ -21872,9 +21882,9 @@
       "source_file": "package.json",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_expo_html_elements",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_expo_html_elements"
     },
     {
       "relation": "contains",
@@ -21882,9 +21892,9 @@
       "source_file": "package.json",
       "source_location": "L33",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_expo_image",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_expo_image"
     },
     {
       "relation": "contains",
@@ -21892,9 +21902,9 @@
       "source_file": "package.json",
       "source_location": "L34",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_expo_image_manipulator",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_expo_image_manipulator"
     },
     {
       "relation": "contains",
@@ -21902,9 +21912,9 @@
       "source_file": "package.json",
       "source_location": "L35",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_expo_image_picker",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_expo_image_picker"
     },
     {
       "relation": "contains",
@@ -21912,9 +21922,9 @@
       "source_file": "package.json",
       "source_location": "L36",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_expo_linking",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_expo_linking"
     },
     {
       "relation": "contains",
@@ -21922,9 +21932,9 @@
       "source_file": "package.json",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_expo_location",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_expo_location"
     },
     {
       "relation": "contains",
@@ -21932,9 +21942,9 @@
       "source_file": "package.json",
       "source_location": "L38",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_expo_notifications",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_expo_notifications"
     },
     {
       "relation": "contains",
@@ -21942,9 +21952,9 @@
       "source_file": "package.json",
       "source_location": "L39",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_expo_router",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_expo_router"
     },
     {
       "relation": "contains",
@@ -21952,9 +21962,9 @@
       "source_file": "package.json",
       "source_location": "L40",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_expo_secure_store",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_expo_secure_store"
     },
     {
       "relation": "contains",
@@ -21962,9 +21972,9 @@
       "source_file": "package.json",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_expo_splash_screen",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_expo_splash_screen"
     },
     {
       "relation": "contains",
@@ -21972,9 +21982,9 @@
       "source_file": "package.json",
       "source_location": "L42",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_expo_status_bar",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_expo_status_bar"
     },
     {
       "relation": "contains",
@@ -21982,9 +21992,9 @@
       "source_file": "package.json",
       "source_location": "L43",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_expo_task_manager",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_expo_task_manager"
     },
     {
       "relation": "contains",
@@ -21992,9 +22002,9 @@
       "source_file": "package.json",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_gluestack_ui_core",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_gluestack_ui_core"
     },
     {
       "relation": "contains",
@@ -22002,9 +22012,9 @@
       "source_file": "package.json",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_gluestack_ui_utils",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_gluestack_ui_utils"
     },
     {
       "relation": "contains",
@@ -22012,9 +22022,9 @@
       "source_file": "package.json",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_gorhom_bottom_sheet",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_gorhom_bottom_sheet"
     },
     {
       "relation": "contains",
@@ -22022,9 +22032,9 @@
       "source_file": "package.json",
       "source_location": "L44",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_lucide_react_native",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_lucide_react_native"
     },
     {
       "relation": "contains",
@@ -22032,9 +22042,9 @@
       "source_file": "package.json",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_maplibre_maplibre_react_native",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_maplibre_maplibre_react_native"
     },
     {
       "relation": "contains",
@@ -22042,9 +22052,9 @@
       "source_file": "package.json",
       "source_location": "L45",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_react",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_react"
     },
     {
       "relation": "contains",
@@ -22052,9 +22062,9 @@
       "source_file": "package.json",
       "source_location": "L46",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_react_dom",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_react_dom"
     },
     {
       "relation": "contains",
@@ -22062,9 +22072,9 @@
       "source_file": "package.json",
       "source_location": "L47",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_react_native",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_react_native"
     },
     {
       "relation": "contains",
@@ -22072,9 +22082,9 @@
       "source_file": "package.json",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_react_native_async_storage_async_storage",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_react_native_async_storage_async_storage"
     },
     {
       "relation": "contains",
@@ -22082,9 +22092,9 @@
       "source_file": "package.json",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_react_native_community_netinfo",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_react_native_community_netinfo"
     },
     {
       "relation": "contains",
@@ -22092,9 +22102,9 @@
       "source_file": "package.json",
       "source_location": "L48",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_react_native_gesture_handler",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_react_native_gesture_handler"
     },
     {
       "relation": "contains",
@@ -22102,9 +22112,9 @@
       "source_file": "package.json",
       "source_location": "L49",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_react_native_keyboard_controller",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_react_native_keyboard_controller"
     },
     {
       "relation": "contains",
@@ -22112,9 +22122,9 @@
       "source_file": "package.json",
       "source_location": "L50",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_react_native_reanimated",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_react_native_reanimated"
     },
     {
       "relation": "contains",
@@ -22122,9 +22132,9 @@
       "source_file": "package.json",
       "source_location": "L51",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_react_native_safe_area_context",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_react_native_safe_area_context"
     },
     {
       "relation": "contains",
@@ -22132,9 +22142,9 @@
       "source_file": "package.json",
       "source_location": "L52",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_react_native_screens",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_react_native_screens"
     },
     {
       "relation": "contains",
@@ -22142,9 +22152,9 @@
       "source_file": "package.json",
       "source_location": "L53",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_react_native_svg",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_react_native_svg"
     },
     {
       "relation": "contains",
@@ -22152,9 +22162,9 @@
       "source_file": "package.json",
       "source_location": "L54",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_react_native_web",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_react_native_web"
     },
     {
       "relation": "contains",
@@ -22162,9 +22172,9 @@
       "source_file": "package.json",
       "source_location": "L55",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_react_native_worklets",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_react_native_worklets"
     },
     {
       "relation": "contains",
@@ -22172,9 +22182,9 @@
       "source_file": "package.json",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_react_navigation_bottom_tabs",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_react_navigation_bottom_tabs"
     },
     {
       "relation": "contains",
@@ -22182,9 +22192,9 @@
       "source_file": "package.json",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_react_navigation_native",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_react_navigation_native"
     },
     {
       "relation": "contains",
@@ -22192,9 +22202,9 @@
       "source_file": "package.json",
       "source_location": "L56",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_tailwindcss",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_tailwindcss"
     },
     {
       "relation": "contains",
@@ -22202,9 +22212,9 @@
       "source_file": "package.json",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_turf_boolean_point_in_polygon",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_turf_boolean_point_in_polygon"
     },
     {
       "relation": "contains",
@@ -22212,9 +22222,9 @@
       "source_file": "package.json",
       "source_location": "L57",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_dependencies",
-      "target": "aleconnect_mobile_human_references_package_dependencies_uniwind",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_dependencies_uniwind"
     },
     {
       "relation": "contains",
@@ -22222,9 +22232,9 @@
       "source_file": "package.json",
       "source_location": "L62",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_devdependencies",
-      "target": "aleconnect_mobile_human_references_package_devdependencies_eslint",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_devdependencies_eslint"
     },
     {
       "relation": "contains",
@@ -22232,9 +22242,9 @@
       "source_file": "package.json",
       "source_location": "L63",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_devdependencies",
-      "target": "aleconnect_mobile_human_references_package_devdependencies_eslint_config_expo",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_devdependencies_eslint_config_expo"
     },
     {
       "relation": "contains",
@@ -22242,9 +22252,9 @@
       "source_file": "package.json",
       "source_location": "L60",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_devdependencies",
-      "target": "aleconnect_mobile_human_references_package_devdependencies_react_native_community_cli",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_devdependencies_react_native_community_cli"
     },
     {
       "relation": "contains",
@@ -22252,9 +22262,9 @@
       "source_file": "package.json",
       "source_location": "L61",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_devdependencies",
-      "target": "aleconnect_mobile_human_references_package_devdependencies_types_react",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_devdependencies_types_react"
     },
     {
       "relation": "contains",
@@ -22262,9 +22272,9 @@
       "source_file": "package.json",
       "source_location": "L64",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_package_devdependencies",
-      "target": "aleconnect_mobile_human_references_package_devdependencies_typescript",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_package_devdependencies_typescript"
     },
     {
       "relation": "contains",
@@ -50473,9 +50483,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_tsconfig_json",
-      "target": "aleconnect_mobile_human_references_tsconfig_compileroptions",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_tsconfig_compileroptions"
     },
     {
       "relation": "contains",
@@ -50483,9 +50493,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_tsconfig_json",
-      "target": "aleconnect_mobile_human_references_tsconfig_extends",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_tsconfig_extends"
     },
     {
       "relation": "contains",
@@ -50493,9 +50503,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_tsconfig_json",
-      "target": "aleconnect_mobile_human_references_tsconfig_include",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_tsconfig_include"
     },
     {
       "relation": "contains",
@@ -50503,9 +50513,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_tsconfig_compileroptions",
-      "target": "aleconnect_mobile_human_references_tsconfig_compileroptions_allowimportingtsextensions",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_tsconfig_compileroptions_allowimportingtsextensions"
     },
     {
       "relation": "contains",
@@ -50513,9 +50523,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_tsconfig_compileroptions",
-      "target": "aleconnect_mobile_human_references_tsconfig_compileroptions_forceconsistentcasinginfilenames",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_tsconfig_compileroptions_forceconsistentcasinginfilenames"
     },
     {
       "relation": "contains",
@@ -50523,9 +50533,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_tsconfig_compileroptions",
-      "target": "aleconnect_mobile_human_references_tsconfig_compileroptions_module",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_tsconfig_compileroptions_module"
     },
     {
       "relation": "contains",
@@ -50533,9 +50543,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_tsconfig_compileroptions",
-      "target": "aleconnect_mobile_human_references_tsconfig_compileroptions_paths",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_tsconfig_compileroptions_paths"
     },
     {
       "relation": "contains",
@@ -50543,9 +50553,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_tsconfig_compileroptions",
-      "target": "aleconnect_mobile_human_references_tsconfig_compileroptions_strict",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_tsconfig_compileroptions_strict"
     },
     {
       "relation": "contains",
@@ -50553,9 +50563,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_tsconfig_compileroptions_paths",
-      "target": "aleconnect_mobile_human_references_tsconfig_paths",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_tsconfig_paths"
     },
     {
       "relation": "contains",
@@ -50563,9 +50573,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_tsconfig_compileroptions_paths",
-      "target": "aleconnect_mobile_human_references_tsconfig_paths_assets",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_tsconfig_paths_assets"
     },
     {
       "relation": "contains",
@@ -50583,9 +50593,9 @@
       "source_file": ".agents/skills/aleconnect-cross-project-change/SKILL.md",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_agents_skills_aleconnect_cross_project_change_skill_md",
-      "target": "aleconnect_cross_project_change_skill_aleconnect_cross_project_change",
-      "confidence_score": 1.0
+      "target": "aleconnect_cross_project_change_skill_aleconnect_cross_project_change"
     },
     {
       "relation": "contains",
@@ -50623,9 +50633,9 @@
       "source_file": ".agents/skills/aleconnect-mobile-workflow/SKILL.md",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_agents_skills_aleconnect_mobile_workflow_skill_md",
-      "target": "aleconnect_mobile_workflow_skill_aleconnect_mobile_workflow",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_workflow_skill_aleconnect_mobile_workflow"
     },
     {
       "relation": "contains",
@@ -50643,9 +50653,9 @@
       "source_file": ".agents/skills/building-native-ui/SKILL.md",
       "source_location": "L8",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_skill_md",
-      "target": "building_native_ui_skill_expo_ui_guidelines"
+      "source": "building_native_ui_skill",
+      "target": "building_native_ui_skill_expo_ui_guidelines",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -50653,9 +50663,9 @@
       "source_file": ".agents/skills/building-native-ui/SKILL.md",
       "source_location": "L143",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_skill_md",
-      "target": "building_native_ui_skill_navigation"
+      "source": "building_native_ui_skill",
+      "target": "building_native_ui_skill_navigation",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -50663,9 +50673,9 @@
       "source_file": ".agents/skills/building-native-ui/SKILL.md",
       "source_location": "L111",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_skill_md",
-      "target": "building_native_ui_skill_styling"
+      "source": "building_native_ui_skill",
+      "target": "building_native_ui_skill_styling",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -50873,9 +50883,9 @@
       "source_file": ".agents/skills/building-native-ui/references/animations.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_animations_md",
-      "target": "references_animations_animations"
+      "source": "references_animations",
+      "target": "references_animations_animations",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -51013,9 +51023,9 @@
       "source_file": ".agents/skills/building-native-ui/references/controls.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_controls_md",
-      "target": "references_controls_native_controls"
+      "source": "references_controls",
+      "target": "references_controls_native_controls",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -51213,9 +51223,9 @@
       "source_file": ".agents/skills/building-native-ui/references/form-sheet.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_form_sheet_md",
-      "target": "references_form_sheet_form_sheets_in_expo_router"
+      "source": "references_form_sheet",
+      "target": "references_form_sheet_form_sheets_in_expo_router",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -51333,9 +51343,9 @@
       "source_file": ".agents/skills/building-native-ui/references/gradients.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_gradients_md",
-      "target": "references_gradients_css_gradients"
+      "source": "references_gradients",
+      "target": "references_gradients_css_gradients",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -51423,9 +51433,9 @@
       "source_file": ".agents/skills/building-native-ui/references/icons.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_icons_md",
-      "target": "references_icons_icons_sf_symbols"
+      "source": "references_icons",
+      "target": "references_icons_icons_sf_symbols",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -51613,9 +51623,9 @@
       "source_file": ".agents/skills/building-native-ui/references/media.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_media_md",
-      "target": "references_media_media"
+      "source": "references_media",
+      "target": "references_media_media",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -51683,9 +51693,9 @@
       "source_file": ".agents/skills/building-native-ui/references/route-structure.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_route_structure_md",
-      "target": "references_route_structure_route_structure"
+      "source": "references_route_structure",
+      "target": "references_route_structure_route_structure",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -51813,9 +51823,9 @@
       "source_file": ".agents/skills/building-native-ui/references/search.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_search_md",
-      "target": "references_search_search"
+      "source": "references_search",
+      "target": "references_search_search",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -51933,9 +51943,9 @@
       "source_file": ".agents/skills/building-native-ui/references/storage.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_storage_md",
-      "target": "references_storage_storage"
+      "source": "references_storage",
+      "target": "references_storage_storage",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -51993,9 +52003,9 @@
       "source_file": ".agents/skills/building-native-ui/references/tabs.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_tabs_md",
-      "target": "references_tabs_native_tabs"
+      "source": "references_tabs",
+      "target": "references_tabs_native_tabs",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -52293,9 +52303,9 @@
       "source_file": ".agents/skills/building-native-ui/references/toolbar-and-headers.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_toolbar_and_headers_md",
-      "target": "references_toolbar_and_headers_toolbars_and_headers"
+      "source": "references_toolbar_and_headers",
+      "target": "references_toolbar_and_headers_toolbars_and_headers",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -52413,9 +52423,9 @@
       "source_file": ".agents/skills/building-native-ui/references/visual-effects.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_visual_effects_md",
-      "target": "references_visual_effects_visual_effects"
+      "source": "references_visual_effects",
+      "target": "references_visual_effects_visual_effects",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -52553,9 +52563,9 @@
       "source_file": ".agents/skills/building-native-ui/references/webgpu-three.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_webgpu_three_md",
-      "target": "references_webgpu_three_webgpu_three_js_for_expo"
+      "source": "references_webgpu_three",
+      "target": "references_webgpu_three_webgpu_three_js_for_expo",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -52793,9 +52803,9 @@
       "source_file": ".agents/skills/building-native-ui/references/zoom-transitions.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_building_native_ui_references_zoom_transitions_md",
-      "target": "references_zoom_transitions_apple_zoom_transitions"
+      "source": "references_zoom_transitions",
+      "target": "references_zoom_transitions_apple_zoom_transitions",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -52903,9 +52913,9 @@
       "source_file": ".agents/skills/expo-module/SKILL.md",
       "source_location": "L8",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_expo_module_skill_md",
-      "target": "expo_module_skill_writing_expo_modules"
+      "source": "expo_module_skill",
+      "target": "expo_module_skill_writing_expo_modules",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -53003,9 +53013,9 @@
       "source_file": ".agents/skills/expo-module/references/config-plugin.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_expo_module_references_config_plugin_md",
-      "target": "references_config_plugin_config_plugins_reference"
+      "source": "references_config_plugin",
+      "target": "references_config_plugin_config_plugins_reference",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -53063,9 +53073,9 @@
       "source_file": ".agents/skills/expo-module/references/lifecycle.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_expo_module_references_lifecycle_md",
-      "target": "references_lifecycle_lifecycle_hooks_reference"
+      "source": "references_lifecycle",
+      "target": "references_lifecycle_lifecycle_hooks_reference",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -53143,9 +53153,9 @@
       "source_file": ".agents/skills/expo-module/references/module-config.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_expo_module_references_module_config_md",
-      "target": "references_module_config_module_configuration_reference"
+      "source": "references_module_config",
+      "target": "references_module_config_module_configuration_reference",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -53193,9 +53203,9 @@
       "source_file": ".agents/skills/expo-module/references/native-module.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_expo_module_references_native_module_md",
-      "target": "references_native_module_native_module_dsl_reference"
+      "source": "references_native_module",
+      "target": "references_native_module_native_module_dsl_reference",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -53383,9 +53393,9 @@
       "source_file": ".agents/skills/expo-module/references/native-view.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_expo_module_references_native_view_md",
-      "target": "references_native_view_native_view_reference"
+      "source": "references_native_view",
+      "target": "references_native_view_native_view_reference",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -53453,9 +53463,9 @@
       "source_file": ".agents/skills/expo-tailwind-setup/SKILL.md",
       "source_location": "L8",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_expo_tailwind_setup_skill_md",
-      "target": "expo_tailwind_setup_skill_tailwind_css_setup_for_expo_with_react_native_css"
+      "source": "expo_tailwind_setup_skill",
+      "target": "expo_tailwind_setup_skill_tailwind_css_setup_for_expo_with_react_native_css",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -53673,9 +53683,9 @@
       "source_file": ".agents/skills/heroui-native/SKILL.md",
       "source_location": "L9",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_heroui_native_skill_md",
-      "target": "heroui_native_skill_heroui_native_development_guide"
+      "source": "heroui_native_skill",
+      "target": "heroui_native_skill_heroui_native_development_guide",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -53813,9 +53823,9 @@
       "source_file": ".agents/skills/uniwind/SKILL.md",
       "source_location": "L19",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_agents_skills_uniwind_skill_md",
-      "target": "uniwind_skill_uniwind_complete_reference"
+      "source": "uniwind_skill",
+      "target": "uniwind_skill_uniwind_complete_reference",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -54993,9 +55003,9 @@
       "source_file": ".codex/skills/graphify/SKILL.md",
       "source_location": "L6",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_codex_skills_graphify_skill_md",
-      "target": "graphify_skill_graphify"
+      "source": "graphify_skill",
+      "target": "graphify_skill_graphify",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -55233,9 +55243,9 @@
       "source_file": ".codex/skills/graphify/references/add-watch.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_codex_skills_graphify_references_add_watch_md",
-      "target": "references_add_watch_graphify_reference_add_a_url_and_watch_a_folder"
+      "source": "references_add_watch",
+      "target": "references_add_watch_graphify_reference_add_a_url_and_watch_a_folder",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -55263,9 +55273,9 @@
       "source_file": ".codex/skills/graphify/references/exports.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_codex_skills_graphify_references_exports_md",
-      "target": "references_exports_graphify_reference_extra_exports_and_benchmark"
+      "source": "references_exports",
+      "target": "references_exports_graphify_reference_extra_exports_and_benchmark",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -55343,9 +55353,9 @@
       "source_file": ".codex/skills/graphify/references/extraction-spec.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_codex_skills_graphify_references_extraction_spec_md",
-      "target": "references_extraction_spec_graphify_reference_extraction_subagent_prompt_compact"
+      "source": "references_extraction_spec",
+      "target": "references_extraction_spec_graphify_reference_extraction_subagent_prompt_compact",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -55353,9 +55363,9 @@
       "source_file": ".codex/skills/graphify/references/github-and-merge.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_codex_skills_graphify_references_github_and_merge_md",
-      "target": "references_github_and_merge_graphify_reference_github_clone_and_cross_repo_merge"
+      "source": "references_github_and_merge",
+      "target": "references_github_and_merge_graphify_reference_github_clone_and_cross_repo_merge",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -55373,9 +55383,9 @@
       "source_file": ".codex/skills/graphify/references/hooks.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_codex_skills_graphify_references_hooks_md",
-      "target": "references_hooks_graphify_reference_commit_hook_and_native_claude_md_integration"
+      "source": "references_hooks",
+      "target": "references_hooks_graphify_reference_commit_hook_and_native_claude_md_integration",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -55403,9 +55413,9 @@
       "source_file": ".codex/skills/graphify/references/query.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_codex_skills_graphify_references_query_md",
-      "target": "references_query_graphify_reference_query_path_explain"
+      "source": "references_query",
+      "target": "references_query_graphify_reference_query_path_explain",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -55453,9 +55463,9 @@
       "source_file": ".codex/skills/graphify/references/transcribe.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_codex_skills_graphify_references_transcribe_md",
-      "target": "references_transcribe_graphify_reference_transcribe_video_and_audio"
+      "source": "references_transcribe",
+      "target": "references_transcribe_graphify_reference_transcribe_video_and_audio",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -55473,9 +55483,9 @@
       "source_file": ".codex/skills/graphify/references/update.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_codex_skills_graphify_references_update_md",
-      "target": "references_update_graphify_reference_incremental_update_and_cluster_only"
+      "source": "references_update",
+      "target": "references_update_graphify_reference_incremental_update_and_cluster_only",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -55503,9 +55513,9 @@
       "source_file": "AGENTS.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_agents_md",
-      "target": "aleconnect_mobile_human_references_agents_aleconnect_mobile_agent_guide",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_agents_aleconnect_mobile_agent_guide"
     },
     {
       "relation": "references",
@@ -55513,9 +55523,9 @@
       "source_file": "AGENTS.md",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_agents_md",
-      "target": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_agent_harness_cross_project_contracts_md",
-      "confidence_score": 1.0
+      "target": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_agent_harness_cross_project_contracts_md"
     },
     {
       "relation": "references",
@@ -55523,9 +55533,9 @@
       "source_file": "AGENTS.md",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_agents_md",
-      "target": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_agent_harness_index_md",
-      "confidence_score": 1.0
+      "target": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_agent_harness_index_md"
     },
     {
       "relation": "references",
@@ -55533,9 +55543,9 @@
       "source_file": "AGENTS.md",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_agents_md",
-      "target": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_mobile_release_hardening_tracker_md",
-      "confidence_score": 1.0
+      "target": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_mobile_release_hardening_tracker_md"
     },
     {
       "relation": "contains",
@@ -55543,9 +55553,9 @@
       "source_file": "AGENTS.md",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_agents_aleconnect_mobile_agent_guide",
-      "target": "aleconnect_mobile_human_references_agents_authority_map",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_agents_authority_map"
     },
     {
       "relation": "contains",
@@ -55553,9 +55563,9 @@
       "source_file": "AGENTS.md",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_agents_aleconnect_mobile_agent_guide",
-      "target": "aleconnect_mobile_human_references_agents_finish_gate",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_agents_finish_gate"
     },
     {
       "relation": "contains",
@@ -55563,9 +55573,9 @@
       "source_file": "AGENTS.md",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_agents_aleconnect_mobile_agent_guide",
-      "target": "aleconnect_mobile_human_references_agents_graphify",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_agents_graphify"
     },
     {
       "relation": "contains",
@@ -55573,9 +55583,9 @@
       "source_file": "AGENTS.md",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_agents_aleconnect_mobile_agent_guide",
-      "target": "aleconnect_mobile_human_references_agents_repository_boundaries",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_agents_repository_boundaries"
     },
     {
       "relation": "contains",
@@ -55583,9 +55593,9 @@
       "source_file": "AGENTS.md",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_agents_aleconnect_mobile_agent_guide",
-      "target": "aleconnect_mobile_human_references_agents_start_here",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_agents_start_here"
     },
     {
       "relation": "contains",
@@ -55593,9 +55603,9 @@
       "source_file": "AGENTS.md",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_human_references_agents_aleconnect_mobile_agent_guide",
-      "target": "aleconnect_mobile_human_references_agents_work_rules",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_human_references_agents_work_rules"
     },
     {
       "relation": "contains",
@@ -55603,9 +55613,9 @@
       "source_file": "PRODUCT.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_product_md",
-      "target": "aleconnect_mobile_product_product"
+      "source": "product",
+      "target": "product_product",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -55613,9 +55623,9 @@
       "source_file": "PRODUCT.md",
       "source_location": "L31",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "aleconnect_mobile_product_product",
-      "target": "aleconnect_mobile_product_accessibility_inclusion"
+      "source": "product_product",
+      "target": "product_accessibility_inclusion",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -55623,9 +55633,9 @@
       "source_file": "PRODUCT.md",
       "source_location": "L19",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "aleconnect_mobile_product_product",
-      "target": "aleconnect_mobile_product_anti_references"
+      "source": "product_product",
+      "target": "product_anti_references",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -55633,9 +55643,9 @@
       "source_file": "PRODUCT.md",
       "source_location": "L15",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "aleconnect_mobile_product_product",
-      "target": "aleconnect_mobile_product_brand_personality"
+      "source": "product_product",
+      "target": "product_brand_personality",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -55643,9 +55653,9 @@
       "source_file": "PRODUCT.md",
       "source_location": "L23",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "aleconnect_mobile_product_product",
-      "target": "aleconnect_mobile_product_design_principles"
+      "source": "product_product",
+      "target": "product_design_principles",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -55653,9 +55663,9 @@
       "source_file": "PRODUCT.md",
       "source_location": "L11",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "aleconnect_mobile_product_product",
-      "target": "aleconnect_mobile_product_product_purpose"
+      "source": "product_product",
+      "target": "product_product_purpose",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -55663,9 +55673,9 @@
       "source_file": "PRODUCT.md",
       "source_location": "L3",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "aleconnect_mobile_product_product",
-      "target": "aleconnect_mobile_product_register"
+      "source": "product_product",
+      "target": "product_register",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -55673,9 +55683,9 @@
       "source_file": "PRODUCT.md",
       "source_location": "L7",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "aleconnect_mobile_product_product",
-      "target": "aleconnect_mobile_product_users"
+      "source": "product_product",
+      "target": "product_users",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -55683,9 +55693,9 @@
       "source_file": "README.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "c_users_justine_vscodeprojects_aleconnect_mobile_readme_md",
-      "target": "aleconnect_mobile_readme_welcome_to_your_expo_app"
+      "source": "readme",
+      "target": "readme_welcome_to_your_expo_app",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -55693,9 +55703,9 @@
       "source_file": "README.md",
       "source_location": "L28",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "aleconnect_mobile_readme_welcome_to_your_expo_app",
-      "target": "aleconnect_mobile_readme_get_a_fresh_project"
+      "source": "readme_welcome_to_your_expo_app",
+      "target": "readme_get_a_fresh_project",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -55703,9 +55713,9 @@
       "source_file": "README.md",
       "source_location": "L5",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "aleconnect_mobile_readme_welcome_to_your_expo_app",
-      "target": "aleconnect_mobile_readme_get_started"
+      "source": "readme_welcome_to_your_expo_app",
+      "target": "readme_get_started",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -55713,9 +55723,9 @@
       "source_file": "README.md",
       "source_location": "L51",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "aleconnect_mobile_readme_welcome_to_your_expo_app",
-      "target": "aleconnect_mobile_readme_join_the_community"
+      "source": "readme_welcome_to_your_expo_app",
+      "target": "readme_join_the_community",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -55723,9 +55733,9 @@
       "source_file": "README.md",
       "source_location": "L44",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "aleconnect_mobile_readme_welcome_to_your_expo_app",
-      "target": "aleconnect_mobile_readme_learn_more"
+      "source": "readme_welcome_to_your_expo_app",
+      "target": "readme_learn_more",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -55733,9 +55743,9 @@
       "source_file": "README.md",
       "source_location": "L38",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "aleconnect_mobile_readme_get_a_fresh_project",
-      "target": "aleconnect_mobile_readme_other_setup_steps"
+      "source": "readme_get_a_fresh_project",
+      "target": "readme_other_setup_steps",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -55766,16 +55776,6 @@
       "confidence_score": 1.0,
       "source": "agent_harness_active_work_active_work",
       "target": "agent_harness_active_work_account_recovery_and_multi_account_report_ux_correction_2026_08_26"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "docs/agent-harness/active-work.md",
-      "source_location": "L3",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "agent_harness_active_work_active_work",
-      "target": "agent_harness_active_work_compact_human_reference_compatibility_2026_08_30"
     },
     {
       "relation": "contains",
@@ -55921,6 +55921,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/agent-harness/active-work.md",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "agent_harness_active_work_active_work",
+      "target": "agent_harness_active_work_mobile_baseline_contract_correction_2026_08_30",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/agent-harness/active-work.md",
       "source_location": "L10",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -55953,9 +55963,9 @@
       "source_file": "docs/agent-harness/cross-project-contracts.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_agent_harness_cross_project_contracts_md",
-      "target": "agent_harness_cross_project_contracts_aleconnect_cross_project_contracts",
-      "confidence_score": 1.0
+      "target": "agent_harness_cross_project_contracts_aleconnect_cross_project_contracts"
     },
     {
       "relation": "references",
@@ -55963,9 +55973,9 @@
       "source_file": "docs/agent-harness/index.md",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_agent_harness_index_md",
-      "target": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_agent_harness_cross_project_contracts_md",
-      "confidence_score": 1.0
+      "target": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_agent_harness_cross_project_contracts_md"
     },
     {
       "relation": "contains",
@@ -56241,10 +56251,10 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L587",
+      "source_location": "L600",
       "weight": 1.0,
       "source": "agent_harness_implementation_history_implementation_history",
-      "target": "agent_harness_implementation_history_2026_08_17_compact_consumer_advisory_cards_587",
+      "target": "agent_harness_implementation_history_2026_08_17_compact_consumer_advisory_cards_600",
       "confidence_score": 1.0
     },
     {
@@ -56483,9 +56493,9 @@
       "source_file": "docs/agent-harness/implementation-history.md",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "agent_harness_implementation_history_implementation_history",
-      "target": "agent_harness_implementation_history_2026_08_30_compact_human_reference_canonical_source_integration",
-      "confidence_score": 1.0
+      "target": "agent_harness_implementation_history_2026_08_30_compact_human_reference_canonical_source_integration"
     },
     {
       "relation": "contains",
@@ -56513,9 +56523,9 @@
       "source_file": "docs/agent-harness/implementation-history.md",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "agent_harness_implementation_history_implementation_history",
-      "target": "agent_harness_implementation_history_2026_08_30_compact_reference_native_release_ci_hardening",
-      "confidence_score": 1.0
+      "target": "agent_harness_implementation_history_2026_08_30_compact_reference_native_release_ci_hardening"
     },
     {
       "relation": "contains",
@@ -56530,12 +56540,22 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "docs/agent-harness/implementation-history.md",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "agent_harness_implementation_history_implementation_history",
+      "target": "agent_harness_implementation_history_2026_08_30_mobile_baseline_contract_correction",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "docs/agent-harness/index.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_agent_harness_index_md",
-      "target": "agent_harness_index_aleconnect_mobile_harness",
-      "confidence_score": 1.0
+      "target": "agent_harness_index_aleconnect_mobile_harness"
     },
     {
       "relation": "references",
@@ -56543,9 +56563,9 @@
       "source_file": "docs/agent-harness/index.md",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_agent_harness_index_md",
-      "target": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_mobile_release_hardening_plan_md",
-      "confidence_score": 1.0
+      "target": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_mobile_release_hardening_plan_md"
     },
     {
       "relation": "references",
@@ -56553,9 +56573,9 @@
       "source_file": "docs/agent-harness/index.md",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_agent_harness_index_md",
-      "target": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_mobile_release_hardening_tracker_md",
-      "confidence_score": 1.0
+      "target": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_mobile_release_hardening_tracker_md"
     },
     {
       "relation": "contains",
@@ -56563,9 +56583,9 @@
       "source_file": "docs/mobile-release-hardening-plan.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_mobile_release_hardening_plan_md",
-      "target": "docs_mobile_release_hardening_plan_aleconnect_mobile_release_hardening_plan",
-      "confidence_score": 1.0
+      "target": "docs_mobile_release_hardening_plan_aleconnect_mobile_release_hardening_plan"
     },
     {
       "relation": "contains",
@@ -56643,9 +56663,9 @@
       "source_file": "docs/mobile-release-hardening-tracker.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_mobile_release_hardening_tracker_md",
-      "target": "docs_mobile_release_hardening_tracker_aleconnect_mobile_release_hardening_tracker",
-      "confidence_score": 1.0
+      "target": "docs_mobile_release_hardening_tracker_aleconnect_mobile_release_hardening_tracker"
     },
     {
       "relation": "contains",
@@ -56663,9 +56683,9 @@
       "source_file": "docs/superpowers/plans/2026-07-17-gluestack-ui-v5-migration.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_superpowers_plans_2026_07_17_gluestack_ui_v5_migration_md",
-      "target": "plans_2026_07_17_gluestack_ui_v5_migration_gluestack_ui_v5_migration_implementation_plan",
-      "confidence_score": 1.0
+      "target": "plans_2026_07_17_gluestack_ui_v5_migration_gluestack_ui_v5_migration_implementation_plan"
     },
     {
       "relation": "contains",
@@ -56853,9 +56873,9 @@
       "source_file": "docs/superpowers/plans/2026-08-15-notification-settings-offline-cache.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_superpowers_plans_2026_08_15_notification_settings_offline_cache_md",
-      "target": "plans_2026_08_15_notification_settings_offline_cache_notification_settings_offline_cache_implementation_plan",
-      "confidence_score": 1.0
+      "target": "plans_2026_08_15_notification_settings_offline_cache_notification_settings_offline_cache_implementation_plan"
     },
     {
       "relation": "contains",
@@ -56903,9 +56923,9 @@
       "source_file": "docs/superpowers/plans/2026-08-15-ticket-push-report-sync.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_superpowers_plans_2026_08_15_ticket_push_report_sync_md",
-      "target": "plans_2026_08_15_ticket_push_report_sync_push_driven_report_status_sync_implementation_plan",
-      "confidence_score": 1.0
+      "target": "plans_2026_08_15_ticket_push_report_sync_push_driven_report_status_sync_implementation_plan"
     },
     {
       "relation": "contains",
@@ -56993,9 +57013,9 @@
       "source_file": "docs/superpowers/plans/2026-08-17-evidence-camera-source-picker.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_superpowers_plans_2026_08_17_evidence_camera_source_picker_md",
-      "target": "plans_2026_08_17_evidence_camera_source_picker_evidence_camera_source_picker_implementation_plan",
-      "confidence_score": 1.0
+      "target": "plans_2026_08_17_evidence_camera_source_picker_evidence_camera_source_picker_implementation_plan"
     },
     {
       "relation": "contains",
@@ -57053,9 +57073,9 @@
       "source_file": "docs/superpowers/plans/2026-08-20-aleconnect-lineman.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_superpowers_plans_2026_08_20_aleconnect_lineman_md",
-      "target": "plans_2026_08_20_aleconnect_lineman_aleconnect_lineman_implementation_plan",
-      "confidence_score": 1.0
+      "target": "plans_2026_08_20_aleconnect_lineman_aleconnect_lineman_implementation_plan"
     },
     {
       "relation": "contains",
@@ -57173,9 +57193,9 @@
       "source_file": "docs/superpowers/specs/2026-07-17-gluestack-ui-v5-migration-design.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_superpowers_specs_2026_07_17_gluestack_ui_v5_migration_design_md",
-      "target": "specs_2026_07_17_gluestack_ui_v5_migration_design_gluestack_ui_v5_migration_design",
-      "confidence_score": 1.0
+      "target": "specs_2026_07_17_gluestack_ui_v5_migration_design_gluestack_ui_v5_migration_design"
     },
     {
       "relation": "contains",
@@ -57473,9 +57493,9 @@
       "source_file": "docs/superpowers/specs/2026-08-15-notification-settings-offline-cache-design.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_superpowers_specs_2026_08_15_notification_settings_offline_cache_design_md",
-      "target": "specs_2026_08_15_notification_settings_offline_cache_design_notification_settings_offline_cache_design",
-      "confidence_score": 1.0
+      "target": "specs_2026_08_15_notification_settings_offline_cache_design_notification_settings_offline_cache_design"
     },
     {
       "relation": "contains",
@@ -57633,9 +57653,9 @@
       "source_file": "docs/superpowers/specs/2026-08-15-ticket-push-report-sync-design.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_superpowers_specs_2026_08_15_ticket_push_report_sync_design_md",
-      "target": "specs_2026_08_15_ticket_push_report_sync_design_push_driven_report_status_sync_design",
-      "confidence_score": 1.0
+      "target": "specs_2026_08_15_ticket_push_report_sync_design_push_driven_report_status_sync_design"
     },
     {
       "relation": "contains",
@@ -57823,9 +57843,9 @@
       "source_file": "docs/superpowers/specs/2026-08-17-evidence-camera-source-picker-design.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_vscodeprojects_aleconnect_mobile_human_references_docs_superpowers_specs_2026_08_17_evidence_camera_source_picker_design_md",
-      "target": "specs_2026_08_17_evidence_camera_source_picker_design_evidence_camera_source_picker_design",
-      "confidence_score": 1.0
+      "target": "specs_2026_08_17_evidence_camera_source_picker_design_evidence_camera_source_picker_design"
     },
     {
       "relation": "contains",
@@ -57979,5 +57999,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "12a0534ba6640eb78a0b9a6ed0e19dd82d9a039d"
+  "built_at_commit": "f2e1e256eec1a0dbb5157c5fd3368e0aa270c780"
 }
