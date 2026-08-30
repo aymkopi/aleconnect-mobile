@@ -661,3 +661,14 @@
 - Remaining risks: full mobile TypeScript/lint retain unrelated baseline errors, and device/native verification remains outstanding.
 - Device evidence: Android tooling was available, but `adb devices` reported no attached target; native advisory rendering was not exercised.
 - Next: retain the isolated worktree for review/commit or integrate only under separate authorization; resolve the dependency baseline before native release.
+
+## 2026-08-31 - Advisory date policy integrated release gate
+
+- Repositories: consumer `aleconnect-mobile`, coordinated with authoritative staff/API `aleconnect`; Lineman is unchanged.
+- Scope: merged nullable advisory restoration/date display with current compact/legacy advisory control-number normalization and private scoped cache behavior.
+- Files: mobile advisory service/list/detail/tests, generated Graphify outputs, and harness handoffs.
+- Contracts: omitted/null dates and older cache rows remain readable; compact and legacy control numbers normalize through the existing shared helper; server authorization, publication, targeting, and deployment order remain staff-owned.
+- Verification: feature commit `4c78aff` merged as `25bbd7b`; staff integration is `21c97fd`. Focused coverage passed 12/12, the complete suite passed 196/197 with one skip and zero failures, TypeScript passed, lint reported 0 errors/four existing warnings, harness/diff checks passed, Android production export succeeded, and Graphify rebuilt 2,119 nodes/3,569 edges/187 communities.
+- Git/Deployment: clean integration worktree only; canonical `master` has not yet been fast-forwarded or pushed. No EAS build/submission, store release, backend deployment, or database action occurred.
+- Remaining risks: no physical device is attached, so native advisory rendering and production adoption remain unverified.
+- Next: commit the integration evidence, fast-forward and push `master`, but keep EAS/store publication gated until device/release evidence is available.

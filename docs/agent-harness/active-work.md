@@ -177,3 +177,9 @@ Verify branch, worktree, source, and connected device again before relying on th
 - Evidence: `node --test --test-concurrency=1 tests/advisory-feed.test.mjs tests/manila-time.test.mjs` passed 12/12, including the intentional end-only expectation `Until 5:00 PM, Today`. The full suite reported 174 passed, five unrelated pre-existing failures, and one skip across 180 tests; the former Manila advisory-range failure is resolved. TypeScript retains the existing Expo/Gluestack/MapLibre declaration and implicit-any baseline (the owned detail route is named only for its existing `expo-router` import); lint retains 25 unresolved dependency imports and four warnings without an owned advisory diagnostic.
 - Boundary: no API schema change, native build/release, device test, deployment, commit, or merge occurred. Mobile harness passed with only the absent default sibling warning, `git diff --check` is clean, and Graphify refreshed to 2,063 nodes/3,473 edges/182 communities.
 - Device evidence: `adb devices` reported no attached target, so native advisory rendering was not exercised.
+
+## Advisory date policy integrated release gate (2026-08-31)
+
+- Status: feature commit `4c78aff` was merged with current `master` compact/legacy control-number compatibility as integration commit `25bbd7b`; staff integration is `21c97fd`.
+- Verification: focused advisory/time coverage passed 12/12; the complete suite passed 196/197 with one skip and zero failures; TypeScript, lint (0 errors/four existing warnings), harness, diff checks, and Android production export passed. Graphify refreshed to 2,119 nodes/3,569 edges/187 communities.
+- Boundary: no physical device is attached, so advisory rendering remains unverified on-device. No EAS build/submission, store release, canonical fast-forward, remote push, backend deploy, or database action has occurred at this gate.
