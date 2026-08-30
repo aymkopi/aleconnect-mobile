@@ -39,6 +39,15 @@ function formatDate(value: string | null) {
     timeStyle: "short",
   }).format(date);
 }
+
+function advisoryType(value: string | null) {
+  return value?.trim().toLowerCase() || null;
+}
+
+function displaysInterruption(type: string | null) {
+  return type !== "general" && type !== "weather_advisory";
+}
+
 export default function AdvisoryDetailsRoute() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -190,39 +199,59 @@ export default function AdvisoryDetailsRoute() {
             </VStack>
 
             <VStack className="gap-3 rounded-xl border border-border bg-card p-5">
-              <View className="flex-row items-center gap-2">
-                <CalendarDays size={19} color={accentColor} />
-                <Heading size="sm">Schedule</Heading>
-              </View>
-              <Text className="text-sm text-muted-foreground">
-                Published: {formatDate(visibleAdvisory.publishedAt)}
-              </Text>
-
-              {visibleAdvisory.expiresAt ? (
-                <Text className="text-sm text-muted-foreground">
-                  Available until: {formatDate(visibleAdvisory.expiresAt)}
-                </Text>
-              ) : null}
-
-              {visibleAdvisory.scheduledStartAt || visibleAdvisory.scheduledEndAt ? (
-                <VStack className="gap-2 border-t border-border pt-3">
-                  <Text className="text-sm font-semibold text-foreground">
-                    Interruption
-                  </Text>
-
-                  {visibleAdvisory.scheduledStartAt ? (
+              {(() => {
+                const type = advisoryType(visibleAdvisory.type);
+                const showInterruption = displaysInterruption(type);
+                const isRestoration = type === "restoration";
+                return (
+                  <>
+                    <View className="flex-row items-center gap-2">
+                      <CalendarDays size={19} color={accentColor} />
+                      <Heading size="sm">Schedule</Heading>
+                    </View>
                     <Text className="text-sm text-muted-foreground">
-                      Starts: {formatDate(visibleAdvisory.scheduledStartAt)}
+                      Published: {formatDate(visibleAdvisory.publishedAt)}
                     </Text>
-                  ) : null}
 
-                  {visibleAdvisory.scheduledEndAt ? (
-                    <Text className="text-sm text-muted-foreground">
-                      Ends: {formatDate(visibleAdvisory.scheduledEndAt)}
-                    </Text>
-                  ) : null}
-                </VStack>
-              ) : null}
+                    {visibleAdvisory.expiresAt ? (
+                      <Text className="text-sm text-muted-foreground">
+                        Available until: {formatDate(visibleAdvisory.expiresAt)}
+                      </Text>
+                    ) : null}
+
+                    {showInterruption && isRestoration ? (
+                      <VStack className="gap-2 border-t border-border pt-3">
+                        <Text className="text-sm font-semibold text-foreground">
+                          Restored at
+                        </Text>
+                        <Text className="text-sm text-muted-foreground">
+                          {visibleAdvisory.scheduledEndAt
+                            ? formatDate(visibleAdvisory.scheduledEndAt)
+                            : "To be confirmed"}
+                        </Text>
+                      </VStack>
+                    ) : showInterruption && (visibleAdvisory.scheduledStartAt || visibleAdvisory.scheduledEndAt) ? (
+                      <VStack className="gap-2 border-t border-border pt-3">
+                        <Text className="text-sm font-semibold text-foreground">
+                          Interruption
+                        </Text>
+
+                        {visibleAdvisory.scheduledStartAt ? (
+                          <Text className="text-sm text-muted-foreground">
+                            Starts: {formatDate(visibleAdvisory.scheduledStartAt)}
+                          </Text>
+                        ) : null}
+
+                        {visibleAdvisory.scheduledEndAt ? (
+                          <Text className="text-sm text-muted-foreground">
+                            Ends: {formatDate(visibleAdvisory.scheduledEndAt)}
+                          </Text>
+                        ) : null}
+                      </VStack>
+                    ) : null}
+                  </>
+                );
+              })()}
             </VStack>
           </>
         )}

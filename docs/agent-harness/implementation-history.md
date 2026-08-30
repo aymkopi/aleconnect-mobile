@@ -649,3 +649,15 @@
 - Git/Deployment: mobile implementation only; no Expo/EAS/store publication is included.
 - Remaining risks: audience text requires the additive staff API field. Until that backend contract is deployed and cached advisory data refreshes, the audience line is safely omitted.
 - Next: verify the coordinated staff API contract, deploy the additive backend field first, then release the compatible mobile UI.
+
+## 2026-08-31 - Advisory date/publication policy implementation
+
+- Repositories: coordinated mobile reader/cache work for ALEConnect advisories; staff/API implementation is isolated in the sibling worktree.
+- Scope: coordinated consumer advisory readers preserve the nullable advisory API/cache contract while normalizing older cached records and presenting restoration and end-only timing correctly. General/weather interruption lines remain hidden; no required fields were added.
+- Files: `src/services/advisories.ts`, `src/features/advisories/advisory-list-item.tsx`, `src/app/advisory/[id].tsx`, `tests/advisory-feed.test.mjs`, `tests/manila-time.test.mjs`, and this implementation-history entry.
+- Contracts: mobile keeps the existing field names, nullable date values, publication filters, identity handling, and cache shape. Missing optional fields from older cache entries normalize to `null`; restoration displays `Restored at` with `To be confirmed` when absent, and end-only timing remains `Until ...`.
+- Verification: focused advisory/time tests passed 12/12. The full suite reported 174 passed, five unrelated pre-existing failures, and one skip across 180 tests; the former Manila advisory-range failure is resolved. TypeScript retains the existing Expo/Gluestack/MapLibre declaration and implicit-any baseline (the owned detail route appears only at its existing `expo-router` import), while lint retains 25 unresolved dependency errors and four warnings without an owned advisory diagnostic. `npm run harness:check` passed with only the absent default sibling warning, `git diff --check` is clean, and Graphify refreshed to 2,063 nodes/3,473 edges/182 communities.
+- Git/Deployment: isolated mobile worktree only; no API schema change, native build/release, device test, deployment, commit, or merge occurred.
+- Remaining risks: full mobile TypeScript/lint retain unrelated baseline errors, and device/native verification remains outstanding.
+- Device evidence: Android tooling was available, but `adb devices` reported no attached target; native advisory rendering was not exercised.
+- Next: retain the isolated worktree for review/commit or integrate only under separate authorization; resolve the dependency baseline before native release.
