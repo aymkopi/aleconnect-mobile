@@ -672,3 +672,14 @@
 - Git/Deployment: clean integration worktree only; canonical `master` has not yet been fast-forwarded or pushed. No EAS build/submission, store release, backend deployment, or database action occurred.
 - Remaining risks: no physical device is attached, so native advisory rendering and production adoption remain unverified.
 - Next: commit the integration evidence, fast-forward and push `master`, but keep EAS/store publication gated until device/release evidence is available.
+
+## 2026-08-31 - Advisory date policy canonical integration
+
+- Repositories: consumer `aleconnect-mobile` coordinated with deployed authoritative staff/API `aleconnect`; Lineman remained unchanged.
+- Scope: fast-forwarded and pushed the verified mobile advisory reader/UI integration after the backward-compatible staff contract deployed successfully.
+- Files: product and generated Graphify files already recorded by integration commits; this entry and active work add release evidence only.
+- Contracts: nullable dates, old cache rows, compact/legacy advisory references, scoped private cache behavior, and server authorization remain compatible. No required field or native configuration changed.
+- Verification: `master`/`origin/master` reached `a416868`; GitHub workflow `33332483201` passed `npm ci`, harness, the complete 196/197 suite with one skip, TypeScript, and lint. Staff production workflow `33332307651` deployed `b19764d`; smoke returned 200 for staff root/dashboard, expected 401 for unauthenticated advisories, and 200/null for session.
+- Git/Deployment: feature `4c78aff` is merged through `25bbd7b`, with release head `a416868`. Mobile source is pushed and CI-verified. No EAS build/submission, store release, backend/database action, or native distribution occurred.
+- Remaining risks: no attached physical device was available, so native advisory rendering and production adoption remain unverified.
+- Next: perform device rendering and separately authorize EAS/store publication if a native release is required.

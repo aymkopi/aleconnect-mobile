@@ -183,3 +183,9 @@ Verify branch, worktree, source, and connected device again before relying on th
 - Status: feature commit `4c78aff` was merged with current `master` compact/legacy control-number compatibility as integration commit `25bbd7b`; staff integration is `21c97fd`.
 - Verification: focused advisory/time coverage passed 12/12; the complete suite passed 196/197 with one skip and zero failures; TypeScript, lint (0 errors/four existing warnings), harness, diff checks, and Android production export passed. Graphify refreshed to 2,119 nodes/3,569 edges/187 communities.
 - Boundary: no physical device is attached, so advisory rendering remains unverified on-device. No EAS build/submission, store release, canonical fast-forward, remote push, backend deploy, or database action has occurred at this gate.
+
+## Advisory date policy canonical integration (2026-08-31)
+
+- Mobile `master` and `origin/master` now point to `a416868`; GitHub validation `33332483201` passed install, harness, the complete test suite, TypeScript, and lint. Staff `main` is deployed from `b19764d` by successful Cloudflare workflow `33332307651`.
+- Production server smoke preserved the expected contract: public staff routes returned 200, unauthenticated mobile advisories returned 401, and session returned 200/null.
+- Boundary: no EAS build/submission, native/store release, database mutation, production advisory creation, push send, or Facebook call occurred. No device is attached, so native advisory rendering remains unverified.
