@@ -6,13 +6,13 @@ Android device: `25040RP0AG` via wireless ADB `192.168.1.31:41667`
 
 | Route group | Methods | Staff handler | Mobile reader | State owner | Screen/journey | Automated result | Device result |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `/api/auth/*` | POST/GET | `api/auth/[...all].ts` | `src/services/auth.ts`, `src/services/api.ts` | SecureStore session | Sign in/out/session | Baseline pass | Task 2 journey |
-| `/api/mobile/auth/change-password` | POST | `api/mobile/auth/change-password.ts` | `src/services/auth.ts` | session | Required-password screen | Task 2 focused gate | Restricted: disposable credentials required |
-| `/api/mobile/consumer-identity` | GET/POST | `api/mobile/consumer-identity.ts` | `src/services/consumer-identity.ts` | identity/access snapshot | Email setup and app bootstrap | Task 2 focused gate | Task 2 journey |
-| `/api/mobile/linked-accounts` | GET/PATCH | `api/mobile/linked-accounts.ts` | `src/services/linked-accounts.ts` | identity/account/revision | Profile accounts | Task 2 focused gate | Task 2 journey |
-| `/api/mobile/account-link-requests` | GET/POST | `api/mobile/account-link-requests.ts` | `src/services/account-link-requests.ts` | identity/access revision | Link-account request | Task 2 focused gate | Valid supplied credentials required |
-| `/api/mobile/profile` | GET/PATCH | `api/mobile/profile/index.ts` | `src/services/profile.ts` | selected account/revision | Profile details/address | Task 2 focused gate | Task 2 journey |
-| `/api/mobile/profile/avatar-*` | POST/PUT/POST | `api/mobile/profile/avatar-upload.ts`, `avatar-complete.ts` | `src/services/profile.ts` | selected account/revision | Profile avatar | Task 2 focused gate | Task 2 journey |
+| `/api/auth/*` | POST/GET | `api/auth/[...all].ts` | `src/services/auth.ts`, `src/services/api.ts` | SecureStore session | Sign in/out/session | Task 2 pass: 37/37 focused | Account-number sign-in, safe invalid account/email states, sign-out, and restart-to-guest pass against live API |
+| `/api/mobile/auth/change-password` | POST | `api/mobile/auth/change-password.ts` | `src/services/auth.ts` | session | Required-password screen | Task 2 pass: 37/37 focused | Blocked: disposable credentials unavailable |
+| `/api/mobile/consumer-identity` | GET/POST | `api/mobile/consumer-identity.ts` | `src/services/consumer-identity.ts` | identity/access snapshot | Email setup and app bootstrap | Task 2 pass: 37/37 focused | Authenticated bootstrap reaches optional email setup; skipping returns Home; unauthenticated boundary returns 401 |
+| `/api/mobile/linked-accounts` | GET/PATCH | `api/mobile/linked-accounts.ts` | `src/services/linked-accounts.ts` | identity/account/revision | Profile accounts | Task 2 pass: 37/37 focused | One linked account and default state load; default mutation not applicable because only one account exists |
+| `/api/mobile/account-link-requests` | GET/POST | `api/mobile/account-link-requests.ts` | `src/services/account-link-requests.ts` | identity/access revision | Link-account request | Task 2 pass: 37/37 focused | Empty history loads; new link is correctly gated on email setup, so no request was submitted |
+| `/api/mobile/profile` | GET/PATCH | `api/mobile/profile/index.ts` | `src/services/profile.ts` | selected account/revision | Profile details/address | Task 2 pass: 37/37 focused | Profile reads pass; phone update passes and the original value is restored with DB equality proof; guest boundary passes |
+| `/api/mobile/profile/avatar-*` | POST/PUT/POST | `api/mobile/profile/avatar-upload.ts`, `avatar-complete.ts` | `src/services/profile.ts` | selected account/revision | Profile avatar | Task 2 pass: 37/37 focused | Blocked: neutral reversible upload image unavailable |
 | `/api/mobile/complaints/meta` | GET | `api/mobile/complaints.ts` | `src/services/reports.ts` | bounded metadata cache | New report form | Task 3 focused gate | Task 3 journey |
 | `/api/mobile/complaints` | GET/POST | `api/mobile/complaints.ts` | `src/services/reports.ts`, `report-queue.ts` | identity/account/revision caches | Recent, Archive, submit | Task 3 focused gate | Task 3 journey |
 | `/api/mobile/complaints/:id` | GET | `api/mobile/complaints.ts` | `src/services/reports.ts` | scoped detail cache | Report detail/history/map | Task 3 focused gate | Task 3 journey |
@@ -31,3 +31,5 @@ Android device: `25040RP0AG` via wireless ADB `192.168.1.31:41667`
 - Full mobile baseline passes 197/197 JavaScript tests and 11/11 TypeScript tests.
 - `npx tsc --noEmit` and `npm run harness:check` pass.
 - `npm run lint` passes with zero errors and four existing warnings: three unused-value warnings and one map-picker hook dependency warning.
+- Task 2 fixed the shared development fallback from the Expo host on port 5173 to `https://api.aleconnect.app`; the production build remains fail-closed without explicit HTTPS configuration.
+- Task 2 used a read-only production credential lookup and local hash verification; no username, password, phone number, or session token is stored in repository evidence.

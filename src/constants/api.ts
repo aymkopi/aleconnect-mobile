@@ -1,18 +1,9 @@
-import Constants from "expo-constants";
-
-function getExpoHostBaseUrl(): string | null {
-  const hostUri =
-    Constants.expoConfig?.hostUri ?? Constants.expoGoConfig?.debuggerHost;
-  const host = hostUri?.split(":")[0];
-  return host ? `http://${host}:5173` : null;
-}
-
 const configuredApiBaseUrl =
   process.env.EXPO_PUBLIC_ALECONNECT_API_URL ??
   process.env.EXPO_PUBLIC_API_URL;
 const resolvedApiBaseUrl =
   configuredApiBaseUrl ??
-  (__DEV__ ? getExpoHostBaseUrl() ?? "http://localhost:5173" : null);
+  (__DEV__ ? "https://api.aleconnect.app" : null);
 
 if (!resolvedApiBaseUrl) {
   throw new Error(

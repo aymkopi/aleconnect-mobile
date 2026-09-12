@@ -189,8 +189,9 @@ npx tsx --test --test-concurrency=1 tests/consumer-account-snapshot-behavior.tes
 Run the new worktree on a separate port so canonical Metro stays available:
 
 ```powershell
-adb -s 192.168.1.31:41667 reverse tcp:8082 tcp:8082
-npx expo run:android --device 192.168.1.31:41667 --port 8082
+$env:ANDROID_SERIAL = "192.168.1.31:41667"
+adb reverse tcp:8082 tcp:8082
+npx expo run:android --device 25040RP0AG --port 8082
 ```
 
 Confirm `com.kapecakes.aleconnectmobile/.MainActivity` is foreground and logs identify the 8082 bundle before accepting device evidence.
@@ -416,8 +417,9 @@ npx expo export --platform android --output-dir .expo\mobile-api-refresh-export
 After export finishes, run/install the worktree client on port 8082:
 
 ```powershell
-adb -s 192.168.1.31:41667 reverse tcp:8082 tcp:8082
-npx expo run:android --device 192.168.1.31:41667 --port 8082
+$env:ANDROID_SERIAL = "192.168.1.31:41667"
+adb reverse tcp:8082 tcp:8082
+npx expo run:android --device 25040RP0AG --port 8082
 ```
 
 Keep generated export/native artifacts uncommitted. Do not run EAS or a release build.

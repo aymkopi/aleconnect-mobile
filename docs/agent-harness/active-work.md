@@ -1,5 +1,13 @@
 # Active work
 
+## Mobile API refresh (2026-09-13)
+
+- Status: Task 1 is committed as `515de6e`; Task 2 source and authenticated device verification is complete and awaiting its scoped commit. The plan remains exactly five tasks.
+- Scope: development Android client only, consuming `https://api.aleconnect.app`. No Staff deployment, direct database mutation, EAS/OTA action, release build, or store submission is authorized.
+- Evidence: route contracts pass 31/31, Staff route/runtime registration passes 19/19, the full mobile baseline passes 197/197 JavaScript and 11/11 TypeScript tests, Task 2 focused coverage passes 37/37, TypeScript passes, and lint has zero errors with four existing warnings. The worktree development client built and loaded on `25040RP0AG` through Metro port 8082.
+- Device evidence: authenticated account sign-in, optional email setup boundary, identity/account/Profile reads, reversible phone update with DB-confirmed restoration, password screen, sign-out, restart-to-guest, guest Profile protection, and safe invalid account-number/email responses pass against the live API. Password mutation and avatar upload were not executed; multi-account default switching is not applicable.
+- Next: commit Task 2, then verify reports/evidence/offline behavior under Task 3 without widening production scope.
+
 ## Android production-signing guard (2026-08-30)
 
 - Status: the native-generation hardening is implemented locally on canonical `master`; production distribution and compact cutover remain separately blocked.

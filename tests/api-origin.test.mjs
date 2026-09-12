@@ -11,5 +11,6 @@ test("production API origin fails closed and requires HTTPS", async () => {
   assert.match(source, /__DEV__/);
   assert.match(source, /https:/);
   assert.match(source, /throw new Error/);
-  assert.match(source, /__DEV__ \? getExpoHostBaseUrl\(\)/);
+  assert.match(source, /__DEV__\s*\?\s*"https:\/\/api\.aleconnect\.app"/);
+  assert.doesNotMatch(source, /localhost:5173|getExpoHostBaseUrl/);
 });

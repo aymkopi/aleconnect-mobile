@@ -1,5 +1,18 @@
 # Implementation history
 
+## 2026-09-13 - Development API origin refresh and Task 2 device gate
+
+- Repositories: `aleconnect-mobile` consumer only; the Staff checkout was inspected and left unchanged.
+- Scope: changed the development fallback API origin from the Expo host on port 5173 to `https://api.aleconnect.app`. Explicit environment overrides remain supported, and production builds still fail closed without an explicit HTTPS origin.
+- Files: `src/constants/api.ts`, `tests/api-origin.test.mjs`, the five-task plan, matrix, active-work, and this entry.
+- Contracts: all callers continue through the existing shared API service; no endpoint, payload, cache, authentication, native identifier, or persisted-data shape changed.
+- Verification: the API-origin contract reproduced RED before the source fix, then Task 2 focused coverage passed 37/37 and `npx tsc --noEmit` passed. Live production probes returned 200 for unauthenticated session lookup and 401 for protected identity, linked-account, account-link-request, and Profile routes.
+- Device evidence: the Android development client built successfully, installed on `25040RP0AG`, and loaded the worktree bundle through Metro port 8082. Account-number sign-in, optional email setup/skip, one-account identity/default loading, empty account-link history, Profile reads, password-screen loading, sign-out, and restart-to-guest passed. A phone update was exercised and immediately restored; a read-only DB comparison proved the original value was restored. Generic invalid-credential errors also passed for account-number and email modes. No React Native or Android runtime error was observed in the captured error log.
+- Git/Deployment: mobile development worktree only; no Staff deploy, direct database mutation, EAS/OTA/store action, release build, merge, or push.
+- Boundary: the only authenticated production mutation was the reversible Profile phone test, which was immediately restored and verified. Database access was read-only.
+- Remaining risks: password mutation was intentionally not executed, avatar upload remains unverified without a neutral reversible image, default switching is not applicable to the one-account identity, and account-link submission is gated on email setup.
+- Next: continue the approved five-task plan with authenticated report, advisory, notification, and hotline evidence.
+
 ## 2026-08-30 - Compact-reference Android preview build
 
 - Repositories: consumer `aleconnect-mobile` on canonical `master`; Staff and Lineman source remained unchanged.
