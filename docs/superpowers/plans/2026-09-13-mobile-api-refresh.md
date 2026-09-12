@@ -69,8 +69,8 @@ git status --short --branch
 git -C ..\aleconnect status --short --branch
 git worktree list --porcelain
 adb devices -l
-adb -s 192.168.1.9:36457 shell pidof com.kapecakes.aleconnectmobile
-adb -s 192.168.1.9:36457 reverse --list
+adb -s 192.168.1.31:41667 shell pidof com.kapecakes.aleconnectmobile
+adb -s 192.168.1.31:41667 reverse --list
 ```
 
 Expected: mobile branch is `codex/mobile-api-refresh`; Staff dirty files remain untouched; wireless device is connected; existing client/Metro state is recorded.
@@ -111,7 +111,12 @@ Run:
 ```powershell
 rg -n 'prefix: "/api/mobile|startsWith\("/api/mobile' ..\aleconnect\worker\index.ts ..\aleconnect\vite.config.ts
 node --test --test-concurrency=1 tests/agent-harness.test.mjs tests/api-origin.test.mjs tests/human-reference-contract.test.mjs
-node --test --test-concurrency=1 ..\aleconnect\tests\deployment\consumer-account-linking-routes.test.mjs ..\aleconnect\tests\deployment\cloudflare-runtime.test.mjs
+Push-Location ..\aleconnect
+try {
+  node --test --test-concurrency=1 tests/deployment/consumer-account-linking-routes.test.mjs tests/deployment/cloudflare-runtime.test.mjs
+} finally {
+  Pop-Location
+}
 ```
 
 Expected: every matrix route is registered in both runtimes; shared marker block matches; API origin remains HTTPS and compact/legacy references remain opaque.
@@ -184,8 +189,8 @@ npx tsx --test --test-concurrency=1 tests/consumer-account-snapshot-behavior.tes
 Run the new worktree on a separate port so canonical Metro stays available:
 
 ```powershell
-adb -s 192.168.1.9:36457 reverse tcp:8082 tcp:8082
-npx expo run:android --device 192.168.1.9:36457 --port 8082
+adb -s 192.168.1.31:41667 reverse tcp:8082 tcp:8082
+npx expo run:android --device 192.168.1.31:41667 --port 8082
 ```
 
 Confirm `com.kapecakes.aleconnectmobile/.MainActivity` is foreground and logs identify the 8082 bundle before accepting device evidence.
@@ -263,13 +268,13 @@ Use a non-emergency category/type accepted by live metadata. Put `TEST - mobile 
 Keep one PowerShell terminal open for the whole offline interval. Refuse to overwrite a pre-existing proxy and restore direct networking in `finally`:
 
 ```powershell
-$priorProxy = adb -s 192.168.1.9:36457 shell settings get global http_proxy
+$priorProxy = adb -s 192.168.1.31:41667 shell settings get global http_proxy
 if($priorProxy -notin @('null', ':0')) { throw "Existing device proxy must be preserved: $priorProxy" }
 try {
-  adb -s 192.168.1.9:36457 shell settings put global http_proxy 127.0.0.1:9
+  adb -s 192.168.1.31:41667 shell settings put global http_proxy 127.0.0.1:9
   Read-Host 'Queue and inspect the offline test draft, then press Enter to restore networking'
 } finally {
-  adb -s 192.168.1.9:36457 shell settings put global http_proxy :0
+  adb -s 192.168.1.31:41667 shell settings put global http_proxy :0
 }
 ```
 
@@ -411,8 +416,8 @@ npx expo export --platform android --output-dir .expo\mobile-api-refresh-export
 After export finishes, run/install the worktree client on port 8082:
 
 ```powershell
-adb -s 192.168.1.9:36457 reverse tcp:8082 tcp:8082
-npx expo run:android --device 192.168.1.9:36457 --port 8082
+adb -s 192.168.1.31:41667 reverse tcp:8082 tcp:8082
+npx expo run:android --device 192.168.1.31:41667 --port 8082
 ```
 
 Keep generated export/native artifacts uncommitted. Do not run EAS or a release build.
