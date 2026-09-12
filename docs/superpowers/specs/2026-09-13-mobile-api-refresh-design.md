@@ -137,6 +137,8 @@ The user authorized ordinary current-account writes from the development client 
 
 ## Implementation Phases
 
+The implementation plan must contain exactly five tasks, one for each phase below. Setup, tests, documentation, and commits belong inside their owning task; they must not become extra tasks.
+
 ### Phase 1: Contract and baseline matrix
 
 Inventory every endpoint, method, request field, response field, mobile reader, screen, cache key, focused test, and device journey. Record current Staff baseline failures separately. Produce no product change when contracts already match.
