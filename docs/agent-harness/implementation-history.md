@@ -1,5 +1,17 @@
 # Implementation history
 
+## 2026-09-13 - Mobile API refresh device and live report acceptance
+
+- Repositories: `aleconnect-mobile` physical-device acceptance coordinated with Staff/API deployment from isolated `aleconnect` commit `37768d9`.
+- Scope: completed Task 5 by selecting `25040RP0AG` through normal `npx expo run:android --device`, rebuilding/installing the refreshed development client with Metro, retrying the existing queued report, and smoke-checking Home, Reports, Hotlines, Profile, background/resume, and production API health.
+- Files: mobile source is unchanged from commit `3c6b852`; this follow-up updates the matrix and harness handoffs with deployment/device evidence.
+- Contracts: the original queue idempotency key was preserved. Staff's compatible one-placeholder SQL correction changed no payload, response, ownership, cache, notification, evidence, or native contract.
+- Verification: Expo built and installed the development client, then bundled 4,574 modules. Production Worker `7ed8ff46-7543-4b65-aede-7aa00f5d7be7` returned 201 for the complaint and 200 for authenticated bootstrap/push follow-up requests. Read-only MySQL verification found exactly one `under_review` ticket with one evidence item. The report list shows one record, and its detail shows location/map and one evidence control. Home advisories, Hotlines contacts/search controls, Profile account sections, and background/resume passed; Android proxy is `:0` and fresh React Native/Android runtime error logs are empty.
+- Device/production consumer writes: the one previously approved non-operational report was created exactly once. No additional report, Profile, password, account-link, notification-setting, call, or website mutation was performed in this final gate.
+- Git/Deployment: mobile branch only for documentation; no mobile merge/push, EAS/OTA, release build, store submission, or iOS action. The API Worker deployment and rollback IDs are recorded in the Staff repository.
+- Remaining risks: organic provider push delivery, iOS, password mutation, avatar replacement, multi-account switching, the two Staff baseline assertions, four mobile lint warnings, and npm dependency audit findings remain unverified or outside the development refresh.
+- Next: keep normal Metro development running for user testing and integrate the isolated branches when desired.
+
 ## 2026-09-13 - Five-task mobile API refresh final gate
 
 - Repositories: `aleconnect-mobile` owns the development consumer refresh; isolated Staff worktree `aleconnect-mobile-api-refresh-server` owns the complaint-insert regression fix. The dirty canonical Staff checkout remained read-only.
