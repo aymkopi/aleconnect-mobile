@@ -17,6 +17,16 @@ export type MobileAdvisory = {
   readonly scheduledStartAt: string | null;
   readonly scheduledEndAt: string | null;
   readonly publishedAt: string;
+  readonly photos?: readonly MobilePublicPhoto[];
+};
+
+export type MobilePublicPhoto = {
+  readonly id: string;
+  readonly url: string;
+  readonly altText: string;
+  readonly position: number;
+  readonly width: number | null;
+  readonly height: number | null;
 };
 
 export type MobileAdvisoryPage = {
@@ -37,6 +47,18 @@ function nullableString(value: unknown) {
   return typeof value === "string" && value.length > 0 ? value : null;
 }
 
+export function normalizePublicPhoto(value: unknown): MobilePublicPhoto {
+  const record = value && typeof value === "object" ? value as UnknownRecord : {};
+  return {
+    id: typeof record.id === "string" ? record.id : "",
+    url: typeof record.url === "string" ? record.url : "",
+    altText: typeof record.altText === "string" ? record.altText : "",
+    position: Number.isFinite(record.position) ? Number(record.position) : 0,
+    width: Number.isFinite(record.width) ? Number(record.width) : null,
+    height: Number.isFinite(record.height) ? Number(record.height) : null,
+  };
+}
+
 /** Keep old cache entries usable when optional API fields were absent. */
 export function normalizeMobileAdvisory(value: unknown): MobileAdvisory {
   const record = value && typeof value === "object" ? value as UnknownRecord : {};
@@ -55,6 +77,9 @@ export function normalizeMobileAdvisory(value: unknown): MobileAdvisory {
     // publishedAt remains a required API field; an old cache missing it is
     // still readable and will be replaced by the next successful fetch.
     publishedAt: typeof record.publishedAt === "string" ? record.publishedAt : "",
+    photos: Array.isArray(record.photos)
+      ? record.photos.map(normalizePublicPhoto).filter((photo) => photo.url).sort((a, b) => a.position - b.position)
+      : [],
   };
 }
 

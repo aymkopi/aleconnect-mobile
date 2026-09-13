@@ -30,6 +30,7 @@ import { useAuthSession } from "@/hooks/use-auth-session";
 import { useConsumerAccount } from "@/hooks/use-consumer-account";
 import { consumeForcedLogoutReason } from "@/services/api";
 import { clearAdvisoryCache } from "@/services/advisories";
+import { clearPublicUpdatesCache } from "@/services/public-updates";
 import { registerDevicePushToken } from "@/services/notification-settings";
 import {
   advisoryIdFromPushData,
@@ -132,6 +133,7 @@ function PushTokenBridge() {
           void Promise.all([
             userId ? clearReportListCache(userId) : Promise.resolve(),
             userId ? clearAdvisoryCache({ userId, identityUserId: accountContext?.identityUserId, accessRevision: accountContext?.accessRevision }) : Promise.resolve(),
+            userId ? clearPublicUpdatesCache({ userId, identityUserId: accountContext?.identityUserId, accessRevision: accountContext?.accessRevision }) : Promise.resolve(),
             userId ? invalidateNotifications(userId) : Promise.resolve(),
           ]).finally(() => signOut().finally(() => router.replace({ pathname: "/sign-in", params: { mode: "email", linked: "1" } })));
         } else if (userId) {
@@ -181,6 +183,7 @@ function PushTokenBridge() {
       if (userId) {
         void Promise.all([
           clearAdvisoryCache({ userId, identityUserId: accountContext?.identityUserId, accessRevision: accountContext?.accessRevision }),
+          clearPublicUpdatesCache({ userId, identityUserId: accountContext?.identityUserId, accessRevision: accountContext?.accessRevision }),
           handleReportStatusPush(data, userId),
         ]).then(() => invalidateNotifications(userId));
       }

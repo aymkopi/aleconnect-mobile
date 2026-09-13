@@ -4,14 +4,11 @@ import { Heading } from "@/components/ui/heading";
 import { ListSection, ListSectionItem } from "@/components/ui/list-section";
 import { Text } from "@/components/ui/text";
 import { statusBarHeight } from "@/constants";
-import { AdvisoryListItem } from "@/features/advisories/advisory-list-item";
+import { PublicUpdateListItem } from "@/features/advisories/public-update-list-item";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useConsumerAccount } from "@/hooks/use-consumer-account";
-import {
-  fetchActiveAdvisories,
-  type MobileAdvisory,
-} from "@/services/advisories";
+import { fetchPublicUpdates, type MobilePublicUpdate } from "@/services/public-updates";
 import {
   fetchNotifications,
   subscribeNotificationsChanged,
@@ -42,13 +39,13 @@ export default function HomeRoute() {
   const { accountContext } = useConsumerAccount();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [advisories, setAdvisories] = useState<MobileAdvisory[]>([]);
+  const [updates, setUpdates] = useState<MobilePublicUpdate[]>([]);
   const [loadedScopeKey, setLoadedScopeKey] = useState<string | null>(null);
   const currentScopeKey = accountContext?.cacheKey ?? (session ? `${session.user.id}:0` : null);
   const activeScopeKeyRef = useRef(currentScopeKey);
   activeScopeKeyRef.current = currentScopeKey;
   const hasCurrentUserData = loadedScopeKey === currentScopeKey;
-  const visibleAdvisories = hasCurrentUserData ? advisories : [];
+  const visibleUpdates = hasCurrentUserData ? updates : [];
   const visibleUnreadCount = hasCurrentUserData ? unreadCount : 0;
   const [accentColor, mutedColor] = useAppColors(["accent", "muted"]);
   const bottomPadding = appScrollableBottomPadding(insets.bottom);
@@ -57,7 +54,7 @@ export default function HomeRoute() {
     useCallback(() => {
       if (!session) {
         setUnreadCount(0);
-        setAdvisories([]);
+        setUpdates([]);
         setLoadedScopeKey(null);
         return;
       }
@@ -72,12 +69,12 @@ export default function HomeRoute() {
             identityUserId: accountContext?.identityUserId,
             accessRevision: accountContext?.accessRevision,
           }),
-          fetchActiveAdvisories({ userId, identityUserId: accountContext?.identityUserId, accessRevision: accountContext?.accessRevision, limit: 3 }),
+          fetchPublicUpdates({ userId, identityUserId: accountContext?.identityUserId, accessRevision: accountContext?.accessRevision, limit: 3 }),
         ])
           .then(([notifications, advisoryPage]) => {
             if (!isActive || activeScopeKeyRef.current !== scopeKey) return;
             setUnreadCount(notifications.unreadCount);
-            setAdvisories(advisoryPage.advisories);
+            setUpdates(advisoryPage.items);
             setLoadedScopeKey(scopeKey);
           })
           .catch(() => undefined);
@@ -105,7 +102,7 @@ export default function HomeRoute() {
             accessRevision: accountContext?.accessRevision,
             force: true,
           }),
-          fetchActiveAdvisories({
+          fetchPublicUpdates({
             userId,
             identityUserId: accountContext?.identityUserId,
             accessRevision: accountContext?.accessRevision,
@@ -115,7 +112,7 @@ export default function HomeRoute() {
         ]);
         if (activeScopeKeyRef.current !== scopeKey) return;
         setUnreadCount(notifications.unreadCount);
-        setAdvisories(advisoryPage.advisories);
+        setUpdates(advisoryPage.items);
         setLoadedScopeKey(scopeKey);
       }
     } finally {
@@ -230,12 +227,12 @@ export default function HomeRoute() {
       {session ? (
         <View className="gap-2">
           <View className="flex-row items-center justify-between px-1">
-            <Heading size="sm">Active advisories</Heading>
+            <Heading size="sm">Public Updates</Heading>
 
             <Button
               size="sm"
               variant="ghost"
-              accessibilityLabel="View all advisories"
+              accessibilityLabel="View all public updates"
               onPress={() => router.push("/advisories")}
             >
               <ButtonText>View all</ButtonText>
@@ -244,17 +241,17 @@ export default function HomeRoute() {
             </Button>
           </View>
 
-          {visibleAdvisories.length > 0 ? (
+          {visibleUpdates.length > 0 ? (
             <View className="gap-2">
-              {visibleAdvisories.map((advisory) => (
-                <AdvisoryListItem
-                  key={advisory.id}
-                  advisory={advisory}
-                  onPress={() =>
+              {visibleUpdates.map((item) => (
+                <PublicUpdateListItem
+                  key={`${item.kind}:${item.id}`}
+                  item={item}
+                  onAdvisoryPress={(id) =>
                     router.push({
                       pathname: "/advisory/[id]",
                       params: {
-                        id: advisory.id,
+                        id,
                       },
                     })
                   }
@@ -266,7 +263,7 @@ export default function HomeRoute() {
               <ListSectionItem
                 description="New service notices for your area will appear here."
                 showDivider={false}
-                title="No active advisories"
+                title="No public updates"
               />
             </ListSection>
           )}

@@ -8,6 +8,7 @@ import {
 } from "@/utils/manila-time";
 import { ChevronRight } from "lucide-react-native";
 import { View } from "react-native";
+import { PublicUpdatePhotos } from "@/features/advisories/public-update-photos";
 
 function formatAdvisoryLabel(
   value: string | null | undefined,
@@ -162,6 +163,7 @@ export function AdvisoryListItem({
             strokeWidth={2}
           />
         </View>
+        <PublicUpdatePhotos photos={advisory.photos ?? []} />
       </View>
     </Pressable>
   );

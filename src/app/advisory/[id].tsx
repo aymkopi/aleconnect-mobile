@@ -20,6 +20,7 @@ import {
   useRouter,
 } from "expo-router";
 import { CalendarDays, Megaphone } from "lucide-react-native";
+import { PublicUpdatePhotos } from "@/features/advisories/public-update-photos";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BackHandler, RefreshControl, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -196,6 +197,7 @@ export default function AdvisoryDetailsRoute() {
               <Text className="leading-6 text-foreground">
                 {visibleAdvisory.content}
               </Text>
+              <PublicUpdatePhotos photos={visibleAdvisory.photos ?? []} />
             </VStack>
 
             <VStack className="gap-3 rounded-xl border border-border bg-card p-5">

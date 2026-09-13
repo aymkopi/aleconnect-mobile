@@ -3,14 +3,11 @@ import { Alert, AlertText } from "@/components/ui/alert";
 import { Button, ButtonText } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
-import { AdvisoryListItem } from "@/features/advisories/advisory-list-item";
+import { PublicUpdateListItem } from "@/features/advisories/public-update-list-item";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useConsumerAccount } from "@/hooks/use-consumer-account";
-import {
-  fetchActiveAdvisories,
-  type MobileAdvisory,
-} from "@/services/advisories";
+import { fetchPublicUpdates, type MobilePublicUpdate } from "@/services/public-updates";
 import { Redirect, useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useRef, useState } from "react";
 import {
@@ -28,7 +25,7 @@ export default function AdvisoriesRoute() {
   const { session, isLoading: isSessionLoading } = useAuthSession();
   const { accountContext } = useConsumerAccount();
   const [accentColor] = useAppColors(["accent"]);
-  const [items, setItems] = useState<MobileAdvisory[]>([]);
+  const [items, setItems] = useState<MobilePublicUpdate[]>([]);
   const [loadedScopeKey, setLoadedScopeKey] = useState<string | null>(null);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,19 +51,19 @@ export default function AdvisoriesRoute() {
       else if (!hasLoadedRef.current) setIsLoading(true);
 
       try {
-        const response = await fetchActiveAdvisories({
+        const response = await fetchPublicUpdates({
           userId,
           identityUserId: accountContext?.identityUserId,
           accessRevision: accountContext?.accessRevision,
           force,
         });
         if (activeScopeKeyRef.current !== scopeKey) return;
-        setItems(response.advisories);
+        setItems(response.items);
         setLoadedScopeKey(scopeKey);
         setNextCursor(response.nextCursor);
         setError(
           response.isStale
-            ? "Showing saved advisories while the network is unavailable."
+            ? "Showing saved public updates while the network is unavailable."
             : null,
         );
       } catch (nextError) {
@@ -74,7 +71,7 @@ export default function AdvisoriesRoute() {
         setError(
           nextError instanceof Error
             ? nextError.message
-            : "Unable to load advisories.",
+            : "Unable to load public updates.",
         );
       } finally {
         if (activeScopeKeyRef.current !== scopeKey) return;
@@ -91,7 +88,7 @@ export default function AdvisoriesRoute() {
     const userId = session.user.id;
     setIsLoadingMore(true);
     try {
-      const response = await fetchActiveAdvisories({
+      const response = await fetchPublicUpdates({
         userId,
         identityUserId: accountContext?.identityUserId,
         accessRevision: accountContext?.accessRevision,
@@ -100,8 +97,8 @@ export default function AdvisoriesRoute() {
       if (activeScopeKeyRef.current !== scopeKey) return;
       setItems((current) => [
         ...current,
-        ...response.advisories.filter(
-          (next) => !current.some((item) => item.id === next.id),
+        ...response.items.filter(
+          (next) => !current.some((item) => item.kind === next.kind && item.id === next.id),
         ),
       ]);
       setLoadedScopeKey(scopeKey);
@@ -111,7 +108,7 @@ export default function AdvisoriesRoute() {
       setError(
         nextError instanceof Error
           ? nextError.message
-          : "Unable to load more advisories.",
+          : "Unable to load more public updates.",
       );
     } finally {
       if (activeScopeKeyRef.current === scopeKey) setIsLoadingMore(false);
@@ -138,8 +135,8 @@ export default function AdvisoriesRoute() {
   return (
     <View className="flex-1 bg-background">
       <ChildAppBar
-        title="Advisories"
-        description="Active service notices for your area"
+        title="Public Updates"
+        description="Advisories and public posts from ALECO"
         onBack={handleBack}
         backAccessibilityLabel="Back to home"
       />
@@ -175,7 +172,7 @@ export default function AdvisoriesRoute() {
             paddingBottom: Math.max(insets.bottom, 16) + 20,
           }}
           data={visibleItems}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => `${item.kind}:${item.id}`}
           onEndReached={() => void loadMore()}
           onEndReachedThreshold={0.35}
           refreshControl={
@@ -196,10 +193,10 @@ export default function AdvisoriesRoute() {
           ListEmptyComponent={
             <View className="flex-1 items-center justify-center gap-3 px-8 py-20">
               <Text className="text-center font-semibold text-foreground">
-                No active advisories
+                No public updates
               </Text>
               <Text className="text-center text-sm text-muted-foreground">
-                New service notices for your account and area will appear here.
+                New advisories and Facebook posts will appear here.
               </Text>
               <Button
                 variant="secondary"
@@ -215,12 +212,12 @@ export default function AdvisoriesRoute() {
             ) : null
           }
           renderItem={({ item }) => (
-            <AdvisoryListItem
-              advisory={item}
-              onPress={() =>
+            <PublicUpdateListItem
+              item={item}
+              onAdvisoryPress={(id) =>
                 router.push({
                   pathname: "/advisory/[id]",
-                  params: { id: item.id },
+                  params: { id },
                 })
               }
             />

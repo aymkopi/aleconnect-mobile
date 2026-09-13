@@ -19,14 +19,14 @@ test("active advisories have a compact shared card, feed, home preview, and deta
   assert.match(service, /nextCursor/);
   assert.match(service, /readonly audience\?: string \| null;/);
 
-  assert.match(home, /Active advisories/);
-  assert.match(home, /AdvisoryListItem/);
+  assert.match(home, /Public Updates/);
+  assert.match(home, /PublicUpdateListItem/);
   assert.match(home, /\/advisories/);
   assert.match(home, /pathname:\s*"\/advisory\/\[id\]"/);
 
   assert.match(feed, /FlatList/);
   assert.match(feed, /nextCursor/);
-  assert.match(feed, /AdvisoryListItem/);
+  assert.match(feed, /PublicUpdateListItem/);
   assert.match(feed, /pathname:\s*"\/advisory\/\[id\]"/);
   assert.doesNotMatch(feed, /<ListSection>/);
 
