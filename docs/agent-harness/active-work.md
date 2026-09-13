@@ -1,5 +1,12 @@
 # Active work
 
+## Public Updates local integration (2026-09-14)
+
+- Status: feature head `4fb3fb9` is merged into local `master`; Staff feature head `3e71154` is present on local `main`.
+- Evidence: focused tests pass 6/6, TypeScript passes, lint has zero errors and four existing warnings, and the Staff-owned Public Updates contract snapshot is synchronized.
+- Boundary: the unrelated untracked Graphify query remains untouched. No push, backend deployment, EAS/OTA, store release, device install, secret change, or production mutation occurred.
+- Next: wait for the separately authorized backend-first release and physical-device acceptance.
+
 ## Public Updates backend production prerequisite (2026-09-14)
 
 - Status: Staff's additive Facebook publication schema is now present and empty on production Aiven; the `/api/mobile/public-updates` Worker code is not deployed, and this mobile build is not released.

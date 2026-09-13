@@ -1,7 +1,7 @@
 # ALEConnect cross-project contracts
 
 Authoritative source: `../aleconnect/docs/agent-harness/cross-project-contracts.md`
-Last synchronized staff commit: `9596dad254ef74d2477010f8e24c5080efbff76e`
+Last synchronized staff commit: `3e71154c5015ba3162c5bff83118f998d9c1f5ff`
 
 <!-- shared-contract:start -->
 ## Ownership and routes
@@ -25,6 +25,7 @@ Last synchronized staff commit: `9596dad254ef74d2477010f8e24c5080efbff76e`
 - Advisory publication, user access/password security, directory lifecycle/public visibility, account-link review, notification read state, delivery processing, and provider receipts remain separate status axes. The canonical target never advances business lifecycle from transport acceptance or read receipts. During Phase A compatibility only, the legacy `planned -> sent` transition on SMS acceptance remains isolated in the SMS outbox; canonical writers assign independently, and Phase C retires that alias behavior.
 - Tickets, Service Memos, dispatch trips, public updates, agency media, avatars, and report media retain server validation, authorization, and audit boundaries.
 - Cache invalidation is bounded to committed affected families. Mobile private caches are consumer-scoped and may provide a bounded last-successful offline view, never an authorization bypass.
+- Public Updates are owned by Staff at `/api/mobile/public-updates`. Its opaque cursor pages the `kind: "advisory" | "facebook_post"` union; advisory records retain compatible fields plus optional ordered `photos`. Eligible standalone/imported Facebook posts are additive, while records with an `advisory_id` are excluded by that exact relationship so an advisory and its mirrored Page post never appear twice. Mobile keys the bounded cache by consumer identity/access revision and uses `/api/mobile/advisories` only for `404`, `405`, or `501`; release the backend contract before the mobile reader.
 
 ## Compatibility and release order
 

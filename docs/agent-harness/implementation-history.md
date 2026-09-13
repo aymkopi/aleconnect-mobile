@@ -1,5 +1,16 @@
 # Implementation history
 
+## 2026-09-14 - Public Updates merged locally
+
+- Repositories: Mobile `master` fast-forwarded to feature head `4fb3fb9`; Staff `main` contains feature head `3e71154`.
+- Scope: integrated the consumer Public Updates reader and synchronized the Staff-owned shared contract without changing deployment or release state.
+- Files: `docs/agent-harness/cross-project-contracts.md`, active work, and implementation history; product files are the previously verified feature commits.
+- Contracts: `/api/mobile/public-updates`, exact `advisory_id` deduplication, consumer-scoped caching, legacy endpoint fallback, and backend-before-mobile release order are unchanged.
+- Verification: pre- and post-merge focused tests pass 6/6; TypeScript passes; lint has zero errors and four existing warnings; the shared contract comparison and harness pass after synchronization.
+- Git/Deployment: local `master` only. The unrelated untracked Graphify query remains untouched. No push, EAS/OTA, store release, device install, Staff deployment, secret change, or production mutation occurred.
+- Remaining risks: physical-device Public Updates rendering and coordinated backend/mobile release gates remain open.
+- Next: release the compatible Staff backend first only when authorized, then verify and distribute Mobile separately.
+
 ## 2026-09-14 - Public Updates production prerequisite update
 
 - Repositories: Staff/API production migration from isolated `codex/facebook-publication-public-updates`; mobile branch/source unchanged.
