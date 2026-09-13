@@ -1,5 +1,13 @@
 # Active work
 
+## Unified advisory and Facebook Public Updates feed (2026-09-14)
+
+- Status: the coordinated mobile task is complete on isolated branch `codex/facebook-publication-public-updates`.
+- Scope: the existing Advisories destination and Home preview now consume Staff's additive `/api/mobile/public-updates` contract, render advisory and standalone/imported Facebook cards together, show attached photos, and open eligible Facebook permalinks accessibly.
+- Safety: exact Staff-owned `advisory_id` linkage removes Facebook mirrors of advisories. The five-minute fresh/24-hour stale cache is keyed by consumer identity/access revision, clears beside the existing advisory cache, and never restores another consumer's data; legacy endpoint fallback is limited to an unavailable union route.
+- Evidence: Public Updates, advisory-feed, and identity-cache tests pass 6/6; TypeScript passes; lint has zero errors and the same four pre-existing warnings.
+- Boundary: no Staff deployment or database action, EAS/OTA, native release, store submission, physical-device acceptance, merge, or push occurred.
+
 ## Mobile API refresh (2026-09-13)
 
 - Status: all five approved tasks are complete on `codex/mobile-api-refresh`. Task 5 refreshed the Expo SDK 55 patch set, rebuilt and installed the development client through Expo's interactive selector, and completed the final physical-device smoke. The plan remains exactly five tasks.

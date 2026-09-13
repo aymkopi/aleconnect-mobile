@@ -1,5 +1,16 @@
 # Implementation history
 
+## 2026-09-14 - Unified Public Updates mobile reader
+
+- Repositories: mobile worktree `aleconnect-mobile-facebook-public-updates` consumes the Staff/API contract from `aleconnect/.worktrees/facebook-publication-public-updates`; both use isolated branch `codex/facebook-publication-public-updates`.
+- Scope: added the typed Public Updates client, identity/revision-scoped bounded cache, advisory-only compatibility fallback, unified list/card rendering, advisory and Facebook photo rendering, Facebook permalink action, Home preview integration, and cache invalidation hooks.
+- Files: Public Updates service/cache, advisory normalization, unified update cards/lists/photos, existing Advisories/Home/detail screens, root invalidation hooks, focused tests, and harness records.
+- Contracts: existing advisory routes/navigation remain canonical. Staff excludes linked Facebook mirrors by exact `advisory_id`; mobile renders only the returned additive union and preserves legacy advisory payload compatibility.
+- Verification: `tests/public-updates.test.mjs`, `tests/advisory-feed.test.mjs`, and `tests/advisory-identity-cache-contract.test.mjs` pass 6/6; `npx tsc --noEmit` passes; lint has zero errors and four existing unrelated warnings.
+- Git/Deployment: local isolated commit `2ff3b4b`; no EAS/OTA, store submission, native release, device install, Staff deployment, database mutation, merge, or push occurred.
+- Remaining risks: physical Android/iOS rendering, authenticated production union data, and coordinated server/mobile release ordering remain unverified.
+- Next: review the isolated branches and release the compatible Staff/API contract before any separately authorized mobile build or distribution.
+
 ## 2026-09-13 - Mobile API refresh device and live report acceptance
 
 - Repositories: `aleconnect-mobile` physical-device acceptance coordinated with Staff/API deployment from isolated `aleconnect` commit `37768d9`.
