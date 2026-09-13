@@ -1,5 +1,11 @@
 # Active work
 
+## Public Updates backend production prerequisite (2026-09-14)
+
+- Status: Staff's additive Facebook publication schema is now present and empty on production Aiven; the `/api/mobile/public-updates` Worker code is not deployed, and this mobile build is not released.
+- Evidence: production-backed exact relationship deduplication passed 1/1 and removed all fixtures. Staff's real Page smoke passed photo post, attachment, edit, comment, read, and cleanup operations with zero temporary objects remaining.
+- Boundary: mobile source and distribution are unchanged. Release still requires storing the derived Page token, then backend deployment before any separately authorized mobile release.
+
 ## Unified advisory and Facebook Public Updates feed (2026-09-14)
 
 - Status: the coordinated mobile task is complete on isolated branch `codex/facebook-publication-public-updates`.

@@ -1710,7 +1710,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tabs_layout",
-      "community": 36,
+      "community": 106,
       "norm_label": "_layout.tsx"
     },
     {
@@ -1720,7 +1720,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "tabs_layout_tabslayout",
-      "community": 36,
+      "community": 106,
       "norm_label": "tabslayout()"
     },
     {
@@ -1730,7 +1730,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tabs_home",
-      "community": 32,
+      "community": 82,
       "norm_label": "home.tsx"
     },
     {
@@ -1740,7 +1740,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "tabs_home_homeroute",
-      "community": 73,
+      "community": 179,
       "norm_label": "homeroute()"
     },
     {
@@ -1930,7 +1930,7 @@
       "source_location": "L523",
       "_origin": "ast",
       "id": "tabs_hotlines_hotlinesroute",
-      "community": 85,
+      "community": 179,
       "norm_label": "hotlinesroute()"
     },
     {
@@ -1970,7 +1970,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "profile_accounts",
-      "community": 176,
+      "community": 179,
       "norm_label": "accounts.tsx"
     },
     {
@@ -1980,7 +1980,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "profile_accounts_linkedaccountsroute",
-      "community": 85,
+      "community": 179,
       "norm_label": "linkedaccountsroute()"
     },
     {
@@ -2030,7 +2030,7 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "profile_details_profiledetailsroute",
-      "community": 85,
+      "community": 179,
       "norm_label": "profiledetailsroute()"
     },
     {
@@ -2100,7 +2100,7 @@
       "source_location": "L144",
       "_origin": "ast",
       "id": "profile_index_profileroute",
-      "community": 85,
+      "community": 179,
       "norm_label": "profileroute()"
     },
     {
@@ -2110,7 +2110,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "profile_link_account",
-      "community": 162,
+      "community": 30,
       "norm_label": "link-account.tsx"
     },
     {
@@ -2120,7 +2120,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "profile_link_account_linkaccountroute",
-      "community": 85,
+      "community": 179,
       "norm_label": "linkaccountroute()"
     },
     {
@@ -2130,7 +2130,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "profile_push_notifications",
-      "community": 156,
+      "community": 36,
       "norm_label": "push-notifications.tsx"
     },
     {
@@ -2140,7 +2140,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "profile_push_notifications_parentstate",
-      "community": 156,
+      "community": 36,
       "norm_label": "parentstate"
     },
     {
@@ -2150,7 +2150,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "profile_push_notifications_notice",
-      "community": 156,
+      "community": 36,
       "norm_label": "notice"
     },
     {
@@ -2160,7 +2160,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "profile_push_notifications_ospermissionstate",
-      "community": 156,
+      "community": 36,
       "norm_label": "ospermissionstate"
     },
     {
@@ -2170,7 +2170,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "profile_push_notifications_makeinitialselection",
-      "community": 156,
+      "community": 36,
       "norm_label": "makeinitialselection()"
     },
     {
@@ -2180,7 +2180,7 @@
       "source_location": "L75",
       "_origin": "ast",
       "id": "profile_push_notifications_compactselection",
-      "community": 156,
+      "community": 36,
       "norm_label": "compactselection()"
     },
     {
@@ -2190,7 +2190,7 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "profile_push_notifications_buildsavepayload",
-      "community": 156,
+      "community": 36,
       "norm_label": "buildsavepayload()"
     },
     {
@@ -2200,7 +2200,7 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "profile_push_notifications_tristatecheckbox",
-      "community": 156,
+      "community": 36,
       "norm_label": "tristatecheckbox()"
     },
     {
@@ -2210,7 +2210,7 @@
       "source_location": "L156",
       "_origin": "ast",
       "id": "profile_push_notifications_feedercheckbox",
-      "community": 156,
+      "community": 36,
       "norm_label": "feedercheckbox()"
     },
     {
@@ -2220,7 +2220,7 @@
       "source_location": "L181",
       "_origin": "ast",
       "id": "profile_push_notifications_toggleswitch",
-      "community": 156,
+      "community": 36,
       "norm_label": "toggleswitch()"
     },
     {
@@ -2230,7 +2230,7 @@
       "source_location": "L201",
       "_origin": "ast",
       "id": "profile_push_notifications_preferenceswitch",
-      "community": 156,
+      "community": 36,
       "norm_label": "preferenceswitch()"
     },
     {
@@ -2240,7 +2240,7 @@
       "source_location": "L232",
       "_origin": "ast",
       "id": "profile_push_notifications_loadingstate",
-      "community": 156,
+      "community": 36,
       "norm_label": "loadingstate()"
     },
     {
@@ -2250,7 +2250,7 @@
       "source_location": "L243",
       "_origin": "ast",
       "id": "profile_push_notifications_pushnotificationsroute",
-      "community": 73,
+      "community": 179,
       "norm_label": "pushnotificationsroute()"
     },
     {
@@ -2310,7 +2310,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "reports_layout",
-      "community": 85,
+      "community": 179,
       "norm_label": "_layout.tsx"
     },
     {
@@ -2320,7 +2320,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "reports_layout_unstable_settings",
-      "community": 85,
+      "community": 179,
       "norm_label": "unstable_settings"
     },
     {
@@ -2330,7 +2330,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "reports_layout_complaintslayout",
-      "community": 85,
+      "community": 179,
       "norm_label": "complaintslayout()"
     },
     {
@@ -2530,7 +2530,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "reports_queue",
-      "community": 179,
+      "community": 82,
       "norm_label": "queue.tsx"
     },
     {
@@ -2540,7 +2540,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "reports_queue_reportqueueroute",
-      "community": 73,
+      "community": 36,
       "norm_label": "reportqueueroute()"
     },
     {
@@ -2620,7 +2620,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_advisories",
-      "community": 32,
+      "community": 82,
       "norm_label": "advisories.tsx"
     },
     {
@@ -2630,7 +2630,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "app_advisories_advisoriesroute",
-      "community": 85,
+      "community": 179,
       "norm_label": "advisoriesroute()"
     },
     {
@@ -2710,7 +2710,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "app_email_setup_emailsetuproute",
-      "community": 85,
+      "community": 30,
       "norm_label": "emailsetuproute()"
     },
     {
@@ -2760,7 +2760,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_notifications",
-      "community": 36,
+      "community": 82,
       "norm_label": "notifications.tsx"
     },
     {
@@ -2770,7 +2770,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "app_notifications_notice",
-      "community": 36,
+      "community": 82,
       "norm_label": "notice"
     },
     {
@@ -2780,7 +2780,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "app_notifications_categoryfilters",
-      "community": 36,
+      "community": 82,
       "norm_label": "categoryfilters"
     },
     {
@@ -2790,7 +2790,7 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "app_notifications_severitytone",
-      "community": 36,
+      "community": 82,
       "norm_label": "severitytone()"
     },
     {
@@ -2800,7 +2800,7 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "app_notifications_searchabletext",
-      "community": 36,
+      "community": 82,
       "norm_label": "searchabletext()"
     },
     {
@@ -2810,7 +2810,7 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "app_notifications_notificationdescription",
-      "community": 36,
+      "community": 82,
       "norm_label": "notificationdescription()"
     },
     {
@@ -2820,7 +2820,7 @@
       "source_location": "L141",
       "_origin": "ast",
       "id": "app_notifications_notificationrow",
-      "community": 36,
+      "community": 82,
       "norm_label": "notificationrow()"
     },
     {
@@ -2830,7 +2830,7 @@
       "source_location": "L254",
       "_origin": "ast",
       "id": "app_notifications_emptystate",
-      "community": 36,
+      "community": 82,
       "norm_label": "emptystate()"
     },
     {
@@ -2840,7 +2840,7 @@
       "source_location": "L284",
       "_origin": "ast",
       "id": "app_notifications_loadingstate",
-      "community": 36,
+      "community": 82,
       "norm_label": "loadingstate()"
     },
     {
@@ -2850,7 +2850,7 @@
       "source_location": "L294",
       "_origin": "ast",
       "id": "app_notifications_notificationsroute",
-      "community": 73,
+      "community": 179,
       "norm_label": "notificationsroute()"
     },
     {
@@ -2860,7 +2860,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "report_id",
-      "community": 85,
+      "community": 179,
       "norm_label": "[id].tsx"
     },
     {
@@ -2870,7 +2870,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "report_id_reportdetailroute",
-      "community": 85,
+      "community": 179,
       "norm_label": "reportdetailroute()"
     },
     {
@@ -2880,7 +2880,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_sign_in",
-      "community": 162,
+      "community": 30,
       "norm_label": "sign-in.tsx"
     },
     {
@@ -2890,7 +2890,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "app_sign_in_signinmode",
-      "community": 162,
+      "community": 30,
       "norm_label": "signinmode"
     },
     {
@@ -2900,7 +2900,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "app_sign_in_signinroute",
-      "community": 85,
+      "community": 30,
       "norm_label": "signinroute()"
     },
     {
@@ -2910,7 +2910,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_child_app_bar",
-      "community": 41,
+      "community": 82,
       "norm_label": "child-app-bar.tsx"
     },
     {
@@ -2920,7 +2920,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "components_child_app_bar_childappbarprops",
-      "community": 41,
+      "community": 82,
       "norm_label": "childappbarprops"
     },
     {
@@ -2930,7 +2930,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "components_child_app_bar_childappbar",
-      "community": 41,
+      "community": 32,
       "norm_label": "childappbar()"
     },
     {
@@ -2990,7 +2990,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "components_floating_app_bar_appscrollablebottompadding",
-      "community": 73,
+      "community": 179,
       "norm_label": "appscrollablebottompadding()"
     },
     {
@@ -3030,7 +3030,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_floating_tabs_bar",
-      "community": 36,
+      "community": 106,
       "norm_label": "floating-tabs-bar.tsx"
     },
     {
@@ -3040,7 +3040,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "components_floating_tabs_bar_nestedroute",
-      "community": 36,
+      "community": 106,
       "norm_label": "nestedroute"
     },
     {
@@ -3050,7 +3050,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "components_floating_tabs_bar_getfocusednestedroutename",
-      "community": 36,
+      "community": 106,
       "norm_label": "getfocusednestedroutename()"
     },
     {
@@ -3060,7 +3060,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "components_floating_tabs_bar_floatingtabsbar",
-      "community": 36,
+      "community": 106,
       "norm_label": "floatingtabsbar()"
     },
     {
@@ -3390,7 +3390,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "badge_index",
-      "community": 95,
+      "community": 19,
       "norm_label": "index.tsx"
     },
     {
@@ -3400,7 +3400,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "badge_index_badgestyle",
-      "community": 95,
+      "community": 19,
       "norm_label": "badgestyle"
     },
     {
@@ -3410,7 +3410,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "badge_index_badgetextstyle",
-      "community": 95,
+      "community": 19,
       "norm_label": "badgetextstyle"
     },
     {
@@ -3420,7 +3420,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "badge_index_badgeiconstyle",
-      "community": 95,
+      "community": 19,
       "norm_label": "badgeiconstyle"
     },
     {
@@ -3430,7 +3430,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "badge_index_contextview",
-      "community": 95,
+      "community": 19,
       "norm_label": "contextview"
     },
     {
@@ -3440,7 +3440,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "badge_index_ibadgeprops",
-      "community": 95,
+      "community": 19,
       "norm_label": "ibadgeprops"
     },
     {
@@ -3450,7 +3450,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "badge_index_badge",
-      "community": 95,
+      "community": 19,
       "norm_label": "badge()"
     },
     {
@@ -3460,7 +3460,7 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "badge_index_ibadgetextprops",
-      "community": 95,
+      "community": 19,
       "norm_label": "ibadgetextprops"
     },
     {
@@ -3470,7 +3470,7 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "badge_index_badgetext",
-      "community": 32,
+      "community": 19,
       "norm_label": "badgetext"
     },
     {
@@ -3480,7 +3480,7 @@
       "source_location": "L94",
       "_origin": "ast",
       "id": "badge_index_ibadgeiconprops",
-      "community": 95,
+      "community": 19,
       "norm_label": "ibadgeiconprops"
     },
     {
@@ -3490,7 +3490,7 @@
       "source_location": "L99",
       "_origin": "ast",
       "id": "badge_index_styleduiicon",
-      "community": 95,
+      "community": 19,
       "norm_label": "styleduiicon"
     },
     {
@@ -3500,7 +3500,7 @@
       "source_location": "L102",
       "_origin": "ast",
       "id": "badge_index_badgeicon",
-      "community": 95,
+      "community": 19,
       "norm_label": "badgeicon"
     },
     {
@@ -4000,7 +4000,7 @@
       "source_location": "L128",
       "_origin": "ast",
       "id": "button_index_button",
-      "community": 32,
+      "community": 82,
       "norm_label": "button"
     },
     {
@@ -4020,7 +4020,7 @@
       "source_location": "L143",
       "_origin": "ast",
       "id": "button_index_buttontext",
-      "community": 32,
+      "community": 82,
       "norm_label": "buttontext"
     },
     {
@@ -4030,7 +4030,7 @@
       "source_location": "L163",
       "_origin": "ast",
       "id": "button_index_buttonspinner",
-      "community": 162,
+      "community": 30,
       "norm_label": "buttonspinner"
     },
     {
@@ -4080,7 +4080,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "divider_index",
-      "community": 180,
+      "community": 87,
       "norm_label": "index.tsx"
     },
     {
@@ -4090,7 +4090,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "divider_index_dividerstyle",
-      "community": 180,
+      "community": 87,
       "norm_label": "dividerstyle"
     },
     {
@@ -4100,7 +4100,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "divider_index_iuidividerprops",
-      "community": 180,
+      "community": 87,
       "norm_label": "iuidividerprops"
     },
     {
@@ -4110,7 +4110,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "divider_index_divider",
-      "community": 180,
+      "community": 87,
       "norm_label": "divider"
     },
     {
@@ -4500,7 +4500,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "heading_index",
-      "community": 41,
+      "community": 32,
       "norm_label": "index.tsx"
     },
     {
@@ -4510,7 +4510,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "heading_index_iheadingprops",
-      "community": 41,
+      "community": 32,
       "norm_label": "iheadingprops"
     },
     {
@@ -4520,7 +4520,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "heading_index_h1",
-      "community": 41,
+      "community": 32,
       "norm_label": "h1"
     },
     {
@@ -4530,7 +4530,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "heading_index_h2",
-      "community": 41,
+      "community": 32,
       "norm_label": "h2"
     },
     {
@@ -4540,7 +4540,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "heading_index_h3",
-      "community": 41,
+      "community": 32,
       "norm_label": "h3"
     },
     {
@@ -4550,7 +4550,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "heading_index_h4",
-      "community": 41,
+      "community": 32,
       "norm_label": "h4"
     },
     {
@@ -4560,7 +4560,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "heading_index_h5",
-      "community": 41,
+      "community": 32,
       "norm_label": "h5"
     },
     {
@@ -4570,7 +4570,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "heading_index_h6",
-      "community": 41,
+      "community": 32,
       "norm_label": "h6"
     },
     {
@@ -4580,7 +4580,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "heading_index_mappedheading",
-      "community": 41,
+      "community": 32,
       "norm_label": "mappedheading"
     },
     {
@@ -4590,7 +4590,7 @@
       "source_location": "L185",
       "_origin": "ast",
       "id": "heading_index_heading",
-      "community": 41,
+      "community": 82,
       "norm_label": "heading"
     },
     {
@@ -4660,7 +4660,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "input_index",
-      "community": 162,
+      "community": 30,
       "norm_label": "index.tsx"
     },
     {
@@ -4670,7 +4670,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "input_index_styleduiicon",
-      "community": 162,
+      "community": 30,
       "norm_label": "styleduiicon"
     },
     {
@@ -4680,7 +4680,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "input_index_uiinput",
-      "community": 162,
+      "community": 30,
       "norm_label": "uiinput"
     },
     {
@@ -4690,7 +4690,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "input_index_inputstyle",
-      "community": 162,
+      "community": 30,
       "norm_label": "inputstyle"
     },
     {
@@ -4700,7 +4700,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "input_index_inputiconstyle",
-      "community": 162,
+      "community": 30,
       "norm_label": "inputiconstyle"
     },
     {
@@ -4710,7 +4710,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "input_index_inputslotstyle",
-      "community": 162,
+      "community": 30,
       "norm_label": "inputslotstyle"
     },
     {
@@ -4720,7 +4720,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "input_index_inputfieldstyle",
-      "community": 162,
+      "community": 30,
       "norm_label": "inputfieldstyle"
     },
     {
@@ -4730,7 +4730,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "input_index_iinputprops",
-      "community": 162,
+      "community": 30,
       "norm_label": "iinputprops"
     },
     {
@@ -4740,7 +4740,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "input_index_input",
-      "community": 162,
+      "community": 30,
       "norm_label": "input"
     },
     {
@@ -4750,7 +4750,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "input_index_iinputiconprops",
-      "community": 162,
+      "community": 30,
       "norm_label": "iinputiconprops"
     },
     {
@@ -4760,7 +4760,7 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "input_index_inputicon",
-      "community": 162,
+      "community": 30,
       "norm_label": "inputicon"
     },
     {
@@ -4770,7 +4770,7 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "input_index_iinputslotprops",
-      "community": 162,
+      "community": 30,
       "norm_label": "iinputslotprops"
     },
     {
@@ -4780,7 +4780,7 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "input_index_inputslot",
-      "community": 162,
+      "community": 30,
       "norm_label": "inputslot"
     },
     {
@@ -4790,7 +4790,7 @@
       "source_location": "L91",
       "_origin": "ast",
       "id": "input_index_iinputfieldprops",
-      "community": 162,
+      "community": 30,
       "norm_label": "iinputfieldprops"
     },
     {
@@ -4800,7 +4800,7 @@
       "source_location": "L94",
       "_origin": "ast",
       "id": "input_index_inputfield",
-      "community": 162,
+      "community": 30,
       "norm_label": "inputfield"
     },
     {
@@ -4810,7 +4810,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_list_section",
-      "community": 179,
+      "community": 82,
       "norm_label": "list-section.tsx"
     },
     {
@@ -4820,7 +4820,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "ui_list_section_listsection",
-      "community": 179,
+      "community": 82,
       "norm_label": "listsection()"
     },
     {
@@ -4830,7 +4830,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "ui_list_section_listsectionitem",
-      "community": 179,
+      "community": 82,
       "norm_label": "listsectionitem()"
     },
     {
@@ -5320,7 +5320,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "pressable_index",
-      "community": 179,
+      "community": 41,
       "norm_label": "index.tsx"
     },
     {
@@ -5330,7 +5330,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "pressable_index_uipressable",
-      "community": 179,
+      "community": 41,
       "norm_label": "uipressable"
     },
     {
@@ -5340,7 +5340,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "pressable_index_pressablestyle",
-      "community": 179,
+      "community": 41,
       "norm_label": "pressablestyle"
     },
     {
@@ -5350,7 +5350,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "pressable_index_ipressableprops",
-      "community": 179,
+      "community": 41,
       "norm_label": "ipressableprops"
     },
     {
@@ -5360,7 +5360,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "pressable_index_pressable",
-      "community": 179,
+      "community": 41,
       "norm_label": "pressable"
     },
     {
@@ -5370,7 +5370,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "progress_index",
-      "community": 156,
+      "community": 95,
       "norm_label": "index.tsx"
     },
     {
@@ -5380,7 +5380,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "progress_index_uiprogress",
-      "community": 156,
+      "community": 95,
       "norm_label": "uiprogress"
     },
     {
@@ -5390,7 +5390,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "progress_index_progressstyle",
-      "community": 156,
+      "community": 95,
       "norm_label": "progressstyle"
     },
     {
@@ -5400,7 +5400,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "progress_index_progressfilledtrackstyle",
-      "community": 156,
+      "community": 95,
       "norm_label": "progressfilledtrackstyle"
     },
     {
@@ -5410,7 +5410,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "progress_index_iprogressprops",
-      "community": 156,
+      "community": 95,
       "norm_label": "iprogressprops"
     },
     {
@@ -5420,7 +5420,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "progress_index_iprogressfilledtrackprops",
-      "community": 156,
+      "community": 95,
       "norm_label": "iprogressfilledtrackprops"
     },
     {
@@ -5430,7 +5430,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "progress_index_progress",
-      "community": 156,
+      "community": 95,
       "norm_label": "progress"
     },
     {
@@ -5440,7 +5440,7 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "progress_index_progressfilledtrack",
-      "community": 156,
+      "community": 95,
       "norm_label": "progressfilledtrack"
     },
     {
@@ -5450,7 +5450,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_search_field",
-      "community": 162,
+      "community": 30,
       "norm_label": "search-field.tsx"
     },
     {
@@ -5460,7 +5460,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "ui_search_field_searchfieldprops",
-      "community": 162,
+      "community": 30,
       "norm_label": "searchfieldprops"
     },
     {
@@ -5470,7 +5470,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "ui_search_field_searchfield",
-      "community": 36,
+      "community": 82,
       "norm_label": "searchfield()"
     },
     {
@@ -5570,7 +5570,7 @@
       "source_location": "L119",
       "_origin": "ast",
       "id": "select_index_select",
-      "community": 30,
+      "community": 77,
       "norm_label": "select"
     },
     {
@@ -5590,7 +5590,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "select_index_selecttrigger",
-      "community": 30,
+      "community": 77,
       "norm_label": "selecttrigger"
     },
     {
@@ -5610,7 +5610,7 @@
       "source_location": "L161",
       "_origin": "ast",
       "id": "select_index_selectinput",
-      "community": 30,
+      "community": 77,
       "norm_label": "selectinput"
     },
     {
@@ -5630,7 +5630,7 @@
       "source_location": "L184",
       "_origin": "ast",
       "id": "select_index_selecticon",
-      "community": 30,
+      "community": 77,
       "norm_label": "selecticon"
     },
     {
@@ -5650,7 +5650,7 @@
       "source_location": "L241",
       "_origin": "ast",
       "id": "select_index_selectcontent",
-      "community": 30,
+      "community": 77,
       "norm_label": "selectcontent"
     },
     {
@@ -6270,7 +6270,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "text_index",
-      "community": 179,
+      "community": 82,
       "norm_label": "index.tsx"
     },
     {
@@ -6280,7 +6280,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "text_index_itextprops",
-      "community": 179,
+      "community": 82,
       "norm_label": "itextprops"
     },
     {
@@ -6290,7 +6290,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "text_index_text",
-      "community": 179,
+      "community": 82,
       "norm_label": "text"
     },
     {
@@ -6350,7 +6350,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "textarea_index",
-      "community": 168,
+      "community": 111,
       "norm_label": "index.tsx"
     },
     {
@@ -6360,7 +6360,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "textarea_index_uitextarea",
-      "community": 168,
+      "community": 111,
       "norm_label": "uitextarea"
     },
     {
@@ -6370,7 +6370,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "textarea_index_textareastyle",
-      "community": 168,
+      "community": 111,
       "norm_label": "textareastyle"
     },
     {
@@ -6380,7 +6380,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "textarea_index_textareainputstyle",
-      "community": 168,
+      "community": 111,
       "norm_label": "textareainputstyle"
     },
     {
@@ -6390,7 +6390,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "textarea_index_itextareaprops",
-      "community": 168,
+      "community": 111,
       "norm_label": "itextareaprops"
     },
     {
@@ -6400,7 +6400,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "textarea_index_textarea",
-      "community": 168,
+      "community": 111,
       "norm_label": "textarea"
     },
     {
@@ -6410,7 +6410,7 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "textarea_index_itextareainputprops",
-      "community": 168,
+      "community": 111,
       "norm_label": "itextareainputprops"
     },
     {
@@ -6420,7 +6420,7 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "textarea_index_textareainput",
-      "community": 168,
+      "community": 111,
       "norm_label": "textareainput"
     },
     {
@@ -6570,7 +6570,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "vstack_index",
-      "community": 32,
+      "community": 19,
       "norm_label": "index.tsx"
     },
     {
@@ -6580,7 +6580,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "vstack_index_ivstackprops",
-      "community": 32,
+      "community": 19,
       "norm_label": "ivstackprops"
     },
     {
@@ -6590,7 +6590,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "vstack_index_vstack",
-      "community": 32,
+      "community": 19,
       "norm_label": "vstack"
     },
     {
@@ -6600,7 +6600,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "vstack_index_web",
-      "community": 106,
+      "community": 19,
       "norm_label": "index.web.tsx"
     },
     {
@@ -6610,7 +6610,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "vstack_index_web_ivstackprops",
-      "community": 106,
+      "community": 19,
       "norm_label": "ivstackprops"
     },
     {
@@ -6620,7 +6620,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "vstack_index_web_vstack",
-      "community": 106,
+      "community": 19,
       "norm_label": "vstack"
     },
     {
@@ -6630,7 +6630,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "vstack_styles",
-      "community": 106,
+      "community": 19,
       "norm_label": "styles.tsx"
     },
     {
@@ -6640,7 +6640,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "vstack_styles_vstackstyle",
-      "community": 106,
+      "community": 19,
       "norm_label": "vstackstyle"
     },
     {
@@ -6790,7 +6790,7 @@
       "source_location": "L163",
       "_origin": "ast",
       "id": "context_auth_session_context_useauthsessioncontext",
-      "community": 85,
+      "community": 164,
       "norm_label": "useauthsessioncontext()"
     },
     {
@@ -6850,7 +6850,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "context_consumer_account_context",
-      "community": 83,
+      "community": 93,
       "norm_label": "consumer-account-context.tsx"
     },
     {
@@ -6860,7 +6860,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "context_consumer_account_context_consumeraccountcontextvalue",
-      "community": 83,
+      "community": 93,
       "norm_label": "consumeraccountcontextvalue"
     },
     {
@@ -6870,7 +6870,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "context_consumer_account_context_consumeraccountcontext",
-      "community": 83,
+      "community": 93,
       "norm_label": "consumeraccountcontext"
     },
     {
@@ -6880,7 +6880,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "context_consumer_account_context_consumeraccountprovider",
-      "community": 83,
+      "community": 93,
       "norm_label": "consumeraccountprovider()"
     },
     {
@@ -6900,7 +6900,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "context_consumer_profile_context",
-      "community": 10,
+      "community": 179,
       "norm_label": "consumer-profile-context.ts"
     },
     {
@@ -6910,7 +6910,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "context_consumer_profile_context_consumerprofilecontext",
-      "community": 10,
+      "community": 179,
       "norm_label": "consumerprofilecontext"
     },
     {
@@ -6920,7 +6920,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "context_consumer_profile_context_consumerprofileprovider",
-      "community": 10,
+      "community": 179,
       "norm_label": "consumerprofileprovider()"
     },
     {
@@ -6930,7 +6930,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "context_consumer_profile_context_useconsumerprofilecontext",
-      "community": 85,
+      "community": 179,
       "norm_label": "useconsumerprofilecontext()"
     },
     {
@@ -6940,7 +6940,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "context_report_queue_context",
-      "community": 93,
+      "community": 160,
       "norm_label": "report-queue-context.tsx"
     },
     {
@@ -6950,7 +6950,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "context_report_queue_context_reportqueuecontextvalue",
-      "community": 93,
+      "community": 160,
       "norm_label": "reportqueuecontextvalue"
     },
     {
@@ -6960,7 +6960,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "context_report_queue_context_reportqueuecontext",
-      "community": 93,
+      "community": 160,
       "norm_label": "reportqueuecontext"
     },
     {
@@ -6970,7 +6970,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "context_report_queue_context_reportqueueprovider",
-      "community": 85,
+      "community": 179,
       "norm_label": "reportqueueprovider()"
     },
     {
@@ -7000,7 +7000,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "accounts_contract_linkedaccount",
-      "community": 83,
+      "community": 164,
       "norm_label": "linkedaccount"
     },
     {
@@ -7030,7 +7030,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "accounts_contract_consumeraccountcontext",
-      "community": 83,
+      "community": 93,
       "norm_label": "consumeraccountcontext"
     },
     {
@@ -7180,7 +7180,7 @@
       "source_location": "L170",
       "_origin": "ast",
       "id": "accounts_contract_combineconsumeraccountsnapshots",
-      "community": 83,
+      "community": 93,
       "norm_label": "combineconsumeraccountsnapshots()"
     },
     {
@@ -7190,7 +7190,7 @@
       "source_location": "L205",
       "_origin": "ast",
       "id": "accounts_contract_readconsistentconsumeraccountsnapshot",
-      "community": 83,
+      "community": 93,
       "norm_label": "readconsistentconsumeraccountsnapshot()"
     },
     {
@@ -7260,7 +7260,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "advisories_advisory_list_item",
-      "community": 32,
+      "community": 19,
       "norm_label": "advisory-list-item.tsx"
     },
     {
@@ -7270,7 +7270,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "advisories_advisory_list_item_formatadvisorylabel",
-      "community": 32,
+      "community": 19,
       "norm_label": "formatadvisorylabel()"
     },
     {
@@ -7280,7 +7280,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "advisories_advisory_list_item_advisoryseveritybadge",
-      "community": 32,
+      "community": 19,
       "norm_label": "advisoryseveritybadge()"
     },
     {
@@ -7290,7 +7290,7 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "advisories_advisory_list_item_advisorylistitem",
-      "community": 32,
+      "community": 19,
       "norm_label": "advisorylistitem()"
     },
     {
@@ -7300,7 +7300,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "advisories_public_update_list_item",
-      "community": 32,
+      "community": 19,
       "norm_label": "public-update-list-item.tsx"
     },
     {
@@ -7310,7 +7310,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "advisories_public_update_list_item_publicupdatelistitem",
-      "community": 32,
+      "community": 19,
       "norm_label": "publicupdatelistitem()"
     },
     {
@@ -7320,7 +7320,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "advisories_public_update_photos",
-      "community": 32,
+      "community": 19,
       "norm_label": "public-update-photos.tsx"
     },
     {
@@ -7330,7 +7330,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "advisories_public_update_photos_publicupdatephotos",
-      "community": 32,
+      "community": 19,
       "norm_label": "publicupdatephotos()"
     },
     {
@@ -7550,7 +7550,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "maps_static_location_map_staticlocationmap",
-      "community": 36,
+      "community": 105,
       "norm_label": "staticlocationmap()"
     },
     {
@@ -7560,7 +7560,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_accountdetailsbuilder",
-      "community": 179,
+      "community": 82,
       "norm_label": "accountdetailsbuilder.tsx"
     },
     {
@@ -7570,7 +7570,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "components_accountdetailsbuilder_accountdetailsbuilderprops",
-      "community": 179,
+      "community": 82,
       "norm_label": "accountdetailsbuilderprops"
     },
     {
@@ -7670,7 +7670,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "components_profiledetailssheetcontent_editablefield",
-      "community": 179,
+      "community": 30,
       "norm_label": "editablefield"
     },
     {
@@ -7690,7 +7690,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "components_profiledetailssheetcontent_profiledetailssheetcontent",
-      "community": 179,
+      "community": 30,
       "norm_label": "profiledetailssheetcontent()"
     },
     {
@@ -7790,7 +7790,7 @@
       "source_location": "L91",
       "_origin": "ast",
       "id": "reports_address_canuseresolvedpin",
-      "community": 89,
+      "community": 98,
       "norm_label": "canuseresolvedpin()"
     },
     {
@@ -7870,7 +7870,7 @@
       "source_location": "L211",
       "_origin": "ast",
       "id": "reports_address_formatresolvedaddress",
-      "community": 98,
+      "community": 89,
       "norm_label": "formatresolvedaddress()"
     },
     {
@@ -7990,7 +7990,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "components_evidence_photo_viewer_evidencephotoviewer",
-      "community": 82,
+      "community": 41,
       "norm_label": "evidencephotoviewer()"
     },
     {
@@ -8000,7 +8000,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "reports_contract",
-      "community": 111,
+      "community": 81,
       "norm_label": "contract.ts"
     },
     {
@@ -8010,7 +8010,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "reports_contract_reportlimits",
-      "community": 111,
+      "community": 81,
       "norm_label": "reportlimits"
     },
     {
@@ -8020,7 +8020,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "reports_contract_reportaccountselectoraccount",
-      "community": 111,
+      "community": 81,
       "norm_label": "reportaccountselectoraccount"
     },
     {
@@ -8050,7 +8050,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "reports_contract_albaybounds",
-      "community": 111,
+      "community": 81,
       "norm_label": "albaybounds"
     },
     {
@@ -8060,7 +8060,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "reports_contract_reportformerrors",
-      "community": 111,
+      "community": 81,
       "norm_label": "reportformerrors"
     },
     {
@@ -8080,7 +8080,7 @@
       "source_location": "L81",
       "_origin": "ast",
       "id": "reports_contract_hascurrentreportcontract",
-      "community": 111,
+      "community": 81,
       "norm_label": "hascurrentreportcontract()"
     },
     {
@@ -8100,7 +8100,7 @@
       "source_location": "L203",
       "_origin": "ast",
       "id": "reports_contract_reportdetails",
-      "community": 111,
+      "community": 81,
       "norm_label": "reportdetails()"
     },
     {
@@ -8110,7 +8110,7 @@
       "source_location": "L218",
       "_origin": "ast",
       "id": "reports_contract_conditionalreportpayload",
-      "community": 111,
+      "community": 81,
       "norm_label": "conditionalreportpayload()"
     },
     {
@@ -8120,7 +8120,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "reports_data",
-      "community": 19,
+      "community": 81,
       "norm_label": "data.ts"
     },
     {
@@ -8130,7 +8130,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "reports_data_complaintcategory",
-      "community": 111,
+      "community": 81,
       "norm_label": "complaintcategory"
     },
     {
@@ -8140,7 +8140,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "reports_data_complainttype",
-      "community": 111,
+      "community": 81,
       "norm_label": "complainttype"
     },
     {
@@ -8150,7 +8150,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "reports_data_complaintmunicipality",
-      "community": 19,
+      "community": 81,
       "norm_label": "complaintmunicipality"
     },
     {
@@ -8160,7 +8160,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "reports_data_complaintbarangay",
-      "community": 19,
+      "community": 81,
       "norm_label": "complaintbarangay"
     },
     {
@@ -8170,7 +8170,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "reports_data_complaintmeta",
-      "community": 89,
+      "community": 81,
       "norm_label": "complaintmeta"
     },
     {
@@ -8190,7 +8190,7 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "reports_data_preserveknownconsumerreportstatuses",
-      "community": 19,
+      "community": 161,
       "norm_label": "preserveknownconsumerreportstatuses()"
     },
     {
@@ -8200,7 +8200,7 @@
       "source_location": "L95",
       "_origin": "ast",
       "id": "reports_data_preserveknownconsumerreportdetailstatus",
-      "community": 19,
+      "community": 41,
       "norm_label": "preserveknownconsumerreportdetailstatus()"
     },
     {
@@ -8210,7 +8210,7 @@
       "source_location": "L108",
       "_origin": "ast",
       "id": "reports_data_reporthistoryitem",
-      "community": 19,
+      "community": 81,
       "norm_label": "reporthistoryitem"
     },
     {
@@ -8220,7 +8220,7 @@
       "source_location": "L116",
       "_origin": "ast",
       "id": "reports_data_incidentpublicupdate",
-      "community": 19,
+      "community": 81,
       "norm_label": "incidentpublicupdate"
     },
     {
@@ -8230,7 +8230,7 @@
       "source_location": "L128",
       "_origin": "ast",
       "id": "reports_data_consumerservicememoupdate",
-      "community": 19,
+      "community": 81,
       "norm_label": "consumerservicememoupdate"
     },
     {
@@ -8240,7 +8240,7 @@
       "source_location": "L141",
       "_origin": "ast",
       "id": "reports_data_reportdetail",
-      "community": 19,
+      "community": 161,
       "norm_label": "reportdetail"
     },
     {
@@ -8250,7 +8250,7 @@
       "source_location": "L166",
       "_origin": "ast",
       "id": "reports_data_isrecord",
-      "community": 19,
+      "community": 81,
       "norm_label": "isrecord()"
     },
     {
@@ -8260,7 +8260,7 @@
       "source_location": "L170",
       "_origin": "ast",
       "id": "reports_data_ishttpurl",
-      "community": 19,
+      "community": 81,
       "norm_label": "ishttpurl()"
     },
     {
@@ -8270,7 +8270,7 @@
       "source_location": "L179",
       "_origin": "ast",
       "id": "reports_data_normalizeconsumermessage",
-      "community": 19,
+      "community": 177,
       "norm_label": "normalizeconsumermessage()"
     },
     {
@@ -8280,7 +8280,7 @@
       "source_location": "L182",
       "_origin": "ast",
       "id": "reports_data_normalizereportdisplayaddress",
-      "community": 19,
+      "community": 177,
       "norm_label": "normalizereportdisplayaddress()"
     },
     {
@@ -8290,7 +8290,7 @@
       "source_location": "L186",
       "_origin": "ast",
       "id": "reports_data_normalizereportlistitem",
-      "community": 19,
+      "community": 177,
       "norm_label": "normalizereportlistitem()"
     },
     {
@@ -8320,7 +8320,7 @@
       "source_location": "L248",
       "_origin": "ast",
       "id": "reports_data_consumerservicememoupdatetypes",
-      "community": 19,
+      "community": 81,
       "norm_label": "consumerservicememoupdatetypes"
     },
     {
@@ -8330,7 +8330,7 @@
       "source_location": "L254",
       "_origin": "ast",
       "id": "reports_data_optionalinstant",
-      "community": 19,
+      "community": 81,
       "norm_label": "optionalinstant()"
     },
     {
@@ -8340,7 +8340,7 @@
       "source_location": "L258",
       "_origin": "ast",
       "id": "reports_data_parseconsumerservicememoupdate",
-      "community": 19,
+      "community": 81,
       "norm_label": "parseconsumerservicememoupdate()"
     },
     {
@@ -8350,7 +8350,7 @@
       "source_location": "L294",
       "_origin": "ast",
       "id": "reports_data_parsereporthistoryitem",
-      "community": 19,
+      "community": 81,
       "norm_label": "parsereporthistoryitem()"
     },
     {
@@ -8360,7 +8360,7 @@
       "source_location": "L312",
       "_origin": "ast",
       "id": "reports_data_legacyconsumerservicememoupdate",
-      "community": 19,
+      "community": 81,
       "norm_label": "legacyconsumerservicememoupdate()"
     },
     {
@@ -8370,7 +8370,7 @@
       "source_location": "L329",
       "_origin": "ast",
       "id": "reports_data_parsereportdetailresponse",
-      "community": 19,
+      "community": 177,
       "norm_label": "parsereportdetailresponse()"
     },
     {
@@ -8380,7 +8380,7 @@
       "source_location": "L390",
       "_origin": "ast",
       "id": "reports_data_complaintformstate",
-      "community": 111,
+      "community": 81,
       "norm_label": "complaintformstate"
     },
     {
@@ -8390,7 +8390,7 @@
       "source_location": "L415",
       "_origin": "ast",
       "id": "reports_data_complaintphotoupload",
-      "community": 19,
+      "community": 81,
       "norm_label": "complaintphotoupload"
     },
     {
@@ -8400,7 +8400,7 @@
       "source_location": "L423",
       "_origin": "ast",
       "id": "reports_data_emptycomplaintmeta",
-      "community": 179,
+      "community": 73,
       "norm_label": "emptycomplaintmeta"
     },
     {
@@ -8410,7 +8410,7 @@
       "source_location": "L430",
       "_origin": "ast",
       "id": "reports_data_initialcomplaintform",
-      "community": 19,
+      "community": 81,
       "norm_label": "initialcomplaintform"
     },
     {
@@ -8420,7 +8420,7 @@
       "source_location": "L455",
       "_origin": "ast",
       "id": "reports_data_complaintcategorytitles",
-      "community": 19,
+      "community": 81,
       "norm_label": "complaintcategorytitles"
     },
     {
@@ -8480,7 +8480,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "reports_report_list",
-      "community": 179,
+      "community": 41,
       "norm_label": "report-list.tsx"
     },
     {
@@ -8510,7 +8510,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "reports_status",
-      "community": 19,
+      "community": 177,
       "norm_label": "status.ts"
     },
     {
@@ -8520,7 +8520,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "reports_status_consumer_ticket_statuses",
-      "community": 19,
+      "community": 177,
       "norm_label": "consumer_ticket_statuses"
     },
     {
@@ -8530,7 +8530,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "reports_status_consumerticketstatus",
-      "community": 13,
+      "community": 177,
       "norm_label": "consumerticketstatus"
     },
     {
@@ -8540,7 +8540,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "reports_status_issupportedconsumerstatusmodelversion",
-      "community": 19,
+      "community": 177,
       "norm_label": "issupportedconsumerstatusmodelversion()"
     },
     {
@@ -8550,7 +8550,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "reports_status_statuslabels",
-      "community": 19,
+      "community": 177,
       "norm_label": "statuslabels"
     },
     {
@@ -8560,7 +8560,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "reports_status_parseconsumerticketstatus",
-      "community": 19,
+      "community": 177,
       "norm_label": "parseconsumerticketstatus()"
     },
     {
@@ -8570,7 +8570,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "reports_status_consumerticketstatuslabel",
-      "community": 19,
+      "community": 177,
       "norm_label": "consumerticketstatuslabel()"
     },
     {
@@ -8580,7 +8580,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "reports_status_consumerticketstatustone",
-      "community": 19,
+      "community": 177,
       "norm_label": "consumerticketstatustone"
     },
     {
@@ -8620,7 +8620,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "hooks_use_auth_session",
-      "community": 85,
+      "community": 179,
       "norm_label": "use-auth-session.ts"
     },
     {
@@ -8630,7 +8630,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "hooks_use_auth_session_useauthsessionstate",
-      "community": 85,
+      "community": 179,
       "norm_label": "useauthsessionstate"
     },
     {
@@ -8640,7 +8640,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "hooks_use_auth_session_useauthsession",
-      "community": 85,
+      "community": 179,
       "norm_label": "useauthsession()"
     },
     {
@@ -8650,7 +8650,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "hooks_use_consumer_account",
-      "community": 85,
+      "community": 179,
       "norm_label": "use-consumer-account.ts"
     },
     {
@@ -8660,7 +8660,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "hooks_use_consumer_account_useconsumeraccount",
-      "community": 85,
+      "community": 179,
       "norm_label": "useconsumeraccount()"
     },
     {
@@ -8700,7 +8700,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "hooks_use_consumer_profile_keyfor",
-      "community": 10,
+      "community": 179,
       "norm_label": "keyfor()"
     },
     {
@@ -8750,7 +8750,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "hooks_use_consumer_profile_useconsumerprofilestate",
-      "community": 10,
+      "community": 179,
       "norm_label": "useconsumerprofilestate"
     },
     {
@@ -8760,7 +8760,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "hooks_use_consumer_profile_useconsumerprofile",
-      "community": 10,
+      "community": 179,
       "norm_label": "useconsumerprofile()"
     },
     {
@@ -8770,7 +8770,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "hooks_use_unread_notification_count",
-      "community": 85,
+      "community": 104,
       "norm_label": "use-unread-notification-count.ts"
     },
     {
@@ -8780,7 +8780,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "hooks_use_unread_notification_count_useunreadnotificationcount",
-      "community": 85,
+      "community": 73,
       "norm_label": "useunreadnotificationcount()"
     },
     {
@@ -8940,7 +8940,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "services_advisories_mobileadvisory",
-      "community": 32,
+      "community": 82,
       "norm_label": "mobileadvisory"
     },
     {
@@ -9170,7 +9170,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "services_api_authuser",
-      "community": 83,
+      "community": 85,
       "norm_label": "authuser"
     },
     {
@@ -9200,7 +9200,7 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "services_api_setauthtoken",
-      "community": 1,
+      "community": 85,
       "norm_label": "setauthtoken()"
     },
     {
@@ -9270,7 +9270,7 @@
       "source_location": "L207",
       "_origin": "ast",
       "id": "services_api_apirequest",
-      "community": 177,
+      "community": 164,
       "norm_label": "apirequest()"
     },
     {
@@ -9280,7 +9280,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_auth",
-      "community": 1,
+      "community": 85,
       "norm_label": "auth.ts"
     },
     {
@@ -9290,7 +9290,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "services_auth_signinwithaccountnumberparams",
-      "community": 1,
+      "community": 85,
       "norm_label": "signinwithaccountnumberparams"
     },
     {
@@ -9300,7 +9300,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "services_auth_signinwithemailparams",
-      "community": 1,
+      "community": 85,
       "norm_label": "signinwithemailparams"
     },
     {
@@ -9310,7 +9310,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "services_auth_consumerloginresponse",
-      "community": 1,
+      "community": 85,
       "norm_label": "consumerloginresponse"
     },
     {
@@ -9320,7 +9320,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "services_auth_getratelimitkey",
-      "community": 1,
+      "community": 85,
       "norm_label": "getratelimitkey()"
     },
     {
@@ -9330,7 +9330,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "services_auth_pruneoldattempts",
-      "community": 1,
+      "community": 85,
       "norm_label": "pruneoldattempts()"
     },
     {
@@ -9340,7 +9340,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "services_auth_formatremainingtime",
-      "community": 1,
+      "community": 85,
       "norm_label": "formatremainingtime()"
     },
     {
@@ -9350,7 +9350,7 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "services_auth_readattempts",
-      "community": 1,
+      "community": 85,
       "norm_label": "readattempts()"
     },
     {
@@ -9360,7 +9360,7 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "services_auth_writeattempts",
-      "community": 1,
+      "community": 85,
       "norm_label": "writeattempts()"
     },
     {
@@ -9370,7 +9370,7 @@
       "source_location": "L84",
       "_origin": "ast",
       "id": "services_auth_clearattempts",
-      "community": 1,
+      "community": 85,
       "norm_label": "clearattempts()"
     },
     {
@@ -9380,7 +9380,7 @@
       "source_location": "L89",
       "_origin": "ast",
       "id": "services_auth_assertratelimit",
-      "community": 1,
+      "community": 85,
       "norm_label": "assertratelimit()"
     },
     {
@@ -9390,7 +9390,7 @@
       "source_location": "L107",
       "_origin": "ast",
       "id": "services_auth_registerfailedattempt",
-      "community": 1,
+      "community": 85,
       "norm_label": "registerfailedattempt()"
     },
     {
@@ -9400,7 +9400,7 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "services_auth_normalizeaccountnumber",
-      "community": 1,
+      "community": 85,
       "norm_label": "normalizeaccountnumber()"
     },
     {
@@ -9410,7 +9410,7 @@
       "source_location": "L119",
       "_origin": "ast",
       "id": "services_auth_normalizepassword",
-      "community": 1,
+      "community": 85,
       "norm_label": "normalizepassword()"
     },
     {
@@ -9420,7 +9420,7 @@
       "source_location": "L123",
       "_origin": "ast",
       "id": "services_auth_resolveconsumerusernamebyaccountnumber",
-      "community": 1,
+      "community": 85,
       "norm_label": "resolveconsumerusernamebyaccountnumber()"
     },
     {
@@ -9430,7 +9430,7 @@
       "source_location": "L135",
       "_origin": "ast",
       "id": "services_auth_signinwithaccountnumber",
-      "community": 1,
+      "community": 85,
       "norm_label": "signinwithaccountnumber()"
     },
     {
@@ -9440,7 +9440,7 @@
       "source_location": "L188",
       "_origin": "ast",
       "id": "services_auth_signinwithemail",
-      "community": 1,
+      "community": 85,
       "norm_label": "signinwithemail()"
     },
     {
@@ -9450,7 +9450,7 @@
       "source_location": "L213",
       "_origin": "ast",
       "id": "services_auth_changeconsumerpassword",
-      "community": 1,
+      "community": 85,
       "norm_label": "changeconsumerpassword()"
     },
     {
@@ -9460,7 +9460,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_consumer_identity",
-      "community": 83,
+      "community": 93,
       "norm_label": "consumer-identity.ts"
     },
     {
@@ -9470,7 +9470,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "services_consumer_identity_consumeridentitysetupinput",
-      "community": 83,
+      "community": 93,
       "norm_label": "consumeridentitysetupinput"
     },
     {
@@ -9480,7 +9480,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "services_consumer_identity_consumeridentitysetupresponse",
-      "community": 83,
+      "community": 93,
       "norm_label": "consumeridentitysetupresponse"
     },
     {
@@ -9490,7 +9490,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "services_consumer_identity_emailsetupdismissalkey",
-      "community": 83,
+      "community": 93,
       "norm_label": "emailsetupdismissalkey()"
     },
     {
@@ -9500,7 +9500,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "services_consumer_identity_hasdismissedemailsetup",
-      "community": 83,
+      "community": 93,
       "norm_label": "hasdismissedemailsetup()"
     },
     {
@@ -9510,7 +9510,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "services_consumer_identity_dismissemailsetup",
-      "community": 83,
+      "community": 93,
       "norm_label": "dismissemailsetup()"
     },
     {
@@ -9520,7 +9520,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "services_consumer_identity_clearemailsetupdismissal",
-      "community": 83,
+      "community": 93,
       "norm_label": "clearemailsetupdismissal()"
     },
     {
@@ -9540,7 +9540,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "services_consumer_identity_fetchconsumeraccountcontext",
-      "community": 83,
+      "community": 93,
       "norm_label": "fetchconsumeraccountcontext()"
     },
     {
@@ -9550,7 +9550,7 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "services_consumer_identity_setupconsumeridentity",
-      "community": 1,
+      "community": 85,
       "norm_label": "setupconsumeridentity()"
     },
     {
@@ -9560,7 +9560,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_hotlines",
-      "community": 81,
+      "community": 104,
       "norm_label": "hotlines.ts"
     },
     {
@@ -9570,7 +9570,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "services_hotlines_hotlinecontact",
-      "community": 81,
+      "community": 104,
       "norm_label": "hotlinecontact"
     },
     {
@@ -9580,7 +9580,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "services_hotlines_hotlineagency",
-      "community": 81,
+      "community": 104,
       "norm_label": "hotlineagency"
     },
     {
@@ -9590,7 +9590,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "services_hotlines_hotlinecategory",
-      "community": 81,
+      "community": 104,
       "norm_label": "hotlinecategory"
     },
     {
@@ -9600,7 +9600,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "services_hotlines_hotlineresponse",
-      "community": 81,
+      "community": 104,
       "norm_label": "hotlineresponse"
     },
     {
@@ -9610,7 +9610,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "services_hotlines_readcache",
-      "community": 81,
+      "community": 104,
       "norm_label": "readcache()"
     },
     {
@@ -9620,7 +9620,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "services_hotlines_writecache",
-      "community": 81,
+      "community": 104,
       "norm_label": "writecache()"
     },
     {
@@ -9630,7 +9630,7 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "services_hotlines_fetchhotlines",
-      "community": 81,
+      "community": 104,
       "norm_label": "fetchhotlines()"
     },
     {
@@ -9640,7 +9640,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_linked_accounts",
-      "community": 83,
+      "community": 164,
       "norm_label": "linked-accounts.ts"
     },
     {
@@ -9650,7 +9650,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "services_linked_accounts_linkedaccountsstate",
-      "community": 83,
+      "community": 164,
       "norm_label": "linkedaccountsstate"
     },
     {
@@ -9670,7 +9670,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "services_linked_accounts_setdefaultlinkedaccount",
-      "community": 83,
+      "community": 164,
       "norm_label": "setdefaultlinkedaccount()"
     },
     {
@@ -9680,7 +9680,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "services_linked_accounts_unlinklinkedaccount",
-      "community": 83,
+      "community": 164,
       "norm_label": "unlinklinkedaccount()"
     },
     {
@@ -9690,7 +9690,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_notification_navigation",
-      "community": 13,
+      "community": 177,
       "norm_label": "notification-navigation.ts"
     },
     {
@@ -9700,7 +9700,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "services_notification_navigation_mobilenotificationdestination",
-      "community": 13,
+      "community": 177,
       "norm_label": "mobilenotificationdestination"
     },
     {
@@ -9710,7 +9710,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "services_notification_navigation_ticketstatuschangedpush",
-      "community": 13,
+      "community": 177,
       "norm_label": "ticketstatuschangedpush"
     },
     {
@@ -9720,7 +9720,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "services_notification_navigation_ticketstatuschangedpushclassification",
-      "community": 13,
+      "community": 177,
       "norm_label": "ticketstatuschangedpushclassification"
     },
     {
@@ -9730,7 +9730,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "services_notification_navigation_notificationdestinationfromnotification",
-      "community": 13,
+      "community": 177,
       "norm_label": "notificationdestinationfromnotification()"
     },
     {
@@ -9770,7 +9770,7 @@
       "source_location": "L113",
       "_origin": "ast",
       "id": "services_notification_navigation_accountlinkingpush",
-      "community": 13,
+      "community": 177,
       "norm_label": "accountlinkingpush"
     },
     {
@@ -9780,7 +9780,7 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "services_notification_navigation_accountlinkingpushfromdata",
-      "community": 13,
+      "community": 177,
       "norm_label": "accountlinkingpushfromdata()"
     },
     {
@@ -9790,7 +9790,7 @@
       "source_location": "L123",
       "_origin": "ast",
       "id": "services_notification_navigation_advisoryidfrompushdata",
-      "community": 13,
+      "community": 177,
       "norm_label": "advisoryidfrompushdata()"
     },
     {
@@ -9950,7 +9950,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_notifications",
-      "community": 177,
+      "community": 104,
       "norm_label": "notifications.ts"
     },
     {
@@ -9960,7 +9960,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "services_notifications_mobilenotificationcategory",
-      "community": 177,
+      "community": 104,
       "norm_label": "mobilenotificationcategory"
     },
     {
@@ -9980,7 +9980,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "services_notifications_mobilenotificationsresponse",
-      "community": 177,
+      "community": 104,
       "norm_label": "mobilenotificationsresponse"
     },
     {
@@ -9990,7 +9990,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "services_notifications_listeners",
-      "community": 177,
+      "community": 104,
       "norm_label": "listeners"
     },
     {
@@ -10000,7 +10000,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "services_notifications_requests",
-      "community": 177,
+      "community": 104,
       "norm_label": "requests"
     },
     {
@@ -10010,7 +10010,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "services_notifications_cachekey",
-      "community": 177,
+      "community": 104,
       "norm_label": "cachekey()"
     },
     {
@@ -10020,7 +10020,7 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "services_notifications_readcache",
-      "community": 177,
+      "community": 104,
       "norm_label": "readcache()"
     },
     {
@@ -10030,7 +10030,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "services_notifications_writecache",
-      "community": 177,
+      "community": 104,
       "norm_label": "writecache()"
     },
     {
@@ -10040,7 +10040,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "services_notifications_subscribenotificationschanged",
-      "community": 36,
+      "community": 104,
       "norm_label": "subscribenotificationschanged()"
     },
     {
@@ -10050,7 +10050,7 @@
       "source_location": "L85",
       "_origin": "ast",
       "id": "services_notifications_invalidatenotifications",
-      "community": 177,
+      "community": 104,
       "norm_label": "invalidatenotifications()"
     },
     {
@@ -10060,7 +10060,7 @@
       "source_location": "L94",
       "_origin": "ast",
       "id": "services_notifications_normalizenotification",
-      "community": 177,
+      "community": 104,
       "norm_label": "normalizenotification()"
     },
     {
@@ -10070,7 +10070,7 @@
       "source_location": "L105",
       "_origin": "ast",
       "id": "services_notifications_normalizeresponse",
-      "community": 177,
+      "community": 104,
       "norm_label": "normalizeresponse()"
     },
     {
@@ -10080,7 +10080,7 @@
       "source_location": "L109",
       "_origin": "ast",
       "id": "services_notifications_fetchnotifications",
-      "community": 177,
+      "community": 104,
       "norm_label": "fetchnotifications()"
     },
     {
@@ -10090,7 +10090,7 @@
       "source_location": "L168",
       "_origin": "ast",
       "id": "services_notifications_marknotificationsread",
-      "community": 177,
+      "community": 104,
       "norm_label": "marknotificationsread()"
     },
     {
@@ -10100,7 +10100,7 @@
       "source_location": "L180",
       "_origin": "ast",
       "id": "services_notifications_markallnotificationsread",
-      "community": 177,
+      "community": 104,
       "norm_label": "markallnotificationsread()"
     },
     {
@@ -10240,7 +10240,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "services_public_updates_mobilepublicupdate",
-      "community": 32,
+      "community": 82,
       "norm_label": "mobilepublicupdate"
     },
     {
@@ -10350,7 +10350,7 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "services_public_updates_fetchpublicupdates",
-      "community": 32,
+      "community": 104,
       "norm_label": "fetchpublicupdates()"
     },
     {
@@ -10540,7 +10540,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_report_background_sync",
-      "community": 93,
+      "community": 160,
       "norm_label": "report-background-sync.ts"
     },
     {
@@ -10550,7 +10550,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "services_report_background_sync_ensurereportbackgroundsyncregistered",
-      "community": 93,
+      "community": 160,
       "norm_label": "ensurereportbackgroundsyncregistered()"
     },
     {
@@ -10560,7 +10560,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_report_queue_access",
-      "community": 163,
+      "community": 160,
       "norm_label": "report-queue-access.ts"
     },
     {
@@ -10570,7 +10570,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_report_queue_access_queuedreportaccessscope",
-      "community": 163,
+      "community": 160,
       "norm_label": "queuedreportaccessscope"
     },
     {
@@ -10580,7 +10580,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "services_report_queue_access_currentreportaccessscope",
-      "community": 163,
+      "community": 160,
       "norm_label": "currentreportaccessscope"
     },
     {
@@ -10590,7 +10590,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "services_report_queue_access_isqueuedreportvisible",
-      "community": 163,
+      "community": 160,
       "norm_label": "isqueuedreportvisible()"
     },
     {
@@ -10600,7 +10600,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "services_report_queue_access_queuedreportaccessdecision",
-      "community": 163,
+      "community": 160,
       "norm_label": "queuedreportaccessdecision"
     },
     {
@@ -10610,7 +10610,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "services_report_queue_access_evaluatequeuedreportaccess",
-      "community": 163,
+      "community": 160,
       "norm_label": "evaluatequeuedreportaccess()"
     },
     {
@@ -10640,7 +10640,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "services_report_queue_reportqueueitem",
-      "community": 73,
+      "community": 160,
       "norm_label": "reportqueueitem"
     },
     {
@@ -10750,7 +10750,7 @@
       "source_location": "L120",
       "_origin": "ast",
       "id": "services_report_queue_subscribereportqueue",
-      "community": 93,
+      "community": 160,
       "norm_label": "subscribereportqueue()"
     },
     {
@@ -10760,7 +10760,7 @@
       "source_location": "L127",
       "_origin": "ast",
       "id": "services_report_queue_queueitemvisibletoscope",
-      "community": 163,
+      "community": 160,
       "norm_label": "queueitemvisibletoscope()"
     },
     {
@@ -10800,7 +10800,7 @@
       "source_location": "L279",
       "_origin": "ast",
       "id": "services_report_queue_syncreportqueue",
-      "community": 93,
+      "community": 160,
       "norm_label": "syncreportqueue()"
     },
     {
@@ -10830,7 +10830,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_report_submission_completion_store",
-      "community": 93,
+      "community": 160,
       "norm_label": "report-submission-completion-store.ts"
     },
     {
@@ -10840,7 +10840,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_report_submission_completion_store_reportsubmissioncompletion",
-      "community": 93,
+      "community": 160,
       "norm_label": "reportsubmissioncompletion"
     },
     {
@@ -10850,7 +10850,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "services_report_submission_completion_store_mergereportsubmissioncompletions",
-      "community": 93,
+      "community": 160,
       "norm_label": "mergereportsubmissioncompletions()"
     },
     {
@@ -10860,7 +10860,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "services_report_submission_completion_store_takereportsubmissioncompletions",
-      "community": 93,
+      "community": 160,
       "norm_label": "takereportsubmissioncompletions()"
     },
     {
@@ -10870,7 +10870,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_report_submission_events",
-      "community": 93,
+      "community": 160,
       "norm_label": "report-submission-events.ts"
     },
     {
@@ -10880,7 +10880,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "services_report_submission_events_complaintsubmissiontoast",
-      "community": 93,
+      "community": 160,
       "norm_label": "complaintsubmissiontoast"
     },
     {
@@ -10890,7 +10890,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "services_report_submission_events_listeners",
-      "community": 93,
+      "community": 160,
       "norm_label": "listeners"
     },
     {
@@ -10900,7 +10900,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "services_report_submission_events_runcompletionmutation",
-      "community": 93,
+      "community": 160,
       "norm_label": "runcompletionmutation"
     },
     {
@@ -10910,7 +10910,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "services_report_submission_events_readcompletions",
-      "community": 93,
+      "community": 160,
       "norm_label": "readcompletions()"
     },
     {
@@ -10920,7 +10920,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "services_report_submission_events_recordreportsubmissioncompletions",
-      "community": 93,
+      "community": 160,
       "norm_label": "recordreportsubmissioncompletions()"
     },
     {
@@ -10930,7 +10930,7 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "services_report_submission_events_consumereportsubmissioncompletions",
-      "community": 93,
+      "community": 160,
       "norm_label": "consumereportsubmissioncompletions()"
     },
     {
@@ -10940,7 +10940,7 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "services_report_submission_events_emitcomplaintsubmissiontoast",
-      "community": 93,
+      "community": 160,
       "norm_label": "emitcomplaintsubmissiontoast()"
     },
     {
@@ -10950,7 +10950,7 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "services_report_submission_events_subscribecomplaintsubmissiontoast",
-      "community": 93,
+      "community": 160,
       "norm_label": "subscribecomplaintsubmissiontoast()"
     },
     {
@@ -11350,7 +11350,7 @@
       "source_location": "L256",
       "_origin": "ast",
       "id": "services_reports_clearreportlistcache",
-      "community": 161,
+      "community": 160,
       "norm_label": "clearreportlistcache()"
     },
     {
@@ -11370,7 +11370,7 @@
       "source_location": "L308",
       "_origin": "ast",
       "id": "services_reports_fetchcomplaintreportpage",
-      "community": 161,
+      "community": 73,
       "norm_label": "fetchcomplaintreportpage()"
     },
     {
@@ -11380,7 +11380,7 @@
       "source_location": "L476",
       "_origin": "ast",
       "id": "services_reports_fetchcomplaintreports",
-      "community": 161,
+      "community": 73,
       "norm_label": "fetchcomplaintreports()"
     },
     {
@@ -11390,7 +11390,7 @@
       "source_location": "L484",
       "_origin": "ast",
       "id": "services_reports_fetchcomplaintreportdetail",
-      "community": 177,
+      "community": 13,
       "norm_label": "fetchcomplaintreportdetail()"
     },
     {
@@ -11440,7 +11440,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "utils_async_coordination",
-      "community": 93,
+      "community": 160,
       "norm_label": "async-coordination.ts"
     },
     {
@@ -11450,7 +11450,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "utils_async_coordination_createkeyedserialexecutor",
-      "community": 93,
+      "community": 160,
       "norm_label": "createkeyedserialexecutor()"
     },
     {
@@ -11460,7 +11460,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "utils_async_coordination_createpromiseregistry",
-      "community": 93,
+      "community": 160,
       "norm_label": "createpromiseregistry()"
     },
     {
@@ -11610,7 +11610,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "utils_human_reference",
-      "community": 19,
+      "community": 104,
       "norm_label": "human-reference.ts"
     },
     {
@@ -11620,7 +11620,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "utils_human_reference_humanreferencekind",
-      "community": 19,
+      "community": 104,
       "norm_label": "humanreferencekind"
     },
     {
@@ -11630,7 +11630,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "utils_human_reference_normalizehumanreference",
-      "community": 19,
+      "community": 104,
       "norm_label": "normalizehumanreference()"
     },
     {
@@ -11640,7 +11640,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "utils_human_reference_classifyhumanreference",
-      "community": 19,
+      "community": 104,
       "norm_label": "classifyhumanreference()"
     },
     {
@@ -11840,7 +11840,7 @@
       "source_location": "L172",
       "_origin": "ast",
       "id": "utils_manila_time_formatmanilareportlistdatetime",
-      "community": 32,
+      "community": 19,
       "norm_label": "formatmanilareportlistdatetime()"
     },
     {
@@ -11860,7 +11860,7 @@
       "source_location": "L203",
       "_origin": "ast",
       "id": "utils_manila_time_formatmanilaadvisoryinterruptionrange",
-      "community": 32,
+      "community": 19,
       "norm_label": "formatmanilaadvisoryinterruptionrange()"
     },
     {
@@ -12010,7 +12010,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_account_linking_report_ux_test",
-      "community": 83,
+      "community": 162,
       "norm_label": "account-linking-report-ux.test.ts"
     },
     {
@@ -12020,7 +12020,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "tests_account_linking_report_ux_test_accountactionpresentation",
-      "community": 83,
+      "community": 162,
       "norm_label": "accountactionpresentation"
     },
     {
@@ -12030,7 +12030,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "tests_account_linking_report_ux_test_accountcontractundertest",
-      "community": 83,
+      "community": 162,
       "norm_label": "accountcontractundertest"
     },
     {
@@ -12040,7 +12040,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "tests_account_linking_report_ux_test_reportcontractundertest",
-      "community": 83,
+      "community": 162,
       "norm_label": "reportcontractundertest"
     },
     {
@@ -12050,7 +12050,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "tests_account_linking_report_ux_test_accountbehavior",
-      "community": 83,
+      "community": 162,
       "norm_label": "accountbehavior"
     },
     {
@@ -12060,7 +12060,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "tests_account_linking_report_ux_test_reportbehavior",
-      "community": 83,
+      "community": 162,
       "norm_label": "reportbehavior"
     },
     {
@@ -12250,7 +12250,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_async_coordination_test",
-      "community": 93,
+      "community": 160,
       "norm_label": "async-coordination.test.mjs"
     },
     {
@@ -13060,7 +13060,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_report_queue_access_test",
-      "community": 163,
+      "community": 160,
       "norm_label": "report-queue-access.test.mjs"
     },
     {
@@ -13070,7 +13070,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "tests_report_queue_access_test_current",
-      "community": 163,
+      "community": 160,
       "norm_label": "current"
     },
     {
@@ -13200,7 +13200,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_report_submission_completions_test",
-      "community": 93,
+      "community": 160,
       "norm_label": "report-submission-completions.test.mjs"
     },
     {
@@ -13210,7 +13210,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "tests_report_submission_completions_test_completion",
-      "community": 93,
+      "community": 160,
       "norm_label": "completion()"
     },
     {
@@ -18964,10 +18964,20 @@
       "norm_label": "active work"
     },
     {
-      "label": "Unified advisory and Facebook Public Updates feed (2026-09-14)",
+      "label": "Public Updates backend production prerequisite (2026-09-14)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
       "source_location": "L3",
+      "_origin": "ast",
+      "id": "agent_harness_active_work_public_updates_backend_production_prerequisite_2026_09_14",
+      "community": 99,
+      "norm_label": "public updates backend production prerequisite (2026-09-14)"
+    },
+    {
+      "label": "Unified advisory and Facebook Public Updates feed (2026-09-14)",
+      "file_type": "document",
+      "source_file": "docs/agent-harness/active-work.md",
+      "source_location": "L9",
       "_origin": "ast",
       "id": "agent_harness_active_work_unified_advisory_and_facebook_public_updates_feed_2026_09_14",
       "community": 99,
@@ -18977,7 +18987,7 @@
       "label": "Mobile API refresh (2026-09-13)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
-      "source_location": "L11",
+      "source_location": "L17",
       "_origin": "ast",
       "id": "agent_harness_active_work_mobile_api_refresh_2026_09_13",
       "community": 99,
@@ -18987,7 +18997,7 @@
       "label": "Android production-signing guard (2026-08-30)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
-      "source_location": "L19",
+      "source_location": "L25",
       "_origin": "ast",
       "id": "agent_harness_active_work_android_production_signing_guard_2026_08_30",
       "community": 99,
@@ -18997,7 +19007,7 @@
       "label": "Mobile baseline contract correction (2026-08-30)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
-      "source_location": "L29",
+      "source_location": "L35",
       "_origin": "ast",
       "id": "agent_harness_active_work_mobile_baseline_contract_correction_2026_08_30",
       "community": 99,
@@ -19007,7 +19017,7 @@
       "label": "Consumer-safe status normalization (2026-08-28)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
-      "source_location": "L40",
+      "source_location": "L46",
       "_origin": "ast",
       "id": "agent_harness_active_work_consumer_safe_status_normalization_2026_08_28",
       "community": 99,
@@ -19017,7 +19027,7 @@
       "label": "Account-linking/report UX local integration (2026-08-28)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
-      "source_location": "L48",
+      "source_location": "L54",
       "_origin": "ast",
       "id": "agent_harness_active_work_account_linking_report_ux_local_integration_2026_08_28",
       "community": 99,
@@ -19027,7 +19037,7 @@
       "label": "Account recovery and multi-account report UX correction (2026-08-26)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
-      "source_location": "L56",
+      "source_location": "L62",
       "_origin": "ast",
       "id": "agent_harness_active_work_account_recovery_and_multi_account_report_ux_correction_2026_08_26",
       "community": 99,
@@ -19037,7 +19047,7 @@
       "label": "Consumer mock-verification confirmation correction (2026-08-26)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
-      "source_location": "L64",
+      "source_location": "L70",
       "_origin": "ast",
       "id": "agent_harness_active_work_consumer_mock_verification_confirmation_correction_2026_08_26",
       "community": 99,
@@ -19047,7 +19057,7 @@
       "label": "Consumer multi-account V18 release evidence (2026-08-26)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
-      "source_location": "L72",
+      "source_location": "L78",
       "_origin": "ast",
       "id": "agent_harness_active_work_consumer_multi_account_v18_release_evidence_2026_08_26",
       "community": 99,
@@ -19057,7 +19067,7 @@
       "label": "Consumer multi-account V18 final remediation (2026-08-26)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
-      "source_location": "L79",
+      "source_location": "L85",
       "_origin": "ast",
       "id": "agent_harness_active_work_consumer_multi_account_v18_final_remediation_2026_08_26",
       "community": 99,
@@ -19067,7 +19077,7 @@
       "label": "Consumer multi-account V17 queue and advisory scope compatibility (2026-08-26)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
-      "source_location": "L88",
+      "source_location": "L94",
       "_origin": "ast",
       "id": "agent_harness_active_work_consumer_multi_account_v17_queue_and_advisory_scope_compatibility_2026_08_26",
       "community": 99,
@@ -19077,7 +19087,7 @@
       "label": "Consumer multi-account linking (2026-08-25)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
-      "source_location": "L95",
+      "source_location": "L101",
       "_origin": "ast",
       "id": "agent_harness_active_work_consumer_multi_account_linking_2026_08_25",
       "community": 99,
@@ -19087,7 +19097,7 @@
       "label": "Saved home address report selection (2026-08-25)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
-      "source_location": "L103",
+      "source_location": "L109",
       "_origin": "ast",
       "id": "agent_harness_active_work_saved_home_address_report_selection_2026_08_25",
       "community": 99,
@@ -19097,7 +19107,7 @@
       "label": "Mobile operations parity integration (2026-08-13, unmerged)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
-      "source_location": "L118",
+      "source_location": "L124",
       "_origin": "ast",
       "id": "agent_harness_active_work_mobile_operations_parity_integration_2026_08_13_unmerged",
       "community": 99,
@@ -19107,7 +19117,7 @@
       "label": "Unused module and dependency cleanup (2026-08-20, committed and locally merged)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
-      "source_location": "L128",
+      "source_location": "L134",
       "_origin": "ast",
       "id": "agent_harness_active_work_unused_module_and_dependency_cleanup_2026_08_20_committed_and_locally_merged",
       "community": 99,
@@ -19117,7 +19127,7 @@
       "label": "Consumer multi-account review remediation (2026-08-25)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
-      "source_location": "L137",
+      "source_location": "L143",
       "_origin": "ast",
       "id": "agent_harness_active_work_consumer_multi_account_review_remediation_2026_08_25",
       "community": 99,
@@ -19127,7 +19137,7 @@
       "label": "Consumer multi-account v3 report-queue remediation (2026-08-25)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
-      "source_location": "L142",
+      "source_location": "L148",
       "_origin": "ast",
       "id": "agent_harness_active_work_consumer_multi_account_v3_report_queue_remediation_2026_08_25",
       "community": 99,
@@ -19137,7 +19147,7 @@
       "label": "Consumer multi-account queue retry guard (2026-08-25)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
-      "source_location": "L147",
+      "source_location": "L153",
       "_origin": "ast",
       "id": "agent_harness_active_work_consumer_multi_account_queue_retry_guard_2026_08_25",
       "community": 99,
@@ -19147,7 +19157,7 @@
       "label": "Consumer multi-account staff delivery compatibility (2026-08-26)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
-      "source_location": "L152",
+      "source_location": "L158",
       "_origin": "ast",
       "id": "agent_harness_active_work_consumer_multi_account_staff_delivery_compatibility_2026_08_26",
       "community": 99,
@@ -19157,7 +19167,7 @@
       "label": "Consumer multi-account consolidated aggregate evidence (2026-08-26)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
-      "source_location": "L157",
+      "source_location": "L163",
       "_origin": "ast",
       "id": "agent_harness_active_work_consumer_multi_account_consolidated_aggregate_evidence_2026_08_26",
       "community": 99,
@@ -19167,7 +19177,7 @@
       "label": "Consumer multi-account V13 migration-shape gate compatibility (2026-08-26)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
-      "source_location": "L163",
+      "source_location": "L169",
       "_origin": "ast",
       "id": "agent_harness_active_work_consumer_multi_account_v13_migration_shape_gate_compatibility_2026_08_26",
       "community": 99,
@@ -19177,7 +19187,7 @@
       "label": "Consumer multi-account V14 setup replay compatibility (2026-08-26)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
-      "source_location": "L170",
+      "source_location": "L176",
       "_origin": "ast",
       "id": "agent_harness_active_work_consumer_multi_account_v14_setup_replay_compatibility_2026_08_26",
       "community": 99,
@@ -19187,7 +19197,7 @@
       "label": "Consumer multi-account V15 snapshot consistency and advisory identity-active compatibility (2026-08-26)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
-      "source_location": "L177",
+      "source_location": "L183",
       "_origin": "ast",
       "id": "agent_harness_active_work_consumer_multi_account_v15_snapshot_consistency_and_advisory_identity_active_compatibility_2026_08_26",
       "community": 99,
@@ -19197,7 +19207,7 @@
       "label": "Compact human-reference rollout physical compatibility evidence (2026-08-30)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
-      "source_location": "L184",
+      "source_location": "L190",
       "_origin": "ast",
       "id": "agent_harness_active_work_compact_human_reference_rollout_physical_compatibility_evidence_2026_08_30",
       "community": 99,
@@ -19207,7 +19217,7 @@
       "label": "Advisory date/publication policy implementation (2026-08-31)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
-      "source_location": "L190",
+      "source_location": "L196",
       "_origin": "ast",
       "id": "agent_harness_active_work_advisory_date_publication_policy_implementation_2026_08_31",
       "community": 99,
@@ -19217,7 +19227,7 @@
       "label": "Advisory date policy integrated release gate (2026-08-31)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
-      "source_location": "L197",
+      "source_location": "L203",
       "_origin": "ast",
       "id": "agent_harness_active_work_advisory_date_policy_integrated_release_gate_2026_08_31",
       "community": 99,
@@ -19227,7 +19237,7 @@
       "label": "Advisory date policy canonical integration (2026-08-31)",
       "file_type": "document",
       "source_file": "docs/agent-harness/active-work.md",
-      "source_location": "L203",
+      "source_location": "L209",
       "_origin": "ast",
       "id": "agent_harness_active_work_advisory_date_policy_canonical_integration_2026_08_31",
       "community": 99,
@@ -19314,10 +19324,20 @@
       "norm_label": "implementation history"
     },
     {
-      "label": "2026-09-14 - Unified Public Updates mobile reader",
+      "label": "2026-09-14 - Public Updates production prerequisite update",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
       "source_location": "L3",
+      "_origin": "ast",
+      "id": "agent_harness_implementation_history_2026_09_14_public_updates_production_prerequisite_update",
+      "community": 90,
+      "norm_label": "2026-09-14 - public updates production prerequisite update"
+    },
+    {
+      "label": "2026-09-14 - Unified Public Updates mobile reader",
+      "file_type": "document",
+      "source_file": "docs/agent-harness/implementation-history.md",
+      "source_location": "L14",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_09_14_unified_public_updates_mobile_reader",
       "community": 90,
@@ -19327,7 +19347,7 @@
       "label": "2026-09-13 - Mobile API refresh device and live report acceptance",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L12",
+      "source_location": "L25",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_09_13_mobile_api_refresh_device_and_live_report_acceptance",
       "community": 90,
@@ -19337,7 +19357,7 @@
       "label": "2026-09-13 - Five-task mobile API refresh final gate",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L24",
+      "source_location": "L37",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_09_13_five_task_mobile_api_refresh_final_gate",
       "community": 90,
@@ -19347,7 +19367,7 @@
       "label": "2026-09-13 - Development API origin refresh and Task 2 device gate",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L36",
+      "source_location": "L49",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_09_13_development_api_origin_refresh_and_task_2_device_gate",
       "community": 90,
@@ -19357,7 +19377,7 @@
       "label": "2026-08-30 - Compact-reference Android preview build",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L49",
+      "source_location": "L62",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_30_compact_reference_android_preview_build",
       "community": 90,
@@ -19367,7 +19387,7 @@
       "label": "2026-08-30 - Mobile baseline contract correction",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L61",
+      "source_location": "L74",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_30_mobile_baseline_contract_correction",
       "community": 90,
@@ -19377,7 +19397,7 @@
       "label": "2026-08-30 - Fail-closed Android production-signing guard",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L74",
+      "source_location": "L87",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_30_fail_closed_android_production_signing_guard",
       "community": 90,
@@ -19387,7 +19407,7 @@
       "label": "2026-08-30 - Compact-reference native release CI hardening",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L88",
+      "source_location": "L101",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_30_compact_reference_native_release_ci_hardening",
       "community": 90,
@@ -19397,7 +19417,7 @@
       "label": "2026-08-30 - Compact human-reference canonical source integration",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L100",
+      "source_location": "L113",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_30_compact_human_reference_canonical_source_integration",
       "community": 90,
@@ -19407,7 +19427,7 @@
       "label": "2026-08-30 - Compact human-reference verification refresh",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L112",
+      "source_location": "L125",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_30_compact_human_reference_verification_refresh",
       "community": 90,
@@ -19417,7 +19437,7 @@
       "label": "2026-08-30 - Compact human-reference compatibility",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L124",
+      "source_location": "L137",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_30_compact_human_reference_compatibility",
       "community": 90,
@@ -19427,7 +19447,7 @@
       "label": "2026-08-30 - Consumer status GitHub integration",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L135",
+      "source_location": "L148",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_30_consumer_status_github_integration",
       "community": 90,
@@ -19437,7 +19457,7 @@
       "label": "2026-08-29 - Consumer status final review remediation",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L146",
+      "source_location": "L159",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_29_consumer_status_final_review_remediation",
       "community": 90,
@@ -19447,7 +19467,7 @@
       "label": "2026-08-28 - Consumer-safe canonical status projection",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L157",
+      "source_location": "L170",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_28_consumer_safe_canonical_status_projection",
       "community": 90,
@@ -19457,7 +19477,7 @@
       "label": "2026-08-28 - Account-linking/report UX canonical integration and cleanup",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L168",
+      "source_location": "L181",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_28_account_linking_report_ux_canonical_integration_and_cleanup",
       "community": 90,
@@ -19467,7 +19487,7 @@
       "label": "2026-08-26 - Account recovery, report selector, and immediate filtering UX",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L179",
+      "source_location": "L192",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_26_account_recovery_report_selector_and_immediate_filtering_ux",
       "community": 90,
@@ -19477,7 +19497,7 @@
       "label": "2026-08-26 - Consumer mock-verification confirmation correction",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L191",
+      "source_location": "L204",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_26_consumer_mock_verification_confirmation_correction",
       "community": 90,
@@ -19487,7 +19507,7 @@
       "label": "2026-08-26 - Consumer multi-account V18 release evidence",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L204",
+      "source_location": "L217",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_26_consumer_multi_account_v18_release_evidence",
       "community": 90,
@@ -19497,7 +19517,7 @@
       "label": "2026-08-26 - Consumer multi-account V18 final remediation",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L217",
+      "source_location": "L230",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_26_consumer_multi_account_v18_final_remediation",
       "community": 90,
@@ -19507,7 +19527,7 @@
       "label": "2026-08-26 - Consumer multi-account V17 queue and advisory scope remediation",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L228",
+      "source_location": "L241",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_26_consumer_multi_account_v17_queue_and_advisory_scope_remediation",
       "community": 90,
@@ -19517,7 +19537,7 @@
       "label": "2026-08-25 - Consumer multi-account linking mobile implementation",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L240",
+      "source_location": "L253",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_25_consumer_multi_account_linking_mobile_implementation",
       "community": 90,
@@ -19527,7 +19547,7 @@
       "label": "2026-08-25 - Saved home address report selection correction",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L252",
+      "source_location": "L265",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_25_saved_home_address_report_selection_correction",
       "community": 90,
@@ -19537,7 +19557,7 @@
       "label": "2026-08-19 - Report location integrity and home/manual location switching",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L265",
+      "source_location": "L278",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_19_report_location_integrity_and_home_manual_location_switching",
       "community": 90,
@@ -19547,7 +19567,7 @@
       "label": "2026-08-18 - Unified Service Memo consumer updates",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L282",
+      "source_location": "L295",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_18_unified_service_memo_consumer_updates",
       "community": 90,
@@ -19557,7 +19577,7 @@
       "label": "2026-08-15 - Push-driven report status synchronization",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L294",
+      "source_location": "L307",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_15_push_driven_report_status_synchronization",
       "community": 90,
@@ -19567,7 +19587,7 @@
       "label": "2026-08-13 - Mobile operations parity integration handoff",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L305",
+      "source_location": "L318",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_13_mobile_operations_parity_integration_handoff",
       "community": 90,
@@ -19577,7 +19597,7 @@
       "label": "2026-08-09 - G-24 terminated-process notification routing",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L324",
+      "source_location": "L337",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_09_g_24_terminated_process_notification_routing",
       "community": 90,
@@ -19587,7 +19607,7 @@
       "label": "2026-08-02 \u2014 Mobile agent harness foundation",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L335",
+      "source_location": "L348",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_02_mobile_agent_harness_foundation",
       "community": 90,
@@ -19597,7 +19617,7 @@
       "label": "2026-08-02 - Mobile harness enforcement",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L346",
+      "source_location": "L359",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_02_mobile_harness_enforcement",
       "community": 90,
@@ -19607,7 +19627,7 @@
       "label": "2026-08-02 - ALEConnect mobile workflow skill",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L357",
+      "source_location": "L370",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_02_aleconnect_mobile_workflow_skill",
       "community": 90,
@@ -19617,7 +19637,7 @@
       "label": "2026-08-02 - ALEConnect cross-project change skill",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L368",
+      "source_location": "L381",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_02_aleconnect_cross_project_change_skill",
       "community": 90,
@@ -19627,7 +19647,7 @@
       "label": "2026-08-02 - ALEConnect cross-project skill portability fix",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L379",
+      "source_location": "L392",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_02_aleconnect_cross_project_skill_portability_fix",
       "community": 90,
@@ -19637,7 +19657,7 @@
       "label": "2026-08-02 \u2014 ALEConnect mobile agent harness final verification and handoff",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L390",
+      "source_location": "L403",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_02_aleconnect_mobile_agent_harness_final_verification_and_handoff",
       "community": 90,
@@ -19647,7 +19667,7 @@
       "label": "2026-08-02 \u2014 ALEConnect agent harness final fix wave",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L401",
+      "source_location": "L414",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_02_aleconnect_agent_harness_final_fix_wave",
       "community": 90,
@@ -19657,7 +19677,7 @@
       "label": "2026-08-02 \u2014 Structured address and public hotline batches",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L412",
+      "source_location": "L425",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_02_structured_address_and_public_hotline_batches",
       "community": 90,
@@ -19667,7 +19687,7 @@
       "label": "2026-08-02 - Mobile report API and transport hardening",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L423",
+      "source_location": "L436",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_02_mobile_report_api_and_transport_hardening",
       "community": 90,
@@ -19677,7 +19697,7 @@
       "label": "2026-08-06 - Notification destination focus",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L434",
+      "source_location": "L447",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_06_notification_destination_focus",
       "community": 90,
@@ -19687,7 +19707,7 @@
       "label": "2026-08-06 - Notification release validation",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L445",
+      "source_location": "L458",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_06_notification_release_validation",
       "community": 90,
@@ -19697,7 +19717,7 @@
       "label": "2026-08-06 - Physical push proof and deferred terminated-state response",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L456",
+      "source_location": "L469",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_06_physical_push_proof_and_deferred_terminated_state_response",
       "community": 90,
@@ -19707,7 +19727,7 @@
       "label": "2026-08-09 - Terminated notification response routing",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L469",
+      "source_location": "L482",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_09_terminated_notification_response_routing",
       "community": 90,
@@ -19717,7 +19737,7 @@
       "label": "2026-08-15 - Targeted ticket push report revalidation",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L480",
+      "source_location": "L493",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_15_targeted_ticket_push_report_revalidation",
       "community": 90,
@@ -19727,7 +19747,7 @@
       "label": "2026-08-15 - Immediate submitted-report list synchronization",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L491",
+      "source_location": "L504",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_15_immediate_submitted_report_list_synchronization",
       "community": 90,
@@ -19737,7 +19757,7 @@
       "label": "2026-08-15 - Immediate post-submit report list synchronization",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L502",
+      "source_location": "L515",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_15_immediate_post_submit_report_list_synchronization",
       "community": 90,
@@ -19747,7 +19767,7 @@
       "label": "2026-08-15 - Single report type automatic selection",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L513",
+      "source_location": "L526",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_15_single_report_type_automatic_selection",
       "community": 90,
@@ -19757,7 +19777,7 @@
       "label": "2026-08-17 - Adaptive bottom-sheet interaction and hotline directory refinements",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L524",
+      "source_location": "L537",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_17_adaptive_bottom_sheet_interaction_and_hotline_directory_refinements",
       "community": 90,
@@ -19767,7 +19787,7 @@
       "label": "2026-08-17 - Consumer report list card redesign",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L535",
+      "source_location": "L548",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_17_consumer_report_list_card_redesign",
       "community": 90,
@@ -19777,7 +19797,7 @@
       "label": "2026-08-17 - Compact consumer advisory cards",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L546",
+      "source_location": "L559",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_17_compact_consumer_advisory_cards",
       "community": 90,
@@ -19787,7 +19807,7 @@
       "label": "2026-08-30 - Compact human-reference rollout physical compatibility evidence",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L557",
+      "source_location": "L570",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_30_compact_human_reference_rollout_physical_compatibility_evidence",
       "community": 90,
@@ -19797,7 +19817,7 @@
       "label": "2026-08-26 - Consumer multi-account consolidated aggregate evidence",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L573",
+      "source_location": "L586",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_26_consumer_multi_account_consolidated_aggregate_evidence",
       "community": 90,
@@ -19807,7 +19827,7 @@
       "label": "2026-08-26 - Consumer multi-account V13 migration-shape gate compatibility",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L584",
+      "source_location": "L597",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_26_consumer_multi_account_v13_migration_shape_gate_compatibility",
       "community": 90,
@@ -19817,7 +19837,7 @@
       "label": "2026-08-26 - Consumer multi-account V14 setup replay compatibility",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L595",
+      "source_location": "L608",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_26_consumer_multi_account_v14_setup_replay_compatibility",
       "community": 90,
@@ -19827,7 +19847,7 @@
       "label": "2026-08-26 - Consumer multi-account V15 snapshot consistency and advisory identity-active compatibility",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L606",
+      "source_location": "L619",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_26_consumer_multi_account_v15_snapshot_consistency_and_advisory_identity_active_compatibility",
       "community": 90,
@@ -19837,7 +19857,7 @@
       "label": "2026-08-26 - Consumer multi-account staff delivery compatibility",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L617",
+      "source_location": "L630",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_26_consumer_multi_account_staff_delivery_compatibility",
       "community": 90,
@@ -19847,7 +19867,7 @@
       "label": "2026-08-25 - Consumer multi-account review remediation",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L629",
+      "source_location": "L642",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_25_consumer_multi_account_review_remediation",
       "community": 90,
@@ -19857,7 +19877,7 @@
       "label": "2026-08-25 - Consumer multi-account v3 queue remediation",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L640",
+      "source_location": "L653",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_25_consumer_multi_account_v3_queue_remediation",
       "community": 90,
@@ -19867,7 +19887,7 @@
       "label": "2026-08-25 - Consumer multi-account queue retry guard",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L651",
+      "source_location": "L664",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_25_consumer_multi_account_queue_retry_guard",
       "community": 90,
@@ -19877,7 +19897,7 @@
       "label": "2026-08-20 - Mobile unused module and dependency cleanup (committed and locally merged)",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L662",
+      "source_location": "L675",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_20_mobile_unused_module_and_dependency_cleanup_committed_and_locally_merged",
       "community": 90,
@@ -19887,7 +19907,7 @@
       "label": "2026-08-17 - Evidence camera and gallery source picker",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L675",
+      "source_location": "L688",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_17_evidence_camera_and_gallery_source_picker",
       "community": 90,
@@ -19897,9 +19917,9 @@
       "label": "2026-08-17 - Compact consumer advisory cards",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L688",
+      "source_location": "L701",
       "_origin": "ast",
-      "id": "agent_harness_implementation_history_2026_08_17_compact_consumer_advisory_cards_688",
+      "id": "agent_harness_implementation_history_2026_08_17_compact_consumer_advisory_cards_701",
       "community": 90,
       "norm_label": "2026-08-17 - compact consumer advisory cards"
     },
@@ -19907,7 +19927,7 @@
       "label": "2026-08-31 - Advisory date/publication policy implementation",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L699",
+      "source_location": "L712",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_31_advisory_date_publication_policy_implementation",
       "community": 90,
@@ -19917,7 +19937,7 @@
       "label": "2026-08-31 - Advisory date policy integrated release gate",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L711",
+      "source_location": "L724",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_31_advisory_date_policy_integrated_release_gate",
       "community": 90,
@@ -19927,7 +19947,7 @@
       "label": "2026-08-31 - Advisory date policy canonical integration",
       "file_type": "document",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L722",
+      "source_location": "L735",
       "_origin": "ast",
       "id": "agent_harness_implementation_history_2026_08_31_advisory_date_policy_canonical_integration",
       "community": 90,
@@ -22120,9 +22140,9 @@
       "source_file": "app.json",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "c_users_justine_codex_worktrees_aleconnect_mobile_advisory_date_policy_integration_app_json",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo"
     },
     {
       "relation": "contains",
@@ -22130,9 +22150,9 @@
       "source_file": "app.json",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_android",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_android"
     },
     {
       "relation": "contains",
@@ -22140,9 +22160,9 @@
       "source_file": "app.json",
       "source_location": "L31",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_androidstatusbar",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_androidstatusbar"
     },
     {
       "relation": "contains",
@@ -22150,9 +22170,9 @@
       "source_file": "app.json",
       "source_location": "L86",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_experiments",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_experiments"
     },
     {
       "relation": "contains",
@@ -22160,9 +22180,9 @@
       "source_file": "app.json",
       "source_location": "L90",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_extra",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_extra"
     },
     {
       "relation": "contains",
@@ -22170,9 +22190,9 @@
       "source_file": "app.json",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_icon",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_icon"
     },
     {
       "relation": "contains",
@@ -22180,9 +22200,9 @@
       "source_file": "app.json",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_ios",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_ios"
     },
     {
       "relation": "contains",
@@ -22190,9 +22210,9 @@
       "source_file": "app.json",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_name",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_name"
     },
     {
       "relation": "contains",
@@ -22200,9 +22220,9 @@
       "source_file": "app.json",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_orientation",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_orientation"
     },
     {
       "relation": "contains",
@@ -22210,9 +22230,9 @@
       "source_file": "app.json",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_plugins",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_plugins"
     },
     {
       "relation": "contains",
@@ -22220,9 +22240,9 @@
       "source_file": "app.json",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_scheme",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_scheme"
     },
     {
       "relation": "contains",
@@ -22230,9 +22250,9 @@
       "source_file": "app.json",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_slug",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_slug"
     },
     {
       "relation": "contains",
@@ -22240,9 +22260,9 @@
       "source_file": "app.json",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_userinterfacestyle",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_userinterfacestyle"
     },
     {
       "relation": "contains",
@@ -22250,9 +22270,9 @@
       "source_file": "app.json",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_version",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_version"
     },
     {
       "relation": "contains",
@@ -22260,9 +22280,9 @@
       "source_file": "app.json",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_web",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_expo_web"
     },
     {
       "relation": "contains",
@@ -22270,9 +22290,9 @@
       "source_file": "app.json",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo_ios",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_ios_bundleidentifier",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_ios_bundleidentifier"
     },
     {
       "relation": "contains",
@@ -22280,9 +22300,9 @@
       "source_file": "app.json",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo_ios",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_ios_icon",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_ios_icon"
     },
     {
       "relation": "contains",
@@ -22290,9 +22310,9 @@
       "source_file": "app.json",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo_ios",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_ios_infoplist",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_ios_infoplist"
     },
     {
       "relation": "contains",
@@ -22300,9 +22320,9 @@
       "source_file": "app.json",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_ios_infoplist",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_infoplist_itsappusesnonexemptencryption",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_infoplist_itsappusesnonexemptencryption"
     },
     {
       "relation": "contains",
@@ -22310,9 +22330,9 @@
       "source_file": "app.json",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_ios_infoplist",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_infoplist_nslocationwheninuseusagedescription",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_infoplist_nslocationwheninuseusagedescription"
     },
     {
       "relation": "contains",
@@ -22320,9 +22340,9 @@
       "source_file": "app.json",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo_android",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_android_adaptiveicon",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_android_adaptiveicon"
     },
     {
       "relation": "contains",
@@ -22330,9 +22350,9 @@
       "source_file": "app.json",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo_android",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_android_allowbackup",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_android_allowbackup"
     },
     {
       "relation": "contains",
@@ -22340,9 +22360,9 @@
       "source_file": "app.json",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo_android",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_android_googleservicesfile",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_android_googleservicesfile"
     },
     {
       "relation": "contains",
@@ -22350,9 +22370,9 @@
       "source_file": "app.json",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo_android",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_android_package",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_android_package"
     },
     {
       "relation": "contains",
@@ -22360,9 +22380,9 @@
       "source_file": "app.json",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo_android",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_android_permissions",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_android_permissions"
     },
     {
       "relation": "contains",
@@ -22370,9 +22390,9 @@
       "source_file": "app.json",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo_android",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_android_predictivebackgestureenabled",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_android_predictivebackgestureenabled"
     },
     {
       "relation": "contains",
@@ -22380,9 +22400,9 @@
       "source_file": "app.json",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_android_adaptiveicon",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_adaptiveicon_backgroundcolor",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_adaptiveicon_backgroundcolor"
     },
     {
       "relation": "contains",
@@ -22390,9 +22410,9 @@
       "source_file": "app.json",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_android_adaptiveicon",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_adaptiveicon_backgroundimage",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_adaptiveicon_backgroundimage"
     },
     {
       "relation": "contains",
@@ -22400,9 +22420,9 @@
       "source_file": "app.json",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_android_adaptiveicon",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_adaptiveicon_foregroundimage",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_adaptiveicon_foregroundimage"
     },
     {
       "relation": "contains",
@@ -22410,9 +22430,9 @@
       "source_file": "app.json",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_android_adaptiveicon",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_adaptiveicon_monochromeimage",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_adaptiveicon_monochromeimage"
     },
     {
       "relation": "contains",
@@ -22420,9 +22440,9 @@
       "source_file": "app.json",
       "source_location": "L33",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo_androidstatusbar",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_androidstatusbar_backgroundcolor",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_androidstatusbar_backgroundcolor"
     },
     {
       "relation": "contains",
@@ -22430,9 +22450,9 @@
       "source_file": "app.json",
       "source_location": "L32",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo_androidstatusbar",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_androidstatusbar_barstyle",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_androidstatusbar_barstyle"
     },
     {
       "relation": "contains",
@@ -22440,9 +22460,9 @@
       "source_file": "app.json",
       "source_location": "L35",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo_androidstatusbar",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_androidstatusbar_hidden",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_androidstatusbar_hidden"
     },
     {
       "relation": "contains",
@@ -22450,9 +22470,9 @@
       "source_file": "app.json",
       "source_location": "L34",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo_androidstatusbar",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_androidstatusbar_translucent",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_androidstatusbar_translucent"
     },
     {
       "relation": "contains",
@@ -22460,9 +22480,9 @@
       "source_file": "app.json",
       "source_location": "L39",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo_web",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_web_favicon",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_web_favicon"
     },
     {
       "relation": "contains",
@@ -22470,9 +22490,9 @@
       "source_file": "app.json",
       "source_location": "L38",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo_web",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_web_output",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_web_output"
     },
     {
       "relation": "contains",
@@ -22480,9 +22500,9 @@
       "source_file": "app.json",
       "source_location": "L88",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo_experiments",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_experiments_reactcompiler",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_experiments_reactcompiler"
     },
     {
       "relation": "contains",
@@ -22490,9 +22510,9 @@
       "source_file": "app.json",
       "source_location": "L87",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo_experiments",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_experiments_typedroutes",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_experiments_typedroutes"
     },
     {
       "relation": "contains",
@@ -22500,9 +22520,9 @@
       "source_file": "app.json",
       "source_location": "L92",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo_extra",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_extra_eas",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_extra_eas"
     },
     {
       "relation": "contains",
@@ -22510,9 +22530,9 @@
       "source_file": "app.json",
       "source_location": "L91",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_expo_extra",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_extra_router",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_extra_router"
     },
     {
       "relation": "contains",
@@ -22520,9 +22540,9 @@
       "source_file": "app.json",
       "source_location": "L93",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "aleconnect_mobile_advisory_date_policy_integration_app_extra_eas",
-      "target": "aleconnect_mobile_advisory_date_policy_integration_app_eas_projectid",
-      "confidence_score": 1.0
+      "target": "aleconnect_mobile_advisory_date_policy_integration_app_eas_projectid"
     },
     {
       "relation": "contains",
@@ -23859,9 +23879,9 @@
       "source_file": "src/app/(tabs)/home.tsx",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_home",
-      "target": "advisories_public_update_list_item",
-      "confidence_score": 1.0
+      "target": "advisories_public_update_list_item"
     },
     {
       "relation": "imports",
@@ -23870,9 +23890,9 @@
       "source_file": "src/app/(tabs)/home.tsx",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_home",
-      "target": "advisories_public_update_list_item_publicupdatelistitem",
-      "confidence_score": 1.0
+      "target": "advisories_public_update_list_item_publicupdatelistitem"
     },
     {
       "relation": "imports_from",
@@ -24112,9 +24132,9 @@
       "source_file": "src/app/(tabs)/home.tsx",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_home",
-      "target": "services_public_updates",
-      "confidence_score": 1.0
+      "target": "services_public_updates"
     },
     {
       "relation": "imports",
@@ -24123,9 +24143,9 @@
       "source_file": "src/app/(tabs)/home.tsx",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_home",
-      "target": "services_public_updates_fetchpublicupdates",
-      "confidence_score": 1.0
+      "target": "services_public_updates_fetchpublicupdates"
     },
     {
       "relation": "imports",
@@ -24134,9 +24154,9 @@
       "source_file": "src/app/(tabs)/home.tsx",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_home",
-      "target": "services_public_updates_mobilepublicupdate",
-      "confidence_score": 1.0
+      "target": "services_public_updates_mobilepublicupdate"
     },
     {
       "relation": "contains",
@@ -31815,9 +31835,9 @@
       "source_file": "src/app/_layout.tsx",
       "source_location": "L33",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_layout",
-      "target": "services_public_updates",
-      "confidence_score": 1.0
+      "target": "services_public_updates"
     },
     {
       "relation": "imports",
@@ -31826,9 +31846,9 @@
       "source_file": "src/app/_layout.tsx",
       "source_location": "L33",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_layout",
-      "target": "services_public_updates_clearpublicupdatescache",
-      "confidence_score": 1.0
+      "target": "services_public_updates_clearpublicupdatescache"
     },
     {
       "relation": "imports_from",
@@ -32123,9 +32143,9 @@
       "source_file": "src/app/advisories.tsx",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_advisories",
-      "target": "advisories_public_update_list_item",
-      "confidence_score": 1.0
+      "target": "advisories_public_update_list_item"
     },
     {
       "relation": "imports",
@@ -32134,9 +32154,9 @@
       "source_file": "src/app/advisories.tsx",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_advisories",
-      "target": "advisories_public_update_list_item_publicupdatelistitem",
-      "confidence_score": 1.0
+      "target": "advisories_public_update_list_item_publicupdatelistitem"
     },
     {
       "relation": "imports_from",
@@ -32342,9 +32362,9 @@
       "source_file": "src/app/advisories.tsx",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_advisories",
-      "target": "services_public_updates",
-      "confidence_score": 1.0
+      "target": "services_public_updates"
     },
     {
       "relation": "imports",
@@ -32353,9 +32373,9 @@
       "source_file": "src/app/advisories.tsx",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_advisories",
-      "target": "services_public_updates_fetchpublicupdates",
-      "confidence_score": 1.0
+      "target": "services_public_updates_fetchpublicupdates"
     },
     {
       "relation": "imports",
@@ -32364,9 +32384,9 @@
       "source_file": "src/app/advisories.tsx",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_advisories",
-      "target": "services_public_updates_mobilepublicupdate",
-      "confidence_score": 1.0
+      "target": "services_public_updates_mobilepublicupdate"
     },
     {
       "relation": "imports_from",
@@ -32474,9 +32494,9 @@
       "source_file": "src/app/advisory/[id].tsx",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "advisory_id",
-      "target": "advisories_public_update_photos",
-      "confidence_score": 1.0
+      "target": "advisories_public_update_photos"
     },
     {
       "relation": "imports",
@@ -32485,9 +32505,9 @@
       "source_file": "src/app/advisory/[id].tsx",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "advisory_id",
-      "target": "advisories_public_update_photos_publicupdatephotos",
-      "confidence_score": 1.0
+      "target": "advisories_public_update_photos_publicupdatephotos"
     },
     {
       "relation": "contains",
@@ -36103,9 +36123,9 @@
       "source_file": "src/features/advisories/public-update-list-item.tsx",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "advisories_public_update_list_item",
-      "target": "button_index",
-      "confidence_score": 1.0
+      "target": "button_index"
     },
     {
       "relation": "contains",
@@ -36350,9 +36370,9 @@
       "source_file": "src/features/advisories/public-update-list-item.tsx",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "advisories_public_update_list_item",
-      "target": "button_index_button",
-      "confidence_score": 1.0
+      "target": "button_index_button"
     },
     {
       "relation": "imports",
@@ -36427,9 +36447,9 @@
       "source_file": "src/features/advisories/public-update-list-item.tsx",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "advisories_public_update_list_item",
-      "target": "button_index_buttontext",
-      "confidence_score": 1.0
+      "target": "button_index_buttontext"
     },
     {
       "relation": "imports",
@@ -39375,9 +39395,9 @@
       "source_file": "src/features/advisories/public-update-list-item.tsx",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "advisories_public_update_list_item",
-      "target": "text_index",
-      "confidence_score": 1.0
+      "target": "text_index"
     },
     {
       "relation": "imports_from",
@@ -39527,9 +39547,9 @@
       "source_file": "src/features/advisories/public-update-list-item.tsx",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "advisories_public_update_list_item",
-      "target": "text_index_text",
-      "confidence_score": 1.0
+      "target": "text_index_text"
     },
     {
       "relation": "imports",
@@ -41624,9 +41644,9 @@
       "source_file": "src/features/advisories/advisory-list-item.tsx",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "advisories_advisory_list_item",
-      "target": "advisories_public_update_photos",
-      "confidence_score": 1.0
+      "target": "advisories_public_update_photos"
     },
     {
       "relation": "imports",
@@ -41635,9 +41655,9 @@
       "source_file": "src/features/advisories/advisory-list-item.tsx",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "advisories_advisory_list_item",
-      "target": "advisories_public_update_photos_publicupdatephotos",
-      "confidence_score": 1.0
+      "target": "advisories_public_update_photos_publicupdatephotos"
     },
     {
       "relation": "imports_from",
@@ -41723,9 +41743,9 @@
       "source_file": "src/features/advisories/public-update-list-item.tsx",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "advisories_public_update_list_item",
-      "target": "advisories_advisory_list_item",
-      "confidence_score": 1.0
+      "target": "advisories_advisory_list_item"
     },
     {
       "relation": "calls",
@@ -41789,9 +41809,9 @@
       "source_file": "src/features/advisories/public-update-list-item.tsx",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "advisories_public_update_list_item",
-      "target": "advisories_advisory_list_item_advisorylistitem",
-      "confidence_score": 1.0
+      "target": "advisories_advisory_list_item_advisorylistitem"
     },
     {
       "relation": "contains",
@@ -41799,9 +41819,9 @@
       "source_file": "src/features/advisories/public-update-list-item.tsx",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "advisories_public_update_list_item",
-      "target": "advisories_public_update_list_item_publicupdatelistitem",
-      "confidence_score": 1.0
+      "target": "advisories_public_update_list_item_publicupdatelistitem"
     },
     {
       "relation": "imports_from",
@@ -41810,9 +41830,9 @@
       "source_file": "src/features/advisories/public-update-list-item.tsx",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "advisories_public_update_list_item",
-      "target": "advisories_public_update_photos",
-      "confidence_score": 1.0
+      "target": "advisories_public_update_photos"
     },
     {
       "relation": "imports",
@@ -41821,9 +41841,9 @@
       "source_file": "src/features/advisories/public-update-list-item.tsx",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "advisories_public_update_list_item",
-      "target": "advisories_public_update_photos_publicupdatephotos",
-      "confidence_score": 1.0
+      "target": "advisories_public_update_photos_publicupdatephotos"
     },
     {
       "relation": "imports_from",
@@ -41832,9 +41852,9 @@
       "source_file": "src/features/advisories/public-update-list-item.tsx",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "advisories_public_update_list_item",
-      "target": "services_public_updates",
-      "confidence_score": 1.0
+      "target": "services_public_updates"
     },
     {
       "relation": "imports",
@@ -41843,9 +41863,9 @@
       "source_file": "src/features/advisories/public-update-list-item.tsx",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "advisories_public_update_list_item",
-      "target": "services_public_updates_mobilepublicupdate",
-      "confidence_score": 1.0
+      "target": "services_public_updates_mobilepublicupdate"
     },
     {
       "relation": "imports_from",
@@ -41854,9 +41874,9 @@
       "source_file": "src/features/advisories/public-update-list-item.tsx",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "advisories_public_update_list_item",
-      "target": "utils_manila_time",
-      "confidence_score": 1.0
+      "target": "utils_manila_time"
     },
     {
       "relation": "imports",
@@ -41865,9 +41885,9 @@
       "source_file": "src/features/advisories/public-update-list-item.tsx",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "advisories_public_update_list_item",
-      "target": "utils_manila_time_formatmanilareportlistdatetime",
-      "confidence_score": 1.0
+      "target": "utils_manila_time_formatmanilareportlistdatetime"
     },
     {
       "relation": "calls",
@@ -41886,9 +41906,9 @@
       "source_file": "src/features/advisories/public-update-photos.tsx",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "advisories_public_update_photos",
-      "target": "advisories_public_update_photos_publicupdatephotos",
-      "confidence_score": 1.0
+      "target": "advisories_public_update_photos_publicupdatephotos"
     },
     {
       "relation": "imports_from",
@@ -41897,9 +41917,9 @@
       "source_file": "src/features/advisories/public-update-photos.tsx",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "advisories_public_update_photos",
-      "target": "services_advisories",
-      "confidence_score": 1.0
+      "target": "services_advisories"
     },
     {
       "relation": "imports",
@@ -41908,9 +41928,9 @@
       "source_file": "src/features/advisories/public-update-photos.tsx",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "advisories_public_update_photos",
-      "target": "services_advisories_mobilepublicphoto",
-      "confidence_score": 1.0
+      "target": "services_advisories_mobilepublicphoto"
     },
     {
       "relation": "imports_from",
@@ -45425,9 +45445,9 @@
       "source_file": "src/services/advisories.ts",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_advisories",
-      "target": "services_advisories_mobilepublicphoto",
-      "confidence_score": 1.0
+      "target": "services_advisories_mobilepublicphoto"
     },
     {
       "relation": "contains",
@@ -45455,9 +45475,9 @@
       "source_file": "src/services/advisories.ts",
       "source_location": "L50",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_advisories",
-      "target": "services_advisories_normalizepublicphoto",
-      "confidence_score": 1.0
+      "target": "services_advisories_normalizepublicphoto"
     },
     {
       "relation": "contains",
@@ -45582,9 +45602,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates",
-      "target": "services_advisories",
-      "confidence_score": 1.0
+      "target": "services_advisories"
     },
     {
       "relation": "imports",
@@ -45593,9 +45613,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates",
-      "target": "services_advisories_mobileadvisory",
-      "confidence_score": 1.0
+      "target": "services_advisories_mobileadvisory"
     },
     {
       "relation": "imports",
@@ -45604,9 +45624,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates",
-      "target": "services_advisories_mobilepublicphoto",
-      "confidence_score": 1.0
+      "target": "services_advisories_mobilepublicphoto"
     },
     {
       "relation": "calls",
@@ -45637,9 +45657,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates",
-      "target": "services_advisories_normalizepublicphoto",
-      "confidence_score": 1.0
+      "target": "services_advisories_normalizepublicphoto"
     },
     {
       "relation": "calls",
@@ -45670,9 +45690,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates",
-      "target": "services_advisories_normalizemobileadvisory",
-      "confidence_score": 1.0
+      "target": "services_advisories_normalizemobileadvisory"
     },
     {
       "relation": "calls",
@@ -45714,9 +45734,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates",
-      "target": "services_advisories_advisoryscope",
-      "confidence_score": 1.0
+      "target": "services_advisories_advisoryscope"
     },
     {
       "relation": "calls",
@@ -45747,9 +45767,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates",
-      "target": "services_advisories_advisoryscopekey",
-      "confidence_score": 1.0
+      "target": "services_advisories_advisoryscopekey"
     },
     {
       "relation": "calls",
@@ -45758,9 +45778,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L49",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates_cachekey",
-      "target": "services_advisories_advisoryscopekey",
-      "confidence_score": 1.0
+      "target": "services_advisories_advisoryscopekey"
     },
     {
       "relation": "calls",
@@ -45846,9 +45866,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates",
-      "target": "services_advisories_fetchactiveadvisories",
-      "confidence_score": 1.0
+      "target": "services_advisories_fetchactiveadvisories"
     },
     {
       "relation": "contains",
@@ -46129,9 +46149,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates",
-      "target": "services_api",
-      "confidence_score": 1.0
+      "target": "services_api"
     },
     {
       "relation": "imports_from",
@@ -46194,9 +46214,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates",
-      "target": "services_api_apirequesterror",
-      "confidence_score": 1.0
+      "target": "services_api_apirequesterror"
     },
     {
       "relation": "imports",
@@ -46700,9 +46720,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates",
-      "target": "services_api_apirequest",
-      "confidence_score": 1.0
+      "target": "services_api_apirequest"
     },
     {
       "relation": "calls",
@@ -48372,9 +48392,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L48",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates",
-      "target": "services_public_updates_cachekey",
-      "confidence_score": 1.0
+      "target": "services_public_updates_cachekey"
     },
     {
       "relation": "contains",
@@ -48382,9 +48402,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L112",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates",
-      "target": "services_public_updates_clearpublicupdatescache",
-      "confidence_score": 1.0
+      "target": "services_public_updates_clearpublicupdatescache"
     },
     {
       "relation": "contains",
@@ -48392,9 +48412,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L71",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates",
-      "target": "services_public_updates_fetchpublicupdates",
-      "confidence_score": 1.0
+      "target": "services_public_updates_fetchpublicupdates"
     },
     {
       "relation": "contains",
@@ -48402,9 +48422,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates",
-      "target": "services_public_updates_mobilepublicupdate",
-      "confidence_score": 1.0
+      "target": "services_public_updates_mobilepublicupdate"
     },
     {
       "relation": "contains",
@@ -48412,9 +48432,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates",
-      "target": "services_public_updates_mobilepublicupdatespage",
-      "confidence_score": 1.0
+      "target": "services_public_updates_mobilepublicupdatespage"
     },
     {
       "relation": "contains",
@@ -48422,9 +48442,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates",
-      "target": "services_public_updates_normalizemobilepublicupdate",
-      "confidence_score": 1.0
+      "target": "services_public_updates_normalizemobilepublicupdate"
     },
     {
       "relation": "contains",
@@ -48432,9 +48452,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L39",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates",
-      "target": "services_public_updates_normalizepage",
-      "confidence_score": 1.0
+      "target": "services_public_updates_normalizepage"
     },
     {
       "relation": "contains",
@@ -48442,9 +48462,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates",
-      "target": "services_public_updates_nullablestring",
-      "confidence_score": 1.0
+      "target": "services_public_updates_nullablestring"
     },
     {
       "relation": "contains",
@@ -48452,9 +48472,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates",
-      "target": "services_public_updates_publicupdatescache",
-      "confidence_score": 1.0
+      "target": "services_public_updates_publicupdatescache"
     },
     {
       "relation": "contains",
@@ -48462,9 +48482,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L52",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates",
-      "target": "services_public_updates_readcache",
-      "confidence_score": 1.0
+      "target": "services_public_updates_readcache"
     },
     {
       "relation": "contains",
@@ -48472,9 +48492,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates",
-      "target": "services_public_updates_requests",
-      "confidence_score": 1.0
+      "target": "services_public_updates_requests"
     },
     {
       "relation": "contains",
@@ -48482,9 +48502,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates",
-      "target": "services_public_updates_unknownrecord",
-      "confidence_score": 1.0
+      "target": "services_public_updates_unknownrecord"
     },
     {
       "relation": "contains",
@@ -48492,9 +48512,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L67",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates",
-      "target": "services_public_updates_writecache",
-      "confidence_score": 1.0
+      "target": "services_public_updates_writecache"
     },
     {
       "relation": "imports_from",
@@ -48503,9 +48523,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates",
-      "target": "utils_refresh_cooldown",
-      "confidence_score": 1.0
+      "target": "utils_refresh_cooldown"
     },
     {
       "relation": "imports",
@@ -48514,9 +48534,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates",
-      "target": "utils_refresh_cooldown_claimrefresh",
-      "confidence_score": 1.0
+      "target": "utils_refresh_cooldown_claimrefresh"
     },
     {
       "relation": "calls",
@@ -48525,9 +48545,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L34",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates_normalizemobilepublicupdate",
-      "target": "services_public_updates_nullablestring",
-      "confidence_score": 1.0
+      "target": "services_public_updates_nullablestring"
     },
     {
       "relation": "calls",
@@ -48536,9 +48556,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L43",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates_normalizepage",
-      "target": "services_public_updates_nullablestring",
-      "confidence_score": 1.0
+      "target": "services_public_updates_nullablestring"
     },
     {
       "relation": "calls",
@@ -48547,9 +48567,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L60",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates_readcache",
-      "target": "services_public_updates_normalizepage",
-      "confidence_score": 1.0
+      "target": "services_public_updates_normalizepage"
     },
     {
       "relation": "calls",
@@ -48558,9 +48578,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L68",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates_writecache",
-      "target": "services_public_updates_normalizepage",
-      "confidence_score": 1.0
+      "target": "services_public_updates_normalizepage"
     },
     {
       "relation": "calls",
@@ -48569,9 +48589,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L113",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates_clearpublicupdatescache",
-      "target": "services_public_updates_cachekey",
-      "confidence_score": 1.0
+      "target": "services_public_updates_cachekey"
     },
     {
       "relation": "calls",
@@ -48580,9 +48600,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L53",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates_readcache",
-      "target": "services_public_updates_cachekey",
-      "confidence_score": 1.0
+      "target": "services_public_updates_cachekey"
     },
     {
       "relation": "calls",
@@ -48591,9 +48611,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L68",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates_writecache",
-      "target": "services_public_updates_cachekey",
-      "confidence_score": 1.0
+      "target": "services_public_updates_cachekey"
     },
     {
       "relation": "calls",
@@ -48602,9 +48622,9 @@
       "source_file": "src/services/public-updates.ts",
       "source_location": "L78",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_public_updates_fetchpublicupdates",
-      "target": "services_public_updates_readcache",
-      "confidence_score": 1.0
+      "target": "services_public_updates_readcache"
     },
     {
       "relation": "calls",
@@ -52250,9 +52270,9 @@
       "source_file": "tests/public-updates.test.mjs",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_public_updates_test",
-      "target": "tests_public_updates_test_read",
-      "confidence_score": 1.0
+      "target": "tests_public_updates_test_read"
     },
     {
       "relation": "contains",
@@ -57800,9 +57820,9 @@
       "source_file": "docs/agent-harness/active-work.md",
       "source_location": "L203",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "agent_harness_active_work_active_work",
-      "target": "agent_harness_active_work_advisory_date_policy_canonical_integration_2026_08_31",
-      "confidence_score": 1.0
+      "target": "agent_harness_active_work_advisory_date_policy_canonical_integration_2026_08_31"
     },
     {
       "relation": "contains",
@@ -57810,9 +57830,9 @@
       "source_file": "docs/agent-harness/active-work.md",
       "source_location": "L197",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "agent_harness_active_work_active_work",
-      "target": "agent_harness_active_work_advisory_date_policy_integrated_release_gate_2026_08_31",
-      "confidence_score": 1.0
+      "target": "agent_harness_active_work_advisory_date_policy_integrated_release_gate_2026_08_31"
     },
     {
       "relation": "contains",
@@ -57990,9 +58010,9 @@
       "source_file": "docs/agent-harness/active-work.md",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "agent_harness_active_work_active_work",
-      "target": "agent_harness_active_work_mobile_api_refresh_2026_09_13",
-      "confidence_score": 1.0
+      "target": "agent_harness_active_work_mobile_api_refresh_2026_09_13"
     },
     {
       "relation": "contains",
@@ -58018,6 +58038,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/agent-harness/active-work.md",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "agent_harness_active_work_active_work",
+      "target": "agent_harness_active_work_public_updates_backend_production_prerequisite_2026_09_14",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/agent-harness/active-work.md",
       "source_location": "L66",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -58030,9 +58060,9 @@
       "source_file": "docs/agent-harness/active-work.md",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "agent_harness_active_work_active_work",
-      "target": "agent_harness_active_work_unified_advisory_and_facebook_public_updates_feed_2026_09_14",
-      "confidence_score": 1.0
+      "target": "agent_harness_active_work_unified_advisory_and_facebook_public_updates_feed_2026_09_14"
     },
     {
       "relation": "contains",
@@ -58338,10 +58368,10 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/agent-harness/implementation-history.md",
-      "source_location": "L688",
+      "source_location": "L701",
       "weight": 1.0,
       "source": "agent_harness_implementation_history_implementation_history",
-      "target": "agent_harness_implementation_history_2026_08_17_compact_consumer_advisory_cards_688",
+      "target": "agent_harness_implementation_history_2026_08_17_compact_consumer_advisory_cards_701",
       "confidence_score": 1.0
     },
     {
@@ -58670,9 +58700,9 @@
       "source_file": "docs/agent-harness/implementation-history.md",
       "source_location": "L722",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "agent_harness_implementation_history_implementation_history",
-      "target": "agent_harness_implementation_history_2026_08_31_advisory_date_policy_canonical_integration",
-      "confidence_score": 1.0
+      "target": "agent_harness_implementation_history_2026_08_31_advisory_date_policy_canonical_integration"
     },
     {
       "relation": "contains",
@@ -58680,9 +58710,9 @@
       "source_file": "docs/agent-harness/implementation-history.md",
       "source_location": "L711",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "agent_harness_implementation_history_implementation_history",
-      "target": "agent_harness_implementation_history_2026_08_31_advisory_date_policy_integrated_release_gate",
-      "confidence_score": 1.0
+      "target": "agent_harness_implementation_history_2026_08_31_advisory_date_policy_integrated_release_gate"
     },
     {
       "relation": "contains",
@@ -58700,9 +58730,9 @@
       "source_file": "docs/agent-harness/implementation-history.md",
       "source_location": "L36",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "agent_harness_implementation_history_implementation_history",
-      "target": "agent_harness_implementation_history_2026_09_13_development_api_origin_refresh_and_task_2_device_gate",
-      "confidence_score": 1.0
+      "target": "agent_harness_implementation_history_2026_09_13_development_api_origin_refresh_and_task_2_device_gate"
     },
     {
       "relation": "contains",
@@ -58710,9 +58740,9 @@
       "source_file": "docs/agent-harness/implementation-history.md",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "agent_harness_implementation_history_implementation_history",
-      "target": "agent_harness_implementation_history_2026_09_13_five_task_mobile_api_refresh_final_gate",
-      "confidence_score": 1.0
+      "target": "agent_harness_implementation_history_2026_09_13_five_task_mobile_api_refresh_final_gate"
     },
     {
       "relation": "contains",
@@ -58720,9 +58750,9 @@
       "source_file": "docs/agent-harness/implementation-history.md",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "agent_harness_implementation_history_implementation_history",
-      "target": "agent_harness_implementation_history_2026_09_13_mobile_api_refresh_device_and_live_report_acceptance",
-      "confidence_score": 1.0
+      "target": "agent_harness_implementation_history_2026_09_13_mobile_api_refresh_device_and_live_report_acceptance"
     },
     {
       "relation": "contains",
@@ -58731,8 +58761,18 @@
       "source_location": "L3",
       "weight": 1.0,
       "source": "agent_harness_implementation_history_implementation_history",
-      "target": "agent_harness_implementation_history_2026_09_14_unified_public_updates_mobile_reader",
+      "target": "agent_harness_implementation_history_2026_09_14_public_updates_production_prerequisite_update",
       "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/agent-harness/implementation-history.md",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "agent_harness_implementation_history_implementation_history",
+      "target": "agent_harness_implementation_history_2026_09_14_unified_public_updates_mobile_reader"
     },
     {
       "relation": "contains",
@@ -58770,9 +58810,9 @@
       "source_file": "docs/implementation/2026-09-13-mobile-api-refresh-matrix.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "implementation_2026_09_13_mobile_api_refresh_matrix",
-      "target": "implementation_2026_09_13_mobile_api_refresh_matrix_mobile_api_refresh_matrix",
-      "confidence_score": 1.0
+      "target": "implementation_2026_09_13_mobile_api_refresh_matrix_mobile_api_refresh_matrix"
     },
     {
       "relation": "contains",
@@ -58780,9 +58820,9 @@
       "source_file": "docs/implementation/2026-09-13-mobile-api-refresh-matrix.md",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "implementation_2026_09_13_mobile_api_refresh_matrix_mobile_api_refresh_matrix",
-      "target": "implementation_2026_09_13_mobile_api_refresh_matrix_baseline_notes",
-      "confidence_score": 1.0
+      "target": "implementation_2026_09_13_mobile_api_refresh_matrix_baseline_notes"
     },
     {
       "relation": "contains",
@@ -59400,9 +59440,9 @@
       "source_file": "docs/superpowers/plans/2026-09-13-mobile-api-refresh.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_09_13_mobile_api_refresh",
-      "target": "plans_2026_09_13_mobile_api_refresh_aleconnect_mobile_api_refresh_implementation_plan",
-      "confidence_score": 1.0
+      "target": "plans_2026_09_13_mobile_api_refresh_aleconnect_mobile_api_refresh_implementation_plan"
     },
     {
       "relation": "contains",
@@ -59410,9 +59450,9 @@
       "source_file": "docs/superpowers/plans/2026-09-13-mobile-api-refresh.md",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_09_13_mobile_api_refresh_aleconnect_mobile_api_refresh_implementation_plan",
-      "target": "plans_2026_09_13_mobile_api_refresh_global_constraints",
-      "confidence_score": 1.0
+      "target": "plans_2026_09_13_mobile_api_refresh_global_constraints"
     },
     {
       "relation": "contains",
@@ -59420,9 +59460,9 @@
       "source_file": "docs/superpowers/plans/2026-09-13-mobile-api-refresh.md",
       "source_location": "L45",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_09_13_mobile_api_refresh_global_constraints",
-      "target": "plans_2026_09_13_mobile_api_refresh_task_1_freeze_the_api_to_module_contract_matrix_and_clean_baseline",
-      "confidence_score": 1.0
+      "target": "plans_2026_09_13_mobile_api_refresh_task_1_freeze_the_api_to_module_contract_matrix_and_clean_baseline"
     },
     {
       "relation": "contains",
@@ -59430,9 +59470,9 @@
       "source_file": "docs/superpowers/plans/2026-09-13-mobile-api-refresh.md",
       "source_location": "L148",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_09_13_mobile_api_refresh_global_constraints",
-      "target": "plans_2026_09_13_mobile_api_refresh_task_2_verify_and_repair_authentication_accounts_and_profile",
-      "confidence_score": 1.0
+      "target": "plans_2026_09_13_mobile_api_refresh_task_2_verify_and_repair_authentication_accounts_and_profile"
     },
     {
       "relation": "contains",
@@ -59440,9 +59480,9 @@
       "source_file": "docs/superpowers/plans/2026-09-13-mobile-api-refresh.md",
       "source_location": "L229",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_09_13_mobile_api_refresh_global_constraints",
-      "target": "plans_2026_09_13_mobile_api_refresh_task_3_verify_and_repair_reports_evidence_and_offline_synchronization",
-      "confidence_score": 1.0
+      "target": "plans_2026_09_13_mobile_api_refresh_task_3_verify_and_repair_reports_evidence_and_offline_synchronization"
     },
     {
       "relation": "contains",
@@ -59450,9 +59490,9 @@
       "source_file": "docs/superpowers/plans/2026-09-13-mobile-api-refresh.md",
       "source_location": "L300",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_09_13_mobile_api_refresh_global_constraints",
-      "target": "plans_2026_09_13_mobile_api_refresh_task_4_verify_and_repair_advisories_notifications_and_hotlines",
-      "confidence_score": 1.0
+      "target": "plans_2026_09_13_mobile_api_refresh_task_4_verify_and_repair_advisories_notifications_and_hotlines"
     },
     {
       "relation": "contains",
@@ -59460,9 +59500,9 @@
       "source_file": "docs/superpowers/plans/2026-09-13-mobile-api-refresh.md",
       "source_location": "L362",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_09_13_mobile_api_refresh_global_constraints",
-      "target": "plans_2026_09_13_mobile_api_refresh_task_5_run_the_full_android_acceptance_gate_and_close_the_handoff",
-      "confidence_score": 1.0
+      "target": "plans_2026_09_13_mobile_api_refresh_task_5_run_the_full_android_acceptance_gate_and_close_the_handoff"
     },
     {
       "relation": "contains",
@@ -60280,9 +60320,9 @@
       "source_file": "docs/superpowers/specs/2026-09-13-mobile-api-refresh-design.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_13_mobile_api_refresh_design",
-      "target": "specs_2026_09_13_mobile_api_refresh_design_aleconnect_mobile_api_refresh_design",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_13_mobile_api_refresh_design_aleconnect_mobile_api_refresh_design"
     },
     {
       "relation": "contains",
@@ -60290,9 +60330,9 @@
       "source_file": "docs/superpowers/specs/2026-09-13-mobile-api-refresh-design.md",
       "source_location": "L62",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_13_mobile_api_refresh_design_aleconnect_mobile_api_refresh_design",
-      "target": "specs_2026_09_13_mobile_api_refresh_design_architecture",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_13_mobile_api_refresh_design_architecture"
     },
     {
       "relation": "contains",
@@ -60300,9 +60340,9 @@
       "source_file": "docs/superpowers/specs/2026-09-13-mobile-api-refresh-design.md",
       "source_location": "L83",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_13_mobile_api_refresh_design_aleconnect_mobile_api_refresh_design",
-      "target": "specs_2026_09_13_mobile_api_refresh_design_compatibility",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_13_mobile_api_refresh_design_compatibility"
     },
     {
       "relation": "contains",
@@ -60310,9 +60350,9 @@
       "source_file": "docs/superpowers/specs/2026-09-13-mobile-api-refresh-design.md",
       "source_location": "L77",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_13_mobile_api_refresh_design_aleconnect_mobile_api_refresh_design",
-      "target": "specs_2026_09_13_mobile_api_refresh_design_contract",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_13_mobile_api_refresh_design_contract"
     },
     {
       "relation": "contains",
@@ -60320,9 +60360,9 @@
       "source_file": "docs/superpowers/specs/2026-09-13-mobile-api-refresh-design.md",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_13_mobile_api_refresh_design_aleconnect_mobile_api_refresh_design",
-      "target": "specs_2026_09_13_mobile_api_refresh_design_current_evidence",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_13_mobile_api_refresh_design_current_evidence"
     },
     {
       "relation": "contains",
@@ -60330,9 +60370,9 @@
       "source_file": "docs/superpowers/specs/2026-09-13-mobile-api-refresh-design.md",
       "source_location": "L130",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_13_mobile_api_refresh_design_aleconnect_mobile_api_refresh_design",
-      "target": "specs_2026_09_13_mobile_api_refresh_design_error_handling",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_13_mobile_api_refresh_design_error_handling"
     },
     {
       "relation": "contains",
@@ -60340,9 +60380,9 @@
       "source_file": "docs/superpowers/specs/2026-09-13-mobile-api-refresh-design.md",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_13_mobile_api_refresh_design_aleconnect_mobile_api_refresh_design",
-      "target": "specs_2026_09_13_mobile_api_refresh_design_goal",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_13_mobile_api_refresh_design_goal"
     },
     {
       "relation": "contains",
@@ -60350,9 +60390,9 @@
       "source_file": "docs/superpowers/specs/2026-09-13-mobile-api-refresh-design.md",
       "source_location": "L195",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_13_mobile_api_refresh_design_aleconnect_mobile_api_refresh_design",
-      "target": "specs_2026_09_13_mobile_api_refresh_design_handoff",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_13_mobile_api_refresh_design_handoff"
     },
     {
       "relation": "contains",
@@ -60360,9 +60400,9 @@
       "source_file": "docs/superpowers/specs/2026-09-13-mobile-api-refresh-design.md",
       "source_location": "L138",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_13_mobile_api_refresh_design_aleconnect_mobile_api_refresh_design",
-      "target": "specs_2026_09_13_mobile_api_refresh_design_implementation_phases",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_13_mobile_api_refresh_design_implementation_phases"
     },
     {
       "relation": "contains",
@@ -60370,9 +60410,9 @@
       "source_file": "docs/superpowers/specs/2026-09-13-mobile-api-refresh-design.md",
       "source_location": "L53",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_13_mobile_api_refresh_design_aleconnect_mobile_api_refresh_design",
-      "target": "specs_2026_09_13_mobile_api_refresh_design_non_goals",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_13_mobile_api_refresh_design_non_goals"
     },
     {
       "relation": "contains",
@@ -60380,9 +60420,9 @@
       "source_file": "docs/superpowers/specs/2026-09-13-mobile-api-refresh-design.md",
       "source_location": "L100",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_13_mobile_api_refresh_design_aleconnect_mobile_api_refresh_design",
-      "target": "specs_2026_09_13_mobile_api_refresh_design_offline",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_13_mobile_api_refresh_design_offline"
     },
     {
       "relation": "contains",
@@ -60390,9 +60430,9 @@
       "source_file": "docs/superpowers/specs/2026-09-13-mobile-api-refresh-design.md",
       "source_location": "L92",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_13_mobile_api_refresh_design_aleconnect_mobile_api_refresh_design",
-      "target": "specs_2026_09_13_mobile_api_refresh_design_ownership",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_13_mobile_api_refresh_design_ownership"
     },
     {
       "relation": "contains",
@@ -60400,9 +60440,9 @@
       "source_file": "docs/superpowers/specs/2026-09-13-mobile-api-refresh-design.md",
       "source_location": "L109",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_13_mobile_api_refresh_design_aleconnect_mobile_api_refresh_design",
-      "target": "specs_2026_09_13_mobile_api_refresh_design_permissions",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_13_mobile_api_refresh_design_permissions"
     },
     {
       "relation": "contains",
@@ -60410,9 +60450,9 @@
       "source_file": "docs/superpowers/specs/2026-09-13-mobile-api-refresh-design.md",
       "source_location": "L119",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_13_mobile_api_refresh_design_aleconnect_mobile_api_refresh_design",
-      "target": "specs_2026_09_13_mobile_api_refresh_design_production_data_safety",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_13_mobile_api_refresh_design_production_data_safety"
     },
     {
       "relation": "contains",
@@ -60420,9 +60460,9 @@
       "source_file": "docs/superpowers/specs/2026-09-13-mobile-api-refresh-design.md",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_13_mobile_api_refresh_design_aleconnect_mobile_api_refresh_design",
-      "target": "specs_2026_09_13_mobile_api_refresh_design_scope",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_13_mobile_api_refresh_design_scope"
     },
     {
       "relation": "contains",
@@ -60430,9 +60470,9 @@
       "source_file": "docs/superpowers/specs/2026-09-13-mobile-api-refresh-design.md",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_13_mobile_api_refresh_design_aleconnect_mobile_api_refresh_design",
-      "target": "specs_2026_09_13_mobile_api_refresh_design_status",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_13_mobile_api_refresh_design_status"
     },
     {
       "relation": "contains",
@@ -60440,9 +60480,9 @@
       "source_file": "docs/superpowers/specs/2026-09-13-mobile-api-refresh-design.md",
       "source_location": "L203",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_13_mobile_api_refresh_design_aleconnect_mobile_api_refresh_design",
-      "target": "specs_2026_09_13_mobile_api_refresh_design_success_criteria",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_13_mobile_api_refresh_design_success_criteria"
     },
     {
       "relation": "contains",
@@ -60450,9 +60490,9 @@
       "source_file": "docs/superpowers/specs/2026-09-13-mobile-api-refresh-design.md",
       "source_location": "L162",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_13_mobile_api_refresh_design_aleconnect_mobile_api_refresh_design",
-      "target": "specs_2026_09_13_mobile_api_refresh_design_verification",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_13_mobile_api_refresh_design_verification"
     },
     {
       "relation": "contains",
@@ -60460,9 +60500,9 @@
       "source_file": "docs/superpowers/specs/2026-09-13-mobile-api-refresh-design.md",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_13_mobile_api_refresh_design_scope",
-      "target": "specs_2026_09_13_mobile_api_refresh_design_contract_inventory",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_13_mobile_api_refresh_design_contract_inventory"
     },
     {
       "relation": "contains",
@@ -60470,9 +60510,9 @@
       "source_file": "docs/superpowers/specs/2026-09-13-mobile-api-refresh-design.md",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_13_mobile_api_refresh_design_scope",
-      "target": "specs_2026_09_13_mobile_api_refresh_design_runtime_acceptance",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_13_mobile_api_refresh_design_runtime_acceptance"
     },
     {
       "relation": "contains",
@@ -60480,9 +60520,9 @@
       "source_file": "docs/superpowers/specs/2026-09-13-mobile-api-refresh-design.md",
       "source_location": "L142",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_13_mobile_api_refresh_design_implementation_phases",
-      "target": "specs_2026_09_13_mobile_api_refresh_design_phase_1_contract_and_baseline_matrix",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_13_mobile_api_refresh_design_phase_1_contract_and_baseline_matrix"
     },
     {
       "relation": "contains",
@@ -60490,9 +60530,9 @@
       "source_file": "docs/superpowers/specs/2026-09-13-mobile-api-refresh-design.md",
       "source_location": "L146",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_13_mobile_api_refresh_design_implementation_phases",
-      "target": "specs_2026_09_13_mobile_api_refresh_design_phase_2_authentication_accounts_and_profile",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_13_mobile_api_refresh_design_phase_2_authentication_accounts_and_profile"
     },
     {
       "relation": "contains",
@@ -60500,9 +60540,9 @@
       "source_file": "docs/superpowers/specs/2026-09-13-mobile-api-refresh-design.md",
       "source_location": "L150",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_13_mobile_api_refresh_design_implementation_phases",
-      "target": "specs_2026_09_13_mobile_api_refresh_design_phase_3_reports_evidence_and_offline_synchronization",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_13_mobile_api_refresh_design_phase_3_reports_evidence_and_offline_synchronization"
     },
     {
       "relation": "contains",
@@ -60510,9 +60550,9 @@
       "source_file": "docs/superpowers/specs/2026-09-13-mobile-api-refresh-design.md",
       "source_location": "L154",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_13_mobile_api_refresh_design_implementation_phases",
-      "target": "specs_2026_09_13_mobile_api_refresh_design_phase_4_advisories_notifications_and_hotlines",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_13_mobile_api_refresh_design_phase_4_advisories_notifications_and_hotlines"
     },
     {
       "relation": "contains",
@@ -60520,11 +60560,11 @@
       "source_file": "docs/superpowers/specs/2026-09-13-mobile-api-refresh-design.md",
       "source_location": "L158",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_13_mobile_api_refresh_design_implementation_phases",
-      "target": "specs_2026_09_13_mobile_api_refresh_design_phase_5_full_device_acceptance_and_handoff",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_13_mobile_api_refresh_design_phase_5_full_device_acceptance_and_handoff"
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "2ff3b4b5a23ca6884aaa733373f64d4add4851fc"
+  "built_at_commit": "8c2bf2b3d13eb0f65fd9fb0d673ff68003c583bc"
 }

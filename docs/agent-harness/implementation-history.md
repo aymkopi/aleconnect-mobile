@@ -1,5 +1,16 @@
 # Implementation history
 
+## 2026-09-14 - Public Updates production prerequisite update
+
+- Repositories: Staff/API production migration from isolated `codex/facebook-publication-public-updates`; mobile branch/source unchanged.
+- Scope: records that the additive production tables now exist while the compatible Public Updates API and mobile reader remain undeployed.
+- Files: mobile harness records only.
+- Contracts: exact `advisory_id` deduplication passed against production-backed fixtures; no mobile cache, route, or payload changed.
+- Verification: Staff production-backed Public Updates test passes 1/1 and cleanup reports zero remaining test publications/advisories/media.
+- Git/Deployment: schema only. No Worker/Pages deployment, integration enablement, mobile build, EAS/OTA, store release, merge, or push occurred.
+- Remaining risks: Staff's comment/photo provider smoke is green, but its stored credential still needs to be replaced with the derived Page token before backend deployment; mobile physical-device and release gates remain open.
+- Next: release the compatible Staff endpoint first, then verify and distribute mobile only with separate authorization.
+
 ## 2026-09-14 - Unified Public Updates mobile reader
 
 - Repositories: mobile worktree `aleconnect-mobile-facebook-public-updates` consumes the Staff/API contract from `aleconnect/.worktrees/facebook-publication-public-updates`; both use isolated branch `codex/facebook-publication-public-updates`.
