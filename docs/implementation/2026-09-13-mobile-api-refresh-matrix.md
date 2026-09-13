@@ -31,6 +31,10 @@ Android device: `25040RP0AG` via wireless ADB `192.168.1.31:41667`
 - Full mobile baseline passes 197/197 JavaScript tests and 11/11 TypeScript tests.
 - `npx tsc --noEmit` and `npm run harness:check` pass.
 - `npm run lint` passes with zero errors and four existing warnings: three unused-value warnings and one map-picker hook dependency warning.
+- `npx expo install --fix` aligned all 15 drifted Expo SDK 55 packages; Expo Doctor now passes 20/20. The package audit still reports 30 dependency findings and was not force-fixed.
+- Android export completed at 4,479 modules, and the refreshed native debug APK compiled successfully across 574 Gradle tasks. Post-refresh device installation/smoke remains pending because wireless ADB stopped advertising the selected phone.
+- The Staff-owned mobile lifecycle gate passes 146/148; the two failures are the existing compact-mode configuration assertion and stale Users Directory source assertion. Staff deployment route/runtime coverage passes 19/19.
+- Graphify refreshed to 2,161 nodes, 3,608 edges, and 188 communities; its broad generated churn remains separate from the scoped product commit.
 - Task 2 fixed the shared development fallback from the Expo host on port 5173 to `https://api.aleconnect.app`; the production build remains fail-closed without explicit HTTPS configuration.
 - Task 2 used a read-only production credential lookup and local hash verification; no username, password, phone number, or session token is stored in repository evidence.
 - Task 3 forced the Android proxy to `127.0.0.1:9`, proved the protected queued report remained visible, and restored the original direct-network state to `:0` in `finally`.

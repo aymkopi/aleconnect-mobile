@@ -2,11 +2,11 @@
 
 ## Mobile API refresh (2026-09-13)
 
-- Status: Task 1 is committed as `515de6e`; Task 2 source and authenticated device verification is complete and awaiting its scoped commit. The plan remains exactly five tasks.
+- Status: Tasks 1-4 are committed through `423a582`. Task 5 refreshed the Expo SDK 55 patch set and passed source, export, and native compile gates; installing that rebuilt dev client and repeating the final smoke is pending because wireless ADB stopped advertising the selected phone. The plan remains exactly five tasks.
 - Scope: development Android client only, consuming `https://api.aleconnect.app`. No Staff deployment, direct database mutation, EAS/OTA action, release build, or store submission is authorized.
-- Evidence: route contracts pass 31/31, Staff route/runtime registration passes 19/19, the full mobile baseline passes 197/197 JavaScript and 11/11 TypeScript tests, Task 2 focused coverage passes 37/37, TypeScript passes, and lint has zero errors with four existing warnings. The worktree development client built and loaded on `25040RP0AG` through Metro port 8082.
-- Device evidence: authenticated account sign-in, optional email setup boundary, identity/account/Profile reads, reversible phone update with DB-confirmed restoration, password screen, sign-out, restart-to-guest, guest Profile protection, and safe invalid account-number/email responses pass against the live API. Password mutation and avatar upload were not executed; multi-account default switching is not applicable.
-- Next: commit Task 2, then verify reports/evidence/offline behavior under Task 3 without widening production scope.
+- Evidence: the full mobile suites pass 197/197 JavaScript and 11/11 TypeScript tests; TypeScript, Android export, Expo Doctor 20/20, and the 574-task debug APK build pass. Lint has zero errors and four existing warnings. Staff route/runtime coverage passes 19/19; the broader Staff mobile-contract gate is 146/148 with the two known compact-mode and Users Directory source-assertion mismatches reproduced.
+- Device evidence: before the dependency refresh, authenticated account/Profile, report queue/offline/detail, advisory, notification/settings, Hotline, background/resume, sign-out, and guest boundaries passed on `25040RP0AG` through Metro port 8082. The notification preference and Profile phone test values were restored and re-read. The approved report remains safely queued because the live final complaint insert is defective; the one-placeholder Staff fix is verified locally at `37768d9` but is not deployed.
+- Next: reconnect wireless debugging, install the rebuilt development APK through Expo's interactive device selector, repeat the Home/Profile/Reports/Hotlines smoke, and keep Staff deployment separately authorized.
 
 ## Android production-signing guard (2026-08-30)
 

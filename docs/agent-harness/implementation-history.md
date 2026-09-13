@@ -1,5 +1,17 @@
 # Implementation history
 
+## 2026-09-13 - Five-task mobile API refresh final gate
+
+- Repositories: `aleconnect-mobile` owns the development consumer refresh; isolated Staff worktree `aleconnect-mobile-api-refresh-server` owns the complaint-insert regression fix. The dirty canonical Staff checkout remained read-only.
+- Scope: completed the approved five-task audit of authentication/Profile, reports/evidence/offline queue, advisories, notifications/push settings, and Hotlines against `https://api.aleconnect.app`; aligned the 15 drifted Expo SDK 55 patch packages without adding dependencies or changing release configuration.
+- Files: mobile shared API origin and its contract test from Task 2, `package.json`, `package-lock.json`, the five-task plan/matrix, active work, and this history. Staff commit `37768d9` changes only the complaint ticket insert placeholder count, its regression test, and Staff harness handoffs.
+- Contracts: explicit development API overrides remain supported and production stays fail-closed without HTTPS configuration. Mobile request/payload/cache/native-identifier shapes are unchanged. The queued report retains its original idempotency key. Staff's 19-column complaint insert now has 19 values in the isolated fix.
+- Verification: mobile passes 197/197 JavaScript and 11/11 TypeScript tests, `npx tsc --noEmit`, Android export at 4,479 modules, Expo Doctor 20/20, and a 574-task debug APK build. Lint exits 0 with four existing warnings. Staff route/runtime coverage passes 19/19; broad mobile lifecycle coverage is 146/148 with the existing compact-mode and Users Directory source-assertion mismatches reproduced. Staff fix coverage passes 41/41, Staff build and harness pass. Graphify refreshed to 2,161 nodes, 3,608 edges, and 188 communities.
+- Device/production consumer writes: before the dependency refresh, `25040RP0AG` passed account/Profile, report queue/offline/detail, advisory, notification/settings, Hotline, background/resume, sign-out, and guest flows. The Profile phone and notification-setting verification values were restored and re-read. One current-account notification was marked read. The approved non-operational report remains queued; the failed live transaction inserted no ticket. No passwords, session tokens, or customer identifiers are recorded.
+- Git/Deployment: mobile work remains on `codex/mobile-api-refresh`; the isolated Staff fix is commit `37768d9` on `codex/mobile-api-refresh-server`. No merge, push, Staff/API deployment, database mutation, EAS/OTA, release build, store submission, or iOS action occurred.
+- Remaining risks: the live complaint POST remains broken until the separately verified Staff fix is authorized and deployed. The refreshed dev APK compiled but could not be installed after wireless ADB stopped advertising the selected phone, so post-refresh device smoke is pending. Organic provider push, password mutation, avatar upload, multi-account switching, iOS, and the 30 reported npm dependency findings remain unverified or intentionally out of scope.
+- Next: restore wireless debugging, install through Expo's interactive device selector, repeat the final Android smoke, then separately authorize the Staff API deployment if live report completion is required.
+
 ## 2026-09-13 - Development API origin refresh and Task 2 device gate
 
 - Repositories: `aleconnect-mobile` consumer only; the Staff checkout was inspected and left unchanged.
