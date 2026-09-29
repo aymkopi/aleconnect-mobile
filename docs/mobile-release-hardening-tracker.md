@@ -41,6 +41,7 @@ Status values: `pending`, `in_progress`, `complete`, `deferred`, `blocked`.
 
 ## Verification Log
 
+- 2026-09-14 local performance preview: production signing remained fail-closed; Node 24.14.1 reproduced a Windows bundle-process access violation, while Node 22.23.2 completed the same bundle task and the full non-debuggable, standalone-Hermes `assemblePreview` APK. No ADB device was connected, so install and physical-device performance remain pending.
 - 2026-07-28 baseline: mobile TypeScript, lint, Expo Doctor, and 33 tests passed.
 - 2026-07-28 baseline: backend build and 15 focused mobile/lifecycle tests passed.
 - 2026-07-28 baseline: live R2 evidence objects returned valid WebP responses.

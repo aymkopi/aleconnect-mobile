@@ -7,6 +7,7 @@ const PACKAGE_PREFIXES = Object.freeze({
 
 const START_MARKER = "// @generated aleconnect-production-signing-guard:start";
 const END_MARKER = "// @generated aleconnect-production-signing-guard:end";
+const LOCAL_PREVIEW_MARKER = "// @generated aleconnect-local-preview-build";
 
 function validateSigningPrefix(androidPackage, prefix) {
   const expectedPrefix = PACKAGE_PREFIXES[androidPackage];
@@ -105,6 +106,39 @@ function signingGuardBlock(prefix) {
   ].join("\n");
 }
 
+function addLocalPreviewBuildType(contents) {
+  if (contents.includes(LOCAL_PREVIEW_MARKER)) {
+    const preview = contents.slice(contents.indexOf(LOCAL_PREVIEW_MARKER));
+    if (
+      !/preview\s*\{/.test(preview) ||
+      !preview.includes("initWith release") ||
+      !preview.includes("signingConfig signingConfigs.debug") ||
+      !preview.includes("matchingFallbacks = ['release']")
+    ) {
+      throw new Error("Android local preview build marker is present but its release-runtime configuration is incomplete.");
+    }
+    return contents;
+  }
+
+  const packagingOptions = /\r?\n    packagingOptions\s*\{/;
+  if (!packagingOptions.test(contents)) {
+    throw new Error("Android app Gradle file has no packagingOptions boundary for the local preview build.");
+  }
+
+  return contents.replace(
+    packagingOptions,
+    `\n    ${LOCAL_PREVIEW_MARKER}
+    buildTypes {
+        preview {
+            initWith release
+            signingConfig signingConfigs.debug
+            matchingFallbacks = ['release']
+        }
+    }
+    packagingOptions {`,
+  );
+}
+
 function transformAndroidAppBuildGradle(contents, options = {}) {
   const prefix = validateTransformPrefix(options.prefix);
   const hasStartMarker = contents.includes(START_MARKER);
@@ -119,7 +153,7 @@ function transformAndroidAppBuildGradle(contents, options = {}) {
     if (!releaseBuildType || releaseBuildType[1] !== "release") {
       throw new Error("Android production signing guard markers are present but release is not configured with signingConfigs.release.");
     }
-    return contents;
+    return addLocalPreviewBuildType(contents);
   }
 
   const releaseAssignment = /(\brelease\s*\{[\s\S]*?)signingConfig\s+signingConfigs\.debug/;
@@ -135,10 +169,11 @@ function transformAndroidAppBuildGradle(contents, options = {}) {
     throw new Error("Android app Gradle file has no signingConfigs/buildTypes boundary.");
   }
 
-  return withoutDebugReleaseSigning.replace(
+  const withSigningGuard = withoutDebugReleaseSigning.replace(
     signingConfigsClose,
     `\n${signingGuardBlock(prefix)}\n    }\n    buildTypes {`,
   );
+  return addLocalPreviewBuildType(withSigningGuard);
 }
 
 function withAndroidProductionSigningGuard(config, options = {}) {
@@ -155,6 +190,7 @@ function withAndroidProductionSigningGuard(config, options = {}) {
 
 module.exports = withAndroidProductionSigningGuard;
 module.exports.PACKAGE_PREFIXES = PACKAGE_PREFIXES;
+module.exports.addLocalPreviewBuildType = addLocalPreviewBuildType;
 module.exports.transformAndroidAppBuildGradle = transformAndroidAppBuildGradle;
 module.exports.validateSigningPrefix = validateSigningPrefix;
 module.exports.isVerifiedEasInjection = isVerifiedEasInjection;

@@ -1,5 +1,14 @@
 # Active work
 
+## Local Android release-performance preview (2026-09-14)
+
+- Status: the local release-performance build path is restored without weakening production signing.
+- Root causes: `assembleRelease` correctly fails closed because no production keystore is configured; separately, Node 24.14.1 crashes the completed Expo bundle process on Windows with `0xC0000005`, while the same task succeeds under the repository's Node 22 lane.
+- Scope: the signing config plugin generates an installable `preview` build type derived from `release` but signed with the local debug key. `npm run android:preview` pins the supported Node major, runs Expo prebuild, sets the production bundle environment, and assembles the preview APK.
+- Evidence: signing/config tests pass 9/9; Expo Doctor passes 20/20; `npm run android:preview` under Node 22.23.2 completes `BUILD SUCCESSFUL` with 947 actionable tasks. The 146,081,425-byte APK is non-debuggable, contains the standalone bundle and Hermes libraries, supports four ABIs, and verifies with an Android Debug certificate. Production `assembleRelease` still fails at the sanitized missing-signing guard.
+- Boundary: no device was visible to ADB, so installation and physical-device performance remain pending. No EAS build, store submission, OTA update, Staff/API change, secret change, or production mutation occurred.
+- Next: connect a USB-debugging or wireless-ADB device and install `android/app/build/outputs/apk/preview/app-preview.apk`; configure the existing production/EAS signing source only when a distributable release is authorized.
+
 ## Public Updates local integration (2026-09-14)
 
 - Status: feature head `4fb3fb9` is merged into local `master`; Staff feature head `3e71154` is present on local `main`.

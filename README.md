@@ -25,6 +25,20 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
+## Test an Android preview on a device
+
+Requirements: Node 22 LTS, JDK 21, Android SDK 36, and an Android device with USB debugging enabled.
+
+```powershell
+npm install
+npm run android:preview
+adb install -r android\app\build\outputs\apk\preview\app-preview.apk
+```
+
+The preview is non-debuggable, includes the standalone Hermes bundle, and uses release runtime settings with the local Android debug key. It does not need Metro. A production `assembleRelease` remains blocked until the `ALECONNECT_MOBILE_KEYSTORE_*` signing properties or verified EAS credentials are available.
+
+If `adb install -r` reports a signature mismatch, the installed app was signed with another key. Uninstalling it will erase that app's local data.
+
 ## Get a fresh project
 
 When you're ready, run:

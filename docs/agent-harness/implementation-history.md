@@ -1,5 +1,17 @@
 # Implementation history
 
+## 2026-09-14 - Local Android release-performance preview restored
+
+- Repositories: mobile `master`; Staff/API source unchanged.
+- Scope: added a generated `preview` Android build type that inherits `release` runtime settings and uses the local debug key, plus a Node-22-guarded `npm run android:preview` command and setup documentation.
+- Files: `.nvmrc`, `package.json`, `package-lock.json`, `README.md`, `plugins/with-android-production-signing-guard.js`, `tests/android-production-signing-guard.test.mjs`, and mobile harness records.
+- Contracts: the production `release` build still selects `signingConfigs.release` and fails closed without complete app-scoped, legacy managed, or verified EAS signing credentials. No credential value is embedded or logged.
+- Root-cause evidence: the initial local `assembleRelease` stopped at the expected missing-signing guard. After reaching bundling through the preview variant, Node 24.14.1 crashed after bundling 4,482 modules with Windows exit `-1073741819` (`0xC0000005`); the exact failed bundle task completed under Node 22.23.2.
+- Verification: preview/signing tests pass 9/9; Expo Doctor passes 20/20; `npm run android:preview` completes `BUILD SUCCESSFUL in 16m 18s`. The generated 146,081,425-byte APK has SHA-256 `424CBD4F0C313724616860F5599B2A247139BC23A8B22A725149EAE1A53C17FF`, package `com.kapecakes.aleconnectmobile`, four ABIs, a standalone `assets/index.android.bundle`, Hermes native libraries, no debuggable manifest flag, and a verified Android Debug certificate.
+- Git/Deployment: local source only. No push, EAS/OTA action, store submission, Staff deployment, secret change, or production mutation occurred.
+- Remaining risks: no ADB device was connected, so install, launch, authenticated smoke, and physical-device performance are unverified.
+- Next: install the preview APK on a USB-debugging or wireless-ADB device and run the physical performance smoke; provide production/EAS signing only for an authorized distributable release.
+
 ## 2026-09-14 - Public Updates merged locally
 
 - Repositories: Mobile `master` fast-forwarded to feature head `4fb3fb9`; Staff `main` contains feature head `3e71154`.

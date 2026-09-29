@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import { createRequire } from "node:module"
-import { existsSync } from "node:fs"
+import { existsSync, readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import test from "node:test"
 
@@ -28,6 +28,8 @@ const baseGradle = `android {
             minifyEnabled false
         }
     }
+    packagingOptions {
+    }
 }`
 
 function transform() {
@@ -42,6 +44,22 @@ test("Mobile release build is never assigned the debug signing config", () => {
   const release = output.slice(releaseStart, output.indexOf("\n        }", releaseStart) + 10)
   assert.match(release, /signingConfig signingConfigs\.release/)
   assert.doesNotMatch(release, /signingConfigs\.debug/)
+})
+
+test("Mobile local preview uses release runtime settings with a non-production signature", () => {
+  const output = transform()
+  const previewStart = output.indexOf("preview {")
+  const preview = output.slice(previewStart, output.indexOf("\n        }", previewStart) + 10)
+  assert.match(preview, /initWith release/)
+  assert.match(preview, /signingConfig signingConfigs\.debug/)
+  assert.match(preview, /matchingFallbacks = \['release'\]/)
+})
+
+test("Mobile exposes a Node 22 local preview build command", () => {
+  const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"))
+  assert.equal(packageJson.engines.node, "22.x")
+  assert.match(packageJson.scripts["android:preview"], /Node 22 LTS/)
+  assert.match(packageJson.scripts["android:preview"], /assemblePreview/)
 })
 
 test("Mobile guard resolves app-scoped local and managed Gradle signing properties at build time", () => {
