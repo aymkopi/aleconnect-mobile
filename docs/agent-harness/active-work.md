@@ -1,5 +1,13 @@
 # Active work
 
+## Master synchronization and Android preview verification (2026-09-29)
+
+- Status: local and remote `master` are synchronized at `1bd73c2`; stale merged mobile branches and worktrees were removed.
+- Evidence: 202 JavaScript tests, TypeScript, harness validation, and Expo Doctor 20/20 pass; lint has zero errors and four existing warnings. Node 22.23.2 `npm run android:preview` completed `BUILD SUCCESSFUL` (947 tasks), and the 146,081,429-byte APK (`242E8977076EADBC0B4C6B745146D466C7FB3EAFD0739537B3BF8D0CB8D9437B`) installed and launched on `25040RP0AG` (Android 16) with PID 6830, `Running "main"`, and no fatal/React errors in the launch log. GitHub Actions run `36572859160` passed.
+- Recovery: generated Graphify output and the uncommitted UI-overhaul snapshot remain in named local stashes; no source work was discarded during cleanup.
+- Boundary: this proves a local preview build and launch, not a production-signed release, EAS/store publication, authenticated workflow, or production deployment. Production signing remains fail-closed.
+- Next: keep EAS/store publication and production signing separately authorized; use the preview APK for any further device workflow checks.
+
 ## Local Android release-performance preview (2026-09-14)
 
 - Status: the local release-performance build path is restored without weakening production signing.

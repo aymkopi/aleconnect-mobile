@@ -1,5 +1,16 @@
 # Implementation history
 
+## 2026-09-29 - Mobile master synchronization and preview device verification
+
+- Repositories: consumer `aleconnect-mobile`; Staff/API and Lineman remained unchanged.
+- Scope: fast-forwarded the verified local mobile history to remote `master`, recorded the Node-22 Android preview lane, and removed stale merged feature branches/worktrees after preserving recovery stashes.
+- Files: mobile preview/signing source, harness records, Graphify outputs, and `.nvmrc` were committed as `1bd73c2`.
+- Contracts: production signing remains fail-closed; the preview inherits release runtime settings but uses the local debug signature. No API, authentication, database, server secret, or production contract changed.
+- Verification: 202 JavaScript tests, TypeScript, `npm run harness:check`, Expo Doctor 20/20, and `npm run android:preview` under Node 22.23.2 passed. Lint has zero errors and four existing warnings. The 146,081,429-byte APK (SHA-256 `242E8977076EADBC0B4C6B745146D466C7FB3EAFD0739537B3BF8D0CB8D9437B`) installed and launched on Android 16 device `25040RP0AG`; PID 6830 reported `Running "main"` with no fatal/React launch errors. GitHub Actions run `36572859160` passed.
+- Git/Deployment: `master` and `origin/master` match at `1bd73c2`; stale remote agent branches `agent/advisory-card-redesign` and `agent/report-list-card-redesign` had no PRs and were deleted. No EAS/store release, backend deployment, database mutation, or production action occurred.
+- Remaining risks: this is local preview/device-launch evidence only; authenticated workflow, production signing, and EAS/store distribution remain outside scope.
+- Next: keep production signing and distribution separately authorized.
+
 ## 2026-09-14 - Local Android release-performance preview restored
 
 - Repositories: mobile `master`; Staff/API source unchanged.
