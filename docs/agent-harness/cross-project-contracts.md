@@ -1,7 +1,7 @@
 # ALEConnect cross-project contracts
 
 Authoritative source: `../aleconnect/docs/agent-harness/cross-project-contracts.md`
-Last synchronized staff commit: `3e71154c5015ba3162c5bff83118f998d9c1f5ff`
+Last synchronized staff commit: `c4e02993009795c813bee4d2de8e8ec58cd4c24b`
 
 <!-- shared-contract:start -->
 ## Ownership and routes
@@ -19,10 +19,10 @@ Last synchronized staff commit: `3e71154c5015ba3162c5bff83118f998d9c1f5ff`
 ## Operational flows
 
 - Consumer reports enter through `/api/mobile/*`; evidence uses validated R2 object keys and presigned upload flow, never mobile database access.
-- Notifications and advisories are selected server-side from consumer scope, subscriptions, and preferences. Push/SMS work records must remain idempotent and replay-safe.
+- Notifications and advisories are selected server-side from consumer scope, subscriptions, and preferences. Push work records remain idempotent and replay-safe.
 - Status contracts are domain-specific. Ticket consumer projection v1 exposes only `under_review`, `verified`, `rejected`, `dispatched`, `in_progress`, `resolved`, and `closed`; unknown or internal values fail closed and are never shown raw. Mobile accepts response-envelope `statusModelVersion` only when absent or `1`; unsupported ticket push, row, or envelope versions preserve the last valid memory-or-persistent cached status and mark the report list for authoritative revalidation.
-- During the canonical rollout, Service Memo readers accept `open|draft|ready|dispatched|in_progress|resolved|closed|cancelled`, trip readers accept `planned|sent|assigned|acknowledged|in_progress|completed|denied|declined|cancelled|handed_off`, and field-item readers accept `pending|en_route|arrived|in_progress|paused|completed|skipped|cancelled|handed_off`. Server writers switch only behind the staff-owned rollout gate.
-- Advisory publication, user access/password security, directory lifecycle/public visibility, account-link review, notification read state, delivery processing, and provider receipts remain separate status axes. The canonical target never advances business lifecycle from transport acceptance or read receipts. During Phase A compatibility only, the legacy `planned -> sent` transition on SMS acceptance remains isolated in the SMS outbox; canonical writers assign independently, and Phase C retires that alias behavior.
+- Service Memo readers accept `open|draft|ready|dispatched|in_progress|resolved|closed|cancelled`, trip readers accept `planned|sent|assigned|acknowledged|in_progress|completed|denied|declined|cancelled|handed_off`, and field-item readers accept `pending|en_route|arrived|in_progress|paused|completed|skipped|cancelled|handed_off`. Server writers use Draft/Ready/Assigned/Declined unconditionally. Legacy values remain readable during historical backfill.
+- Advisory publication, user access/password security, directory lifecycle/public visibility, account-link review, notification read state, delivery processing, and provider receipts remain separate status axes. Transport acceptance or read receipts never advance business lifecycle.
 - Tickets, Service Memos, dispatch trips, public updates, agency media, avatars, and report media retain server validation, authorization, and audit boundaries.
 - Cache invalidation is bounded to committed affected families. Mobile private caches are consumer-scoped and may provide a bounded last-successful offline view, never an authorization bypass.
 - Public Updates are owned by Staff at `/api/mobile/public-updates`. Its opaque cursor pages the `kind: "advisory" | "facebook_post"` union; advisory records retain compatible fields plus optional ordered `photos`. Eligible standalone/imported Facebook posts are additive, while records with an `advisory_id` are excluded by that exact relationship so an advisory and its mirrored Page post never appear twice. Mobile keys the bounded cache by consumer identity/access revision and uses `/api/mobile/advisories` only for `404`, `405`, or `501`; release the backend contract before the mobile reader.
