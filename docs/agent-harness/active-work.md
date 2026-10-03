@@ -1,5 +1,13 @@
 # Active work
 
+## Online dispatch contract snapshot (2026-10-03)
+
+- Files: shared contract and handoff documents; consumer behavior unchanged.
+- Verification: byte-matching shared Staff contract; harness recorded at finish.
+- Git/Deployment: isolated `codex/sms-retirement-contract` from `origin/master`.
+- Remaining risks: Staff runtime/data cutover is pending; no consumer release.
+- Next: merge coordinated documentation after source release review.
+
 ## Master synchronization and Android preview verification (2026-09-29)
 
 - Status: local and remote `master` are synchronized at `1bd73c2`; stale merged mobile branches and worktrees were removed.

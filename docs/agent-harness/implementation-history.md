@@ -1,5 +1,19 @@
 # Implementation history
 
+## 2026-10-03 — Synchronize online dispatch ownership contract
+
+- Repositories: Staff authoritative contract and consumer Mobile snapshot.
+- Contracts: unconditional online Staff dispatch; consumer behavior and server-side
+  authorization remain intact.
+- Scope: documentation snapshot only for Staff's complete SMS retirement.
+- Files: `docs/agent-harness/cross-project-contracts.md` and handoff documents.
+- Verification: shared contract block matches Staff; harness gate recorded below.
+- Git/Deployment: isolated `codex/sms-retirement-contract` from `origin/master`;
+  no consumer source, schema or native release changes.
+- Remaining risks: Staff coordinated source/runtime release and separately
+  authorized physical archive/removal are pending.
+- Next: integrate the matching contract snapshot with Staff release evidence.
+
 ## 2026-09-29 - Mobile master synchronization and preview device verification
 
 - Repositories: consumer `aleconnect-mobile`; Staff/API and Lineman remained unchanged.
