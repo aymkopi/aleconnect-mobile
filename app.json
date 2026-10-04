@@ -26,13 +26,10 @@
       "allowBackup": false,
       "predictiveBackGestureEnabled": false,
       "package": "com.kapecakes.aleconnectmobile",
-      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"]
-    },
-    "androidStatusBar": {
-      "barStyle": "dark-content",
-      "backgroundColor": "#f8fafc",
-      "translucent": false,
-      "hidden": false
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "output": "single",
@@ -81,7 +78,17 @@
       ],
       "@maplibre/maplibre-react-native",
       "expo-secure-store",
-      "expo-background-task"
+      "expo-background-task",
+      "expo-font",
+      "expo-image",
+      [
+        "expo-status-bar",
+        {
+          "style": "dark",
+          "hidden": false
+        }
+      ],
+      "@react-native-vector-icons/feather"
     ],
     "experiments": {
       "typedRoutes": true,

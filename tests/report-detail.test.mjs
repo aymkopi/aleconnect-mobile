@@ -228,7 +228,7 @@ test("report detail normalizes the optional Service Memo message and limits it t
 
 test("report detail uses later history order when all verified timestamps are invalid", async () => {
   const { consumerMessageTimelineIndex } = await import(
-    new URL("../src/features/reports/data.ts", import.meta.url),
+    new URL("../src/features/reports/data.ts", import.meta.url)
   );
 
   assert.equal(

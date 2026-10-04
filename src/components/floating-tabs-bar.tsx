@@ -1,5 +1,5 @@
 import { FloatingAppBar } from "@/components/floating-app-bar";
-import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import type { BottomTabBarProps } from "expo-router/js-tabs";
 import { usePathname } from "expo-router";
 import { View } from "react-native";
 

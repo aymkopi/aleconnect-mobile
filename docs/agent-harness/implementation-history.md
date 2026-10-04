@@ -1,5 +1,30 @@
 # Implementation history
 
+## 2026-10-04 - User-authorized Expo 57 integration
+
+- Repositories: consumer Mobile; paired Staff coordination documentation only.
+- Scope: commit the verified SDK upgrade, merge into local master and push normally to origin/master.
+- Files: migration source/config/lockfile/tests/plan and handoffs; generated Graphify output and ignored APK/recovery files excluded.
+- Contracts: existing Staff consumer contract unchanged; Lineman migration follows independently.
+- Verification: fresh release-tree suite 215 pass/zero fail; TypeScript, harness and whitespace pass. Prior native preview/export/signing evidence remains applicable to unchanged app source.
+- Git/Deployment: master and origin/master share base `cb6c614`; integration and remote CI evidence follow after publication. No EAS, OTA, store or production-data action.
+- Remaining risks: existing lint/audit debt, physical runtime and native iOS limits remain as documented below.
+- Next: verify remote head/CI, then migrate Lineman separately.
+
+## 2026-10-04 - Sequential Expo 55 to 56 to 57 migration
+
+- Repositories: Mobile owns the consumer/native upgrade; Staff was inspected for authorization/response evidence and receives documentation only. Lineman is outside scope.
+- Scope: stable SDK 55.0.31 to 56.0.23 to 57.0.26; final React Native 0.86.3, React 19.2.3, Reanimated 4.5.1, Worklets 0.10.1, TypeScript 6.0.3. Refreshed compatible MapLibre 11.4.1, Bottom Sheet 5.2.14, Lucide 1.51.0, Uniwind 1.12.1, Expo HTML elements and tools. Retained Expo's AsyncStorage 2.2.0 and ESLint 9 because newer majors do not fit the validated native/plugin matrix.
+- Files: package/lockfile, app/TypeScript/ESLint configuration, floating tabs, Profile's Feather import, shared menu/modal animations, evidence processing and its two behavioral tests, one parser-compatible dynamic import, migration plan, and harness handoffs.
+- Contracts: Staff profile route still uses canonical consumer/authorized service-account/access-revision checks. Successful response readers, cache identity, queue ownership, private evidence, permissions, backup exclusions and production signing remain intact. No payload/server migration.
+- Verification: SDK 55 had 202 JavaScript tests and TypeScript passing. SDK 56 passed 204 JavaScript tests, TypeScript, Android export (4,649 modules), native prebuild and alignment; Doctor was 21/22 solely for the documented Hermes V1 regression requiring SDK 57. Evidence-copy tests were RED before `await` and GREEN afterward. Final Node 22.23.2 clean install, 215 combined tests, TypeScript, alignment, peer tree (zero problems), Doctor 21/21, Android prebuild, Android/iOS exports and independent read-only source review passed. Lint passes with 0 errors/44 warnings; supplemental all-file ESLint has 47 warnings. Both harness/whitespace checks and Mobile AST Graphify update pass. Native artifact verification is recorded below.
+- Git/Deployment: local `codex/mobile-expo-57` from Mobile `cb6c614fb18bf956682cc67ba58bcac79b60fb1e`; inspected Staff `5345b67ffd7adaa748e927afade95d517e3d1e0e`. No commits, merge, push, deployment, EAS/OTA or store action.
+- Remaining risks: existing React Compiler diagnostics stay visible at warning level, with core Hooks errors retained; they are not claimed fixed. Remaining npm audit is 43 findings (12 moderate/31 high), with incompatible downgrade/SDK 58 suggestions or no safe fix. ADB and connector device discovery did not respond, so authenticated native fetch/uploads, navigation, maps, notifications and offline replay remain device-unverified. iOS minimum is now 16.4 with Xcode 26.4+; iOS is unbuilt.
+- Verification (native final): `npm run android:preview` under Node 22.23.2 with the HTTPS production origin completed `BUILD SUCCESSFUL in 21m 15s`, 1,024 tasks. APK is 164,901,874 bytes with all four ABIs, standalone bundle, Hermes/React Native libraries and Feather font. Signature verifies as Android Debug, original preview keystore is unchanged, minimum API 24/target API 36 and disabled backup are verified. Source and `.expo/sdk-upgrade/sdk57-preview.apk` SHA-256 match at `551F7931BD56B4784017E18515958EB6109A440B4E82DBDC710A49CF8B605526`. Windows iOS native prebuild explicitly skipped its unsupported host; iOS bundle export passed independently. No runtime result is inferred.
+- Verification (signing guard): generated `:app:assembleRelease --dry-run --no-daemon` fails at the expected sanitized missing-production-signing guard. No production build task ran. This confirms SDK 57 regeneration did not weaken the fail-closed boundary.
+- Next: use the SDK 57 native build for physical-device acceptance when discovery is restored; generate/build iOS on a supported host. Keep publication separate. Rollback preserves SDK 55/56 package snapshots and ignored native-source/config recovery in `.expo/sdk-upgrade`; see `docs/superpowers/plans/2026-10-04-expo-57-upgrade.md`.
+
+
 ## 2026-10-04 - Dispatch Git synchronization and shared harness parity
 
 - Repositories: consumer Mobile master with authoritative Staff and Lineman main.

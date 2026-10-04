@@ -1,5 +1,20 @@
 # Active work
 
+## Expo 57 integration (2026-10-04)
+
+- User authorized local merge and remote publication. Fresh release-tree checks: 215 tests pass, TypeScript and harness/whitespace pass; lint and remote CI are recorded in the final integration checkpoint.
+- Integrate `codex/mobile-expo-57` into `master` from verified common base `cb6c614`; generated Graphify output and ignored native recovery/artifacts stay outside the source commit. Native/store/OTA distribution remains separate.
+
+## Sequential Expo 55 to 56 to 57 upgrade (2026-10-04)
+
+- Status: local SDK/dependency migration and Android preview build complete on `codex/mobile-expo-57` from `cb6c614`. Expo 56.0.23 was verified as an intermediate source checkpoint before Expo 57.0.26 / React Native 0.86.3 / React 19.2.3.
+- Scope: Expo-managed modules plus compatible MapLibre, Bottom Sheet, Lucide, Uniwind and development tools. Migrated Router tab types and the Feather icon package, awaited asynchronous evidence copy, removed unsupported ZoomIn opacity, declared Node 22 test types, migrated native status-bar configuration, and preserved incremental previews with `prebuild --no-clean`.
+- Evidence: clean Node 22.23.2 `npm ci`; 215/215 combined JavaScript/TypeScript tests; TypeScript; Expo alignment; Doctor 21/21; peer tree with no problems; native Android prebuild; Android and iOS JavaScript/Hermes exports. Lint passes with 0 errors/44 warnings; both harness/whitespace checks and Mobile AST Graphify update pass. Fresh read-only review has no actionable findings after its preview-command correction. Android preview build passes (21m 15s/1,024 tasks); the 164,901,874-byte APK signature, four ABIs, Hermes/bundle/static Feather font and matching recovery-copy SHA-256 `551F7931BD56B4784017E18515958EB6109A440B4E82DBDC710A49CF8B605526` are verified. Original preview key is preserved; Android minimum/target is API 24/36.
+- Remaining: four React Compiler diagnostic families remain visible as warnings for existing consumer identity/async lifecycle code; they were not behaviorally refactored. In-range audit fixes reduced findings from 46 to 43 (12 moderate, 31 high); incompatible automated downgrades were not applied. iOS requires 16.4/Xcode 26.4+ and remains unbuilt on Windows; physical-device discovery is unresponsive, so native runtime acceptance remains unverified.
+- Recovery: `.expo/sdk-upgrade` holds SDK 55/56 package checkpoints, the SDK 55 native configuration archive, installed-version evidence and validation logs. See the migration plan for scoped rollback.
+- Boundary: Staff contracts/data and Lineman are unchanged; no merge, commit, push, EAS/OTA/store release or production mutation.
+
+
 ## Dispatch Git synchronization and shared harness repair (2026-10-04)
 
 - Primary master was fast-forwarded to remote `9c1e10b`; original dispatch handoff notes remain in recovery stash `7b490a2c68db65d5e735d10b43decc8b1ad229cf`.

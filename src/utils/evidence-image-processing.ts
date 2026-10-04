@@ -31,7 +31,7 @@ export async function prepareEvidencePhoto(
 
     if (compressed.size <= evidenceMaxBytes) {
       if (destination.exists) destination.delete();
-      compressed.copy(destination);
+      await compressed.copy(destination);
       return { id: photoId, uri: destination.uri, size: destination.size };
     }
   }

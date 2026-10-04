@@ -9,7 +9,7 @@ import { Text } from "@/components/ui/text";
 import { statusBarHeight } from "@/constants";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
-import Feather from "@expo/vector-icons/Feather";
+import { Feather } from "@react-native-vector-icons/feather/static";
 import { type Href, useFocusEffect, useRouter } from "expo-router";
 import {
   Check,
