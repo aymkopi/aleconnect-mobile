@@ -3,6 +3,7 @@ import { createRequire } from "node:module"
 import { existsSync, readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import test from "node:test"
+import { runInNewContext } from "node:vm"
 
 const require = createRequire(import.meta.url)
 const pluginPath = new URL("../plugins/with-android-production-signing-guard.js", import.meta.url)
@@ -55,10 +56,10 @@ test("Mobile local preview uses release runtime settings with a non-production s
   assert.match(preview, /matchingFallbacks = \['release'\]/)
 })
 
-test("Mobile exposes a Node 22 local preview build command", () => {
+test("Mobile exposes a Node 24 local preview build command", () => {
   const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"))
-  assert.equal(readFileSync(new URL("../.node-version", import.meta.url), "utf8").trim(), "22.23.2")
-  assert.match(packageJson.scripts["android:preview"], /Node 22 LTS/)
+  assert.equal(readFileSync(new URL("../.node-version", import.meta.url), "utf8").trim(), "24.21.0")
+  assert.match(packageJson.scripts["android:preview"], /Node 24 LTS/)
   assert.match(packageJson.scripts["android:preview"], /assemblePreview/)
 })
 
@@ -153,4 +154,12 @@ test("Mobile package can only use its own app-scoped signing prefix", () => {
     () => validateSigningPrefix(packageName, "ALECONNECT_LINEMAN"),
     /does not match Android package/,
   )
+})
+
+test("Mobile preview runtime guard enforces the supported Node 24 minimum", () => {
+  const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"))
+  const guard = /^node -e "([^"\n]+)"/.exec(pkg.scripts["android:preview"])[1]
+  const inspect = (version) => runInNewContext(guard, { process: { versions: { node: version } } })
+  for (const version of ["22.23.2", "24.0.0", "24.2.9", "26.0.0"]) assert.throws(() => inspect(version), /Node 24 LTS/)
+  for (const version of ["24.3.0", "24.21.0"]) assert.doesNotThrow(() => inspect(version))
 })

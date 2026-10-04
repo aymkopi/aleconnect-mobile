@@ -59,3 +59,10 @@ New entries use four fields: scope, verification, remaining risks, next. Put aff
 - Verification: 59/59 focused harness checks passed on both Node 22.23.2 and Node 24.14.1; all locked dependency engines accept both. Full GitHub CI passed dependency installation and application checks using .node-version: 37204741834. Workflow actionlint, metadata-only lock comparison and Graphify AST refresh passed. Dependency resolutions are unchanged; generated graph evidence is preserved externally. Full application suite: 244 passes, one absent-sibling skip and zero failures; TypeScript passed; lint passed with zero errors and 41 existing warnings. [GitHub pipeline](https://github.com/aymkopi/aleconnect-mobile/actions/runs/37204741834).
 - Remaining risks: Node 24 native/device acceptance remains unverified; compatibility metadata and harness checks do not imply it.
 - Next: no remaining runtime implementation; final docs-only checks precede task worktree cleanup.
+
+## 2026-10-04 — Node 24 selected for CI and client tooling
+
+- Scope: set .node-version to 24.21.0, update client launch/preview runtime selection and current harness/README guidance. The supported dependency range remains unchanged; Node 22 is no longer the selected default.
+- Verification: 59 harness/CI checks, 245 application tests, plus 10 focused signing/runtime-guard tests, TypeScript, lint (zero errors/41 existing warnings), Expo alignment and Doctor 21/21 passed. Android and iOS Hermes exports and Gradle createBundlePreviewJsAndAssets passed on Node 24.21.0. Mobile initial shared-cache EPERM was resolved by isolated TEMP/TMP without clearing another process's cache. Locked dependency engines accept 24.21.0; lockfiles/resolutions are unchanged. Graphify refresh passed with generated evidence preserved outside commits. Local dependency junctions reuse primary installations; GitHub clean-install acceptance is pending.
+- Remaining risks: build evidence and device acceptance are distinct. No production signing or device state changed.
+- Next: verify source/build/bundling on Node 24, publish and confirm full GitHub gates.

@@ -4,7 +4,7 @@ Consumer Expo/React Native app for submitting and tracking service reports, view
 
 ## Development
 
-Use Node 22; exact Expo/React Native versions are in `package.json` and the lockfile.
+Use Node 24.21.0 from `.node-version`; exact Expo/React Native versions are in `package.json` and the lockfile.
 
 ```powershell
 npm ci
@@ -28,7 +28,7 @@ Use focused tests for the changed behavior; the JS suite is `node --test tests/*
 
 ## Android preview
 
-Run `npm run android:preview` with Node 22 and the required Java/Android SDK from the current native configuration. The local preview uses a standalone production bundle and preview signing; it is separate from a production-signed/store release.
+Run `npm run android:preview` with Node 24 and the required Java/Android SDK from the current native configuration. The local preview uses a standalone production bundle and preview signing; it is separate from a production-signed/store release.
 
 Output: `android/app/build/outputs/apk/preview/app-preview.apk`. For a requested handoff, copy the requested app to the agreed output directory and verify its SHA-256. Install/launch and authenticated/native behavior need separate device evidence.
 

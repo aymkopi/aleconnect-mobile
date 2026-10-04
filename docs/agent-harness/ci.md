@@ -6,7 +6,7 @@ Documentation, project instructions, generated Graphify output and harness-only 
 
 Staff has an independent push/PR harness workflow. Its production workflow keeps Push Dispatch -> API -> maintenance Workers -> Pages order and only deploys when app checks are required. Client workflows run npm run test (including consumer TypeScript tests), typecheck and lint when required; they do not publish native apps. Existing feature verification workflows retain their scoped tests.
 
-Workflows read .node-version (validated Node 22.23.2) for app commands and current [checkout](https://github.com/actions/checkout/releases/tag/v7.0.1) / [setup-node](https://github.com/actions/setup-node/releases/tag/v7.0.0) actions. Their internal runtime is separate from the application's Node version.
+Workflows read .node-version (Node 24.21.0) for app commands and current [checkout](https://github.com/actions/checkout/releases/tag/v7.0.1) / [setup-node](https://github.com/actions/setup-node/releases/tag/v7.0.0) actions. Their internal runtime is separate from the application's Node version.
 
 Local coordinated checks compare available sibling contracts and skill mirrors. Standalone GitHub checkouts warn when siblings are absent; cross-repository contract work still requires its coordinated local checks. Passing CI is source/build evidence, not device or store acceptance.
 
