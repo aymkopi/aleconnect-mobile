@@ -4,6 +4,13 @@ import { join, resolve } from "node:path"
 import { pathToFileURL } from "node:url"
 
 // Read-only diagnostics: no install, environment-file access, service start or network call.
+export const supportsAppNode = (version) => {
+  const match = /^(\d+)\.(\d+)\.(\d+)$/.exec(version)
+  if (!match) return false
+  const [, major, minor] = match.map(Number)
+  return (major === 22 && minor >= 13) || (major === 24 && minor >= 3)
+}
+
 export function inspectWorktree({ root = process.cwd(), app = false, sibling, nodeVersion = process.versions.node } = {}) {
   const errors = []
   const warnings = []
@@ -37,9 +44,17 @@ export function inspectWorktree({ root = process.cwd(), app = false, sibling, no
   }
   if (staff && !existsSync(resolve(root, "..", "aleconnect-lineman", "package.json"))) warnings.push("Lineman sibling unavailable; locate it before field contract work.")
   if (app) {
-    if (nodeVersion.split(".")[0] !== "22") errors.push("App work requires Node 22; use the project runtime before npm ci or builds.")
+    if (!supportsAppNode(nodeVersion)) errors.push("App work requires stable Node 22.13+ or 24.3+; use the validated version in .node-version for CI and Android previews.")
+    try {
+      const pinned = readFileSync(join(root, ".node-version"), "utf8").trim()
+      if (!supportsAppNode(pinned)) errors.push("Invalid .node-version; select a supported stable LTS runtime.")
+      else {
+        details.push(`Validated CI runtime: ${pinned}; declared supported range: ${pkg.engines?.node ?? "not declared"}`)
+        if (supportsAppNode(nodeVersion) && nodeVersion !== pinned) warnings.push(`Using compatible Node ${nodeVersion}; CI and Windows Android previews retain validated Node ${pinned}. A successful diagnostic does not prove native bundling or device acceptance.`)
+      }
+    } catch { errors.push("Missing .node-version; restore the committed CI runtime pin.") }
     const tools = staff ? ["vite/bin/vite.js", "typescript/bin/tsc"] : ["expo/bin/cli", "typescript/bin/tsc"]
-    for (const tool of tools) if (!existsSync(join(root, "node_modules", tool))) errors.push(`Missing local ${tool}; run npm ci in this worktree using Node 22.`)
+    for (const tool of tools) if (!existsSync(join(root, "node_modules", tool))) errors.push(`Missing local ${tool}; run npm ci in this worktree using .node-version.`)
     details.push(`Declared development command: npm run ${staff ? "dev" : "start"}`)
   } else details.push("Docs/harness mode: no installed application dependencies required.")
   return { errors, warnings, details }

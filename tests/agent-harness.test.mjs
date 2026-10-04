@@ -360,7 +360,7 @@ test("mobile instructions and CI route validation without publishing", async () 
   }
 
   assert.match(workflow, /fetch-depth: 0/)
-  assert.match(workflow, /node-version: '22\.23\.2'/)
+  assert.match(workflow, /node-version-file: '\.node-version'/)
   assert.doesNotMatch(workflow, /\beas\s+(?:build|submit)\b/i)
   assert.doesNotMatch(workflow, /\b(?:wrangler\s+(?:pages\s+)?deploy|npm\s+run\s+(?:deploy|publish)|eas\s+update)\b/i)
 })

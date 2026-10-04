@@ -21,6 +21,6 @@ Handle routine changes directly; load a specialist only for the affected contrac
 | TypeScript/UI | Focused tests, `npx tsc --noEmit`, scoped lint; render checks for visual/interaction claims |
 | Native/config/release | Above plus Expo alignment/Doctor, build/export, and installed-device checks for the claimed behavior |
 
-Use Node 22 for Android previews. Build/hash/signature checks do not establish device acceptance or store publication. Use [the release tracker](docs/mobile-release-hardening-tracker.md) only for release/hardening work; EAS, OTA, and store distribution need release authorization.
+Use [the reviewed runtime policy](docs/agent-harness/runtime.md); Android previews retain the validated .node-version runtime. Build/hash/signature checks do not establish device acceptance or store publication. Use [the release tracker](docs/mobile-release-hardening-tracker.md) only for release/hardening work; EAS, OTA, and store distribution need release authorization.
 
 Append compact scope, verification, remaining risks, and next steps to history for meaningful changes. Update the affected task handoff; active work is its index. Distinguish passed, baseline-failing, and unverified checks. Query Graphify for codebase questions when available and refresh it after code changes; preserve generated churn separately.

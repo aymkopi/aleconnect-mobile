@@ -4,17 +4,23 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readdirSync, readFileSyn
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import test from "node:test"
-import { inspectWorktree } from "../scripts/check-agent-worktree.mjs"
+import { inspectWorktree, supportsAppNode } from "../scripts/check-agent-worktree.mjs"
 
 function fixture(t, name = "aleconnect") {
   const root = mkdtempSync(join(tmpdir(), "aleconnect-worktree-"))
   t.after(() => rmSync(root, { recursive: true, force: true }))
   writeFileSync(join(root, "package.json"), JSON.stringify({ name }))
   writeFileSync(join(root, "package-lock.json"), "{}")
+  writeFileSync(join(root, ".node-version"), "22.23.2\n")
   execFileSync("git", ["init"], { cwd: root, stdio: "pipe" })
   execFileSync("git", ["-c", "user.name=Harness test", "-c", "user.email=test@example.invalid", "commit", "--allow-empty", "-m", "fixture"], { cwd: root, stdio: "pipe" })
   return root
 }
+
+test("current dependency policy enforces supported LTS minimum patches", () => {
+  for (const version of ["22.13.0", "22.23.2", "24.3.0", "24.14.1"]) assert.equal(supportsAppNode(version), true, version)
+  for (const version of ["20.19.4", "22.0.0", "22.12.9", "24.0.0", "24.2.9", "25.0.0", "26.0.0", "24.3.0-rc.1", "bad"]) assert.equal(supportsAppNode(version), false, version)
+})
 
 test("docs diagnostics require no app dependencies and preserve files", (t) => {
   const root = fixture(t)
@@ -45,6 +51,9 @@ for (const name of ["aleconnect", "aleconnect-mobile", "aleconnect-lineman"]) {
       writeFileSync(path, "fixture")
     }
     assert.deepEqual(inspectWorktree({ root, app: true, nodeVersion: "22.23.2" }).errors, [])
+    const alternative = inspectWorktree({ root, app: true, nodeVersion: "24.14.1" })
+    assert.deepEqual(alternative.errors, [])
+    assert.ok(alternative.warnings.some((message) => message.includes("native bundling")))
   })
 }
 
@@ -56,4 +65,27 @@ test("an explicit sibling must be the contract owner", (t) => {
   mkdirSync(join(sibling, "docs/agent-harness"), { recursive: true })
   writeFileSync(join(sibling, "docs/agent-harness/cross-project-contracts.md"), "contract")
   assert.deepEqual(inspectWorktree({ root, sibling }).errors, [])
+})
+
+test("app diagnostics require a valid committed runtime pin", (t) => {
+  const root = fixture(t)
+  rmSync(join(root, ".node-version"))
+  assert.ok(inspectWorktree({ root, app: true, nodeVersion: "24.14.1" }).errors.some((message) => message.includes("Missing .node-version")))
+  writeFileSync(join(root, ".node-version"), "22.12.0\n")
+  assert.ok(inspectWorktree({ root, app: true, nodeVersion: "22.23.2" }).errors.some((message) => message.includes("Invalid .node-version")))
+})
+
+test("committed runtime policy keeps CI, package and lockfile aligned", () => {
+  const pin = readFileSync(".node-version", "utf8").trim()
+  assert.equal(supportsAppNode(pin), true)
+  const pkg = JSON.parse(readFileSync("package.json", "utf8"))
+  const lock = JSON.parse(readFileSync("package-lock.json", "utf8"))
+  assert.equal(pkg.engines.node, "^22.13.0 || ^24.3.0")
+  assert.equal(lock.packages[""].engines.node, pkg.engines.node)
+  for (const file of readdirSync(".github/workflows").filter((name) => /\.ya?ml$/.test(name))) {
+    const workflow = readFileSync(join(".github/workflows", file), "utf8")
+    if (!workflow.includes("actions/setup-node@")) continue
+    assert.match(workflow, /node-version-file: ['"]?\.node-version['"]?/, file)
+    assert.doesNotMatch(workflow, /node-version:/, file)
+  }
 })
