@@ -1,11 +1,11 @@
 # Active work
 
 Last reviewed: 2026-10-04
-Current branch: codex/node24-runtime; integration target master.
-Active plan: verify and select Node 24.21.0 for CI and client tooling.
-Next task: finish Node 24 source/build checks and publish the verified update.
+Current branch: local master after Node 24 integration; prepared on codex/node24-runtime.
+Active plan: Node 24.21.0 runtime migration complete; verified results are in its task record.
+Next task: no remaining runtime work; APK/device/store acceptance stays with its owning tasks.
 Known blockers: no harness blocker. Source cleanup/CI completed; native/device acceptance limits remain in the operational handoff.
-Last verified: 59 harness/CI checks, 245 application tests, plus 10 focused signing/runtime-guard tests, TypeScript, lint (zero errors/41 existing warnings), Expo alignment and Doctor 21/21 passed. Android and iOS Hermes exports and Gradle createBundlePreviewJsAndAssets passed on Node 24.21.0. Mobile initial shared-cache EPERM was resolved by isolated TEMP/TMP without clearing another process's cache. Locked dependency engines accept 24.21.0; lockfiles/resolutions are unchanged. Graphify refresh passed with generated evidence preserved outside commits. Local dependency junctions reuse primary installations; GitHub clean-install acceptance is pending.
+Last verified: 59 harness/CI checks, 245 application tests, plus 10 focused signing/runtime-guard tests, TypeScript, lint (zero errors/41 existing warnings), Expo alignment and Doctor 21/21 passed. Android and iOS Hermes exports and Gradle createBundlePreviewJsAndAssets passed on Node 24.21.0. Mobile initial shared-cache EPERM was resolved by isolated TEMP/TMP without clearing another process's cache. Locked dependency engines accept 24.21.0; lockfiles/resolutions are unchanged. Graphify refresh passed with generated evidence preserved outside commits. Local dependency junctions reuse primary installations; Full GitHub CI 37206566499 passed clean installation and required application gates on the .node-version runtime.
 
 
 - [Harness refinement](tasks/harness-refinement.md): isolated docs/skills/checks; no product release.
