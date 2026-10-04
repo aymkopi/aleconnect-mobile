@@ -1,5 +1,10 @@
 # Active work
 
+## Dispatch Git synchronization and shared harness repair (2026-10-04)
+
+- Primary master was fast-forwarded to remote `9c1e10b`; original dispatch handoff notes remain in recovery stash `7b490a2c68db65d5e735d10b43decc8b1ad229cf`.
+- Shared cross-project skill/manifest now match authoritative Staff. Validator metadata and its fixtures recognize that consumer-scoped workflow. Harness tests pass 29/29; consumer status/cache/UI checks pass 11/11. Consumer app source/native behavior is unchanged.
+
 ## Online dispatch contract snapshot (2026-10-03)
 
 - Files: shared contract and handoff documents; consumer behavior unchanged.

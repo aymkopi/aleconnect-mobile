@@ -1,5 +1,16 @@
 # Implementation history
 
+## 2026-10-04 - Dispatch Git synchronization and shared harness parity
+
+- Repositories: consumer Mobile master with authoritative Staff and Lineman main.
+- Scope: user-authorized pull, scoped commit/push and task worktree/branch cleanup; repair the shared harness drift exposed by current remote Staff.
+- Files: shared cross-project SKILL.md/openai.yaml, validator metadata, validator fixtures and two handoff documents.
+- Contracts: shared engineering workflow copies match Staff; consumer API readers, private caches, permissions, app/native source and release behavior are unchanged.
+- Verification: validator tests 29/29 and consumer status/cache/UI tests 11/11 pass; shared markers match Staff. Final harness and remote CI evidence is retained outside Git.
+- Git/Deployment: primary master fast-forwarded from `0724983` to `9c1e10b`; scoped parity repair is included with this entry. No native publication or production-data change.
+- Remaining risks: original local dispatch notes remain recoverable in stash `7b490a2c68db65d5e735d10b43decc8b1ad229cf`; no new device test was required by these workflow-only changes.
+- Next: retain recovery notes and the existing preview artifact; keep unrelated worktrees outside this cleanup.
+
 ## 2026-10-03 — Synchronize online dispatch ownership contract
 
 - Repositories: Staff authoritative contract and consumer Mobile snapshot.

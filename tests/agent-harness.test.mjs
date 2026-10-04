@@ -44,15 +44,15 @@ const mobileManifest = `interface:
 `
 const crossSkill = `---
 name: aleconnect-cross-project-change
-description: Use when an ALEConnect request affects both repositories, changes /api/mobile routes, or changes authentication, notifications, advisories, tickets, evidence, avatars, identifiers, or response fields consumed by mobile.
+description: Use when an ALEConnect change crosses Staff and consumer Mobile, changes /api/mobile/*, or changes consumer authentication, notifications, advisories, tickets, evidence, avatars, identifiers, or fields consumed by mobile.
 ---
 
 # Cross-project change
 `
 const crossManifest = `interface:
   display_name: "ALEConnect Cross-Project Change"
-  short_description: "Coordinate staff and mobile contracts safely"
-  default_prompt: "Use $aleconnect-cross-project-change to coordinate a compatible staff API and mobile consumer change across both repositories."
+  short_description: "Coordinate Staff and consumer Mobile safely"
+  default_prompt: "Use $aleconnect-cross-project-change for coordinated Staff and consumer Mobile contract changes."
 `
 
 const write = async (root, relativePath, text) => {
