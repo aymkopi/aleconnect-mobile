@@ -12,4 +12,4 @@ Last verified: local 49/49; coordinated 160 Node 22 checks, 13 Python skill chec
 - [Operational acceptance](tasks/operational-acceptance.md): preserved native/CI/device acceptance and protected operational state; read before live/device work.
 - Prior detail: [preserved handoff](archive/2026-10-04/active-work.md) and [history](implementation-history.md).
 
-- [Harness CI alignment](tasks/harness-ci.md): GitHub gates updated for task-specific verification.
+- [Harness CI alignment](tasks/harness-ci.md): completed and published; full GitHub gates passed, docs-only closeout verification recorded by commit.
