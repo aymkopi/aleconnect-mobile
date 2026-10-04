@@ -10,6 +10,7 @@
 - Git/Deployment: master and origin/master share base `cb6c614`; integration and remote CI evidence follow after publication. No EAS, OTA, store or production-data action.
 - Remaining risks: existing lint/audit debt, physical runtime and native iOS limits remain as documented below.
 - Next: verify remote head/CI, then migrate Lineman separately.
+- Integration result: `2312009b5933e8f1cc314428fdc573424550860b` fast-forward merged and pushed to master; exact remote equality verified. CI [37187330785](https://github.com/aymkopi/aleconnect-mobile/actions/runs/37187330785) completed successfully. Fresh local lint zero errors/44 warnings; Node 22 combined suite 215/215. This records source publication, not app distribution/device acceptance.
 
 ## 2026-10-04 - Sequential Expo 55 to 56 to 57 migration
 

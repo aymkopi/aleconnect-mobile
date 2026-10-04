@@ -2,8 +2,8 @@
 
 ## Expo 57 integration (2026-10-04)
 
-- User authorized local merge and remote publication. Fresh release-tree checks: 215 tests pass, TypeScript and harness/whitespace pass; lint and remote CI are recorded in the final integration checkpoint.
-- Integrate `codex/mobile-expo-57` into `master` from verified common base `cb6c614`; generated Graphify output and ignored native recovery/artifacts stay outside the source commit. Native/store/OTA distribution remains separate.
+- Upgrade commit `2312009b5933e8f1cc314428fdc573424550860b` was fast-forward merged into local `master` and pushed normally; remote master equality verified. GitHub run `37187330785` completed successfully (clean install, harness, JavaScript tests, TypeScript and lint).
+- Fresh local release-tree checks: 215 tests pass, TypeScript and harness/whitespace pass; lint zero errors/44 existing warnings. Generated Graphify output and ignored native recovery/artifacts remain outside the source commit. Native/store/OTA distribution remains separate.
 
 ## Sequential Expo 55 to 56 to 57 upgrade (2026-10-04)
 
