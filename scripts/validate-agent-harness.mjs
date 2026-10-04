@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process"
-import { access, readFile } from "node:fs/promises"
-import { join, resolve } from "node:path"
+import { access, readFile, readdir } from "node:fs/promises"
+import { dirname, join, relative, resolve } from "node:path"
 import { pathToFileURL } from "node:url"
 
 const siblingRepository = "staff"
@@ -17,30 +17,22 @@ const expectedSkills = [
     skillPath: ".agents/skills/aleconnect-mobile-workflow/SKILL.md",
     manifestPath: ".agents/skills/aleconnect-mobile-workflow/agents/openai.yaml",
     name: "aleconnect-mobile-workflow",
-    description: "Use when changing ALEConnect Mobile Expo screens, consumer API usage, authentication, notifications, offline state, evidence, maps, native configuration, or Android and iOS release behavior.",
-    displayName: "ALEConnect Mobile Workflow",
-    shortDescription: "Safely change ALEConnect consumer mobile",
-    defaultPrompt: "Use $aleconnect-mobile-workflow to implement a scoped Expo, consumer API, offline, notification, or native change safely.",
   },
   {
     skillPath: ".agents/skills/aleconnect-cross-project-change/SKILL.md",
     manifestPath: ".agents/skills/aleconnect-cross-project-change/agents/openai.yaml",
     name: "aleconnect-cross-project-change",
-    description: "Use when an ALEConnect change crosses Staff and consumer Mobile, changes /api/mobile/*, or changes consumer authentication, notifications, advisories, tickets, evidence, avatars, identifiers, or fields consumed by mobile.",
-    displayName: "ALEConnect Cross-Project Change",
-    shortDescription: "Coordinate Staff and consumer Mobile safely",
-    defaultPrompt: "Use $aleconnect-cross-project-change for coordinated Staff and consumer Mobile contract changes.",
   },
 ]
 const requiredArtifacts = expectedSkills.flatMap(({ skillPath, manifestPath }) => [skillPath, manifestPath])
 const readText = (root, relativePath) => readFile(join(root, relativePath), "utf8")
 const normalizeText = (text) => text.replace(/\r\n/g, "\n")
-const requiredHistoryFields = ["Repositories", "Scope", "Files", "Contracts", "Verification", "Git/Deployment", "Remaining risks", "Next"]
+const requiredHistoryFields = ["Scope", "Verification", "Remaining risks", "Next"]
 const credentialPatterns = [/mysql:\/\/[^:\s]+:[^@\s]+@/i, /\bsk-[A-Za-z0-9_-]{20,}\b/, /\bBearer\s+[A-Za-z0-9._-]{20,}\b/i]
 const unfinishedMarkers = ["TO" + "DO", "TB" + "D", "FIX" + "ME", "<place" + "holder>"]
 const machinePathPatterns = [/\b[A-Za-z]:\\Users\\[^\\\s]+\\/i]
 const productPrefixes = ["src/", "plugins/", "assets/", "tests/", "app.json", "eas.json", "global.css", "metro.config.js", "package.json", "tsconfig.json"]
-const isHarnessPath = (relativePath) => relativePath === "scripts/validate-agent-harness.mjs" || relativePath === "tests/agent-harness.test.mjs" || relativePath.startsWith("docs/agent-harness/")
+const isHarnessPath = (relativePath) => relativePath === "scripts/validate-agent-harness.mjs" || relativePath === "scripts/check-agent-worktree.mjs" || relativePath === "tests/agent-worktree.test.mjs" || relativePath === "tests/agent-harness.test.mjs" || relativePath.startsWith("docs/agent-harness/")
 const sharedContract = /<!-- shared-contract:start -->([\s\S]*?)<!-- shared-contract:end -->/
 const crossSkillPaths = [
   ".agents/skills/aleconnect-cross-project-change/SKILL.md",
@@ -64,7 +56,25 @@ const isValidDate = (value) => {
 }
 
 const localAgentLinks = (text) => [...text.matchAll(/\[[^\]]*\]\(([^)]+)\)/g)].map((match) => match[1].trim().replace(/^<|>$/g, ""))
-const yamlValue = (text, field) => text.match(new RegExp(`^\\s*${field}:\\s*(?:"([^"]*)"|(\\S.*))$`, "m"))?.slice(1).find((value) => value !== undefined)?.trim()
+const yamlValue = (text, field, indent = "") => {
+  const values = [...text.matchAll(new RegExp("^" + indent + field + ":[ \\t]*(.*)$", "gm"))]
+  if (values.length !== 1) return ""
+  const raw = values[0][1].trim()
+  if (!raw || /^[#|>\[\]{}&*!]/.test(raw)) return ""
+  if (raw.startsWith('"')) {
+    try { const value = JSON.parse(raw); return typeof value === "string" ? value.trim() : "" } catch { return "" }
+  }
+  if (raw.startsWith("'")) {
+    if (!raw.endsWith("'") || raw.length < 2) return ""
+    const body = raw.slice(1, -1)
+    if (body.replace(/''/g, "").includes("'")) return ""
+    return body.replace(/''/g, "'").trim()
+  }
+  const value = raw.replace(/[ \t]+#.*$/, "").trim()
+  if (/^[-+]?(?:[0-9]|\.[0-9])/.test(value) || /^[-?:][ \t]/.test(value)) return ""
+  if (/^(?:null|true|false|yes|no|on|off|~|[-+]?\d[\d_.eE+-]*|[-+]?\.inf|\.nan)$/i.test(value) || /:[ \t]/.test(value)) return ""
+  return value
+}
 const gitPaths = (root, args) => execFileSync("git", args, { cwd: root, encoding: "utf8", stdio: "pipe" }).trim().split(/\r?\n/).filter(Boolean)
 const workingTreePaths = (root) => {
   try {
@@ -104,6 +114,16 @@ export const validateHarness = async ({ root = process.cwd(), baseRef, siblingRo
     else errors.push(`missing required document: ${relativePath}`)
   }
 
+  for (const relativePath of ["docs/agent-harness/worktree-setup.md", "docs/agent-harness/evaluation.md"]) {
+    if (await exists(root, relativePath)) presentDocs.push(relativePath)
+  }
+  const taskDirectory = "docs/agent-harness/tasks"
+  if (await exists(root, taskDirectory)) {
+    for (const entry of await readdir(join(root, taskDirectory), { withFileTypes: true })) {
+      if (entry.isFile() && entry.name.endsWith(".md")) presentDocs.push(taskDirectory + "/" + entry.name)
+    }
+  }
+
   const presentArtifacts = []
   for (const relativePath of requiredArtifacts) {
     if (await exists(root, relativePath)) presentArtifacts.push(relativePath)
@@ -125,24 +145,28 @@ export const validateHarness = async ({ root = process.cwd(), baseRef, siblingRo
       if (!frontmatter) errors.push(`${expected.skillPath} requires YAML frontmatter`)
       else {
         if (yamlValue(frontmatter, "name") !== expected.name) errors.push(`${expected.skillPath} has an invalid frontmatter name`)
-        if (yamlValue(frontmatter, "description") !== expected.description) errors.push(`${expected.skillPath} has an invalid frontmatter description`)
+        if (!yamlValue(frontmatter, "description") || yamlValue(frontmatter, "description").length > 1024) errors.push(`${expected.skillPath} has an invalid frontmatter description`)
       }
     }
     const manifest = artifacts.find(([relativePath]) => relativePath === expected.manifestPath)?.[1]
     if (manifest) {
       if (!/^interface:[ \t]*$/m.test(manifest)) errors.push(`${expected.manifestPath} requires an interface mapping`)
-      for (const [field, value] of [["display_name", expected.displayName], ["short_description", expected.shortDescription], ["default_prompt", expected.defaultPrompt]]) {
-        if (yamlValue(manifest, field) !== value) errors.push(`${expected.manifestPath} has an invalid ${field}`)
+      const interfaceBlock = manifest.match(/^interface:[ \t]*\r?\n((?:[ \t]+[^\r\n]*\r?\n?|[ \t]*\r?\n)*)/m)?.[1] ?? ""
+      for (const field of ["display_name", "short_description", "default_prompt"]) {
+        const value = yamlValue(interfaceBlock, field, "  ")
+        if (!value || (field === "short_description" && (value.length < 25 || value.length > 64))) errors.push(`${expected.manifestPath} has an invalid ${field}`)
       }
+      const prompt = yamlValue(interfaceBlock, "default_prompt", "  ")
+      if (!new RegExp(`\\$${expected.name}(?![a-z0-9-])`).test(prompt)) errors.push(`${expected.manifestPath} default_prompt must mention $${expected.name}`)
     }
   }
 
-  const agents = documents.find(([relativePath]) => relativePath === "AGENTS.md")?.[1]
-  if (agents) {
-    for (const href of localAgentLinks(agents)) {
+  for (const [relativePath, text] of documents) {
+    for (const href of localAgentLinks(text)) {
       const localPath = href.split("#", 1)[0]
       if (!localPath || /^(https?):/i.test(localPath)) continue
-      if (!(await exists(root, localPath))) errors.push(`broken link in AGENTS.md: ${href}`)
+      const target = relative(resolve(root), resolve(root, dirname(relativePath), localPath))
+      if (!(await exists(root, target))) errors.push(`broken link in ${relativePath}: ${href}`)
     }
   }
 
@@ -210,13 +234,23 @@ export const formatHarnessResult = ({ errors, warnings }) => [
   ...warnings.map((message) => `WARNING: ${message}`),
 ].join("\n")
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const args = process.argv.slice(2)
+export const parseHarnessArguments = (args) => {
+  const flags = {"--base":"baseRef","--sibling":"siblingRoot"}
   const options = {}
   for (let index = 0; index < args.length; index += 1) {
-    if (args[index] === "--base") options.baseRef = args[++index]
-    if (args[index] === "--sibling") options.siblingRoot = args[++index]
+    const key = Object.hasOwn(flags, args[index]) ? flags[args[index]] : undefined
+    const value = args[index + 1]
+    if (!key || Object.hasOwn(options, key) || !value?.trim() || value.startsWith("-")) throw new Error("Invalid harness arguments. Usage: [--base <value>] [--sibling <value>]")
+    options[key] = value
+    index += 1
   }
+  return options
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  let options
+  try { options = parseHarnessArguments(process.argv.slice(2)) }
+  catch (error) { console.error(error.message); process.exit(2) }
   const result = await validateHarness(options)
   const output = formatHarnessResult(result)
   if (output) console.log(output)

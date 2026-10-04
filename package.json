@@ -12,6 +12,7 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "harness:check": "node scripts/validate-agent-harness.mjs",
+    "harness:doctor": "node scripts/check-agent-worktree.mjs",
     "lint": "expo lint"
   },
   "dependencies": {

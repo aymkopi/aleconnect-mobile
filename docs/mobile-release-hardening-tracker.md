@@ -1,3 +1,5 @@
+> Dated release/hardening evidence. Use [current active work](agent-harness/active-work.md) for open gates and verify applicability against today's SDK/source; a historical complete row does not establish fresh native acceptance.
+
 # Aleconnect Mobile Release Hardening Tracker
 
 Plan: `docs/mobile-release-hardening-plan.md`

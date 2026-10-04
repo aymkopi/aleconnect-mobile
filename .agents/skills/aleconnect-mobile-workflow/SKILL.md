@@ -1,24 +1,20 @@
 ---
 name: aleconnect-mobile-workflow
-description: Use when changing ALEConnect Mobile Expo screens, consumer API usage, authentication, notifications, offline state, evidence, maps, native configuration, or Android and iOS release behavior.
+description: Coordinate consumer Mobile offline-state, native capability, SDK upgrade, or release changes.
 ---
 
-# ALEConnect Mobile Workflow
+# ALEConnect Mobile workflow
 
-Keep Expo a consumer client; the sibling staff repository owns API, authorization, MySQL, R2 signing, and deployment order.
+Inspect [AGENTS](../../../AGENTS.md) and the affected screen/service; consult [active work](../../../docs/agent-harness/active-work.md) for resumed/coordinated or live/device work. Use [the map](../../../docs/agent-harness/index.md) for further reading.
 
-## Required plan
+For UI-only work, reuse the established contract. When API use, auth, notifications, media or response/cache shape changes, inspect the authoritative Staff handler and [contract](../../../docs/agent-harness/cross-project-contracts.md); use the cross-project skill when both sides change. If required evidence is unavailable, stop the dependent change and continue independent work.
 
-Before planning, read `AGENTS.md`, relevant mobile code, cross-project contract, active work, and history. Inspect the current staff `/api/mobile/*` route and response in `../aleconnect`; this read-only step is required for proposals. UI urgency or an assumed field never replaces it.
+Keep consumer role/record ownership server-side. Preserve private consumer-scoped caches/queues, old/omitted/null payload handling, bounded offline views and auth/session invalidation. Never retarget queued work after an account change or put server secrets/MySQL access in the app.
 
-Return these exact headings, even when asked for only files and validation:
+Give a short change/verification plan proportional to the task. Explain compatibility, offline state and permissions when affected; routine UI work needs no seven-heading template or separate planning document.
 
-- **Contract:** Staff endpoint/response evidence; coordinate shared changes server-first.
-- **Compatibility:** Add fields/readers compatibly; accept omitted or `null` mobile fields and name the unavailable fallback. Preserve successful payloads and cached data.
-- **Ownership:** Keep consumer authorization and record ownership server-side. Never use MySQL, secrets, or cached UI as authority.
-- **Offline:** State cache behavior even when none exists: private consumer scope, bounded last-successful view, invalidation, and that auth/session failure cannot show cached data; cache never bypasses authorization.
-- **Permissions:** Request only feature-required device permissions and handle denial.
-- **Verification:** List focused tests, TypeScript, lint, and Expo checks. Include an Expo/emulator/device render check for UI; require real device/runtime evidence for native config, permissions, notifications, or background work.
-- **Handoff:** Include this post-implementation action: append an append-only history entry with verified scope, contracts, commands/results, commits, and risks; update active work without replacing unrelated state.
+Request only feature-required permissions and handle denial. Check package/lock/app config before SDK-sensitive changes; preserve signing keys, native checkpoints and saved device work.
 
-**Stop:** Report a blocker only when the staff contract is unavailable; do not invent field names or give a files-and-validation-only plan.
+Verify focused tests, TypeScript and scoped lint. Use rendered evidence for UI claims; Expo/build/device checks for native config, permissions, push and background behavior. A build/export is separate from installed-device acceptance.
+
+Run harness/whitespace checks and record compact outcomes for meaningful changes. Update active work only when its handoff changes. Shared contracts release Staff-first; EAS/OTA/store publication follows explicit release authorization.

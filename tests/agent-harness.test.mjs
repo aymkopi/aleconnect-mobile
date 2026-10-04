@@ -3,10 +3,10 @@ import { execFileSync } from "node:child_process"
 import { access, mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
-import { pathToFileURL } from "node:url"
+import { pathToFileURL, fileURLToPath } from "node:url"
 import test from "node:test"
 
-import { validateHarness } from "../scripts/validate-agent-harness.mjs"
+import { validateHarness, parseHarnessArguments } from "../scripts/validate-agent-harness.mjs"
 
 const history = `## 2026-08-02 — Harness foundation
 
@@ -182,7 +182,7 @@ test("rejects invalid local skill metadata", async (t) => {
   const root = await createFixture()
   cleanup(t, root)
   await write(root, ".agents/skills/aleconnect-mobile-workflow/SKILL.md", mobileSkill.replace("name: aleconnect-mobile-workflow", "name: wrong"))
-  await write(root, ".agents/skills/aleconnect-mobile-workflow/agents/openai.yaml", mobileManifest.replace("ALEConnect Mobile Workflow", "Wrong Workflow"))
+  await write(root, ".agents/skills/aleconnect-mobile-workflow/agents/openai.yaml", mobileManifest.replace(/^  display_name:.*$/m, '  display_name: ""'))
   const result = await validateHarness({ root, siblingRoot: root })
   assert.ok(result.errors.some((message) => message.includes("frontmatter name")))
   assert.ok(result.errors.some((message) => message.includes("display_name")))
@@ -368,4 +368,105 @@ test("mobile instructions and CI route validation without publishing", async () 
 test("mobile harness workflow validates pushes to canonical master and retains main coverage", async () => {
   const workflow = await readFile(new URL("../.github/workflows/agent-harness.yml", import.meta.url), "utf8")
   assert.match(workflow, /branches:\s*\[main,\s*master\]/)
+})
+
+
+test("accepts compact four-field history alongside legacy entries", async (t) => {
+  const root = await createFixture()
+  cleanup(t, root)
+  const compact = "## 2026-10-04 - Compact outcome\n\n- Scope: scoped change and affected contract\n- Verification: focused checks passed; no deployment\n- Remaining risks: device acceptance unverified\n- Next: review the change\n"
+  await write(root, "docs/agent-harness/implementation-history.md", history + "\n" + compact)
+  const result = await validateHarness({ root, siblingRoot: root })
+  assert.deepEqual(result.errors, [])
+})
+
+test("compact history still requires evidence, risk and next action", async (t) => {
+  const root = await createFixture()
+  cleanup(t, root)
+  const compact = "## 2026-10-04 - Compact outcome\n\n- Scope: change\n- Verification: checked\n- Remaining risks: none known\n- Next: review\n"
+  for (const field of ["Scope", "Verification", "Remaining risks", "Next"]) {
+    await write(root, "docs/agent-harness/implementation-history.md", compact.replace(new RegExp("^- " + field + ":.*\\n", "m"), ""))
+    const result = await validateHarness({ root, siblingRoot: root })
+    assert.ok(result.errors.some((message) => message.includes("missing or blank: " + field)))
+  }
+})
+
+test("checks task-map links relative to the document", async (t) => {
+  const root = await createFixture()
+  cleanup(t, root)
+  await write(root, "docs/agent-harness/index.md", "# Harness\n\n[Active](active-work.md)\n[History](implementation-history.md#outcome)\n")
+  assert.deepEqual((await validateHarness({ root, siblingRoot: root })).errors, [])
+  await write(root, "docs/agent-harness/index.md", "# Harness\n\n[Missing](missing-reference.md)\n")
+  assert.ok((await validateHarness({ root, siblingRoot: root })).errors.some((message) => message.includes("broken link in docs/agent-harness/index.md")))
+})
+
+for (const scenario of ["reword", "blank-description", "blank-name", "blank-short", "wrong-prompt", "long-description", "outside-interface"]) {
+  test("skill metadata schema: " + scenario, async (t) => {
+    const root = await createFixture()
+    cleanup(t, root)
+    const skillPath = ".agents/skills/aleconnect-mobile-workflow/SKILL.md"
+    const manifestPath = ".agents/skills/aleconnect-mobile-workflow/agents/openai.yaml"
+    let skill = await readFile(join(root, skillPath), "utf8")
+    let manifest = await readFile(join(root, manifestPath), "utf8")
+    if (scenario === "reword") {
+      skill = skill.replace(/^description:.*$/m, "description: Coordinate the affected ALEConnect workflow.")
+      manifest = manifest.replace(/^  display_name:.*$/m, '  display_name: "ALEConnect Task Workflow"')
+        .replace(/^  short_description:.*$/m, '  short_description: "Coordinate the affected project workflow"')
+        .replace(/^  default_prompt:.*$/m, '  default_prompt: "Use $aleconnect-mobile-workflow for this scoped task."')
+    }
+    if (scenario === "blank-description") skill = skill.replace(/^description:.*$/m, "description:   ")
+    if (scenario === "long-description") skill = skill.replace(/^description:.*$/m, "description: " + "x".repeat(1025))
+    if (scenario === "blank-name") manifest = manifest.replace(/^  display_name:.*$/m, '  display_name: "   "')
+    if (scenario === "blank-short") manifest = manifest.replace(/^  short_description:.*$/m, '  short_description: ""')
+    if (scenario === "wrong-prompt") manifest = manifest.replace(/^  default_prompt:.*$/m, '  default_prompt: "Use $aleconnect-mobile-workflow-other for this task."')
+    if (scenario === "outside-interface") manifest = manifest.replace(/^  display_name:.*$/m, 'display_name: "ALEConnect Task Workflow"')
+    await write(root, skillPath, skill)
+    await write(root, manifestPath, manifest)
+    const result = await validateHarness({ root, siblingRoot: root })
+    if (scenario === "reword") assert.deepEqual(result.errors, [])
+    else assert.ok(result.errors.some((message) => /description|display_name|short_description|default_prompt/.test(message)), result.errors.join("\n"))
+  })
+}
+
+test("checks task handoff links", async (t) => {
+  const root = await createFixture()
+  cleanup(t, root)
+  await write(root, "docs/agent-harness/tasks/owned-task.md", "# Task\n\n[Evidence](missing-evidence.md)\n")
+  const result = await validateHarness({ root, siblingRoot: root })
+  assert.ok(result.errors.some((message) => message.includes("owned-task.md") && message.includes("broken link")))
+})
+
+test("privacy-scans task handoffs", async (t) => {
+  const root = await createFixture()
+  cleanup(t, root)
+  await write(root, "docs/agent-harness/tasks/owned-task.md", "# Task\n\nBearer abcdefghijklmnopqrstuvwxyz123456\n")
+  const result = await validateHarness({ root, siblingRoot: root })
+  assert.ok(result.errors.some((message) => message.includes("owned-task.md") && message.includes("credential")))
+})
+
+test("rejects CLI arguments that bypass intended checks", () => {
+  const script = fileURLToPath(new URL("../scripts/validate-agent-harness.mjs", import.meta.url))
+  for (const args of [["--base"], ["--sibling"], ["--base", "--sibling", "x"], ["--staff", "x"], ["--unknown"], ["--sibling", "   "], ["--base", "HEAD", "--base", "HEAD~1"]]) {
+    assert.throws(() => parseHarnessArguments(args), /Usage:/)
+    assert.throws(() => execFileSync(process.execPath, [script, ...args], { stdio: "pipe" }), (error) => error.status === 2 && /Usage:/.test(String(error.stderr)))
+  }
+  assert.deepEqual(parseHarnessArguments(["--base", "HEAD", "--sibling", "../staff with spaces"]), { baseRef: "HEAD", siblingRoot: "../staff with spaces" })
+})
+
+test("rejects non-string and nested skill metadata", async (t) => {
+  const root = await createFixture()
+  cleanup(t, root)
+  const skillPath = ".agents/skills/aleconnect-mobile-workflow/SKILL.md"
+  const manifestPath = ".agents/skills/aleconnect-mobile-workflow/agents/openai.yaml"
+  const skill = await readFile(join(root, skillPath), "utf8")
+  const manifest = await readFile(join(root, manifestPath), "utf8")
+  for (const value of ["[]", "{}", "null", "false", "true", "123", ".5", "0x10", "0o10", "2026-10-04", "~", "&alias content", "*alias"]) {
+    await write(root, skillPath, skill.replace(/^description:.*$/m, "description: " + value))
+    const result = await validateHarness({ root, siblingRoot: root })
+    assert.ok(result.errors.some((message) => message.includes("frontmatter description")), value)
+  }
+  await write(root, skillPath, skill)
+  await write(root, manifestPath, manifest.replace(/^interface:/m, "interface:\n  unused:").replace(/^  (display_name|short_description|default_prompt):/gm, "    $1:"))
+  const nested = await validateHarness({ root, siblingRoot: root })
+  for (const field of ["display_name", "short_description", "default_prompt"]) assert.ok(nested.errors.some((message) => message.includes(field)))
 })
