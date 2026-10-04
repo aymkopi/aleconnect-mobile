@@ -849,3 +849,14 @@
 - Git/Deployment: user-approved normal fast-forward integration and push; monitor existing GitHub CI and Staff main's Cloudflare workflow. Recovery evidence remains outside cleanup worktrees.
 - Remaining risks: existing lint/bundle warnings and browser/device acceptance limits remain; Staff's inherited broad-suite failures are not claimed green.
 - Next: verify merged-tree checks, remote equality and CI, then remove only this task's cleanup worktrees and merged branches.
+
+## 2026-10-04 - Cleanup integrated and verified
+
+- Repositories: aleconnect-mobile; coordinated cleanup completed across Staff, consumer Mobile and Lineman.
+- Scope: user-approved retention of unused UI folders, local/remote master integration and task worktree cleanup.
+- Files: Shared UI retained; unused application state/helper/context and starter assets removed, working verification commands and repository layout documentation integrated.
+- Contracts: required framework paths, API/native identity, durable queues and authorization preserved.
+- Verification: Merged-tree 215 tests, TypeScript and harness pass; fresh configured lint passed before fast-forward with 41 existing warnings. CI clean install, tests, TypeScript, lint and harness succeeded.
+- Git/Deployment: product cleanup 54b7810 fast-forward merged and pushed normally; local/remote equality verified. [GitHub workflow](https://github.com/aymkopi/aleconnect-mobile/actions/runs/37194065471) succeeded. No native installation, store or OTA publication performed. Clean cleanup worktree removed with Git; merged cleanup branch deleted. Export metadata and external verification logs retained. This follow-up records evidence only and uses skip ci; deployed product code is unchanged.
+- Remaining risks: existing warnings and browser/device acceptance limits remain. Staff's previously disclosed three broad assertions and shared-picker timeout remain baseline issues.
+- Next: cleanup request complete; preserve recovery evidence and unrelated worktrees.
