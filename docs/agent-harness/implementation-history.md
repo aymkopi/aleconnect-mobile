@@ -45,3 +45,10 @@ New entries use four fields: scope, verification, remaining risks, next. Put aff
 - Verification: committed lock engines and official Expo SDK/build-image requirements confirm Node 22.23.2 remains supported. Regression cases cover Node 22/24 lower boundaries, stable alternatives, invalid pins and non-LTS/prerelease rejection. 59/59 focused harness/CI regression checks passed on both Node 22.23.2 and Node 24.14.1. All locked dependency Node engines accept both tested versions. Workflow actionlint and metadata-only lockfile comparison passed; no dependency resolutions changed. Graphify AST refresh passed; generated changes preserved in external recovery evidence. Remote application checks remain pending publication.
 - Remaining risks: dependency-compatible Node 24 is distinct from installed-device or Android preview acceptance. Historical older-stack failures do not prove current incompatibility. No Node 24 native build or device acceptance is inferred from doctor checks.
 - Next: verify focused harness suites on both accepted runtimes, inspect metadata-only lock changes, publish and confirm the pipelines using .node-version, then remove the task worktrees.
+
+## 2026-10-04 — Android preview assertion follows validated pin
+
+- Scope: full GitHub application checks exposed the Android signing-guard test still asserting the old package-wide 22.x engine range. The preview test now checks .node-version = 22.23.2; supported runtime range is covered separately by harness tests. Native scripts and signing behavior are unchanged.
+- Verification: Initial remote run identified the exact stale assertion. Local Node 22 preview/signing guard tests passed (9 tests), resolving config plugins from the primary checkout. Fresh worktree npm ci was disk-space blocked; session-created partial installs were removed using scoped Git cleanup. Graphify refresh passed with generated evidence preserved externally. Corrected clean-runner full CI remains pending.
+- Remaining risks: no Node 24 native acceptance is inferred.
+- Next: rerun complete client checks and record successful pipeline results before cleanup.

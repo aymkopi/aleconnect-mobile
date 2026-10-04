@@ -57,7 +57,7 @@ test("Mobile local preview uses release runtime settings with a non-production s
 
 test("Mobile exposes a Node 22 local preview build command", () => {
   const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"))
-  assert.equal(packageJson.engines.node, "22.x")
+  assert.equal(readFileSync(new URL("../.node-version", import.meta.url), "utf8").trim(), "22.23.2")
   assert.match(packageJson.scripts["android:preview"], /Node 22 LTS/)
   assert.match(packageJson.scripts["android:preview"], /assemblePreview/)
 })
