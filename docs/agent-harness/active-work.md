@@ -1,5 +1,27 @@
 # Active work
 
+## 2026-10-04 - Retain UI libraries and integrate cleanup
+
+- Repositories: consumer Mobile, coordinated with the other two independent repositories.
+- Scope: user explicitly requests keeping unused UI folders and authorizes local/remote main/master integration and removal of this task's cleanup worktrees. Based on master 3001d63.
+- Files: Shared UI folders preserved; retained scoped application dead-code/starter-asset cleanup and verification scripts. Shared UI library scaffolding remains available even without current application consumers; docs/repository-structure.md records this policy.
+- Contracts: framework entry paths, public API contracts, native identity, queues and authorization behavior preserved. No manual data/schema/native release action.
+- Verification: Fresh 215 tests, TypeScript and configured lint pass; 41 existing lint warnings. Prior Android/iOS exports and Doctor 21/21 passed on this product tree. Graphify AST refresh, harness and whitespace checks pass before integration.
+- Git/Deployment: user-approved normal fast-forward integration and push; monitor existing GitHub CI and Staff main's Cloudflare workflow. Recovery evidence remains outside cleanup worktrees.
+- Remaining risks: existing lint/bundle warnings and browser/device acceptance limits remain; Staff's inherited broad-suite failures are not claimed green.
+- Next: verify merged-tree checks, remote equality and CI, then remove only this task's cleanup worktrees and merged branches.
+
+## 2026-10-04 - Isolated repository cleanup
+
+- Repositories: consumer Mobile; Staff and Lineman cleanup is coordinated in separate worktrees.
+- Scope: user-approved source/dead-code cleanup from master 3001d63 on codex/repository-cleanup. Existing primary checkout work is preserved.
+- Files: unused blur context, unused React imports, never-read avatar/submission progress state, obsolete report-fetch wrapper and starter assets removed. Broken starter reset command replaced with working test/typecheck commands; TypeScript rejects unused locals/parameters. Graphify caches are untracked. README and docs/repository-structure.md describe the application layout.
+- Contracts: src/app routes, root native entry/configuration, platform variants, notifications, evidence queues, authenticated API calls and framework-required peers remain intact. No environment files copied.
+- Verification: 215/215 tests, strict TypeScript and ESLint pass (43 existing warnings in the full repository lint). Android/iOS JavaScript and Hermes export, Expo dependency alignment and Doctor 21/21 pass using Node 22.23.2. Import/reachability audit has no unresolved imports or orphan application modules; framework/runtime dependency candidates retained. Graphify AST update, coordinated harness and whitespace checks pass.
+- Git/Deployment: local isolated cleanup branch only; commit requested by user. No merge, push, device installation, store/OTA publication or backend/data action.
+- Remaining risks: lint warnings remain; native compilation and physical-device acceptance were not performed for this cleanup.
+- Next: review and integrate the local cleanup commit.
+
 ## Expo 57 integration (2026-10-04)
 
 - Upgrade commit `2312009b5933e8f1cc314428fdc573424550860b` was fast-forward merged into local `master` and pushed normally; remote master equality verified. GitHub run `37187330785` completed successfully (clean install, harness, JavaScript tests, TypeScript and lint).

@@ -3,8 +3,9 @@
   "main": "./index.ts",
   "version": "1.0.0",
   "scripts": {
+    "test": "node --test --test-concurrency=1 tests/*.test.mjs tests/*.test.ts",
+    "typecheck": "tsc --noEmit",
     "start": "expo start",
-    "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
     "android:preview": "node -e \"if (process.versions.node.split('.')[0] !== '22') throw new Error('ALEConnect Android previews require Node 22 LTS')\" && expo prebuild --no-clean --platform android --no-install && cd android && set NODE_ENV=production&& gradlew.bat :app:assemblePreview --no-daemon",
     "android:sync": "expo prebuild --clean --platform android --no-install",

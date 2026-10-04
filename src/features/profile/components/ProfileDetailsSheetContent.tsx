@@ -8,7 +8,6 @@ import {
   FormControlLabel,
   FormControlLabelText,
 } from "@/components/ui/form-control";
-import React from "react";
 import { View } from "react-native";
 import { ProfileEditSheetHeader } from "./ProfileEditSheetHeader";
 

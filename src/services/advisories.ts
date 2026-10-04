@@ -202,7 +202,7 @@ export async function clearAdvisoryCache(scope: AdvisoryScope) {
 
 export async function fetchActiveAdvisory(
   id: string,
-  scope: AdvisoryScope,
+  _scope: AdvisoryScope,
 ): Promise<MobileAdvisory> {
   const response = await apiRequest<{ advisory: MobileAdvisory }>(
     `/api/mobile/advisories/${encodeURIComponent(id)}`,

@@ -39,7 +39,7 @@ import {
   LucideSheet,
   LucideUserRound,
 } from "lucide-react-native";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { BackHandler, Keyboard, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -101,8 +101,6 @@ export default function ProfileDetailsRoute() {
   const [inputValue, setInputValue] = useState("");
   const [inputError, setInputError] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [avatarPhoto, setAvatarPhoto] =
-    useState<ImagePicker.ImagePickerAsset | null>(null);
   const [avatarUri, setAvatarUri] = useState<string | null>(
     () => profile?.avatarUrl ?? null,
   );
@@ -210,7 +208,6 @@ export default function ProfileDetailsRoute() {
         contentType: "image/webp",
       }, profileScope ?? undefined);
 
-      setAvatarPhoto(selectedPhoto);
       setAvatarUri(nextAvatarUrl);
       await setAvatarUrl(nextAvatarUrl);
       void reload({ forceNetwork: true });

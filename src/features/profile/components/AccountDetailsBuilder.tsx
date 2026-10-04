@@ -4,7 +4,6 @@ import { Text } from "@/components/ui/text";
 import { useAppColors } from "@/hooks/use-app-colors";
 import type { LucideIcon } from "lucide-react-native";
 import type { ComponentProps } from "react";
-import React from "react";
 import { View } from "react-native";
 
 export type AccountDetailsBuilderProps = {

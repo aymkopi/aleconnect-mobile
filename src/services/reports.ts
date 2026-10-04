@@ -473,14 +473,6 @@ export async function fetchComplaintReportPage(options?: {
   );
 }
 
-export async function fetchComplaintReports(options?: {
-  force?: boolean;
-  revalidate?: boolean;
-  userId?: string;
-}): Promise<Report[]> {
-  return fetchComplaintReportPage(options).then((page) => page.reports);
-}
-
 export async function fetchComplaintReportDetail(
   id: string,
   options?: { refreshEvidence?: boolean; serviceAccountId?: string | null; accessRevision?: number | null; statusRevalidationAttempted?: boolean },

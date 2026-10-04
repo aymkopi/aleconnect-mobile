@@ -341,8 +341,6 @@ export default function NewComplaintRoute() {
   const [step, setStep] = useState(1);
   const [attemptedStep, setAttemptedStep] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitProgress, setSubmitProgress] = useState("");
-  const [submitProgressValue, setSubmitProgressValue] = useState(0);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [viewerPhotoIndex, setViewerPhotoIndex] = useState<number | null>(null);
   const [form, setForm] = useState<ComplaintFormState>(initialComplaintForm);
@@ -608,8 +606,6 @@ export default function NewComplaintRoute() {
 
     isSubmittingRef.current = true;
     setIsSubmitting(true);
-    setSubmitProgress("Saving report securely...");
-    setSubmitProgressValue(15);
     setSubmitError(null);
 
     try {
@@ -657,21 +653,16 @@ export default function NewComplaintRoute() {
           ...conditionalDetails,
         },
       });
-      setSubmitProgressValue(40);
-      setSubmitProgress("Uploading evidence and creating your ticket...");
-      setSubmitProgressValue(65);
       const results = await syncQueue(false);
       const result = results.find((item) => item.id === reportId);
 
       if (result?.status === "submitted") {
-        setSubmitProgressValue(100);
         if (isMountedRef.current) {
           setForm((current) => ({
             ...current,
             ticketId: result.ticketId,
             ticketNumber: result.ticketNumber,
           }));
-          setSubmitProgress("");
           setStep(5);
         }
       } else if (result?.status === "failed") {
@@ -694,8 +685,6 @@ export default function NewComplaintRoute() {
     } finally {
       if (isMountedRef.current) {
         setIsSubmitting(false);
-        setSubmitProgress("");
-        setSubmitProgressValue(0);
       }
       isSubmittingRef.current = false;
     }
