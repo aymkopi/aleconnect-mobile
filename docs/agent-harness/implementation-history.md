@@ -24,3 +24,10 @@ New entries use four fields: scope, verification, remaining risks, next. Put aff
 - Verification: Staff 57/57, Lineman 54/54, Mobile 49/49 on Node 22.23.2; three harness checks; all 13 Python skill checks; three primary app diagnostics on Node 22.23.2; six scenario review/recheck; final script review approved after CLI/YAML schema regression fixes; document/archive integrity, whitespace and scope checks. [Final acceptance](final-acceptance.md) records measured instruction volume and limitations. Earlier missing-PyYAML and pending-review entries are superseded.
 - Remaining risks: no harness acceptance blocker. Global plugins retain their settings; no coding-agent speed, device acceptance, live-schema or deployed behavior is inferred. Native/product acceptance remains with existing tasks.
 - Next: local update complete after fast-forward and merged-tree validation; commit IDs are recorded in Git. No remote push, production/native release, live write or unrelated worktree cleanup performed.
+
+## 2026-10-04 — GitHub pipeline alignment with the lean harness
+
+- Scope: updated workflow actions and Node 22.23.2, added a dependency-free CI runner with conservative Git-base fallback and docs/harness-only app gating. Staff adds an independent push/PR harness job and retains deployment order; clients use their complete npm test and typecheck scripts. Product source, lockfiles, payloads, secrets and native publication are unchanged.
+- Verification: Git-base/classification/output failure regression tests, focused harness suites, standalone checks and actionlint validate the pipeline. Remote workflow outcomes are attached to the resulting commit in GitHub after publication.
+- Remaining risks: workflow changes intentionally require full app verification. Source/build CI does not establish installed-device or store acceptance; absent sibling checkouts still require coordinated checks for contract changes.
+- Next: publish the reviewed pipeline changes, verify GitHub workflows and Staff read-only production smoke, and preserve this task's scoped recovery evidence.

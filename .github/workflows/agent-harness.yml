@@ -9,27 +9,42 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: agent-harness-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - name: Validate agent harness
+          node-version: '22.23.2'
+          package-manager-cache: false
+      - name: Validate agent harness and regression tests
+        id: harness
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
-        run: |
-          if [ -n "$BASE_SHA" ] && [ "$BASE_SHA" != "0000000000000000000000000000000000000000" ]; then
-            npm run harness:check -- --base "$BASE_SHA"
-          else
-            npm run harness:check
-          fi
-      - run: node --test tests/*.test.mjs
-      - run: npx tsc --noEmit
-      - run: npm run lint
+        run: node scripts/run-agent-ci.mjs
+      - name: Set up dependency cache
+        if: steps.harness.outputs.app_changed == 'true'
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22.23.2'
+          cache: npm
+      - name: Install dependencies
+        if: steps.harness.outputs.app_changed == 'true'
+        run: npm ci
+      - name: App tests
+        if: steps.harness.outputs.app_changed == 'true'
+        run: npm run test
+      - name: TypeScript
+        if: steps.harness.outputs.app_changed == 'true'
+        run: npm run typecheck
+      - name: Lint
+        if: steps.harness.outputs.app_changed == 'true'
+        run: npm run lint

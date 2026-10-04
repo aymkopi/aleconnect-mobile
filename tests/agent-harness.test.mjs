@@ -351,16 +351,16 @@ test("mobile instructions and CI route validation without publishing", async () 
     "npm ci",
     "github.event.pull_request.base.sha",
     "github.event.before",
-    "npm run harness:check -- --base \"$BASE_SHA\"",
-    "node --test tests/*.test.mjs",
-    "npx tsc --noEmit",
+    "node scripts/run-agent-ci.mjs",
+    "npm run test",
+    "npm run typecheck",
     "npm run lint",
   ]) {
     assert.match(workflow, new RegExp(command.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")))
   }
 
   assert.match(workflow, /fetch-depth: 0/)
-  assert.match(workflow, /node-version: 22/)
+  assert.match(workflow, /node-version: '22\.23\.2'/)
   assert.doesNotMatch(workflow, /\beas\s+(?:build|submit)\b/i)
   assert.doesNotMatch(workflow, /\b(?:wrangler\s+(?:pages\s+)?deploy|npm\s+run\s+(?:deploy|publish)|eas\s+update)\b/i)
 })

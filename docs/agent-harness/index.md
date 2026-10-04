@@ -33,3 +33,5 @@ Docs-only checks: `npm run harness:check`, `git diff --check`; validation change
 Run `node scripts/check-agent-worktree.mjs` for a read-only Git, lockfile, and sibling-layout check. Add `--app` before app work to require Node 22 and the local toolchain; use `--sibling <path>` for a different contract-owner layout. See [worktree setup](worktree-setup.md).
 
 The [evaluation guide](evaluation.md) compares representative tasks and records correctness, time, usage and user interventions. Validator tests are not evidence of agent performance. Routine edits use one agent; complex contracts, migrations, releases or uncertain changes benefit from an independent final review when available and authorized.
+
+GitHub verification and docs-only gating: [CI guide](ci.md).

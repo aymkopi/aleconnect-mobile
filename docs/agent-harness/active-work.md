@@ -11,3 +11,5 @@ Last verified: local 49/49; coordinated 160 Node 22 checks, 13 Python skill chec
 - [Harness refinement](tasks/harness-refinement.md): isolated docs/skills/checks; no product release.
 - [Operational acceptance](tasks/operational-acceptance.md): preserved native/CI/device acceptance and protected operational state; read before live/device work.
 - Prior detail: [preserved handoff](archive/2026-10-04/active-work.md) and [history](implementation-history.md).
+
+- [Harness CI alignment](tasks/harness-ci.md): GitHub gates updated for task-specific verification.
