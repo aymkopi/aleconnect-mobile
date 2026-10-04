@@ -52,3 +52,10 @@ New entries use four fields: scope, verification, remaining risks, next. Put aff
 - Verification: Initial remote run identified the exact stale assertion. Local Node 22 preview/signing guard tests passed (9 tests), resolving config plugins from the primary checkout. Fresh worktree npm ci was disk-space blocked; session-created partial installs were removed using scoped Git cleanup. Graphify refresh passed with generated evidence preserved externally. Corrected clean-runner full CI remains pending.
 - Remaining risks: no Node 24 native acceptance is inferred.
 - Next: rerun complete client checks and record successful pipeline results before cleanup.
+
+## 2026-10-04 — Runtime policy publication and acceptance
+
+- Scope: published ebb9d5d672a05549c7ce899bab1797da4715edaf on local/remote master. CI uses .node-version; dependency-compatible Node 24 is accepted by harness diagnostics without changing Windows Android defaults.
+- Verification: 59/59 focused harness checks passed on both Node 22.23.2 and Node 24.14.1; all locked dependency engines accept both. Full GitHub CI passed dependency installation and application checks using .node-version: 37204741834. Workflow actionlint, metadata-only lock comparison and Graphify AST refresh passed. Dependency resolutions are unchanged; generated graph evidence is preserved externally. Full application suite: 244 passes, one absent-sibling skip and zero failures; TypeScript passed; lint passed with zero errors and 41 existing warnings. [GitHub pipeline](https://github.com/aymkopi/aleconnect-mobile/actions/runs/37204741834).
+- Remaining risks: Node 24 native/device acceptance remains unverified; compatibility metadata and harness checks do not imply it.
+- Next: no remaining runtime implementation; final docs-only checks precede task worktree cleanup.
