@@ -13,3 +13,6 @@ Start with [active work](agent-harness/active-work.md) and use [the harness map]
 | Designs and plans | `superpowers/specs/`, `superpowers/plans/` | Historical decisions unless the current handoff names them as active |
 
 Preserve old acceptance and rollback facts. Replace superseded active status, record new outcomes once in history, and keep contract details in the contract document. A passing old tracker does not prove current device, native SDK or backend acceptance.
+
+- [PanelUI 2.0.0 integration](panelui-major-migration.md): current PR, canonical-folder promotion, preserved edits and acceptance boundaries.
+- [Major update changelog](../CHANGELOG.md): shipped presentation/flow changes and removed features.

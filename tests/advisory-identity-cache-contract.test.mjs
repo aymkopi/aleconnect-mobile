@@ -8,9 +8,9 @@ test("advisory storage, requests, pagination, and detail use the identity revisi
   const [service, publicUpdates, home, feed, detail] = await Promise.all([
     read("src/services/advisories.ts"),
     read("src/services/public-updates.ts"),
-    read("src/app/(tabs)/home.tsx"),
-    read("src/app/advisories.tsx"),
-    read("src/app/advisory/[id].tsx"),
+    read("src/features/home/home-screen.tsx"),
+    read("src/features/advisories/use-update-feed.ts"),
+    read("src/features/advisories/update-detail-screen.tsx"),
   ]);
   for (const source of [service, publicUpdates, home, feed, detail]) {
     assert.match(source, /identityUserId/);
@@ -20,7 +20,6 @@ test("advisory storage, requests, pagination, and detail use the identity revisi
   assert.match(service, /advisoryScopeKey/);
   assert.match(publicUpdates, /public_updates_cache_v1/);
   assert.match(publicUpdates, /advisoryScopeKey/);
-  assert.match(feed, /loadedScopeKey/);
-  assert.match(detail, /activeScopeKeyRef/);
-  assert.match(detail, /loadedScopeKey/);
+  assert.match(feed, /useScopedRead\(scope/);
+  assert.match(detail, /useScopedRead\(scope/);
 });

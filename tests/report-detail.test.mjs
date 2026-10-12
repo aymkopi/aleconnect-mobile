@@ -4,25 +4,6 @@ import test from "node:test";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("report detail presents restoration progress and general Service Memo updates", async () => {
-  const [detail, card, data] = await Promise.all([
-    read("src/app/(tabs)/reports/[id].tsx"),
-    read("src/features/reports/extended-outage-status-card.tsx"),
-    read("src/features/reports/data.ts"),
-  ]);
-  assert.match(detail, /ExtendedOutageStatusCard/);
-  assert.match(detail, /Service Memo updates/);
-  assert.match(detail, /consumerUpdates/);
-  assert.match(card, /Extended outage — Restoration in progress/);
-  assert.match(card, /Next update by/);
-  assert.doesNotMatch(card, /Public update history/);
-  assert.match(data, /publicUpdates: IncidentPublicUpdate\[\]/);
-  assert.match(data, /consumerUpdates: ConsumerServiceMemoUpdate\[\]/);
-  assert.match(detail, /preserveKnownConsumerReportDetailStatus/);
-  const service = await read("src/services/reports.ts");
-  assert.match(service, /statusRevalidationAttempted/);
-});
-
 test("report detail parser supports general consumer updates and legacy public-update fallback", async () => {
   const { parseReportDetailResponse } = await import(
     new URL("../src/features/reports/data.ts", import.meta.url)
@@ -241,15 +222,4 @@ test("report detail uses later history order when all verified timestamps are in
     ),
     1,
   );
-});
-
-test("report detail retains content, exposes retry, and refreshes expired evidence once", async () => {
-  const detail = await read("src/app/(tabs)/reports/[id].tsx");
-
-  assert.match(detail, /EvidencePhotoViewer/);
-  assert.match(detail, /cachePolicy="memory-disk"/);
-  assert.match(detail, /refreshEvidenceOnce/);
-  assert.match(detail, /refreshEvidence: true/);
-  assert.match(detail, /Retry/);
-  assert.doesNotMatch(detail, /isLoading \|\| !report/);
 });

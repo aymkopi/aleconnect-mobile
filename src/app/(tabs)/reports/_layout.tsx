@@ -1,20 +1,6 @@
-import { Redirect, Stack } from "expo-router";
-import { ConsumerProfileProvider } from "@/context/consumer-profile-context";
-import { useAuthSession } from "@/hooks/use-auth-session";
-
-export const unstable_settings = {
-  initialRouteName: "index",
-};
-
-export default function ComplaintsLayout() {
-  const { isLoading, session } = useAuthSession();
-
-  if (isLoading) return null;
-  if (!session) return <Redirect href="/sign-in" />;
-
-  return (
-    <ConsumerProfileProvider>
-      <Stack screenOptions={{ headerShown: false }} />
-    </ConsumerProfileProvider>
-  );
+import { Stack } from "expo-router";
+import { useAppColors } from "@/hooks/use-app-colors";
+export default function ReportsLayout() {
+  const [background] = useAppColors(["background"]);
+  return <Stack screenOptions={{ headerShown: false, animation: "none", contentStyle: { backgroundColor: background } }} />;
 }

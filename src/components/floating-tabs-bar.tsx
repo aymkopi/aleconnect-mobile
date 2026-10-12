@@ -1,6 +1,7 @@
 import { FloatingAppBar } from "@/components/floating-app-bar";
 import type { BottomTabBarProps } from "expo-router/js-tabs";
 import { usePathname } from "expo-router";
+import { useGuestAccess } from "@/context/guest-access-context";
 import { View } from "react-native";
 
 type NestedRoute = {
@@ -22,20 +23,26 @@ function getFocusedNestedRouteName(route: NestedRoute): string | undefined {
   return getFocusedNestedRouteName(nestedRoute) ?? nestedRoute.name;
 }
 
-export function FloatingTabsBar({
-  state,
-  navigation,
-}: BottomTabBarProps) {
+export function FloatingTabsBar({ state, navigation }: BottomTabBarProps) {
   const pathname = usePathname();
+  const { guest, requestSignIn } = useGuestAccess();
   const activeRoute = state.routes[state.index];
   const nestedRouteName = activeRoute
     ? getFocusedNestedRouteName(activeRoute as NestedRoute)
     : undefined;
 
+  const reportDetail =
+    nestedRouteName === "[id]" && pathname.startsWith("/reports/");
   if (
-    pathname.endsWith("/reports/new") ||
-    pathname.endsWith("/profile/details") ||
-    (nestedRouteName && nestedRouteName !== "index")
+    [
+      "/reports/new",
+      "/reports/list",
+      "/reports/queue",
+      "/reports/timeline",
+      "/reports/period",
+    ].includes(pathname) ||
+    pathname.startsWith("/profile/") ||
+    (nestedRouteName && nestedRouteName !== "index" && !reportDetail)
   ) {
     return null;
   }
@@ -51,7 +58,11 @@ export function FloatingTabsBar({
             return;
           }
 
-          navigation.navigate(route.name);
+          if (guest && route.name === "reports") { requestSignIn("/reports", "reports"); return; }
+          const event = navigation.emit({ type: "tabPress", target: route.key, canPreventDefault: true });
+          if (event.defaultPrevented) return;
+          if (route.name === "reports" || route.name === "profile") navigation.navigate(route.name, { screen: "index" });
+          else navigation.navigate(route.name);
         }}
       />
     </View>

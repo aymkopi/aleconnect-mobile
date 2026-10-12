@@ -13,21 +13,3 @@ test("Public Updates uses the additive endpoint and private cache", async () => 
   assert.match(service, /ApiRequestError/)
   assert.match(service, /fetchActiveAdvisories/)
 })
-
-test("the feed renders advisory and Facebook cards without a new tab", async () => {
-  const [feed, card, tabs] = await Promise.all([
-    read("src/app/advisories.tsx"),
-    read("src/features/advisories/public-update-list-item.tsx"),
-    read("src/app/(tabs)/_layout.tsx"),
-  ])
-  assert.match(feed, /Public Updates/)
-  assert.match(card, /item\.kind === "advisory"/)
-  assert.match(card, /View on Facebook/)
-  assert.match(card, /Linking\.openURL/)
-  assert.doesNotMatch(tabs, /public-updates|facebook/)
-})
-
-test("unified list keys include the item kind", async () => {
-  const feed = await read("src/app/advisories.tsx")
-  assert.match(feed, /`\$\{item\.kind\}:\$\{item\.id\}`/)
-})

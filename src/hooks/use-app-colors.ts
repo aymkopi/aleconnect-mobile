@@ -7,9 +7,9 @@ export type AppColorToken =
   | "border"
   | "card"
   | "card-foreground"
-  | "danger"
   | "destructive"
   | "foreground"
+  | "feature"
   | "input"
   | "muted"
   | "muted-foreground"
@@ -18,10 +18,8 @@ export type AppColorToken =
   | "primary"
   | "primary-foreground"
   | "ring"
-  | "separator"
   | "success"
   | "surface"
-  | "surface-foreground"
   | "warning";
 
 export function useAppColors<const T extends readonly AppColorToken[]>(

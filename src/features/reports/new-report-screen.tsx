@@ -1,0 +1,1814 @@
+import { Asset } from "expo-asset";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { BackHandler, Image, Pressable, View } from "react-native";
+import { useFocusEffect, useNavigation, useRouter } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
+import {
+  Activity,
+  Camera,
+  Check,
+  CircleEllipsis,
+  ClipboardCheck,
+  Cpu,
+  Gauge,
+  House,
+  Images,
+  Lightbulb,
+  MapPin,
+  Pencil,
+  Plug,
+  PowerOff,
+  Scissors,
+  TriangleAlert,
+  X,
+  ZapOff,
+  type LucideIcon,
+} from "lucide-react-native";
+import { Button } from "@/components/panelui/button";
+import { BottomSheet } from "@/components/panelui/bottom-sheet";
+import { Dialog } from "@/components/panelui/dialog";
+import { Card } from "@/components/panelui/card";
+import { Field } from "@/components/panelui/field";
+import { Input } from "@/components/panelui/input";
+import { Select } from "@/components/panelui/select";
+import { Spinner } from "@/components/panelui/spinner";
+import { ContentSkeleton } from "@/components/content-skeleton";
+import { Text } from "@/components/panelui/text";
+import { PANELUI_PREVIEW } from "@/constants/panelui-preview";
+import { useVisualPreview } from "@/context/visual-preview-context";
+import { useReportQueue } from "@/context/report-queue-context";
+import { ReportLocationPicker } from "@/features/maps/report-location-picker";
+import { StaticLocationMap } from "@/features/maps/static-location-map";
+import { readReportCoordinates, resolveHomeReportLocation } from "./address";
+import { findAlbayBarangay } from "./albay-barangays";
+import {
+  conditionalReportPayload,
+  hasCurrentReportContract,
+  reportLimits,
+  validateReportForm,
+} from "./contract";
+import {
+  emptyComplaintMeta,
+  formatComplaintCategoryTitle,
+  initialComplaintForm,
+  type ComplaintFormState,
+} from "./data";
+import { ReportPage } from "./components/report-page";
+import { ReportReceipt } from "./report-receipt";
+import { EvidencePhotoViewer } from "./components/evidence-photo-viewer";
+import {
+  creationStepErrors,
+  nextCreationStep,
+  singleCategoryTypeId,
+  previousCreationStep,
+  confirmedReportReceipt,
+  isDraftScopeCurrent,
+  creationSubmissionMode,
+  changeReportIssue,
+  type CreationStep,
+  type ReportDraftScope,
+} from "./creation-state";
+import {
+  creationFixtureAccounts,
+  creationFixtureLocation,
+  creationFixtureMeta,
+  buildFixtureEvidence,
+} from "./creation-fixtures";
+import { useAppColors } from "@/hooks/use-app-colors";
+import { useAuthSession } from "@/hooks/use-auth-session";
+import { useConsumerAccount } from "@/hooks/use-consumer-account";
+import { useConsumerProfile } from "@/hooks/use-consumer-profile";
+import { createLocalReportId, enqueueReport } from "@/services/report-queue";
+import { fetchComplaintMeta } from "@/services/reports";
+import {
+  deleteEvidencePhoto,
+  prepareEvidencePhoto,
+} from "@/utils/evidence-image-processing";
+
+const stepLabels = [
+  "Account",
+  "Issue & type",
+  "Location",
+  "Details",
+  "Photos",
+  "Review",
+];
+const categoryIcons: LucideIcon[] = [
+  ZapOff,
+  Activity,
+  Plug,
+  TriangleAlert,
+  Gauge,
+  Scissors,
+  PowerOff,
+  Lightbulb,
+  Cpu,
+  CircleEllipsis,
+  ClipboardCheck,
+];
+const fixtureImages = [
+  require("@/assets/aleconnect/report-evidence-1.png"),
+  require("@/assets/aleconnect/report-evidence-2.png"),
+  require("@/assets/aleconnect/report-evidence-3.png"),
+];
+function Heading({
+  children,
+  description,
+}: {
+  children: string;
+  description?: string;
+}) {
+  return (
+    <View className="gap-1">
+      <Text
+        accessibilityRole="header"
+        style={{
+          fontFamily: "PlusJakartaSans_600SemiBold",
+          fontSize: 22,
+          lineHeight: 30,
+        }}
+      >
+        {children}
+      </Text>
+      {description ? (
+        <Text size="sm" muted>
+          {description}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+function EditRow({ title, onPress }: { title: string; onPress: () => void }) {
+  const [primary] = useAppColors(["primary"]);
+  return (
+    <View className="flex-row items-center justify-between gap-3">
+      <Text size="sm" weight="semibold" className="flex-1">
+        {title}
+      </Text>
+      <Button
+        size="sm"
+        variant="ghost"
+        onPress={onPress}
+        accessibilityLabel={`Edit ${title}`}
+        startContent={<Pencil size={14} color={primary} />}
+      >
+        Edit
+      </Button>
+    </View>
+  );
+}
+function draftHasContent(form: ComplaintFormState) {
+  return Boolean(
+    form.categoryId ||
+    form.typeId ||
+    form.categoryDescription ||
+    form.typeDescription ||
+    form.desiredAction ||
+    form.currentRegisteredName ||
+    form.requestedRegisteredName ||
+    form.photoUploads.length ||
+    !form.useHomeAddress,
+  );
+}
+
+export default function NewReportScreen() {
+  const router = useRouter(),
+    navigation = useNavigation();
+  const { session, isLoading: authLoading } = useAuthSession();
+  const {
+    accountContext,
+    selectedServiceAccountId,
+    isLoading: accountLoading,
+    refreshConsumerAccount,
+  } = useConsumerAccount();
+  const {
+    profile,
+    isLoading: profileLoading,
+    error: profileError,
+    setServiceAccountId,
+    reload: reloadProfile,
+  } = useConsumerProfile();
+  const { sync, refresh: refreshQueue, announceSubmission } = useReportQueue();
+  const { fixtures } = useVisualPreview();
+  const [primary, muted, foreground, primaryForeground, danger] = useAppColors([
+    "primary",
+    "muted-foreground",
+    "foreground",
+    "primary-foreground",
+    "destructive",
+  ]);
+  const [step, setStep] = useState<CreationStep>(1),
+    [editingReview, setEditingReview] = useState(false);
+  const [form, setForm] = useState<ComplaintFormState>({
+    ...initialComplaintForm,
+  });
+  const [meta, setMeta] = useState(emptyComplaintMeta),
+    [metaLoading, setMetaLoading] = useState(true),
+    [metaError, setMetaError] = useState<string | null>(null),
+    [metaRetry, setMetaRetry] = useState(0);
+  const [selectedAccount, setSelectedAccount] = useState<string | null>(null),
+    [scope, setScope] = useState<ReportDraftScope | null>(null);
+  const [attempted, setAttempted] = useState(false),
+    [submitError, setSubmitError] = useState<string | null>(null),
+    [submitting, setSubmitting] = useState(false);
+  const [mapOpen, setMapOpen] = useState(false),
+    [locateOnOpen, setLocateOnOpen] = useState(false),
+    [sourceOpen, setSourceOpen] = useState(false),
+    [pickerBusy, setPickerBusy] = useState(false),
+    [photoError, setPhotoError] = useState<string | null>(null),
+    [viewerIndex, setViewerIndex] = useState<number | null>(null);
+  const [confirm, setConfirm] = useState<
+      "discard" | "account" | "restart" | "issue" | null
+    >(null),
+    [nextAccount, setNextAccount] = useState<string | null>(null);
+  const [nextIssue, setNextIssue] = useState<{
+    categoryId: string;
+    typeId: string;
+  } | null>(null);
+  const [issueView, setIssueView] = useState<"category" | "type">("category");
+  const [submissionPhase, setSubmissionPhase] = useState<
+    "saving" | "sending" | "checking"
+  >("saving");
+  const [fixtureSubmit, setFixtureSubmit] = useState(false),
+    [receipt, setReceipt] = useState<{
+      ticketId: string;
+      ticketNumber: string;
+    } | null>(null);
+  const reportId = useRef(createLocalReportId()),
+    leaving = useRef(false),
+    mounted = useRef(true),
+    submittingRef = useRef(false),
+    queued = useRef(false),
+    draftGeneration = useRef(0);
+  const previousFixture = useRef(fixtures),
+    manualLocation = useRef<Partial<ComplaintFormState> | null>(null);
+  const accounts = fixtures
+    ? creationFixtureAccounts
+    : (accountContext?.accounts ?? []);
+  const accountId =
+    selectedAccount ??
+    (fixtures
+      ? creationFixtureAccounts[0].id
+      : (selectedServiceAccountId ?? accountContext?.defaultServiceAccountId ?? session?.user.id ?? null));
+  const selected = accounts.find((account) => account.id === accountId);
+  const currentScope = {
+    principalId: fixtures ? "fixture" : (session?.user.id ?? null),
+    identityUserId: fixtures
+      ? "fixture"
+      : (accountContext?.identityUserId ?? session?.user.id ?? null),
+    accessRevision: fixtures ? 0 : (accountContext?.accessRevision ?? 0),
+    authorizedServiceAccountIds: fixtures
+      ? accounts.map((account) => account.id)
+      : (accountContext?.authorizedServiceAccountIds ??
+        (session ? [session.user.id] : [])),
+    profileId: fixtures ? accountId : (profile?.profileId ?? null),
+  };
+  const scopeCurrent = isDraftScopeCurrent(scope, currentScope);
+  const accountReady =
+    scopeCurrent &&
+    !metaLoading &&
+    hasCurrentReportContract(meta) &&
+    (fixtures || (!accountLoading && !profileLoading && !profileError));
+  const stale = Boolean(
+    scope &&
+    (scope.principalId !== currentScope.principalId ||
+      scope.identityUserId !== currentScope.identityUserId ||
+      scope.accessRevision !== currentScope.accessRevision ||
+      !currentScope.authorizedServiceAccountIds.includes(
+        scope.serviceAccountId,
+      )),
+  );
+  const latest = useRef({ currentScope, scopeCurrent, fixtures, accountId });
+  latest.current = { currentScope, scopeCurrent, fixtures, accountId };
+  useEffect(
+    () => () => {
+      mounted.current = false;
+      draftGeneration.current += 1;
+    },
+    [],
+  );
+  useEffect(() => {
+    let active = true;
+    setMetaLoading(true);
+    setMetaError(null);
+    if (fixtures) {
+      setMeta(creationFixtureMeta);
+      setMetaLoading(false);
+      return;
+    }
+    if (!session?.user.id) {
+      setMetaLoading(false);
+      return;
+    }
+    fetchComplaintMeta({ force: true })
+      .then((next) => {
+        if (!hasCurrentReportContract(next))
+          throw new Error(
+            "Connect to update the report form before continuing.",
+          );
+        if (active) setMeta(next);
+      })
+      .catch((error) => {
+        if (active)
+          setMetaError(
+            error instanceof Error
+              ? error.message
+              : "Could not load the report form.",
+          );
+      })
+      .finally(() => {
+        if (active) setMetaLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [fixtures, metaRetry, session?.user.id]);
+  useEffect(() => {
+    if (!fixtures && accountId) setServiceAccountId(accountId);
+  }, [fixtures, accountId, setServiceAccountId]);
+  useEffect(() => {
+    if (previousFixture.current === fixtures) return;
+    previousFixture.current = fixtures;
+    draftGeneration.current += 1;
+    setForm({ ...initialComplaintForm });
+    setScope(null);
+    setSelectedAccount(null);
+    setStep(1);
+    setReceipt(null);
+    setEditingReview(false);
+    setAttempted(false);
+    queued.current = false;
+    reportId.current = createLocalReportId();
+  }, [fixtures]);
+  useEffect(() => {
+    if (
+      scope ||
+      !accountId ||
+      !currentScope.principalId ||
+      !currentScope.identityUserId ||
+      !hasCurrentReportContract(meta) ||
+      (!fixtures &&
+        (profile?.profileId !== accountId || accountLoading || profileLoading))
+    )
+      return;
+    const coordinates = readReportCoordinates(profile?.homeCoordinates);
+    const home = fixtures
+      ? creationFixtureLocation
+      : resolveHomeReportLocation(
+          meta,
+          profile,
+          coordinates
+            ? findAlbayBarangay(coordinates.latitude, coordinates.longitude)
+                ?.barangayPsgc
+            : null,
+        );
+    setScope({
+      principalId: currentScope.principalId,
+      identityUserId: currentScope.identityUserId,
+      serviceAccountId: accountId,
+      accessRevision: currentScope.accessRevision,
+    });
+    setForm((current) => ({
+      ...current,
+      serviceAccountId: accountId,
+      accessRevision: currentScope.accessRevision,
+      accountNumber: fixtures
+        ? (selected?.accountNumber ?? "")
+        : (profile?.accountNumber ?? ""),
+      ...home,
+    }));
+  }, [
+    scope,
+    accountId,
+    currentScope.principalId,
+    currentScope.identityUserId,
+    currentScope.accessRevision,
+    meta,
+    fixtures,
+    profile,
+    selected?.accountNumber,
+    accountLoading,
+    profileLoading,
+  ]);
+  const category = meta.categories.find((item) => item.id === form.categoryId),
+    type = meta.types.find((item) => item.id === form.typeId);
+  const types = meta.types.filter(
+    (item) => item.categoryId === form.categoryId,
+  );
+  const errors = validateReportForm(form, category, type, meta),
+    stepErrors = creationStepErrors(step, errors, accountReady);
+  const summaryErrors = step === 5 ? [] : stepErrors.filter(message => step !== 3 || message !== errors.purok);
+  const readyPhotos = form.photoUploads.filter(
+    (photo) => photo.status === "ready",
+  );
+  const address = [
+    form.purok.trim(),
+    meta.barangays.find((item) => item.code === form.barangayPsgc)?.name,
+    meta.municipalities.find((item) => item.code === form.municipalityCode)
+      ?.name,
+    form.landmark,
+  ]
+    .filter(Boolean)
+    .join(", ");
+  const accountLabel = `${selected?.registeredName ?? "Service account"} · ${form.accountNumber ? "•••• " + form.accountNumber.slice(-4) : "Unavailable"}`;
+  const update = <K extends keyof ComplaintFormState>(
+    key: K,
+    value: ComplaintFormState[K],
+  ) => setForm((current) => ({ ...current, [key]: value }));
+  const leave = useCallback(
+    (path: "/reports" | "/reports/queue" | "/home" = "/reports") => {
+      leaving.current = true;
+      router.replace(path);
+    },
+    [router],
+  );
+  const cleanDraft = () => {
+    draftGeneration.current += 1;
+    if (!PANELUI_PREVIEW && !fixtures && !queued.current)
+      form.photoUploads
+        .filter((photo) => photo.status === "ready")
+        .forEach((photo) => deleteEvidencePhoto(photo.uri));
+  };
+  const closeDraft = useCallback(() => {
+    leaving.current = true;
+    if (router.canGoBack()) router.back();
+    else router.replace("/reports");
+  }, [router]);
+  const requestClose = useCallback(() => {
+    if (submittingRef.current) return;
+    if (receipt) leave();
+    else if (!draftHasContent(form)) closeDraft();
+    else setConfirm("discard");
+  }, [form, leave, closeDraft, receipt]);
+  const back = useCallback(() => {
+    if (submitting && fixtures) {
+      setSubmitting(false);
+      return;
+    }
+    if (submittingRef.current) { if (queued.current) leave(); return; }
+    if (mapOpen) {
+      setMapOpen(false);
+      return;
+    }
+    if (sourceOpen) {
+      setSourceOpen(false);
+      return;
+    }
+    if (viewerIndex != null) {
+      setViewerIndex(null);
+      return;
+    }
+    if (confirm) {
+      setConfirm(null);
+      return;
+    }
+    if (receipt) {
+      leave();
+      return;
+    }
+    if (step === 1) {
+      requestClose();
+      return;
+    }
+    if (step === 2 && issueView === "type" && !editingReview) {
+      setIssueView("category");
+      return;
+    }
+    setStep(previousCreationStep(step, editingReview));
+    setEditingReview(false);
+    setAttempted(false);
+  }, [
+    mapOpen,
+    sourceOpen,
+    viewerIndex,
+    confirm,
+    receipt,
+    step,
+    editingReview,
+    issueView,
+    submitting,
+    fixtures,
+    requestClose,
+    leave,
+  ]);
+  useFocusEffect(
+    useCallback(() => {
+      const listener = BackHandler.addEventListener("hardwareBackPress", () => {
+        back();
+        return true;
+      });
+      return () => listener.remove();
+    }, [back]),
+  );
+  useEffect(
+    () =>
+      navigation.addListener("beforeRemove", (event) => {
+        if (leaving.current) return;
+        event.preventDefault();
+        back();
+      }),
+    [navigation, back],
+  );
+  const reset = (target = accountId) => {
+    cleanDraft();
+    setScope(null);
+    setSelectedAccount(target);
+    setForm({ ...initialComplaintForm });
+    setStep(1);
+    setIssueView("category");
+    setEditingReview(false);
+    setAttempted(false);
+    setSubmitError(null);
+    setPhotoError(null);
+    setConfirm(null);
+    manualLocation.current = null;
+    reportId.current = createLocalReportId();
+    queued.current = false;
+  };
+  const selectAccount = (id: string) => {
+    if (id === accountId || submitting || pickerBusy) return;
+    if (draftHasContent(form)) {
+      setNextAccount(id);
+      setConfirm("account");
+    } else reset(id);
+  };
+  const edit = (target: CreationStep) => {
+    setStep(target);
+    setEditingReview(true);
+    setAttempted(false);
+  };
+  const applyIssue = (categoryId: string, typeId: string) => {
+    setForm(current => changeReportIssue(current, categoryId, typeId));
+    setAttempted(false);
+  };
+  const selectIssue = (categoryId: string, typeId: string) => {
+    if (!typeId && categoryId === form.categoryId) return;
+    if (form.categoryId === categoryId && form.typeId === typeId) {
+      applyIssue(categoryId, typeId);
+      return;
+    }
+    if (
+      form.typeId &&
+      (editingReview ||
+        form.categoryDescription ||
+        form.typeDescription ||
+        form.currentRegisteredName ||
+        form.requestedRegisteredName)
+    ) {
+      setNextIssue({ categoryId, typeId });
+      setConfirm("issue");
+      return;
+    }
+    applyIssue(categoryId, typeId);
+  };
+  const addFixturePhoto = () => {
+    const slot = fixtureImages[form.photoUploads.length];
+    if (!slot) return;
+    const uri = Asset.fromModule(slot)?.uri;
+    if (!uri) {
+      setPhotoError("Fixture photo is unavailable.");
+      return;
+    }
+    const photo = {
+      id: createLocalReportId(),
+      uri,
+      size: 30_000,
+      status: "ready" as const,
+    };
+    setForm((current) => ({
+      ...current,
+      photos: [...current.photos, uri],
+      photoUploads: [...current.photoUploads, photo],
+    }));
+  };
+  const previewPhotos = (state: string) => {
+    if (!fixtures) return;
+    const photos = buildFixtureEvidence(
+      fixtureImages.map((asset) => Asset.fromModule(asset).uri),
+      state,
+    );
+    setForm((current) => ({
+      ...current,
+      photos: photos.map((photo) => photo.uri),
+      photoUploads: photos,
+    }));
+  };
+  const preparePhoto = async (uri: string, generation: number) => {
+    const id = createLocalReportId(),
+      localReportId = reportId.current;
+    setForm((current) =>
+      current.photoUploads.length >= reportLimits.evidenceMax
+        ? current
+        : {
+            ...current,
+            photos: [...current.photos, uri],
+            photoUploads: [
+              ...current.photoUploads,
+              { id, uri, size: null, status: "processing" },
+            ],
+          },
+    );
+    try {
+      const prepared = await prepareEvidencePhoto(uri, localReportId, id);
+      if (!mounted.current || generation !== draftGeneration.current) {
+        deleteEvidencePhoto(prepared.uri);
+        return;
+      }
+      setForm((current) => {
+        if (!current.photoUploads.some((photo) => photo.id === id)) {
+          deleteEvidencePhoto(prepared.uri);
+          return current;
+        }
+        return {
+          ...current,
+          photos: current.photoUploads.map((photo) =>
+            photo.id === id ? prepared.uri : photo.uri,
+          ),
+          photoUploads: current.photoUploads.map((photo) =>
+            photo.id === id
+              ? {
+                  ...photo,
+                  uri: prepared.uri,
+                  size: prepared.size,
+                  status: "ready",
+                }
+              : photo,
+          ),
+        };
+      });
+    } catch (error) {
+      if (!mounted.current || generation !== draftGeneration.current) return;
+      setForm((current) => ({
+        ...current,
+        photoUploads: current.photoUploads.map((photo) =>
+          photo.id === id
+            ? {
+                ...photo,
+                status: "failed",
+                error:
+                  error instanceof Error
+                    ? error.message
+                    : "Could not prepare this photo.",
+              }
+            : photo,
+        ),
+      }));
+    }
+  };
+  const pickPhotos = async (source: "camera" | "gallery") => {
+    setSourceOpen(false);
+    setPhotoError(null);
+    if (fixtures) {
+      addFixturePhoto();
+      return;
+    }
+    if (PANELUI_PREVIEW) {
+      setPhotoError(
+        "Photo preparation is paused in this preview. Enable visual fixtures in Account to use sample evidence.",
+      );
+      return;
+    }
+    if (pickerBusy || !scopeCurrent || queued.current) return;
+    const generation = draftGeneration.current,
+      available = reportLimits.evidenceMax - form.photoUploads.length;
+    if (available <= 0) return;
+    setPickerBusy(true);
+    try {
+      const permission =
+        source === "camera"
+          ? await ImagePicker.requestCameraPermissionsAsync()
+          : await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        setPhotoError(
+          source === "camera"
+            ? "Camera access was denied. Choose from gallery or enable access in device settings."
+            : "Photo access was denied. Take a photo or enable access in device settings.",
+        );
+        return;
+      }
+      const result =
+        source === "camera"
+          ? await ImagePicker.launchCameraAsync({
+              mediaTypes: ["images"],
+              quality: 0.8,
+            })
+          : await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ["images"],
+              allowsMultipleSelection: true,
+              selectionLimit: available,
+              quality: 0.8,
+            });
+      if (
+        result.canceled ||
+        generation !== draftGeneration.current ||
+        !latest.current.scopeCurrent
+      )
+        return;
+      await Promise.all(
+        result.assets
+          .slice(0, available)
+          .map((asset) => preparePhoto(asset.uri, generation)),
+      );
+    } catch {
+      setPhotoError(
+        "Could not open photos. Try again or choose another source.",
+      );
+    } finally {
+      if (mounted.current) setPickerBusy(false);
+    }
+  };
+  const removePhoto = (id: string) => {
+    if (submitting || queued.current) return;
+    const removed = form.photoUploads.find((photo) => photo.id === id);
+    if (!PANELUI_PREVIEW && !fixtures && removed?.status === "ready")
+      deleteEvidencePhoto(removed.uri);
+    setForm((current) => {
+      const remaining = current.photoUploads.filter((photo) => photo.id !== id);
+      return {
+        ...current,
+        photos: remaining.map((photo) => photo.uri),
+        photoUploads: remaining,
+      };
+    });
+  };
+  const submit = async () => {
+    if (submittingRef.current || queued.current) return;
+    setAttempted(true);
+    setSubmitError(null);
+    if (
+      Object.keys(errors).length ||
+      !accountReady ||
+      !isDraftScopeCurrent(scope, latest.current.currentScope)
+    ) {
+      setSubmitError(
+        "Review the required fields and current account access before submitting.",
+      );
+      return;
+    }
+    const submissionMode = creationSubmissionMode(PANELUI_PREVIEW, fixtures);
+    if (submissionMode === "fixture") {
+      setFixtureSubmit(true);
+      return;
+    }
+    if (submissionMode === "disabled") {
+      setSubmitError(
+        "Queue replay is paused in this preview. Enable visual fixtures in Account to simulate submission.",
+      );
+      return;
+    }
+    if (!session || !scope) {
+      setSubmitError("Sign in again before sending this report.");
+      return;
+    }
+    const submissionScope = scope;
+    const submissionId = reportId.current;
+    submittingRef.current = true;
+    setSubmissionPhase("saving");
+    setSubmitting(true);
+    try {
+      await enqueueReport({
+        id: reportId.current,
+        idempotencyKey: `mobile:${reportId.current}`,
+        userId: session.user.id,
+        identityUserId: scope.identityUserId,
+        serviceAccountId: scope.serviceAccountId,
+        accessRevision: scope.accessRevision,
+        title: type?.title ?? category?.title ?? "Report",
+        evidence: readyPhotos.map(({ id, uri, size }) => ({
+          id,
+          uri,
+          size: size ?? 0,
+        })),
+        payload: {
+          typeId: form.typeId,
+          accountNumber: form.accountNumber,
+          barangayPsgc: form.barangayPsgc,
+          purok: form.purok,
+          landmark: form.landmark,
+          actionDesired: form.desiredAction,
+          latitude: form.latitude,
+          longitude: form.longitude,
+          serviceAccountId: scope.serviceAccountId,
+          accessRevision: scope.accessRevision,
+          ...conditionalReportPayload(form),
+        },
+      });
+      queued.current = true;
+      await refreshQueue();
+      if (!isDraftScopeCurrent(submissionScope, latest.current.currentScope)) {
+        if (mounted.current)
+          setSubmitError(
+            "Account access changed. Your saved report remains protected on this device.",
+          );
+        return;
+      }
+      setSubmissionPhase("sending");
+      const results = await sync(false);
+      if (leaving.current || !mounted.current) { await announceSubmission(submissionId); return; }
+      setSubmissionPhase("checking");
+      if (
+        !mounted.current ||
+        !isDraftScopeCurrent(submissionScope, latest.current.currentScope)
+      )
+        return;
+      const confirmed = confirmedReportReceipt(
+        results.find((item) => item.id === reportId.current),
+      );
+      if (confirmed) setReceipt(confirmed);
+      else leave("/reports/queue");
+    } catch (error) {
+      if (!mounted.current || leaving.current) { if (queued.current) await announceSubmission(submissionId); return; }
+      if (
+        queued.current &&
+        isDraftScopeCurrent(submissionScope, latest.current.currentScope)
+      )
+        leave("/reports/queue");
+      else
+        setSubmitError(
+          error instanceof Error
+            ? error.message
+            : "Could not save this report. Your draft is kept; try again.",
+        );
+    } finally {
+      submittingRef.current = false;
+      if (mounted.current) setSubmitting(false);
+    }
+  };
+  const continueStep = () => {
+    setAttempted(true);
+    if (pickerBusy) return;
+    if (step === 2 && issueView === "category") {
+      if (!form.categoryId || !accountReady) return;
+      if (!form.typeId) { setIssueView("type"); setAttempted(false); return; }
+    }
+    if (stepErrors.length) return;
+    if (step === 6) {
+      void submit();
+      return;
+    }
+    setStep(nextCreationStep(step, editingReview));
+    setEditingReview(false);
+    setAttempted(false);
+  };
+  const photoStrip = (editable: boolean) => (
+    <View className="flex-row gap-2">
+      {(editable
+        ? Array.from(
+            { length: reportLimits.evidenceMax },
+            (_, index) => form.photoUploads[index],
+          )
+        : readyPhotos
+      ).map((photo, index) => (
+        <View
+          key={photo?.id ?? index}
+          className="flex-1"
+          style={{ aspectRatio: 1 }}
+        >
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={
+              photo
+                ? `View evidence photo ${index + 1}, ${photo.status}`
+                : "Add evidence photo"
+            }
+            disabled={submitting || (pickerBusy && !photo)}
+            onPress={() => {
+              if (photo)
+                setViewerIndex(
+                  form.photoUploads.findIndex((item) => item.id === photo.id),
+                );
+              else if (!photo) setSourceOpen(true);
+            }}
+            className="flex-1 rounded-xl overflow-hidden border border-border bg-muted items-center justify-center"
+          >
+            {photo ? (
+              <Image
+                source={{ uri: photo.uri }}
+                className="h-full w-full"
+                resizeMode="cover"
+              />
+            ) : (
+              <Camera size={24} color={muted} />
+            )}
+            {photo?.status === "processing" ? (
+              <View className="absolute inset-0 items-center justify-center bg-background/80">
+                <Spinner />
+                <Text size="xs">Preparing</Text>
+              </View>
+            ) : photo?.status === "failed" ? (
+              <View className="absolute inset-0 items-center justify-center bg-background/90 p-2">
+                <TriangleAlert color={muted} size={20} />
+                <Text size="xs" className="text-center">
+                  Failed · remove and retry
+                </Text>
+              </View>
+            ) : null}
+          </Pressable>
+          {editable && photo ? (
+            <Button
+              size="icon"
+              variant="secondary"
+              className="absolute right-1 top-1 h-8 w-8 rounded-full"
+              disabled={submitting}
+              accessibilityLabel={`Remove evidence photo ${index + 1}`}
+              onPress={() => removePhoto(photo.id)}
+            >
+              <X size={16} color={foreground} />
+            </Button>
+          ) : null}
+        </View>
+      ))}
+    </View>
+  );
+  const textField = (
+    key:
+      | "categoryDescription"
+      | "typeDescription"
+      | "desiredAction"
+      | "currentRegisteredName"
+      | "requestedRegisteredName",
+    label: string,
+    required = false,
+    multiline = true,
+  ) => (
+    <Field
+      key={key}
+      required={required}
+      invalid={attempted && Boolean(errors[key])}
+    >
+      <Input
+        label={label}
+        value={form[key]}
+        onChangeText={(value) => update(key, value)}
+        multiline={multiline}
+        numberOfLines={multiline ? 4 : 1}
+        isRequired={required}
+        disabled={submitting}
+        maxLength={
+          key === "desiredAction"
+            ? reportLimits.actionDesired
+            : multiline
+              ? reportLimits.description
+              : reportLimits.registeredName
+        }
+        errorMessage={attempted ? errors[key] : undefined}
+        placeholder={multiline ? "Tell ALECO what happened" : "Registered name"}
+        containerClassName="rounded-xl"
+      />
+      <Text size="xs" muted className="text-right">
+        {form[key].length} /{" "}
+        {key === "desiredAction"
+          ? reportLimits.actionDesired
+          : multiline
+            ? reportLimits.description
+            : reportLimits.registeredName}
+      </Text>
+    </Field>
+  );
+
+  if (!fixtures && (authLoading || !session))
+    return (
+      <ReportPage title="New report">
+        {authLoading ? (
+          <View accessibilityLabel="Checking sign-in">
+            <Spinner />
+          </View>
+        ) : (
+          <View className="gap-3">
+            <Text weight="semibold" size="lg">
+              Sign in to create a report
+            </Text>
+            <Text muted>
+              Use your ALECO account to report an issue and follow its progress.
+            </Text>
+            <Button onPress={() => router.push({ pathname: "/sign-in", params: { returnTo: "/reports/new" } })}>Sign in</Button>
+          </View>
+        )}
+      </ReportPage>
+    );
+
+  if (receipt && scopeCurrent)
+    return (
+      <ReportReceipt
+        ticketNumber={receipt.ticketNumber}
+        title={form.categoryDescription || type?.title || "Report"}
+        issue={[category?.title, type?.title].filter(Boolean).join(" · ")}
+        account={accountLabel}
+        address={address}
+        photoCount={readyPhotos.length}
+        fixture={fixtures}
+        onHome={() => leave("/home")}
+        onTrack={() => {
+          leaving.current = true;
+          router.replace({
+            pathname: "/reports/[id]",
+            params: { id: receipt.ticketId },
+          });
+        }}
+      />
+    );
+  if (submitting)
+    return (
+      <ReportPage
+        title="Submitting report"
+        onBack={back}
+        scroll={false}
+        footer={
+          fixtures ? (
+            <Button variant="secondary" onPress={() => setSubmitting(false)}>
+              Back to review
+            </Button>
+          ) : <Button variant="secondary" disabled={submissionPhase === "saving"} onPress={() => leave()}>Back to reports</Button>
+        }
+      >
+        <View className="flex-1 items-center justify-center px-4 gap-3">
+          <Spinner />
+          <Text weight="semibold">
+            {submissionPhase === "saving"
+              ? "Saving your report on this device"
+              : submissionPhase === "sending"
+                ? "Sending your saved report"
+                : "Checking ticket confirmation"}
+          </Text>
+          <Text muted size="sm" className="text-center">
+            Once saved, you can return to Reports while submission finishes. Your evidence stays in the queue if the connection changes.
+          </Text>
+        </View>
+      </ReportPage>
+    );
+  return (
+    <>
+      <ReportPage
+        title="New report"
+        onBack={back}
+        step={{ current: step, total: 6, label: stepLabels[step - 1] }}
+        footer={
+          <>
+            {step === 6 ? (
+              <Text size="xs" muted>
+                By submitting, you confirm these details are accurate and agree to the{" "}
+                <Text size="xs" className="text-primary" accessibilityRole="link" onPress={() => router.push("/legal/terms")}>Terms and Conditions</Text>{" "}
+                and{" "}<Text size="xs" className="text-primary" accessibilityRole="link" onPress={() => router.push("/legal/privacy")}>Privacy Policy</Text>.
+              </Text>
+            ) : null}
+            <View className="flex-row gap-3">
+              {step > 1 ? (
+                <Button
+                  variant="secondary"
+                  onPress={back}
+                  disabled={submitting}
+                  accessibilityLabel={
+                    editingReview ? "Back to review" : "Previous step"
+                  }
+                >
+                  Back
+                </Button>
+              ) : null}
+              <Button
+                className="flex-1 rounded-2xl"
+                loading={submitting}
+                disabled={metaLoading || stale || pickerBusy || !accountReady}
+                onPress={continueStep}
+              >
+                {editingReview
+                  ? "Save changes"
+                  : step === 6
+                    ? "Submit report"
+                    : "Continue"}
+              </Button>
+            </View>
+          </>
+        }
+      >
+        {metaLoading ? (
+          <ContentSkeleton layout="form" count={2} label="Loading report form" />
+        ) : metaError ? (
+          <View className="gap-3 rounded-xl bg-card border border-border p-4">
+            <Text accessibilityRole="alert">{metaError}</Text>
+            <Button onPress={() => setMetaRetry((current) => current + 1)}>
+              Retry
+            </Button>
+          </View>
+        ) : stale ? (
+          <View className="gap-3 rounded-xl bg-card border border-border p-4">
+            <Text weight="semibold">Account access changed</Text>
+            <Text muted size="sm">
+              This draft cannot be sent with another login or changed account
+              access. Refresh before starting again. Saved queue evidence is
+              kept.
+            </Text>
+            <Button
+              loading={submitting}
+              onPress={() => {
+                void refreshConsumerAccount()
+                  .then(() => setConfirm("restart"))
+                  .catch(() =>
+                    setSubmitError(
+                      "Could not refresh account access. Connect and retry.",
+                    ),
+                  );
+              }}
+            >
+              Refresh account access
+            </Button>
+          </View>
+        ) : (
+          <>
+            {step === 1 ? (
+              <>
+                <Heading description="Choose the service account connected to this issue.">
+                  Which ALECO account?
+                </Heading>
+                {accounts.map((account) => (
+                  <Pressable
+                    key={account.id}
+                    accessibilityRole="radio"
+                    accessibilityState={{
+                      checked: accountId === account.id,
+                      disabled: submitting || pickerBusy,
+                    }}
+                    disabled={submitting || pickerBusy}
+                    onPress={() => selectAccount(account.id)}
+                    className={`flex-row items-center gap-3 border rounded-xl px-4 py-4 ${accountId === account.id ? "border-primary bg-primary/5" : "border-border bg-card"}`}
+                    style={{ minHeight: 80 }}
+                  >
+                    <View
+                      className={`h-5 w-5 rounded-full border items-center justify-center ${accountId === account.id ? "border-primary" : "border-muted-foreground"}`}
+                    >
+                      {accountId === account.id ? (
+                        <View className="h-2.5 w-2.5 rounded-full bg-primary" />
+                      ) : null}
+                    </View>
+                    <View className="flex-1 gap-1">
+                      <Text size="sm" weight="semibold">
+                        {account.registeredName} ·{" "}
+                        {account.accountNumber
+                          ? "•••• " + account.accountNumber.slice(-4)
+                          : "Number unavailable"}
+                      </Text>
+                      <Text muted size="xs">
+                        {account.address ?? "Service address unavailable"}
+                      </Text>
+                    </View>
+                    <House
+                      size={20}
+                      color={accountId === account.id ? primary : muted}
+                    />
+                  </Pressable>
+                ))}
+                {!accounts.length && !accountLoading ? (
+                  <Text muted>
+                    No linked service account is available. Refresh your account
+                    access.
+                  </Text>
+                ) : null}
+                {profileLoading || accountLoading ? (
+                  <View className="flex-row items-center gap-2">
+                    <Spinner size="sm" />
+                    <Text muted size="sm">
+                      Loading account details
+                    </Text>
+                  </View>
+                ) : profileError ? (
+                  <>
+                    <Text
+                      accessibilityRole="alert"
+                      className="text-destructive"
+                      size="sm"
+                    >
+                      {profileError.message}
+                    </Text>
+                    <Button
+                      variant="secondary"
+                      onPress={() => void reloadProfile({ forceNetwork: true })}
+                    >
+                      Retry account details
+                    </Button>
+                  </>
+                ) : null}
+                <Input
+                    label="Account number"
+                    value={accountReady ? form.accountNumber : selected?.accountNumber ?? ""}
+                    disabled={!accountReady || Boolean(fixtures || profile?.accountNumber)}
+                    onChangeText={(value) => update("accountNumber", value)}
+                    isRequired
+                    errorMessage={attempted ? errors.accountNumber : undefined}
+                    description={
+                      fixtures || profile?.accountNumber
+                        ? "Confirmed from your linked service account"
+                        : "Enter the account number for this linked service account"
+                    }
+                  />
+              </>
+            ) : null}
+            {step === 2 ? (
+              <>
+                <Heading
+                  description={
+                    issueView === "category"
+                      ? "Select a category to continue."
+                      : "Select a report type to continue."
+                  }
+                >
+                  {issueView === "category"
+                    ? "What’s the issue?"
+                    : category
+                      ? formatComplaintCategoryTitle(category.title)
+                      : "Select type"}
+                </Heading>
+                {issueView === "category" ? (
+                  <View className="flex-row flex-wrap" style={{ gap: 12 }}>
+                    {meta.categories.map((item, index) => {
+                      const Icon = categoryIcons[index % categoryIcons.length];
+                      return (
+                        <Pressable
+                          key={item.id}
+                          onPress={() =>
+                            selectIssue(
+                              item.id,
+                              singleCategoryTypeId(meta.types, item.id),
+                            )
+                          }
+                          accessibilityRole="radio"
+                          accessibilityState={{
+                            checked: form.categoryId === item.id,
+                          }}
+                          className={`rounded-xl p-4 gap-3 border ${form.categoryId === item.id ? "border-primary bg-primary/5" : "border-border bg-card"}`}
+                          style={{ width: "48%", minHeight: 106 }}
+                        >
+                          <Icon
+                            size={24}
+                            color={
+                              form.categoryId === item.id ? primary : muted
+                            }
+                          />
+                          <Text size="sm" weight="semibold">
+                            {formatComplaintCategoryTitle(item.title)}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                ) : category ? (
+                  <>
+                    <Field
+                      required
+                      invalid={attempted && Boolean(errors.typeId)}
+                    >
+                      <Field.Label>Report type</Field.Label>
+                      <View
+                        className="gap-3"
+                        accessibilityRole="radiogroup"
+                        accessibilityLabel="Report type"
+                      >
+                        {types.map((item) => {
+                          const checked = form.typeId === item.id;
+                          return (
+                            <Pressable
+                              key={item.id}
+                              accessibilityRole="radio"
+                              accessibilityLabel={item.title}
+                              accessibilityState={{ checked }}
+                              aria-checked={checked}
+                              accessibilityHint={
+                                editingReview
+                                  ? "Select, then press Continue to return to review"
+                                  : "Select, then press Continue to choose the issue location"
+                              }
+                              onPress={() => selectIssue(form.categoryId, item.id)}
+                            >
+                              <Card
+                                className={checked ? "border-primary bg-primary/5" : undefined}
+                              >
+                                <Card.Content className="min-h-14 flex-row items-center gap-3 p-4">
+                                  <View
+                                    className="h-5 w-5 shrink-0 items-center justify-center rounded-full"
+                                    style={{
+                                      borderWidth: 0.75,
+                                      borderColor: checked ? primary : muted,
+                                    }}
+                                  >
+                                    {checked ? (
+                                      <View className="h-2.5 w-2.5 rounded-full bg-primary" />
+                                    ) : null}
+                                  </View>
+                                  <Card.Title size="sm" weight="medium" className="flex-1">
+                                    {item.title}
+                                  </Card.Title>
+                                </Card.Content>
+                              </Card>
+                            </Pressable>
+                          );
+                        })}
+                        {!types.length ? (
+                          <Text size="sm" muted>
+                            No report types are available for this category. Choose another category or refresh the form.
+                          </Text>
+                        ) : null}
+                      </View>
+                      {attempted && errors.typeId ? (
+                        <Field.Error>{errors.typeId}</Field.Error>
+                      ) : null}
+                    </Field>
+                    <Button
+                      variant="ghost"
+                      onPress={() => setIssueView("category")}
+                    >
+                      Change category
+                    </Button>
+                  </>
+                ) : null}
+              </>
+            ) : null}
+            {step === 3 ? (
+              <>
+                <Heading>Where is the issue?</Heading>
+                <Button
+                  variant="outline"
+                  startContent={<MapPin size={18} color={muted} />}
+                  onPress={() => {
+                    setLocateOnOpen(false);
+                    setMapOpen(true);
+                  }}
+                >
+                  Search an address or choose on map
+                </Button>
+                <Button
+                  variant="ghost"
+                  startContent={<MapPin size={18} color={primary} />}
+                  onPress={() => {
+                    setLocateOnOpen(true);
+                    setMapOpen(true);
+                  }}
+                >
+                  Use my current location
+                </Button>
+                <Pressable
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: form.useHomeAddress }}
+                  onPress={() => {
+                    if (form.useHomeAddress) {
+                      manualLocation.current = manualLocation.current ?? {};
+                      setForm((current) => ({
+                        ...current,
+                        useHomeAddress: false,
+                        municipalityCode: "",
+                        barangayPsgc: "",
+                        latitude: null,
+                        longitude: null,
+                        locationVerified: false,
+                        purok: "",
+                        landmark: "",
+                        ...manualLocation.current,
+                      }));
+                    } else {
+                      const coordinates = readReportCoordinates(
+                        profile?.homeCoordinates,
+                      );
+                      manualLocation.current = {
+                        municipalityCode: form.municipalityCode,
+                        barangayPsgc: form.barangayPsgc,
+                        latitude: form.latitude,
+                        longitude: form.longitude,
+                        locationVerified: form.locationVerified,
+                        purok: form.purok,
+                        landmark: form.landmark,
+                      };
+                      setForm((current) => ({
+                        ...current,
+                        useHomeAddress: true,
+                        ...(fixtures
+                          ? creationFixtureLocation
+                          : resolveHomeReportLocation(
+                              meta,
+                              profile,
+                              coordinates
+                                ? findAlbayBarangay(
+                                    coordinates.latitude,
+                                    coordinates.longitude,
+                                  )?.barangayPsgc
+                                : null,
+                            )),
+                      }));
+                    }
+                  }}
+                  className="flex-row items-center gap-3 rounded-xl border border-border bg-card p-4"
+                >
+                  <View
+                    className={`h-5 w-5 rounded border items-center justify-center ${form.useHomeAddress ? "bg-primary border-primary" : "border-muted-foreground"}`}
+                  >
+                    {form.useHomeAddress ? (
+                      <Check size={14} color={primaryForeground} />
+                    ) : null}
+                  </View>
+                  <Text size="sm">Use my saved Home Address</Text>
+                </Pressable>
+                {form.latitude != null && form.longitude != null ? (
+                  <Pressable accessibilityRole="button" accessibilityLabel="Choose location on the full map" onPress={() => { setLocateOnOpen(false); setMapOpen(true); }}>
+                  <View pointerEvents="none"><StaticLocationMap
+                    latitude={form.latitude}
+                    longitude={form.longitude}
+                    label={address}
+                    height={200}
+                    fixture={fixtures}
+                  /></View>
+                  </Pressable>
+                ) : null}
+                <View className="gap-2 rounded-xl border border-border bg-card p-4">
+                  <Text size="xs" muted>
+                    Issue location
+                  </Text>
+                  <Text weight="semibold" size="sm">
+                    {address || "Choose the location on the map"}
+                  </Text>
+                  <Text muted size="xs">
+                    {form.locationVerified
+                      ? "Location confirmed within Albay"
+                      : "Location needs confirmation"}
+                  </Text>
+                </View>
+                <Input
+                  label="Purok / street"
+                  isRequired
+                  errorMessage={attempted ? errors.purok : undefined}
+                  value={form.purok}
+                  onChangeText={(value) => update("purok", value)}
+                />
+                <Input
+                  label="Landmark (optional)"
+                  value={form.landmark}
+                  onChangeText={(value) => update("landmark", value)}
+                />
+              </>
+            ) : null}
+            {step === 4 ? (
+              <>
+                <Heading>Describe the issue</Heading>
+                {textField(
+                  "categoryDescription",
+                  category?.descriptionLabel ?? "Description",
+                  Boolean(category?.requiresDescription),
+                )}
+                {type?.requiresDescription
+                  ? textField(
+                      "typeDescription",
+                      type.descriptionLabel ?? "Report type details",
+                      true,
+                    )
+                  : null}
+                {type?.requiresKwhmTransfer ? (
+                  <>
+                    {textField(
+                      "currentRegisteredName",
+                      "Current registered name",
+                      true,
+                      false,
+                    )}
+                    {textField(
+                      "requestedRegisteredName",
+                      "Requested registered name",
+                      true,
+                      false,
+                    )}
+                  </>
+                ) : null}
+                {textField("desiredAction", "Action Desired")}
+              </>
+            ) : null}
+            {step === 5 ? (
+              <>
+                <Heading>Add photos</Heading>
+                {attempted && errors.evidence ? (
+                  <Card className="flex-row items-start gap-2 border-destructive/40 bg-destructive-subtle p-3" accessibilityRole="alert">
+                    <TriangleAlert size={18} color={danger} />
+                    <View className="flex-1 gap-1">
+                      <Text size="sm" weight="semibold" className="text-destructive">Photo required</Text>
+                      <Text size="xs" className="text-destructive">{errors.evidence}</Text>
+                    </View>
+                  </Card>
+                ) : null}
+                {fixtures ? (
+                  <Field>
+                    <Field.Label>Visual fixture photo state</Field.Label>
+                    <Select
+                      presentation="inline"
+                      placeholder="Preview an evidence state"
+                      onValueChange={previewPhotos}
+                    >
+                      <Select.Item
+                        value="ready"
+                        label="Three ready photos / maximum"
+                      />
+                      <Select.Item value="preparing" label="Photos preparing" />
+                      <Select.Item value="failed" label="Preparation failed" />
+                      <Select.Item value="removed" label="Photos removed" />
+                    </Select>
+                  </Field>
+                ) : null}
+                <View className="gap-3 rounded-xl bg-card border border-border p-4">
+                  <Text size="sm" weight="semibold">
+                    Attach {reportLimits.evidenceMin}–{reportLimits.evidenceMax}{" "}
+                    photos
+                  </Text>
+                  <Text muted size="xs">
+                    Each prepared photo must be 5 MB or smaller.
+                  </Text>
+                  {photoStrip(true)}
+                  <Text muted size="xs">
+                    {form.photoUploads.length} photos added
+                  </Text>
+                  {form.photoUploads.map((photo) =>
+                    photo.error ? (
+                      <Text
+                        key={photo.id}
+                        size="xs"
+                        className="text-destructive"
+                        accessibilityRole="alert"
+                      >
+                        {photo.error}
+                      </Text>
+                    ) : null,
+                  )}
+                  <Button
+                    variant="outline"
+                    disabled={
+                      form.photoUploads.length >= reportLimits.evidenceMax ||
+                      pickerBusy
+                    }
+                    loading={pickerBusy}
+                    onPress={() => {
+                      setPhotoError(null);
+                      setSourceOpen(true);
+                    }}
+                    startContent={<Camera size={18} color={primary} />}
+                  >
+                    Add photo
+                  </Button>
+                </View>
+                {photoError ? (
+                  <Text
+                    size="sm"
+                    className="text-destructive"
+                    accessibilityRole="alert"
+                  >
+                    {photoError}
+                  </Text>
+                ) : null}
+              </>
+            ) : null}
+            {step === 6 ? (
+              <>
+                <Heading description="Check your report before sending to ALECO.">
+                  Review & submit
+                </Heading>
+                <View className="rounded-xl border border-border bg-card p-3 gap-3">
+                  <EditRow
+                    title={category?.title ?? "Issue & type"}
+                    onPress={() => edit(2)}
+                  />
+                  <Text size="sm" weight="semibold">
+                    {type?.title}
+                  </Text>
+                  <EditRow title="Service account" onPress={() => edit(1)} />
+                  <Text size="sm">{accountLabel}</Text>
+                </View>
+                <View className="rounded-xl border border-border bg-card p-3 gap-2">
+                  <EditRow title="Location" onPress={() => edit(3)} />
+                  <Text size="sm">{address}</Text>
+                </View>
+                <View className="rounded-xl border border-border bg-card p-3 gap-2">
+                  <EditRow title="Report details" onPress={() => edit(4)} />
+                  <Text size="sm">
+                    {form.categoryDescription || "No additional description"}
+                  </Text>
+                  {form.typeDescription ? (
+                    <Text size="sm">{form.typeDescription}</Text>
+                  ) : null}
+                  {type?.requiresKwhmTransfer ? (
+                    <>
+                      <Text muted size="xs">
+                        Current registered name
+                      </Text>
+                      <Text size="sm">{form.currentRegisteredName}</Text>
+                      <Text muted size="xs">
+                        Requested registered name
+                      </Text>
+                      <Text size="sm">{form.requestedRegisteredName}</Text>
+                    </>
+                  ) : null}
+                  <Text size="xs" muted>
+                    Requested action
+                  </Text>
+                  <Text size="sm">{form.desiredAction || "Not specified"}</Text>
+                </View>
+                <View className="rounded-xl border border-border bg-card p-3 gap-2">
+                  <EditRow
+                    title={`Photos · ${readyPhotos.length} attached`}
+                    onPress={() => edit(5)}
+                  />
+                  {photoStrip(false)}
+                </View>
+              </>
+            ) : null}
+          </>
+        )}
+        {attempted && summaryErrors.length ? (
+          <Text
+            accessibilityRole="alert"
+            size="sm"
+            className="text-destructive"
+          >
+            {summaryErrors.join("\n")}
+          </Text>
+        ) : null}
+        {submitError ? (
+          <View className="gap-2">
+            <Text
+              accessibilityRole="alert"
+              size="sm"
+              className="text-destructive"
+            >
+              {submitError}
+            </Text>
+            {queued.current ? (
+              <Button
+                variant="secondary"
+                onPress={() => leave("/reports/queue")}
+              >
+                Open saved reports
+              </Button>
+            ) : null}
+          </View>
+        ) : null}
+      </ReportPage>
+      <Dialog
+        open={confirm != null}
+        onOpenChange={(open) => {
+          if (!open) setConfirm(null);
+        }}
+      >
+        <Dialog.Content>
+          <Dialog.Title>
+            {confirm === "account"
+              ? "Change service account?"
+              : confirm === "issue"
+                ? "Change report type?"
+                : confirm === "restart"
+                  ? "Start a new report?"
+                  : "Discard this draft?"}
+          </Dialog.Title>
+          <Dialog.Description>
+            {confirm === "account"
+              ? "The issue, location, details, and photos will be reset for the other account."
+              : confirm === "issue"
+                ? "Details that belong to the old category or report type will be cleared. Your location, requested action, and photos are kept."
+                : "Unsaved details and photos will be removed. Reports already saved in the queue are kept."}
+          </Dialog.Description>
+          <Dialog.Footer>
+            <Button variant="secondary" onPress={() => setConfirm(null)}>
+              Keep draft
+            </Button>
+            <Button
+              variant="destructive"
+              onPress={() => {
+                if (confirm === "discard") {
+                  cleanDraft();
+                  closeDraft();
+                } else if (confirm === "issue" && nextIssue) {
+                  setConfirm(null);
+                  applyIssue(nextIssue.categoryId, nextIssue.typeId);
+                } else reset(confirm === "account" ? nextAccount : null);
+              }}
+            >
+              {confirm === "account"
+                ? "Change account"
+                : confirm === "issue"
+                  ? "Change type"
+                  : confirm === "restart"
+                    ? "Start again"
+                    : "Discard draft"}
+            </Button>
+          </Dialog.Footer>
+        </Dialog.Content>
+      </Dialog>
+      <BottomSheet
+        open={sourceOpen && scopeCurrent}
+        onOpenChange={setSourceOpen}
+      >
+        <BottomSheet.Content size="auto">
+          <BottomSheet.Header>
+            <Text weight="semibold">Add evidence photo</Text>
+          </BottomSheet.Header>
+          <BottomSheet.Body className="gap-3">
+            <Button
+              variant="outline"
+              startContent={<Camera size={20} color={primary} />}
+              onPress={() => void pickPhotos("camera")}
+            >
+              Take photo
+            </Button>
+            <Button
+              variant="outline"
+              startContent={<Images size={20} color={primary} />}
+              onPress={() => void pickPhotos("gallery")}
+            >
+              Choose from gallery
+            </Button>
+            {fixtures ? (
+              <Text muted size="xs">
+                Visual fixture · adds a sample photo without opening your
+                library.
+              </Text>
+            ) : null}
+          </BottomSheet.Body>
+        </BottomSheet.Content>
+      </BottomSheet>
+      <BottomSheet
+        open={fixtureSubmit && scopeCurrent}
+        onOpenChange={setFixtureSubmit}
+      >
+        <BottomSheet.Content size="auto">
+          <BottomSheet.Header>
+            <Text weight="semibold">Simulate submission</Text>
+          </BottomSheet.Header>
+          <BottomSheet.Body className="gap-3">
+            <Text muted size="sm">
+              Visual fixture only. No report or evidence will be sent.
+            </Text>
+            <Select
+              presentation="inline"
+              placeholder="Preview a submission stage"
+              onValueChange={(value) => {
+                setFixtureSubmit(false);
+                setSubmissionPhase(value as "saving" | "sending" | "checking");
+                setSubmitting(true);
+              }}
+            >
+              <Select.Item value="saving" label="Saving locally" />
+              <Select.Item value="sending" label="Sending saved report" />
+              <Select.Item value="checking" label="Checking confirmation" />
+            </Select>
+            <Button
+              variant="outline"
+              onPress={() => {
+                setFixtureSubmit(false);
+                setSubmitError(
+                  "Simulated local save failure. Your draft is kept. Try submitting again.",
+                );
+              }}
+            >
+              Show local save failure / retry
+            </Button>
+            <Button
+              onPress={() => {
+                setFixtureSubmit(false);
+                setReceipt({
+                  ticketId: "fixture-1",
+                  ticketNumber: "TK-2026-1043",
+                });
+              }}
+            >
+              Show confirmed receipt
+            </Button>
+            <Button
+              variant="secondary"
+              onPress={() => {
+                setFixtureSubmit(false);
+                leave("/reports/queue");
+              }}
+            >
+              Show saved on device
+            </Button>
+          </BottomSheet.Body>
+        </BottomSheet.Content>
+      </BottomSheet>
+      <EvidencePhotoViewer
+        photos={form.photoUploads}
+        initialIndex={viewerIndex ?? 0}
+        open={viewerIndex != null && scopeCurrent}
+        onClose={() => setViewerIndex(null)}
+      />
+      <ReportLocationPicker
+        open={mapOpen && scopeCurrent}
+        meta={meta}
+        initialCoordinates={
+          form.latitude != null && form.longitude != null
+            ? { latitude: form.latitude, longitude: form.longitude }
+            : null
+        }
+        locateOnOpen={locateOnOpen}
+        fixture={fixtures}
+        onClose={() => setMapOpen(false)}
+        onConfirm={(location) => {
+          manualLocation.current = location;
+          setForm((current) => ({
+            ...current,
+            ...location,
+            useHomeAddress: false,
+          }));
+          setMapOpen(false);
+        }}
+      />
+    </>
+  );
+}

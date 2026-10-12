@@ -24,22 +24,3 @@ test("profile address mutation sends one structured owner-scoped payload", async
   assert.match(model, /readonly landmark/);
   assert.match(hook, /setProfileView/);
 });
-
-test("profile address sheet uses linked selects and the shared Albay map picker", async () => {
-  const [route, addressSheet, picker] = await Promise.all([
-    read("src/app/(tabs)/profile/details.tsx"),
-    read("src/features/profile/components/ProfileAddressSheetContent.tsx"),
-    read("src/features/maps/albay-location-picker-sheet.tsx"),
-  ]);
-
-  assert.match(route, /<ProfileAddressSheetContent/);
-  assert.match(route, /<AlbayLocationPickerSheet/);
-  assert.match(route, /fetchComplaintMeta/);
-  assert.match(route, /isAddressMapOpen/);
-  assert.match(addressSheet, /Select municipality/);
-  assert.match(addressSheet, /Select barangay/);
-  assert.match(addressSheet, /Choose location on map/);
-  assert.match(addressSheet, /isUpdating/);
-  assert.match(picker, /loadMapLibreModule\(\)/);
-  assert.match(picker, /onConfirm/);
-});

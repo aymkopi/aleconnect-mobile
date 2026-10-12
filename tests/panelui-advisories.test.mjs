@@ -1,0 +1,98 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import ts from "typescript";
+import { advisorySchedule } from "../src/features/advisories/presentation.ts";
+const source = await readFile(
+  new URL("../src/features/advisories/publisher-card.tsx", import.meta.url),
+  "utf8",
+);
+const rangeCalls = [],
+  jsx = (type, props) => ({ type, props });
+const mocks = {
+    "./presentation": { advisorySchedule },
+    "react/jsx-runtime": { jsx, jsxs: jsx },
+    "react-native": { Pressable: "Pressable", View: "View" },
+    "lucide-react-native": {
+      ChevronRight: "Chevron",
+      Zap: "Zap",
+      MapPin: "MapPin",
+    },
+    "@/components/panelui/text": { Text: "Text" },
+    "@/components/panelui/badge": { Badge: "Badge" },
+    "@/hooks/use-app-colors": { useAppColors: () => ["blue"] },
+    "@/components/soft-radial": { SoftRadial: "Radial" },
+    "@/utils/manila-time": {
+      formatManilaDateTime: () => "Published date",
+      formatManilaAdvisoryInterruptionRange: (start, end) => {
+        rangeCalls.push([start, end]);
+        return end ? "Start – End" : "Starts at time";
+      },
+    },
+  },
+  exports = {};
+new Function(
+  "require",
+  "exports",
+  ts.transpileModule(source, {
+    compilerOptions: {
+      module: ts.ModuleKind.CommonJS,
+      jsx: ts.JsxEmit.ReactJSX,
+    },
+  }).outputText,
+)((id) => mocks[id], exports);
+function text(node) {
+  if (typeof node === "string") return node;
+  if (Array.isArray(node)) return node.map(text).join(" ");
+  return node && typeof node === "object" ? text(node.props?.children) : "";
+}
+test("scheduled publisher cards use source range, including unknown restoration time", () => {
+  for (const end of ["2026-10-07T09:00:00Z", null]) {
+    const tree = exports.PublisherCard({
+      item: {
+        kind: "advisory",
+        title: "Scheduled interruption",
+        type: "scheduled_outage",
+        scheduledStartAt: "2026-10-07T00:00:00Z",
+        scheduledEndAt: end,
+        severity: "high",
+        audience: "Rawis",
+      },
+      onPress() {},
+      featured: true,
+    });
+    assert.deepEqual(rangeCalls.at(-1), ["2026-10-07T00:00:00Z", end]);
+    assert.match(text(tree), end ? /Start – End/ : /Starts at time/);
+    assert.equal(tree.props.accessibilityLabel, "Scheduled interruption");
+  }
+});
+test("image-free public posts have readable publisher and summary fallbacks", () => {
+  const tree = exports.PublisherCard({
+    item: {
+      kind: "facebook_post",
+      message: "",
+      pageName: null,
+      photos: [],
+      permalink: null,
+    },
+    onPress() {},
+  });
+  assert.match(text(tree), /ALECO update/);
+  assert.match(text(tree), /Read story/);
+  assert.doesNotMatch(text(tree), /Important|SO-/);
+});
+
+test("fixed-height carousel cards truncate the title while retaining full accessible navigation", () => {
+  const title = "Scheduled power outage affecting several barangays in Legazpi City";
+  let opened = 0;
+  const props = { item: { kind: "advisory", title, severity: "high", audience: "Rawis" }, onPress() { opened++; } };
+  const card = exports.PublisherCard({ ...props, height: 112 });
+  assert.equal(card.props.style.height, 112);
+  const titleNode = card.props.children.find(n => n?.props?.children === title);
+  assert.equal(titleNode.props.numberOfLines, 1);
+  assert.equal(card.props.accessibilityLabel, title);
+  card.props.onPress();
+  assert.equal(opened, 1);
+  const listCard = exports.PublisherCard(props);
+  assert.equal(listCard.props.children.find(n => n?.props?.children === title).props.numberOfLines, 2);
+});

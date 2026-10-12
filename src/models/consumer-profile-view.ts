@@ -19,6 +19,8 @@ export interface ConsumerProfileView {
   readonly isActive: boolean;
   readonly createdAt: Date;
   readonly updatedAt: Date;
+  readonly emailEditable?: boolean;
+  readonly profileEditing?: { version: number; activeReportCount: number };
 }
 
 export type ConsumerProfileViewCachePayload = Omit<
@@ -29,10 +31,7 @@ export type ConsumerProfileViewCachePayload = Omit<
   updatedAt: string;
 };
 
-function readString(
-  value: unknown,
-  fallback: string | null = null,
-): string | null {
+function readString(value: unknown, fallback: string | null = null): string | null {
   return typeof value === "string" && value.length > 0 ? value : fallback;
 }
 
@@ -48,9 +47,7 @@ function readDate(value: unknown): Date {
   return new Date();
 }
 
-export function parseConsumerCoordinates(
-  value: unknown,
-): Record<string, unknown> | null {
+export function parseConsumerCoordinates(value: unknown): Record<string, unknown> | null {
   if (value && typeof value === "object" && !Array.isArray(value)) {
     return value as Record<string, unknown>;
   }
@@ -60,19 +57,12 @@ export function parseConsumerCoordinates(
       const parsed = JSON.parse(value) as unknown;
       if (parsed !== value) return parseConsumerCoordinates(parsed);
     } catch {
-      const match = value.match(
-        /^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/,
-      );
+      const match = value.match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/);
       if (!match) return null;
 
       const latitude = Number(match[1]);
       const longitude = Number(match[2]);
-      if (
-        latitude >= -90 &&
-        latitude <= 90 &&
-        longitude >= -180 &&
-        longitude <= 180
-      ) {
+      if (latitude >= -90 && latitude <= 90 && longitude >= -180 && longitude <= 180) {
         return { latitude, longitude };
       }
     }
@@ -81,11 +71,14 @@ export function parseConsumerCoordinates(
   return null;
 }
 
-export function toConsumerProfileView(
-  row: Record<string, unknown>,
-): ConsumerProfileView {
+export function toConsumerProfileView(row: Record<string, unknown>): ConsumerProfileView {
   return {
     profileId: String(row.profile_id ?? ""),
+    emailEditable: row.email_editable === true,
+    profileEditing:
+      row.profile_editing && typeof row.profile_editing === "object"
+        ? (row.profile_editing as { version: number; activeReportCount: number })
+        : undefined,
     accountNumber: readString(row.account_number),
     fullName: String(row.full_name ?? ""),
     contactNum: readString(row.contact_num),

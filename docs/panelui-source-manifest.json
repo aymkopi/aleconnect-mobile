@@ -1,0 +1,678 @@
+{
+  "cli": "0.6.2",
+  "referencePackage": "0.109.0",
+  "registry": "https://panelui.dev/r",
+  "retrieved": "2026-10-12",
+  "license": "MIT",
+  "cliIntegrity": "sha512-+8S54XWmMkNkkpvZcKlJdoDHaoM/5Afg+1jDFKR+NnMoB8S6/E+JixyNvRQW0XXV2/yMKfipAQCL1SIGDaSvsA==",
+  "files": [
+    {
+      "path": "src/components/panelui/animated-pressable.tsx",
+      "sha256": "1b36a4a54b2b7e58ebb087370f867b8f8641d7e620045d97e931abad6356d150"
+    },
+    {
+      "path": "src/components/panelui/avatar-group.ts",
+      "sha256": "9cab4776348235db66b883cc0696ed93b2230e1bd21ed74bdf8ef39d1f5059ed"
+    },
+    {
+      "path": "src/components/panelui/avatar-source.ts",
+      "sha256": "c40e0901a74d1f31baa29e6d9b180016d43fe95eeb92c542eaf1f4e7d73b1dcd"
+    },
+    {
+      "path": "src/components/panelui/avatar.tsx",
+      "sha256": "4b16d52f5a4dd1a46772d293a8c9702d98e8c46f0569da77f70a28c720822e90"
+    },
+    {
+      "path": "src/components/panelui/badge.tsx",
+      "sha256": "a9304708303825cda57557c3405e93c8a71b76b72f127c758701051af0cc4e90"
+    },
+    {
+      "path": "src/components/panelui/bottom-sheet.tsx",
+      "sha256": "cf2e92e815871d84ef619bd454fcede53c1e279234bc0a5c535d7a45282f8d17"
+    },
+    {
+      "path": "src/components/panelui/button.tsx",
+      "sha256": "7c68f772f3a58ff502a74072c66f0e6d7da07d4b255cc291bd48d97a567f2ffa"
+    },
+    {
+      "path": "src/components/panelui/card.tsx",
+      "sha256": "442f077931b8d0fb88e2d1d918d851d9cb239932b0153beebc3203aa5e176e22"
+    },
+    {
+      "path": "src/components/panelui/carousel-lifecycle.ts",
+      "sha256": "ba2fe378ad5e0a8d3e96ff8e9501935ac8fcf1f853e63bb0329a634c72baaba3"
+    },
+    {
+      "path": "src/components/panelui/carousel.tsx",
+      "sha256": "be5ab347fcccc0e7d454a6318ac11719ff3b91db047a8339aef01d20dadf468a"
+    },
+    {
+      "path": "src/components/panelui/checkbox.tsx",
+      "sha256": "3828f4d33343381dc481b856a1d407ed08041902dbcb5ef79e9829619bd49e23"
+    },
+    {
+      "path": "src/components/panelui/controllable-state.ts",
+      "sha256": "07587394974bbd8eebdc9af5b890ab1fa6f07494c06e0c5b71a88854a7bbf787"
+    },
+    {
+      "path": "src/components/panelui/dialog.tsx",
+      "sha256": "1a6310c28787fda3385ddb62e93a8e3fa2fc507cece081aa9270ac01d18c5d3c"
+    },
+    {
+      "path": "src/components/panelui/empty-state.tsx",
+      "sha256": "a2ef7dac949ebc81885e21fb6b364d55fb06478f67ecc48bfcb4cead3872c286"
+    },
+    {
+      "path": "src/components/panelui/field.tsx",
+      "sha256": "bc41d7accf9b62c54c7516baa7cb154a448ef6ba96fa3019cc891f0409f40485"
+    },
+    {
+      "path": "src/components/panelui/focus-restoration-store.ts",
+      "sha256": "cd47b2ec6b440f1073e831912037677aaca12330f33a8aea335d67a46980a7a9"
+    },
+    {
+      "path": "src/components/panelui/icons.tsx",
+      "sha256": "40304ab28217324e0f5261b7008d59f09dacec988e8b1a08479c1f23ed448f0b"
+    },
+    {
+      "path": "src/components/panelui/input-content-padding.ts",
+      "sha256": "3b948993b1bd50d9dfe012ce17aaa3a062fee261ce04b183a27a7bbdf5d985cf"
+    },
+    {
+      "path": "src/components/panelui/input-group-measurements.ts",
+      "sha256": "4cb3a9b85ad33fe1f42e6b1a3236fd1bc1a78aac321c78cb15ad2daf03a58389"
+    },
+    {
+      "path": "src/components/panelui/input-group.tsx",
+      "sha256": "1733040dc81d22ec8a838b934ac4e47282730182b9dec3e13e4afd21e70a40a6"
+    },
+    {
+      "path": "src/components/panelui/input.tsx",
+      "sha256": "f0b84faa0f5be132fc8ca96ecdf55cf8eef676daa7337ab5cc32c367b79dba12"
+    },
+    {
+      "path": "src/components/panelui/item.tsx",
+      "sha256": "8923f60b47fcbe901891011230116ba9b11a8bdf88542c0f3de94757c82e5e9b"
+    },
+    {
+      "path": "src/components/panelui/keyboard-avoider.tsx",
+      "sha256": "4de490da48ba8d45f995ffd3b398c1f4634fe036c88be96c81ae730bd944743b"
+    },
+    {
+      "path": "src/components/panelui/label.tsx",
+      "sha256": "073e590531c57510cecc2257bcc517e6d1fdfc64f9cfa4cb1b726a9a93353d78"
+    },
+    {
+      "path": "src/components/panelui/modal-isolation-store.ts",
+      "sha256": "346301f0da15175f23a8918834d0c6e9bbdb096e3c130fa92bc9640dc3500c70"
+    },
+    {
+      "path": "src/components/panelui/native-select-contract.ts",
+      "sha256": "c04f9fb7c2a3595fe5e5eb2471cd09c9e2d3ffa86eb70dbf4326ea9185f8e9c9"
+    },
+    {
+      "path": "src/components/panelui/panel-ui-provider.tsx",
+      "sha256": "ec40fa8768ae0152fb0838897494455285b406957820b7162975ba383582ee7b"
+    },
+    {
+      "path": "src/components/panelui/portal.tsx",
+      "sha256": "2cc29c719cd9f1b423b3a10b729e5c1bdc6f7e2861c23e3621af689464200276"
+    },
+    {
+      "path": "src/components/panelui/scrim.tsx",
+      "sha256": "b8a5f68918ced359b54fa8897f752c6f18ad6a9f2e8e445c572d19f518986fb2"
+    },
+    {
+      "path": "src/components/panelui/search-bar-debounce.ts",
+      "sha256": "14601f75b7da630eacd7003a8c4c91b05044ad4cb98a638cc291e812e696721e"
+    },
+    {
+      "path": "src/components/panelui/search-bar.tsx",
+      "sha256": "1d961465053e1863a51a39f5f5c43031362865cb9228f10ddc8ae3a5bbaf2f3e"
+    },
+    {
+      "path": "src/components/panelui/select.tsx",
+      "sha256": "95091884cac39f86ca5543e6f4592528c45795fbde9df22ed05de4f3915b897c"
+    },
+    {
+      "path": "src/components/panelui/separator.tsx",
+      "sha256": "791913f1f539d562f21e1db26b607e4c3e5406c04509edbcdb799ab4b7b6a39b"
+    },
+    {
+      "path": "src/components/panelui/skeleton.tsx",
+      "sha256": "a96f39a132975b1bf1867b57326b03fd1311ea2822dfcdb678537d40cfba23d0"
+    },
+    {
+      "path": "src/components/panelui/slide-button-track.ts",
+      "sha256": "211ed086af37f1416e995f0ecbb8ea481db1bed98c9531afbd789547439e217f"
+    },
+    {
+      "path": "src/components/panelui/slide-button.tsx",
+      "sha256": "08e0063a187438f32df9fea33baa66b528af477cfbe803a99026c305428d7547"
+    },
+    {
+      "path": "src/components/panelui/spinner.tsx",
+      "sha256": "0cabd59ba126afb9f4721001e55e8fa87ab5f1f93e0062b83a1ae490b3c0aa4f"
+    },
+    {
+      "path": "src/components/panelui/surface.tsx",
+      "sha256": "8cd5cb8307862ba0222f6544a6f730a7f09457fae186b9697ada4bca874b0f0a"
+    },
+    {
+      "path": "src/components/panelui/switch.tsx",
+      "sha256": "6c62644d1df9d062ab75be2e4f9ead8e79e21a69f25354de896377395de36b98"
+    },
+    {
+      "path": "src/components/panelui/tabs.tsx",
+      "sha256": "a50671f11f00f99b6178b069d6c861619f0243afc3f604bff1f838adef6f4a34"
+    },
+    {
+      "path": "src/components/panelui/text.tsx",
+      "sha256": "324bcd1e21ff2471deb04798bd1af7def316f72c0cb8909cf1160e4be7850530"
+    },
+    {
+      "path": "src/components/panelui/toast-store.ts",
+      "sha256": "3a74ab7c74e9aae50664bd5e7fd1204b267b45e20a1e89821911ceee4fc3d63f"
+    },
+    {
+      "path": "src/components/panelui/toast.tsx",
+      "sha256": "0d8e1b57144fae6e7856abe7100694a1fb332fe64137730b40a417f82e4c1343"
+    },
+    {
+      "path": "src/components/panelui/typography.tsx",
+      "sha256": "089d07889ffdef450eca07f4b5f38795b5c77778d010a751d45772599695cd94"
+    },
+    {
+      "path": "src/lib/cn.ts",
+      "sha256": "9304a861c8673bee09e0f12de31773abbde503b02e59dfd74763ddec2e37cf05"
+    },
+    {
+      "path": "src/lib/haptics.ts",
+      "sha256": "aad3c62bb6b9039ef5db86da4f161e415f3f459e25b192a192ae325997733e41"
+    },
+    {
+      "path": "src/lib/native-host.tsx",
+      "sha256": "c03292c099c4cf992798e6cde2b0628731f8e6f30f88a992b8f2b3c8e47a210e"
+    },
+    {
+      "path": "src/lib/native.ts",
+      "sha256": "d2c74e54b8376bae665119a516b67a5f9570a58b6a1ea1b5e71af06993be34d0"
+    },
+    {
+      "path": "src/hooks/use-back-handler.ts",
+      "sha256": "7c45197c64beb13d8ab1f386758e07e2d83bdb6d02e5d83e27153afbdfa686e1"
+    },
+    {
+      "path": "src/hooks/use-direction.ts",
+      "sha256": "9202d8550abaed8720af42d0320acf51e227fbf23f649b5636fd26475b849867"
+    },
+    {
+      "path": "src/hooks/use-keyboard-avoidance.ts",
+      "sha256": "4b7346aad45e028a73ac3859cfff4e30c5f53b629636aca4af072f56c05565fc"
+    },
+    {
+      "path": "src/hooks/use-keyboard.ts",
+      "sha256": "7436b26e1ac93892305ff45a523e18b13a44876a194e3d31cde86e6559d92875"
+    },
+    {
+      "path": "src/hooks/use-theme.ts",
+      "sha256": "1e0fe0e82d80fbb51c93bf6735d2676cf5f125a7f8f1210756e0aec5e8ec743f"
+    },
+    {
+      "path": "src/components/panelui/progress-button.tsx",
+      "sha256": "bfbfb2138fcd2944ff6ea7305d9263abf7d153a116a2cb43fc28db57dc22b171"
+    },
+    {
+      "path": "src/components/panelui/progress-button-hold.ts",
+      "sha256": "8ddd657e267b9d48c4dd2fce4ed4b627559c2543427b1b9327182ecdc10ca6c7"
+    },
+    {
+      "path": "src/components/panelui/scroll-fade.tsx",
+      "sha256": "6cdbb05928f04c978775d07e7c303b744cec87bea052da5796a8bba17b86171d"
+    },
+    {
+      "path": "src/lib/date.ts",
+      "sha256": "f61a21bf7c712781f4e7e5fc9239b1e3cff04399c9fef7ea083b0e5d5a8b14f5",
+      "retrieved": "2026-10-12",
+      "registry": "https://panelui.dev/r/date.json",
+      "customizations": [
+        "PanelUI import paths",
+        "Consistent subtle elevation"
+      ]
+    },
+    {
+      "path": "src/components/panelui/popover.tsx",
+      "sha256": "c45aed1673dec3d5d2b1d81c58b5d659493976f8e8cd732610c027b7552bf5cb",
+      "retrieved": "2026-10-12",
+      "registry": "https://panelui.dev/r/popover.json",
+      "customizations": [
+        "PanelUI import paths",
+        "Consistent subtle elevation",
+        "Trigger refs are measured only on press; scoped React compiler suppression for cloneElement handler false positive"
+      ]
+    },
+    {
+      "path": "src/components/panelui/calendar.tsx",
+      "sha256": "75792ce7861dec98490973c423aeaef9f87fa6ed676cbce3709eb30347fd43da",
+      "retrieved": "2026-10-12",
+      "registry": "https://panelui.dev/r/calendar.json",
+      "customizations": [
+        "PanelUI import paths",
+        "Consistent subtle elevation",
+        "Named timestamp dependency for React compiler compatibility"
+      ]
+    },
+    {
+      "path": "src/components/panelui/date-picker.tsx",
+      "sha256": "98ec54f6216d80630439d2fdd4234a91367a51d4abe01f97377d30482239488b",
+      "retrieved": "2026-10-12",
+      "registry": "https://panelui.dev/r/date-picker.json",
+      "customizations": [
+        "PanelUI import paths",
+        "Consistent subtle elevation"
+      ]
+    }
+  ],
+  "adaptations": [
+    "Moved copied source under src aliases",
+    "Replace glyph adapter with Lucide",
+    "ALEConnect typography/token/padding roles",
+    "Static installed KeyboardProvider for stable native ownership",
+    "Equal centered 48px field decorators",
+    "Compact tab visuals with nonoverlapping expanded hit areas",
+    "Select content presentation reuses options in an existing sheet; BottomSheet.Content.onBack returns within that sheet on Android. Reports and Appearance replace content and preserve their parent state.",
+    "Inter 400/500/600/700 native font utility aliases; Text and Input preserve caller typography without forced inline faces. Jakarta 600/700 is reserved for prominent headings.",
+    "BottomSheet.Footer owns 12px top margin and 12px top padding around its semantic separator; optional native sheet root has no extra child gap. All action footers inherit this spacing.",
+    "Carousel pan freezes its touch-down position and cancels the previous spring; cumulative movement events use that origin so one swipe advances one slide. Home reuses full-width Carousel and 24px slide gaps without indicators inside 16px gutters.",
+    "ProgressButton uses fresh continuous hold attempts, real-time three-second emergency duration, release/background/route/unmount cancellation and fixture dial suppression. Latest reviewed upstream source0.108.0 merged without overwriting existing adaptations.",
+    "Merged 0.109 size variants with existing custom Input decorators, Select content/back navigation and Tabs touch targets. Official Kpi and its chart/progress source dependencies imported; Reports uses current counts, no synthetic trend."
+  ],
+  "reviewedFiles": [
+    {
+      "path": "src/components/panelui/animated-pressable.tsx",
+      "sha256": "1b36a4a54b2b7e58ebb087370f867b8f8641d7e620045d97e931abad6356d150"
+    },
+    {
+      "path": "src/components/panelui/avatar-group.ts",
+      "sha256": "9cab4776348235db66b883cc0696ed93b2230e1bd21ed74bdf8ef39d1f5059ed"
+    },
+    {
+      "path": "src/components/panelui/avatar-source.ts",
+      "sha256": "c40e0901a74d1f31baa29e6d9b180016d43fe95eeb92c542eaf1f4e7d73b1dcd"
+    },
+    {
+      "path": "src/components/panelui/avatar.tsx",
+      "sha256": "d866b5b7f3eed4a544f212a96fb81f8a703fc7f50b1f5cdc6d0f375a23fb8584"
+    },
+    {
+      "path": "src/components/panelui/badge.tsx",
+      "sha256": "f761b2523bd5e72ecc7d6c67e4c4acf97b903fb776668bb39d873801d5bf862f"
+    },
+    {
+      "path": "src/components/panelui/bottom-sheet.tsx",
+      "sha256": "9d39a49b99751e275f05e7f887e1a317887b3942141cc0755778f7816c28115f"
+    },
+    {
+      "path": "src/components/panelui/button.tsx",
+      "sha256": "acac68903299c5837ae12c995614acbd5bcec9b30d2353c3cf85478542079d6d"
+    },
+    {
+      "path": "src/components/panelui/card.tsx",
+      "sha256": "442f077931b8d0fb88e2d1d918d851d9cb239932b0153beebc3203aa5e176e22"
+    },
+    {
+      "path": "src/components/panelui/carousel-lifecycle.ts",
+      "sha256": "ba2fe378ad5e0a8d3e96ff8e9501935ac8fcf1f853e63bb0329a634c72baaba3"
+    },
+    {
+      "path": "src/components/panelui/carousel.tsx",
+      "sha256": "9c80f037cc33dfc4107eebdede7e5ba22c66d46b88989392809596d9040aab23"
+    },
+    {
+      "path": "src/components/panelui/checkbox.tsx",
+      "sha256": "7a65810a8cf99e7940c0db4293cbdb9a118cb8e94dd5cec993a6114087601fb6"
+    },
+    {
+      "path": "src/components/panelui/controllable-state.ts",
+      "sha256": "07587394974bbd8eebdc9af5b890ab1fa6f07494c06e0c5b71a88854a7bbf787"
+    },
+    {
+      "path": "src/components/panelui/dialog.tsx",
+      "sha256": "9ab004ee899b883b4dce91d930dc0ebed0efdc836e5c3760ccd7fe1bae3de52d"
+    },
+    {
+      "path": "src/components/panelui/empty-state.tsx",
+      "sha256": "a2ef7dac949ebc81885e21fb6b364d55fb06478f67ecc48bfcb4cead3872c286"
+    },
+    {
+      "path": "src/components/panelui/field.tsx",
+      "sha256": "bc41d7accf9b62c54c7516baa7cb154a448ef6ba96fa3019cc891f0409f40485"
+    },
+    {
+      "path": "src/components/panelui/focus-restoration-store.ts",
+      "sha256": "cd47b2ec6b440f1073e831912037677aaca12330f33a8aea335d67a46980a7a9"
+    },
+    {
+      "path": "src/components/panelui/icons.tsx",
+      "sha256": "adbe698fbd4bce41916d53ba080b38d9581a338e0a073a65802d803cb7d973e7"
+    },
+    {
+      "path": "src/components/panelui/input-content-padding.ts",
+      "sha256": "3b948993b1bd50d9dfe012ce17aaa3a062fee261ce04b183a27a7bbdf5d985cf"
+    },
+    {
+      "path": "src/components/panelui/input-group-measurements.ts",
+      "sha256": "4cb3a9b85ad33fe1f42e6b1a3236fd1bc1a78aac321c78cb15ad2daf03a58389"
+    },
+    {
+      "path": "src/components/panelui/input-group.tsx",
+      "sha256": "b44bf64b260ea147e8539444bfd159bb679dfcc2afdc52e1ea4f8db54939671c"
+    },
+    {
+      "path": "src/components/panelui/input.tsx",
+      "sha256": "639a165fc5a66872fd71f569818d6a415071cb9e79b25e3452e3402fff318a0d"
+    },
+    {
+      "path": "src/components/panelui/item.tsx",
+      "sha256": "8923f60b47fcbe901891011230116ba9b11a8bdf88542c0f3de94757c82e5e9b"
+    },
+    {
+      "path": "src/components/panelui/keyboard-avoider.tsx",
+      "sha256": "4de490da48ba8d45f995ffd3b398c1f4634fe036c88be96c81ae730bd944743b"
+    },
+    {
+      "path": "src/components/panelui/label.tsx",
+      "sha256": "073e590531c57510cecc2257bcc517e6d1fdfc64f9cfa4cb1b726a9a93353d78"
+    },
+    {
+      "path": "src/components/panelui/modal-isolation-store.ts",
+      "sha256": "346301f0da15175f23a8918834d0c6e9bbdb096e3c130fa92bc9640dc3500c70"
+    },
+    {
+      "path": "src/components/panelui/native-select-contract.ts",
+      "sha256": "c04f9fb7c2a3595fe5e5eb2471cd09c9e2d3ffa86eb70dbf4326ea9185f8e9c9"
+    },
+    {
+      "path": "src/components/panelui/panel-ui-provider.tsx",
+      "sha256": "e3bd5c6a40a8445abe1f22d508d6176b7d08fde89141079702fa912b9b568748"
+    },
+    {
+      "path": "src/components/panelui/portal.tsx",
+      "sha256": "2cc29c719cd9f1b423b3a10b729e5c1bdc6f7e2861c23e3621af689464200276"
+    },
+    {
+      "path": "src/components/panelui/scrim.tsx",
+      "sha256": "b8a5f68918ced359b54fa8897f752c6f18ad6a9f2e8e445c572d19f518986fb2"
+    },
+    {
+      "path": "src/components/panelui/search-bar-debounce.ts",
+      "sha256": "14601f75b7da630eacd7003a8c4c91b05044ad4cb98a638cc291e812e696721e"
+    },
+    {
+      "path": "src/components/panelui/search-bar.tsx",
+      "sha256": "1d961465053e1863a51a39f5f5c43031362865cb9228f10ddc8ae3a5bbaf2f3e"
+    },
+    {
+      "path": "src/components/panelui/select.tsx",
+      "sha256": "4f427af2c2cf36f637ff9dc27b9fec8dac8e57358be5e6c5965f92bfb164cb46"
+    },
+    {
+      "path": "src/components/panelui/separator.tsx",
+      "sha256": "791913f1f539d562f21e1db26b607e4c3e5406c04509edbcdb799ab4b7b6a39b"
+    },
+    {
+      "path": "src/components/panelui/skeleton.tsx",
+      "sha256": "a96f39a132975b1bf1867b57326b03fd1311ea2822dfcdb678537d40cfba23d0"
+    },
+    {
+      "path": "src/components/panelui/slide-button-track.ts",
+      "sha256": "211ed086af37f1416e995f0ecbb8ea481db1bed98c9531afbd789547439e217f"
+    },
+    {
+      "path": "src/components/panelui/slide-button.tsx",
+      "sha256": "08e0063a187438f32df9fea33baa66b528af477cfbe803a99026c305428d7547"
+    },
+    {
+      "path": "src/components/panelui/spinner.tsx",
+      "sha256": "0cabd59ba126afb9f4721001e55e8fa87ab5f1f93e0062b83a1ae490b3c0aa4f"
+    },
+    {
+      "path": "src/components/panelui/surface.tsx",
+      "sha256": "8cd5cb8307862ba0222f6544a6f730a7f09457fae186b9697ada4bca874b0f0a"
+    },
+    {
+      "path": "src/components/panelui/switch.tsx",
+      "sha256": "2b34b1ed6cc341f16efcf7f9ab8bfe86b49ed718730efd93aec83a5fac946c87"
+    },
+    {
+      "path": "src/components/panelui/tabs.tsx",
+      "sha256": "b87269444ae606e2e6a899d4fdabac537c9e94dbca5f4d87d76269ddd776b722"
+    },
+    {
+      "path": "src/components/panelui/text.tsx",
+      "sha256": "6de1980522efb75d4b4f94d60606366cb50775e4f0d73a79364c588afbbac0d8"
+    },
+    {
+      "path": "src/components/panelui/toast-store.ts",
+      "sha256": "3a74ab7c74e9aae50664bd5e7fd1204b267b45e20a1e89821911ceee4fc3d63f"
+    },
+    {
+      "path": "src/components/panelui/toast.tsx",
+      "sha256": "0d8e1b57144fae6e7856abe7100694a1fb332fe64137730b40a417f82e4c1343"
+    },
+    {
+      "path": "src/components/panelui/typography.tsx",
+      "sha256": "089d07889ffdef450eca07f4b5f38795b5c77778d010a751d45772599695cd94"
+    },
+    {
+      "path": "src/lib/cn.ts",
+      "sha256": "9304a861c8673bee09e0f12de31773abbde503b02e59dfd74763ddec2e37cf05"
+    },
+    {
+      "path": "src/lib/haptics.ts",
+      "sha256": "aad3c62bb6b9039ef5db86da4f161e415f3f459e25b192a192ae325997733e41"
+    },
+    {
+      "path": "src/lib/native-host.tsx",
+      "sha256": "c03292c099c4cf992798e6cde2b0628731f8e6f30f88a992b8f2b3c8e47a210e"
+    },
+    {
+      "path": "src/lib/native.ts",
+      "sha256": "d2c74e54b8376bae665119a516b67a5f9570a58b6a1ea1b5e71af06993be34d0"
+    },
+    {
+      "path": "src/hooks/use-back-handler.ts",
+      "sha256": "7c45197c64beb13d8ab1f386758e07e2d83bdb6d02e5d83e27153afbdfa686e1"
+    },
+    {
+      "path": "src/hooks/use-direction.ts",
+      "sha256": "9202d8550abaed8720af42d0320acf51e227fbf23f649b5636fd26475b849867"
+    },
+    {
+      "path": "src/hooks/use-keyboard-avoidance.ts",
+      "sha256": "4b7346aad45e028a73ac3859cfff4e30c5f53b629636aca4af072f56c05565fc"
+    },
+    {
+      "path": "src/hooks/use-keyboard.ts",
+      "sha256": "7436b26e1ac93892305ff45a523e18b13a44876a194e3d31cde86e6559d92875"
+    },
+    {
+      "path": "src/hooks/use-theme.ts",
+      "sha256": "ea7a2b819afe3bfdcd3aeff59616e9837784b85ba41488a9f3c89792dbef6822"
+    },
+    {
+      "path": "src/components/panelui/kpi.tsx",
+      "sha256": "471f2e8c68f48645552d34bed9c0f9583668cc92867e87cacca550a4695d9fb6"
+    },
+    {
+      "path": "src/components/panelui/line-chart.tsx",
+      "sha256": "416e64dceab43017af34855a37fb62ed16597af10d171e192270241f5c4e3187"
+    },
+    {
+      "path": "src/components/panelui/progress.tsx",
+      "sha256": "d18f434c331b2d47281da1763344ae5990b983abfcbd8b3f3b3b55da59603560"
+    },
+    {
+      "path": "src/components/panelui/chart-accessibility.ts",
+      "sha256": "32186807d2bc752936da901286d067f535829ba096d25f2bfffd6afa456e5590"
+    },
+    {
+      "path": "src/lib/chart.ts",
+      "sha256": "12160f7c56a4f37f117a8edfbf84c899b9043f57be97b43c13d62b5b25b80e6a"
+    }
+  ],
+  "componentUpdates": {
+    "progress-button": {
+      "referencePackage": "0.108.0",
+      "adaptations": [
+        "Existing two-second emergency hold, typed value clamping, reset/cancellation and ALEConnect Lucide typography retained"
+      ]
+    },
+    "bottom-sheet": {
+      "referencePackage": "0.107.1",
+      "adaptations": [
+        "Copied root closes on owning Expo Router blur; controlled and uncontrolled closure callbacks reset sheet content",
+        "Footer spacing and single-sheet internal Back retained",
+        "Styled and platform-native sheet content use the shared 16px horizontal inset"
+      ],
+      "currentSha256": "4e5087ba7faf262c0f62eea58dba4e1f15f0fa3e7b7f17ae0c43f6ba021a7782"
+    },
+    "scroll-fade": {
+      "retrieved": "2026-10-11",
+      "source": "https://panelui.dev/r/scroll-fade.json",
+      "registrySha256": "5d923c2812b49d685911669905f0f9fcdc3b38248dcf4e1b60b8919c2db0d937",
+      "adaptations": [
+        "Clamp both fades to the scrollable range during bounce or fitting content; guard zero fade distance",
+        "Cache animated native wrappers by component type at module scope and use React createElement for dynamic child support",
+        "Remove three unused upstream imports under the app strict compiler"
+      ],
+      "currentSha256": "3bd3dde4659bf68afb969b6b3e821a7391379576411adb3b061ebb1fc14f90c6"
+    },
+    "avatar": {
+      "referencePackage": "0.109.0",
+      "adaptations": [
+        "ALEConnect aliases, existing typography, accessibility and theme adaptations retained"
+      ],
+      "currentSha256": "d866b5b7f3eed4a544f212a96fb81f8a703fc7f50b1f5cdc6d0f375a23fb8584"
+    },
+    "badge": {
+      "referencePackage": "0.109.0",
+      "adaptations": [
+        "ALEConnect aliases, existing typography, accessibility and theme adaptations retained"
+      ],
+      "currentSha256": "f761b2523bd5e72ecc7d6c67e4c4acf97b903fb776668bb39d873801d5bf862f"
+    },
+    "button": {
+      "referencePackage": "0.109.0",
+      "adaptations": [
+        "ALEConnect aliases, existing typography, accessibility and theme adaptations retained"
+      ],
+      "currentSha256": "acac68903299c5837ae12c995614acbd5bcec9b30d2353c3cf85478542079d6d"
+    },
+    "checkbox": {
+      "referencePackage": "0.109.0",
+      "adaptations": [
+        "ALEConnect aliases, existing typography, accessibility and theme adaptations retained"
+      ],
+      "currentSha256": "7a65810a8cf99e7940c0db4293cbdb9a118cb8e94dd5cec993a6114087601fb6"
+    },
+    "switch": {
+      "referencePackage": "0.109.0",
+      "adaptations": [
+        "ALEConnect aliases, existing typography, accessibility and theme adaptations retained"
+      ],
+      "currentSha256": "2b34b1ed6cc341f16efcf7f9ab8bfe86b49ed718730efd93aec83a5fac946c87"
+    },
+    "input": {
+      "referencePackage": "0.109.0",
+      "adaptations": [
+        "ALEConnect aliases, existing typography, accessibility and theme adaptations retained"
+      ],
+      "currentSha256": "639a165fc5a66872fd71f569818d6a415071cb9e79b25e3452e3402fff318a0d"
+    },
+    "select": {
+      "referencePackage": "0.109.0",
+      "adaptations": [
+        "ALEConnect aliases, existing typography, accessibility and theme adaptations retained"
+      ],
+      "currentSha256": "4f427af2c2cf36f637ff9dc27b9fec8dac8e57358be5e6c5965f92bfb164cb46"
+    },
+    "tabs": {
+      "referencePackage": "0.109.0",
+      "adaptations": [
+        "ALEConnect aliases, existing typography, accessibility and theme adaptations retained",
+        "Retain eight-point vertical touch padding for existing compact md tabs"
+      ],
+      "currentSha256": "99308c391a93eca4a95ea0d7dfc8da5887cac7c5acd1deb1b1262099fe7165e6"
+    },
+    "kpi": {
+      "referencePackage": "0.109.0",
+      "adaptations": [
+        "ALEConnect aliases, existing typography, accessibility and theme adaptations retained"
+      ],
+      "currentSha256": "471f2e8c68f48645552d34bed9c0f9583668cc92867e87cacca550a4695d9fb6"
+    },
+    "line-chart": {
+      "referencePackage": "0.109.0",
+      "adaptations": [
+        "ALEConnect aliases, existing typography, accessibility and theme adaptations retained"
+      ],
+      "currentSha256": "416e64dceab43017af34855a37fb62ed16597af10d171e192270241f5c4e3187"
+    },
+    "progress": {
+      "referencePackage": "0.109.0",
+      "adaptations": [
+        "ALEConnect aliases, existing typography, accessibility and theme adaptations retained"
+      ],
+      "currentSha256": "d18f434c331b2d47281da1763344ae5990b983abfcbd8b3f3b3b55da59603560"
+    },
+    "chart-accessibility": {
+      "referencePackage": "0.109.0",
+      "adaptations": [
+        "ALEConnect aliases, existing typography, accessibility and theme adaptations retained"
+      ]
+    },
+    "chart": {
+      "referencePackage": "0.109.0",
+      "adaptations": [
+        "ALEConnect aliases, existing typography, accessibility and theme adaptations retained"
+      ]
+    },
+    "flip-card": {
+      "referencePackage": "0.109.0",
+      "registry": "https://panelui.dev/r/flip-card.json",
+      "adaptations": [
+        "ALEConnect aliases; semantic web Pressable; visible-face accessibility; native gesture retained"
+      ],
+      "currentSha256": "12995d25b026660da3bb6e1bf232764b4d36c14a61617808cb5fdf00d38f2dab"
+    },
+    "qr-code": {
+      "referencePackage": "0.109.0",
+      "registry": "https://panelui.dev/r/qr-code.json",
+      "adaptations": [
+        "ALEConnect aliases; published PanelUI encoder and quiet-zone canvas"
+      ],
+      "currentSha256": "03d1e3118db3f4d80b0d670e573eea80c4fb89e44322b8fa4f5baf0ff3d72e7d"
+    },
+    "qr-encode": {
+      "referencePackage": "0.109.0",
+      "registry": "https://panelui.dev/r/qr-code.json",
+      "adaptations": [
+        "ALEConnect aliases; published PanelUI encoder and quiet-zone canvas"
+      ],
+      "currentSha256": "babd4cf7f1f151c4e5cfcb71881124ace941f07a7c59d98eaf2ac4ac4e05abd6"
+    },
+    "qr-shapes": {
+      "referencePackage": "0.109.0",
+      "registry": "https://panelui.dev/r/qr-code.json",
+      "adaptations": [
+        "ALEConnect aliases; published PanelUI encoder and quiet-zone canvas"
+      ],
+      "currentSha256": "43005545cbb4ae76420fb5c7f230d94801b63a88d57156cdcd58bef4bec4d995"
+    }
+  },
+  "packageIntegrity": "sha512-Jv8dbRxqu14X3Pgs8+6ufGTbUz/Dahhjk+C1h4YzblKas2vWR+YEMGyhNYgLgAm8yr2AO8W3xnjw8lZlzhaPMA==",
+  "baseFilesReferencePackage": "0.107.1",
+  "licenseFile": "src/components/panelui/LICENSE",
+  "licenseSource": "https://github.com/panel-ui/PanelUI/blob/main/LICENSE"
+}

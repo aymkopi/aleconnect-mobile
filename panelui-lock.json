@@ -1,0 +1,465 @@
+{
+  "version": 2,
+  "files": {
+    "src/components/panelui/panel-ui-provider.tsx": {
+      "item": "panel-ui-provider",
+      "digest": "sha256:ec40fa8768ae0152fb0838897494455285b406957820b7162975ba383582ee7b"
+    },
+    "src/lib/cn.ts": {
+      "item": "cn",
+      "digest": "sha256:9304a861c8673bee09e0f12de31773abbde503b02e59dfd74763ddec2e37cf05"
+    },
+    "src/components/panelui/portal.tsx": {
+      "item": "portal",
+      "digest": "sha256:2cc29c719cd9f1b423b3a10b729e5c1bdc6f7e2861c23e3621af689464200276"
+    },
+    "src/components/panelui/focus-restoration-store.ts": {
+      "item": "focus-restoration-store",
+      "digest": "sha256:cd47b2ec6b440f1073e831912037677aaca12330f33a8aea335d67a46980a7a9"
+    },
+    "src/components/panelui/modal-isolation-store.ts": {
+      "item": "modal-isolation-store",
+      "digest": "sha256:346301f0da15175f23a8918834d0c6e9bbdb096e3c130fa92bc9640dc3500c70"
+    },
+    "src/components/panelui/toast.tsx": {
+      "item": "toast",
+      "digest": "sha256:0d8e1b57144fae6e7856abe7100694a1fb332fe64137730b40a417f82e4c1343"
+    },
+    "src/components/panelui/toast-store.ts": {
+      "item": "toast",
+      "digest": "sha256:3a74ab7c74e9aae50664bd5e7fd1204b267b45e20a1e89821911ceee4fc3d63f"
+    },
+    "src/components/panelui/button.tsx": {
+      "item": "button",
+      "digest": "sha256:7c68f772f3a58ff502a74072c66f0e6d7da07d4b255cc291bd48d97a567f2ffa"
+    },
+    "src/components/panelui/animated-pressable.tsx": {
+      "item": "animated-pressable",
+      "digest": "sha256:1b36a4a54b2b7e58ebb087370f867b8f8641d7e620045d97e931abad6356d150"
+    },
+    "src/components/panelui/icons.tsx": {
+      "item": "icons",
+      "digest": "sha256:40304ab28217324e0f5261b7008d59f09dacec988e8b1a08479c1f23ed448f0b"
+    },
+    "src/hooks/use-direction.ts": {
+      "item": "use-direction",
+      "digest": "sha256:9202d8550abaed8720af42d0320acf51e227fbf23f649b5636fd26475b849867"
+    },
+    "src/lib/native.ts": {
+      "item": "native",
+      "digest": "sha256:d2c74e54b8376bae665119a516b67a5f9570a58b6a1ea1b5e71af06993be34d0"
+    },
+    "src/lib/native-host.tsx": {
+      "item": "native",
+      "digest": "sha256:c03292c099c4cf992798e6cde2b0628731f8e6f30f88a992b8f2b3c8e47a210e"
+    },
+    "src/hooks/use-theme.ts": {
+      "item": "use-theme",
+      "digest": "sha256:1e0fe0e82d80fbb51c93bf6735d2676cf5f125a7f8f1210756e0aec5e8ec743f"
+    },
+    "src/components/panelui/spinner.tsx": {
+      "item": "spinner",
+      "digest": "sha256:0cabd59ba126afb9f4721001e55e8fa87ab5f1f93e0062b83a1ae490b3c0aa4f"
+    },
+    "src/components/panelui/text.tsx": {
+      "item": "text",
+      "digest": "sha256:324bcd1e21ff2471deb04798bd1af7def316f72c0cb8909cf1160e4be7850530"
+    },
+    "src/components/panelui/typography.tsx": {
+      "item": "typography",
+      "digest": "sha256:089d07889ffdef450eca07f4b5f38795b5c77778d010a751d45772599695cd94"
+    },
+    "src/components/panelui/card.tsx": {
+      "item": "card",
+      "digest": "sha256:442f077931b8d0fb88e2d1d918d851d9cb239932b0153beebc3203aa5e176e22"
+    },
+    "src/components/panelui/surface.tsx": {
+      "item": "surface",
+      "digest": "sha256:8cd5cb8307862ba0222f6544a6f730a7f09457fae186b9697ada4bca874b0f0a"
+    },
+    "src/components/panelui/avatar-group.ts": {
+      "item": "avatar",
+      "digest": "sha256:9cab4776348235db66b883cc0696ed93b2230e1bd21ed74bdf8ef39d1f5059ed"
+    },
+    "src/components/panelui/avatar-source.ts": {
+      "item": "avatar",
+      "digest": "sha256:c40e0901a74d1f31baa29e6d9b180016d43fe95eeb92c542eaf1f4e7d73b1dcd"
+    },
+    "src/components/panelui/avatar.tsx": {
+      "item": "avatar",
+      "digest": "sha256:4b16d52f5a4dd1a46772d293a8c9702d98e8c46f0569da77f70a28c720822e90"
+    },
+    "src/components/panelui/badge.tsx": {
+      "item": "badge",
+      "digest": "sha256:a9304708303825cda57557c3405e93c8a71b76b72f127c758701051af0cc4e90"
+    },
+    "src/components/panelui/input.tsx": {
+      "item": "input",
+      "digest": "sha256:f0b84faa0f5be132fc8ca96ecdf55cf8eef676daa7337ab5cc32c367b79dba12"
+    },
+    "src/components/panelui/input-content-padding.ts": {
+      "item": "input",
+      "digest": "sha256:3b948993b1bd50d9dfe012ce17aaa3a062fee261ce04b183a27a7bbdf5d985cf"
+    },
+    "src/components/panelui/keyboard-avoider.tsx": {
+      "item": "keyboard-avoider",
+      "digest": "sha256:4de490da48ba8d45f995ffd3b398c1f4634fe036c88be96c81ae730bd944743b"
+    },
+    "src/hooks/use-keyboard-avoidance.ts": {
+      "item": "use-keyboard-avoidance",
+      "digest": "sha256:4b7346aad45e028a73ac3859cfff4e30c5f53b629636aca4af072f56c05565fc"
+    },
+    "src/components/panelui/label.tsx": {
+      "item": "label",
+      "digest": "sha256:073e590531c57510cecc2257bcc517e6d1fdfc64f9cfa4cb1b726a9a93353d78"
+    },
+    "src/components/panelui/input-group.tsx": {
+      "item": "input-group",
+      "digest": "sha256:1733040dc81d22ec8a838b934ac4e47282730182b9dec3e13e4afd21e70a40a6"
+    },
+    "src/components/panelui/input-group-measurements.ts": {
+      "item": "input-group",
+      "digest": "sha256:4cb3a9b85ad33fe1f42e6b1a3236fd1bc1a78aac321c78cb15ad2daf03a58389"
+    },
+    "src/components/panelui/field.tsx": {
+      "item": "field",
+      "digest": "sha256:bc41d7accf9b62c54c7516baa7cb154a448ef6ba96fa3019cc891f0409f40485"
+    },
+    "src/components/panelui/separator.tsx": {
+      "item": "separator",
+      "digest": "sha256:791913f1f539d562f21e1db26b607e4c3e5406c04509edbcdb799ab4b7b6a39b"
+    },
+    "src/components/panelui/search-bar.tsx": {
+      "item": "search-bar",
+      "digest": "sha256:1d961465053e1863a51a39f5f5c43031362865cb9228f10ddc8ae3a5bbaf2f3e"
+    },
+    "src/components/panelui/search-bar-debounce.ts": {
+      "item": "search-bar",
+      "digest": "sha256:14601f75b7da630eacd7003a8c4c91b05044ad4cb98a638cc291e812e696721e"
+    },
+    "src/hooks/use-keyboard.ts": {
+      "item": "use-keyboard",
+      "digest": "sha256:7436b26e1ac93892305ff45a523e18b13a44876a194e3d31cde86e6559d92875"
+    },
+    "src/components/panelui/tabs.tsx": {
+      "item": "tabs",
+      "digest": "sha256:a50671f11f00f99b6178b069d6c861619f0243afc3f604bff1f838adef6f4a34"
+    },
+    "src/components/panelui/select.tsx": {
+      "item": "select",
+      "digest": "sha256:95091884cac39f86ca5543e6f4592528c45795fbde9df22ed05de4f3915b897c"
+    },
+    "src/components/panelui/native-select-contract.ts": {
+      "item": "select",
+      "digest": "sha256:c04f9fb7c2a3595fe5e5eb2471cd09c9e2d3ffa86eb70dbf4326ea9185f8e9c9"
+    },
+    "src/components/panelui/bottom-sheet.tsx": {
+      "item": "bottom-sheet",
+      "digest": "sha256:17bb856f984ec3a34210c5d25184e9f11894175da34df36c29c5446290fbd072"
+    },
+    "src/lib/haptics.ts": {
+      "item": "haptics",
+      "digest": "sha256:aad3c62bb6b9039ef5db86da4f161e415f3f459e25b192a192ae325997733e41"
+    },
+    "src/components/panelui/scrim.tsx": {
+      "item": "scrim",
+      "digest": "sha256:b8a5f68918ced359b54fa8897f752c6f18ad6a9f2e8e445c572d19f518986fb2"
+    },
+    "src/hooks/use-back-handler.ts": {
+      "item": "use-back-handler",
+      "digest": "sha256:7c45197c64beb13d8ab1f386758e07e2d83bdb6d02e5d83e27153afbdfa686e1"
+    },
+    "src/components/panelui/dialog.tsx": {
+      "item": "dialog",
+      "digest": "sha256:1a6310c28787fda3385ddb62e93a8e3fa2fc507cece081aa9270ac01d18c5d3c"
+    },
+    "src/components/panelui/item.tsx": {
+      "item": "item",
+      "digest": "sha256:8923f60b47fcbe901891011230116ba9b11a8bdf88542c0f3de94757c82e5e9b"
+    },
+    "src/components/panelui/empty-state.tsx": {
+      "item": "empty-state",
+      "digest": "sha256:a2ef7dac949ebc81885e21fb6b364d55fb06478f67ecc48bfcb4cead3872c286"
+    },
+    "src/components/panelui/skeleton.tsx": {
+      "item": "skeleton",
+      "digest": "sha256:a96f39a132975b1bf1867b57326b03fd1311ea2822dfcdb678537d40cfba23d0"
+    },
+    "src/components/panelui/carousel-lifecycle.ts": {
+      "item": "carousel",
+      "digest": "sha256:ba2fe378ad5e0a8d3e96ff8e9501935ac8fcf1f853e63bb0329a634c72baaba3"
+    },
+    "src/components/panelui/carousel.tsx": {
+      "item": "carousel",
+      "digest": "sha256:be5ab347fcccc0e7d454a6318ac11719ff3b91db047a8339aef01d20dadf468a"
+    },
+    "src/components/panelui/controllable-state.ts": {
+      "item": "controllable-state",
+      "digest": "sha256:07587394974bbd8eebdc9af5b890ab1fa6f07494c06e0c5b71a88854a7bbf787"
+    },
+    "src/components/panelui/slide-button.tsx": {
+      "item": "slide-button",
+      "digest": "sha256:08e0063a187438f32df9fea33baa66b528af477cfbe803a99026c305428d7547"
+    },
+    "src/components/panelui/slide-button-track.ts": {
+      "item": "slide-button",
+      "digest": "sha256:211ed086af37f1416e995f0ecbb8ea481db1bed98c9531afbd789547439e217f"
+    },
+    "src/components/panelui/switch.tsx": {
+      "item": "switch",
+      "digest": "sha256:6c62644d1df9d062ab75be2e4f9ead8e79e21a69f25354de896377395de36b98"
+    },
+    "src/components/panelui/checkbox.tsx": {
+      "item": "checkbox",
+      "digest": "sha256:3828f4d33343381dc481b856a1d407ed08041902dbcb5ef79e9829619bd49e23"
+    },
+    "src/components/panelui/progress-button.tsx": {
+      "item": "progress-button",
+      "digest": "sha256:bfbfb2138fcd2944ff6ea7305d9263abf7d153a116a2cb43fc28db57dc22b171"
+    },
+    "src/components/panelui/progress-button-hold.ts": {
+      "item": "progress-button",
+      "digest": "sha256:8ddd657e267b9d48c4dd2fce4ed4b627559c2543427b1b9327182ecdc10ca6c7"
+    }
+  },
+  "roots": {
+    "panel-ui-provider": [
+      "panel-ui-provider",
+      "cn",
+      "portal",
+      "focus-restoration-store",
+      "modal-isolation-store",
+      "toast",
+      "button",
+      "animated-pressable",
+      "icons",
+      "use-direction",
+      "native",
+      "use-theme",
+      "spinner",
+      "text"
+    ],
+    "text": [
+      "text",
+      "use-direction"
+    ],
+    "typography": [
+      "typography",
+      "cn",
+      "text",
+      "use-direction"
+    ],
+    "button": [
+      "button",
+      "animated-pressable",
+      "cn",
+      "icons",
+      "use-direction",
+      "native",
+      "use-theme",
+      "spinner",
+      "text"
+    ],
+    "card": [
+      "card",
+      "cn",
+      "text",
+      "use-direction"
+    ],
+    "surface": [
+      "surface"
+    ],
+    "avatar": [
+      "avatar",
+      "cn",
+      "text",
+      "use-direction"
+    ],
+    "badge": [
+      "badge",
+      "text",
+      "use-direction"
+    ],
+    "input": [
+      "input",
+      "icons",
+      "use-direction",
+      "keyboard-avoider",
+      "text",
+      "use-keyboard-avoidance",
+      "label"
+    ],
+    "input-group": [
+      "input-group",
+      "input",
+      "icons",
+      "use-direction",
+      "keyboard-avoider",
+      "text",
+      "use-keyboard-avoidance",
+      "label"
+    ],
+    "field": [
+      "field",
+      "label",
+      "text",
+      "use-direction",
+      "separator",
+      "cn"
+    ],
+    "label": [
+      "label",
+      "text",
+      "use-direction"
+    ],
+    "search-bar": [
+      "search-bar",
+      "animated-pressable",
+      "icons",
+      "use-direction",
+      "input",
+      "keyboard-avoider",
+      "text",
+      "use-keyboard-avoidance",
+      "label",
+      "spinner",
+      "use-keyboard"
+    ],
+    "tabs": [
+      "tabs",
+      "cn",
+      "text",
+      "use-direction"
+    ],
+    "select": [
+      "select",
+      "bottom-sheet",
+      "cn",
+      "haptics",
+      "icons",
+      "use-direction",
+      "native",
+      "use-theme",
+      "portal",
+      "focus-restoration-store",
+      "modal-isolation-store",
+      "scrim",
+      "text",
+      "use-back-handler",
+      "input-group",
+      "input",
+      "keyboard-avoider",
+      "use-keyboard-avoidance",
+      "label"
+    ],
+    "bottom-sheet": [
+      "bottom-sheet",
+      "cn",
+      "haptics",
+      "icons",
+      "use-direction",
+      "native",
+      "use-theme",
+      "portal",
+      "focus-restoration-store",
+      "modal-isolation-store",
+      "scrim",
+      "text",
+      "use-back-handler"
+    ],
+    "dialog": [
+      "dialog",
+      "cn",
+      "portal",
+      "focus-restoration-store",
+      "modal-isolation-store",
+      "scrim",
+      "text",
+      "use-direction",
+      "use-back-handler"
+    ],
+    "item": [
+      "item",
+      "animated-pressable",
+      "cn",
+      "text",
+      "use-direction"
+    ],
+    "separator": [
+      "separator",
+      "cn",
+      "text",
+      "use-direction"
+    ],
+    "empty-state": [
+      "empty-state",
+      "text",
+      "use-direction"
+    ],
+    "skeleton": [
+      "skeleton",
+      "cn"
+    ],
+    "spinner": [
+      "spinner"
+    ],
+    "toast": [
+      "toast",
+      "button",
+      "animated-pressable",
+      "cn",
+      "icons",
+      "use-direction",
+      "native",
+      "use-theme",
+      "spinner",
+      "text",
+      "portal",
+      "focus-restoration-store",
+      "modal-isolation-store"
+    ],
+    "carousel": [
+      "carousel",
+      "cn",
+      "controllable-state",
+      "icons",
+      "use-direction",
+      "text"
+    ],
+    "slide-button": [
+      "slide-button",
+      "haptics",
+      "icons",
+      "use-direction",
+      "text"
+    ],
+    "switch": [
+      "switch",
+      "field",
+      "label",
+      "text",
+      "use-direction",
+      "separator",
+      "cn",
+      "haptics",
+      "native",
+      "use-theme"
+    ],
+    "checkbox": [
+      "checkbox",
+      "icons",
+      "use-direction",
+      "text"
+    ],
+    "progress-button": [
+      "progress-button",
+      "progress-button-hold",
+      "haptics",
+      "icons",
+      "use-direction",
+      "text"
+    ]
+  },
+  "legacyFiles": [],
+  "registry": "https://panelui.dev/r"
+}

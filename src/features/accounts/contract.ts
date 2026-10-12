@@ -5,6 +5,7 @@ export type LinkedAccount = {
   isDefault: boolean;
   address?: string | null;
   meterSerialNumber?: string | null;
+  phoneNumber?: string | null;
 };
 
 export type ConsumerCapabilities = {

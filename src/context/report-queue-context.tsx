@@ -10,6 +10,7 @@ import {
   type PropsWithChildren,
 } from "react";
 import { AppState } from "react-native";
+import { isQueuedReportVisible } from "@/services/report-queue-access";
 
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useConsumerAccount } from "@/hooks/use-consumer-account";
@@ -33,13 +34,14 @@ type ReportQueueContextValue = {
   isSyncing: boolean;
   refresh: () => Promise<void>;
   sync: (announce?: boolean) => Promise<ReportQueueItem[]>;
+  announceSubmission: (id: string) => Promise<void>;
   retry: (id: string) => Promise<void>;
   remove: (id: string) => Promise<void>;
 };
 
 const ReportQueueContext = createContext<ReportQueueContextValue | null>(null);
 
-export function ReportQueueProvider({ children }: PropsWithChildren) {
+export function ReportQueueProvider({ children, syncEnabled = true }: PropsWithChildren<{ syncEnabled?: boolean }>) {
   const { session } = useAuthSession();
   const { accountContext } = useConsumerAccount();
   const userId = session?.user.id;
@@ -51,16 +53,22 @@ export function ReportQueueProvider({ children }: PropsWithChildren) {
     };
     return userId ? { identityUserId: userId, authorizedServiceAccountIds: [userId], accessRevision: 0 } : null;
   }, [accountContext, userId]);
+  const latestScope = useRef(queueScope);
+  latestScope.current = queueScope;
+  const scopeCurrent = useCallback(() => !!queueScope && !!latestScope.current &&
+    latestScope.current.identityUserId === queueScope.identityUserId &&
+    latestScope.current.accessRevision === queueScope.accessRevision, [queueScope]);
   const [items, setItems] = useState<ReportQueueItem[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
   const activeSync = useRef<Promise<ReportQueueItem[]> | null>(null);
 
   const refresh = useCallback(async () => {
-    setItems(queueScope ? await listReportQueue(queueScope) : []);
-  }, [queueScope]);
+    const next = queueScope ? await listReportQueue(queueScope) : [];
+    if (!queueScope || scopeCurrent()) setItems(next);
+  }, [queueScope, scopeCurrent]);
 
   const sync = useCallback(async (announce = true) => {
-    if (!queueScope) return [];
+    if (!syncEnabled || !queueScope) return [];
     if (activeSync.current) return activeSync.current;
 
     const before = await listReportQueue(queueScope);
@@ -73,7 +81,7 @@ export function ReportQueueProvider({ children }: PropsWithChildren) {
     activeSync.current = syncReportQueue(queueScope)
       .then(async (results) => {
         await refresh();
-        if (announce) {
+        if (announce && scopeCurrent()) {
           results
             .filter(
               (item) =>
@@ -93,7 +101,7 @@ export function ReportQueueProvider({ children }: PropsWithChildren) {
         setIsSyncing(false);
       });
     return activeSync.current;
-  }, [queueScope, refresh]);
+  }, [queueScope, refresh, syncEnabled, scopeCurrent]);
 
   useEffect(() => {
     void refresh();
@@ -101,9 +109,10 @@ export function ReportQueueProvider({ children }: PropsWithChildren) {
   }, [queueScope, refresh, sync, userId]);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!syncEnabled || !userId) return;
     void ensureReportBackgroundSyncRegistered();
     void consumeReportSubmissionCompletions(userId).then((completions) => {
+      if (!scopeCurrent()) return;
       completions.forEach((completion) => {
         emitComplaintSubmissionToast({
           status: "success",
@@ -111,12 +120,12 @@ export function ReportQueueProvider({ children }: PropsWithChildren) {
         });
       });
     });
-  }, [userId]);
+  }, [syncEnabled, userId, scopeCurrent]);
 
   useEffect(() => subscribeReportQueue(() => void refresh()), [refresh]);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!syncEnabled || !userId) return;
     const networkSubscription = NetInfo.addEventListener((state) => {
       if (state.isConnected && state.isInternetReachable !== false) void sync();
     });
@@ -130,25 +139,40 @@ export function ReportQueueProvider({ children }: PropsWithChildren) {
       networkSubscription();
       appStateSubscription.remove();
     };
-  }, [sync, userId]);
+  }, [sync, syncEnabled, userId]);
+
+  const visibleItems = useMemo(() => queueScope ? items.filter(item =>
+    isQueuedReportVisible(item, queueScope) &&
+    queueScope.authorizedServiceAccountIds.includes(item.serviceAccountId ?? item.userId)) : [], [items, queueScope]);
 
   const value = useMemo<ReportQueueContextValue>(
     () => ({
-      items,
-      pendingCount: items.filter((item) => item.status !== "submitted").length,
+      items: visibleItems,
+      pendingCount: visibleItems.filter((item) => item.status !== "submitted").length,
       isSyncing,
       refresh,
       sync,
+      announceSubmission: async (id) => {
+        if (!queueScope || !scopeCurrent()) return;
+        const item = (await listReportQueue(queueScope)).find(v => v.id === id);
+        if (!item || !scopeCurrent() ||
+          !queueScope.authorizedServiceAccountIds.includes(item.serviceAccountId ?? item.userId)) return;
+        emitComplaintSubmissionToast(item.status === "submitted"
+          ? { status: "success", message: "Report submitted: " + item.ticketNumber }
+          : { status: "info", message: "Report saved to your queue. Open Reports to check or retry." });
+      },
       retry: async (id) => {
+        if (!syncEnabled) return;
         await retryQueuedReport(id);
         await sync();
       },
       remove: async (id) => {
+        if (!syncEnabled) return;
         await removeQueuedReport(id);
         await refresh();
       },
     }),
-    [isSyncing, items, refresh, sync],
+    [isSyncing, visibleItems, refresh, sync, syncEnabled, queueScope, scopeCurrent],
   );
 
   return (

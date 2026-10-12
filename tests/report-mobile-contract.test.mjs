@@ -9,7 +9,7 @@ test("report form follows backend field rules and aligned evidence limits", asyn
   const [data, contract, route, evidence] = await Promise.all([
     read("src/features/reports/data.ts"),
     read("src/features/reports/contract.ts"),
-    read("src/app/(tabs)/reports/new.tsx"),
+    read("src/features/reports/new-report-screen.tsx"),
     read("src/utils/evidence-image-processing.ts"),
   ]);
 
@@ -28,10 +28,9 @@ test("report form follows backend field rules and aligned evidence limits", asyn
   assert.match(contract, /municipalityCode/);
   assert.match(contract, /isWithinAlbay/);
   assert.match(route, /validateReportForm/);
-  assert.match(route, /categoryDescription:/);
-  assert.match(route, /typeDescription:/);
-  assert.match(route, /currentRegisteredName:/);
-  assert.match(route, /requestedRegisteredName:/);
+  assert.match(route, /conditionalReportPayload\(form\)/);
+  assert.match(contract, /categoryDescription/);
+  assert.match(contract, /typeDescription/);
   assert.doesNotMatch(route, /description:\s*reportDescription/);
   assert.match(evidence, /evidenceMaxBytes\s*=\s*5_000_000/);
 });
@@ -134,31 +133,6 @@ test("report validation rejects missing distinct details, equal transfer names, 
     },
   );
   assert.deepEqual(validErrors, {});
-});
-
-test("report details avoid raw coordinates and render authenticated evidence plus a static map", async () => {
-  const [detail, staticMap] = await Promise.all([
-    read("src/app/(tabs)/reports/[id].tsx"),
-    read("src/features/maps/static-location-map.tsx"),
-  ]);
-
-  assert.match(detail, /title="Report details"/);
-  assert.doesNotMatch(detail, /label="Coordinates"/);
-  assert.match(detail, /<StaticLocationMap/);
-  assert.match(staticMap, /dragPan=\{false\}/);
-  assert.match(staticMap, /touchZoom=\{false\}/);
-  assert.match(detail, /report\.imageUrls/);
-  assert.match(detail, /Report status/);
-});
-
-test("reports expose one archive entry and keep queued drafts inside the archive", async () => {
-  const [main, archive] = await Promise.all([
-    read("src/app/(tabs)/reports/index.tsx"),
-    read("src/app/(tabs)/reports/list.tsx"),
-  ]);
-
-  assert.equal((main.match(/router\.push\("\/reports\/list"\)/g) ?? []).length, 1);
-  assert.doesNotMatch(main, /router\.push\("\/reports\/queue"\)/);
-  assert.match(archive, /Saved on this device/);
-  assert.match(archive, /Official reports/);
+  const missingStreet = validateReportForm({...form,purok:'   '}, category, type, meta);
+  assert.equal(missingStreet.purok,'Enter the purok or street of the issue.');
 });

@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Device from "expo-device";
 import { Platform } from "react-native";
 
-import { apiRequest } from "@/services/api";
+import { apiRequest, ApiRequestError } from "@/services/api";
 
 export type NotificationFeeder = {
   readonly id: string;
@@ -82,12 +82,12 @@ export async function fetchNotificationSettings(
   userId: string,
 ): Promise<NotificationSettingsResult> {
   try {
-    const response = await apiRequest<NotificationSettings>(
-      "/api/mobile/push-notifications",
-    );
+    const response = await apiRequest<NotificationSettings>("/api/mobile/push-notifications");
     await writeCache(userId, response);
     return { ...response, isStale: false };
   } catch (error) {
+    if (error instanceof ApiRequestError && (error.status === 401 || error.status === 403))
+      throw error;
     const cached = await readCachedNotificationSettings(userId);
     if (cached) return cached;
     throw error;
@@ -98,13 +98,10 @@ export async function saveNotificationSettings(
   userId: string,
   input: SaveNotificationSettingsInput,
 ): Promise<NotificationSettingsResult> {
-  const response = await apiRequest<NotificationSettings>(
-    "/api/mobile/push-notifications",
-    {
-      method: "POST",
-      body: JSON.stringify(input),
-    },
-  );
+  const response = await apiRequest<NotificationSettings>("/api/mobile/push-notifications", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
   await writeCache(userId, response);
   return { ...response, isStale: false };
 }

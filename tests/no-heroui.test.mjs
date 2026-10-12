@@ -28,17 +28,9 @@ test("HeroUI Native is absent from runtime source and dependencies", async () =>
   assert.doesNotMatch(contents.join("\n"), /heroui-native|HeroUINativeProvider/i);
 });
 
-test("app routes use the shared GlueStack Pressable", async () => {
-  const files = (await sourceFiles(path.join(root, "src", "app"))).filter(
-    (file) => file.endsWith(".tsx"),
-  );
-
-  for (const file of files) {
-    const source = await readFile(file, "utf8");
-    assert.doesNotMatch(
-      source,
-      /import\s*\{[^}]*\bPressable\b[^}]*\}\s*from\s*["']react-native["']/s,
-      path.relative(root, file),
-    );
-  }
+test("active app contains no retired Gluestack or imported legacy rendering", async () => {
+ const files=await sourceFiles(path.join(root,"src")); const contents=await Promise.all(files.map(file=>readFile(file,"utf8")));
+ assert.doesNotMatch(contents.join("\n"), /@gluestack-ui|components\/ui\/|legacy\/presentation/);
+ const pkg=JSON.parse(await readFile(path.join(root,"package.json"),"utf8"));
+ for(const name of ["@gluestack-ui/core","@gluestack-ui/utils","@gorhom/bottom-sheet","@react-native-vector-icons/feather"]) assert.equal(pkg.dependencies[name],undefined);
 });

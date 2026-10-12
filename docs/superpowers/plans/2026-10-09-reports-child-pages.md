@@ -1,0 +1,19 @@
+# Reports child pages implementation
+User authorization: implement all Reports child pages from the completed Figma design, continuing the approved isolated PanelUI migration.
+Worktree C:/Users/Justine/AppData/Local/Temp/aleconnect-panelui; primary checkouts and existing dirty work are preserved.
+
+Design authority: Figma 6uIaVRM63oHA723WKgjo5k/page94:2045. High-fidelity contexts saved under .superpowers/sdd/2026-10-09-reports-child-pages/figma. All source flows remain available under legacy/presentation. This is presentation migration; existing services, form validation, canonical statuses, consumer scope, queue/evidence durability, idempotency and auth remain authoritative. No new server capability/dependency or production writes are authorized. Emulator preview replay/push remain paused.
+
+Tasks:
+1. Shared report child shell: 16px sides, Inter body/Jakarta600 20/28 title, 12px page gaps, rounded12 cards, standard safe areas/keyboard handling, hidden scrollbars and one sheet at a time. Root owns src/features/reports/components/report-page.tsx and integration callers.
+2. Creation: service account -> category/type -> location -> details -> photos -> review; optional full-screen map pinning; conditional fields/validation; source evidence limits/processing; edit-from-review returns to review; discard protection; confirmation receipt only after server confirmation; offline/local saved/uncertain states truthfully use the durable queue. Own src/features/reports/new-report-screen.tsx, creation helper/tests, map UI, new.tsx and receipt support. Use installed Lucide and Panel controls. No API contract edits.
+3. Details: canonical status detail/timeline, available real history, unknown/rejected/unavailable/stale states; evidence viewer including loading/error/next/previous; privacy/auth scope. Own detail/timeline/evidence screens and route [id]. Reuse exact viewer interface from legacy where possible; coordinate creation caller.
+4. Browse and saved-device queue: all/search reports, status/type/account/period/sort filters and pagination; queue list/detail/retry/status/diagnostic/discard and failure states. Own list/queue routes and modules/tests; one BottomSheet content changes with Back. Queue scoped to current consumer, no evidence deletion while sending or uncertain result.
+5. Integration and acceptance: Root connects Home/Reports/notification-compatible detail routes, saves design-state coverage, focused regressions/typecheck/scoped lint, export/same-signature emulator build/install/data-retention, rendered light/dark/large text flows, Graphify refresh/harness/history and source checkpoint. No commit/push/release.
+
+Interfaces:
+- ReportPage({title, children, footer?, onBack?, onClose?, step?:{current:number,total:number,label:string}, subtitle?, scroll?:boolean}) exports from features/reports/components/report-page. Default Back pops or replaces /reports, safe top/header/body/bottom placement. Creation onClose owns discard. Footer receives controls and separator spacing.
+- Detail owns EvidencePhotoViewer contract; creation can implement photos inline until stable contract is communicated.
+- Existing Report/ComplaintFormState/ComplaintMeta, validateReportForm and ReportQueueContext/ReportQueueItem signatures are unchanged. Fixtures are explicitly labelled and must not call mutations. Root handles public alias routing and main-page navigation.
+
+Acceptance: every Figma Reports child state has a reachable implementation or documented reason tied to existing service contract. No feature action is a phase-boundary placeholder. New unknown-time work uses spinners; progress only for known six stages. No nested sheets/visible scrollbars/duplicate field suffixes. Preserve current certificates/package/device data; install only dedicated emulator. Native iOS/physical/spoken/live-authenticated verification reported separately.

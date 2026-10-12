@@ -47,11 +47,10 @@ test("transport errors use actionable phase messages without leaking account dat
 });
 
 test("submission transport persists diagnostics and retries only the idempotent final call", async () => {
-  const [api, reports, queue, list] = await Promise.all([
+  const [api, reports, queue] = await Promise.all([
     read("src/services/api.ts"),
     read("src/services/reports.ts"),
     read("src/services/report-queue.ts"),
-    read("src/app/(tabs)/reports/list.tsx"),
   ]);
 
   assert.match(api, /x-request-id/);
@@ -63,5 +62,4 @@ test("submission transport persists diagnostics and retries only the idempotent 
   assert.match(queue, /mapWithConcurrency\([\s\S]*?,\s*2,/);
   assert.match(queue, /diagnosticId/);
   assert.match(queue, /lastErrorPhase/);
-  assert.match(list, /Copy diagnostic code/);
 });

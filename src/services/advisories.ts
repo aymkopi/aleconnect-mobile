@@ -8,6 +8,7 @@ export type MobileAdvisory = {
   readonly id: string;
   readonly controlNumber: string | null;
   readonly type: string | null;
+  readonly topic?: string | null;
   readonly title: string;
   readonly content: string;
   readonly severity: string;
@@ -66,6 +67,7 @@ export function normalizeMobileAdvisory(value: unknown): MobileAdvisory {
     id: typeof record.id === "string" ? record.id : "",
     controlNumber: normalizeHumanReference(record.controlNumber),
     type: nullableString(record.type),
+    topic: nullableString(record.topic)?.trim() || null,
     title: typeof record.title === "string" ? record.title : "",
     content: typeof record.content === "string" ? record.content : "",
     severity: typeof record.severity === "string" ? record.severity : "",
@@ -100,10 +102,10 @@ const cacheTtlMs = 5 * 60 * 1000;
 const staleTtlMs = 24 * 60 * 60 * 1000;
 const requests = new Map<string, Promise<MobileAdvisoryPage>>();
 
-export type AdvisoryScope = { userId: string; identityUserId?: string; accessRevision?: number };
+export type AdvisoryScope = { userId: string; identityUserId?: string; accessRevision?: number; publicOnly?: boolean };
 
 export function advisoryScopeKey(scope: AdvisoryScope) {
-  return `${scope.identityUserId ?? scope.userId}:${scope.accessRevision ?? 0}`;
+  return scope.publicOnly ? "public" : `${scope.identityUserId ?? scope.userId}:${scope.accessRevision ?? 0}`;
 }
 
 function cacheKey(scope: AdvisoryScope) {
@@ -149,6 +151,7 @@ async function writeCache(
 
 export async function fetchActiveAdvisories(options: {
   readonly userId: string;
+  readonly publicOnly?: boolean;
   readonly identityUserId?: string;
   readonly accessRevision?: number;
   readonly limit?: number;
@@ -174,7 +177,9 @@ export async function fetchActiveAdvisories(options: {
   if (cursor) params.set("cursor", cursor);
 
   const request = apiRequest<MobileAdvisoryPage>(
-    `/api/mobile/advisories?${params.toString()}`,
+    `${options.publicOnly ? "/api/mobile/public/advisories" : "/api/mobile/advisories"}?${params.toString()}`,
+    {},
+    options.publicOnly ? { authToken: null } : {},
   )
     .then(async (response) => {
       const normalized = normalizeMobileAdvisoryPage(response);
@@ -182,9 +187,14 @@ export async function fetchActiveAdvisories(options: {
       return normalized;
     })
     .catch(async (error) => {
+      const failure = error as { status?: number; code?: string } | null;
+      if ([401, 403, 409].includes(failure?.status ?? 0) || ["ACCOUNT_NOT_ACCESSIBLE", "STALE_ACCESS_REVISION"].includes(failure?.code ?? "")) {
+        await clearAdvisoryCache(scope);
+        throw error;
+      }
       if (!cursor) {
         const stale = await readCache(scope, limit, true);
-        if (stale) return stale;
+        if (stale) return { ...stale, isStale: true };
       }
       throw error;
     })
@@ -202,10 +212,12 @@ export async function clearAdvisoryCache(scope: AdvisoryScope) {
 
 export async function fetchActiveAdvisory(
   id: string,
-  _scope: AdvisoryScope,
+  scope: AdvisoryScope,
 ): Promise<MobileAdvisory> {
   const response = await apiRequest<{ advisory: MobileAdvisory }>(
-    `/api/mobile/advisories/${encodeURIComponent(id)}`,
+    `${scope.publicOnly ? "/api/mobile/public/advisories" : "/api/mobile/advisories"}/${encodeURIComponent(id)}`,
+    {},
+    scope.publicOnly ? { authToken: null } : {},
   );
   return normalizeMobileAdvisory(response.advisory);
 }

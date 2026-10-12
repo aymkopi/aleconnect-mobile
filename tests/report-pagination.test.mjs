@@ -8,7 +8,7 @@ const read = (path) =>
 test("report archive uses server filters, opaque cursors, and a virtualized list", async () => {
   const [service, archive] = await Promise.all([
     read("src/services/reports.ts"),
-    read("src/app/(tabs)/reports/list.tsx"),
+    read("src/features/reports/all-reports-screen.tsx"),
   ]);
 
   assert.match(service, /fetchComplaintReportPage/);

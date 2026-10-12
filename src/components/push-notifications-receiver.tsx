@@ -1,12 +1,13 @@
+import { PANELUI_PREVIEW } from "@/constants/panelui-preview";
 import * as Notifications from "expo-notifications";
 import { useEffect } from "react";
 
 import {
-    clearLastNotificationResponse,
-    configurePushNotificationHandler,
-    consumeLastNotificationResponseAsync,
-    registerForPushNotificationsAsync,
-    subscribeToNotificationResponses,
+  clearLastNotificationResponse,
+  configurePushNotificationHandler,
+  consumeLastNotificationResponseAsync,
+  registerForPushNotificationsAsync,
+  subscribeToNotificationResponses,
 } from "@/services/push-notifications";
 
 type PushNotificationsReceiverProps = {
@@ -33,21 +34,23 @@ export function PushNotificationsReceiver({
       clearLastNotificationResponse();
       onNotificationResponseReceived?.(response);
     };
-    const unsubscribeNotificationResponses =
-      subscribeToNotificationResponses(handleNotificationResponse);
+    const unsubscribeNotificationResponses = PANELUI_PREVIEW
+      ? () => {}
+      : subscribeToNotificationResponses(handleNotificationResponse);
 
-    void registerForPushNotificationsAsync().then((token) => {
-      if (isMounted && token) {
-        onPushTokenReceived?.(token);
-      }
-    });
+    if (!PANELUI_PREVIEW) {
+      void registerForPushNotificationsAsync().then((token) => {
+        if (isMounted && token) {
+          onPushTokenReceived?.(token);
+        }
+      });
 
-    void consumeLastNotificationResponseAsync().then((response) => {
-      if (isMounted && response) {
-        handleNotificationResponse(response);
-      }
-    });
-
+      void consumeLastNotificationResponseAsync().then((response) => {
+        if (isMounted && response) {
+          handleNotificationResponse(response);
+        }
+      });
+    }
     const notificationReceivedSubscription =
       Notifications.addNotificationReceivedListener((notification) => {
         onNotificationReceived?.(notification);

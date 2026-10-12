@@ -16,6 +16,11 @@ const forcedLogoutReasonKey = "aleconnect_forced_logout_reason_v1";
 const forcedLogoutMessage =
   "You have been logged out because your account was accessed from another device.";
 const authInvalidatedListeners = new Set<(reason: string) => void>();
+let authTokenRevision = 0;
+let tokenWrite = Promise.resolve();
+export function getAuthTokenRevision() {
+  return authTokenRevision;
+}
 
 export class ApiRequestError extends Error {
   constructor(
@@ -65,6 +70,7 @@ export type AuthSession = {
 };
 
 export async function getAuthToken(): Promise<string | null> {
+  await tokenWrite;
   if (Platform.OS === "web") return AsyncStorage.getItem(authTokenKey);
 
   const secureToken = await SecureStore.getItemAsync(authTokenKey);
@@ -80,23 +86,50 @@ export async function getAuthToken(): Promise<string | null> {
   return legacyToken;
 }
 
-export async function setAuthToken(token: string): Promise<void> {
-  if (Platform.OS === "web") {
-    await AsyncStorage.setItem(authTokenKey, token);
-    return;
-  }
-
-  await SecureStore.setItemAsync(authTokenKey, token, {
-    keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+export async function setAuthToken(
+  token: string,
+  guard?: {
+    expectedRevision: number;
+    isCurrent?: () => boolean;
+  },
+): Promise<void> {
+  if (
+    guard &&
+    (guard.expectedRevision !== authTokenRevision ||
+      guard.isCurrent?.() === false)
+  )
+    throw new Error("Account access changed. Sign in again.");
+  const revision = ++authTokenRevision;
+  const write = tokenWrite.then(async () => {
+    if (revision !== authTokenRevision || guard?.isCurrent?.() === false)
+      throw new Error("Account access changed. Sign in again.");
+    if (Platform.OS === "web") await AsyncStorage.setItem(authTokenKey, token);
+    else {
+      await SecureStore.setItemAsync(authTokenKey, token, {
+        keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+      });
+      await AsyncStorage.removeItem(authTokenKey);
+    }
+    if (revision === authTokenRevision && guard?.isCurrent?.() === false) {
+      if (Platform.OS !== "web")
+        await SecureStore.deleteItemAsync(authTokenKey);
+      await AsyncStorage.removeItem(authTokenKey);
+    }
   });
-  await AsyncStorage.removeItem(authTokenKey);
+  tokenWrite = write.catch(() => {});
+  await write;
+  if (revision !== authTokenRevision || guard?.isCurrent?.() === false)
+    throw new Error("Account access changed. Sign in again.");
 }
 
 export async function clearAuthToken(): Promise<void> {
-  if (Platform.OS !== "web") {
-    await SecureStore.deleteItemAsync(authTokenKey);
-  }
-  await AsyncStorage.removeItem(authTokenKey);
+  ++authTokenRevision;
+  const write = tokenWrite.then(async () => {
+    if (Platform.OS !== "web") await SecureStore.deleteItemAsync(authTokenKey);
+    await AsyncStorage.removeItem(authTokenKey);
+  });
+  tokenWrite = write.catch(() => {});
+  await write;
 }
 
 export function subscribeAuthInvalidated(
@@ -117,11 +150,16 @@ export async function consumeForcedLogoutReason(): Promise<string | null> {
   return reason;
 }
 
-async function markAuthInvalidated(): Promise<void> {
+async function markAuthInvalidated(token: string): Promise<void> {
+  const revision = authTokenRevision;
+  if ((await getAuthToken()) !== token || revision !== authTokenRevision)
+    return;
   // A 401 with a stored token means the server no longer accepts this session.
   // The common case is a newer device login replacing this device's session.
-  await AsyncStorage.setItem(forcedLogoutReasonKey, forcedLogoutMessage);
   await clearAuthToken();
+  if (revision + 1 !== authTokenRevision) return;
+  await AsyncStorage.setItem(forcedLogoutReasonKey, forcedLogoutMessage);
+  if (revision + 1 !== authTokenRevision) return;
   authInvalidatedListeners.forEach((listener) => listener(forcedLogoutMessage));
 }
 
@@ -141,13 +179,10 @@ async function performRequest<T>(
   const headers = new Headers(init.headers);
   const controller = new AbortController();
   let didTimeout = false;
-  const timeout = setTimeout(
-    () => {
-      didTimeout = true;
-      controller.abort();
-    },
-    timeoutMs,
-  );
+  const timeout = setTimeout(() => {
+    didTimeout = true;
+    controller.abort();
+  }, timeoutMs);
   const abortFromCaller = () => controller.abort();
   init.signal?.addEventListener("abort", abortFromCaller, { once: true });
 
@@ -185,12 +220,14 @@ async function performRequest<T>(
 
   if (!response.ok) {
     if (response.status === 401 && token) {
-      await markAuthInvalidated();
+      await markAuthInvalidated(token);
     }
 
-    const body = await readJson<{ error?: string; message?: string; code?: string }>(
-      response,
-    ).catch(() => null);
+    const body = await readJson<{
+      error?: string;
+      message?: string;
+      code?: string;
+    }>(response).catch(() => null);
     throw new ApiRequestError(
       body?.error ?? body?.message ?? `Request failed with ${response.status}`,
       response.status,

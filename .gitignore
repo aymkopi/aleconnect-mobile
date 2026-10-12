@@ -44,3 +44,10 @@ app-example
 
 # Reproducible local analysis caches
 /graphify-out/cache/
+
+# Generated matching worker/shared assets; refreshed by sync:web-map and web scripts.
+/public/maplibre/
+
+# Local task evidence and temporary tool state
+/.cache/
+/.superpowers/

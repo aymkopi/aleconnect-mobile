@@ -26,8 +26,14 @@ Not a marketing landing page, not a heavy staff dashboard, not an exact clone of
 - Use clear category colors only where they improve scanning.
 - Keep forms step-based so consumers do not face one long page.
 - Prefer familiar mobile controls, readable labels, and obvious next actions.
-- Treat map and attachment features as progressive tools, not required blockers.
+- Require a verified Albay report location, Purok/Street and valid evidence; offer actionable recovery when location or photo permission is unavailable. Keep reporting drafts safe before navigating away.
 
 ## Accessibility & Inclusion
 
 Use readable contrast, large tap targets, descriptive labels, reduced-motion-safe transitions, and plain language for consumers filing reports under stress.
+
+## Current consumer flows
+
+Use five main destinations: Home, Reports, Advisories, Hotlines and Account. Guest access shows public All-target updates, service previews and hotlines; protected actions explain the sign-in requirement in one sheet. Account-number and linked-email sign-in remain consumer-only. Onboarding is not implemented in this release. Payment pages list external payment channels and never collect payment credentials.
+
+Staff remains authoritative for account access, targeting, report statuses and editable fields. Optional unread/contact metadata must not become an authorization source. UI gating cannot substitute for server password/ownership/revision checks.

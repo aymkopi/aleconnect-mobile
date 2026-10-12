@@ -319,13 +319,15 @@ test("rejects HEAD~1 fallback in a shallow clone", async (t) => {
   assert.ok(result.errors.some((message) => message.includes("could not compare Git base")))
 })
 
-const staffContractUrl = new URL("../../aleconnect/docs/agent-harness/cross-project-contracts.md", import.meta.url)
+const staffContractUrl = process.env.ALECONNECT_STAFF_ROOT
+  ? pathToFileURL(join(process.env.ALECONNECT_STAFF_ROOT, "docs/agent-harness/cross-project-contracts.md"))
+  : new URL("../../aleconnect/docs/agent-harness/cross-project-contracts.md", import.meta.url)
 const staffSiblingAvailable = await access(staffContractUrl).then(() => true, () => false)
 
 test("mobile shared contract matches the authoritative staff block", { skip: !staffSiblingAvailable && "staff sibling checkout is absent" }, async () => {
   const marker = /<!-- shared-contract:start -->([\s\S]*?)<!-- shared-contract:end -->/
   const mobile = await readFile(new URL("../docs/agent-harness/cross-project-contracts.md", import.meta.url), "utf8")
-  const staff = await readFile(new URL("../../aleconnect/docs/agent-harness/cross-project-contracts.md", import.meta.url), "utf8")
+  const staff = await readFile(staffContractUrl, "utf8")
   assert.equal(
     mobile.match(marker)?.[1].replace(/\r\n/g, "\n"),
     staff.match(marker)?.[1].replace(/\r\n/g, "\n"),
