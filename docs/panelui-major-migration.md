@@ -12,7 +12,7 @@ Requested: integrate the rebuilt app into local/remote aleconnect-mobile through
 | Deprecated UI cleanup | Passed | Gluestack runtime/provider/primitives and temporary archived presentation removed. Old fonts removed only after checking active imports. Reusable PanelUI source retained. |
 | Active tests | Passed | 431/431 current tests, zero skips, against canonical Staff source; mixed service guards and active flow tests retained. |
 | Source/config/export verification | Passed | TypeScript/harness/whitespace pass; lint0 errors/181 warnings; Expo alignment and Doctor21/21 pass. Fixture-free Android/iOS Hermes and web exports pass. Graphify refreshed3853 nodes/7013 edges/291 communities; generated files are separately preserved. Clean CI install remains a PR gate. |
-| Final review | Pending | Fresh read-only review of the concrete integration diff. |
+| Final review | Passed after fix | Read-only review verified identities, Home hashes, recovery and deprecated import removal. Missing upstream PanelUI MIT notice added and referenced. No remaining blocking source finding; native/private acceptance remains separate. |
 | PR/remote master | Pending | Create PR, attach it to the chat, pass exact-head CI and merge normally. |
 | Local master/folder promotion | Pending | Fast-forward local master; preserve common .git before replacing the original checkout; verify source hashes and refs at canonical path. |
 
@@ -43,3 +43,5 @@ Fresh results will be appended before integration. Prior v53 native build/signat
 Fresh verification on Node24.21.0:431 tests passed with no skipped cases;56 deprecated archived UI assertions were retired or superseded by active-reader coverage. Source exports used EXPO_NO_DOTENV=1, EXPO_PUBLIC_PANELUI_PREVIEW=0 and the explicit live HTTPS API origin. Lint warnings remain visible; no unrelated compiler/provider rewrite was introduced. Both VS Code Home source hashes exactly match the pre-integration recovery snapshot.
 
 Initial PR CI stopped on six Windows-only APK Markdown links in historical harness handoffs. Artifact paths are retained as local text references so Linux validation remains meaningful; no harness bypass was added.
+
+Review correction: include upstream PanelUI MIT copyright/permission notice at src/components/panelui/LICENSE and reference its source/provenance. Refreshed Graphify files were ZIP/hash verified, then restored to the tracked baseline for a clean canonical source checkout; current generated analysis remains in external recovery.

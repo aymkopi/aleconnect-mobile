@@ -8,7 +8,7 @@ Major consumer-app presentation update. The Figma-based PanelUI rebuild replaces
 
 - Adopt copied-source PanelUI 0.109, Uniwind/Tailwind 4 and Lucide. Keep source provenance in `panelui-lock.json` and `docs/panelui-source-manifest.json`; components remain locally editable.
 - Normalize light/dark surfaces, subtle card gradients, lighter 0.75px outlines, attached keyboard-aware bottom sheets, field adornments, 16px page padding and rounded interactive controls. Dark background is #00060F.
-- Replace Satoshi/SF-style app typography with Inter for controls/body and Plus Jakarta Sans for headings. Include the font licenses.
+- Replace Satoshi/SF-style app typography with Inter for controls/body and Plus Jakarta Sans for headings. Include the font licenses and upstream PanelUI MIT notice.
 - Use Expo Router for five main tabs: Home, Reports, Advisories, Hotlines and Account. Reset focused main pages to the top; preserve the caller when returning from notifications/settings. Keep page switching immediate and theme-aware.
 - Use one sheet with content/back navigation instead of nested sheets. Theme selection opens directly from Appearance. Remove scrollbars while retaining scrolling on child pages.
 - Add page-specific empty/error/offline/retry states and content-sized skeletons. Blocking mutations use a spinner; determinate progress is reserved for steps or known-duration actions.

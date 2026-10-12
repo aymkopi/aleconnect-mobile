@@ -672,5 +672,7 @@
     }
   },
   "packageIntegrity": "sha512-Jv8dbRxqu14X3Pgs8+6ufGTbUz/Dahhjk+C1h4YzblKas2vWR+YEMGyhNYgLgAm8yr2AO8W3xnjw8lZlzhaPMA==",
-  "baseFilesReferencePackage": "0.107.1"
+  "baseFilesReferencePackage": "0.107.1",
+  "licenseFile": "src/components/panelui/LICENSE",
+  "licenseSource": "https://github.com/panel-ui/PanelUI/blob/main/LICENSE"
 }

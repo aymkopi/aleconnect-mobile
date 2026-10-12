@@ -43,3 +43,5 @@ Worktree diagnostics: `npm run harness:doctor` (docs) or `npm run harness:doctor
 Five Expo Router tabs and their child screens live in `src/app`; feature implementations live in `src/features`. Shared copied-source controls live in `src/components/panelui`, with provenance in `panelui-lock.json`. Consumer API/storage logic stays in `src/services`, models/contracts stay near their owners, and native config plugins stay in `plugins`.
 
 See [the detailed changelog](CHANGELOG.md) and [major migration handoff](docs/panelui-major-migration.md). Onboarding and in-app payment collection are outside the shipped flows. Optional Staff PR40 contracts must be released before claiming their dependent behavior.
+
+Copied PanelUI source is Copyright (c) 2026 Khalid Abdi and distributed under [its MIT license](src/components/panelui/LICENSE). Font licenses are included beside the font assets.
