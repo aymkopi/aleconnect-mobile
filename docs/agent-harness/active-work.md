@@ -1,11 +1,11 @@
 # Active work
 
 Last reviewed: 2026-10-12
-Current branch: codex/panelui-five-main; preparing PanelUI 2.0.0 integration into master.
+Current branch: master; PanelUI 2.0.0 major integration merged through PR #3.
 Active plan: [PanelUI 2.0.0 integration](../panelui-major-migration.md).
-Next task: finish source/review/CI gates, merge PR and promote the modernized tree to the canonical Mobile folder.
-Known blockers: no harness blocker. Source cleanup/CI completed; native/device acceptance limits remain in the operational handoff.
-Last verified: 59 harness/CI checks, 245 application tests, plus 10 focused signing/runtime-guard tests, TypeScript, lint (zero errors/41 existing warnings), Expo alignment and Doctor 21/21 passed. Android and iOS Hermes exports and Gradle createBundlePreviewJsAndAssets passed on Node 24.21.0. Mobile initial shared-cache EPERM was resolved by isolated TEMP/TMP without clearing another process's cache. Locked dependency engines accept 24.21.0; lockfiles/resolutions are unchanged. Graphify refresh passed with generated evidence preserved outside commits. Local dependency junctions reuse primary installations; Full GitHub CI 37206566499 passed clean installation and required application gates on the .node-version runtime.
+Next task: complete separate Staff PR40/native/private acceptance gates; source integration and canonical folder promotion are complete.
+Known blockers: no source/harness blocker. Staff PR40 and native/private/provider acceptance remain separate. Windows holds the empty former aleconnect-panelui directory; it contains no project contents.
+Last verified: 431/431 active tests with zero skips, TypeScript, lint 0 errors/181 retained warnings, harness/whitespace, Expo alignment and Doctor 21/21; fixture-free Android/iOS Hermes and web exports passed on Node 24.21.0. Both exact-head PR checks passed. PR #3 merge ae90471440269f35b18a9261693822eb01ac8e8c is on local/remote master. Canonical physical source promotion retains the full common Git repository, nine stashes, signer/provider configuration and byte-identical recent VS Code Home edits. Android prebuild now uses 2.0.0/code 54 without a dependency change. Old acceptance detail remains in its task handoff.
 
 
 - [Harness refinement](tasks/harness-refinement.md): isolated docs/skills/checks; no product release.
@@ -22,4 +22,4 @@ Last verified: 59 harness/CI checks, 245 application tests, plus 10 focused sign
 
 - [PanelUI0.109/Home/topic pass](../panelui-0109-facebook-topics.md): Figma/app fixed Home grids and Kpi complete; Staff topic migration/release and new native preview pending.
 
-- [PanelUI 2.0.0 integration](../panelui-major-migration.md): detailed changelog, recent VS Code Home edits, deprecated presentation cleanup, source verification and safe local/remote integration.
+- [PanelUI 2.0.0 integration](../panelui-major-migration.md): completed PR #3 major update and canonical folder promotion; detailed changelog, recent VS Code edits, safe recovery and remaining release limits.
