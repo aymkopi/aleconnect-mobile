@@ -24,11 +24,11 @@ npx tsc --noEmit
 npm run lint
 ```
 
-Use focused tests for the changed behavior; the JS suite is `node --test tests/*.test.mjs`. Native/config changes also need Expo alignment/Doctor and appropriate exports/build/device checks. Docs-only edits need harness and whitespace checks.
+Use focused tests for the changed behavior; `npm test` runs the JS and TypeScript suites. Native/config changes also need Expo alignment/Doctor and appropriate exports/build/device checks. Docs-only edits need harness and whitespace checks.
 
 ## Android preview
 
-Run `npm run android:preview` with Node 24 and the required Java/Android SDK from the current native configuration. The local preview uses a standalone production bundle and preview signing; it is separate from a production-signed/store release.
+The `npm run android:preview` script is emulator QA only: it requires `EXPO_PUBLIC_PANELUI_PREVIEW=1` and pauses queue replay. For a fixture-free real-device build, follow [the signed-device runbook](docs/superpowers/plans/2026-10-10-real-android-preview.md) with `EXPO_NO_DOTENV=1`, `EXPO_PUBLIC_PANELUI_PREVIEW=0` and the explicit HTTPS API origin. Force regeneration of the Hermes bundle when changing build-mode environment variables. Preserve the original local signing key; this is separate from a production-signed/store release.
 
 Output: `android/app/build/outputs/apk/preview/app-preview.apk`. For a requested handoff, copy the requested app to the agreed output directory and verify its SHA-256. Install/launch and authenticated/native behavior need separate device evidence.
 
@@ -37,3 +37,9 @@ Do not uninstall an existing app to resolve a signature mismatch as routine clea
 [Agent guide](AGENTS.md) · [Product](PRODUCT.md) · [Documentation map](docs/README.md) · [Current work](docs/agent-harness/active-work.md)
 
 Worktree diagnostics: `npm run harness:doctor` (docs) or `npm run harness:doctor -- --app` (app toolchain). See [isolated setup](docs/agent-harness/worktree-setup.md).
+
+## PanelUI 2.0.0
+
+Five Expo Router tabs and their child screens live in `src/app`; feature implementations live in `src/features`. Shared copied-source controls live in `src/components/panelui`, with provenance in `panelui-lock.json`. Consumer API/storage logic stays in `src/services`, models/contracts stay near their owners, and native config plugins stay in `plugins`.
+
+See [the detailed changelog](CHANGELOG.md) and [major migration handoff](docs/panelui-major-migration.md). Onboarding and in-app payment collection are outside the shipped flows. Optional Staff PR40 contracts must be released before claiming their dependent behavior.

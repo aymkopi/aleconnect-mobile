@@ -4,13 +4,20 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "types": ["node", "react"],
+    "types": [
+      "node",
+      "react"
+    ],
     "forceConsistentCasingInFileNames": true,
     "module": "esnext",
     "allowImportingTsExtensions": true,
     "paths": {
-      "@/*": ["./src/*"],
-      "@/assets/*": ["./assets/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@/assets/*": [
+        "./assets/*"
+      ]
     }
   },
   "include": [

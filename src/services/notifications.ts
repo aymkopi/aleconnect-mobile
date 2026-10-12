@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { apiRequest } from "@/services/api";
+import { apiRequest, ApiRequestError } from "@/services/api";
 import { claimRefresh } from "@/utils/refresh-cooldown";
 
 export type MobileNotificationCategory =
@@ -33,6 +33,7 @@ export type MobileNotificationsResponse = {
   notifications: MobileNotification[];
   nextCursor: string | null;
   isStale?: boolean;
+  accessRevision?: number;
 };
 
 const cachePrefix = "notification_list_cache_v3";
@@ -82,12 +83,15 @@ export function subscribeNotificationsChanged(listener: () => void) {
   return () => listeners.delete(listener);
 }
 
-export async function invalidateNotifications(userId?: string) {
+export async function invalidateNotifications(userId?: string, accessRevision?: number, isCurrent?: () => boolean) {
+  if (isCurrent && !isCurrent()) return;
   if (userId) {
-    const prefix = `${cachePrefix}:${userId}:`;
+    const prefix = `${cachePrefix}:${userId}:${accessRevision === undefined ? "" : `${accessRevision}:`}`;
     const keys = (await AsyncStorage.getAllKeys()).filter((key) => key.startsWith(prefix));
+    if (isCurrent && !isCurrent()) return;
     if (keys.length) await AsyncStorage.multiRemove(keys);
   }
+  if (isCurrent && !isCurrent()) return;
   listeners.forEach((listener) => listener());
 }
 
@@ -111,6 +115,8 @@ export async function fetchNotifications(options: {
   /** Identity principal and revision prevent a former account owner seeing stale private rows. */
   readonly identityUserId?: string;
   readonly accessRevision?: number;
+  readonly sessionId?: string;
+  readonly isCurrent?: () => boolean;
   readonly serviceAccountId?: string | null;
   readonly cursor?: string | null;
   readonly limit?: number;
@@ -129,12 +135,18 @@ export async function fetchNotifications(options: {
     Boolean(options.force) &&
     claimRefresh(`notifications:${identityUserId}:${accessRevision}:${filtersKey}`);
 
+  const assertCurrent = () => {
+    if (options.isCurrent && !options.isCurrent()) throw new ApiRequestError("Account access changed. Refresh notifications.", 409);
+  };
+  assertCurrent();
+
   if (!cursor && !force) {
     const cached = await readCache(identityUserId, accessRevision, filtersKey);
+    assertCurrent();
     if (cached) return cached;
   }
 
-  const requestKey = `${identityUserId}:${accessRevision}:${cursor ?? "first"}:${limit}:${filtersKey}`;
+  const requestKey = `${identityUserId}:${accessRevision}:${options.sessionId ?? "legacy"}:${cursor ?? "first"}:${limit}:${filtersKey}`;
   const existing = requests.get(requestKey);
   if (existing) return existing;
 
@@ -148,14 +160,25 @@ export async function fetchNotifications(options: {
     `/api/mobile/notifications?${params.toString()}`,
   )
     .then(async (response) => {
+      assertCurrent();
+      if (response.accessRevision !== undefined && response.accessRevision !== accessRevision) {
+        throw new ApiRequestError("Your account access changed. Refresh notifications.", 409);
+      }
       const normalized = normalizeResponse(response);
       if (!cursor) await writeCache(identityUserId, accessRevision, filtersKey, normalized);
       return normalized;
     })
     .catch(async (error) => {
-      if (!cursor) {
+      assertCurrent();
+      const status = (error as { status?: number })?.status;
+      if (status === 401 || status === 403 || status === 409) {
+        await invalidateNotifications(identityUserId, accessRevision, options.isCurrent);
+        throw error;
+      }
+      if (!cursor && !(status && status >= 400 && status < 500)) {
         const stale = await readCache(identityUserId, accessRevision, filtersKey, true);
-        if (stale) return stale;
+        assertCurrent();
+        if (stale) return { ...stale, isStale: true };
       }
       throw error;
     })
@@ -165,26 +188,34 @@ export async function fetchNotifications(options: {
   return request;
 }
 
-export async function markNotificationsRead(ids: string[], userId: string, scope?: { identityUserId?: string; accessRevision?: number }) {
+type NotificationMutationScope = { identityUserId?: string; accessRevision?: number; serviceAccountId?: string | null; isCurrent?: () => boolean };
+
+function mutationPath(scope?: NotificationMutationScope) {
+  return scope?.serviceAccountId ? `/api/mobile/notifications?${new URLSearchParams({ serviceAccountId: scope.serviceAccountId })}` : "/api/mobile/notifications";
+}
+
+export async function markNotificationsRead(ids: string[], userId: string, scope?: NotificationMutationScope) {
+  if (scope?.isCurrent && !scope.isCurrent()) throw new ApiRequestError("Account access changed. Refresh notifications.", 409);
   const response = await apiRequest<MobileNotificationsResponse>(
-    "/api/mobile/notifications",
+    mutationPath(scope),
     {
       method: "POST",
       body: JSON.stringify({ action: "markRead", ids, accessRevision: scope?.accessRevision }),
     },
   );
-  await invalidateNotifications(userId);
-  return response;
+  await invalidateNotifications(scope?.identityUserId ?? userId, scope?.accessRevision, scope?.isCurrent);
+  return normalizeResponse(response);
 }
 
-export async function markAllNotificationsRead(userId: string, scope?: { identityUserId?: string; accessRevision?: number }) {
+export async function markAllNotificationsRead(userId: string, scope?: NotificationMutationScope) {
+  if (scope?.isCurrent && !scope.isCurrent()) throw new ApiRequestError("Account access changed. Refresh notifications.", 409);
   const response = await apiRequest<MobileNotificationsResponse>(
-    "/api/mobile/notifications",
+    mutationPath(scope),
     {
       method: "POST",
       body: JSON.stringify({ action: "markAllRead", accessRevision: scope?.accessRevision }),
     },
   );
-  await invalidateNotifications(userId);
-  return response;
+  await invalidateNotifications(scope?.identityUserId ?? userId, scope?.accessRevision, scope?.isCurrent);
+  return normalizeResponse(response);
 }

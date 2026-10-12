@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   ApiRequestError,
   apiRequest,
-  clearAuthToken,
+  getAuthTokenRevision,
   setAuthToken,
   type AuthUser,
 } from "@/services/api";
@@ -132,10 +132,11 @@ function resolveConsumerUsernameByAccountNumber(
   return normalizedAccountNumber;
 }
 
-export async function signInWithAccountNumber({
-  accountNumber,
-  password,
-}: SignInWithAccountNumberParams): Promise<ConsumerLoginResponse> {
+export async function signInWithAccountNumber(
+  { accountNumber, password }: SignInWithAccountNumberParams,
+  isCurrent?: () => boolean,
+): Promise<ConsumerLoginResponse> {
+  const tokenRevision = getAuthTokenRevision();
   const normalizedAccountNumber = normalizeAccountNumber(accountNumber);
   const normalizedPassword = normalizePassword(password);
 
@@ -165,6 +166,7 @@ export async function signInWithAccountNumber({
           password: normalizedPassword,
         }),
       },
+      { authToken: null },
     );
   } catch (error) {
     if (error instanceof ApiRequestError && error.status !== 401) {
@@ -176,19 +178,22 @@ export async function signInWithAccountNumber({
   }
 
   if (login.user.role !== "consumer") {
-    await clearAuthToken();
     throw new Error("This app only supports consumer accounts.");
   }
 
-  await setAuthToken(login.token);
+  await setAuthToken(login.token, {
+    expectedRevision: tokenRevision,
+    isCurrent,
+  });
   await clearAttempts(normalizedAccountNumber);
   return login;
 }
 
-export async function signInWithEmail({
-  email,
-  password,
-}: SignInWithEmailParams): Promise<ConsumerLoginResponse> {
+export async function signInWithEmail(
+  { email, password }: SignInWithEmailParams,
+  isCurrent?: () => boolean,
+): Promise<ConsumerLoginResponse> {
+  const tokenRevision = getAuthTokenRevision();
   const normalizedEmail = email.trim().toLowerCase();
   if (!normalizedEmail || !password) {
     throw new Error("Email and password are required.");
@@ -200,13 +205,16 @@ export async function signInWithEmail({
       method: "POST",
       body: JSON.stringify({ mode: "email", email: normalizedEmail, password }),
     },
+    { authToken: null },
   );
   if (login.user.role !== "consumer") {
-    await clearAuthToken();
     throw new Error("This app only supports consumer accounts.");
   }
 
-  await setAuthToken(login.token);
+  await setAuthToken(login.token, {
+    expectedRevision: tokenRevision,
+    isCurrent,
+  });
   return login;
 }
 

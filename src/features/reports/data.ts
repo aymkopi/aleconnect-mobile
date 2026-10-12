@@ -63,6 +63,7 @@ export type Report = {
   typeId: string;
   typeTitle: string;
   createdAt: string;
+  updatedAt?: string | null;
   status: ConsumerTicketStatus | null;
   ticketNumber: string;
   description?: string | null;
@@ -71,6 +72,7 @@ export type Report = {
   serviceAccountId?: string | null;
   accountNumber?: string | null;
   accountName?: string | null;
+  unreadNotificationIds?: string[];
 };
 
 export function preserveKnownConsumerReportStatuses(
@@ -183,11 +185,17 @@ export function normalizeReportDisplayAddress(value: unknown) {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
+export function normalizeUnreadReportNotificationIds(value: unknown): string[] {
+  return Array.isArray(value) ? [...new Set(value.filter((id): id is string =>
+    typeof id === "string" && id.length > 0 && id.length <= 36))].slice(0, 100) : [];
+}
+
 export function normalizeReportListItem(
   report: Omit<Report, "status"> & { status: unknown },
 ): Report {
   return {
     ...report,
+    unreadNotificationIds: normalizeUnreadReportNotificationIds(report.unreadNotificationIds),
     status: parseConsumerTicketStatus(report.status),
     ticketNumber: normalizeHumanReference(report.ticketNumber) ?? "",
     displayAddress: normalizeReportDisplayAddress(report.displayAddress),
@@ -384,6 +392,7 @@ export function parseReportDetailResponse(value: unknown): ReportDetail {
         ? report.imageUrlsExpiresAt
         : null,
     consumerMessage: normalizeConsumerMessage(report.consumerMessage),
+    unreadNotificationIds: normalizeUnreadReportNotificationIds(report.unreadNotificationIds),
   };
 }
 

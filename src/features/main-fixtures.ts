@@ -1,0 +1,128 @@
+import type { Report } from "@/features/reports/data";
+import type { MobilePublicUpdate } from "@/services/public-updates";
+import type { HotlineCategory } from "@/services/hotlines";
+export const fixtureReportAccounts = [
+  { id: "fixture-home", registeredName: "Home", accountNumber: "10004821" },
+  { id: "fixture-shop", registeredName: "Shop", accountNumber: "10006822" },
+];
+export const fixtureReports: Report[] = [
+  {
+    id: "fixture-1",
+    serviceAccountId: "fixture-home",
+    accountName: "Home",
+    accountNumber: "10004821",
+    ticketNumber: "AL26-081701",
+    title: "Primary Line",
+    categoryTitle: "No light / power",
+    categoryId: "power",
+    typeTitle: "Primary Line",
+    typeId: "primary",
+    createdAt: "2026-10-07T01:00:00Z",
+    status: "verified",
+    displayAddress: "Purok 5, Bay 28 · Victory Village North, Legazpi",
+  },
+  {
+    id: "fixture-2",
+    serviceAccountId: "fixture-shop",
+    accountName: "Shop",
+    accountNumber: "10006822",
+    ticketNumber: "AL26-081652",
+    title: "Service Drop",
+    categoryTitle: "Service drop",
+    categoryId: "service",
+    typeTitle: "Service Drop",
+    typeId: "service",
+    createdAt: "2026-10-06T06:20:00Z",
+    status: "in_progress",
+    displayAddress: "Rawis · Legazpi City",
+  },
+  {
+    id: "fixture-3",
+    serviceAccountId: "fixture-home",
+    accountName: "Home",
+    accountNumber: "10004821",
+    ticketNumber: "AL26-081601",
+    title: "Meter inspection",
+    categoryTitle: "KWHR meter",
+    categoryId: "meter",
+    typeTitle: "Meter inspection",
+    typeId: "meter",
+    createdAt: "2026-10-03T02:00:00Z",
+    status: "resolved",
+    displayAddress: "Rawis · Legazpi City",
+  },
+];
+export const fixtureUpdates: MobilePublicUpdate[] = [
+  {
+    kind: "advisory",
+    id: "fixture-advisory",
+    controlNumber: "SO-1920",
+    type: "scheduled_outage",
+    title: "Scheduled power outage",
+    content:
+      "Plan ahead for today’s interruption. Maintenance helps keep our community connected.",
+    severity: "high",
+    audience: "Rawis · Legazpi City",
+    effectiveAt: null,
+    expiresAt: null,
+    scheduledStartAt: "2026-10-07T00:00:00Z",
+    scheduledEndAt: "2026-10-07T09:00:00Z",
+    publishedAt: "2026-10-06T06:00:00Z",
+  },
+  {
+    kind: "facebook_post",
+    id: "fixture-story",
+    message:
+      "Serving Albay, every day. Official advisories, report progress and service contacts.",
+    photos: [],
+    publishedAt: "2026-10-06T02:00:00Z",
+    permalink: null,
+    pageName: "ALECO",
+    topic: "communications",
+  },
+  {
+    kind: "facebook_post",
+    id: "fixture-safety",
+    message:
+      "A safer home starts with safe wiring. A quick reminder about home wiring and service-line concerns.",
+    photos: [],
+    publishedAt: "2026-10-05T02:00:00Z",
+    permalink: null,
+    pageName: "ALECO",
+    topic: "communications",
+  },
+];
+export const fixtureHotlines: HotlineCategory[] = [
+  {
+    id: "fixture-aleco",
+    name: "Electric utility",
+    description: null,
+    agencies: [
+      {
+        id: "fixture-agency",
+        categoryId: "fixture-aleco",
+        name: "ALECO",
+        description: "Power and account support",
+        address: null,
+        logoUrl: null,
+        websiteLink: null,
+        avatarVersion: null,
+        contacts: [
+          {
+            id: "fixture-phone",
+            number: "Not available",
+            type: "Mobile",
+            label: "Fixture — calling disabled",
+            group: "Other service contacts",
+          },
+        ],
+      },
+    ],
+  },
+  ...["Police", "Fire & rescue", "Hospitals", "Government"].map((name, i) => ({
+    id: "fixture-category-" + i,
+    name,
+    description: "Find local service contacts",
+    agencies: [],
+  })),
+];

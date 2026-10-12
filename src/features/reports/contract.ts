@@ -59,6 +59,7 @@ export type ReportFormErrors = Partial<
     | "municipalityCode"
     | "barangayPsgc"
     | "location"
+    | "purok"
     | "categoryDescription"
     | "typeDescription"
     | "currentRegisteredName"
@@ -120,6 +121,8 @@ export function validateReportForm(
     barangay &&
     barangay.municipalityCode === form.municipalityCode,
   );
+
+  if (!form.purok.trim()) errors.purok = "Enter the purok or street of the issue.";
 
   if (!form.municipalityCode) {
     errors.municipalityCode = "Report location has no matched municipality.";

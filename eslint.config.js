@@ -5,7 +5,7 @@ const expoConfig = require("eslint-config-expo/flat");
 module.exports = defineConfig([
   expoConfig,
   {
-    ignores: ["dist/*"],
+    ignores: ["dist/**"],
     // SDK 56 adds compiler diagnostics for existing identity/async lifecycle
     // patterns. Keep them visible while preserving runtime behavior during
     // the SDK migration; the compiler can skip these optimizations safely.

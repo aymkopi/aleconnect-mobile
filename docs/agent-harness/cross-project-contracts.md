@@ -1,7 +1,7 @@
 # ALEConnect cross-project contracts
 
 Authoritative source: `../aleconnect/docs/agent-harness/cross-project-contracts.md`
-Last synchronized staff commit: `c4e02993009795c813bee4d2de8e8ec58cd4c24b`
+Snapshot synchronized with the local Staff source at `2ec4ca51ba40ec13a7fb3274083eb9e9c7ff6604` on 2026-10-12.
 
 <!-- shared-contract:start -->
 ## Ownership and routes
@@ -33,3 +33,13 @@ Last synchronized staff commit: `c4e02993009795c813bee4d2de8e8ec58cd4c24b`
 - For coordinated changes: verify the server contract, deploy Worker-compatible changes, deploy Pages when needed, then publish the mobile consumer release. Record both commits and versions in each implementation history.
 - Validate staff with focused Node tests and `npm run build`; validate mobile with its focused tests, TypeScript, lint, Expo checks, and device behavior appropriate to the change.
 <!-- shared-contract:end -->
+
+## Additive PanelUI integration contracts
+
+The following reviewed companion snapshot records Mobile readers beyond the local Staff baseline. It does not assert that an unmerged server change is deployed. Staff PR40 remains a separate dependency for editable profile details without active-report locks, linked-account contact details and unread-report metadata. Existing payloads without these optional fields remain supported. See [API alignment](../panelui-api-alignment.md) and [major migration](../panelui-major-migration.md) for release limits.
+
+- Guest reads use additive unauthenticated `/api/mobile/public/advisories` and `/api/mobile/public/updates` endpoints. Only eligible published/effective/unexpired All-target advisories and eligible standalone published posts are returned; unknown scopes fail closed. Authenticated scoped endpoints/caches are unchanged.
+- Consumer report lists accept additive `sort=updated`, ordering/continuing by exact `updated_at DESC, ticket_id DESC`; optional `updatedAt` preserves legacy DTO readers. Cursor precision remains six fractional digits. Counts from loaded records are not complete server totals.
+- Profile detail editing adds authenticated `field:details` with serviceAccountId/accessRevision, a selected-service password and reviewed field batch. Server ownership/revision and selected-service password validation precede atomic updates; active reports do not block profile edits, and profile mutations never advance ticket lifecycle. Legacy single-field payloads remain compatible. Mobile locks editing when capability metadata is absent. Production email re-verification is unavailable and must not be simulated.
+- Report list/detail add optional `unreadNotificationIds` from the existing owner/account/audience-scoped inbox rules. Opening a visible report uses the existing notification markRead endpoint; old readers ignore the field. Linked accounts add existing phone/readable PSGC address fields for account-card presentation; QR contains only the account identifier.
+- Standalone/imported Facebook posts add optional topic metadata (General/Billing/Communications/custom1-80-character names) to private and guest Public Updates. Topic-only Staff classification never changes provider caption or delivery state; advisory mirrors/comments remain separate. Deploy the additive nullable post_topic schema before the new Staff reader; legacy consumer caches without topic remain compatible.

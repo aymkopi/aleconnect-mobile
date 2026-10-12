@@ -6,7 +6,7 @@ import { claimRefresh } from "@/utils/refresh-cooldown";
 
 export type MobilePublicUpdate =
   | ({ readonly kind: "advisory" } & MobileAdvisory)
-  | { readonly kind: "facebook_post"; readonly id: string; readonly message: string; readonly photos: readonly MobilePublicPhoto[]; readonly publishedAt: string; readonly permalink: string | null; readonly pageName: string | null };
+  | { readonly kind: "facebook_post"; readonly id: string; readonly message: string; readonly photos: readonly MobilePublicPhoto[]; readonly publishedAt: string; readonly permalink: string | null; readonly pageName: string | null; readonly topic?: string | null };
 
 export type MobilePublicUpdatesPage = { readonly items: MobilePublicUpdate[]; readonly nextCursor: string | null; readonly isStale?: boolean };
 type PublicUpdatesCache = { fetchedAt: number; limit: number; value: MobilePublicUpdatesPage };
@@ -33,6 +33,7 @@ export function normalizeMobilePublicUpdate(value: unknown): MobilePublicUpdate 
     publishedAt: typeof record.publishedAt === "string" ? record.publishedAt : "",
     permalink: nullableString(record.permalink),
     pageName: nullableString(record.pageName),
+    topic: nullableString(record.topic)?.trim() || null,
   };
 }
 
@@ -71,8 +72,8 @@ async function writeCache(scope: AdvisoryScope, limit: number, value: MobilePubl
 export async function fetchPublicUpdates(options: AdvisoryScope & { limit?: number; cursor?: string | null; force?: boolean }): Promise<MobilePublicUpdatesPage> {
   const limit = Math.min(50, Math.max(1, options.limit ?? 25));
   const cursor = options.cursor ?? null;
-  const { userId, identityUserId, accessRevision } = options;
-  const scopeKey = advisoryScopeKey({ userId, identityUserId, accessRevision });
+  const { userId, identityUserId, accessRevision, publicOnly } = options;
+  const scopeKey = advisoryScopeKey({ userId, identityUserId, accessRevision, publicOnly });
   const force = Boolean(options.force) && claimRefresh(`public-updates:${scopeKey}`);
   if (!cursor && !force) {
     const cached = await readCache(options, limit);
@@ -83,7 +84,11 @@ export async function fetchPublicUpdates(options: AdvisoryScope & { limit?: numb
   if (existing) return existing;
   const params = new URLSearchParams({ limit: String(limit) });
   if (cursor) params.set("cursor", cursor);
-  const request = apiRequest<MobilePublicUpdatesPage>(`/api/mobile/public-updates?${params}`)
+  const request = apiRequest<MobilePublicUpdatesPage>(
+    `${options.publicOnly ? "/api/mobile/public/updates" : "/api/mobile/public-updates"}?${params}`,
+    {},
+    options.publicOnly ? { authToken: null } : {},
+  )
     .then(async (response) => {
       const normalized = normalizePage(response);
       if (!cursor) await writeCache(options, limit, normalized);
@@ -107,6 +112,17 @@ export async function fetchPublicUpdates(options: AdvisoryScope & { limit?: numb
     .finally(() => requests.delete(requestKey));
   requests.set(requestKey, request);
   return request;
+}
+
+export async function fetchGuestPublicPost(id: string): Promise<Extract<MobilePublicUpdate, { kind: "facebook_post" }>> {
+  const response = await apiRequest<{ item: MobilePublicUpdate }>(
+    "/api/mobile/public/updates/posts/" + encodeURIComponent(id),
+    {},
+    { authToken: null },
+  );
+  const item = normalizeMobilePublicUpdate(response.item);
+  if (!item || item.kind !== "facebook_post") throw new Error("Public post not found.");
+  return item;
 }
 
 export async function clearPublicUpdatesCache(scope: AdvisoryScope) {

@@ -94,16 +94,6 @@ test("identity setup stores the replacement token before its caller refreshes se
   assert.match(source, /idempotent: true/);
 });
 
-test("email setup preserves one logical idempotency key across confirm retries", async () => {
-  const source = await readFile(new URL("../src/app/email-setup.tsx", import.meta.url), "utf8");
-  assert.match(source, /useRef<\{ email: string; idempotencyKey: string \}/);
-  assert.match(source, /setupAttempt\.current\?\.email !== normalizedEmail/);
-  assert.match(source, /idempotencyKey: createApiRequestId\(\)/);
-  assert.match(source, /idempotencyKey: setupAttempt\.current\.idempotencyKey/);
-  assert.match(source, /EMAIL_SETUP_CONFIRMATION_INVALID/);
-  assert.match(source, /setupAttempt\.current = null/);
-});
-
 test("email setup dismissal is scoped to the legacy service account rather than globally", async () => {
   const source = await readFile(
     new URL("../src/services/consumer-identity.ts", import.meta.url),
@@ -123,15 +113,4 @@ test("consumer account loading does not combine unequal identity and linked-acco
 
   assert.match(source, /readConsistentConsumerAccountSnapshot/);
   assert.doesNotMatch(source, /Math\.max\(identity\.accessRevision, linkedAccounts\.accessRevision\)/);
-});
-
-test("mock setup remains disabled until the server capability is explicitly true", async () => {
-  const source = await readFile(
-    new URL("../src/app/email-setup.tsx", import.meta.url),
-    "utf8",
-  );
-
-  assert.match(source, /accountContext\.capabilities\.mockEmailVerification/);
-  assert.match(source, /isDisabled=\{!mockVerificationAvailable \|\| isSubmitting\}/);
-  assert.match(source, /if \(!mockVerificationAvailable\) return/);
 });

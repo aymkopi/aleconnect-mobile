@@ -24,6 +24,6 @@ async function routeFiles(directory) {
 test("every Expo Router screen exports a default component", async () => {
   for (const file of await routeFiles(appRoot)) {
     const source = await readFile(file, "utf8");
-    assert.match(source, /export default/, path.relative(appRoot, file));
+    assert.match(source, /export default|export \{\s*(?:default|\w+\s+as\s+default)\s*\}/, path.relative(appRoot, file));
   }
 });

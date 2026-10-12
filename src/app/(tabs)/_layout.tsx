@@ -1,10 +1,13 @@
 import { FloatingTabsBar } from "@/components/floating-tabs-bar";
 import { useAppColors } from "@/hooks/use-app-colors";
-import { Tabs } from "expo-router";
-
+import { Tabs, Redirect, usePathname } from "expo-router";
+import { authReturnRoute } from "@/features/auth/auth-state";
+import { useAuthSession } from "@/hooks/use-auth-session";
 export default function TabsLayout() {
-  const [sceneBackgroundColor] = useAppColors(["background"]);
-
+  const [background] = useAppColors(["background"]);
+  const { session } = useAuthSession();
+  const pathname = usePathname();
+  if (session?.user.mustChangePassword) return <Redirect href={{ pathname: "/required-password", params: { returnTo: authReturnRoute(pathname) } }} />;
   return (
     <Tabs
       detachInactiveScreens
@@ -12,37 +15,21 @@ export default function TabsLayout() {
       screenOptions={{
         animation: "none",
         headerShown: false,
-        headerLeft: () => null,
         lazy: true,
-        sceneStyle: { backgroundColor: sceneBackgroundColor },
+        sceneStyle: { backgroundColor: background },
         tabBarShowLabel: false,
       }}
     >
-      <Tabs.Screen
-        name="home"
-        options={{
-          title: "Home",
-        }}
-      />
+      <Tabs.Screen name="home" options={{ title: "Home" }} />
       <Tabs.Screen
         name="reports"
-        options={{
-          popToTopOnBlur: true,
-          title: "Reports",
-        }}
+        options={{ title: "Reports", popToTopOnBlur: true }}
       />
-      <Tabs.Screen
-        name="hotlines"
-        options={{
-          title: "Hotlines",
-        }}
-      />
+      <Tabs.Screen name="advisories" options={{ title: "Advisories" }} />
+      <Tabs.Screen name="hotlines" options={{ title: "Hotlines" }} />
       <Tabs.Screen
         name="profile"
-        options={{
-          popToTopOnBlur: true,
-          title: "Profile",
-        }}
+        options={{ title: "Account", popToTopOnBlur: true }}
       />
     </Tabs>
   );

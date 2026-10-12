@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import ts from "typescript";
 
 const sourceUrl = new URL("../src/services/reports.ts", import.meta.url);
 
@@ -38,4 +39,22 @@ test("successful authoritative default-page refresh clears the stale marker", as
     source,
     /complaintReportRevalidationUsers\.has\(userId\)[\s\S]*isStale: true/,
   );
+});
+
+test("receipt invalidation clears every cache scope for its owner and retains other owners", async () => {
+  const source = await readFile(sourceUrl,"utf8");
+  const block = source.slice(source.indexOf("export async function clearReportListCache("), source.indexOf("export async function fetchComplaintMeta("));
+  const keys = new Set(["report_list_cache_v1:owner:1:all","report_list_cache_v1:owner:1:linked","report_list_cache_v1:other:1:all"]);
+  const storage = { getAllKeys: async () => [...keys], multiRemove: async values => values.forEach(value => keys.delete(value)) };
+  const factory = new Function("AsyncStorage","initial","exports",
+    "let complaintReportsCacheGeneration=0,complaintReportsMemoryCache=initial;const complaintReportRevalidationUsers=new Set(),complaintReportRequests={clear(){}},complaintReportStorageKey=id=>'report_list_cache_v1:'+id;" +
+    ts.transpileModule(block,{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText +
+    ";return {clear:exports.clearReportListCache,cache:()=>complaintReportsMemoryCache};");
+  const own = factory(storage,{userId:"owner:1:all"},{});
+  await own.clear("owner");
+  assert.equal(own.cache(),null);
+  assert.deepEqual([...keys],["report_list_cache_v1:other:1:all"]);
+  const other = factory(storage,{userId:"other:1:all"},{});
+  await other.clear("owner");
+  assert.equal(other.cache().userId,"other:1:all");
 });

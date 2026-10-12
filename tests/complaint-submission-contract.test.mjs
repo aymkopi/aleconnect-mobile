@@ -8,14 +8,14 @@ test("report submissions persist one backend idempotency key", async () => {
     "utf8",
   );
   const routeSource = await readFile(
-    new URL("../src/app/(tabs)/reports/new.tsx", import.meta.url),
+    new URL("../src/features/reports/new-report-screen.tsx", import.meta.url),
     "utf8",
   );
 
   assert.match(serviceSource, /idempotencyKey:\s*string/);
   assert.match(
     routeSource,
-    /idempotencyKey:\s*`mobile:\$\{reportId\}`/,
+    /idempotencyKey:\s*`mobile:\$\{reportId\.current\}`/,
   );
 });
 

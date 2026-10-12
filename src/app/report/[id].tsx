@@ -1,18 +1,23 @@
-import { Redirect, Stack } from "expo-router";
+import { Redirect, useLocalSearchParams } from "expo-router";
 
-import { useAuthSession } from "@/hooks/use-auth-session";
-import ComplaintDetail from "../(tabs)/reports/[id]";
-
-export default function ReportDetailRoute() {
-  const { isLoading, session } = useAuthSession();
-
-  if (isLoading) return null;
-  if (!session) return <Redirect href="/sign-in" />;
-
+export default function ReportAlias() {
+  const { id, focus, serviceAccountId } = useLocalSearchParams<{
+    id: string;
+    focus?: string;
+    serviceAccountId?: string;
+  }>();
+  if (typeof id !== "string" || !id.trim())
+    return <Redirect href="/reports/list" />;
   return (
-    <>
-      <Stack.Screen options={{ headerShown: false }} />
-      <ComplaintDetail />
-    </>
+    <Redirect
+      href={{
+        pathname: "/reports/[id]",
+        params: {
+          id,
+          ...(typeof focus === "string" ? { focus } : {}),
+          ...(typeof serviceAccountId === "string" ? { serviceAccountId } : {}),
+        },
+      }}
+    />
   );
 }

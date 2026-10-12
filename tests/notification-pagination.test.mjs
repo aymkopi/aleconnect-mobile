@@ -6,11 +6,13 @@ const read = (path) =>
   readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("consumer notifications paginate, virtualize, and open advisory details", async () => {
-  const [service, page, navigation, root] = await Promise.all([
+  const [service, page, navigation, root, reader, presentation] = await Promise.all([
     read("src/services/notifications.ts"),
-    read("src/app/notifications.tsx"),
+    read("src/features/notifications/notifications-screen.tsx"),
     read("src/services/notification-navigation.ts"),
     read("src/app/_layout.tsx"),
+    read("src/features/notifications/use-notifications.ts"),
+    read("src/features/notifications/presentation.ts"),
   ]);
 
   assert.match(service, /notification_list_cache_v3/);
@@ -19,12 +21,11 @@ test("consumer notifications paginate, virtualize, and open advisory details", a
   assert.match(service, /serviceAccountId/);
   assert.match(service, /nextCursor/);
   assert.match(page, /SectionList/);
-  assert.match(page, /nextCursor/);
-  assert.match(page, /entityType === "advisory"/);
-  assert.match(page, /notification\.entityType === "account_linking"/);
-  assert.match(page, /"View account request"/);
-  assert.match(page, /notificationDestinationFromNotification/);
-  assert.match(page, /await markNotificationsRead/);
+  assert.match(reader, /nextCursor/);
+  assert.match(presentation, /entityType === "advisory"/);
+  assert.match(page, /item\.entityType === "account_linking"/);
+  assert.match(presentation, /export function notificationRoute\(/);
+  assert.match(reader, /await markNotificationsRead/);
   assert.match(navigation, /focus: "notification"/);
   assert.match(navigation, /advisoryIdFromPushData/);
   assert.match(navigation, /notificationDestinationFromNotification/);

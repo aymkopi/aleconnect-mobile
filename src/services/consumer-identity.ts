@@ -7,7 +7,7 @@ import {
   type ConsumerAccountContext,
 } from "@/features/accounts/contract";
 import { fetchLinkedAccounts } from "@/services/linked-accounts";
-import { apiRequest, setAuthToken, type AuthUser } from "@/services/api";
+import { apiRequest, getAuthToken, setAuthToken, type AuthUser } from "@/services/api";
 
 const emailSetupDismissalKeyPrefix = "email_setup_dismissed_v1:";
 
@@ -47,9 +47,7 @@ export async function fetchConsumerIdentity(user: AuthUser): Promise<ConsumerAcc
   return normalizeConsumerIdentity(response, user);
 }
 
-export async function fetchConsumerAccountContext(
-  user: AuthUser,
-): Promise<ConsumerAccountContext> {
+export async function fetchConsumerAccountContext(user: AuthUser): Promise<ConsumerAccountContext> {
   return readConsistentConsumerAccountSnapshot({
     readIdentity: () => fetchConsumerIdentity(user),
     readLinkedAccounts: () => fetchLinkedAccounts(user),
@@ -58,7 +56,11 @@ export async function fetchConsumerAccountContext(
 
 export async function setupConsumerIdentity(
   input: ConsumerIdentitySetupInput,
+  isCurrent?: () => boolean,
 ): Promise<ConsumerIdentitySetupResponse> {
+  const token = await getAuthToken();
+  if (!token || (isCurrent && !isCurrent()))
+    throw new Error("Account access changed. Sign in again.");
   const response = await apiRequest<ConsumerIdentitySetupResponse>(
     "/api/mobile/consumer-identity",
     {
@@ -70,7 +72,7 @@ export async function setupConsumerIdentity(
         idempotencyKey: input.idempotencyKey,
       }),
     },
-    { idempotent: true, requestId: input.idempotencyKey },
+    { authToken: token, idempotent: true, requestId: input.idempotencyKey },
   );
   if (typeof response.token !== "string" || !response.token) {
     throw new Error("Email setup did not return a replacement session.");
@@ -78,6 +80,9 @@ export async function setupConsumerIdentity(
 
   // The identity setup endpoint atomically revokes the legacy session. Store its
   // replacement before any caller asks the normal session provider to refresh.
+  const unchangedToken = await getAuthToken();
+  if (unchangedToken !== token || (isCurrent && !isCurrent()))
+    throw new Error("Account access changed. Sign in again.");
   await setAuthToken(response.token);
   return response;
 }

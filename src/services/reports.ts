@@ -44,7 +44,7 @@ const complaintReportRevalidationUsers = new Set<string>();
 
 let complaintReportsCacheGeneration = 0;
 
-export type ComplaintReportSort = "newest" | "oldest" | "status";
+export type ComplaintReportSort = "newest" | "oldest" | "updated" | "status";
 
 export type ComplaintReportPage = {
   reports: Report[];
@@ -256,7 +256,8 @@ export async function clearComplaintCache(userId?: string): Promise<void> {
 export async function clearReportListCache(userId: string): Promise<void> {
   complaintReportsCacheGeneration += 1;
 
-  if (complaintReportsMemoryCache?.userId === userId) {
+  if (complaintReportsMemoryCache && (complaintReportsMemoryCache.userId === userId ||
+    complaintReportsMemoryCache.userId.startsWith(userId + ":"))) {
     complaintReportsMemoryCache = null;
   }
 
@@ -464,6 +465,11 @@ export async function fetchComplaintReportPage(options?: {
         return normalizedResponse;
       })
       .catch(async (error) => {
+        const failure = error as { status?: number; code?: string } | null;
+        if ([401, 403, 409].includes(failure?.status ?? 0) || ["ACCOUNT_NOT_ACCESSIBLE", "STALE_ACCESS_REVISION"].includes(failure?.code ?? "")) {
+          if (userId) await clearReportListCache(userId);
+          throw error;
+        }
         if (userId && isDefaultPage) {
           const stored = await readStoredComplaintReportPage(userId, true);
           if (stored) return { ...stored, isStale: true };

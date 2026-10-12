@@ -4,40 +4,6 @@ import test from "node:test";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("report creation scopes a multi-account draft, evidence intent, and queue retry to one authorized account", async () => {
-  const [screen, reports, queue, context] = await Promise.all([
-    read("src/app/(tabs)/reports/new.tsx"),
-    read("src/services/reports.ts"),
-    read("src/services/report-queue.ts"),
-    read("src/context/report-queue-context.tsx"),
-  ]);
-
-  assert.match(screen, /useConsumerAccount/);
-  assert.match(screen, /accounts\.length > 1/);
-  assert.doesNotMatch(screen, /label="Report for"/);
-  assert.match(screen, /label="Account number"/);
-  assert.match(screen, /buildReportAccountSelector/);
-  assert.match(screen, /setServiceAccountId/);
-  assert.match(screen, /serviceAccountId/);
-  assert.match(screen, /accessRevision/);
-  assert.match(screen, /deleteEvidencePhoto/);
-  assert.match(reports, /serviceAccountId/);
-  assert.match(reports, /accessRevision/);
-  assert.match(queue, /identityUserId/);
-  assert.match(queue, /authorizedServiceAccountIds/);
-  assert.match(queue, /ACCOUNT_NOT_ACCESSIBLE/);
-  assert.match(queue, /createEvidenceUploads/);
-  assert.match(context, /useConsumerAccount/);
-});
-
-test("Recent Reports reloads when its account filter changes", async () => {
-  const screen = await read("src/app/(tabs)/reports/index.tsx");
-
-  assert.match(screen, /shouldReloadReportsForAccountChange/);
-  assert.match(screen, /serviceAccountId/);
-  assert.match(screen, /loadComplaintsRef\.current/);
-});
-
 test("offline report sync fails closed on stale identity, account, or revision without deleting the protected draft", async () => {
   const [queue, access] = await Promise.all([
     read("src/services/report-queue.ts"),

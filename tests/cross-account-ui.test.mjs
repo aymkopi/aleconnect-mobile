@@ -6,7 +6,7 @@ const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("unified report and notification readers retain identity, revision, and account labels", async () => {
   const [reports, notifications, navigation, screen] = await Promise.all([
-    read("src/services/reports.ts"), read("src/services/notifications.ts"), read("src/services/notification-navigation.ts"), read("src/app/notifications.tsx"),
+    read("src/services/reports.ts"), read("src/services/notifications.ts"), read("src/services/notification-navigation.ts"), read("src/features/notifications/notifications-screen.tsx"),
   ]);
   assert.match(reports, /serviceAccountId/);
   assert.match(reports, /accessRevision/);

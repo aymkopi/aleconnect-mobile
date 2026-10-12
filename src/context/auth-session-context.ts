@@ -16,6 +16,7 @@ import {
   apiRequest,
   clearAuthToken,
   getAuthToken,
+  getAuthTokenRevision,
   subscribeAuthInvalidated,
   type AuthSession,
 } from "@/services/api";
@@ -75,11 +76,20 @@ export function AuthSessionProvider({ children }: PropsWithChildren) {
   const refreshSession = useCallback(
     async (options?: { forceNetwork?: boolean }) => {
       const generation = authGeneration.current;
+      const tokenRevision = getAuthTokenRevision();
       const token = await getAuthToken();
-      if (generation !== authGeneration.current) return null;
+      if (
+        generation !== authGeneration.current ||
+        tokenRevision !== getAuthTokenRevision()
+      )
+        return null;
       if (!token) {
         await clearCachedSession();
-        if (generation !== authGeneration.current) return null;
+        if (
+          generation !== authGeneration.current ||
+          tokenRevision !== getAuthTokenRevision()
+        )
+          return null;
         setSession(null);
         setIsLoading(false);
         return null;
@@ -89,7 +99,8 @@ export function AuthSessionProvider({ children }: PropsWithChildren) {
       if (
         cachedSession &&
         !options?.forceNetwork &&
-        generation === authGeneration.current
+        generation === authGeneration.current &&
+        tokenRevision === getAuthTokenRevision()
       ) {
         setSession(cachedSession);
         setIsLoading(false);
@@ -101,12 +112,20 @@ export function AuthSessionProvider({ children }: PropsWithChildren) {
           {},
           { authToken: token },
         );
-        if (generation !== authGeneration.current) return null;
+        if (
+          generation !== authGeneration.current ||
+          tokenRevision !== getAuthTokenRevision()
+        )
+          return null;
         setSession(nextSession);
         await writeCachedSession(nextSession);
         return nextSession;
       } catch (error) {
-        if (generation !== authGeneration.current) return null;
+        if (
+          generation !== authGeneration.current ||
+          tokenRevision !== getAuthTokenRevision()
+        )
+          return null;
         if (error instanceof ApiRequestError && error.status === 401) {
           await clearAuthToken();
           await clearCachedSession();
@@ -114,9 +133,13 @@ export function AuthSessionProvider({ children }: PropsWithChildren) {
           return null;
         }
 
-        return cachedSession;
+        return options?.forceNetwork ? null : cachedSession;
       } finally {
-        if (generation === authGeneration.current) setIsLoading(false);
+        if (
+          generation === authGeneration.current &&
+          tokenRevision === getAuthTokenRevision()
+        )
+          setIsLoading(false);
       }
     },
     [],
@@ -124,7 +147,9 @@ export function AuthSessionProvider({ children }: PropsWithChildren) {
 
   const signOut = useCallback(async () => {
     authGeneration.current += 1;
+    const tokenRevision = getAuthTokenRevision();
     const token = await getAuthToken();
+    if (tokenRevision !== getAuthTokenRevision()) return;
     if (token) {
       await apiRequest<{ success: boolean }>(
         "/api/auth/sign-out",
@@ -132,6 +157,7 @@ export function AuthSessionProvider({ children }: PropsWithChildren) {
         { authToken: token },
       ).catch(() => null);
     }
+    if (tokenRevision !== getAuthTokenRevision()) return;
     await clearAuthToken();
     await clearCachedSession();
     setSession(null);

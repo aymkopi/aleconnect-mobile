@@ -1,5 +1,1 @@
-import PushNotificationSettings from "./(tabs)/profile/push-notifications";
-
-export default function NotificationSettingsRoute() {
-  return <PushNotificationSettings />;
-}
+export { default } from "@/features/profile/alerts-screen";
