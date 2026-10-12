@@ -20,7 +20,7 @@ To request a manual rebuild: GitHub Actions → Android Alpha Release → Run wo
 
 A successful pipeline does not establish real-device/private authenticated/FCM/native-iOS acceptance. Do not uninstall an existing device app to fix a signer mismatch. The canonical signer/provider config, cached queues, device data, old APKs and recovery evidence remain protected.
 
-## Current rollout
+## Initial alpha.1 rollout
 
 Source gates pass: 436/436 Node tests with zero skips using the canonical Staff contract path, Python APK verifier 2/2, TypeScript, lint 0 errors/181 existing warnings, harness/whitespace, YAML parse, release-tag ordering query, Expo alignment and Doctor 21/21. The changelog classifier regression observed failure then passed 7/7; independent source review has no blocker. The isolated checkout first needed the existing sync:web-map generated worker. The current alpha includes the merged border-free UI and is published with exact source and artifact proof below. The historical v54 binary remains available.
 
@@ -35,7 +35,7 @@ Source gates pass: 436/436 Node tests with zero skips using the canonical Staff 
 
 The first native attempt compiled successfully and passed the actual APK verifier (alpha.1/code55, original certificate, 54 native libraries, fixture mode disabled). Publication failed on the first GitHub release-list request with a TCP connection timeout. Read-only release inventory confirmed no alpha draft or asset existed. The failed job was rerun with the same source/version/code and published successfully; no application-code repair was needed.
 
-## Published alpha and closeout
+## Published alpha.1 and closeout
 
 - [1.0.0-alpha.1 release](https://github.com/aymkopi/aleconnect-mobile/releases/tag/v1.0.0-alpha.1), published 2026-10-12; tag and metadata pin source 2d39979fa3d47c51cfd014ac6b9c5e6794514091. Android code 55, package com.kapecakes.aleconnectmobile, API https://api.aleconnect.app, fixtures disabled and non-debuggable runtime.
 - APK aleconnect-mobile-1.0.0-alpha.1.apk is 104101097 bytes. SHA-256: 57a523031d9a86d89ff355d4745c4ae5fe8e62cad7dd98d5c5a826c17a0f642d. All three downloaded asset digests match GitHub; SHA256SUMS and build-metadata.json match the APK. Desktop copy at C:/Users/Justine/Desktop/AleconnectApps/aleconnect-mobile-1.0.0-alpha.1.apk has the same hash.
@@ -45,3 +45,10 @@ The first native attempt compiled successfully and passed the actual APK verifie
 - Evidence: mobile-alpha-release-2026-10-12 under the session visualization directory contains successful-build-run.json, published-release.json, docs-only-run.json, artifact-acceptance.json, downloaded assets and native acceptance logs. The final handoff commit is docs-only and does not need another APK; its validation/skip result is available on that commit's Actions run. Fresh closeout harness/whitespace and 50 documentation/harness regressions pass.
 
 Remaining acceptance: install this exact APK on a real device and verify private authenticated flows and notification delivery. Native iOS, EAS/OTA and store-production signing are not part of this release. No Staff/database deployment or private credential upload occurred.
+
+
+## Latest publication — 2026-10-13
+
+[Alpha.4/code58](https://github.com/aymkopi/aleconnect-mobile/releases/tag/v1.0.0-alpha.4) includes merged PR6 source b481117: normalized Figma/app sheets and all latest manual Home/Reports/Advisories/Hotlines/detail edits. [Run38282464018](https://github.com/aymkopi/aleconnect-mobile/actions/runs/38282464018) passed reusable validation, fresh native compile, actual APK verification and digest-gated publication. Merged canonical437 tests, TypeScript/harness/whitespace and independent source review pass; lint retains181 existing warnings.
+
+Downloaded assets/checksum/metadata match GitHub. APK104104701 bytes, SHA-256537674b95fefd8fe4d46094561d7158bdd123a32325060d0aa7649d9fedbbb21; original certificate/package, code58/versionalpha.4, API24-target36, non-debuggable ARM64/x86_64 and all54-library ZIP/ELF16KB checks pass locally. CI verifies fixture-disabled bytecode and the live API. The Desktop AleconnectApps copy matches the published hash. Earlier releases are retained; docs-only runs explain the version ordinal gap. Source/cleanup and Figma/browser evidence are in the [sheet handoff](bottom-sheet-normalization.md). Device/private/provider/iOS acceptance remains separate.

@@ -1,9 +1,10 @@
 # Changelog
 
-## Unreleased
+## 1.0.0-alpha.4 — 2026-10-13
 
 - Normalize every custom and native BottomSheet to one semantic surface: #EFF2F6 in Light and #1A1F27 in Dark. Keep contact cards white/darker than the sheet, without decorative borders or shadows. Select and small-screen Popover sheets inherit the standard.
 - Match the Figma sheet token before app changes; preserve attached, keyboard-aware sheets and single-sheet content/back navigation.
+- Publish the combined change as [alpha.4/code58](https://github.com/aymkopi/aleconnect-mobile/releases/tag/v1.0.0-alpha.4) from merged PR6 source b481117. Original signer/package, fixture-free live-API configuration, asset digests and 16KB alignment are verified. Docs-only CI runs consume ordinals without publishing binaries; version codes remain increasing.
 - Include the latest manual Home, Reports, Advisories, Hotlines and report-detail edits: roomier Home spacing/padding, clearer white KPI text on its feature surface, compact status badges, 12px list spacing and formatting refinements. Home accounts for actual rendered gaps so the larger padding fits ordinary phone heights; the existing small-screen/large-font fallback remains.
 
 ## 1.0.0-alpha.1 — 2026-10-12

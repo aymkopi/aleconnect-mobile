@@ -1,12 +1,12 @@
 # Active work
 
 Last reviewed: 2026-10-13
-Current branch: codex/normalize-mobile-sheets; isolated from canonical master and manual edits.
-Active plan: [BottomSheet normalization](../bottom-sheet-normalization.md); Figma-first palette and all eight latest manual files included; final publication checks in progress.
-Next task: exact-head PR/CI integration, then the existing alpha pipeline; real-device acceptance remains separate.
-Preserved work: original manual patches/hashes, all nine stashes, private signing/provider/device state and unrelated Staff edits. Alpha.1 remains the previously verified binary.
+Current branch: master; PR6 normalized sheets and all latest manual edits are merged locally/remotely.
+Active plan: [BottomSheet normalization](../bottom-sheet-normalization.md); Figma-first palette and all eight latest manual files included; source/cleanup complete; alpha.4/code58 published.
+Next task: accept the exact alpha.4 APK on a real device; physical/private/provider/native-iOS acceptance remains separate.
+Preserved work: original manual patches/hashes, all nine stashes, private signing/provider/device state and unrelated Staff edits. Earlier releases remain intact; alpha.4 is the newly verified binary.
 Known blockers: no source blocker. Native/private/provider/iOS acceptance is separate.
-Last verified: 437/437 source tests with zero skips; TypeScript and lint 0 errors/181 existing warnings. Light/Dark integrated-browser contact-sheet checks and fixture-free web export pass. Independent source reviews found no actionable findings; harness/whitespace pass; exact-head remote CI closeout remains next.
+Last verified: 437/437 source tests with zero skips; TypeScript and lint 0 errors/181 existing warnings. Light/Dark integrated-browser contact-sheet checks and fixture-free web export pass. Independent source reviews found no actionable findings; harness/whitespace and exact-head PR CI pass; run38282464018 and downloaded release digests/signer/manifest/54-library alignment pass.
 
 
 - [Harness refinement](tasks/harness-refinement.md): isolated docs/skills/checks; no product release.
@@ -29,4 +29,4 @@ Last verified: 437/437 source tests with zero skips; TypeScript and lint 0 error
 
 - [Android alpha releases](../android-alpha-releases.md): user-authorized default-branch CI build/prerelease, version policy and current release verification.
 
-- [BottomSheet normalization](../bottom-sheet-normalization.md): shared Light/Dark sheet surfaces, contact-card separation and latest manual edits; isolated validation and publication evidence.
+- [BottomSheet normalization](../bottom-sheet-normalization.md): shared Light/Dark sheet surfaces, contact-card separation and latest manual edits; PR6 merged; source/cleanup and alpha.4 publication evidence complete.

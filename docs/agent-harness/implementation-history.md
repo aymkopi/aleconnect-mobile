@@ -449,3 +449,19 @@ Closeout: harness validation against the reviewed Staff companion and git diff -
 - Verification: source suite 437/437, zero skips; TypeScript; lint 0 errors/181 existing warnings; six-theme text/control contrast and native-default route-blur guards. Integrated-browser Light/Dark contact cards have distinct fills and zero decorative border/shadow; report filters/Appearance/Home inspected. Fixture-free web export and independent read-only source reviews pass. Harness/whitespace and exact-head remote gates are recorded in the [handoff](../bottom-sheet-normalization.md).
 - Remaining risks: exact native/device/private/provider/iOS acceptance is separate. Previously published alpha.1 predates this update; publication must be observed before claiming a newer APK. Reports counts remain based on loaded records. No API, DB, dependency, EAS/OTA/store or credential mutation.
 - Next: publish the scoped PR and complete authorized default-branch integration/alpha CI; preserve newer manual edits with a final hash guard and report actual release/cleanup evidence.
+
+
+## 2026-10-13 — Sheet normalization PR6 integration
+
+- Scope: merge PR6 after both exact-head checks passed; fast-forward canonical master to b481117 with a final hash guard for all eight manual files, preserving raw recovery patches and nine saved stashes. Remove only the completed task worktree/branches without force; retain canonical dependencies/private/provider/device state and external generated evidence.
+- Verification: checked PR/merge tree parity; merged-canonical 437 tests, zero skips, TypeScript, harness and whitespace pass. Independent reviews and Figma/Light/Dark browser evidence are retained. Alpha CI run38282464018 passed reusable validation and is building the actual native APK.
+- Remaining risks: native build/publication is pending; published alpha.1 predates the changes. Real-device/private/provider/native-iOS acceptance remains separate. Unrelated Staff edits are untouched.
+- Next: verify the actual automatic alpha artifact/publication and document the release evidence in the [handoff](../bottom-sheet-normalization.md).
+
+
+## 2026-10-13 — Alpha.4 sheet/manual refinement release closeout
+
+- Scope: publish the merged PR6 source b481117 as alpha.4/code58 through the existing authorized CI pipeline. Include every latest manual edit and normalized Figma/app sheets; record detailed changelog and recovery/cleanup evidence. No API/DB/dependency/signing/provider or device mutation.
+- Verification: run38282464018 passed reusable source checks, fresh bundle/native compile, actual APK verifier and digest-gated publication. Downloaded APK104104701 bytes, SHA-256537674b95fefd8fe4d46094561d7158bdd123a32325060d0aa7649d9fedbbb21; all three asset digests/checksum/metadata match GitHub. Local certificate/package/58/alpha.4/API24-target36/non-debuggable/ZIP and all54 ARM64/x86_64 ELF alignment checks pass. Merged canonical437 tests, types, harness/whitespace and two source reviews pass; Figma/Light/Dark browser evidence is retained. Existing lint181 warnings and development-only Sign-In SVG prop warning are documented.
+- Remaining risks: physical/native-iOS/private authenticated API/push/provider acceptance is unverified; original preview signer remains distinct from store-production signing. Source counts are loaded-record metrics. Earlier releases, nine stash refs and protected configurations remain intact; unrelated Staff edits are untouched.
+- Next: real-device acceptance of [alpha.4](https://github.com/aymkopi/aleconnect-mobile/releases/tag/v1.0.0-alpha.4); docs-only closeout CI should validate and skip another binary. See [handoff](../bottom-sheet-normalization.md).
