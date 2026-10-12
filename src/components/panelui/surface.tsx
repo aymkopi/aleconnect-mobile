@@ -38,7 +38,7 @@ const surfaceVariants = tv({
       lg: 'p-6',
     },
     bordered: {
-      true: 'border border-border',
+      true: '',
     },
     elevated: {
       true: 'shadow-sm',
@@ -54,10 +54,7 @@ export interface SurfaceProps
   extends ViewProps,
     VariantProps<typeof surfaceVariants> {
   className?: string;
-  /**
-   * A hairline border. A surface the same colour as what it sits on needs one
-   * to read as a distinct plane rather than dissolving into the background.
-   */
+  /** Legacy compatibility prop; distinct planes now use the surface fill. */
   bordered?: boolean;
   /**
    * A soft shadow lifting the surface off the page. Off by default because a

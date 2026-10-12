@@ -33,7 +33,7 @@ export function DataState({ title, description, loading, loadingLayout, actionLa
 export function DataNotice({ title, description, actionLabel, onAction, busy }: Omit<DataStateProps, "loading" | "loadingLayout" | "icon">) {
   const [muted] = useAppColors(["muted-foreground"]);
   return <View className="gap-3" accessibilityLiveRegion="polite">
-    <View className="rounded-xl border border-border bg-card p-3 gap-1" style={{ borderWidth: 0.75 }}>
+    <View className="rounded-xl bg-card p-3 gap-1">
       <View className="flex-row items-start gap-2"><Info size={18} color={muted} /><Text className="flex-1" size="sm" weight="semibold">{title}</Text></View>
       {description ? <Text size="sm" muted>{description}</Text> : null}
     </View>

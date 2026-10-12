@@ -168,7 +168,7 @@ function ServiceUpdateView({
         >
           Update from ALECO
         </Text>
-        <View className="rounded-xl border border-border bg-card p-3 gap-2">
+        <View className="rounded-xl bg-card p-3 gap-2">
           <Text size="sm" weight="semibold">
             {update.operationalPhase
               ? operationalPhaseLabel(update.operationalPhase)
@@ -188,7 +188,7 @@ function ServiceUpdateView({
         update.estimateEndAt ||
         update.estimateUnavailableReason ||
         update.nextUpdateDueAt ? (
-          <View className="rounded-xl border border-border bg-card p-3 gap-2">
+          <View className="rounded-xl bg-card p-3 gap-2">
             <Text size="sm" weight="semibold">
               Restoration information
             </Text>
@@ -200,7 +200,7 @@ function ServiceUpdateView({
             </Text>
           </View>
         ) : null}
-        <View className="rounded-xl border border-border bg-card p-3 gap-1">
+        <View className="rounded-xl bg-card p-3 gap-1">
           <Text size="sm" weight="semibold">
             Your report
           </Text>
@@ -438,7 +438,7 @@ export default function ReportDetailScreen() {
           </View>
           {read.error || read.data?.isStale ? <DataNotice title="Showing the last loaded report" description="Your report reference is still available. Refresh to confirm the latest status." actionLabel="Refresh report" busy={read.busy} onAction={() => void read.reload(true)} /> : null}
           {report.status === "rejected" ? (
-            <View className="rounded-xl border border-border bg-card p-3 gap-1">
+            <View className="rounded-xl bg-card p-3 gap-1">
               <Text size="sm" weight="semibold">
                 Reason from ALECO
               </Text>
@@ -466,7 +466,7 @@ export default function ReportDetailScreen() {
           >
             What the statuses mean <ChevronRight size={16} color={primary} />
           </Button>
-          <View className="rounded-xl border border-border bg-card p-3 gap-2">
+          <View className="rounded-xl bg-card p-3 gap-2">
             <DetailRow label="Type" value={report.typeTitle} />
             <DetailRow label="Category" value={report.categoryTitle} />
             <DetailRow label="Location" value={address} />
@@ -603,7 +603,7 @@ export default function ReportDetailScreen() {
                     setViewer(null);
                     setUpdateSelection({ scope, update });
                   }}
-                  className="rounded-xl border border-border bg-card p-3 gap-1"
+                  className="rounded-xl bg-card p-3 gap-1"
                   style={{ minHeight: 64 }}
                 >
                   <View className="flex-row gap-2 items-center">

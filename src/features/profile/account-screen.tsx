@@ -69,7 +69,7 @@ function Setting({
       accessibilityRole="button"
       accessibilityLabel={label + (value ? ", " + value : "")}
       onPress={onPress}
-      className="flex-row items-center gap-3 px-4 border-b border-border"
+      className="flex-row items-center gap-3 px-4"
       style={{ minHeight: 56 }}
     >
       <Icon size={20} color={muted} />
@@ -271,7 +271,7 @@ export default function AccountScreen() {
           <Button
             variant="outline"
             fullWidth
-            className="rounded-full bg-popover border-border"
+            className="rounded-full bg-popover"
             startContent={<Link size={18} color={primary} />}
             labelClassName="text-primary"
             onPress={() => openFeature("/profile/accounts")}
@@ -284,7 +284,7 @@ export default function AccountScreen() {
             <Text muted size="xs" weight="medium">
               {group.title}
             </Text>
-            <View className="rounded-xl border border-border bg-card overflow-hidden">
+            <View className="rounded-xl bg-card overflow-hidden">
               {group.rows.map(([label, Icon]) => (
                 <Setting
                   key={label}

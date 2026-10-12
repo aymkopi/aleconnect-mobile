@@ -13,7 +13,7 @@ const avatarVariants = tv({
          * each face slides over the next, and a translucent face lets the one
          * underneath show through it.
          */
-        root: "items-center justify-center overflow-hidden rounded-full border border-border bg-surface-secondary",
+        root: "items-center justify-center overflow-hidden rounded-full bg-surface-secondary",
         /*
          * Rounded itself, not only clipped by the circle around it.
          *
@@ -82,7 +82,7 @@ export interface AvatarBadgeProps extends ViewProps {
  * The ring is `border-background` so the badge separates from the image
  * whatever surface the avatar sits on.
  */
-const AvatarBadge = forwardRef<View, AvatarBadgeProps>(({ className, children, ...props }, ref) => (<View ref={ref} className={cn("absolute -end-1 -top-1 rounded-full border-2 border-background", className)} {...props}>
+const AvatarBadge = forwardRef<View, AvatarBadgeProps>(({ className, children, ...props }, ref) => (<View ref={ref} className={cn("absolute -end-1 -top-1 rounded-full", className)} {...props}>
       {textChildren(children)}
     </View>));
 AvatarBadge.displayName = "Avatar.Badge";
@@ -141,14 +141,14 @@ const AvatarGroup = forwardRef<View, AvatarGroupProps>(({ className, size = "md"
             key: String(face.key ?? index),
             node: cloneElement(face, {
                 size: face.props.size ?? size,
-                className: cn("border-2 border-background", face.props.className),
+                className: cn("", face.props.className),
             }),
         });
     }
     if (overflow > 0) {
         stack.push({
             key: "overflow",
-            node: (<AvatarRoot size={size} fallback={`+${overflow}`} accessibilityLabel={`${overflow} more`} className="border-2 border-background"/>),
+            node: (<AvatarRoot size={size} fallback={`+${overflow}`} accessibilityLabel={`${overflow} more`} className=""/>),
         });
     }
     return (<View ref={ref} className={cn("flex-row self-start", className)} {...props} accessibilityRole="list">

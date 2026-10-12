@@ -851,7 +851,7 @@ function CarouselControls({ className, ...props }: CarouselControlsProps) {
     <View
       {...props}
       className={cn(
-        'flex-row items-center justify-center gap-2 self-center rounded-full border border-border bg-background/80 px-1.5 py-0.5',
+        'flex-row items-center justify-center gap-2 self-center rounded-full bg-background/80 px-1.5 py-0.5',
         className
       )}
     >

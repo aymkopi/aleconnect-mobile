@@ -68,7 +68,7 @@ function QueueRow({
       accessibilityRole="button"
       accessibilityLabel={`${title}, ${subtitle}`}
       onPress={onPress}
-      className="flex-row items-center gap-3 rounded-xl border border-border bg-card p-3 min-h-16"
+      className="flex-row items-center gap-3 rounded-xl bg-card p-3 min-h-16"
     >
       <View className="rounded-xl bg-accent p-2">
         {icon || <FileText color={primary} size={20} />}
@@ -510,14 +510,14 @@ export default function ReportQueueScreen() {
       }
     >
       {feedback?.scope === scope ? (
-        <View className="rounded-xl border border-border bg-card p-3">
+        <View className="rounded-xl bg-card p-3">
           <Text size="sm" accessibilityRole="alert">
             {feedback.text}
           </Text>
         </View>
       ) : null}
       {PANELUI_PREVIEW && !fixtures ? (
-        <View className="rounded-xl border border-border bg-card p-3 gap-1">
+        <View className="rounded-xl bg-card p-3 gap-1">
           <Text weight="semibold" size="sm">
             Preview · device queue protected
           </Text>
@@ -528,7 +528,7 @@ export default function ReportQueueScreen() {
         </View>
       ) : null}
       {id && !selected ? (
-        <View className="rounded-xl border border-border bg-card p-4 gap-3">
+        <View className="rounded-xl bg-card p-4 gap-3">
           <Text weight="semibold">Saved report unavailable</Text>
           <Text muted size="sm">
             This copy is no longer in your current consumer’s queue. Open Sent
@@ -546,7 +546,7 @@ export default function ReportQueueScreen() {
           <Text weight="semibold" size="lg">
             {selected.title}
           </Text>
-          <View className="rounded-xl border border-border bg-card p-3 gap-2">
+          <View className="rounded-xl bg-card p-3 gap-2">
             <View className="flex-row items-center gap-2">
               <Badge variant={presentation.variant}>{presentation.label}</Badge>
               {presentation.sending ? <Spinner size="sm" /> : null}
@@ -557,7 +557,7 @@ export default function ReportQueueScreen() {
             </Text>
           </View>
           {selected.lastError ? (
-            <View className="rounded-xl border border-border bg-card p-3 gap-2">
+            <View className="rounded-xl bg-card p-3 gap-2">
               <Text weight="semibold" size="sm">
                 {selected.lastErrorPhase === "evidence upload"
                   ? "Photo needs attention"
@@ -655,7 +655,7 @@ export default function ReportQueueScreen() {
           <Text weight="semibold" size="lg">
             {items.length ? "Waiting to send" : "No saved reports"}
           </Text>
-          <View className="rounded-xl border border-border bg-card p-3 gap-1">
+          <View className="rounded-xl bg-card p-3 gap-1">
             <Text weight="semibold" size="sm">
               {items.length
                 ? "Receipt not confirmed"

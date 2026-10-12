@@ -40,7 +40,7 @@ export function ServiceRow({
       variant="outline"
       fullWidth
       onPress={onPress}
-      className="bg-card border-border rounded-xl justify-start"
+      className="bg-card rounded-xl justify-start"
       style={{ minHeight: 64, padding: 12, gap: 12 }}
     >
       <View className="h-8 w-8 rounded-xl bg-primary/10 items-center justify-center">

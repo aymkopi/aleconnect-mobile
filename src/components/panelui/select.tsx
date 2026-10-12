@@ -54,10 +54,10 @@ const selectVariants = tv({
     slots: {
         // `rounded-lg`, the same radius Button and Input use — a select sitting in
         // a form beside either of them should read as the same family of control.
-        trigger: "w-full flex-row items-center justify-between gap-3 rounded-lg border border-input bg-background px-4 py-3.5",
+        trigger: "w-full flex-row items-center justify-between gap-3 rounded-lg bg-input px-4 py-3.5",
         triggerLabel: "flex-1 text-base font-medium text-foreground",
         placeholder: "flex-1 text-base text-muted-foreground",
-        list: "overflow-hidden rounded-xl border border-border bg-popover p-2 shadow-none",
+        list: "overflow-hidden rounded-xl bg-popover p-2 shadow-none",
         // The block of options inside a sheet. The sheet is the surface there, so
         // this is what `listClassName` has to reach instead of `list`.
         options: "gap-1 pb-2",

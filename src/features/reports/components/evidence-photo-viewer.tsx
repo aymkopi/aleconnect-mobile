@@ -197,7 +197,7 @@ function EvidencePhotoContent({
                   : "Report evidence"}
           </Text>
           {unavailable || failed ? (
-            <View className="rounded-xl border border-border bg-card p-3 gap-1">
+            <View className="rounded-xl bg-card p-3 gap-1">
               <Text size="sm" weight="semibold">
                 {isUpdate
                   ? "The update is still available"
@@ -273,7 +273,7 @@ function EvidencePhotoContent({
                   Fit
                 </Button>
               </View>
-              <View className="rounded-xl border border-border bg-card p-3 gap-1">
+              <View className="rounded-xl bg-card p-3 gap-1">
                 <Text weight="semibold" size="sm">
                   Photo {selected + 1} of {photos.length}
                 </Text>

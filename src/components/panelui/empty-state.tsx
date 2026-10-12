@@ -30,7 +30,7 @@ const emptyStateVariants = tv({
       default: { root: 'flex-1' },
       // A self-contained block that sits inside content rather than filling a
       // screen: bordered, on the card fill, sized to its contents.
-      card: { root: 'rounded-2xl border border-border bg-card' },
+      card: { root: 'rounded-2xl bg-card' },
     },
     size: {
       sm: { root: 'gap-4 px-4 py-8', title: 'text-base', description: 'text-sm' },
@@ -48,7 +48,7 @@ const mediaVariants = tv({
   slots: {
     wrapper: 'items-center justify-center',
     card: 'shrink-0 items-center justify-center',
-    ghost: 'absolute rounded-md border border-border bg-card',
+    ghost: 'absolute rounded-md bg-card',
   },
   variants: {
     variant: {
@@ -57,7 +57,7 @@ const mediaVariants = tv({
         ghost: 'hidden',
       },
       icon: {
-        card: 'rounded-md border border-border bg-card',
+        card: 'rounded-md bg-card',
       },
     },
     size: {

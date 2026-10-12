@@ -661,12 +661,12 @@ test("sign-in contexts have one centered heading and no appbar while preserving 
   }
 });
 
-test("sign-in fields keep balanced decorators, subtle borders and clear method switching", async () => {
+test("sign-in fields keep balanced decorators, border-free fills and clear method switching", async () => {
   const f = await signInFixture({ context: "new" });
   for (const label of ["Account number", "Password"]) {
     const field = nodes(f.page).find(n => n.type === "Input" && n.props.accessibilityLabel === label);
     const styles = field.props.style.flat(Infinity).filter(Boolean);
-    assert.equal(styles.find(s => s.borderWidth !== undefined)?.borderWidth, 0.75);
+    assert.ok(styles.every(s => !s.borderWidth));
     assert.equal(styles.find(s => s.height !== undefined)?.height, 48);
     field.props.onChangeText(label === "Password" ? "secret" : "001");
   }

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Remove decorative outlines from Light/Dark components and screens; distinguish cards, fields, menus and sheets through semantic fills. Keep #00060F as the Dark page anchor.
+- Preserve readable selection/unchecked/error/disabled states and a visible functional input-focus underline; retain variant/class/inline field fills and balanced prefix/suffix spacing.
+- Publish signed 2.0.0/code54 APK and checksum through GitHub Releases; this UI change remains separate from that preview.
+
 ## 2.0.0 — 2026-10-12
 
 Major consumer-app presentation update. The Figma-based PanelUI rebuild replaces the previous Gluestack interface while retaining Staff-owned authorization, consumer identity, report/evidence contracts, private storage and notification delivery.

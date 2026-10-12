@@ -174,7 +174,7 @@ export default function HotlinesScreen() {
                 <Button
                   key={c.id}
                   variant="secondary"
-                  className="rounded-xl border border-border bg-card"
+                  className="rounded-xl bg-card"
                   style={{
                     width: Math.floor((width - 44) / 2),
                     minHeight: 68,

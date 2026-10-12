@@ -117,7 +117,7 @@ function RequiredPasswordForm({ returnToEmail, onReturnToEmail }: {
       <Text accessibilityRole="header" style={{ fontFamily: "PlusJakartaSans_600SemiBold", fontSize: 18, lineHeight: 26 }}>
         {complete ? "Your password is updated" : "Your account password is ready"}
       </Text>
-      <View accessibilityLiveRegion="polite" className="gap-1 rounded-xl border border-border bg-card p-3">
+      <View accessibilityLiveRegion="polite" className="gap-1 rounded-xl bg-card p-3">
         <Text size="sm" weight="semibold">{complete ? "Use your new password next time" : "Return to your email sign-in"}</Text>
         <Text size="sm">{complete ? "Your current account details and linked service accounts remain available."
           : "Sign in with your email to request linking this ALECO account."}</Text>
@@ -155,7 +155,7 @@ function RequiredPasswordForm({ returnToEmail, onReturnToEmail }: {
         <AuthPasswordField label="Confirm password" value={confirmation} onChangeText={setConfirmation}
           placeholder="Re-enter new password" autoComplete="new-password" maxLength={128}
           editable={!busy} onSubmitEditing={() => void save()} />
-        <View className="gap-1 rounded-xl border border-border bg-card p-4">
+        <View className="gap-1 rounded-xl bg-card p-4">
           <Text size="sm" weight="semibold">Keep your account secure</Text>
           <Text size="sm" muted>Choose a password that’s hard to guess.</Text>
         </View>

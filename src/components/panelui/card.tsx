@@ -41,7 +41,7 @@ const footerVariants = tv({
      */
     variant: {
       plain: 'p-4 pt-0',
-      panel: 'rounded-b-lg border-t border-border bg-inset p-4',
+      panel: 'rounded-b-lg bg-inset p-4',
     },
   },
   defaultVariants: {
@@ -60,7 +60,7 @@ export interface CardFooterProps
 const CardRoot = forwardRef<View, CardProps>(({ className, ...props }, ref) => (
   <View
     ref={ref}
-    className={cn('rounded-lg border border-border bg-card shadow-none', className)}
+    className={cn('rounded-lg bg-card shadow-none', className)}
     {...props}
   />
 ));

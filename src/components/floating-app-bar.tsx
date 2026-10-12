@@ -29,11 +29,10 @@ export function FloatingAppBar({
 }) {
   const { width, fontScale } = useWindowDimensions();
   const insets = useSafeAreaInsets(),
-    [surface, primary, muted, border] = useAppColors([
+    [surface, primary, muted] = useAppColors([
       "card",
       "primary",
       "muted-foreground",
-      "border",
     ]);
   return (
     <View
@@ -50,8 +49,6 @@ export function FloatingAppBar({
         style={{
           height: APP_BAR_HEIGHT,
           backgroundColor: surface,
-          borderColor: border,
-          borderWidth: 0.5,
           borderRadius: 999,
           padding: 6,
           flexDirection: "row",

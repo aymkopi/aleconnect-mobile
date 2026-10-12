@@ -61,7 +61,7 @@ export function StaticLocationMap({
       accessibilityRole="image"
       accessibilityLabel={`Map showing ${label}${fixture ? ", visual fixture" : ""}`}
       pointerEvents="none"
-      className="rounded-xl overflow-hidden bg-muted border border-border"
+      className="rounded-xl overflow-hidden bg-muted"
       style={{ height }}
     >
       {Platform.OS === "web" && !failed ? (

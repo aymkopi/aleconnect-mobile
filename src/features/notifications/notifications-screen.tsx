@@ -71,9 +71,9 @@ function NotificationInbox({ access }: { access: NotificationAccess }) {
         {query ? <InputGroup.Suffix><Button variant="ghost" size="icon" style={{ width: 48, height: 48 }} accessibilityLabel="Clear notification search" onPress={() => setQuery("")}><X size={18} color={muted} /></Button></InputGroup.Suffix> : null}
       </InputGroup>
       <View className="flex-row gap-2">
-        <View className="flex-1 flex-row items-center rounded-xl border border-border bg-card px-1" style={{ minHeight: 44 }}>
+        <View className="flex-1 flex-row items-center rounded-xl bg-card px-1" style={{ minHeight: 44 }}>
           {[false, true].map((value) => <Button key={String(value)} variant="ghost" size="sm" className="flex-1 px-1 min-h-11" accessibilityRole="tab" accessibilityState={{ selected: unread === value }} onPress={() => { setUnread(value); if (rows.length) list.current?.scrollToLocation({ sectionIndex: 0, itemIndex: 0, animated: false }); }}>
-            <View className={unread === value ? "w-full flex-row items-center justify-center gap-1 rounded-xl border border-border bg-card px-2" : "w-full flex-row items-center justify-center gap-1 px-2"} style={{ minHeight: 36 }}><Text size="xs" weight="semibold" className={unread === value ? "text-primary" : "text-muted-foreground"}>{value ? "Unread" : "All"}</Text>{value && count > 0 ? <Badge variant="secondary" className="rounded-md px-1 py-0" labelClassName="text-xs">{count}</Badge> : null}</View>
+            <View className={unread === value ? "w-full flex-row items-center justify-center gap-1 rounded-xl bg-card px-2" : "w-full flex-row items-center justify-center gap-1 px-2"} style={{ minHeight: 36 }}><Text size="xs" weight="semibold" className={unread === value ? "text-primary" : "text-muted-foreground"}>{value ? "Unread" : "All"}</Text>{value && count > 0 ? <Badge variant="secondary" className="rounded-md px-1 py-0" labelClassName="text-xs">{count}</Badge> : null}</View>
           </Button>)}
         </View>
         <Button variant="outline" size="sm" className="min-h-11 rounded-xl px-4" labelClassName="text-xs" startContent={<SlidersHorizontal size={16} color={muted} />} onPress={openFilters}>Filters{category !== "all" || accountId !== "all" ? " · active" : ""}</Button>
@@ -96,7 +96,7 @@ function NotificationInbox({ access }: { access: NotificationAccess }) {
       </View>}
       renderItem={({ item }) => {
         const Icon = item.entityType === "account_linking" ? Link : item.category === "area_incidents" ? MapPin : item.category === "report_updates" ? FileText : item.category === "advisories" && !/billing|collection|payment/i.test(item.title) ? Megaphone : Bell;
-        return <Button variant="ghost" className={item.isRead ? "items-start justify-start gap-2.5 rounded-xl border border-border bg-card p-3" : "items-start justify-start gap-2.5 rounded-xl border border-border bg-primary/5 p-3"} style={{ minHeight: 44 }} accessibilityLabel={`${item.isRead ? "Read" : "Unread"}: ${item.title}. ${notificationContext(item)}`} disabled={feed.mutation.busy} onPress={() => void open(item)}>
+        return <Button variant="ghost" className={item.isRead ? "items-start justify-start gap-2.5 rounded-xl bg-card p-3" : "items-start justify-start gap-2.5 rounded-xl bg-primary/5 p-3"} style={{ minHeight: 44 }} accessibilityLabel={`${item.isRead ? "Read" : "Unread"}: ${item.title}. ${notificationContext(item)}`} disabled={feed.mutation.busy} onPress={() => void open(item)}>
           <View className={item.isRead ? "items-center justify-center rounded-xl bg-muted" : "items-center justify-center rounded-xl bg-card"} style={{ width: 32, height: 32 }}><Icon size={20} color={primary} /></View>
           <View className="flex-1 gap-1"><Text weight="semibold" style={{ fontSize: 14, lineHeight: 20 }}>{item.title}</Text>{item.description ? <Text style={{ fontSize: 13, lineHeight: 20 }}>{item.description}</Text> : null}<Text size="xs" weight="medium" className="text-primary">{notificationContext(item)}</Text><View className="flex-row items-center gap-2"><Text muted style={{ fontSize: 11, lineHeight: 16.5 }}>{notificationTime(item, access.fixtures ? notificationFixtureNow : new Date())}</Text>{item.severity === "High" || item.severity === "Critical" ? <Badge variant="destructive" className="rounded-md bg-destructive/10 px-1.5 py-0.5" labelClassName="text-destructive text-xs">{item.severity}</Badge> : null}</View></View>
           <View className="items-center gap-3 pt-1" style={{ width: 16 }}>{!item.isRead ? <View className="rounded-full bg-primary" style={{ width: 6, height: 6 }} /> : null}<ChevronRight size={16} color={muted} /></View>
@@ -125,6 +125,6 @@ function NotificationInbox({ access }: { access: NotificationAccess }) {
 }
 
 function FilterOption({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
-  const [primary, border] = useAppColors(["primary", "border"]);
-  return <Button variant="ghost" className={selected ? "justify-between min-h-11 rounded-xl bg-primary/5 px-3" : "justify-between min-h-11 rounded-xl px-3"} labelClassName="flex-1 text-left text-sm font-medium" accessibilityRole="radio" accessibilityState={{ checked: selected }} onPress={onPress} endContent={selected ? <Check size={16} color={primary} /> : <View style={{ width: 16, height: 16, borderWidth: 0.75, borderColor: border, borderRadius: 8 }} />}>{label}</Button>;
+  const [primary, control] = useAppColors(["primary", "control"]);
+  return <Button variant="ghost" className={selected ? "justify-between min-h-11 rounded-xl bg-primary/5 px-3" : "justify-between min-h-11 rounded-xl px-3"} labelClassName="flex-1 text-left text-sm font-medium" accessibilityRole="radio" accessibilityState={{ checked: selected }} onPress={onPress} endContent={selected ? <Check size={16} color={primary} /> : <View style={{ width: 16, height: 16, backgroundColor: control, borderRadius: 8 }} />}>{label}</Button>;
 }

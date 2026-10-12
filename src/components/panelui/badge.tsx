@@ -4,7 +4,7 @@ import { tv, type VariantProps } from "tailwind-variants";
 import { Text, textChildren } from "@/components/panelui/text";
 const badgeVariants = tv({
     slots: {
-        root: "flex-row items-center justify-center gap-1 self-start rounded-sm border border-transparent",
+        root: "flex-row items-center justify-center gap-1 self-start rounded-sm",
         label: "font-medium",
     },
     variants: {
@@ -30,7 +30,7 @@ const badgeVariants = tv({
         variant: {
             default: { root: "bg-primary", label: "text-primary-foreground" },
             secondary: { root: "bg-secondary", label: "text-secondary-foreground" },
-            outline: { root: "border-border bg-transparent", label: "text-foreground" },
+            outline: { root: "bg-secondary", label: "text-foreground" },
             destructive: {
                 root: "bg-destructive",
                 label: "text-destructive-solid-foreground",

@@ -283,7 +283,7 @@ const searchBarVariants = tv({
      * sitting in it, and a card is one step from the background — close enough
      * that in dark mode the whole thing dissolves into the screen behind it.
      */
-    panel: 'overflow-hidden rounded-2xl border border-border bg-popover shadow-none',
+    panel: 'overflow-hidden rounded-2xl bg-popover shadow-none',
     panelList: 'p-1.5',
     /** The hairline between the results and the field. */
     panelDivider: 'w-full bg-border',
@@ -360,8 +360,8 @@ const searchBarVariants = tv({
      */
     attached: {
       none: {},
-      top: { field: 'rounded-t-none rounded-b-2xl border-0' },
-      bottom: { field: 'rounded-b-none rounded-t-2xl border-0' },
+      top: { field: 'rounded-t-none rounded-b-2xl' },
+      bottom: { field: 'rounded-b-none rounded-t-2xl' },
     },
     selected: {
       true: { item: 'bg-accent' },

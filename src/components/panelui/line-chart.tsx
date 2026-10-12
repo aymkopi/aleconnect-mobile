@@ -1101,7 +1101,7 @@ function LineChartTooltip({ color, showLabel = true, formatValue, formatX }: Lin
               labelStyle,
             ]}
           >
-            <View className="items-center rounded-xl border border-border bg-popover px-2.5 py-1.5 shadow-lg">
+            <View className="items-center rounded-xl bg-popover px-2.5 py-1.5 shadow-lg">
               {active ? (
                 <>
                   <Text size="xs" muted numberOfLines={1}>

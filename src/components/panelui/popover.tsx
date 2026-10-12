@@ -731,7 +731,7 @@ function PopoverContent({
                 // so a caller can put its own layer underneath the content.
                 unstyled
                   ? 'overflow-hidden rounded-2xl'
-                  : 'rounded-2xl border border-border bg-popover p-4 shadow-none',
+                  : 'rounded-2xl bg-popover p-4 shadow-none',
                 // The gap belongs to whichever view actually holds the
                 // children — on the panel normally, on the scroller's content
                 // when there is one, since the scroller is then the panel's
@@ -803,11 +803,11 @@ function PopoverArrow({ className, style, ...props }: PopoverArrowProps) {
       // Only the two edges that face outwards are drawn; the other two sit
       // under the panel and would show as a seam across it.
       className={cn(
-        'border-border bg-popover',
-        placement === 'bottom' && 'border-l border-t',
-        placement === 'top' && 'border-b border-r',
-        placement === 'right' && 'border-b border-l',
-        placement === 'left' && 'border-r border-t',
+        'bg-popover',
+        placement === 'bottom' && '',
+        placement === 'top' && '',
+        placement === 'right' && '',
+        placement === 'left' && '',
         className
       )}
       {...props}

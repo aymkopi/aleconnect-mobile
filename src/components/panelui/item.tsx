@@ -43,7 +43,7 @@ const itemVariants = tv({
   variants: {
     variant: {
       default: {},
-      outline: { root: 'border border-border' },
+      outline: { root: '' },
       muted: { root: 'bg-muted' },
     },
     size: {
@@ -81,7 +81,7 @@ const mediaVariants = tv({
       /** No box — for an Avatar or anything that styles itself. */
       default: '',
       /** Rounded square tile sized for an icon. */
-      icon: 'rounded-lg border border-border bg-muted',
+      icon: 'rounded-lg bg-muted',
       /** Clipped frame for an image or thumbnail. */
       image: 'overflow-hidden rounded-lg bg-muted',
     },

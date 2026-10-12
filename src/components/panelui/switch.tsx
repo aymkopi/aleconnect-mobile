@@ -9,7 +9,7 @@ import { useFieldLabelledBy } from "@/components/panelui/field";
 const SPRING = { damping: 18, stiffness: 250, mass: 0.5 } as const;
 const switchVariants = tv({
     slots: {
-        track: "justify-center rounded-full border border-transparent bg-input p-[3px]",
+        track: "justify-center rounded-full bg-input p-[3px]",
         activeTrack: "absolute inset-0 rounded-full bg-primary",
         thumb: "rounded-full bg-white shadow-none",
     },

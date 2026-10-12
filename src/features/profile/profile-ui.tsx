@@ -140,8 +140,8 @@ export function ProfileNotice({
       accessibilityLiveRegion="polite"
       className={
         danger
-          ? "gap-1 rounded-xl border border-destructive bg-destructive/10 p-3"
-          : "gap-1 rounded-xl border border-border bg-primary/5 p-3"
+          ? "gap-1 rounded-xl bg-destructive/10 p-3"
+          : "gap-1 rounded-xl bg-primary/5 p-3"
       }
     >
       <Text size="sm" weight="semibold" className={danger ? "text-destructive" : "text-primary"}>

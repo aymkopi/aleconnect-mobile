@@ -34,7 +34,7 @@ export function PublisherCard({
       onPress={onPress}
       style={height ? { height } : undefined}
       className={
-        "rounded-xl border border-border bg-card overflow-hidden " +
+        "rounded-xl bg-card overflow-hidden " +
         (featured ? "p-4 gap-2" : "p-3 gap-1")
       }
     >

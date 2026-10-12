@@ -29,7 +29,7 @@ export function ExtendedOutageStatusCard({
     return null;
   const estimate = publishedRestorationEstimate(latest);
   const content = (
-    <View className="rounded-xl border border-border bg-card p-3 gap-2">
+    <View className="rounded-xl bg-card p-3 gap-2">
       <View className="flex-row gap-2 items-center">
         <Clock3 size={18} color={primary} />
         <Text weight="semibold" size="sm" className="flex-1">

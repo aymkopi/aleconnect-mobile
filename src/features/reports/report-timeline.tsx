@@ -25,7 +25,7 @@ export function ReportTimeline({ report }: { report: ReportDetail }) {
     report.consumerMessage,
   );
   return (
-    <View className="rounded-xl border border-border bg-card p-3">
+    <View className="rounded-xl bg-card p-3">
       {rows.map((row, index) => (
         <View key={`${row.id}:${index}`} className="flex-row gap-3">
           <View className="items-center w-4">

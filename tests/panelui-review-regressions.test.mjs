@@ -1258,3 +1258,40 @@ test("default compact tabs retain their 48-point touch target", async () => {
   const hitSlop = new Function("return (" + initializer + ")")().md;
   assert.equal(32 + hitSlop.top + hitSlop.bottom, 48);
 });
+
+
+test("border-free Input preserves variant, class and inline fills and shows focus without shifting geometry", async () => {
+  const { tv } = await import("tailwind-variants");
+  const flatten = value => Array.isArray(value) ? Object.assign({}, ...value.filter(Boolean).map(flatten)) : value ?? {};
+  for (const props of [{}, {variant:"filled"}, {className:"bg-card"}, {style:{backgroundColor:"rgba(255,255,255,0.14)"}}]) {
+    const h = hooks();
+    const module = await load("src/components/panelui/input.tsx", {
+      react: {...h.react, forwardRef: fn => fn}, "react/jsx-runtime": jsx,
+      "react-native": {View:"View", TextInput:"TextInput", StyleSheet:{flatten}},
+      "tailwind-variants": {tv},
+      uniwind: {useCSSVariable: token => ({"--color-input":"#E7ECF2","--color-accent":"#DFEEFA","--color-ring":"#006BB8"})[token],
+        useResolveClassNames: classes => ({backgroundColor: classes.includes("bg-card") ? "#FFFFFF" : classes.includes("bg-muted") ? "#DDE4EC" : "#E7ECF2"})},
+      "react-native-reanimated": {__esModule:true, default:{createAnimatedComponent: () => "TextInput", View:"FocusIndicator"},
+        useSharedValue: value => h.react.useRef({value}).current, useAnimatedStyle: fn => fn(),
+        withTiming: value => value, interpolateColor: (value, range, colors) => colors[value===1 ? 1 : 0]},
+      "@/components/panelui/label": {Label:"Label"},
+      "@/components/panelui/text": {Text:"Text", textChildren:value=>value},
+      "@/components/panelui/input-content-padding": {inputContentPadding:()=>0},
+    });
+    const render = () => {h.start();const root=module.Input({...props,label:"Email"});h.flush();return root;};
+    let root=render();
+    const field=nodes(root).find(n=>n.type==="TextInput");
+    const resting=flatten(field.props.style).backgroundColor;
+    assert.equal(resting, props.style?.backgroundColor ?? (props.className ? "#FFFFFF" : props.variant ? "#DDE4EC" : "#E7ECF2"));
+    assert.equal(nodes(root).find(n=>n.type==="FocusIndicator").props.style.opacity,0);
+    field.props.onFocus({});render();root=render();
+    const indicator=nodes(root).find(n=>n.type==="FocusIndicator");
+    assert.equal(indicator.props.style.opacity,1);
+    if (props.style) assert.equal(flatten(nodes(root).find(n=>n.type==="TextInput").props.style).backgroundColor,resting);
+    assert.equal(indicator.props.style.backgroundColor, props.style ? "#ffffff" : "#006BB8");
+    assert.match(indicator.props.className,/absolute/);
+    assert.equal(nodes(root).find(n=>n.type==="TextInput").props.className,field.props.className);
+    nodes(root).find(n=>n.type==="TextInput").props.onBlur({});render();root=render();
+    assert.equal(flatten(nodes(root).find(n=>n.type==="TextInput").props.style).backgroundColor,resting);
+  }
+});

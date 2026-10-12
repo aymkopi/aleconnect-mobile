@@ -91,6 +91,7 @@
   --color-warning-solid-foreground: unset;
   --color-border: unset;
   --color-input: unset;
+  --color-control: unset;
   --color-ring: unset;
   /*
    * Elevation ladder. Each step sits one notch further from the page
@@ -200,7 +201,7 @@
 
     @variant light {
       --color-feature: #113248;
-      --color-background: #F6F7F9;
+      --color-background: #EFF2F6;
       /* neutral-800 */
       --color-foreground: #18202A;
 
@@ -219,14 +220,14 @@
       --color-primary-foreground: #FFFFFF;
 
       /* secondary/muted/accent: black at 4% */
-      --color-secondary: #EDF0F4;
+      --color-secondary: #E7ECF2;
       --color-secondary-foreground: #283646;
 
       --color-muted: #E8EDF2;
       /* color-mix(neutral-500 90%, black) */
-      --color-muted-foreground: #617080;
+      --color-muted-foreground: #536170;
 
-      --color-accent: #EAF5FF;
+      --color-accent: #DFEEFA;
       --color-accent-foreground: #00558F;
 
       /* status: {hue}-500, foreground {hue}-700 */
@@ -247,15 +248,15 @@
       --color-warning-solid-foreground: #171717;
 
       /* border: black 8%, input: black 10% */
-      --color-border: #E3E8ED;
-      --color-input: #E3E8ED;
+      --color-border: #CDD5DF;
+      --color-input: #E7ECF2;
       /* neutral-400 */
       --color-ring: #006BB8;
 
       /* grouping surface (Frame) and skeleton fill */
       --color-surface: #FFFFFF;
-      --color-surface-secondary: #f1f1f1;
-      --color-surface-tertiary: #eaeaea;
+      --color-surface-secondary: #E7ECF2;
+      --color-surface-tertiary: #DDE4EC;
       --color-skeleton: #E3E8EF;
 
       /* status fills: -soft = Alert (10%), -subtle = Badge (8%) */
@@ -294,25 +295,27 @@
       --radius-xl: 12px;
       --radius-2xl: 16px;
       --radius-3xl: 24px;
+      --color-control: #7D8996;
+
     }
 
     @variant dark {
-      --color-feature: #121720;
+      --color-feature: #1A1F27;
       /* Near-black anchor; surface steps are precomputed white mixes of #00060F. */
       --color-background: #00060F;
       /* neutral-100 */
       --color-foreground: #FFFFFF;
 
       /* white mix: 4% */
-      --color-card: #0A1019;
+      --color-card: #141A22;
       --color-card-foreground: #FFFFFF;
 
       /* white mix: 7% */
-      --color-popover: #121720;
+      --color-popover: #1A1F27;
       --color-popover-foreground: #FFFFFF;
 
       /* white mix: 10% */
-      --color-overlay: #1A1F27;
+      --color-overlay: #242931;
       --color-overlay-foreground: #FFFFFF;
       /* the sunken band under a card or dialog: black at 22% */
       --color-inset: rgba(0, 0, 0, 0.22);
@@ -321,18 +324,18 @@
       --color-primary-foreground: #00060F;
 
       /* secondary/muted/accent: white at 4% */
-      --color-secondary: #1A1F27;
+      --color-secondary: #242931;
       --color-secondary-foreground: #FFFFFF;
 
-      --color-muted: #1F242C;
+      --color-muted: #292E35;
       /*
        * color-mix(neutral-500 86%, white). Was 90% (#818181), which came out
        * at 4.42:1 on the popover surface — under the 4.5:1 floor for body
        * text. Every other theme's muted foreground already clears it.
        */
-      --color-muted-foreground: #B8B9BC;
+      --color-muted-foreground: #BCC2CA;
 
-      --color-accent: #1A1F27;
+      --color-accent: #20364A;
       --color-accent-foreground: #78C4FF;
 
       /* color-mix(red-500 90%, white), foreground {hue}-400 */
@@ -353,15 +356,15 @@
       --color-warning-solid-foreground: #171717;
 
       /* border: white 6%, input: white 8% */
-      --color-border: #292E35;
-      --color-input: #5E6268;
+      --color-border: #33383F;
+      --color-input: #242931;
       /* neutral-500 */
       --color-ring: #78C4FF;
 
       /* grouping surface (Frame) and skeleton fill */
-      --color-surface: #0A1019;
-      --color-surface-secondary: #121720;
-      --color-surface-tertiary: #1A1F27;
+      --color-surface: #141A22;
+      --color-surface-secondary: #1A1F27;
+      --color-surface-tertiary: #242931;
       --color-skeleton: #202936;
 
       /* status fills: -soft = Alert (6%), -subtle = Badge (16%) */
@@ -400,6 +403,8 @@
       --radius-xl: 12px;
       --radius-2xl: 16px;
       --radius-3xl: 24px;
+      --color-control: #656B73;
+
     }
 
     /*
@@ -523,17 +528,17 @@
     }
 
     @variant moon-dark {
-      --color-feature: #121720;
+      --color-feature: #1A1F27;
       --color-background: #00060F;
       --color-foreground: #FFFFFF;
 
-      --color-card: #0A1019;
+      --color-card: #141A22;
       --color-card-foreground: #FFFFFF;
 
-      --color-popover: #121720;
+      --color-popover: #1A1F27;
       --color-popover-foreground: #FFFFFF;
 
-      --color-overlay: #1A1F27;
+      --color-overlay: #242931;
       --color-overlay-foreground: #FFFFFF;
       /* the sunken band under a card or dialog: black at 22% */
       --color-inset: rgba(0, 0, 0, 0.22);
@@ -541,13 +546,13 @@
       --color-primary: #A8AFFA;
       --color-primary-foreground: #00060F;
 
-      --color-secondary: #1A1F27;
+      --color-secondary: #242931;
       --color-secondary-foreground: #FFFFFF;
 
-      --color-muted: #1F242C;
-      --color-muted-foreground: #B8B9BC;
+      --color-muted: #292E35;
+      --color-muted-foreground: #BCC2CA;
 
-      --color-accent: #1A1F27;
+      --color-accent: #20364A;
       --color-accent-foreground: #A8AFFA;
 
       --color-destructive: #eb5757;
@@ -569,13 +574,13 @@
       /* The hairlines are opaque, not translucent: the surface ladder is only
          a few points wide, so a border mixed with whatever is under it would
          read as a different line on each of them. */
-      --color-border: #292E35;
-      --color-input: #5E6268;
+      --color-border: #33383F;
+      --color-input: #242931;
       --color-ring: #A8AFFA;
 
-      --color-surface: #0A1019;
-      --color-surface-secondary: #121720;
-      --color-surface-tertiary: #1A1F27;
+      --color-surface: #141A22;
+      --color-surface-secondary: #1A1F27;
+      --color-surface-tertiary: #242931;
       --color-skeleton: rgba(255, 255, 255, 0.08);
 
       --color-info-soft: rgba(78, 167, 252, 0.16);
@@ -613,6 +618,8 @@
       --radius-xl: 16px;
       --radius-2xl: 24px;
       --radius-3xl: 32px;
+      --color-control: #656B73;
+
     }
 
     /* Grass — green accent on warm-neutral greys, with soft generous corners. */
@@ -708,17 +715,17 @@
     }
 
     @variant grass-dark {
-      --color-feature: #121720;
+      --color-feature: #1A1F27;
       --color-background: #00060F;
       --color-foreground: #FFFFFF;
 
-      --color-card: #0A1019;
+      --color-card: #141A22;
       --color-card-foreground: #FFFFFF;
 
-      --color-popover: #121720;
+      --color-popover: #1A1F27;
       --color-popover-foreground: #FFFFFF;
 
-      --color-overlay: #1A1F27;
+      --color-overlay: #242931;
       --color-overlay-foreground: #FFFFFF;
       /* the sunken band under a card or dialog: black at 22% */
       --color-inset: rgba(0, 0, 0, 0.22);
@@ -726,13 +733,13 @@
       --color-primary: #3ecf8e;
       --color-primary-foreground: #00060F;
 
-      --color-secondary: #1A1F27;
+      --color-secondary: #242931;
       --color-secondary-foreground: #FFFFFF;
 
-      --color-muted: #1F242C;
-      --color-muted-foreground: #B8B9BC;
+      --color-muted: #292E35;
+      --color-muted-foreground: #BCC2CA;
 
-      --color-accent: #1A1F27;
+      --color-accent: #20364A;
       --color-accent-foreground: #3ecf8e;
 
       --color-destructive: #f15757;
@@ -751,13 +758,13 @@
       --color-warning-foreground: #fbbf24;
       --color-warning-solid-foreground: #171717;
 
-      --color-border: #292E35;
-      --color-input: #5E6268;
+      --color-border: #33383F;
+      --color-input: #242931;
       --color-ring: #3ecf8e;
 
-      --color-surface: #0A1019;
-      --color-surface-secondary: #121720;
-      --color-surface-tertiary: #1A1F27;
+      --color-surface: #141A22;
+      --color-surface-secondary: #1A1F27;
+      --color-surface-tertiary: #242931;
       --color-skeleton: rgba(255, 255, 255, 0.11);
 
       --color-info-soft: rgba(59, 130, 246, 0.08);
@@ -795,6 +802,8 @@
       --radius-xl: 18px;
       --radius-2xl: 22px;
       --radius-3xl: 28px;
+      --color-control: #656B73;
+
     }
   }
 }

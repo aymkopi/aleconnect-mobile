@@ -106,13 +106,13 @@ function project(velocity: number): number {
 }
 
 const sheetVariants = tv({
-  base: "border border-border bg-popover px-4 pt-4 shadow-none",
+  base: "bg-popover px-4 pt-4 shadow-none",
   variants: {
     detached: {
       // Docked: the sheet is continuous with the bottom of the screen, so the
       // bottom edge is not a real edge and drawing a line along it would be a
       // rule through the middle of nothing.
-      false: "rounded-t-3xl border-b-0",
+      false: "rounded-t-3xl",
       // Floating: all four edges are real, so all four are drawn and all four
       // corners are rounded. The bottom gap depends on the safe area, so it is
       // set in the style rather than here — see `detachedGap`.
@@ -1230,7 +1230,7 @@ function BottomSheetFooter({
 }: BottomSheetFooterProps) {
   return (
     <View
-      className={cn("mt-3 gap-2 border-t border-border pt-3", className)}
+      className={cn("mt-3 gap-2 pt-3", className)}
       {...props}
     >
       {textChildren(children)}
