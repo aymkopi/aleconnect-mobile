@@ -26,6 +26,10 @@ npm run lint
 
 Use focused tests for the changed behavior; `npm test` runs the JS and TypeScript suites. Native/config changes also need Expo alignment/Doctor and appropriate exports/build/device checks. Docs-only edits need harness and whitespace checks.
 
+## GitHub APK releases
+
+Installable APKs and SHA-256 checksums are available in [GitHub Releases](https://github.com/aymkopi/aleconnect-mobile/releases). The first [2.0.0 preview](https://github.com/aymkopi/aleconnect-mobile/releases/tag/v2.0.0-preview.1) is a standalone ARM64/x86_64 build with the existing package and signing certificate. Preview publication does not imply real-device/private/provider acceptance or store signing.
+
 ## Android preview
 
 The `npm run android:preview` script is emulator QA only: it requires `EXPO_PUBLIC_PANELUI_PREVIEW=1` and pauses queue replay. For a fixture-free real-device build, follow [the signed-device runbook](docs/superpowers/plans/2026-10-10-real-android-preview.md) with `EXPO_NO_DOTENV=1`, `EXPO_PUBLIC_PANELUI_PREVIEW=0` and the explicit HTTPS API origin. Force regeneration of the Hermes bundle when changing build-mode environment variables. Preserve the original local signing key; this is separate from a production-signed/store release.

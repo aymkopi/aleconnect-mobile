@@ -117,7 +117,7 @@ const slideButtonVariants = tv({
      * radius is also the shape of the fill's leading edge as it comes out of
      * the corner.
      */
-    root: 'relative flex-row items-center overflow-hidden rounded-full border border-transparent bg-secondary',
+    root: 'relative flex-row items-center overflow-hidden rounded-full bg-secondary',
     /**
      * The ground the handle has covered.
      *

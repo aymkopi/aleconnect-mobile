@@ -21,7 +21,7 @@ export function EmergencyCard() {
   const { publicFixtures: fixtures } = useVisualPreview();
   const [destructive] = useAppColors(["destructive"]);
   return (
-    <View className="rounded-xl border overflow-hidden p-3 gap-2 bg-[#FFF0F1] border-[#EAD2D6] dark:bg-[#371D29] dark:border-[#623442]">
+    <View className="rounded-xl overflow-hidden p-3 gap-2 bg-[#FFF0F1] dark:bg-[#371D29] ">
       <View className="flex-row items-center gap-2">
         <Siren size={24} color={destructive} />
         <View className="flex-1">

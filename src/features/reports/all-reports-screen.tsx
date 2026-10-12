@@ -419,7 +419,7 @@ export default function AllReportsScreen() {
         </Button>
       ) : null}
       {stale ? (
-        <View className="rounded-xl border border-border bg-card p-3 gap-2">
+        <View className="rounded-xl bg-card p-3 gap-2">
           <Text weight="semibold" size="sm">
             Saved reports · updates may be delayed
           </Text>

@@ -1,15 +1,8 @@
 /**
  * Input — a text field with a label, a description and an error line.
  *
- * The field's focus state is animated rather than switched. A border that
- * snaps between two colours reads as a redraw; one that crosses over in
- * 150ms reads as the field responding to you. The interpolation runs on the
- * UI thread, so it costs nothing and keeps up with a fast tab through a form.
- *
- * Two backgrounds, because a field's job changes with what surrounds it:
- * `outline` sits on the page and draws its own edge; `filled` sits inside a
- * card or a sheet, where a second border next to the container's own reads as
- * a seam.
+ * Filled surfaces separate fields from surrounding cards. A functional focus
+ * underline remains visible without adding decorative container outlines.
  *
  * ```tsx
  * <Input label="Email" placeholder="you@example.com" />
@@ -40,10 +33,10 @@
  * different box.
  */
 import { forwardRef, useCallback, useEffect, useState, type ReactNode, } from "react";
-import { TextInput, View, type LayoutChangeEvent, type TextInputProps, } from "react-native";
+import { StyleSheet, TextInput, View, type LayoutChangeEvent, type TextInputProps, } from "react-native";
 import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withTiming, } from "react-native-reanimated";
 import { tv, type VariantProps } from "tailwind-variants";
-import { useCSSVariable } from "uniwind";
+import { useCSSVariable, useResolveClassNames } from "uniwind";
 import type { KeyboardAvoidanceMode } from "@/hooks/use-keyboard-avoidance";
 import { IconColorProvider } from "@/components/panelui/icons";
 import { KeyboardAvoider } from "@/components/panelui/keyboard-avoider";
@@ -61,7 +54,7 @@ const inputVariants = tv({
          * is what an app's `--font-normal` token attaches to, and without it a
          * custom font would stop at the edge of every field in the library.
          */
-        field: "w-full rounded-lg border font-normal text-foreground",
+        field: "w-full rounded-lg font-normal text-foreground web:outline-none",
         description: "text-sm text-muted-foreground",
         error: "text-sm text-destructive",
         /*
@@ -75,9 +68,8 @@ const inputVariants = tv({
     },
     variants: {
         variant: {
-            // The border colour is animated, so it is deliberately not set here —
-            // only the background and the resting border width belong to the class.
-            outline: { field: "bg-background" },
+            // Focus and validation use filled surfaces instead of outlines.
+            outline: { field: "bg-input" },
             filled: { field: "bg-muted" },
         },
         size: {
@@ -203,8 +195,10 @@ export const Input = forwardRef<TextInput, InputProps>(({ className, containerCl
     const [endWidth, setEndWidth] = useState(0);
     const placeholderColor = useCSSVariable("--color-muted-foreground");
     const restColor = useCSSVariable("--color-input");
-    const focusColor = useCSSVariable("--color-ring");
-    const errorColor = useCSSVariable("--color-destructive");
+    const focusColor = useCSSVariable("--color-accent");
+    const errorColor = useCSSVariable("--color-destructive-soft");
+    const focusIndicatorColor = useCSSVariable("--color-ring");
+    const invalidIndicatorColor = useCSSVariable("--color-destructive");
     const slots = inputVariants({
         variant,
         size,
@@ -212,7 +206,7 @@ export const Input = forwardRef<TextInput, InputProps>(({ className, containerCl
         disabled: !!disabled,
     });
     /*
-     * Border colour is driven by one 0..1 value rather than by a class per
+     * Focus fill is driven by one 0..1 value rather than by a class per
      * state. Uniwind can only swap a class wholesale, which is the snap this
      * is here to avoid, and a shared value crosses between the two colours on
      * the UI thread without a re-render.
@@ -221,19 +215,31 @@ export const Input = forwardRef<TextInput, InputProps>(({ className, containerCl
     useEffect(() => {
         focus.value = withTiming(focused ? 1 : 0, { duration: FOCUS_DURATION });
     }, [focused, focus]);
-    const resting = typeof restColor === "string" ? restColor : "#e5e5e5";
+    const resolvedFieldStyle = useResolveClassNames(slots.field({ className }));
+    const customFill = StyleSheet.flatten([resolvedFieldStyle, style])?.backgroundColor;
+    const resting = typeof customFill === "string" ? customFill : typeof restColor === "string" ? restColor : "#e5e5e5";
     const active = invalid
         ? typeof errorColor === "string"
             ? errorColor
             : "#ef4444"
+        : typeof customFill === "string" && customFill.startsWith("rgba(255,255,255,")
+            ? customFill
         : typeof focusColor === "string"
             ? focusColor
             : "#a3a3a3";
     // An invalid field is tinted even at rest — the error is a fact about the
     // value, not about whether the field happens to be focused.
     const idle = invalid ? active : resting;
-    const borderStyle = useAnimatedStyle(() => ({
-        borderColor: interpolateColor(focus.value, [0, 1], [idle, active]),
+    const focusStyle = useAnimatedStyle(() => ({
+        backgroundColor: interpolateColor(focus.value, [0, 1], [idle, active]),
+    }));
+    const indicatorStyle = useAnimatedStyle(() => ({
+        opacity: focus.value,
+        backgroundColor: invalid
+            ? typeof invalidIndicatorColor === "string" ? invalidIndicatorColor : "#ef4444"
+            : typeof customFill === "string" && customFill.startsWith("rgba(255,255,255,")
+                ? "#ffffff"
+                : typeof focusIndicatorColor === "string" ? focusIndicatorColor : "#006bb8",
     }));
     const handleFocus = useCallback<NonNullable<TextInputProps["onFocus"]>>((event) => {
         setFocused(true);
@@ -258,39 +264,33 @@ export const Input = forwardRef<TextInput, InputProps>(({ className, containerCl
      */
     const iconColor = typeof placeholderColor === "string" ? placeholderColor : undefined;
     const field = (<AnimatedTextInput ref={ref} editable={!disabled} onFocus={handleFocus} onBlur={handleBlur} accessibilityLabel={label} accessibilityState={{ disabled: !!disabled }} aria-required={isRequired} aria-invalid={invalid} className={slots.field({ className })} style={[
-            borderStyle,
             // Only the side that has content, and only once it has been
             // measured — a 0 here would wipe out the field's own padding.
             startPadding ? { paddingStart: startPadding } : null,
             endPadding ? { paddingEnd: endPadding } : null,
             // Caller styles come last so InputGroup can pad the field around its
-            // decorators, but never last enough to drop the animated border.
+            // decorators, but never last enough to drop the animated focus fill.
             style,
+            focusStyle,
         ]} placeholderTextColor={typeof placeholderColor === "string" ? placeholderColor : undefined} {...props}/>);
     const body = (<>
         {label ? (<Label isRequired={isRequired} isInvalid={invalid} isDisabled={!!disabled}>
             {label}
           </Label>) : null}
-        {startContent || endContent ? (
-        /*
-         * Only wrapped when there is something to position. An extra view
-         * around every field in an app is a real cost in a long form, and
-         * the field is `w-full` either way so the wrapper changes nothing
-         * else about the layout.
-         */
         <View className={slots.fieldBox()}>
-            {startContent ? (<View onLayout={handleStartLayout} pointerEvents={interactiveContent ? "box-none" : "none"} accessibilityElementsHidden={!interactiveContent} importantForAccessibility={interactiveContent ? "auto" : "no-hide-descendants"} className={slots.startContent()}>
+            {startContent ? (<View onLayout={handleStartLayout} pointerEvents={interactiveContent ? "box-none" : "none"} aria-hidden={!interactiveContent} importantForAccessibility={interactiveContent ? "auto" : "no-hide-descendants"} className={slots.startContent()}>
                 <IconColorProvider color={iconColor}>
                   {textChildren(startContent)}
                 </IconColorProvider>
               </View>) : null}
             {field}
-            {endContent ? (<View onLayout={handleEndLayout} pointerEvents={interactiveContent ? "box-none" : "none"} accessibilityElementsHidden={!interactiveContent} importantForAccessibility={interactiveContent ? "auto" : "no-hide-descendants"} className={slots.endContent()}>
+            {endContent ? (<View onLayout={handleEndLayout} pointerEvents={interactiveContent ? "box-none" : "none"} aria-hidden={!interactiveContent} importantForAccessibility={interactiveContent ? "auto" : "no-hide-descendants"} className={slots.endContent()}>
                 <IconColorProvider color={iconColor}>
                   {textChildren(endContent)}
                 </IconColorProvider>
               </View>) : null}
-          </View>) : (field)}
+            <Animated.View pointerEvents="none" aria-hidden className="absolute bottom-[3px] left-3 right-3 h-0.5 rounded-full" style={indicatorStyle}/>
+          </View>
         {errorMessage ? (<Text className={slots.error()}>{errorMessage}</Text>) : description ? (<Text className={slots.description()}>{description}</Text>) : null}
       </>);
     const containerClasses = slots.container({ className: containerClassName });

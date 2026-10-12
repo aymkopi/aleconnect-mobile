@@ -1,11 +1,11 @@
 # Active work
 
 Last reviewed: 2026-10-12
-Current branch: master; PanelUI 2.0.0 major integration merged through PR #3.
+Current branch: codex/mobile-borderless-ui; canonical master retains merged PanelUI 2.0.0.
 Active plan: [PanelUI 2.0.0 integration](../panelui-major-migration.md).
-Next task: complete separate Staff PR40/native/private acceptance gates; source integration and canonical folder promotion are complete.
-Known blockers: no source/harness blocker. Staff PR40 and native/private/provider acceptance remain separate. Windows holds the empty former aleconnect-panelui directory; it contains no project contents.
-Last verified: 431/431 active tests with zero skips, TypeScript, lint 0 errors/181 retained warnings, harness/whitespace, Expo alignment and Doctor 21/21; fixture-free Android/iOS Hermes and web exports passed on Node 24.21.0. Both exact-head PR checks passed. PR #3 merge ae90471440269f35b18a9261693822eb01ac8e8c is on local/remote master. Canonical physical source promotion retains the full common Git repository, nine stashes, signer/provider configuration and byte-identical recent VS Code Home edits. Android prebuild now uses 2.0.0/code 54 without a dependency change. Old acceptance detail remains in its task handoff.
+Next task: review/merge the separate border-free UI PR; physical/native-iOS/private/provider acceptance remains separate.
+Known blockers: no source blocker. Staff PR40 is merged/deployed; native/private/provider acceptance remains separate. Windows holds the empty former aleconnect-panelui directory; it contains no project contents.
+Last verified: 433/433 tests with zero skips, TypeScript, lint 0 errors/181 existing warnings, harness/whitespace and fixture-free web export pass. Figma active families and representative Light/Dark browser fixtures are verified. Independent source review has no blocker. Staff PR40 is deployed; GitHub v2.0.0-preview.1 APK digest/signature/alignment match. Physical/private/provider acceptance remains separate.
 
 
 - [Harness refinement](tasks/harness-refinement.md): isolated docs/skills/checks; no product release.
@@ -23,3 +23,5 @@ Last verified: 431/431 active tests with zero skips, TypeScript, lint 0 errors/1
 - [PanelUI0.109/Home/topic pass](../panelui-0109-facebook-topics.md): Figma/app fixed Home grids and Kpi complete; Staff topic migration/release and new native preview pending.
 
 - [PanelUI 2.0.0 integration](../panelui-major-migration.md): completed PR #3 major update and canonical folder promotion; detailed changelog, recent VS Code edits, safe recovery and remaining release limits.
+
+- [Border-free UI and release](../borderless-ui-review.md): Figma-first semantic fills, independent source review, signed GitHub preview and deployed Staff PR40; UI PR remains separate.

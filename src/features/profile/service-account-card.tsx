@@ -35,7 +35,7 @@ export function ServiceAccountCard({ account }: { account: LinkedAccount }) {
           <RotateCw size={14} color="#E5E7EB" /><Text size="xs" style={{ color: "#E5E7EB" }}>Tap to view details & account QR</Text>
         </View>
       </FlipCard.Front>
-      <FlipCard.Back className="h-full gap-2 rounded-xl border border-border bg-card p-3">
+      <FlipCard.Back className="h-full gap-2 rounded-xl bg-card p-3">
         <View className="flex-1 flex-row items-center gap-3">
           <View className="flex-1 gap-1">
             {[

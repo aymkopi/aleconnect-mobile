@@ -250,7 +250,7 @@ function Alerts({ identity }: { identity: ProfileIdentity }) {
             <Text size="sm" weight="semibold" accessibilityRole="header">
               Notifications
             </Text>
-            <View className="gap-3 rounded-xl border border-border bg-card p-3">
+            <View className="gap-3 rounded-xl bg-card p-3">
               <View className="flex-row items-center gap-2">
                 <Bell size={18} color={muted} />
                 <View className="flex-1 gap-1">
@@ -317,7 +317,7 @@ function Alerts({ identity }: { identity: ProfileIdentity }) {
             <Text size="sm" weight="semibold" accessibilityRole="header">
               Broadcast areas
             </Text>
-            <View className="gap-2 rounded-xl border border-border bg-card p-3">
+            <View className="gap-2 rounded-xl bg-card p-3">
               <View className="flex-row gap-2">
                 <Text size="sm" weight="semibold" className="flex-1">
                   {draft.substations
@@ -480,7 +480,7 @@ function Alerts({ identity }: { identity: ProfileIdentity }) {
                 {matchingStations.map((s) => {
                   const n = s.feeders.filter((f) => areaDraft.includes(f.id)).length;
                   return (
-                    <View key={s.id} className="gap-1 rounded-xl border border-border p-3">
+                    <View key={s.id} className="gap-1 rounded-xl p-3">
                       <Checkbox
                         checked={n === s.feeders.length && n > 0}
                         indeterminate={n > 0 && n < s.feeders.length}

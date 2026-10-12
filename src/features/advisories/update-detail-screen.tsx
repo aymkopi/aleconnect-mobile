@@ -299,7 +299,7 @@ function UpdateDetailScreen({ kind }: { kind: MobilePublicUpdate["kind"] }) {
                       setQuery("");
                       setAreas(true);
                     }}
-                    className="rounded-xl border border-border bg-card p-4 flex-row items-center gap-2"
+                    className="rounded-xl bg-card p-4 flex-row items-center gap-2"
                   >
                     <MapPin size={18} color={primary} />
                     <View className="flex-1 gap-1">

@@ -48,11 +48,11 @@ export function ReportReceipt({
         }}
       >
         <PreviewLabel />
-        <View className="rounded-3xl border border-border bg-muted p-1">
+        <View className="rounded-3xl bg-muted p-1">
           <View className="flex-row items-center justify-center gap-2 py-2">
             <ReportStatusBadge status="under_review" />
           </View>
-          <View className="rounded-[20px] bg-card border border-border p-4 gap-3">
+          <View className="rounded-[20px] bg-card p-4 gap-3">
             <View className="items-center gap-2">
               <View className="h-10 w-10 rounded-full bg-success/10 items-center justify-center">
                 <Check size={20} color={success} />
@@ -89,7 +89,7 @@ export function ReportReceipt({
                   </Text>
                 </View>
               </View>
-              <View className="border-t border-border pt-3 gap-2">
+              <View className="pt-3 gap-2">
                 <View className="flex-row gap-2 items-center">
                   <Building2 size={16} color={muted} />
                   <Text size="xs" className="flex-1">

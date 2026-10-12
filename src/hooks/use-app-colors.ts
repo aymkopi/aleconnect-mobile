@@ -5,6 +5,7 @@ export type AppColorToken =
   | "accent-foreground"
   | "background"
   | "border"
+  | "control"
   | "card"
   | "card-foreground"
   | "destructive"

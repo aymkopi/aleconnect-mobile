@@ -179,7 +179,7 @@ function LinkAccount({ identity }: { identity: ProfileIdentity }) {
               title="Request received"
               description="Keep using your current account while ALECO reviews your request."
             />
-            <View className="gap-3 rounded-xl border border-border bg-card p-4">
+            <View className="gap-3 rounded-xl bg-card p-4">
               <DetailRow label="Requested account" value={"ALECO ••" + number.slice(-4)} />
               <DetailRow label="Registered name" value={name} />
               <DetailRow label="Status" value={status} />
@@ -207,7 +207,7 @@ function LinkAccount({ identity }: { identity: ProfileIdentity }) {
               title="Review your request"
               description="Make sure these match the details on your ALECO bill."
             />
-            <View className="gap-4 rounded-xl border border-border bg-card p-4">
+            <View className="gap-4 rounded-xl bg-card p-4">
               <DetailRow label="ALECO account number" value={number} />
               <DetailRow label="Registered name" value={name} />
               <DetailRow label="Account password" value="Entered · hidden" />

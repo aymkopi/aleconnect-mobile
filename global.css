@@ -3,7 +3,7 @@
 @import "./theme.css";
 @source "./src";
 @theme static {
-  --default-border-width: 0.75px;
+  --default-border-width: 0px;
   --font-sans: "Inter_400Regular";
   --font-normal: "Inter_400Regular";
   --font-medium: "Inter_500Medium";

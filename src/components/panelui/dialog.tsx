@@ -136,7 +136,7 @@ function DialogContent({
           // `p-5` is `DIALOG_PADDING` above — a panel footer bleeds back out
           // through exactly this much, so the two move together.
           className={cn(
-            'w-full max-w-sm gap-1.5 rounded-3xl border border-border bg-popover p-5 shadow-none',
+            'w-full max-w-sm gap-1.5 rounded-3xl bg-popover p-5 shadow-none',
             className
           )}
           {...props}
@@ -189,7 +189,7 @@ const dialogFooterVariants = tv({
      */
     variant: {
       plain: 'mt-4',
-      panel: 'mt-5 rounded-b-2xl border-t border-border bg-inset',
+      panel: 'mt-5 rounded-b-2xl bg-inset',
     },
   },
   defaultVariants: {

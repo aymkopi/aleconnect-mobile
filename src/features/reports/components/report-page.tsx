@@ -133,7 +133,7 @@ export function ReportPage({
             onLayout={(event) =>
               setFooterHeight(event.nativeEvent.layout.height)
             }
-            className="border-t border-border bg-background px-4 pt-3 gap-2"
+            className="bg-background px-4 pt-3 gap-2"
             style={{ paddingBottom: Math.max(insets.bottom, 12) }}
           >
             {footer}

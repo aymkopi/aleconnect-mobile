@@ -259,7 +259,7 @@ export interface TypographyBlockquoteProps extends Omit<TypographyProps, 'type'>
  */
 const TypographyBlockquote = forwardRef<View, TypographyBlockquoteProps>(
   ({ className, containerClassName, muted, weight, align, transform, underline, italic = true, strike, children, ...props }, ref) => (
-    <View ref={ref} className={cn('border-s-2 border-border ps-4', containerClassName)}>
+    <View ref={ref} className={cn('ps-4', containerClassName)}>
       <Text
         className={typographyVariants({
           type: 'blockquote',

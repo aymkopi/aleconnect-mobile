@@ -44,7 +44,7 @@ export function ContactCard({
     ]),
     website = websiteUrl(agency.websiteLink);
   return (
-    <View className="rounded-xl border border-border bg-card p-3 gap-2">
+    <View className="rounded-xl bg-card p-3 gap-2">
       <View className="flex-row gap-2 items-center">
         {agency.logoUrl ? (
           <Image

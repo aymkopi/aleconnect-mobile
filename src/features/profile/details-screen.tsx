@@ -355,7 +355,7 @@ function Details({
                   disabled={busy || identity.account.sessionMode !== "identity"} onPress={() => setDefaultDialog(true)}>Set as default</Button> : null}
                 <ProfileNotice title="Keep your details current"
                   description="Verify your password to update contact details and home location. Active reports keep their original submitted details." />
-                <View className="gap-5 rounded-xl border border-border bg-card p-4">
+                <View className="gap-5 rounded-xl bg-card p-4">
                   <DetailRow label="Contact" value={profile.contactNum ?? "No contact number"} />
                   <DetailRow
                     label={emailEditable ? "Service account email" : "Email sign-in"}
@@ -366,7 +366,7 @@ function Details({
                     value={profile.fullAddress ?? "No location on file"}
                   />
                 </View>
-                <View className="gap-2 rounded-xl border border-border bg-card p-4">
+                <View className="gap-2 rounded-xl bg-card p-4">
                   <Text size="sm" weight="semibold">
                     Service details
                   </Text>
@@ -419,7 +419,7 @@ function Details({
                       : "Changing your email sign-in requires email verification, which is not available yet."
                   }
                 />
-                <View className="gap-2 rounded-xl border border-border bg-card p-4">
+                <View className="gap-2 rounded-xl bg-card p-4">
                   <Text size="sm" weight="semibold">
                     Home location
                   </Text>
@@ -503,7 +503,7 @@ function Details({
                   value={locationDraft.landmark}
                   onChangeText={(v) => setLocationDraft((d) => ({ ...d, landmark: v }))}
                 />
-                <View className="gap-2 rounded-xl border border-border bg-card p-4">
+                <View className="gap-2 rounded-xl bg-card p-4">
                   <Text size="sm" weight="semibold">
                     Home location pin
                   </Text>
@@ -524,7 +524,7 @@ function Details({
             ) : view === "review" ? (
               <>
                 <ProfileHeading title="Review your changes" />
-                <View className="gap-4 rounded-xl border border-border bg-card p-4">
+                <View className="gap-4 rounded-xl bg-card p-4">
                   {phone.replace(/\D/g, "") !== (profile.contactNum ?? "") ? (
                     <>
                       <DetailRow label="Contact · Before" value={profile.contactNum ?? "Not set"} />

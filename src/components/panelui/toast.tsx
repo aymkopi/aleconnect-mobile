@@ -126,7 +126,7 @@ const exitingBottom = exitKeyframe(ENTER_OFFSET);
 
 const toastVariants = tv({
   slots: {
-    root: 'w-full flex-row items-start gap-3 rounded-2xl border px-4 py-3.5 shadow-none',
+    root: 'w-full flex-row items-start gap-3 rounded-2xl px-4 py-3.5 shadow-none',
     indicator: 'pt-px',
     content: 'flex-1 gap-0.5',
     title: 'text-sm font-medium',
@@ -134,12 +134,12 @@ const toastVariants = tv({
   },
   variants: {
     variant: {
-      default: { root: 'border-border bg-popover', title: 'text-popover-foreground' },
-      info: { root: 'border-info/32 bg-popover', title: 'text-info-foreground' },
-      success: { root: 'border-success/32 bg-popover', title: 'text-success-foreground' },
-      warning: { root: 'border-warning/32 bg-popover', title: 'text-warning-foreground' },
+      default: { root: 'bg-popover', title: 'text-popover-foreground' },
+      info: { root: 'bg-popover', title: 'text-info-foreground' },
+      success: { root: 'bg-popover', title: 'text-success-foreground' },
+      warning: { root: 'bg-popover', title: 'text-warning-foreground' },
       destructive: {
-        root: 'border-destructive/32 bg-popover',
+        root: 'bg-popover',
         title: 'text-destructive-foreground',
       },
     },

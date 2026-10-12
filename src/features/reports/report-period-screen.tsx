@@ -27,7 +27,7 @@ export default function ReportPeriodScreen() {
   const [period, setPeriod] = useState(typeof params.period === "string" && Object.keys(reportPeriodLabels).includes(params.period) ? params.period : "all");
   const [start, setStart] = useState(typeof params.start === "string" && validDateRange(params.start, params.start) ? params.start < first ? first : params.start > today ? today : params.start : first);
   const [end, setEnd] = useState(typeof params.end === "string" && validDateRange(params.end, params.end) ? params.end < first ? first : params.end > today ? today : params.end : today);
-  const [primary] = useAppColors(["primary"]);
+  const [primaryForeground] = useAppColors(["primary-foreground"]);
   const rangeValid = dateRangeWithinBounds(start, end, bounds);
   return (
     <ReportPage title="Reporting period" footer={
@@ -42,14 +42,14 @@ export default function ReportPeriodScreen() {
           <Pressable key={value} accessibilityRole="radio" accessibilityLabel={label}
             accessibilityState={{ checked: period === value }} aria-checked={period === value}
             onPress={() => setPeriod(value)}
-            className={"flex-row items-center gap-3 rounded-xl border p-3 bg-card " + (period === value ? "border-primary" : "border-border")}
+            className={"flex-row items-center gap-3 rounded-xl p-3 " + (period === value ? "bg-accent" : "bg-card")}
             style={{ minHeight: 56 }}>
             <View className="flex-1 gap-1">
               <Text weight="semibold">{label}</Text>
               {value !== "all" && value !== "custom" ? <Text muted size="xs">{dateLabel(range.start)} — {dateLabel(range.end)}</Text> : null}
             </View>
-            <View className={"items-center justify-center rounded-full border w-6 h-6 " + (period === value ? "border-primary" : "border-border")}>
-              {period === value ? <Check size={16} color={primary} /> : null}
+            <View className={"items-center justify-center rounded-full w-6 h-6 " + (period === value ? "bg-primary" : "bg-control")}>
+              {period === value ? <Check size={16} color={primaryForeground} /> : null}
             </View>
           </Pressable>
         );

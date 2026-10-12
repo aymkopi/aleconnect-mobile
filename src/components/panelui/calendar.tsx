@@ -127,7 +127,7 @@ const calendarVariants = tv({
   variants: {
     /** Draw the calendar's own panel, for one standing on the page. */
     bordered: {
-      true: { root: 'rounded-3xl border border-border bg-card p-3' },
+      true: { root: 'rounded-3xl bg-card p-3' },
     },
   },
   defaultVariants: {
@@ -151,7 +151,7 @@ const dayVariants = tv({
   },
   variants: {
     selected: { true: { disc: 'bg-primary', label: 'text-primary-foreground' } },
-    today: { true: { disc: 'border border-primary', label: 'text-primary' } },
+    today: { true: { disc: '', label: 'text-primary' } },
     outside: { true: { label: 'text-muted-foreground/40' } },
     disabled: { true: { label: 'text-muted-foreground/30' } },
     /** A ruled-out day inside a range still sits on it, but faintly. */

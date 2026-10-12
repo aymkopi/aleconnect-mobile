@@ -8,7 +8,7 @@ import { ReportPage } from "@/features/reports/components/report-page";
 import type { NotificationAccess } from "./use-notifications";
 
 export function NotificationNotice({ title, children, danger = false }: { title: string; children: ReactNode; danger?: boolean }) {
-  return <View accessibilityLiveRegion="polite" className={danger ? "gap-1 rounded-xl border border-destructive bg-card p-3" : "gap-1 rounded-xl border border-border bg-card p-3"}>
+  return <View accessibilityLiveRegion="polite" className={danger ? "gap-1 rounded-xl bg-card p-3" : "gap-1 rounded-xl bg-card p-3"}>
     <Text size="sm" weight="semibold" accessibilityRole={danger ? "alert" : undefined}>{title}</Text>
     {typeof children === "string" ? <Text size="sm">{children}</Text> : children}
   </View>;

@@ -62,7 +62,7 @@ const DONE_TINT = {
 
 const progressButtonVariants = tv({
   slots: {
-    root: "relative overflow-hidden border border-transparent bg-secondary",
+    root: "relative overflow-hidden bg-secondary",
 
     content: "flex-row items-center justify-center gap-2",
     label: "min-w-0 shrink text-center font-medium",

@@ -170,7 +170,7 @@ function Photo({
           }
         />
         {uri ? (
-          <View className="gap-3 rounded-xl border border-border bg-card p-4">
+          <View className="gap-3 rounded-xl bg-card p-4">
             <Image
               accessibilityLabel="Selected profile photo"
               source={identity.fixture ? require("@/assets/aleconnect/mayon.jpeg") : { uri }}

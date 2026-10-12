@@ -60,20 +60,18 @@ function SignInForm({ intent }: { intent: ReturnType<typeof signInIntent> }) {
   const [mode, setMode] = useState(intent.mode);
   const [resume, setResume] = useState(false);
   const isResume = intent.context === "session-ended";
-  const [foreground, card, muted, primaryForeground, border] = useAppColors([
+  const [foreground, muted, primaryForeground, input] = useAppColors([
     "foreground",
-    "card",
     "muted-foreground",
     "primary-foreground",
-    "border",
+    "input",
   ]);
   const iconColor = isResume ? muted : "white";
   const fieldStyle = [
     styles.field,
     isResume && {
       color: foreground,
-      backgroundColor: card,
-      borderColor: border,
+      backgroundColor: input,
     },
   ];
   const linkingParams = intent.linking ? { linking: "1" } : {};
@@ -496,8 +494,6 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 12,
     backgroundColor: "rgba(255,255,255,0.12)",
-    borderColor: "rgba(255,255,255,0.24)",
-    borderWidth: 0.75,
     color: "white",
     fontFamily: "Inter_400Regular",
     fontSize: 14,
@@ -520,9 +516,7 @@ const styles = StyleSheet.create({
   alternate: {
     minHeight: 48,
     borderRadius: 16,
-    borderWidth: 0.75,
     backgroundColor: "rgba(255,255,255,0.1)",
-    borderColor: "rgba(255,255,255,0.24)",
   },
   note: {
     color: "rgba(255,255,255,0.88)",

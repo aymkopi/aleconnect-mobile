@@ -26,20 +26,36 @@ test("dark surfaces derive from the near-black anchor and text remains readable 
  const block=css.match(new RegExp("@variant "+theme+" \\{([\\s\\S]*?)\\n    \\}"))[1];
  const t=Object.fromEntries([...block.matchAll(/--color-([\w-]+):\s*(#[\da-fA-F]{6});/g)].map(m=>[m[1],m[2].toUpperCase()]));
  const mix=a=>"#"+[0,6,15].map(c=>Math.round(c+(255-c)*a).toString(16).padStart(2,"0")).join("").toUpperCase();
- for(const [token,amount]of Object.entries({background:0,card:.04,popover:.07,overlay:.10,secondary:.10,muted:.12,border:.16,input:.37,surface:.04,"surface-secondary":.07,"surface-tertiary":.10,feature:.07}))assert.equal(t[token],mix(amount),token);
+ for(const [token,amount]of Object.entries({background:0,card:.08,popover:.10,overlay:.14,secondary:.14,muted:.16,border:.20,input:.14,surface:.08,"surface-secondary":.10,"surface-tertiary":.14,feature:.10}))assert.equal(t[token],mix(amount),token);
  assert.equal(t.foreground,"#FFFFFF");
  const lum=h=>{const c=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);return .2126*c[0]+.7152*c[1]+.0722*c[2];};
  const contrast=(a,b)=>(Math.max(lum(a),lum(b))+.05)/(Math.min(lum(a),lum(b))+.05);
  for(const surface of ["background","card","popover","overlay","secondary","muted","feature"])for(const text of ["foreground","muted-foreground","primary"])assert.ok(contrast(t[text],t[surface])>=4.5,text+" on "+surface);
- assert.ok(contrast(t.input,t.card)>=3,"input boundary contrast");
+ assert.ok(contrast(t.control,t.card)>=3,"unchecked control contrast");
  }
 });
 
 test("primary-filled app controls use the theme's contrasting icon and label colors", async () => {
- for (const [path,icon] of [["auth/sign-in-screen.tsx","IdentityIcon"],["maps/static-location-map.tsx","MapPin"],["reports/new-report-screen.tsx","Check"],["profile/accounts-screen.tsx","LinkIcon"]]) {
+ for (const [path,icon] of [["auth/sign-in-screen.tsx","IdentityIcon"],["maps/static-location-map.tsx","MapPin"],["reports/new-report-screen.tsx","Check"],["profile/accounts-screen.tsx","LinkIcon"],["reports/report-period-screen.tsx","Check"]]) {
   const source=await readFile(new URL("../src/features/"+path,import.meta.url),"utf8");
   assert.match(source,new RegExp('<'+icon+' size=\\{\\d+\\} color=\\{primaryForeground\\}'),path);
  }
  const signIn=await readFile(new URL("../src/features/auth/sign-in-screen.tsx",import.meta.url),"utf8");
  assert.match(signIn,/style=\{\[styles.action, \{ color: primaryForeground \}\]\}/);
+});
+
+
+test("border-free field text and focus indicators contrast with Light/Dark filled surfaces",async()=>{
+ const css=await readFile(new URL("../theme.css",import.meta.url),"utf8");
+ const lum=h=>{const c=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);return .2126*c[0]+.7152*c[1]+.0722*c[2];};
+ const contrast=(a,b)=>(Math.max(lum(a),lum(b))+.05)/(Math.min(lum(a),lum(b))+.05);
+ for(const theme of ["light","dark"]){
+  const block=css.split("@variant "+theme+" {")[1].split("\n    }")[0];
+  const t=Object.fromEntries([...block.matchAll(/--color-([\w-]+):\s*(#[\da-fA-F]{6});/g)].map(m=>[m[1],m[2]]));
+  for(const surface of ["card","popover","input","muted"]){
+   assert.ok(contrast(t.foreground,t[surface])>=4.5,theme+" field text");
+   assert.ok(contrast(t["muted-foreground"],t[surface])>=4.5,theme+" field hint");
+   assert.ok(contrast(t.ring,t[surface])>=3,theme+" functional focus");
+  }
+ }
 });

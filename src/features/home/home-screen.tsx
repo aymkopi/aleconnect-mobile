@@ -287,7 +287,7 @@ export default function HomeScreen() {
             Quick Actions
           </Text>
           <View
-            className="rounded-xl border border-border bg-card"
+            className="rounded-xl bg-card"
             style={{
               paddingVertical: layout.gridPadding,
               paddingHorizontal: 8,
@@ -410,7 +410,7 @@ export default function HomeScreen() {
             </View>
           ) : (
             <View
-              className="mx-4 rounded-xl border border-border bg-card p-3 flex-row items-center gap-3 overflow-hidden"
+              className="mx-4 rounded-xl bg-card p-3 flex-row items-center gap-3 overflow-hidden"
               style={{ height: carouselCardHeight }}
             >
               <View className="flex-1 gap-1">
@@ -442,7 +442,7 @@ export default function HomeScreen() {
           )}
         </View>
         <View
-          className="mx-4 rounded-xl border border-border bg-card px-3 py-2 flex-row items-center justify-between gap-3"
+          className="mx-4 rounded-xl bg-card px-3 py-2 flex-row items-center justify-between gap-3"
           style={{ minHeight: layout.ctaHeight }}
         >
           <Text

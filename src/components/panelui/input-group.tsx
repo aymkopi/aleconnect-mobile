@@ -140,7 +140,7 @@ function createDecorator(side: 'prefix' | 'suffix') {
           ref={ref}
           onLayout={handleLayout}
           pointerEvents={isDecorative ? 'none' : 'auto'}
-          accessibilityElementsHidden={isDecorative}
+          aria-hidden={isDecorative}
           importantForAccessibility={isDecorative ? 'no-hide-descendants' : 'auto'}
           className={slots[side]({ className })}
           {...props}

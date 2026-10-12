@@ -113,7 +113,7 @@ function Requests({ identity, initial }: { identity: ProfileIdentity; initial?: 
             ) : (
               <>
                 <ProfileHeading title={consumerAccountLinkRequestStatusLabel(request.status)} />
-                <View className="gap-3 rounded-xl border border-border bg-card p-4">
+                <View className="gap-3 rounded-xl bg-card p-4">
                   <DetailRow
                     label="Requested account"
                     value={"ALECO ••" + request.accountNumber.slice(-4)}
@@ -169,7 +169,7 @@ function Requests({ identity, initial }: { identity: ProfileIdentity; initial?: 
               read.data.map((r) => (
                 <View
                   key={r.requestId}
-                  className="gap-2 rounded-xl border border-border bg-card p-3"
+                  className="gap-2 rounded-xl bg-card p-3"
                 >
                   <Text size="sm" weight="semibold" className="text-primary">
                     {consumerAccountLinkRequestStatusLabel(r.status)}

@@ -88,10 +88,10 @@ const qrCodeVariants = tv({
     // The widget shell every chart in the library is shown in: a titled tray
     // with the card flush inside it. A code is the same kind of thing — one
     // object with a label over it — so it is the same shape.
-    frame: 'w-full overflow-hidden rounded-3xl border border-border bg-surface',
+    frame: 'w-full overflow-hidden rounded-3xl bg-surface',
     header: 'w-full flex-row items-center justify-between gap-3 px-4 pb-3 pt-2.5',
     // Flush left, right and bottom: the shell's own edge is already there.
-    panel: 'relative items-center justify-center overflow-hidden rounded-t-2xl border-t border-border bg-card p-4',
+    panel: 'relative items-center justify-center overflow-hidden rounded-t-2xl bg-card p-4',
     caption: 'text-center text-sm text-muted-foreground',
     value: 'text-center text-xs text-muted-foreground',
   },

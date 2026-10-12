@@ -33,7 +33,7 @@ export function ContentSkeleton({
       accessibilityState={{ busy: true }} accessibilityLiveRegion="polite"
       className="gap-2" style={style}>
       {Array.from({ length: count }, (_, index) => (
-        <View key={index} className={layout === "identity" ? "py-2" : "rounded-lg border border-border bg-card p-3"}
+        <View key={index} className={layout === "identity" ? "py-2" : "rounded-lg bg-card p-3"}
           style={{ minHeight: height * scale }}>
           <Skeleton animated={focused} className="bg-transparent" style={{ minHeight: height * scale - (layout === "identity" ? 16 : 25.5) }}>
             <View className="gap-1.5">

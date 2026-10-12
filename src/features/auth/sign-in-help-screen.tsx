@@ -65,7 +65,7 @@ export default function SignInHelpScreen() {
     {actions.map((action) => <Pressable key={action.key} accessibilityRole="button"
       accessibilityLabel={action.title} accessibilityState={{ disabled: busy }} disabled={busy}
       onPress={() => void go(action.key)}
-      className="flex-row items-center gap-3 rounded-xl border border-border bg-card p-3"
+      className="flex-row items-center gap-3 rounded-xl bg-card p-3"
       style={{ minHeight: 64 }}>
       <View className="items-center justify-center rounded-xl bg-primary/5" style={{ width: 32, height: 32 }}><FileText size={20} color={primary} /></View>
       <View className="flex-1 gap-0.5"><Text size="sm" weight="semibold">{action.title}</Text><Text size="xs" muted>{action.description}</Text></View>

@@ -62,7 +62,7 @@ export default function ReportStatusScreen() {
           accessibilityRole="button"
           accessibilityState={{ expanded: selected === status }}
           onPress={() => setSelected(selected === status ? null : status)}
-          className="rounded-xl border border-border bg-card p-3 gap-2"
+          className="rounded-xl bg-card p-3 gap-2"
           style={{ minHeight: 64 }}
         >
           <View className="flex-row gap-3 items-center">

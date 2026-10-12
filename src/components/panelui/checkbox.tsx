@@ -8,7 +8,7 @@ import { Text } from "@/components/panelui/text";
 const checkboxVariants = tv({
     slots: {
         row: "min-h-12 min-w-12 flex-row items-center gap-2.5",
-        box: "h-5 w-5 items-center justify-center rounded-md border border-input bg-background",
+        box: "h-5 w-5 items-center justify-center rounded-md bg-control",
         fill: "absolute inset-0 items-center justify-center rounded-md bg-primary",
         content: "flex-1 gap-0.5",
         label: "text-sm text-foreground",
@@ -58,7 +58,7 @@ const checkboxVariants = tv({
              * checkbox is a confirmation rather than the affordance itself.
              */
             card: {
-                row: "w-full items-start gap-3 rounded-xl border border-border bg-card p-4",
+                row: "w-full items-start gap-3 rounded-xl bg-card p-4",
                 label: "text-base font-medium",
             },
         },
@@ -73,7 +73,7 @@ const checkboxVariants = tv({
         {
             variant: "card",
             checked: true,
-            class: { row: "border-primary bg-accent" },
+            class: { row: "bg-accent" },
         },
     ],
     defaultVariants: {

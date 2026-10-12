@@ -879,7 +879,7 @@ export default function NewReportScreen() {
                 );
               else if (!photo) setSourceOpen(true);
             }}
-            className="flex-1 rounded-xl overflow-hidden border border-border bg-muted items-center justify-center"
+            className="flex-1 rounded-xl overflow-hidden bg-muted items-center justify-center"
           >
             {photo ? (
               <Image
@@ -1083,14 +1083,14 @@ export default function NewReportScreen() {
         {metaLoading ? (
           <ContentSkeleton layout="form" count={2} label="Loading report form" />
         ) : metaError ? (
-          <View className="gap-3 rounded-xl bg-card border border-border p-4">
+          <View className="gap-3 rounded-xl bg-card p-4">
             <Text accessibilityRole="alert">{metaError}</Text>
             <Button onPress={() => setMetaRetry((current) => current + 1)}>
               Retry
             </Button>
           </View>
         ) : stale ? (
-          <View className="gap-3 rounded-xl bg-card border border-border p-4">
+          <View className="gap-3 rounded-xl bg-card p-4">
             <Text weight="semibold">Account access changed</Text>
             <Text muted size="sm">
               This draft cannot be sent with another login or changed account
@@ -1129,14 +1129,14 @@ export default function NewReportScreen() {
                     }}
                     disabled={submitting || pickerBusy}
                     onPress={() => selectAccount(account.id)}
-                    className={`flex-row items-center gap-3 border rounded-xl px-4 py-4 ${accountId === account.id ? "border-primary bg-primary/5" : "border-border bg-card"}`}
+                    className={`flex-row items-center gap-3 rounded-xl px-4 py-4 ${accountId === account.id ? "bg-accent" : "bg-card"}`}
                     style={{ minHeight: 80 }}
                   >
                     <View
-                      className={`h-5 w-5 rounded-full border items-center justify-center ${accountId === account.id ? "border-primary" : "border-muted-foreground"}`}
+                      className={`h-5 w-5 rounded-full items-center justify-center ${accountId === account.id ? "bg-primary" : "bg-control"}`}
                     >
                       {accountId === account.id ? (
-                        <View className="h-2.5 w-2.5 rounded-full bg-primary" />
+                        <View className="h-2.5 w-2.5 rounded-full bg-primary-foreground" />
                       ) : null}
                     </View>
                     <View className="flex-1 gap-1">
@@ -1233,7 +1233,7 @@ export default function NewReportScreen() {
                           accessibilityState={{
                             checked: form.categoryId === item.id,
                           }}
-                          className={`rounded-xl p-4 gap-3 border ${form.categoryId === item.id ? "border-primary bg-primary/5" : "border-border bg-card"}`}
+                          className={`rounded-xl p-4 gap-3 ${form.categoryId === item.id ? "bg-accent" : "bg-card"}`}
                           style={{ width: "48%", minHeight: 106 }}
                         >
                           <Icon
@@ -1278,18 +1278,17 @@ export default function NewReportScreen() {
                               onPress={() => selectIssue(form.categoryId, item.id)}
                             >
                               <Card
-                                className={checked ? "border-primary bg-primary/5" : undefined}
+                                className={checked ? "bg-primary/5" : undefined}
                               >
                                 <Card.Content className="min-h-14 flex-row items-center gap-3 p-4">
                                   <View
                                     className="h-5 w-5 shrink-0 items-center justify-center rounded-full"
                                     style={{
-                                      borderWidth: 0.75,
-                                      borderColor: checked ? primary : muted,
+                                      backgroundColor: checked ? primary : muted,
                                     }}
                                   >
                                     {checked ? (
-                                      <View className="h-2.5 w-2.5 rounded-full bg-primary" />
+                                      <View className="h-2.5 w-2.5 rounded-full bg-primary-foreground" />
                                     ) : null}
                                   </View>
                                   <Card.Title size="sm" weight="medium" className="flex-1">
@@ -1392,10 +1391,10 @@ export default function NewReportScreen() {
                       }));
                     }
                   }}
-                  className="flex-row items-center gap-3 rounded-xl border border-border bg-card p-4"
+                  className="flex-row items-center gap-3 rounded-xl bg-card p-4"
                 >
                   <View
-                    className={`h-5 w-5 rounded border items-center justify-center ${form.useHomeAddress ? "bg-primary border-primary" : "border-muted-foreground"}`}
+                    className={`h-5 w-5 rounded items-center justify-center ${form.useHomeAddress ? "bg-primary" : "bg-control"}`}
                   >
                     {form.useHomeAddress ? (
                       <Check size={14} color={primaryForeground} />
@@ -1414,7 +1413,7 @@ export default function NewReportScreen() {
                   /></View>
                   </Pressable>
                 ) : null}
-                <View className="gap-2 rounded-xl border border-border bg-card p-4">
+                <View className="gap-2 rounded-xl bg-card p-4">
                   <Text size="xs" muted>
                     Issue location
                   </Text>
@@ -1479,7 +1478,7 @@ export default function NewReportScreen() {
               <>
                 <Heading>Add photos</Heading>
                 {attempted && errors.evidence ? (
-                  <Card className="flex-row items-start gap-2 border-destructive/40 bg-destructive-subtle p-3" accessibilityRole="alert">
+                  <Card className="flex-row items-start gap-2 bg-destructive-subtle p-3" accessibilityRole="alert">
                     <TriangleAlert size={18} color={danger} />
                     <View className="flex-1 gap-1">
                       <Text size="sm" weight="semibold" className="text-destructive">Photo required</Text>
@@ -1505,7 +1504,7 @@ export default function NewReportScreen() {
                     </Select>
                   </Field>
                 ) : null}
-                <View className="gap-3 rounded-xl bg-card border border-border p-4">
+                <View className="gap-3 rounded-xl bg-card p-4">
                   <Text size="sm" weight="semibold">
                     Attach {reportLimits.evidenceMin}–{reportLimits.evidenceMax}{" "}
                     photos
@@ -1561,7 +1560,7 @@ export default function NewReportScreen() {
                 <Heading description="Check your report before sending to ALECO.">
                   Review & submit
                 </Heading>
-                <View className="rounded-xl border border-border bg-card p-3 gap-3">
+                <View className="rounded-xl bg-card p-3 gap-3">
                   <EditRow
                     title={category?.title ?? "Issue & type"}
                     onPress={() => edit(2)}
@@ -1572,11 +1571,11 @@ export default function NewReportScreen() {
                   <EditRow title="Service account" onPress={() => edit(1)} />
                   <Text size="sm">{accountLabel}</Text>
                 </View>
-                <View className="rounded-xl border border-border bg-card p-3 gap-2">
+                <View className="rounded-xl bg-card p-3 gap-2">
                   <EditRow title="Location" onPress={() => edit(3)} />
                   <Text size="sm">{address}</Text>
                 </View>
-                <View className="rounded-xl border border-border bg-card p-3 gap-2">
+                <View className="rounded-xl bg-card p-3 gap-2">
                   <EditRow title="Report details" onPress={() => edit(4)} />
                   <Text size="sm">
                     {form.categoryDescription || "No additional description"}
@@ -1601,7 +1600,7 @@ export default function NewReportScreen() {
                   </Text>
                   <Text size="sm">{form.desiredAction || "Not specified"}</Text>
                 </View>
-                <View className="rounded-xl border border-border bg-card p-3 gap-2">
+                <View className="rounded-xl bg-card p-3 gap-2">
                   <EditRow
                     title={`Photos · ${readyPhotos.length} attached`}
                     onPress={() => edit(5)}

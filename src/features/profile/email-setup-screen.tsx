@@ -157,7 +157,7 @@ function EmailSetup({ identity }: { identity: ProfileIdentity }) {
               />
             ) : null}
             {review ? (
-              <View className="gap-3 rounded-xl border border-border bg-card p-4">
+              <View className="gap-3 rounded-xl bg-card p-4">
                 <DetailRow label="Email sign-in" value={email.trim().toLowerCase()} />
                 <DetailRow label="New password" value="Entered · hidden" />
                 <DetailRow

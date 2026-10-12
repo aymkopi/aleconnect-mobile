@@ -15,7 +15,7 @@ export function ReportCard({
   report: Report;
   onPress: () => void;
 }) {
-  const [primary] = useAppColors(["primary"]);
+  const [primary, accent] = useAppColors(["primary", "accent"]);
   const unread = !!report.unreadNotificationIds?.length;
   return (
     <Pressable
@@ -28,8 +28,8 @@ export function ReportCard({
         consumerTicketStatusLabel(report.status) + (unread ? ", unread report update" : "")
       }
       onPress={onPress}
-      className="rounded-xl border border-border bg-card p-3 gap-1.5"
-      style={unread ? { borderColor: primary } : undefined}
+      className="rounded-xl bg-card p-3 gap-1.5"
+      style={unread ? { backgroundColor: accent } : undefined}
     >
       {unread ? <View className="flex-row items-center gap-1.5 pb-1"><BellDot size={14} color={primary} /><Text size="xs" weight="medium" className="text-primary">New report update · Open to read</Text></View> : null}
       <View className="flex-row items-center justify-between gap-2">

@@ -85,7 +85,7 @@ function PhotoTile({
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={"View photo: " + (photo.altText || "ALECO photo")}
-      className="rounded-xl overflow-hidden bg-muted border border-border"
+      className="rounded-xl overflow-hidden bg-muted"
       style={{ width: hero ? "100%" : 104, height: hero ? 238 : 88 }}
     >
       {uri && state !== "error" ? (

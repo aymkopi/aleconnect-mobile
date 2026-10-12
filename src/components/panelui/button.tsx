@@ -10,7 +10,7 @@ import { NativeHost, getNativeUI, getSwiftUIModifiers } from "@/lib/native";
 import { Spinner, type SpinnerProps } from "@/components/panelui/spinner";
 const buttonVariants = tv({
     slots: {
-        root: "flex-row items-center justify-center gap-2 rounded-2xl border border-transparent",
+        root: "flex-row items-center justify-center gap-2 rounded-2xl",
         // Let a constrained label wrap, and centre every line of an action name.
         // An explicit Tailwind text step would also impose a fixed line height,
         // which can be shorter than the glyphs after Dynamic Type scales them.
@@ -20,7 +20,7 @@ const buttonVariants = tv({
     variants: {
         variant: {
             primary: {
-                root: "border-primary bg-primary shadow-none",
+                root: "bg-primary shadow-none",
                 label: "text-primary-foreground",
                 spinner: "border-primary-foreground/32 border-t-primary-foreground",
             },
@@ -30,7 +30,7 @@ const buttonVariants = tv({
                 spinner: "border-secondary-foreground/24 border-t-secondary-foreground",
             },
             outline: {
-                root: "border-input bg-popover shadow-none",
+                root: "bg-secondary shadow-none",
                 label: "text-foreground",
                 spinner: "border-muted border-t-foreground",
             },
@@ -40,13 +40,13 @@ const buttonVariants = tv({
                 spinner: "border-muted border-t-foreground",
             },
             destructive: {
-                root: "border-destructive bg-destructive shadow-none",
+                root: "bg-destructive shadow-none",
                 label: "text-destructive-solid-foreground",
                 spinner: "border-destructive-solid-foreground/32 border-t-destructive-solid-foreground",
             },
             /** Neutral surface for third-party sign-in, sized for a full-width stack. */
             social: {
-                root: "border-input bg-card shadow-none",
+                root: "bg-card shadow-none",
                 label: "text-foreground",
                 spinner: "border-muted border-t-foreground",
             },
@@ -133,7 +133,7 @@ export function useButtonGroup(): ButtonGroupContextValue | null {
  * neighbours and show the container through the gap. A background is the same
  * signal without the movement.
  */
-const ATTACHED = "rounded-none border-transparent shadow-none active:bg-accent";
+const ATTACHED = "rounded-none shadow-none active:bg-accent";
 const SPINNER_SIZE = { xs: "sm", sm: "sm", md: "sm", lg: "md", xl: "md", icon: "sm" } as const;
 /** Extra room around the styled sizes so even the compact button reaches 48dp. */
 const BUTTON_HIT_SLOP = { xs: 10, sm: 6, md: 2, lg: 0, xl: 0, icon: 2 } as const;
@@ -302,9 +302,9 @@ const NATIVE_VARIANT: Record<NonNullable<ButtonVariantProps["variant"]>, "filled
     primary: "filled",
     destructive: "filled",
     secondary: "filled",
-    outline: "outlined",
+    outline: "filled",
     ghost: "text",
-    social: "outlined",
+    social: "filled",
 };
 export const Button = forwardRef<View, ButtonProps>(({ children, className, labelClassName, variant, size, fullWidth, disabled, loading = false, spinnerProps, startContent, endContent, native, systemImage, glass = false, accessibilityState, ...props }, ref) => {
     const isDisabled = disabled || loading;

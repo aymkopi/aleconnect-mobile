@@ -133,7 +133,7 @@ const tabsVariants = tv({
             // No track at all — the indicator is a rule under the active tab, and
             // the row sits on a hairline so inactive tabs still have a baseline.
             underline: {
-                list: "gap-1 border-b border-border",
+                list: "gap-1",
                 indicator: "-bottom-px h-0.5 rounded-full bg-foreground",
                 trigger: "py-2.5",
             },
