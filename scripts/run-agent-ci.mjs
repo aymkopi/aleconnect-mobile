@@ -4,7 +4,7 @@ import { join } from "node:path"
 import { pathToFileURL } from "node:url"
 
 export const requiresAppChecks = (paths) => paths.some((path) => !(
-  path === "AGENTS.md" || path === "README.md" || path === "PRODUCT.md" ||
+  path === "AGENTS.md" || path === "README.md" || path === "PRODUCT.md" || path === "CHANGELOG.md" ||
   path.startsWith("docs/") || path.startsWith(".agents/") || path.startsWith(".codex/") ||
   path.startsWith("graphify-out/") || path.startsWith("tests/harness/") ||
   /^tests\/agent-[^/]+\.test\.mjs$/.test(path) ||

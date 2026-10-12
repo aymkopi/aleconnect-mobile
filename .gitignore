@@ -51,3 +51,7 @@ app-example
 # Local task evidence and temporary tool state
 /.cache/
 /.superpowers/
+
+# Generated Android release artifacts and stdlib verifier caches
+/release/
+__pycache__/

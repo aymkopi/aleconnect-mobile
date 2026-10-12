@@ -28,7 +28,7 @@ Use focused tests for the changed behavior; `npm test` runs the JS and TypeScrip
 
 ## GitHub APK releases
 
-Installable APKs and SHA-256 checksums are available in [GitHub Releases](https://github.com/aymkopi/aleconnect-mobile/releases). The first [2.0.0 preview](https://github.com/aymkopi/aleconnect-mobile/releases/tag/v2.0.0-preview.1) is a standalone ARM64/x86_64 build with the existing package and signing certificate. Preview publication does not imply real-device/private/provider acceptance or store signing.
+Installable APKs and SHA-256 checksums are available in [GitHub Releases](https://github.com/aymkopi/aleconnect-mobile/releases). Application updates now use [the alpha build/release pipeline](docs/android-alpha-releases.md) after default-branch checks pass; docs-only changes skip the native build and a manual trigger is available. The first [2.0.0 preview](https://github.com/aymkopi/aleconnect-mobile/releases/tag/v2.0.0-preview.1) is a standalone ARM64/x86_64 build with the existing package and signing certificate. Preview publication does not imply real-device/private/provider acceptance or store signing.
 
 ## Android preview
 

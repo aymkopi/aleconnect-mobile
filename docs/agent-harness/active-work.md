@@ -1,9 +1,9 @@
 # Active work
 
 Last reviewed: 2026-10-12
-Current branch: master; PanelUI 2.0.0 and border-free PR #4 are merged locally/remotely.
-Active plan: [border-free merge closeout](../borderless-ui-review.md); implementation and cleanup are complete.
-Next task: build/accept the merged border-free source on a physical device when requested; native-iOS/private/provider acceptance remains separate.
+Current branch: codex/mobile-alpha-releases; canonical master retains merged PR #4.
+Active plan: [Android alpha release](../android-alpha-releases.md); isolated CI implementation/current release.
+Next task: finish/review the automated build pipeline, publish the current alpha and retain separate physical/private/provider/native-iOS acceptance.
 Known blockers: no source/integration/cleanup blocker. Staff PR40 is deployed; physical/native-iOS/private/provider acceptance remains separate. The former empty aleconnect-panelui folder is removed.
 Last verified: fresh pre-merge and merged-canonical runs pass 433/433 tests with zero skips; merged TypeScript/harness/whitespace and exact-head PR/merged-master GitHub CI pass. Prior UI lint had 0 errors/181 existing warnings and fixture-free web export passed. Figma active families and representative Light/Dark browser fixtures are verified. Independent source review has no blocker. Staff PR40 is deployed; GitHub v2.0.0-preview.1 APK digest/signature/alignment match. Physical/private/provider acceptance remains separate.
 
@@ -25,3 +25,5 @@ Last verified: fresh pre-merge and merged-canonical runs pass 433/433 tests with
 - [PanelUI 2.0.0 integration](../panelui-major-migration.md): completed PR #3 major update and canonical folder promotion; detailed changelog, recent VS Code edits, safe recovery and remaining release limits.
 
 - [Border-free UI and release](../borderless-ui-review.md): Figma-first semantic fills, independent source review, signed GitHub preview and deployed Staff PR40; PR #4 merged; local/remote master match and task worktree/local/remote feature branch are removed.
+
+- [Android alpha releases](../android-alpha-releases.md): user-authorized default-branch CI build/prerelease, version policy and current release verification.

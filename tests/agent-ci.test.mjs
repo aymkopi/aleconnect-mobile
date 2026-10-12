@@ -8,7 +8,7 @@ import { requiresAppChecks, selectCiBase, runAgentCi } from "../scripts/run-agen
 
 const sha = "a".repeat(40)
 test("docs and harness edits skip app checks; mixed and unknown paths require them", () => {
-  assert.equal(requiresAppChecks(["AGENTS.md", "docs/agent-harness/tasks/a.md", ".agents/skills/a/SKILL.md", "scripts/run-agent-ci.mjs", "tests/agent-ci.test.mjs"]), false)
+  assert.equal(requiresAppChecks(["AGENTS.md", "CHANGELOG.md", "docs/agent-harness/tasks/a.md", ".agents/skills/a/SKILL.md", "scripts/run-agent-ci.mjs", "tests/agent-ci.test.mjs"]), false)
   for (const path of ["src/app.tsx", "api/data.ts", "package-lock.json", ".github/workflows/agent-harness.yml", "app.json", "android/build.gradle", "scripts/deploy.mjs", "tests/report.test.ts", "unknown-file"]) {
     assert.equal(requiresAppChecks(["docs/README.md", path]), true, path)
   }
