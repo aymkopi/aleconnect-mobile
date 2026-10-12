@@ -41,3 +41,5 @@ Normal merge preserves the major-update commit and detailed changelog. Before cl
 Fresh results will be appended before integration. Prior v53 native build/signature/provider configuration checks remain in the [preview handoff](panelui-device-preview.md). v53 is not a 2.0.0 binary and does not contain the latest Home edits. A physical phone, native iOS, provider delivery and authenticated profile/submission/unread round trips remain unverified for this integration.
 
 Fresh verification on Node24.21.0:431 tests passed with no skipped cases;56 deprecated archived UI assertions were retired or superseded by active-reader coverage. Source exports used EXPO_NO_DOTENV=1, EXPO_PUBLIC_PANELUI_PREVIEW=0 and the explicit live HTTPS API origin. Lint warnings remain visible; no unrelated compiler/provider rewrite was introduced. Both VS Code Home source hashes exactly match the pre-integration recovery snapshot.
+
+Initial PR CI stopped on six Windows-only APK Markdown links in historical harness handoffs. Artifact paths are retained as local text references so Linux validation remains meaningful; no harness bypass was added.
