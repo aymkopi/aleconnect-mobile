@@ -410,3 +410,10 @@ Closeout: harness validation against the reviewed Staff companion and git diff -
 - Release: Staff PR40 merge d6d329f deployed with unchanged bindings/runtime and 17 read-only live checks. Mobile 2.0.0/code54 is published at GitHub v2.0.0-preview.1, source c94da9e, retained signer/package, fixture-free live API, 16KB-aligned ARM64/x86_64; uploaded/Desktop hashes match.
 - Remaining risks: physical/private/provider/native-iOS acceptance is separate; preview signer is retained and 32-bit-only devices are not supported by this artifact. The border-free UI is an open PR, not included in the published APK. Preserve private/generated/device state.
 - Next: review and merge UI PR, then accept its exact signed build on a real device. No unrequested server/DB mutation.
+
+## 2026-10-12 — Border-free PR4 integration and cleanup
+
+- Scope: user-authorized PR #4 merge into the existing default master, canonical local fast-forward, and cleanup of the completed Mobile branch/worktree. Merge 27cfc2f9864d4e250edec4029ce52ac29bedf817 retains the exact checked PR tree; no conflict or default-branch rename.
+- Verification: fresh pre-merge and merged-canonical suites 433/433 with zero skips; merged TypeScript/harness/whitespace and exact-head PR/merged-master GitHub CI pass. Non-force worktree removal and local/remote feature-branch deletion verified. Canonical dependencies, all nine stashes and four protected configuration hashes are unchanged; primary status is clean. Empty former project/task containers are removed.
+- Remaining risks: v54 release is the previous merged c94da9e binary; border-free APK/native/private/provider/iOS acceptance is separate. An unsafe broad archive was rejected; read-only metadata confirmed generated-only worktree files and an empty device list before cleanup. No secrets copied, device mutation, server deployment or EAS/OTA/store release.
+- Next: continue from canonical master; build and accept the exact merged UI on a physical device when requested. See [closeout](../borderless-ui-review.md).

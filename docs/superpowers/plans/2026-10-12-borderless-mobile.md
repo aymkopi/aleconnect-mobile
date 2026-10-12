@@ -44,3 +44,5 @@
 
 - GitHub preview v2.0.0-preview.1 published from c94da9e; signed/code54/fixture-free/16KB and uploaded checksum verified.
 - Independent review passed after Input fixes; [scope and evidence](../../borderless-ui-review.md). Final tests433/433, types, lint0 errors/181 retained warnings, harness/whitespace and fixture-free web export pass. The independent reviewer approves the scoped source; PR publication is the final handoff.
+
+- Integration: user-authorized PR #4 merge 27cfc2f; fresh merged-canonical 433/433 tests/types/harness/whitespace and merged CI pass. Task worktree/local/remote branch and empty former folder are removed; protected state and nine stashes are unchanged. Local/remote default master match. No updated border-free APK is implied.

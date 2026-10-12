@@ -325,3 +325,10 @@ Closeout: harness validation against the reviewed Staff companion and git diff -
 ## 2026-10-12 — PR40 and GitHub v54 release
 
 PR40 is merged/deployed: API 16ffe0ab-49b5-40c0-88e4-7d09f3b3b313, Pages645a52a4-8a55-4de5-8b2b-c671fed46632, 17 live read-only assertions pass, no migration. Standalone 2.0.0/code54 is available in [GitHub Releases](https://github.com/aymkopi/aleconnect-mobile/releases/tag/v2.0.0-preview.1); original signature/package retained, fixtures disabled, live API, ARM64/x86_64 all54 libraries16KB aligned, SHA-256 b6fd04f1fd691a975fd1e942e0b545ac785040611a6b14da816b0690d44bef44. Desktop/upload digests match. The new border-free design remains a separate open UI PR. Physical/private/provider/iOS acceptance remains unverified.
+
+## 2026-10-12 — Border-free PR4 integration and cleanup
+
+- Scope: user-authorized PR #4 merge into the existing default master, canonical local fast-forward, and cleanup of the completed Mobile branch/worktree. Merge 27cfc2f9864d4e250edec4029ce52ac29bedf817 retains the exact checked PR tree; no conflict or default-branch rename.
+- Verification: fresh pre-merge and merged-canonical suites 433/433 with zero skips; merged TypeScript/harness/whitespace and exact-head PR/merged-master GitHub CI pass. Non-force worktree removal and local/remote feature-branch deletion verified. Canonical dependencies, all nine stashes and four protected configuration hashes are unchanged; primary status is clean. Empty former project/task containers are removed.
+- Remaining risks: v54 release is the previous merged c94da9e binary; border-free APK/native/private/provider/iOS acceptance is separate. An unsafe broad archive was rejected; read-only metadata confirmed generated-only worktree files and an empty device list before cleanup. No secrets copied, device mutation, server deployment or EAS/OTA/store release.
+- Next: continue from canonical master; build and accept the exact merged UI on a physical device when requested. See [closeout](../../borderless-ui-review.md).

@@ -35,11 +35,20 @@ Browser acceptance uses explicitly labelled fixtures with mutation/provider deli
 
 ## Final verification
 
-- 433/433 tests pass with zero skips, including sibling Staff contract coverage; the final additional focused Input assertion passes21/21.
+- 433/433 tests pass with zero skips, including sibling Staff contract coverage; the final additional focused Input assertion passes 21/21.
 - TypeScript, harness and whitespace pass. Lint has 0 errors/181 existing warnings. The isolated harness warns about its absent adjacent sibling; test coverage uses the configured canonical Staff path and has no skips.
 - Fixture-free web export passes with EXPO_NO_DOTENV=1 and the explicit live HTTPS API origin. Native dependencies/version are unchanged.
 - Graphify refresh completed with 3870 nodes/7336 edges; generated output is saved separately from the scoped PR.
 - Integrated-browser fixtures at 393×852 cover Home, Reports, Advisories, Hotlines and Account in Light/Dark; attached appearance/filter sheets, gallery/loading surfaces, selected report account and glass sign-in focus were inspected. Screenshot evidence remains local. Older web-only accessibility warnings outside this scope are not native crash evidence.
 - Functional focus and readable field text/hints pass semantic contrast tests. Browser fields use one underline; native-supported aria-hidden preserves decorator semantics. No real login, report submission or dialer/provider action was used for visual acceptance.
 
-The separate UI PR remains open for review. The published v54 APK comes from the earlier merged source and does not include this PR. Physical/private/provider/iOS acceptance remains unverified.
+[UI PR #4](https://github.com/aymkopi/aleconnect-mobile/pull/4) is merged. The published v54 APK comes from the earlier merged source and does not include this PR. Physical/private/provider/iOS acceptance remains unverified.
+
+
+## Merge and cleanup — 2026-10-12
+
+PR #4 merged as 27cfc2f9864d4e250edec4029ce52ac29bedf817. Both exact-head checks passed at d06bcb9; the merged tree is byte-identical to that verified head. Canonical local master fast-forwarded to remote master with zero divergence. Fresh pre-merge and merged-canonical suites both pass 433/433 with zero skips; merged TypeScript, harness and whitespace pass. [Merged-master CI](https://github.com/aymkopi/aleconnect-mobile/actions/runs/38249243713) passed.
+
+Non-force cleanup removed the clean mobile-borderless-ui worktree, its local/remote feature branch, and the empty task container. The empty former aleconnect-panelui folder is removed. The node_modules junction was unlinked without following its canonical target; canonical dependencies remain. All nine saved stashes and four protected provider/signing/configuration hashes are unchanged. The removed worktree had only generated caches and an empty saved-device list. Broad archive copying was rejected by automatic approval review; metadata inspection established a safe generated-only cleanup without copying secrets. Previous recovery, APK, screenshot and Graphify evidence remains outside the removed checkout. Unrelated Staff state/worktrees and device data are untouched.
+
+The GitHub v54 APK remains built from c94da9e; merging this UI does not update the published binary. A newly signed border-free APK and physical/private/provider/iOS acceptance remain future gates. No EAS/OTA/store publication or Staff deployment occurred in this integration step.
