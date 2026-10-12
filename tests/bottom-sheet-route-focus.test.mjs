@@ -48,6 +48,7 @@ for (const controlled of [true, false])
         react,
         "react/jsx-runtime": { jsx, jsxs: jsx },
         "expo-router": { useNavigation: () => navigation },
+        "@/lib/native": { getNativeUI: () => ({}) },
         "react-native": {
           StyleSheet: { create: (value) => value },
           Platform: { OS: "android" },
@@ -67,10 +68,12 @@ for (const controlled of [true, false])
           },
         }).outputText,
       )((id) => mocks[id] ?? {}, exports);
-      exports.BottomSheetRoot({
+      const rendered = exports.BottomSheetRoot({
+        native: true,
         ...(controlled ? { open: true } : { defaultOpen: true }),
         onOpenChange: (value) => changes.push(value),
       });
+      assert.equal(rendered.props.children.props.value.background, true, "Native sheets default to the same semantic surface as styled sheets");
       assert.equal(changes.length, 0);
       const cleanup = effects[0]();
       blur();

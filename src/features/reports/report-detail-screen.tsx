@@ -1,4 +1,25 @@
+import { DataNotice, DataState } from "@/components/data-state";
+import { appScrollableBottomPadding } from "@/components/floating-app-bar";
+import { Button } from "@/components/panelui/button";
+import { Skeleton } from "@/components/panelui/skeleton";
+import { Text } from "@/components/panelui/text";
+import { useConsumerAccountContext } from "@/context/consumer-account-context";
+import { useVisualPreview } from "@/context/visual-preview-context";
+import { StaticLocationMap } from "@/features/maps/static-location-map";
+import { useAppColors } from "@/hooks/use-app-colors";
+import { useAuthSession } from "@/hooks/use-auth-session";
+import { useScopedRead } from "@/hooks/use-scoped-read";
+import { markNotificationsRead } from "@/services/notifications";
+import { requestReportRevalidation } from "@/services/report-sync-events";
+import {
+  clearReportListCache,
+  fetchComplaintReportDetail,
+} from "@/services/reports";
+import { isApiInstantExpired, parseApiInstant } from "@/utils/manila-time";
+import { Image } from "expo-image";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useIsFocused } from "expo-router/react-navigation";
+import { ChevronRight } from "lucide-react-native";
 import {
   useCallback,
   useEffect,
@@ -7,47 +28,29 @@ import {
   useState,
 } from "react";
 import { BackHandler, Modal, Pressable, View } from "react-native";
-import { Image } from "expo-image";
-import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
-import { ChevronRight } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ReportStatusBadge } from "./report-status-badge";
-import { Button } from "@/components/panelui/button";
-import { Skeleton } from "@/components/panelui/skeleton";
-import { DataState, DataNotice } from "@/components/data-state";
-import { Text } from "@/components/panelui/text";
-import { appScrollableBottomPadding } from "@/components/floating-app-bar";
-import { useConsumerAccountContext } from "@/context/consumer-account-context";
-import { useVisualPreview } from "@/context/visual-preview-context";
-import { useAuthSession } from "@/hooks/use-auth-session";
-import { useAppColors } from "@/hooks/use-app-colors";
-import { useScopedRead } from "@/hooks/use-scoped-read";
-import { fetchComplaintReportDetail, clearReportListCache } from "@/services/reports";
-import { markNotificationsRead } from "@/services/notifications";
-import { requestReportRevalidation } from "@/services/report-sync-events";
-import { isApiInstantExpired, parseApiInstant } from "@/utils/manila-time";
-import { ReportPage } from "./components/report-page";
 import { EvidencePhotoViewer } from "./components/evidence-photo-viewer";
+import { ReportPage } from "./components/report-page";
 import {
-  formatReportDate,
   consumerTicketStatusLabel,
+  formatReportDate,
   preserveKnownConsumerReportDetailStatus,
-  type ReportDetail,
   type ConsumerServiceMemoUpdate,
+  type ReportDetail,
 } from "./data";
 import { reportDetailFixture } from "./detail-fixtures";
 import {
+  publishedRestorationEstimate,
+  reportAccessUnavailable,
   reportDetailScope,
   reportRejectionReason,
-  reportAccessUnavailable,
-  publishedRestorationEstimate,
 } from "./detail-presentation";
 import {
   ExtendedOutageStatusCard,
   operationalPhaseLabel,
 } from "./extended-outage-status-card";
+import { ReportStatusBadge } from "./report-status-badge";
 import { ReportTimeline } from "./report-timeline";
-import { StaticLocationMap } from "@/features/maps/static-location-map";
 
 function DetailRow({ label, value }: { label: string; value?: string | null }) {
   if (!value) return null;
@@ -254,7 +257,9 @@ export default function ReportDetailScreen() {
   const scopeRef = useRef(scope);
   useLayoutEffect(() => {
     scopeRef.current = scope;
-    return () => { scopeRef.current = null; };
+    return () => {
+      scopeRef.current = null;
+    };
   }, [scope]);
   const previous = useRef<{ scope: string; report: ReportDetail } | null>(null);
   const evidenceAttempt = useRef<string | null>(null);
@@ -314,20 +319,50 @@ export default function ReportDetailScreen() {
   }, [scope, data]);
   useEffect(() => {
     const ids = report?.unreadNotificationIds ?? [];
-    if (!focused || fixtures || !scope || !report || !session || !accountContext || !ids.length || data?.isStale) return;
+    if (
+      !focused ||
+      fixtures ||
+      !scope ||
+      !report ||
+      !session ||
+      !accountContext ||
+      !ids.length ||
+      data?.isStale
+    )
+      return;
     const key = JSON.stringify([scope, ids]);
     if (markedUpdates.current === key) return;
     markedUpdates.current = key;
     setReadReceiptError(false);
     void markNotificationsRead(ids, session.user.id, {
-      identityUserId: accountContext.identityUserId, accessRevision: accountContext.accessRevision,
-      serviceAccountId: report.serviceAccountId ?? serviceAccountId ?? accountContext.defaultServiceAccountId,
+      identityUserId: accountContext.identityUserId,
+      accessRevision: accountContext.accessRevision,
+      serviceAccountId:
+        report.serviceAccountId ??
+        serviceAccountId ??
+        accountContext.defaultServiceAccountId,
       isCurrent: () => scopeRef.current === scope,
-    }).then(async () => {
-      await clearReportListCache(accountContext.identityUserId);
-      requestReportRevalidation(session.user.id);
-    }).catch(() => { if (scopeRef.current === scope) { markedUpdates.current = ""; setReadReceiptError(true); } });
-  }, [focused, fixtures, scope, report, session, accountContext, serviceAccountId, data?.isStale]);
+    })
+      .then(async () => {
+        await clearReportListCache(accountContext.identityUserId);
+        requestReportRevalidation(session.user.id);
+      })
+      .catch(() => {
+        if (scopeRef.current === scope) {
+          markedUpdates.current = "";
+          setReadReceiptError(true);
+        }
+      });
+  }, [
+    focused,
+    fixtures,
+    scope,
+    report,
+    session,
+    accountContext,
+    serviceAccountId,
+    data?.isStale,
+  ]);
   const expired = Boolean(
     report?.imageUrlsExpiresAt &&
     isApiInstantExpired(report.imageUrlsExpiresAt),
@@ -392,10 +427,14 @@ export default function ReportDetailScreen() {
   const waiting =
     sessionLoading || (!accountContext && accountLoading) || read.busy;
   const accountUnavailable = Boolean(
-    !fixtures && serviceAccountId && accountContext &&
+    !fixtures &&
+    serviceAccountId &&
+    accountContext &&
     !accountContext.authorizedServiceAccountIds.includes(serviceAccountId),
   );
-  const reportUnavailable = Boolean(read.data?.unavailableReason || accountUnavailable);
+  const reportUnavailable = Boolean(
+    read.data?.unavailableReason || accountUnavailable,
+  );
   const scopeError =
     !session && !fixtures
       ? "Sign in to view this report."
@@ -411,17 +450,54 @@ export default function ReportDetailScreen() {
       title={report?.ticketNumber ?? "Report details"}
       onBack={handleBack}
       refreshing={pullRefreshing}
-      onRefresh={async () => { setPullRefreshing(true); try { await read.reload(true); } finally { setPullRefreshing(false); } }}
+      onRefresh={async () => {
+        setPullRefreshing(true);
+        try {
+          await read.reload(true);
+        } finally {
+          setPullRefreshing(false);
+        }
+      }}
       headerAction={
         report ? <ReportStatusBadge status={report.status} /> : undefined
       }
     >
       {!report ? (
-        waiting ? <DataState loading loadingLayout="detail" title="Loading report details" /> : <DataState
-          title={reportUnavailable ? "This report is unavailable" : "Report details couldn’t load"}
-          description={read.data?.unavailableReason ?? (!scope ? scopeError : "Reconnect and retry. Your report has not been changed.")}
-          actionLabel={!session && !fixtures ? "Sign in" : reportUnavailable ? "Back to reports" : "Try again"}
-          onAction={() => { if (!session && !fixtures) router.push("/sign-in"); else if (reportUnavailable) router.replace("/reports"); else if (!accountContext && !fixtures) void refreshConsumerAccount().catch(() => {}); else void read.reload(true); }} />
+        waiting ? (
+          <DataState
+            loading
+            loadingLayout="detail"
+            title="Loading report details"
+          />
+        ) : (
+          <DataState
+            title={
+              reportUnavailable
+                ? "This report is unavailable"
+                : "Report details couldn’t load"
+            }
+            description={
+              read.data?.unavailableReason ??
+              (!scope
+                ? scopeError
+                : "Reconnect and retry. Your report has not been changed.")
+            }
+            actionLabel={
+              !session && !fixtures
+                ? "Sign in"
+                : reportUnavailable
+                  ? "Back to reports"
+                  : "Try again"
+            }
+            onAction={() => {
+              if (!session && !fixtures) router.push("/sign-in");
+              else if (reportUnavailable) router.replace("/reports");
+              else if (!accountContext && !fixtures)
+                void refreshConsumerAccount().catch(() => {});
+              else void read.reload(true);
+            }}
+          />
+        )
       ) : (
         <>
           <View className="gap-1">
@@ -436,7 +512,15 @@ export default function ReportDetailScreen() {
               Submitted {formatReportDate(report.createdAt)}
             </Text>
           </View>
-          {read.error || read.data?.isStale ? <DataNotice title="Showing the last loaded report" description="Your report reference is still available. Refresh to confirm the latest status." actionLabel="Refresh report" busy={read.busy} onAction={() => void read.reload(true)} /> : null}
+          {read.error || read.data?.isStale ? (
+            <DataNotice
+              title="Showing the last loaded report"
+              description="Your report reference is still available. Refresh to confirm the latest status."
+              actionLabel="Refresh report"
+              busy={read.busy}
+              onAction={() => void read.reload(true)}
+            />
+          ) : null}
           {report.status === "rejected" ? (
             <View className="rounded-xl bg-card p-3 gap-1">
               <Text size="sm" weight="semibold">
@@ -448,7 +532,12 @@ export default function ReportDetailScreen() {
               </Text>
             </View>
           ) : null}
-          {readReceiptError ? <Text size="xs" muted>Could not mark this update as read. It stays unread until you reopen the report online.</Text> : null}
+          {readReceiptError ? (
+            <Text size="xs" muted>
+              Could not mark this update as read. It stays unread until you
+              reopen the report online.
+            </Text>
+          ) : null}
           <ReportTimeline report={report} />
           <Button
             variant="ghost"

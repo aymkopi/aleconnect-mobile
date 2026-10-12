@@ -15,7 +15,7 @@ test('list cards get exactly one compact separator instead of duplicated list ga
  for(const path of ['reports/main-screen','advisories/advisories-screen']) {
  const source=await read('src/features/'+path+'.tsx');
  const style=source.slice(source.indexOf('contentContainerStyle={{'),source.indexOf('ListHeaderComponent='));
- assert.ok(source.includes('ItemSeparatorComponent={() => <View style={{ height: 8 }} />}'));
+ assert.ok(source.includes('ItemSeparatorComponent={() => <View style={{ height: 12 }} />}'));
  assert.ok(!style.includes('gap: 12'));
  }
 });

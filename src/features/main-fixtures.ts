@@ -119,8 +119,30 @@ export const fixtureHotlines: HotlineCategory[] = [
       },
     ],
   },
-  ...["Police", "Fire & rescue", "Hospitals", "Government"].map((name, i) => ({
-    id: "fixture-category-" + i,
+  {
+    id: "fixture-category-0",
+    name: "Police",
+    description: "Find local service contacts",
+    agencies: [{
+      id: "fixture-police-office",
+      categoryId: "fixture-category-0",
+      name: "Community service desk",
+      description: "Sample agency · Public service and community assistance",
+      address: null,
+      logoUrl: null,
+      websiteLink: null,
+      avatarVersion: null,
+      contacts: [{
+        id: "fixture-police-contact",
+        number: "Not available",
+        type: "Telephone",
+        label: "Fixture — calling disabled",
+        group: "Other service contacts",
+      }],
+    }],
+  },
+  ...["Fire & rescue", "Hospitals", "Government"].map((name, i) => ({
+    id: "fixture-category-" + (i + 1),
     name,
     description: "Find local service contacts",
     agencies: [],
