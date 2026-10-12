@@ -425,3 +425,11 @@ Closeout: harness validation against the reviewed Staff companion and git diff -
 - Verification: focused metadata/configuration/workflow guards observed failing then passing. Python verifier 2/2, full Node 436/436 with zero skips, types, lint 0 errors/181 retained warnings, harness/whitespace, YAML, Expo alignment/Doctor 21/21 and independent source review pass; actual native/remote acceptance is pending; [release handoff](../android-alpha-releases.md) is the evidence ledger.
 - Remaining risks: preview certificate is not store-production signing; physical/private/provider/native-iOS acceptance remains separate. No private secrets uploaded, server/DB/EAS/OTA/store change. CI drafts/published assets are not overwritten by reruns.
 - Next: complete checks/source review, integrate the pipeline and observe its actual build/publish; record release checksum and safe task cleanup.
+
+
+## 2026-10-12 — Alpha CI integration and first build
+
+- Scope: user-authorized PR #5 merge 2d39979 after both exact-head checks passed; local/remote master synced with no conflict. First automatic APK pipeline 38253889473 is running; no new binary publication is claimed yet.
+- Verification: checked merge-tree parity, source 436 tests/Python 2/types/lint/harness/Expo21 gates retained; local no-clean alpha/code 55 Android sync keeps original signer unchanged. Six fresh public/auth-boundary API checks pass. Native build/verification and docs-only skip acceptance are in progress.
+- Remaining risks: no current alpha APK/device/private/provider/iOS acceptance is claimed before actual completion. Original v54 release is preserved. No private secrets copied, database/server/EAS/OTA/store change.
+- Next: observe native compile, actual APK/digest/publication and docs-only skip, then publish final source/release evidence and perform scoped task cleanup. See [handoff](../android-alpha-releases.md).

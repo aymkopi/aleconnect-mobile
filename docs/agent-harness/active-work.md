@@ -1,9 +1,9 @@
 # Active work
 
 Last reviewed: 2026-10-12
-Current branch: codex/mobile-alpha-releases; canonical master retains merged PR #4.
-Active plan: [Android alpha release](../android-alpha-releases.md); isolated CI implementation/current release.
-Next task: finish/review the automated build pipeline, publish the current alpha and retain separate physical/private/provider/native-iOS acceptance.
+Current branch: master; PR #5 alpha CI and the current border-free UI are merged locally/remotely.
+Active plan: [Android alpha release](../android-alpha-releases.md); source integration complete, first native build in progress.
+Next task: verify the first automatic native build/prerelease and its downloaded checksum; physical/private/provider/native-iOS acceptance remains separate.
 Known blockers: no source/integration/cleanup blocker. Staff PR40 is deployed; physical/native-iOS/private/provider acceptance remains separate. The former empty aleconnect-panelui folder is removed.
 Last verified: fresh pre-merge and merged-canonical runs pass 433/433 tests with zero skips; merged TypeScript/harness/whitespace and exact-head PR/merged-master GitHub CI pass. Prior UI lint had 0 errors/181 existing warnings and fixture-free web export passed. Figma active families and representative Light/Dark browser fixtures are verified. Independent source review has no blocker. Staff PR40 is deployed; GitHub v2.0.0-preview.1 APK digest/signature/alignment match. Physical/private/provider acceptance remains separate.
 

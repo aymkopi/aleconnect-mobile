@@ -23,3 +23,10 @@ A successful pipeline does not establish real-device/private authenticated/FCM/n
 ## Current rollout
 
 Source gates pass: 436/436 Node tests with zero skips using the canonical Staff contract path, Python APK verifier 2/2, TypeScript, lint 0 errors/181 existing warnings, harness/whitespace, YAML parse, release-tag ordering query, Expo alignment and Doctor 21/21. The changelog classifier regression observed failure then passed 7/7; independent source review has no blocker. The isolated checkout first needed the existing sync:web-map generated worker. No new alpha APK is published yet. The current GitHub v54 binary predates the merged border-free UI. This task will publish the current source through the new pipeline and record the exact release/run/asset digest below.
+
+
+## CI integration — 2026-10-12
+
+[PR #5](https://github.com/aymkopi/aleconnect-mobile/pull/5) merged as 2d39979fa3d47c51cfd014ac6b9c5e6794514091 after both exact-head checks passed at f318045. The canonical local default branch fast-forwarded without conflict and has the exact checked source tree. Fresh local prebuild synchronized alpha/code 55 without cleaning the retained Android project; signer hash 221e0a3106aa4c3ccc154e0a418b55020b3f9ea6e84f92e8749cd9e2f39f5e58 is unchanged. Six fresh read-only live API/public/private boundary assertions pass.
+
+[Automatic run 38253889473](https://github.com/aymkopi/aleconnect-mobile/actions/runs/38253889473) passed its reusable CI checks, Android SDK setup, version allocation, verifier tests and original-key hash check, and is compiling the standalone bundle/native APK. Publication is not claimed until actual verification/assets complete. This docs-only integration record also exercises the no-native-build route; its result will be recorded during closeout.
