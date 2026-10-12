@@ -12,6 +12,10 @@ export type WebLocationMapProps = {
   longitude: number;
   zoom?: number;
   interactive?: boolean;
+  maxBounds?: [number, number, number, number];
+  minZoom?: number;
+  maxZoom?: number;
+  userLocation?: { latitude: number; longitude: number } | null;
   label?: string;
   onChange?: (point: { latitude: number; longitude: number }) => void;
   onReady?: () => void;

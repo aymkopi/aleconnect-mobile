@@ -3,6 +3,7 @@ import { appScrollableBottomPadding } from "@/components/floating-app-bar";
 import { Button } from "@/components/panelui/button";
 import { Skeleton } from "@/components/panelui/skeleton";
 import { Text } from "@/components/panelui/text";
+import { toast } from "@/components/panelui/toast";
 import { useConsumerAccountContext } from "@/context/consumer-account-context";
 import { useVisualPreview } from "@/context/visual-preview-context";
 import { StaticLocationMap } from "@/features/maps/static-location-map";
@@ -17,9 +18,10 @@ import {
 } from "@/services/reports";
 import { isApiInstantExpired, parseApiInstant } from "@/utils/manila-time";
 import { Image } from "expo-image";
+import * as Clipboard from "expo-clipboard";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useIsFocused } from "expo-router/react-navigation";
-import { ChevronRight } from "lucide-react-native";
+import { ChevronRight, Copy } from "lucide-react-native";
 import {
   useCallback,
   useEffect,
@@ -447,7 +449,7 @@ export default function ReportDetailScreen() {
 
   return (
     <ReportPage
-      title={report?.ticketNumber ?? "Report details"}
+      title="Ticket details"
       onBack={handleBack}
       refreshing={pullRefreshing}
       onRefresh={async () => {
@@ -458,9 +460,6 @@ export default function ReportDetailScreen() {
           setPullRefreshing(false);
         }
       }}
-      headerAction={
-        report ? <ReportStatusBadge status={report.status} /> : undefined
-      }
     >
       {!report ? (
         waiting ? (
@@ -500,6 +499,27 @@ export default function ReportDetailScreen() {
         )
       ) : (
         <>
+          <View className="flex-row items-center gap-2">
+            <View className="flex-1 flex-row items-center gap-1">
+              <Text size="sm" weight="medium" selectable className="shrink">
+                {report.ticketNumber}
+              </Text>
+              <Button
+                size="icon"
+                variant="ghost"
+                accessibilityLabel="Copy ticket number"
+                onPress={() => void Clipboard.setStringAsync(report.ticketNumber).then(
+                  copied => toast.show(copied ? { label: "Ticket number copied" } : { variant: "destructive", label: "Could not copy the ticket number" }),
+                  () => toast.show({ variant: "destructive", label: "Could not copy the ticket number" }),
+                )}
+              >
+                <Copy size={16} color={primary} />
+              </Button>
+            </View>
+            <View className="self-center">
+              <ReportStatusBadge status={report.status} />
+            </View>
+          </View>
           <View className="gap-1">
             <Text
               weight="semibold"
@@ -587,15 +607,6 @@ export default function ReportDetailScreen() {
             {!report.reportDetails ? (
               <DetailRow label="Description" value={report.description} />
             ) : null}
-            {Number.isFinite(report.latitude) &&
-            Number.isFinite(report.longitude) &&
-            report.latitude !== null &&
-            report.longitude !== null ? (
-              <DetailRow
-                label="Map pin"
-                value={`${report.latitude.toFixed(6)}, ${report.longitude.toFixed(6)}`}
-              />
-            ) : null}
             {report.latitude !== null &&
             report.longitude !== null &&
             Number.isFinite(report.latitude) &&
@@ -640,16 +651,6 @@ export default function ReportDetailScreen() {
                 Photo access has expired. Refresh the report to renew available
                 evidence.
               </Text>
-            ) : null}
-            {photos.length ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                loading={read.busy}
-                onPress={() => void read.reload(true)}
-              >
-                Refresh evidence
-              </Button>
             ) : null}
           </View>
           <ExtendedOutageStatusCard

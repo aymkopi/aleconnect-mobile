@@ -28,7 +28,7 @@ function nodes(node) {
   return [node, ...nodes(node.props.children)];
 }
 
-async function harness() {
+async function harness({ permission, registered } = {}) {
   const state = [];
   let cursor = 0;
   const jsx = (type, props) => ({ type, props });
@@ -37,7 +37,7 @@ async function harness() {
     react: {
       useState(initial) {
         const index = cursor++;
-        if (!(index in state)) state[index] = index === 0 ? structuredClone(settings) : initial;
+        if (!(index in state)) state[index] = index === 0 ? structuredClone(settings) : index === 6 && permission ? permission : index === 14 && registered !== undefined ? registered : initial;
         return [state[index], (next) => { state[index] = typeof next === "function" ? next(state[index]) : next; }];
       },
       useRef: (initial) => ({ current: initial }), useEffect() {},
@@ -135,4 +135,11 @@ test("no-match state retains selection and uses one sheet with 48px labelled sea
   assert.equal(h.find("Checkbox", (node) => node.props.label === "Bitano Feeder 1").props.checked, true);
   h.button("Use selected areas");
   assert.deepEqual(h.selected.sort(), ["bitano-1", "bitano-2", "ligao-1"]);
+});
+
+test("device-ready confirmation disappears after notification permission is revoked", async () => {
+  for (const permission of ["Allowed", "Blocked", "Not allowed"]) {
+    const h = await harness({ permission, registered: true });
+    assert.equal(h.render().some(node => textOf(node) === "Visual fixture · device setup simulated"), permission === "Allowed");
+  }
 });

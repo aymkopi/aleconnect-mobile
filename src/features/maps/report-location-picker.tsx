@@ -18,7 +18,7 @@ import { findAlbayBarangay } from "@/features/reports/albay-barangays";
 import { creationFixtureLocation } from "@/features/reports/creation-fixtures";
 import type { ComplaintMeta } from "@/features/reports/data";
 import type { HomeReportLocation } from "@/features/reports/address";
-import { resolveReportPin } from "./report-location-state";
+import { initialReportCoordinates, REPORT_MAP_BOUNDS, REPORT_MAP_MIN_ZOOM, REPORT_MAP_MAX_ZOOM, resolveReportPin } from "./report-location-state";
 import {
   loadMapLibreModule,
   MAP_LOAD_TIMEOUT_MS,
@@ -27,7 +27,6 @@ import {
 } from "./map-runtime";
 import { WebLocationMap, type WebMapHandle } from "./web-location-map";
 type Coordinates = { latitude: number; longitude: number };
-const albayCenter = { latitude: 13.1775, longitude: 123.528 };
 async function withTimeout<T>(promise: Promise<T>, milliseconds: number) {
   let timeout: ReturnType<typeof setTimeout> | undefined;
   try {
@@ -67,7 +66,7 @@ function ActiveReportLocationPicker({
   const focused = useIsFocused();
   const [module, setModule] = useState<MapLibreModule | null>(null),
     [coordinates, setCoordinates] = useState(
-      initialCoordinates ?? (fixture ? creationFixtureLocation : albayCenter),
+      initialReportCoordinates(initialCoordinates ?? (fixture ? creationFixtureLocation : null)),
     ),
     [streetAddress, setStreetAddress] = useState<
       (Coordinates & { street: string }) | null
@@ -75,11 +74,14 @@ function ActiveReportLocationPicker({
   const [ready, setReady] = useState(false),
     [mapError, setMapError] = useState<string | null>(null),
     [locationError, setError] = useState<string | null>(null),
-    [resolving, setResolving] = useState(false),
+    [resolvingPoint, setResolvingPoint] = useState<Coordinates | null>(null),
     [locating, setLocating] = useState(false),
     [searching, setSearching] = useState(false),
     [searchView, setSearchView] = useState(false),
     [retry, setRetry] = useState(0);
+  const [locationAllowed, setLocationAllowed] = useState(false);
+  const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
+  const [initialCamera, setInitialCamera] = useState(() => ({ center: [coordinates.longitude, coordinates.latitude] as [number, number], zoom: 16 }));
   const [query, setQuery] = useState(""),
     [municipality, setMunicipality] = useState(""),
     [barangay, setBarangay] = useState(""),
@@ -102,11 +104,11 @@ function ActiveReportLocationPicker({
   const pin = useMemo(() => {
     if (!isWithinAlbay(coordinates.latitude, coordinates.longitude))
       return null;
-    if (fixture) return { ...creationFixtureLocation, ...coordinates };
     const detected = findAlbayBarangay(
       coordinates.latitude,
       coordinates.longitude,
     );
+    if (fixture) return detected ? { ...creationFixtureLocation, ...coordinates } : null;
     return resolveReportPin(coordinates, detected?.barangayPsgc ?? null, meta);
   }, [coordinates, fixture, meta]);
   const resolved = pin
@@ -122,9 +124,27 @@ function ActiveReportLocationPicker({
   const pinError = !isWithinAlbay(coordinates.latitude, coordinates.longitude)
     ? "This point is outside Albay. Choose a location within Albay."
     : !pin
-      ? "No matching Albay barangay was found. Move the pin or search another address."
+      ? "Choose a point on land within Albay. Water and locations outside its boundaries cannot be selected."
       : null;
   const error = locationError ?? pinError;
+  const resolving = Boolean(pin && resolvingPoint?.latitude === coordinates.latitude && resolvingPoint?.longitude === coordinates.longitude);
+  useEffect(() => {
+    if (fixture) return;
+    let active = true;
+    let subscription: Location.LocationSubscription | undefined;
+    void Location.getForegroundPermissionsAsync().then(async permission => {
+      if (!active || !permission.granted) return;
+      setLocationAllowed(true);
+      if (Platform.OS === "web") {
+        const next = await Location.watchPositionAsync({ accuracy: Location.Accuracy.Balanced, distanceInterval: 10 }, position => {
+          if (active) setUserLocation(position.coords);
+        });
+        if (active) subscription = next;
+        else next.remove();
+      }
+    }).catch(() => {});
+    return () => { active = false; subscription?.remove(); };
+  }, [fixture, locationAllowed]);
   useEffect(() => {
     if (!open || Platform.OS === "web") return;
     let active = true;
@@ -157,7 +177,7 @@ function ActiveReportLocationPicker({
     if (!open || !pin || fixture) return;
     const request = ++generation.current;
     const timer = setTimeout(() => {
-      setResolving(true);
+      setResolvingPoint(coordinates);
       void withTimeout(Location.reverseGeocodeAsync(coordinates), 6_000)
         .then((results) => {
           if (!openRef.current || request !== generation.current) return;
@@ -172,7 +192,7 @@ function ActiveReportLocationPicker({
         })
         .finally(() => {
           if (openRef.current && request === generation.current)
-            setResolving(false);
+            setResolvingPoint(null);
         });
     }, 400);
     return () => {
@@ -183,6 +203,8 @@ function ActiveReportLocationPicker({
   const moveTo = useCallback((next: Coordinates) => {
     setCoordinates(next);
     setError(null);
+    if (Platform.OS !== "web" && !camera.current)
+      setInitialCamera({ center: [next.longitude, next.latitude], zoom: zoom.current });
     (Platform.OS === "web" ? webCamera.current : camera.current)?.flyTo({
       center: [next.longitude, next.latitude],
       zoom: zoom.current,
@@ -206,6 +228,7 @@ function ActiveReportLocationPicker({
         );
         return;
       }
+      if (openRef.current) setLocationAllowed(true);
       if (!(await Location.hasServicesEnabledAsync())) {
         setError(
           "Location Services are off. Enable them, move the map manually, or search an address.",
@@ -236,6 +259,7 @@ function ActiveReportLocationPicker({
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
       };
+      setUserLocation(next);
       if (!isWithinAlbay(next.latitude, next.longitude)) {
         setError(
           "Your current location is outside Albay. Move the map manually or search within Albay.",
@@ -290,6 +314,7 @@ function ActiveReportLocationPicker({
           );
           return;
         }
+        setLocationAllowed(true);
       }
       const results = await withTimeout(
         Location.geocodeAsync(`${place}, Albay, Philippines`),
@@ -334,8 +359,13 @@ function ActiveReportLocationPicker({
     moveTo(next);
     setSearchView(false);
   };
+  const openSearch = () => {
+    setInitialCamera({ center: [coordinates.longitude, coordinates.latitude], zoom: zoom.current });
+    setSearchView(true);
+  };
   const Map = module?.Map,
-    Camera = module?.Camera;
+    Camera = module?.Camera,
+    UserLocation = module?.UserLocation;
   const address = resolved
     ? [
         resolved.purok,
@@ -484,6 +514,10 @@ function ActiveReportLocationPicker({
                 ref={webCamera}
                 latitude={coordinates.latitude}
                 longitude={coordinates.longitude}
+                maxBounds={REPORT_MAP_BOUNDS}
+                minZoom={REPORT_MAP_MIN_ZOOM}
+                maxZoom={REPORT_MAP_MAX_ZOOM}
+                userLocation={userLocation}
                 onReady={() => setReady(true)}
                 onError={() =>
                   setMapError(
@@ -530,11 +564,12 @@ function ActiveReportLocationPicker({
               >
                 <Camera
                   ref={camera}
-                  initialViewState={{
-                    center: [coordinates.longitude, coordinates.latitude],
-                    zoom: 16,
-                  }}
+                  initialViewState={initialCamera}
+                  maxBounds={REPORT_MAP_BOUNDS}
+                  minZoom={REPORT_MAP_MIN_ZOOM}
+                  maxZoom={REPORT_MAP_MAX_ZOOM}
                 />
+                {locationAllowed && !fixture && UserLocation ? <UserLocation accuracy /> : null}
               </Map>
             ) : (
               <View className="flex-1 items-center justify-center gap-3 px-8">
@@ -546,6 +581,7 @@ function ActiveReportLocationPicker({
                 <Button
                   variant="secondary"
                   onPress={() => {
+                    setInitialCamera({ center: [coordinates.longitude, coordinates.latitude], zoom: zoom.current });
                     setReady(false);
                     setMapError(null);
                     setRetry((current) => current + 1);
@@ -553,7 +589,7 @@ function ActiveReportLocationPicker({
                 >
                   Retry map
                 </Button>
-                <Button onPress={() => setSearchView(true)}>
+                <Button onPress={openSearch}>
                   Find a location
                 </Button>
               </View>
@@ -577,7 +613,7 @@ function ActiveReportLocationPicker({
                 variant="outline"
                 className="bg-card justify-start"
                 startContent={<Search size={18} color={foreground} />}
-                onPress={() => setSearchView(true)}
+                onPress={openSearch}
               >
                 Search within Albay
               </Button>
@@ -605,7 +641,7 @@ function ActiveReportLocationPicker({
                 className="bg-card rounded-xl"
                 accessibilityLabel="Zoom in"
                 onPress={() => {
-                  zoom.current = Math.min(20, zoom.current + 1);
+                  zoom.current = Math.min(REPORT_MAP_MAX_ZOOM, zoom.current + 1);
                   (Platform.OS === "web"
                     ? webCamera.current
                     : camera.current
@@ -620,7 +656,7 @@ function ActiveReportLocationPicker({
                 className="bg-card rounded-xl"
                 accessibilityLabel="Zoom out"
                 onPress={() => {
-                  zoom.current = Math.max(8, zoom.current - 1);
+                  zoom.current = Math.max(REPORT_MAP_MIN_ZOOM, zoom.current - 1);
                   (Platform.OS === "web"
                     ? webCamera.current
                     : camera.current
@@ -631,12 +667,12 @@ function ActiveReportLocationPicker({
               </Button>
             </View>
             <View className="absolute inset-x-4 bottom-8 rounded-xl bg-card p-4 gap-2">
-              <Text muted size="xs">
-                Issue location
-              </Text>
+              <View className="flex-row items-center justify-between" style={{ minHeight: 20 }}>
+                <Text muted size="xs">Issue location</Text>
+                {resolving || locating ? <Spinner size="sm" label={locating ? "Finding your location" : "Confirming address"} /> : null}
+              </View>
               <Text weight="semibold" size="sm" numberOfLines={2}>{address}</Text>
               <View className="flex-row gap-2 items-center" style={{ minHeight: 20 }}>
-                {resolving || locating ? <Spinner size="sm" /> : null}
                 <Text size="xs" muted>{locating ? "Finding your location" : resolving ? "Confirming Albay address…" : "Pin location"}</Text>
               </View>
               <Text size="xs" muted>

@@ -6,7 +6,6 @@ import {
   ChevronRight,
   MapPin,
   Phone,
-  RefreshCw,
   ShieldCheck,
 } from "lucide-react-native";
 import { ReportPage } from "@/features/reports/components/report-page";
@@ -64,6 +63,7 @@ function UpdateDetailScreen({ kind }: { kind: MobilePublicUpdate["kind"] }) {
   const { guest, requestSignIn } = useGuestAccess();
   const [areas, setAreas] = useState(fixtures && preview === "areas"),
     [query, setQuery] = useState("");
+  const [pullRefreshing, setPullRefreshing] = useState(false);
   const [foreground, primary] = useAppColors(["foreground", "primary"]);
   const options = {
     userId: session?.user.id ?? "guest",
@@ -136,7 +136,15 @@ function UpdateDetailScreen({ kind }: { kind: MobilePublicUpdate["kind"] }) {
   const pageTitle = kind === "advisory" ? "Advisory details" : "From ALECO";
   const body = advisory?.content ?? post?.message ?? "";
   return (
-    <ReportPage title={pageTitle} onBack={back}>
+    <ReportPage title={pageTitle} onBack={back} refreshing={pullRefreshing} onRefresh={async () => {
+      setPullRefreshing(true);
+      try {
+        if (fixtures) router.setParams({ preview: undefined });
+        else await read.reload(true);
+      } finally {
+        setPullRefreshing(false);
+      }
+    }}>
       {busy ? (
         <DataState loading loadingLayout="detail" title="Loading this ALECO update" />
       ) : signIn ? (
@@ -415,12 +423,6 @@ function UpdateDetailScreen({ kind }: { kind: MobilePublicUpdate["kind"] }) {
               >
                 <Phone size={18} color={foreground} />
                 <Text>Contact ALECO</Text>
-              </Button>
-              <Button variant="ghost" disabled={read.busy} onPress={retry}>
-                <RefreshCw size={16} color={primary} />
-                <Text className="text-primary">
-                  {read.busy ? "Refreshing…" : "Refresh latest update"}
-                </Text>
               </Button>
               <Button
                 variant="ghost"

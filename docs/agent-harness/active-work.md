@@ -1,5 +1,7 @@
 # Active work
 
+- [Mobile flow refinements](../mobile-flow-refinements.md): Figma-first ticket/report/map/alerts fixes; 444 tests, types/scoped lint/harness, Android/Hermes+web exports and Light/Dark browser/review gates pass. Scoped PR integration pending; preserve device queues, signing configuration and unrelated Staff work.
+
 Last reviewed: 2026-10-13
 Current branch: master; PR6 normalized sheets and all latest manual edits are merged locally/remotely.
 Active plan: [BottomSheet normalization](../bottom-sheet-normalization.md); Figma-first palette and all eight latest manual files included; source/cleanup complete; alpha.4/code58 published.

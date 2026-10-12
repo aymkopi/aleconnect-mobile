@@ -22,7 +22,7 @@ import {
   registerDevicePushToken,
   type NotificationSettingsResult,
 } from "@/services/notification-settings";
-import { registerForPushNotificationsAsync } from "@/services/push-notifications";
+import { registerForPushNotificationsAsync, requestPushNotificationPermissionAsync } from "@/services/push-notifications";
 import { PANELUI_PREVIEW } from "@/constants/panelui-preview";
 import {
   ProfileGate,
@@ -66,6 +66,7 @@ function Alerts({ identity }: { identity: ProfileIdentity }) {
     [areaQuery, setAreaQuery] = useState(""),
     [areaDraft, setAreaDraft] = useState<string[]>([]),
     [discard, setDiscard] = useState(false);
+  const [deviceRegistered, setDeviceRegistered] = useState(false);
   const hydrated = useRef<NotificationSettingsResult | null>(null);
   const { data: loaded, busy: loading, reload: refresh } = read;
   const signature = draft ? JSON.stringify(payload(draft)) : "",
@@ -194,10 +195,11 @@ function Alerts({ identity }: { identity: ProfileIdentity }) {
     try {
       if (identity.fixture) {
         setPermission("Allowed");
+        setDeviceRegistered(true);
         return;
       }
       if (PANELUI_PREVIEW) throw new Error("Live device registration is disabled in this preview.");
-      const p = await Notifications.requestPermissionsAsync();
+      const p = await requestPushNotificationPermissionAsync();
       if (!current()) return;
       setPermission(p.granted ? "Allowed" : p.canAskAgain ? "Not allowed" : "Blocked");
       if (!p.granted) throw new Error("Enable notifications in device settings to receive alerts.");
@@ -208,6 +210,7 @@ function Alerts({ identity }: { identity: ProfileIdentity }) {
       const result = await registerDevicePushToken(token);
       if (current() && !result?.ok)
         throw new Error("This device could not be registered. Retry setup.");
+      if (current()) setDeviceRegistered(true);
     } catch (e) {
       if (current()) setDeviceError(e instanceof Error ? e.message : "Device alert setup failed.");
     } finally {
@@ -314,6 +317,7 @@ function Alerts({ identity }: { identity: ProfileIdentity }) {
             {deviceError ? (
               <ProfileNotice title="Device setup incomplete" description={deviceError} danger />
             ) : null}
+            {deviceRegistered && permission === "Allowed" && !deviceBusy && !deviceError ? <Text size="xs" className="text-primary" accessibilityLiveRegion="polite">{identity.fixture ? "Visual fixture · device setup simulated" : "Device alerts are ready"}</Text> : null}
             <Text size="sm" weight="semibold" accessibilityRole="header">
               Broadcast areas
             </Text>
@@ -325,9 +329,12 @@ function Alerts({ identity }: { identity: ProfileIdentity }) {
                     .map((s) => s.name)
                     .join(" & ") || "Choose your service areas"}
                 </Text>
-                <Text size="xs" className="text-primary">
-                  {ids.length} selected
-                </Text>
+                <View className="flex-row items-center gap-1" accessibilityLiveRegion="polite">
+                  {saving || loading ? <Spinner size="sm" /> : !dirty && online && !loaded?.isStale && !error && !read.error ? <Check size={14} color={primary} /> : null}
+                  <Text size="xs" className="text-primary">
+                    {saving || loading ? "Syncing" : error || read.error ? "Not synced" : dirty || !online || loaded?.isStale ? "Pending sync" : identity.fixture ? "Local preview" : "Synced"}
+                  </Text>
+                </View>
               </View>
               <View className="flex-row flex-wrap gap-2">
                 {feeders.map((f) => (
@@ -466,21 +473,22 @@ function Alerts({ identity }: { identity: ProfileIdentity }) {
             ) : null}
             {station ? (
               matchingFeeders.map((f) => (
+                <View key={f.id} className="rounded-xl bg-card p-3">
                 <Checkbox
-                  key={f.id}
                   checked={areaDraft.includes(f.id)}
                   label={f.name}
                   onCheckedChange={(v) =>
                     changeIds(v ? [...areaDraft, f.id] : areaDraft.filter((id) => id !== f.id))
                   }
                 />
+                </View>
               ))
             ) : (
               <>
                 {matchingStations.map((s) => {
                   const n = s.feeders.filter((f) => areaDraft.includes(f.id)).length;
                   return (
-                    <View key={s.id} className="gap-1 rounded-xl p-3">
+                    <View key={s.id} className="gap-1 rounded-xl bg-card p-3">
                       <Checkbox
                         checked={n === s.feeders.length && n > 0}
                         indeterminate={n > 0 && n < s.feeders.length}

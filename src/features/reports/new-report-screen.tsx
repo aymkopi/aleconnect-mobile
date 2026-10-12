@@ -15,6 +15,7 @@ import {
   Images,
   Lightbulb,
   MapPin,
+  LocateFixed,
   Pencil,
   Plug,
   PowerOff,
@@ -435,7 +436,7 @@ export default function NewReportScreen() {
     else router.replace("/reports");
   }, [router]);
   const requestClose = useCallback(() => {
-    if (submittingRef.current) return;
+    if (submittingRef.current) { if (queued.current) leave(); return; }
     if (receipt) leave();
     else if (!draftHasContent(form)) closeDraft();
     else setConfirm("discard");
@@ -839,7 +840,7 @@ export default function NewReportScreen() {
     if (pickerBusy) return;
     if (step === 2 && issueView === "category") {
       if (!form.categoryId || !accountReady) return;
-      if (!form.typeId) { setIssueView("type"); setAttempted(false); return; }
+      if (types.length !== 1 || !form.typeId) { setIssueView("type"); setAttempted(false); return; }
     }
     if (stepErrors.length) return;
     if (step === 6) {
@@ -952,7 +953,11 @@ export default function NewReportScreen() {
               : reportLimits.registeredName
         }
         errorMessage={attempted ? errors[key] : undefined}
-        placeholder={multiline ? "Tell ALECO what happened" : "Registered name"}
+        placeholder={key === "desiredAction"
+          ? "How would you like ALECO to help?"
+          : multiline
+            ? "What happened, when did it start, and what is affected?"
+            : key === "currentRegisteredName" ? "Name currently on the account" : "Name to register on the account"}
         containerClassName="rounded-xl"
       />
       <Text size="xs" muted className="text-right">
@@ -1040,7 +1045,7 @@ export default function NewReportScreen() {
     <>
       <ReportPage
         title="New report"
-        onBack={back}
+        onBack={requestClose}
         step={{ current: step, total: 6, label: stepLabels[step - 1] }}
         footer={
           <>
@@ -1322,26 +1327,6 @@ export default function NewReportScreen() {
             {step === 3 ? (
               <>
                 <Heading>Where is the issue?</Heading>
-                <Button
-                  variant="outline"
-                  startContent={<MapPin size={18} color={muted} />}
-                  onPress={() => {
-                    setLocateOnOpen(false);
-                    setMapOpen(true);
-                  }}
-                >
-                  Search an address or choose on map
-                </Button>
-                <Button
-                  variant="ghost"
-                  startContent={<MapPin size={18} color={primary} />}
-                  onPress={() => {
-                    setLocateOnOpen(true);
-                    setMapOpen(true);
-                  }}
-                >
-                  Use my current location
-                </Button>
                 <Pressable
                   accessibilityRole="checkbox"
                   accessibilityState={{ checked: form.useHomeAddress }}
@@ -1425,6 +1410,14 @@ export default function NewReportScreen() {
                       ? "Location confirmed within Albay"
                       : "Location needs confirmation"}
                   </Text>
+                </View>
+                <View className="flex-row gap-3">
+                  <Button className="flex-1" variant="secondary" size="sm" startContent={<MapPin size={16} color={primary} />} onPress={() => { setLocateOnOpen(false); setMapOpen(true); }}>
+                    Search map
+                  </Button>
+                  <Button className="flex-1" variant="secondary" size="sm" startContent={<LocateFixed size={16} color={primary} />} onPress={() => { setLocateOnOpen(true); setMapOpen(true); }}>
+                    My location
+                  </Button>
                 </View>
                 <Input
                   label="Purok / street"
