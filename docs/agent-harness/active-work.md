@@ -2,10 +2,11 @@
 
 Last reviewed: 2026-10-12
 Current branch: master; PR #5 alpha CI and the current border-free UI are merged locally/remotely.
-Active plan: [Android alpha release](../android-alpha-releases.md); source integration complete, first native build in progress.
-Next task: verify the first automatic native build/prerelease and its downloaded checksum; physical/private/provider/native-iOS acceptance remains separate.
-Known blockers: no source/integration/cleanup blocker. Staff PR40 is deployed; physical/native-iOS/private/provider acceptance remains separate. The former empty aleconnect-panelui folder is removed.
-Last verified: fresh pre-merge and merged-canonical runs pass 433/433 tests with zero skips; merged TypeScript/harness/whitespace and exact-head PR/merged-master GitHub CI pass. Prior UI lint had 0 errors/181 existing warnings and fixture-free web export passed. Figma active families and representative Light/Dark browser fixtures are verified. Independent source review has no blocker. Staff PR40 is deployed; GitHub v2.0.0-preview.1 APK digest/signature/alignment match. Physical/private/provider acceptance remains separate.
+Active plan: [Android alpha release](../android-alpha-releases.md); completed, alpha.1/code55 is published and task worktree/branches are removed.
+Next task: accept the exact alpha APK on a real device; physical/private/provider/native-iOS acceptance remains separate.
+Preserved work: newer uncommitted Home, Reports and Advisories edits are outside the released 2d39979 snapshot and this docs-only closeout; validate them separately before their next app release.
+Known blockers: no source/native-publication/cleanup blocker. Staff PR40 is deployed; physical/native-iOS/private/provider acceptance remains separate. The former empty aleconnect-panelui folder is removed.
+Last verified: source 436/436 tests with zero skips, Python2/2, TypeScript/harness/whitespace, lint0 errors/181 existing warnings and Expo Doctor21/21 pass. Exact-head PR CI and native release run38253889473 attempt2 pass; downloaded/GitHub/Desktop digests, original signer, version55 and alignment match. Docs-only run38254901886 skips native publication. Prior Figma/Light/Dark browser acceptance and Staff PR40 deployment are recorded separately. Physical/private/provider acceptance remains separate.
 
 
 - [Harness refinement](tasks/harness-refinement.md): isolated docs/skills/checks; no product release.

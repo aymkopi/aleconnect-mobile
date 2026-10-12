@@ -4,12 +4,13 @@
 
 - Restart display/release versioning as alpha; Android version codes continue above54 for safe in-place updates. Keep the earlier2.0.0/code54 release as history.
 - Add a default-branch CI pipeline that reuses existing validation, builds a fixture-free signed ARM64/x86_64 APK for app changes, checks actual native/bundle/signature proof and publishes a GitHub prerelease with checksum/build metadata. Docs-only changes skip compilation; manual rebuilds are supported.
+- Publish [1.0.0-alpha.1/code55](https://github.com/aymkopi/aleconnect-mobile/releases/tag/v1.0.0-alpha.1) from merged source 2d39979. Original preview certificate/package, live API and 16KB alignment are verified; downloaded and Desktop copies match GitHub's digest.
 
 ## Border-free changes included in alpha
 
 - Remove decorative outlines from Light/Dark components and screens; distinguish cards, fields, menus and sheets through semantic fills. Keep #00060F as the Dark page anchor.
 - Preserve readable selection/unchecked/error/disabled states and a visible functional input-focus underline; retain variant/class/inline field fills and balanced prefix/suffix spacing.
-- Publish signed 2.0.0/code54 APK and checksum through GitHub Releases; this UI change remains separate from that preview.
+- Retain the signed 2.0.0/code54 release as history; the alpha.1/code55 release includes the border-free UI.
 
 ## 2.0.0 — 2026-10-12
 

@@ -12,10 +12,10 @@ Files: .github/workflows/agent-harness.yml (reusable checks/output), android-alp
 
 - [x] Tests first: monotonic codes, bad run numbers, counter limits, fixture-disabled bytecode and main-only/CI gate behavior; observe failure.
 - [x] Add the minimal CI metadata and APK verifier, existing workflow reuse and trusted publish job. Assert original signer, non-debuggable identity/code/ABIs, 16KB ZIP/ELF, HTTPS API and compiled fixtures off. Generate SHA256SUMS and build metadata.
-- [ ] Validate tests/types/lint/harness/Expo Doctor/alignment and YAML; refresh Graphify separately; source review and green PR. Merge to activate the authorized pipeline.
-- [ ] Observe the actual GitHub build, repair only proven failures; publish verified draft+APK/checksum/metadata to prerelease, download/hash Desktop copy.
-- [ ] Record exact release/CI/source identities, native/private/provider limits, local/remote sync and safe task cleanup.
+- [x] Validate tests/types/lint/harness/Expo Doctor/alignment and YAML; refresh Graphify separately; source review and green PR. Merge to activate the authorized pipeline.
+- [x] Observe the actual GitHub build, repair only proven failures; publish verified draft+APK/checksum/metadata to prerelease, download/hash Desktop copy.
+- [x] Record exact release/CI/source identities, native/private/provider limits, local/remote sync and safe task cleanup.
 
 Constraints: retain package ID, signer, Firebase/Expo configuration, queues/device state and nine stashes. Node24.21 and JDK21. No dependency/server/schema/UI change. ARM64/x86_64 only. No EAS/OTA/store deployment. No .env.local copies. Current user authorizes automated GitHub APK publication and current release; all implementation is solo.
 
-Ledger: source gates436/436, Python2/2, types, lint0 errors/181 retained warnings, harness/YAML/whitespace, Expo alignment/Doctor21/21 and source review pass. Initial ignored map-worker setup was repaired through existing sync:web-map. CI integration/native release remains pending.
+Ledger: source gates436/436, Python2/2, types, lint0 errors/181 retained warnings, harness/YAML/whitespace, Expo alignment/Doctor21/21 and source review pass. Initial ignored map-worker setup was repaired through existing sync:web-map. PR #5 is merged as 2d39979; release run38253889473 attempt2 passed and published alpha.1/code55. Attempt1 passed native verification but GitHub publication timed out before creating a draft. Docs-only run38254901886 passed validation and skipped its release job. Downloaded/GitHub/checksum/Desktop hashes match; task worktree and feature branches are removed without force. See the release handoff for exact source/hash/certificate and device/private/provider limits.
