@@ -367,9 +367,12 @@ test("mobile instructions and CI route validation without publishing", async () 
   assert.doesNotMatch(workflow, /\b(?:wrangler\s+(?:pages\s+)?deploy|npm\s+run\s+(?:deploy|publish)|eas\s+update)\b/i)
 })
 
-test("mobile harness workflow validates pushes to canonical master and retains main coverage", async () => {
+test("alpha CI owns default-branch pushes and reuses the harness for PRs", async () => {
   const workflow = await readFile(new URL("../.github/workflows/agent-harness.yml", import.meta.url), "utf8")
-  assert.match(workflow, /branches:\s*\[main,\s*master\]/)
+  assert.match(workflow, /workflow_call:/)
+  const releases = await readFile(new URL("../.github/workflows/android-alpha-release.yml", import.meta.url), "utf8")
+  assert.match(releases, /branches:\s*\[main,\s*master\]/)
+  assert.match(releases, /uses: \.\/\.github\/workflows\/agent-harness.yml/)
 })
 
 

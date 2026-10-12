@@ -2,20 +2,24 @@ name: Validate Agent Harness
 
 on:
   pull_request:
-  push:
-    branches: [main, master]
+  workflow_call:
+    outputs:
+      app_changed:
+        value: ${{ jobs.validate.outputs.app_changed }}
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: agent-harness-${{ github.workflow }}-${{ github.ref }}
+  group: agent-harness-${{ github.workflow }}-${{ github.ref }}-${{ github.sha }}
   cancel-in-progress: true
 
 jobs:
   validate:
     runs-on: ubuntu-latest
+    outputs:
+      app_changed: ${{ steps.harness.outputs.app_changed }}
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7

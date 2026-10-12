@@ -1,6 +1,11 @@
 # Changelog
 
-## Unreleased
+## 1.0.0-alpha.1 — 2026-10-12
+
+- Restart display/release versioning as alpha; Android version codes continue above54 for safe in-place updates. Keep the earlier2.0.0/code54 release as history.
+- Add a default-branch CI pipeline that reuses existing validation, builds a fixture-free signed ARM64/x86_64 APK for app changes, checks actual native/bundle/signature proof and publishes a GitHub prerelease with checksum/build metadata. Docs-only changes skip compilation; manual rebuilds are supported.
+
+## Border-free changes included in alpha
 
 - Remove decorative outlines from Light/Dark components and screens; distinguish cards, fields, menus and sheets through semantic fills. Keep #00060F as the Dark page anchor.
 - Preserve readable selection/unchecked/error/disabled states and a visible functional input-focus underline; retain variant/class/inline field fills and balanced prefix/suffix spacing.
