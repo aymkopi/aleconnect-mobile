@@ -1,6 +1,6 @@
 # Active work
 
-- [Mobile flow refinements](../mobile-flow-refinements.md): Figma-first ticket/report/map/alerts fixes; 444 tests, types/scoped lint/harness, Android/Hermes+web exports and Light/Dark browser/review gates pass. Scoped PR integration pending; preserve device queues, signing configuration and unrelated Staff work.
+- [Mobile flow refinements](../mobile-flow-refinements.md): PR7 merged as87daab0 after exact-head checks passed; Figma,444 tests, types/scoped lint/harness, Android/Hermes+web exports and Light/Dark browser/review gates pass. Automatic alpha run38293403614 is building; physical/provider acceptance remains separate. Preserve device queues, signing configuration and unrelated Staff work.
 
 Last reviewed: 2026-10-13
 Current branch: master; PR6 normalized sheets and all latest manual edits are merged locally/remotely.
