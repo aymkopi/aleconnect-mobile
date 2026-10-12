@@ -341,7 +341,7 @@ export interface SelectSheetProps {
     })[];
     /**
      * Paint the native sheet a solid colour instead of the platform's
-     * translucent material. `true` uses the theme's popover surface; a string
+     * translucent material. `true` uses the theme's sheet surface; a string
      * paints that colour. Native sheet only.
      */
     nativeBackground?: boolean | string;

@@ -13,30 +13,35 @@ export function getHomeLayout({
 }) {
   const scale = Math.max(1, fontScale);
   const compact = height < 960 || scale > 1.15 || preview;
-  const gap = compact ? 8 : 12;
+  const preferredGap = compact ? 14 : 16;
   const rowGap = compact ? 6 : 8;
   const cardHeight = 112;
   const headingHeight = Math.ceil(28 * scale);
   const gridLabelHeight = Math.ceil(22 * scale);
-  const gridPadding = compact ? 4 : 10;
+  const gridPadding = compact ? 8 : 14;
   const ctaHeight = 64;
   const iconTileSize = 48;
   const headerHeight = height / 3 - top;
   const available = height - top - bottom;
+  const minimumTile = iconTileSize + 4 + Math.ceil(28 * scale);
   const fixed =
     headerHeight +
     cardHeight +
     headingHeight +
     8 +
     gridPadding * 2 +
-    2 +
     gridLabelHeight +
-    8 +
     ctaHeight +
-    gap * 3 +
-    (preview ? Math.ceil(16 * scale) + gap : 0);
-  const gridBudget = available - fixed;
-  const minimumTile = iconTileSize + 4 + Math.ceil(28 * scale);
+    (preview ? Math.ceil(16 * scale) : 0);
+  const gapCount = preview ? 5 : 4;
+  const gap = Math.max(
+    8,
+    Math.min(
+      preferredGap,
+      Math.floor((available - fixed - minimumTile * 2 - rowGap + 0.5) / gapCount),
+    ),
+  );
+  const gridBudget = available - fixed - gap * gapCount;
   const rows = gridBudget >= minimumTile * 3 + rowGap * 2 ? 3 : 2;
   const tileHeight = Math.max(
     minimumTile,

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Normalize every custom and native BottomSheet to one semantic surface: #EFF2F6 in Light and #1A1F27 in Dark. Keep contact cards white/darker than the sheet, without decorative borders or shadows. Select and small-screen Popover sheets inherit the standard.
+- Match the Figma sheet token before app changes; preserve attached, keyboard-aware sheets and single-sheet content/back navigation.
+- Include the latest manual Home, Reports, Advisories, Hotlines and report-detail edits: roomier Home spacing/padding, clearer white KPI text on its feature surface, compact status badges, 12px list spacing and formatting refinements. Home accounts for actual rendered gaps so the larger padding fits ordinary phone heights; the existing small-screen/large-font fallback remains.
+
 ## 1.0.0-alpha.1 — 2026-10-12
 
 - Restart display/release versioning as alpha; Android version codes continue above54 for safe in-place updates. Keep the earlier2.0.0/code54 release as history.

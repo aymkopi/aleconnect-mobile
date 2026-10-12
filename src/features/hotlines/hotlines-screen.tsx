@@ -1,29 +1,29 @@
-import { useEffect, useState } from "react";
-import { useRouter } from "expo-router";
-import { ScrollView, View, useWindowDimensions } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ShieldCheck, Flame, Hospital, Building2 } from "lucide-react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useMainPageScroll } from "@/hooks/use-main-page-scroll";
-import { MainPageHeader } from "@/components/main-page-header";
-import { SearchField } from "@/components/search-field";
-import { EmergencyCard } from "./emergency-card";
-import { Text } from "@/components/panelui/text";
-import { Button } from "@/components/panelui/button";
-import { BottomSheet } from "@/components/panelui/bottom-sheet";
-import { Checkbox } from "@/components/panelui/checkbox";
-import { DataState, DataNotice } from "@/components/data-state";
-import { toast } from "@/components/panelui/toast";
-import { fetchHotlines, type HotlineCategory } from "@/services/hotlines";
-import { ContactCard } from "./contact-card";
-import { useScopedRead } from "@/hooks/use-scoped-read";
-import { useAuthSession } from "@/hooks/use-auth-session";
-import { useAppColors } from "@/hooks/use-app-colors";
-import { useVisualPreview } from "@/context/visual-preview-context";
-import { useGuestAccess } from "@/context/guest-access-context";
-import { PreviewLabel } from "@/components/preview-label";
-import { fixtureHotlines } from "@/features/main-fixtures";
+import { DataNotice, DataState } from "@/components/data-state";
 import { appScrollableBottomPadding } from "@/components/floating-app-bar";
+import { MainPageHeader } from "@/components/main-page-header";
+import { BottomSheet } from "@/components/panelui/bottom-sheet";
+import { Button } from "@/components/panelui/button";
+import { Checkbox } from "@/components/panelui/checkbox";
+import { Text } from "@/components/panelui/text";
+import { toast } from "@/components/panelui/toast";
+import { PreviewLabel } from "@/components/preview-label";
+import { SearchField } from "@/components/search-field";
+import { useGuestAccess } from "@/context/guest-access-context";
+import { useVisualPreview } from "@/context/visual-preview-context";
+import { fixtureHotlines } from "@/features/main-fixtures";
+import { useAppColors } from "@/hooks/use-app-colors";
+import { useAuthSession } from "@/hooks/use-auth-session";
+import { useMainPageScroll } from "@/hooks/use-main-page-scroll";
+import { useScopedRead } from "@/hooks/use-scoped-read";
+import { fetchHotlines, type HotlineCategory } from "@/services/hotlines";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import { Building2, Flame, Hospital, ShieldCheck } from "lucide-react-native";
+import { useEffect, useState } from "react";
+import { ScrollView, View, useWindowDimensions } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ContactCard } from "./contact-card";
+import { EmergencyCard } from "./emergency-card";
 export default function HotlinesScreen() {
   const insets = useSafeAreaInsets(),
     { session } = useAuthSession(),
@@ -72,9 +72,15 @@ export default function HotlinesScreen() {
     };
   }, [guest, fixtures, key, others.map((c) => c.id).join("|")]);
   const ids =
-    !guest && pinned?.key === key ? pinned.ids : others.slice(0, 4).map((c) => c.id);
+    !guest && pinned?.key === key
+      ? pinned.ids
+      : others.slice(0, 4).map((c) => c.id);
   function toggle(id: string, checked: boolean) {
-    if (guest) { setCustomize(false); requestSignIn("/hotlines", "account"); return; }
+    if (guest) {
+      setCustomize(false);
+      requestSignIn("/hotlines", "account");
+      return;
+    }
     const next = checked
       ? [...new Set([...ids, id])]
       : ids.filter((x) => x !== id);
@@ -117,7 +123,6 @@ export default function HotlinesScreen() {
   );
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
-
       <ScrollView
         className="flex-1"
         ref={scrollRef}
@@ -139,17 +144,64 @@ export default function HotlinesScreen() {
           placeholder="Search a hotline or category"
         />
         <EmergencyCard />
-        {!fixtures && !data.data && data.busy ? <DataState loading loadingLayout="contact" title="Loading the hotline directory" /> : !fixtures && !data.data && data.error ? (
-          <DataState title="The directory couldn’t load" description="Reconnect and try again to get agency contacts. For an emergency, you can still hold to call 911." actionLabel="Try again" onAction={() => void data.reload(true)} />
+        {!fixtures && !data.data && data.busy ? (
+          <DataState
+            loading
+            loadingLayout="contact"
+            title="Loading the hotline directory"
+          />
+        ) : !fixtures && !data.data && data.error ? (
+          <DataState
+            title="The directory couldn’t load"
+            description="Reconnect and try again to get agency contacts. For an emergency, you can still hold to call 911."
+            actionLabel="Try again"
+            onAction={() => void data.reload(true)}
+          />
         ) : query ? (
-          matches.length ? matches.map((a) => <ContactCard key={a.id} agency={a} disableActions={fixtures} />) : <DataState title="No matching hotlines" description="Try another name, number or category." actionLabel="Clear search" onAction={() => setQuery("")} />
-        ) : aleco ? <ContactCard agency={aleco} disableActions={fixtures} /> : <DataState title="No ALECO contacts published yet" description="Browse other agencies below. Emergency calling is still available above." /> }
-        {data.data && (data.error || data.data.isStale) ? <DataNotice title={data.error ? "Could not refresh contacts" : "Showing saved contacts"} description="The directory may have changed. Connect and refresh to check current contact details." actionLabel="Refresh directory" busy={data.busy} onAction={() => void data.reload(true)} /> : null}
+          matches.length ? (
+            matches.map((a) => (
+              <ContactCard key={a.id} agency={a} disableActions={fixtures} />
+            ))
+          ) : (
+            <DataState
+              title="No matching hotlines"
+              description="Try another name, number or category."
+              actionLabel="Clear search"
+              onAction={() => setQuery("")}
+            />
+          )
+        ) : aleco ? (
+          <ContactCard agency={aleco} disableActions={fixtures} />
+        ) : (
+          <DataState
+            title="No ALECO contacts published yet"
+            description="Browse other agencies below. Emergency calling is still available above."
+          />
+        )}
+        {data.data && (data.error || data.data.isStale) ? (
+          <DataNotice
+            title={
+              data.error
+                ? "Could not refresh contacts"
+                : "Showing saved contacts"
+            }
+            description="The directory may have changed. Connect and refresh to check current contact details."
+            actionLabel="Refresh directory"
+            busy={data.busy}
+            onAction={() => void data.reload(true)}
+          />
+        ) : null}
         <View className="flex-row items-center justify-between">
           <Text weight="semibold" style={{ fontSize: 16, lineHeight: 22 }}>
             {guest ? "Browse categories" : "Pinned categories"}
           </Text>
-          <Button size="sm" variant="ghost" onPress={() => guest ? requestSignIn("/hotlines", "account") : setCustomize(true)}>
+          <Button
+            size="sm"
+            variant="ghost"
+            onPress={() =>
+              guest ? requestSignIn("/hotlines", "account") : setCustomize(true)
+            }
+          >
             <Text className="text-primary" size="xs" weight="semibold">
               {guest ? "Sign in to pin" : "Customize"}
             </Text>

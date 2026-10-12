@@ -1,67 +1,70 @@
-import { useIsFocused } from "expo-router/react-navigation";
-import { useEffect, useState } from "react";
+import { ContentSkeleton } from "@/components/content-skeleton";
+import { DataNotice, DataState } from "@/components/data-state";
+import { appScrollableBottomPadding } from "@/components/floating-app-bar";
+import { MainPageHeader } from "@/components/main-page-header";
+import { Badge } from "@/components/panelui/badge";
+import { BottomSheet } from "@/components/panelui/bottom-sheet";
+import { Button } from "@/components/panelui/button";
+import { Kpi } from "@/components/panelui/kpi";
+import { Label } from "@/components/panelui/label";
+import { Select } from "@/components/panelui/select";
+import { Skeleton } from "@/components/panelui/skeleton";
+import { Tabs } from "@/components/panelui/tabs";
+import { Text } from "@/components/panelui/text";
+import { PreviewLabel } from "@/components/preview-label";
+import { SearchField } from "@/components/search-field";
+import { SoftRadial } from "@/components/soft-radial";
+import { useVisualPreview } from "@/context/visual-preview-context";
+import {
+  fixtureReportAccounts,
+  fixtureReports,
+} from "@/features/main-fixtures";
+import { useAppColors } from "@/hooks/use-app-colors";
+import { useAuthSession } from "@/hooks/use-auth-session";
+import { useConsumerAccount } from "@/hooks/use-consumer-account";
+import { useMainPageScroll } from "@/hooks/use-main-page-scroll";
+import { useScopedRead } from "@/hooks/use-scoped-read";
+import {
+  subscribeReportRevalidationRequested,
+  subscribeReportStatusChanged,
+} from "@/services/report-sync-events";
+import {
+  fetchComplaintMeta,
+  fetchComplaintReportPage,
+} from "@/services/reports";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useIsFocused } from "expo-router/react-navigation";
+import {
+  ArrowDownUp,
+  CalendarDays,
+  Check,
+  CheckCircle2,
+  ChevronDown,
+  ChevronLeft,
+  Clock3,
+  CreditCard,
+  FileText,
+  Plus,
+  SlidersHorizontal,
+  Tag,
+} from "lucide-react-native";
+import { useEffect, useState } from "react";
 import { FlatList, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
-  Plus,
-  SlidersHorizontal,
-  FileText,
-  CheckCircle2,
-  Clock3,
-  ChevronLeft,
-  ChevronDown,
-  CalendarDays,
-  CreditCard,
-  Check,
-  Tag,
-  ArrowDownUp,
-} from "lucide-react-native";
-import { useMainPageScroll } from "@/hooks/use-main-page-scroll";
-import { subscribeReportRevalidationRequested, subscribeReportStatusChanged } from "@/services/report-sync-events";
-import { MainPageHeader } from "@/components/main-page-header";
-import { SearchField } from "@/components/search-field";
-import { SoftRadial } from "@/components/soft-radial";
-import { Button } from "@/components/panelui/button";
-import { Text } from "@/components/panelui/text";
-import { Kpi } from "@/components/panelui/kpi";
-import { Badge } from "@/components/panelui/badge";
-import { Select } from "@/components/panelui/select";
-import { Tabs } from "@/components/panelui/tabs";
-import { Label } from "@/components/panelui/label";
-import { BottomSheet } from "@/components/panelui/bottom-sheet";
-import { Skeleton } from "@/components/panelui/skeleton";
-import { ContentSkeleton } from "@/components/content-skeleton";
-import { DataState, DataNotice } from "@/components/data-state";
-import { ReportCard } from "./report-card";
-import {
-  getReportTabCounts,
-  filterReportTab,
-  type ReportTab,
-} from "./main-filter";
-import {
-  fetchComplaintReportPage,
-  fetchComplaintMeta,
-} from "@/services/reports";
-import { useAuthSession } from "@/hooks/use-auth-session";
-import { useConsumerAccount } from "@/hooks/use-consumer-account";
-import { useScopedRead } from "@/hooks/use-scoped-read";
-import { useAppColors } from "@/hooks/use-app-colors";
-import { useVisualPreview } from "@/context/visual-preview-context";
-import { PreviewLabel } from "@/components/preview-label";
-import {
-  fixtureReports,
-  fixtureReportAccounts,
-} from "@/features/main-fixtures";
-import { appScrollableBottomPadding } from "@/components/floating-app-bar";
-import {
-  defaultBrowseFilters,
   compareFixtureReports,
+  defaultBrowseFilters,
+  fetchedReportDateBounds,
   filterBrowseReports,
   reportPeriodLabels,
-  fetchedReportDateBounds,
   type BrowseFilters,
 } from "./browse-filter";
+import {
+  filterReportTab,
+  getReportTabCounts,
+  type ReportTab,
+} from "./main-filter";
+import { ReportCard } from "./report-card";
 import { CONSUMER_TICKET_STATUSES, consumerTicketStatusLabel } from "./status";
 
 const sortLabels = {
@@ -144,10 +147,17 @@ export default function ReportsScreen() {
   const reloadReports = reports.reload;
   useEffect(() => {
     if (!userId || fixtures) return;
-    const reload = (principal: string) => { if (principal === userId) void reloadReports(true); };
+    const reload = (principal: string) => {
+      if (principal === userId) void reloadReports(true);
+    };
     const first = subscribeReportRevalidationRequested(reload);
-    const second = subscribeReportStatusChanged(event => reload(event.userId));
-    return () => { first(); second(); };
+    const second = subscribeReportStatusChanged((event) =>
+      reload(event.userId),
+    );
+    return () => {
+      first();
+      second();
+    };
   }, [userId, fixtures, reloadReports]);
   const meta = useScopedRead(
     !fixtures && userId
@@ -171,7 +181,14 @@ export default function ReportsScreen() {
     : (reports.data?.reports ?? []);
   const hasData = fixtures || !!reports.data;
   const dateBounds = fetchedReportDateBounds(loaded);
-  const filteredView = !!search || tab !== "all" || applied.account !== "all" || applied.type !== "all" || applied.status !== "all" || loaded.length > 0 || !!reports.data?.nextCursor;
+  const filteredView =
+    !!search ||
+    tab !== "all" ||
+    applied.account !== "all" ||
+    applied.type !== "all" ||
+    applied.status !== "all" ||
+    loaded.length > 0 ||
+    !!reports.data?.nextCursor;
   const periodRows = filterBrowseReports(loaded, {
     ...applied,
     account: fixtures ? applied.account : "all",
@@ -236,23 +253,34 @@ export default function ReportsScreen() {
       >
         <SoftRadial />
         <Kpi.Group separated={false}>
-          {([{ label: "Reports", value: counts.all, Icon: FileText }, { label: "Resolved", value: counts.resolved, Icon: CheckCircle2 }, { label: "Open", value: counts.open, Icon: Clock3 }]).map(({ label, value, Icon }) => (
+          {[
+            { label: "Reports", value: counts.all, Icon: FileText },
+            { label: "Resolved", value: counts.resolved, Icon: CheckCircle2 },
+            { label: "Open", value: counts.open, Icon: Clock3 },
+          ].map(({ label, value, Icon }) => (
             <Kpi key={label} surface={false}>
               <Kpi.Stat>
-              {!hasData && reports.busy ? <Skeleton animated={focused} label={"Loading " + label.toLowerCase() + " count"} style={{ width: 54, height: 34 }} /> : <Kpi.Value className="text-white text-[28px] leading-[34px]">{hasData ? value : "—"}</Kpi.Value>}
-              <View className="flex-row gap-1.5 items-center">
-                <Icon size={16} color="#E5E7EB" />
-                <Kpi.Title className="text-white/90 text-xs">{label}</Kpi.Title>
-              </View>
+                {!hasData && reports.busy ? (
+                  <Skeleton
+                    animated={focused}
+                    label={"Loading " + label.toLowerCase() + " count"}
+                    style={{ width: 54, height: 34 }}
+                  />
+                ) : (
+                  <Kpi.Value className="text-white text-[28px] leading-[34px]">
+                    {hasData ? value : "—"}
+                  </Kpi.Value>
+                )}
+                <View className="flex-row gap-1.5 items-center">
+                  <Icon size={16} color="#E5E7EB" />
+                  <Kpi.Title className="text-white/90 text-xs">
+                    {label}
+                  </Kpi.Title>
+                </View>
               </Kpi.Stat>
             </Kpi>
           ))}
         </Kpi.Group>
-        <Text style={{ color: "#D1D5DB", fontSize: 11, lineHeight: 16 }}>
-          Counts reflect loaded records
-          {reports.data?.nextCursor ? " · more available" : ""}. Period filters
-          these records only.
-        </Text>
       </View>
       <View className="flex-row gap-3">
         <View className="flex-1 gap-1">
@@ -284,7 +312,12 @@ export default function ReportsScreen() {
             onPress={() =>
               router.push({
                 pathname: "/reports/period",
-                params: { period, start, end, firstReportDate: dateBounds?.start ?? "" },
+                params: {
+                  period,
+                  start,
+                  end,
+                  firstReportDate: dateBounds?.start ?? "",
+                },
               })
             }
           >
@@ -292,7 +325,7 @@ export default function ReportsScreen() {
           </Button>
         </View>
       </View>
-      <View className="flex-row items-center gap-2">
+      <View className="flex-row items-center gap-3">
         <View className="flex-1">
           <SearchField
             value={query}
@@ -342,10 +375,16 @@ export default function ReportsScreen() {
                   variant="secondary"
                   size="xs"
                   count={hasData ? counts[value] : undefined}
-                  accessibilityLabel={hasData ? `${counts[value]} reports` : "Report count unavailable"}
+                  accessibilityLabel={
+                    hasData
+                      ? `${counts[value]} reports`
+                      : "Report count unavailable"
+                  }
                   className="self-center h-5 min-w-5 items-center justify-center px-1 py-0"
                   labelClassName="text-[10px] leading-[14px]"
-                >{hasData ? null : "—"}</Badge>
+                >
+                  {hasData ? null : "—"}
+                </Badge>
               }
             >
               {value === "all" ? "All" : value === "open" ? "Open" : "Resolved"}
@@ -367,19 +406,30 @@ export default function ReportsScreen() {
             })
           }
         >
-          <Text className="text-primary" size="xs">
+          <Text className="text-primary" size="xs" weight="semibold">
             View all
           </Text>
         </Button>
       </View>
-      {hasData && (reports.data?.isStale || reports.error && reports.errorSource !== "more") ? <DataNotice
-        title={reports.error ? "Could not refresh reports" : "Showing saved reports"}
-        description="Your loaded reports are still available. Connect and refresh to confirm current statuses." actionLabel="Refresh reports" busy={reports.busy} onAction={() => void reports.reload(true)} /> : null}
+      {hasData &&
+      (reports.data?.isStale ||
+        (reports.error && reports.errorSource !== "more")) ? (
+        <DataNotice
+          title={
+            reports.error
+              ? "Could not refresh reports"
+              : "Showing saved reports"
+          }
+          description="Your loaded reports are still available. Connect and refresh to confirm current statuses."
+          actionLabel="Refresh reports"
+          busy={reports.busy}
+          onAction={() => void reports.reload(true)}
+        />
+      ) : null}
     </View>
   );
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
-
       <FlatList
         className="flex-1"
         ref={scrollRef}
@@ -403,61 +453,107 @@ export default function ReportsScreen() {
             }
           />
         )}
-        ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+        ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
         contentContainerStyle={{
           paddingHorizontal: 16,
           paddingTop: 8,
           paddingBottom: appScrollableBottomPadding(insets.bottom),
-          // Rows have one 8px separator; headers keep their own spacing.
-
+          // Rows have one 12px separator; headers keep their own spacing.
         }}
         ListHeaderComponent={<View className="pb-2">{header}</View>}
         ListEmptyComponent={
-          !session && !fixtures ? <DataState title="Sign in to see your reports" description="Reports belong to your signed-in account." actionLabel="Sign in" onAction={() => router.push({ pathname: "/sign-in", params: { returnTo: "/reports" } })} />
-          : !hasData && reports.busy ? <DataState loading title="Loading your reports" />
-          : !hasData && reports.error ? <DataState title="Your reports couldn’t load" description="Reconnect and try again. This does not mean you have no reports." actionLabel="Try again" onAction={() => void reports.reload(true)} />
-          : <DataState icon={FileText} title={filteredView ? "No matching reports" : "No reports yet"}
-            description={reports.data?.nextCursor ? "There may be matches in later pages. Load more reports to keep searching." : filteredView ? "Try another search or reset the account, period and status filters." : "Report an issue with your service and follow its progress here."}
-            actionLabel={filteredView ? "Reset filters" : "Create a report"}
-            onAction={() => { if (filteredView) { setApplied(defaultBrowseFilters); setQuery(""); setSearch(""); setTab("all"); router.replace("/reports"); } else router.push("/reports/new"); }} />
+          !session && !fixtures ? (
+            <DataState
+              title="Sign in to see your reports"
+              description="Reports belong to your signed-in account."
+              actionLabel="Sign in"
+              onAction={() =>
+                router.push({
+                  pathname: "/sign-in",
+                  params: { returnTo: "/reports" },
+                })
+              }
+            />
+          ) : !hasData && reports.busy ? (
+            <DataState loading title="Loading your reports" />
+          ) : !hasData && reports.error ? (
+            <DataState
+              title="Your reports couldn’t load"
+              description="Reconnect and try again. This does not mean you have no reports."
+              actionLabel="Try again"
+              onAction={() => void reports.reload(true)}
+            />
+          ) : (
+            <DataState
+              icon={FileText}
+              title={filteredView ? "No matching reports" : "No reports yet"}
+              description={
+                reports.data?.nextCursor
+                  ? "There may be matches in later pages. Load more reports to keep searching."
+                  : filteredView
+                    ? "Try another search or reset the account, period and status filters."
+                    : "Report an issue with your service and follow its progress here."
+              }
+              actionLabel={filteredView ? "Reset filters" : "Create a report"}
+              onAction={() => {
+                if (filteredView) {
+                  setApplied(defaultBrowseFilters);
+                  setQuery("");
+                  setSearch("");
+                  setTab("all");
+                  router.replace("/reports");
+                } else router.push("/reports/new");
+              }}
+            />
+          )
         }
         refreshing={pullRefreshing}
         onRefresh={async () => {
           setPullRefreshing(true);
-          try { await reports.reload(true); }
-          finally { setPullRefreshing(false); }
+          try {
+            await reports.reload(true);
+          } finally {
+            setPullRefreshing(false);
+          }
         }}
         ListFooterComponent={
           <View className="pt-3 gap-3">
-            {reports.error && reports.errorSource === "more" ? <DataNotice title="More reports couldn’t load" description="The reports above are still available. Retry without losing your place." /> : null}
-          {reports.data?.nextCursor && !reports.data.isStale ? (
-            <Button
-              variant="outline"
-              loading={reports.busy}
-              onPress={() =>
-                void reports.append(
-                  () =>
-                    fetchComplaintReportPage({
-                      ...options,
-                      cursor: reports.data!.nextCursor,
+            {reports.error && reports.errorSource === "more" ? (
+              <DataNotice
+                title="More reports couldn’t load"
+                description="The reports above are still available. Retry without losing your place."
+              />
+            ) : null}
+            {reports.data?.nextCursor && !reports.data.isStale ? (
+              <Button
+                variant="outline"
+                loading={reports.busy}
+                onPress={() =>
+                  void reports.append(
+                    () =>
+                      fetchComplaintReportPage({
+                        ...options,
+                        cursor: reports.data!.nextCursor,
+                      }),
+                    (before, next) => ({
+                      ...next,
+                      reports: [
+                        ...new Map(
+                          [...before.reports, ...next.reports].map((r) => [
+                            r.id,
+                            r,
+                          ]),
+                        ).values(),
+                      ],
                     }),
-                  (before, next) => ({
-                    ...next,
-                    reports: [
-                      ...new Map(
-                        [...before.reports, ...next.reports].map((r) => [
-                          r.id,
-                          r,
-                        ]),
-                      ).values(),
-                    ],
-                  }),
-                )
-              }
-            >
-              {reports.errorSource === "more" ? "Retry more reports" : "Load more reports"}
-            </Button>
-          ) : null}
+                  )
+                }
+              >
+                {reports.errorSource === "more"
+                  ? "Retry more reports"
+                  : "Load more reports"}
+              </Button>
+            ) : null}
           </View>
         }
       />
@@ -570,7 +666,12 @@ export default function ReportsScreen() {
                     {types.map((t) => (
                       <Select.Item key={t.id} value={t.id} label={t.title} />
                     ))}
-                    {meta.busy && types.length === 0 ? <ContentSkeleton layout="selection" label="Loading report types" /> : null}
+                    {meta.busy && types.length === 0 ? (
+                      <ContentSkeleton
+                        layout="selection"
+                        label="Loading report types"
+                      />
+                    ) : null}
                     {meta.error ? (
                       <Button
                         variant="outline"

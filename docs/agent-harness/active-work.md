@@ -1,12 +1,12 @@
 # Active work
 
-Last reviewed: 2026-10-12
-Current branch: master; PR #5 alpha CI and the current border-free UI are merged locally/remotely.
-Active plan: [Android alpha release](../android-alpha-releases.md); completed, alpha.1/code55 is published and task worktree/branches are removed.
-Next task: accept the exact alpha APK on a real device; physical/private/provider/native-iOS acceptance remains separate.
-Preserved work: newer uncommitted Home, Reports and Advisories edits are outside the released 2d39979 snapshot and this docs-only closeout; validate them separately before their next app release.
-Known blockers: no source/native-publication/cleanup blocker. Staff PR40 is deployed; physical/native-iOS/private/provider acceptance remains separate. The former empty aleconnect-panelui folder is removed.
-Last verified: source 436/436 tests with zero skips, Python2/2, TypeScript/harness/whitespace, lint0 errors/181 existing warnings and Expo Doctor21/21 pass. Exact-head PR CI and native release run38253889473 attempt2 pass; downloaded/GitHub/Desktop digests, original signer, version55 and alignment match. Docs-only run38254901886 skips native publication. Prior Figma/Light/Dark browser acceptance and Staff PR40 deployment are recorded separately. Physical/private/provider acceptance remains separate.
+Last reviewed: 2026-10-13
+Current branch: codex/normalize-mobile-sheets; isolated from canonical master and manual edits.
+Active plan: [BottomSheet normalization](../bottom-sheet-normalization.md); Figma-first palette and all eight latest manual files included; final publication checks in progress.
+Next task: exact-head PR/CI integration, then the existing alpha pipeline; real-device acceptance remains separate.
+Preserved work: original manual patches/hashes, all nine stashes, private signing/provider/device state and unrelated Staff edits. Alpha.1 remains the previously verified binary.
+Known blockers: no source blocker. Native/private/provider/iOS acceptance is separate.
+Last verified: 437/437 source tests with zero skips; TypeScript and lint 0 errors/181 existing warnings. Light/Dark integrated-browser contact-sheet checks and fixture-free web export pass. Independent source reviews found no actionable findings; harness/whitespace pass; exact-head remote CI closeout remains next.
 
 
 - [Harness refinement](tasks/harness-refinement.md): isolated docs/skills/checks; no product release.
@@ -28,3 +28,5 @@ Last verified: source 436/436 tests with zero skips, Python2/2, TypeScript/harne
 - [Border-free UI and release](../borderless-ui-review.md): Figma-first semantic fills, independent source review, signed GitHub preview and deployed Staff PR40; PR #4 merged; local/remote master match and task worktree/local/remote feature branch are removed.
 
 - [Android alpha releases](../android-alpha-releases.md): user-authorized default-branch CI build/prerelease, version policy and current release verification.
+
+- [BottomSheet normalization](../bottom-sheet-normalization.md): shared Light/Dark sheet surfaces, contact-card separation and latest manual edits; isolated validation and publication evidence.

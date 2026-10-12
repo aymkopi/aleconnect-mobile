@@ -1,21 +1,21 @@
+import { DataNotice, DataState } from "@/components/data-state";
+import { appScrollableBottomPadding } from "@/components/floating-app-bar";
+import { MainPageHeader } from "@/components/main-page-header";
+import { Button } from "@/components/panelui/button";
+import { Tabs } from "@/components/panelui/tabs";
+import { Text } from "@/components/panelui/text";
+import { PreviewLabel } from "@/components/preview-label";
+import { SearchField } from "@/components/search-field";
 import { useGuestAccess } from "@/context/guest-access-context";
+import { useMainPageScroll } from "@/hooks/use-main-page-scroll";
+import { useRouter } from "expo-router";
+import { Megaphone, Search } from "lucide-react-native";
 import { useState } from "react";
 import { FlatList, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useMainPageScroll } from "@/hooks/use-main-page-scroll";
-import { MainPageHeader } from "@/components/main-page-header";
-import { SearchField } from "@/components/search-field";
-import { useRouter } from "expo-router";
-import { Text } from "@/components/panelui/text";
-import { Tabs } from "@/components/panelui/tabs";
-import { Button } from "@/components/panelui/button";
-import { DataState, DataNotice } from "@/components/data-state";
-import { Megaphone, Search } from "lucide-react-native";
-import { PublisherCard } from "./publisher-card";
-import { PreviewLabel } from "@/components/preview-label";
-import { useUpdateFeed } from "./use-update-feed";
 import { matchesUpdate, updateRoute } from "./presentation";
-import { appScrollableBottomPadding } from "@/components/floating-app-bar";
+import { PublisherCard } from "./publisher-card";
+import { useUpdateFeed } from "./use-update-feed";
 export default function AdvisoriesScreen() {
   const insets = useSafeAreaInsets(),
     router = useRouter(),
@@ -32,7 +32,6 @@ export default function AdvisoriesScreen() {
     stories = items.slice(1);
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
-
       <FlatList
         className="flex-1"
         ref={scrollRef}
@@ -46,21 +45,27 @@ export default function AdvisoriesScreen() {
             onPress={() => router.push(updateRoute(item))}
           />
         )}
-        ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+        ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
         contentContainerStyle={{
           paddingHorizontal: 16,
           paddingTop: 8,
           paddingBottom: appScrollableBottomPadding(insets.bottom),
-
         }}
         refreshing={pullRefreshing}
-        onRefresh={() => { setPullRefreshing(true); void feed.reload(true).finally(() => setPullRefreshing(false)); }}
+        onRefresh={() => {
+          setPullRefreshing(true);
+          void feed.reload(true).finally(() => setPullRefreshing(false));
+        }}
         ListHeaderComponent={
           <View className="gap-3 pb-2">
             <PreviewLabel />
             <MainPageHeader
               title="Advisories"
-              subtitle={guest ? "Public updates · Available to everyone" : "Advisories, news & your community"}
+              subtitle={
+                guest
+                  ? "Public updates · Available to everyone"
+                  : "Advisories, news & your community"
+              }
             />
             <SearchField
               value={query}
@@ -71,7 +76,8 @@ export default function AdvisoriesScreen() {
               defaultValue="all"
               value={tab}
               onValueChange={setTab}
-              variant="pill" size="sm"
+              variant="pill"
+              size="sm"
             >
               <Tabs.List className="gap-1 min-h-12 items-center">
                 {[
@@ -103,11 +109,21 @@ export default function AdvisoriesScreen() {
                 View matching updates
               </Button>
             ) : null}
-            {hasData && (feed.data?.isStale || feed.error && feed.errorSource !== "more") ? <DataNotice
-              title={feed.error ? "Could not refresh updates" : "Showing saved updates"}
-              description="The updates already loaded are still available. Connect and refresh for the latest notices."
-              actionLabel="Refresh updates" busy={feed.busy} onAction={() => void feed.reload(true)}
-            /> : null}
+            {hasData &&
+            (feed.data?.isStale ||
+              (feed.error && feed.errorSource !== "more")) ? (
+              <DataNotice
+                title={
+                  feed.error
+                    ? "Could not refresh updates"
+                    : "Showing saved updates"
+                }
+                description="The updates already loaded are still available. Connect and refresh for the latest notices."
+                actionLabel="Refresh updates"
+                busy={feed.busy}
+                onAction={() => void feed.reload(true)}
+              />
+            ) : null}
             {featured ? (
               <>
                 <Text
@@ -131,29 +147,79 @@ export default function AdvisoriesScreen() {
                 ) : null}
               </>
             ) : !hasData && (feed.busy || feed.authLoading) ? (
-              <DataState loading loadingLayout="advisory" title="Loading ALECO updates" />
+              <DataState
+                loading
+                loadingLayout="advisory"
+                title="Loading ALECO updates"
+              />
             ) : feed.signIn ? (
-              <DataState title="Sign in to see your updates" description="View advisories for the service accounts you can access." actionLabel="Sign in" onAction={() => router.push({ pathname: "/sign-in", params: { returnTo: "/advisories" } })} />
+              <DataState
+                title="Sign in to see your updates"
+                description="View advisories for the service accounts you can access."
+                actionLabel="Sign in"
+                onAction={() =>
+                  router.push({
+                    pathname: "/sign-in",
+                    params: { returnTo: "/advisories" },
+                  })
+                }
+              />
             ) : !hasData && feed.error ? (
-              <DataState title="ALECO updates couldn’t load" description="Reconnect and try again to get the latest notices." actionLabel="Try again" onAction={() => void feed.reload(true)} busy={feed.busy} />
+              <DataState
+                title="ALECO updates couldn’t load"
+                description="Reconnect and try again to get the latest notices."
+                actionLabel="Try again"
+                onAction={() => void feed.reload(true)}
+                busy={feed.busy}
+              />
             ) : (
-              <DataState icon={filtered ? Search : Megaphone} title={filtered ? "No matching updates" : "No updates at the moment"}
-                description={feed.data?.nextCursor ? "There may be matches in earlier updates. Load more to keep searching." : filtered ? "Try another topic or area, or reset this view." : "Public advisories and community posts will appear here when ALECO publishes them."}
-                actionLabel={filtered ? "Reset search and tabs" : "Explore services"}
-                onAction={() => { if (filtered) { setQuery(""); setTab("all"); } else router.push("/services"); }} />
+              <DataState
+                icon={filtered ? Search : Megaphone}
+                title={
+                  filtered ? "No matching updates" : "No updates at the moment"
+                }
+                description={
+                  feed.data?.nextCursor
+                    ? "There may be matches in earlier updates. Load more to keep searching."
+                    : filtered
+                      ? "Try another topic or area, or reset this view."
+                      : "Public advisories and community posts will appear here when ALECO publishes them."
+                }
+                actionLabel={
+                  filtered ? "Reset search and tabs" : "Explore services"
+                }
+                onAction={() => {
+                  if (filtered) {
+                    setQuery("");
+                    setTab("all");
+                  } else router.push("/services");
+                }}
+              />
             )}
           </View>
         }
         ListFooterComponent={
           <View className="pt-3 gap-3">
-            {feed.error && feed.errorSource === "more" ? <DataNotice title="Earlier updates couldn’t load" description="The updates above are still available. Retry without losing your place." /> : null}
-            {feed.data?.nextCursor && !feed.data?.isStale ? <Button variant="outline" loading={feed.busy} onPress={() => void feed.loadMore()}>
-              {feed.errorSource === "more" ? "Retry earlier updates" : "Load more updates"}
-            </Button> : null}
+            {feed.error && feed.errorSource === "more" ? (
+              <DataNotice
+                title="Earlier updates couldn’t load"
+                description="The updates above are still available. Retry without losing your place."
+              />
+            ) : null}
+            {feed.data?.nextCursor && !feed.data?.isStale ? (
+              <Button
+                variant="outline"
+                loading={feed.busy}
+                onPress={() => void feed.loadMore()}
+              >
+                {feed.errorSource === "more"
+                  ? "Retry earlier updates"
+                  : "Load more updates"}
+              </Button>
+            ) : null}
           </View>
         }
       />
-
     </View>
   );
 }

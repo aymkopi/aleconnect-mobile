@@ -106,7 +106,7 @@ function project(velocity: number): number {
 }
 
 const sheetVariants = tv({
-  base: "bg-popover px-4 pt-4 shadow-none",
+  base: "bg-sheet-surface px-4 pt-4 shadow-none",
   variants: {
     detached: {
       // Docked: the sheet is continuous with the bottom of the screen, so the
@@ -169,7 +169,7 @@ export interface BottomSheetProps {
    * content worth glimpsing and wrong for one that is a surface of the app's
    * own, where the app's ground shifting under it reads as a mistake.
    *
-   * `true` uses the theme's popover surface, so the sheet matches the rest of
+   * `true` (the default) uses the theme's sheet surface, so the sheet matches the rest of
    * the app in both schemes. A string paints that colour exactly.
    *
    * It only reaches the platform's sheet, so it does nothing without `native`.
@@ -339,7 +339,7 @@ function BottomSheetRoot({
   defaultOpen = false,
   native,
   snapPoints,
-  nativeBackground,
+  nativeBackground = true,
 }: BottomSheetProps) {
   const navigation = useNavigation();
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
@@ -506,7 +506,7 @@ function BottomSheetContent({
   // Read unconditionally, used only by the native branch: the platform draws
   // that sheet's container, so a token can only reach it as a colour handed
   // over, never as a class.
-  const popoverSurface = useCSSVariable("--color-popover");
+  const sheetSurface = useCSSVariable("--color-sheet-surface");
 
   /*
    * The scrolling body's gesture, if there is one. It is built here rather
@@ -881,8 +881,8 @@ function BottomSheetContent({
     const requested = nativeSheet.background;
     const surface =
       requested === true
-        ? typeof popoverSurface === "string"
-          ? popoverSurface
+        ? typeof sheetSurface === "string"
+          ? sheetSurface
           : undefined
         : typeof requested === "string"
           ? requested

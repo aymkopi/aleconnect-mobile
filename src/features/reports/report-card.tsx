@@ -1,13 +1,10 @@
-import { Pressable, View } from "react-native";
-import { BellDot, ChevronRight } from "lucide-react-native";
-import { ReportStatusBadge } from "./report-status-badge";
 import { Text } from "@/components/panelui/text";
 import { useAppColors } from "@/hooks/use-app-colors";
-import {
-  consumerTicketStatusLabel,
-  type Report,
-} from "./data";
 import { formatManilaDateTime } from "@/utils/manila-time";
+import { BellDot, ChevronRight } from "lucide-react-native";
+import { Pressable, View } from "react-native";
+import { consumerTicketStatusLabel, type Report } from "./data";
+import { ReportStatusBadge } from "./report-status-badge";
 export function ReportCard({
   report,
   onPress,
@@ -25,13 +22,21 @@ export function ReportCard({
         ", " +
         report.typeTitle +
         ", " +
-        consumerTicketStatusLabel(report.status) + (unread ? ", unread report update" : "")
+        consumerTicketStatusLabel(report.status) +
+        (unread ? ", unread report update" : "")
       }
       onPress={onPress}
       className="rounded-xl bg-card p-3 gap-1.5"
       style={unread ? { backgroundColor: accent } : undefined}
     >
-      {unread ? <View className="flex-row items-center gap-1.5 pb-1"><BellDot size={14} color={primary} /><Text size="xs" weight="medium" className="text-primary">New report update · Open to read</Text></View> : null}
+      {unread ? (
+        <View className="flex-row items-center gap-1.5 pb-1">
+          <BellDot size={14} color={primary} />
+          <Text size="xs" weight="medium" className="text-primary">
+            New report update · Open to read
+          </Text>
+        </View>
+      ) : null}
       <View className="flex-row items-center justify-between gap-2">
         <Text size="xs" muted className="flex-1">
           {report.ticketNumber || "Reference pending"}

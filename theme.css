@@ -44,6 +44,7 @@
   --color-foreground: unset;
   --color-card: unset;
   --color-card-foreground: unset;
+  --color-sheet-surface: unset;
   --color-popover: unset;
   --color-popover-foreground: unset;
   /*
@@ -208,6 +209,7 @@
       --color-card: #FFFFFF;
       --color-card-foreground: #18202A;
 
+      --color-sheet-surface: #EFF2F6;
       --color-popover: #FFFFFF;
       --color-popover-foreground: #18202A;
 
@@ -311,6 +313,7 @@
       --color-card-foreground: #FFFFFF;
 
       /* white mix: 7% */
+      --color-sheet-surface: #1A1F27;
       --color-popover: #1A1F27;
       --color-popover-foreground: #FFFFFF;
 
@@ -445,6 +448,7 @@
       --color-card: #ffffff;
       --color-card-foreground: #08090a;
 
+      --color-sheet-surface: #EFF2F6;
       --color-popover: #ffffff;
       --color-popover-foreground: #08090a;
 
@@ -460,7 +464,7 @@
       --color-secondary-foreground: #08090a;
 
       --color-muted: rgba(0, 0, 0, 0.05);
-      --color-muted-foreground: #6b6f76;
+      --color-muted-foreground: #62666E;
 
       --color-accent: rgba(0, 0, 0, 0.06);
       --color-accent-foreground: #08090a;
@@ -535,6 +539,7 @@
       --color-card: #141A22;
       --color-card-foreground: #FFFFFF;
 
+      --color-sheet-surface: #1A1F27;
       --color-popover: #1A1F27;
       --color-popover-foreground: #FFFFFF;
 
@@ -631,6 +636,7 @@
       --color-card: #ffffff;
       --color-card-foreground: #171717;
 
+      --color-sheet-surface: #EFF2F6;
       --color-popover: #ffffff;
       --color-popover-foreground: #171717;
 
@@ -647,7 +653,7 @@
       --color-secondary-foreground: #171717;
 
       --color-muted: rgba(0, 0, 0, 0.05);
-      --color-muted-foreground: #707070;
+      --color-muted-foreground: #646464;
 
       --color-accent: rgba(62, 207, 142, 0.1);
       --color-accent-foreground: #16794c;
@@ -722,6 +728,7 @@
       --color-card: #141A22;
       --color-card-foreground: #FFFFFF;
 
+      --color-sheet-surface: #1A1F27;
       --color-popover: #1A1F27;
       --color-popover-foreground: #FFFFFF;
 

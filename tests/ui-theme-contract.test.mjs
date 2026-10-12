@@ -59,3 +59,18 @@ test("border-free field text and focus indicators contrast with Light/Dark fille
   }
  }
 });
+
+
+test("every sheet theme separates contact cards and keeps labels and controls readable",async()=>{
+ const css=await readFile(new URL("../theme.css",import.meta.url),"utf8");
+ const lum=h=>{const c=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);return .2126*c[0]+.7152*c[1]+.0722*c[2];};
+ const contrast=(a,b)=>(Math.max(lum(a),lum(b))+.05)/(Math.min(lum(a),lum(b))+.05);
+ for(const theme of ["light","dark","moon","moon-dark","grass","grass-dark"]){
+  const block=css.split("@variant "+theme+" {")[1].split("\n    }")[0];
+  const t=Object.fromEntries([...block.matchAll(/--color-([\w-]+):\s*(#[\da-fA-F]{6});/g)].map(m=>[m[1],m[2].toUpperCase()]));
+  assert.equal(t["sheet-surface"],theme.endsWith("dark")?"#1A1F27":"#EFF2F6",theme+" sheet standard");
+  assert.notEqual(t["sheet-surface"],t.card,theme+" card surface separation");
+  for(const text of ["foreground","muted-foreground"])for(const bg of ["sheet-surface","card"])assert.ok(contrast(t[text],t[bg])>=4.5,theme+" "+text+" on "+bg);
+  assert.ok(contrast(t["primary-foreground"],t.primary)>=4.5,theme+" call control");
+ }
+});
