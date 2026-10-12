@@ -104,6 +104,7 @@ async function reportRecovery({ session = { user: { id: "user" }, session: { id:
     "@/components/panelui/button": { Button: "Button" },
     "@/components/panelui/spinner": { Spinner: "Spinner" },
     "@/components/panelui/skeleton": { Skeleton: "Skeleton" },
+    "@/components/panelui/toast": { toast: { show() {} } },
     "@/components/data-state": { DataState: "DataState", DataNotice: "DataNotice" },
     "@/components/panelui/text": { Text: "Text" },
     "@/components/floating-app-bar": { appScrollableBottomPadding: () => 100 },

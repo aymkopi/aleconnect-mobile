@@ -1,6 +1,7 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from "react";
 import type { Map as MapInstance } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { useAppColors } from "@/hooks/use-app-colors";
 import { MAP_STYLE_URL, MAP_LOAD_TIMEOUT_MS } from "./map-runtime";
 import type { WebMapHandle, WebLocationMapProps } from "./web-location-map";
 export const WebLocationMap = forwardRef<WebMapHandle, WebLocationMapProps>(
@@ -10,6 +11,10 @@ export const WebLocationMap = forwardRef<WebMapHandle, WebLocationMapProps>(
       longitude,
       zoom = 16,
       interactive = true,
+      maxBounds,
+      minZoom,
+      maxZoom,
+      userLocation,
       label = "Location map",
       onChange,
       onReady,
@@ -19,9 +24,26 @@ export const WebLocationMap = forwardRef<WebMapHandle, WebLocationMapProps>(
   ) {
     const container = useRef<HTMLDivElement>(null),
       map = useRef<MapInstance | null>(null);
-    const callbacks = useRef({ onChange, onReady, onError });
-    callbacks.current = { onChange, onReady, onError };
-    const initial = useRef({ latitude, longitude, zoom, interactive });
+    const [primary] = useAppColors(["primary"]);
+    const callbacks = useRef({ onChange, onReady, onError, userLocation, primary });
+    callbacks.current = { onChange, onReady, onError, userLocation, primary };
+    const initial = useRef({ latitude, longitude, zoom, interactive, maxBounds, minZoom, maxZoom });
+    const puck = useRef<import("maplibre-gl").Marker | null>(null);
+    const markerClass = useRef<typeof import("maplibre-gl").Marker | null>(null);
+    const updatePuck = useCallback(() => {
+      const { userLocation: point, primary: color } = callbacks.current;
+      if (!point || !map.current || !markerClass.current) { puck.current?.remove(); puck.current = null; return; }
+      if (!puck.current) {
+        const dot = document.createElement("div");
+        dot.setAttribute("aria-label", "Your current location");
+        Object.assign(dot.style, { width: "16px", height: "16px", borderRadius: "50%", background: color, boxShadow: `0 0 0 6px color-mix(in srgb, ${color} 20%, transparent)`, pointerEvents: "none" });
+        puck.current = new markerClass.current({ element: dot }).setLngLat([point.longitude, point.latitude]).addTo(map.current);
+      } else {
+        puck.current.setLngLat([point.longitude, point.latitude]);
+        puck.current.getElement().style.background = color;
+      }
+    }, []);
+    useEffect(updatePuck, [userLocation, primary, updatePuck]);
     useImperativeHandle(
       ref,
       () => ({
@@ -60,9 +82,14 @@ export const WebLocationMap = forwardRef<WebMapHandle, WebLocationMapProps>(
             center: [initial.current.longitude, initial.current.latitude],
             zoom: initial.current.zoom,
             interactive: initial.current.interactive,
+            maxBounds: initial.current.maxBounds,
+            minZoom: initial.current.minZoom,
+            maxZoom: initial.current.maxZoom,
             attributionControl: { compact: true },
           });
           map.current = value;
+          markerClass.current = gl.Marker;
+          updatePuck();
           value.once("load", () => {
             loaded = true;
             clearTimeout(timeout);
@@ -90,10 +117,12 @@ export const WebLocationMap = forwardRef<WebMapHandle, WebLocationMapProps>(
         active = false;
         clearTimeout(timeout);
         resize?.disconnect();
+        puck.current?.remove();
+        puck.current = null;
         map.current?.remove();
         map.current = null;
       };
-    }, []);
+    }, [updatePuck]);
     return (
       <div
         ref={container}

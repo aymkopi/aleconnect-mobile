@@ -44,7 +44,7 @@ export function shouldReloadReportsForAccountChange(
   return hasLoaded && previousServiceAccountId !== nextServiceAccountId;
 }
 
-const albayBounds = {
+export const albayBounds = {
   minLatitude: 12.9,
   maxLatitude: 13.55,
   minLongitude: 123.25,

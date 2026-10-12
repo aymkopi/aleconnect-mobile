@@ -188,6 +188,7 @@ test("Android address search obtains permission and offers manual recovery when 
       barangay: "",
       municipality: "",
       setSearching: () => {},
+      setLocationAllowed: () => {},
       setError: (message: string | null) => errors.push(message),
       setSearchView: () => {},
       openRef: { current: true },

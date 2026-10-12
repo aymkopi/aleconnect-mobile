@@ -215,23 +215,10 @@ export async function registerForPushNotificationsAsync(): Promise<
   }
 
   try {
-    const existingPermission =
-      (await Notifications.getPermissionsAsync()) as PermissionLike;
-    let isGranted = isPermissionGranted(existingPermission);
-
-    if (!isGranted) {
-      const requestedPermission =
-        (await Notifications.requestPermissionsAsync()) as PermissionLike;
-      isGranted = isPermissionGranted(requestedPermission);
-    }
-
-    if (!isGranted) {
+    const permission = await requestPushNotificationPermissionAsync();
+    if (!isPermissionGranted(permission)) {
       console.warn("Expo push token unavailable: notification permission denied.");
       return null;
-    }
-
-    if (Platform.OS === "android") {
-      await configureAndroidNotificationChannels();
     }
 
     if (!expoPushProjectId) {
@@ -260,4 +247,10 @@ export async function registerForPushNotificationsAsync(): Promise<
     console.warn("Failed to register for push notifications", error);
     return null;
   }
+}
+
+export async function requestPushNotificationPermissionAsync() {
+  if (Platform.OS === "android") await configureAndroidNotificationChannels();
+  const permission = await Notifications.getPermissionsAsync();
+  return isPermissionGranted(permission) ? permission : Notifications.requestPermissionsAsync();
 }

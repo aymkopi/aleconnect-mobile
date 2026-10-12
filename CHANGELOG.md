@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased — Mobile flow refinements
+
+- Rename the ticket appbar to “Ticket details”; place the reference, a reliable copy action and compact status together in the body. Keep pull-to-refresh for current details and evidence; remove the separate evidence refresh button and raw coordinate row while retaining the map.
+- Require Continue to revisit report-type confirmation for multi-type categories, including retained selections. Appbar Back asks to exit the report module; the footer Back keeps step navigation and queued submissions remain protected. Move location actions below the map/details into one row and clarify description/action placeholders.
+- Start the location map at the initial local point with street-level zoom; constrain both native/web cameras to the existing Albay service bounds and reject water/outside pins using bundled barangay polygons. Preserve the selected/panned point when finding, cancelling or retrying a location. Show a permission-gated user puck without following the camera; place address-resolution work at the card’s top right.
+- Replace advisory/post “Refresh latest update” with pull-to-refresh. Normalize Broadcast Areas substation and feeder cards to shared Light/Dark surfaces, and replace the area count with saving/synced/pending feedback.
+- Correct Android notification-channel creation before permission/token requests; show setup success only after server registration, and hide it if device permission is revoked. Figma is updated first; add regression coverage for retained selections, land/water, map remounts, permission/token/server outcomes, readiness and clipboard failures.
+
 ## 1.0.0-alpha.4 — 2026-10-13
 
 - Normalize every custom and native BottomSheet to one semantic surface: #EFF2F6 in Light and #1A1F27 in Dark. Keep contact cards white/darker than the sheet, without decorative borders or shadows. Select and small-screen Popover sheets inherit the standard.
