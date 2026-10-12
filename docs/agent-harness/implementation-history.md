@@ -388,3 +388,10 @@ Closeout: harness validation against the reviewed Staff companion and git diff -
 - Verification: in progress; fresh test/type/lint/harness/Expo/export results and exact-head review/CI are recorded in [migration handoff](../panelui-major-migration.md). Both source trees and all Git refs are recoverable from verified local snapshots.
 - Remaining risks: Staff PR40 optional contract deployment remains separate. No physical-device/native-iOS/provider/private mutation acceptance, database changes or EAS/OTA/store publication is claimed. The existing v53 APK predates the recent Home edits and major version.
 - Next: complete checks and review, create/merge PR, fast-forward master and preserve common Git/signing/config state during canonical-folder replacement.
+
+## 2026-10-12 — PanelUI integration review and portable evidence
+
+- Scope: correct Linux-invalid local APK Markdown references without weakening the harness; include the upstream PanelUI MIT copyright/permission notice and source attribution. Preserve refreshed generated Graphify analysis in hash-verified recovery and restore the tracked baseline before canonical-folder promotion.
+- Verification: fresh read-only review verified retained native identities, clean source scope, exact VS Code Home hashes, bundle recovery, retired import/dependency removal and both PR checks.431 current tests and fixture-free exports passed on the runtime candidate. Documentation harness/whitespace and exact-head CI are rerun after review corrections.
+- Remaining risks: physical/private/provider/native-iOS acceptance and Staff PR40 remain separate; no live write or app-store distribution.
+- Next: merge PR3 after its final checks; preserve Git refs/stashes and original local configuration while promoting the modernized tree to aleconnect-mobile.
