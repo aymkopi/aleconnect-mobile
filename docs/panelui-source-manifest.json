@@ -410,7 +410,7 @@
     },
     {
       "path": "src/components/panelui/search-bar.tsx",
-      "sha256": "1d961465053e1863a51a39f5f5c43031362865cb9228f10ddc8ae3a5bbaf2f3e"
+      "sha256": "fe5597384df1f49048f05465e1d020f45a283d964a25c08a93cabf0772486339"
     },
     {
       "path": "src/components/panelui/select.tsx",
@@ -718,6 +718,13 @@
         "Official PanelUI SVG window preview art; ALEConnect aliases"
       ],
       "currentSha256": "254ba9724992ef8d6906eea6df301e65dc67ab6f2fff47f9ed73acf678dfa34c"
+    },
+    "search-bar": {
+      "registry": "https://panelui.dev/r/search-bar.json",
+      "adaptations": [
+        "Retain focus recovery and support both native currentlyFocusedInput and RN-web currentlyFocusedField APIs"
+      ],
+      "currentSha256": "fe5597384df1f49048f05465e1d020f45a283d964a25c08a93cabf0772486339"
     }
   },
   "packageIntegrity": "sha512-Jv8dbRxqu14X3Pgs8+6ufGTbUz/Dahhjk+C1h4YzblKas2vWR+YEMGyhNYgLgAm8yr2AO8W3xnjw8lZlzhaPMA==",

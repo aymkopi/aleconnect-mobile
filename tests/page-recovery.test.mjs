@@ -41,6 +41,16 @@ async function renderAdvisories(feed, query = "", tab = "all") {
 }
 const base = { items: [], fixtures: false, authLoading: false, busy: false, data: null, error: null, errorSource: null, reload: async () => {}, loadMore: async () => {} };
 
+test("shared search blur accepts native and web focused-input APIs", async () => {
+  const source = await readFile(new URL("../src/components/panelui/search-bar.tsx", import.meta.url), "utf8");
+  const expression = source.match(/const holder = (.+);/)[1];
+  const readHolder = State => new Function("TextInput", "return " + expression)({ State });
+  const input = {};
+  assert.equal(readHolder({ currentlyFocusedInput: () => input }), input);
+  assert.equal(readHolder({ currentlyFocusedField: () => input }), input);
+  assert.equal(readHolder({ currentlyFocusedInput: () => null, currentlyFocusedField: () => null }), null);
+});
+
 test("first-load failure offers retry and never reports an empty feed", async () => {
   let retries = 0;
   const view = await renderAdvisories({ ...base, error: "Offline", errorSource: "load", reload: async force => { assert.equal(force, true); retries++; } });

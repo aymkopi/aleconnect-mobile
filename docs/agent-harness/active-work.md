@@ -1,6 +1,6 @@
 # Active work
 
-- [Mobile selection/status refinements](../mobile-selection-refinements.md): Figma-first RadioGroup/Calendar/ThemeSelector, Home after sign-in, Verified incident context and clearer notification/search selections; 448 tests, types/scoped lint, fixture-free Android/Hermes+web exports and Light/Dark browser/review checks pass. Scoped PR integration pending; preserve private/signing/provider/device queues and unrelated Staff work.
+- [Mobile selection/status refinements](../mobile-selection-refinements.md): Figma-first RadioGroup/Calendar/ThemeSelector, Home after sign-in, Verified incident context and clearer notification/search selections; 449 tests, types/scoped lint, fixture-free Android/Hermes+web exports and Light/Dark browser/review checks pass. Scoped PR integration pending; preserve private/signing/provider/device queues and unrelated Staff work.
 
 - [Mobile flow refinements](../mobile-flow-refinements.md): PR7 merged as87daab0 after exact-head checks passed; Figma,444 tests, types/scoped lint/harness, Android/Hermes+web exports and Light/Dark browser/review gates pass. Automatic alpha run38293403614 succeeded and published alpha.6; physical/provider acceptance remains separate. Preserve device queues, signing configuration and unrelated Staff work.
 
