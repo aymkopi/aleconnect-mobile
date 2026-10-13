@@ -1,16 +1,16 @@
 # Active work
 
-- [Mobile selection/status refinements](../mobile-selection-refinements.md): Figma-first RadioGroup/Calendar/ThemeSelector, Home after sign-in, Verified incident context and clearer notification/search selections; 449 tests, types/scoped lint, fixture-free Android/Hermes+web exports and Light/Dark browser/review checks pass. Scoped PR integration pending; preserve private/signing/provider/device queues and unrelated Staff work.
+- [Mobile selection/status refinements](../mobile-selection-refinements.md): Figma-first RadioGroup/Calendar/ThemeSelector, Home after sign-in, Verified incident context and clearer notification/search selections; 449 tests, types/scoped lint, fixture-free Android/Hermes+web exports and Light/Dark browser/review checks pass. PR8 merged as017f743 and alpha.8/code62 published through successful run38372229138; downloaded artifact/signer/bytecode/alignment and Desktop hash pass; preserve private/signing/provider/device queues and unrelated Staff work.
 
 - [Mobile flow refinements](../mobile-flow-refinements.md): PR7 merged as87daab0 after exact-head checks passed; Figma,444 tests, types/scoped lint/harness, Android/Hermes+web exports and Light/Dark browser/review gates pass. Automatic alpha run38293403614 succeeded and published alpha.6; physical/provider acceptance remains separate. Preserve device queues, signing configuration and unrelated Staff work.
 
 Last reviewed: 2026-10-13
-Current branch: codex/mobile-selection-refinements; prior PR7/alpha.6 is integrated, and the new selection task is ready for PR validation.
-Active plan: [BottomSheet normalization](../bottom-sheet-normalization.md); Figma-first palette and all eight latest manual files included; source/cleanup complete; alpha.4/code58 published.
-Next task: accept the exact alpha.4 APK on a real device; physical/private/provider/native-iOS acceptance remains separate.
-Preserved work: original manual patches/hashes, all nine stashes, private signing/provider/device state and unrelated Staff edits. Earlier releases remain intact; alpha.4 is the newly verified binary.
+Current branch: master; PR8/alpha.8 is integrated locally/remotely, and task branch cleanup follows the ancestry check.
+Active plan: [Mobile selection/status refinements](../mobile-selection-refinements.md); source/Figma/browser/CI and alpha.8/code62 publication complete.
+Next task: accept the exact alpha.8 APK on a real device; physical/private/provider/native-iOS acceptance remains separate.
+Preserved work: original manual patches/hashes, all nine stashes, private signing/provider/device state and unrelated Staff edits. Earlier releases remain intact; alpha.8 is the newly verified binary.
 Known blockers: no source blocker. Native/private/provider/iOS acceptance is separate.
-Last verified: 437/437 source tests with zero skips; TypeScript and lint 0 errors/181 existing warnings. Light/Dark integrated-browser contact-sheet checks and fixture-free web export pass. Independent source reviews found no actionable findings; harness/whitespace and exact-head PR CI pass; run38282464018 and downloaded release digests/signer/manifest/54-library alignment pass.
+Last verified: 449 tests, TypeScript/harness/whitespace and source review pass; scoped lint has zero errors/six existing warnings. Figma and Light/Dark browser acceptance, production exports and exact-head PR8 CI pass. Alpha.8 publication and downloaded signature/package/code62/fixture-bytecode/54-library ZIP/ELF16KB alignment and Desktop-copy hash pass.
 
 
 - [Harness refinement](tasks/harness-refinement.md): isolated docs/skills/checks; no product release.

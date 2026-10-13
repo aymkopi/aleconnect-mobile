@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased — Mobile selections and flow refinements
+## 1.0.0-alpha.8 — 2026-10-13
+
+- Publish PR8 from merged source017f743 as Android code62. Original signer/package, live API, fixture-disabled non-debuggable runtime, GitHub/downloaded digests and all54-library ZIP/ELF16KB alignment are verified; prior alphas remain available. [Release](https://github.com/aymkopi/aleconnect-mobile/releases/tag/v1.0.0-alpha.8).
 
 - Route successful account/email sign-in to Home while preserving required password and identity checks. Update resume explanations to describe the new destination.
 - Use PanelUI RadioGroup cards for account/type/period/notification choices and shared Select options; keep searchable/grouped/disabled selections and same-value confirmation. Broadcast Areas remains multi-select Checkbox.
@@ -9,6 +11,10 @@
 - Clarify all canonical report-status descriptions and use distinct Lucide icons. Show the existing server-authorized similar-incident message once under Verified in a warning card; preserve the >=5 current memo-member and recipient gates.
 - Fix shared SearchBar blur handling for the native and RN-web focused-input APIs, preventing a timer error when leaving a search.
 - Remove duplicate advisory search reset/clear controls. Keep one labelled Clear search action that preserves the current tab. Update Figma first; record component provenance and auth/selection/calendar/recovery regression evidence.
+
+## 1.0.0-alpha.6 — 2026-10-13
+
+- Publish the prior PR7 flow refinements from87daab0 as Android code60; retained as release history.
 
 - Rename the ticket appbar to “Ticket details”; place the reference, a reliable copy action and compact status together in the body. Keep pull-to-refresh for current details and evidence; remove the separate evidence refresh button and raw coordinate row while retaining the map.
 - Require Continue to revisit report-type confirmation for multi-type categories, including retained selections. Appbar Back asks to exit the report module; the footer Back keeps step navigation and queued submissions remain protected. Move location actions below the map/details into one row and clarify description/action placeholders.
