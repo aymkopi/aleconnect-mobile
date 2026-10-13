@@ -713,7 +713,7 @@ const SearchBarRoot = forwardRef<TextInput, SearchBarProps>(
            * on deliberately; a focus that has landed nowhere is one of this
            * search's own buttons taking it, which is what the recovery is for.
            */
-          const holder = TextInput.State.currentlyFocusedInput();
+          const holder = TextInput.State.currentlyFocusedInput?.() ?? TextInput.State.currentlyFocusedField?.();
           const elsewhere = holder != null && holder !== inputRef.current;
           if (!ending.current && keyboardUp.current && !elsewhere) {
             inputRef.current?.focus();

@@ -4,16 +4,19 @@ export function SearchField({
   onChangeText,
   placeholder = "Search",
   compact = false,
+  isClearable = true,
 }: {
   value: string;
   onChangeText: (text: string) => void;
   placeholder?: string;
   compact?: boolean;
+  isClearable?: boolean;
 }) {
   return (
     <SearchBar
       accessibilityLabel={placeholder}
       value={value}
+      isClearable={isClearable}
       onChangeText={onChangeText}
       placeholder={placeholder}
       cancel="never"

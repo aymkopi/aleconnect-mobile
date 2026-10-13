@@ -24,6 +24,7 @@ async function renderAdvisories(feed, query = "", tab = "all") {
     "@/components/preview-label": { PreviewLabel: "PreviewLabel" },
     "@/components/data-state": { DataState: "DataState", DataNotice: "DataNotice" },
     "@/components/panelui/text": { Text: "Text" },
+    "@/components/panelui/radio-group": { RadioGroup: Object.assign("RadioGroup", { Item: "RadioItem" }) },
     "@/components/panelui/button": { Button: "Button" },
     "@/components/panelui/tabs": { Tabs },
     "./publisher-card": { PublisherCard: "PublisherCard" },
@@ -40,6 +41,16 @@ async function renderAdvisories(feed, query = "", tab = "all") {
 }
 const base = { items: [], fixtures: false, authLoading: false, busy: false, data: null, error: null, errorSource: null, reload: async () => {}, loadMore: async () => {} };
 
+test("shared search blur accepts native and web focused-input APIs", async () => {
+  const source = await readFile(new URL("../src/components/panelui/search-bar.tsx", import.meta.url), "utf8");
+  const expression = source.match(/const holder = (.+);/)[1];
+  const readHolder = State => new Function("TextInput", "return " + expression)({ State });
+  const input = {};
+  assert.equal(readHolder({ currentlyFocusedInput: () => input }), input);
+  assert.equal(readHolder({ currentlyFocusedField: () => input }), input);
+  assert.equal(readHolder({ currentlyFocusedInput: () => null, currentlyFocusedField: () => null }), null);
+});
+
 test("first-load failure offers retry and never reports an empty feed", async () => {
   let retries = 0;
   const view = await renderAdvisories({ ...base, error: "Offline", errorSource: "load", reload: async force => { assert.equal(force, true); retries++; } });
@@ -51,13 +62,18 @@ test("first-load failure offers retry and never reports an empty feed", async ()
   assert.equal(view.notices.length, 0);
 });
 
-test("loading is indeterminate and empty filters reset both query and tab", async () => {
+test("loading is indeterminate and clearing an empty search preserves its tab", async () => {
   const loading = await renderAdvisories({ ...base, busy: true });
   assert.equal(loading.states[0].props.loading, true);
   const filtered = await renderAdvisories({ ...base, data: { items: [], nextCursor: null } }, "Rawis", "advisories");
   assert.equal(filtered.states[0].props.title, "No matching updates");
-  filtered.states[0].props.onAction();
-  assert.deepEqual(filtered.state, [false, "", "all"]);
+  assert.equal(filtered.states[0].props.onAction, undefined);
+  const header = filtered.list.props.ListHeaderComponent;
+  assert.equal(filtered.find(header, "SearchField")[0].props.isClearable, false);
+  const clear = filtered.find(header, "Button").filter(node => node.props.children === "Clear search");
+  assert.equal(clear.length, 1);
+  clear[0].props.onPress();
+  assert.deepEqual(filtered.state, [false, "", "advisories"]);
 });
 
 test("refresh failure keeps loaded publisher cards and offers a refresh action", async () => {
@@ -101,6 +117,7 @@ async function reportRecovery({ session = { user: { id: "user" }, session: { id:
     "lucide-react-native": {},
     "react-native-safe-area-context": { useSafeAreaInsets: () => ({ top: 0, bottom: 0 }) },
     "@/components/panelui/badge": { Badge: "Badge" },
+    "@/components/panelui/radio-group": { RadioGroup: Object.assign("RadioGroup", { Item: "RadioItem" }) },
     "@/components/panelui/button": { Button: "Button" },
     "@/components/panelui/spinner": { Spinner: "Spinner" },
     "@/components/panelui/skeleton": { Skeleton: "Skeleton" },
@@ -151,7 +168,7 @@ test("report recovery leaves unavailable accounts and retries only requests with
 });
 
 
-async function notificationRecovery(preview) {
+async function notificationRecovery(preview, type = "Badge") {
   let slot = 0;
   const jsx = (type, props) => ({ type, props });
   const access = { key: "fixture", fixtures: true, account: { accounts: [], authorizedServiceAccountIds: [] } };
@@ -165,6 +182,7 @@ async function notificationRecovery(preview) {
     "expo-router": { useRouter: () => ({ push: () => {} }) },
     "lucide-react-native": {},
     "@/components/panelui/badge": { Badge: "Badge" }, "@/components/panelui/bottom-sheet": { BottomSheet },
+    "@/components/panelui/radio-group": { RadioGroup: Object.assign("RadioGroup", { Item: "RadioItem" }) },
     "@/components/panelui/button": { Button: "Button" }, "@/components/panelui/input-group": { InputGroup },
     "@/components/data-state": { DataState: "DataState", DataNotice: "DataNotice" },
     "@/components/panelui/text": { Text: "Text" },
@@ -180,7 +198,7 @@ async function notificationRecovery(preview) {
   new Function("require", "exports", ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText)(id => { assert.ok(id in modules, "Unmocked " + id); return modules[id]; }, exports);
   const child = exports.default().props.children;
   const tree = child.type(child.props);
-  const find = node => Array.isArray(node) ? node.flatMap(find) : node && typeof node === "object" ? [...(node.type === "Badge" ? [node] : []), ...find(node.props?.children)] : [];
+  const find = node => Array.isArray(node) ? node.flatMap(find) : node && typeof node === "object" ? [...(node.type === type ? [node] : []), ...find(node.props?.children)] : [];
   return find(tree);
 }
 
@@ -190,6 +208,12 @@ test("unread count badges are hidden until inbox data is available", async () =>
   assert.equal((await notificationRecovery("empty")).length, 0);
   assert.equal((await notificationRecovery("loaded"))[0].props.children, 5);
   assert.equal((await notificationRecovery("offline"))[0].props.children, 5);
+});
+
+test("notification tabs announce one selection and keep their text color unchanged", async () => {
+  const tabs = (await notificationRecovery("loaded", "Button")).filter(node => node.props.role === "tab");
+  assert.deepEqual(tabs.map(node => node.props["aria-selected"]), [true, false]);
+  for (const tab of tabs) assert.equal(tab.props.children.props.children[0].props.className, "text-foreground");
 });
 
 test("successful unread receipt clears the canonical cache even after immediate Back", async () => {

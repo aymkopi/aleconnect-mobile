@@ -8,6 +8,7 @@ import * as selection from "../src/features/accounts/selection.ts";
 import * as authState from "../src/features/auth/auth-state.ts";
 import * as reportStatuses from "../src/features/reports/status.ts";
 import { nativeSelectSupportsOptions } from "../src/components/panelui/native-select-contract.ts";
+import * as dateHelpers from "../src/lib/date.ts";
 const tick = () => new Promise((resolve) => setImmediate(resolve));
 function hooks() {
   const slots = [],
@@ -75,6 +76,11 @@ async function load(file, mocks) {
   )((id) => {
     if (id === "@/context/guest-access-context") return { useGuestAccess: () => ({ guest: false, openFeature: () => {}, requestSignIn: () => {} }) };
     if (id === "@/context/visual-preview-context" && mocks[id]) return { ...mocks[id], useVisualPreview: () => { const value = mocks[id].useVisualPreview(); return { publicFixtures: value.fixtures, ...value }; } };
+    if (id === "@/components/panelui/radio-group") return { RadioGroup: Object.assign("RadioGroup", { Item: "RadioItem" }) };
+    if (id === "@/components/panelui/theme-selector") return { ThemeSelector: "ThemeSelector" };
+    if (id === "@/components/panelui/calendar") return { Calendar: "Calendar" };
+    if (id === "@/lib/cn") return { cn: (...classes) => classes.filter(Boolean).join(" ") };
+    if (id === "@/lib/date") return dateHelpers;
     if (id === "@/components/panelui/kpi") return { Kpi: Object.assign(() => null, { Group: "KpiGroup", Stat: "KpiStat", Value: "Text", Title: "Text" }) };
     if (id === "expo-router/react-navigation") return { useIsFocused: () => true, ...mocks[id] };
     if (id === "expo-router")
@@ -552,22 +558,20 @@ test("Appearance opens color themes directly, selection closes and Back leaves t
   const open = () => { nodes(render()).find(n => n.props?.label === "Appearance").props.onPress(); return render(); };
   let root = open();
   assert.equal(nodes(root).filter(n => n.type === sheetParts && n.props.open).length, 1);
-  const picker = nodes(root).find(n => n.type === selectParts);
-  assert.equal(picker.props.presentation, "content");
-  const options = nodes(picker).filter(n => n.type === "SelectItem");
-  assert.deepEqual(options.map(n => n.props.value), ["system", "light", "dark"]);
-  assert.ok(options.every(n => n.props.startContent && n.props.description));
+  const picker = nodes(root).find(n => n.type === "ThemeSelector");
+  assert.equal(picker.props.applyTheme, false);
+  assert.equal(picker.props.label, "Choose your color theme");
   assert.ok(!nodes(root).some(n => n.type === "Button" && n.props.accessibilityLabel === "Color theme"));
   assert.ok(!nodes(root).some(n => n.type === "SheetFooter"));
   nodes(root).find(n => n.type === "Button" && n.props.accessibilityLabel === "Back to Account").props.onPress();
   assert.deepEqual(updates, []);
   assert.equal(nodes(render()).find(n => n.type === sheetParts).props.open, false);
   root = open();
-  nodes(root).find(n => n.type === selectParts).props.onValueChange("dark");
+  nodes(root).find(n => n.type === "ThemeSelector").props.onValueChange("dark");
   assert.deepEqual(updates, ["dark"]);
   assert.equal(nodes(render()).find(n => n.type === sheetParts).props.open, false);
   root = open();
-  assert.equal(nodes(root).find(n => n.type === selectParts).props.value, "dark");
+  assert.equal(nodes(root).find(n => n.type === "ThemeSelector").props.value, "dark");
   nodes(root).find(n => n.type === sheetParts).props.onOpenChange(false);
   assert.deepEqual(updates, ["dark"]);
 });
@@ -649,6 +653,9 @@ test("Select content reuses options without rendering a trigger, portal or neste
   assert.ok(nodes(root).includes(option));
   context.onSelect("dark");
   assert.deepEqual(selected, ["dark"]);
+  context.value = "dark";
+  module.Select.Item({ value: "dark", label: "Dark" }).props.onPress();
+  assert.deepEqual(selected, ["dark", "dark"], "confirming the current Select value must still close or leave the content view");
   h.start();
   const disabled = module.Select.Item({
     value: "dark",
@@ -658,7 +665,7 @@ test("Select content reuses options without rendering a trigger, portal or neste
   assert.equal(disabled.props.disabled, true);
   const rich = module.Select.Item({ value: "dark", label: "Dark", description: "Always use the dark theme", startContent: jsx.jsx("Moon", {}) });
   assert.ok(nodes(rich).some(n => n.type === "Moon"));
-  assert.ok(nodes(rich).some(n => n.props?.children === "Always use the dark theme"));
+  assert.equal(rich.props.description, "Always use the dark theme");
   assert.equal(rich.props.accessibilityLabel, "Dark, Always use the dark theme");
 });
 
@@ -1041,7 +1048,6 @@ test("Reporting period validates custom dates and returns them without losing th
       useRouter: () => ({ dismissTo: (r) => visits.push(r) }),
     },
     "./components/report-page": { ReportPage: "Page" },
-    "@/components/panelui/date-picker": { DatePicker: "DatePicker" },
   });
   const render = () => {
     h.start();
@@ -1053,14 +1059,17 @@ test("Reporting period validates custom dates and returns them without losing th
     );
   let root = render();
   assert.equal(apply(root).props.disabled, true);
-  const picker = nodes(root).find(n => n.type === "DatePicker");
+  const picker = nodes(root).find(n => n.type === "Calendar");
   assert.equal(picker.props.mode, "range");
+  assert.equal(picker.props.weekStartsOn, "auto");
+  assert.equal(picker.props.selectOutsideDays, true);
+  assert.equal(reportBrowseFilter.reportPickerDateKey(picker.props.defaultMonth), reportBrowseFilter.manilaDateKey(new Date()));
   assert.equal(reportBrowseFilter.reportPickerDateKey(picker.props.minDate),"2026-01-01");
   assert.equal(reportBrowseFilter.reportPickerDateKey(picker.props.maxDate), reportBrowseFilter.manilaDateKey(new Date()));
   picker.props.onSelect({ from: new Date(2026,9,9) });
   root = render();
   assert.equal(apply(root).props.disabled,true,"half-selected ranges cannot apply");
-  nodes(root).find(n => n.type === "DatePicker").props.onSelect({from: new Date(2026,9,9),to:new Date(2026,9,10)});
+  nodes(root).find(n => n.type === "Calendar").props.onSelect({from: new Date(2026,9,9),to:new Date(2026,9,10)});
   root = render();
   assert.equal(apply(root).props.disabled, false);
   apply(root).props.onPress();

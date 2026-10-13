@@ -1,6 +1,14 @@
 # Changelog
 
-## Unreleased — Mobile flow refinements
+## Unreleased — Mobile selections and flow refinements
+
+- Route successful account/email sign-in to Home while preserving required password and identity checks. Update resume explanations to describe the new destination.
+- Use PanelUI RadioGroup cards for account/type/period/notification choices and shared Select options; keep searchable/grouped/disabled selections and same-value confirmation. Broadcast Areas remains multi-select Checkbox.
+- Replace the appearance rows with PanelUI ThemeSelector window previews. Strengthen All/Unread selected surfaces in Light/Dark without changing label color; announce the selected tab and center the unread count.
+- Use PanelUI Calendar range selection in reporting-period sheets and All reports filters, opening at today with locale week start, selectable adjacent-month days and January 1 2026–today bounds. Show the selected range and prevent partial/out-of-range application.
+- Clarify all canonical report-status descriptions and use distinct Lucide icons. Show the existing server-authorized similar-incident message once under Verified in a warning card; preserve the >=5 current memo-member and recipient gates.
+- Fix shared SearchBar blur handling for the native and RN-web focused-input APIs, preventing a timer error when leaving a search.
+- Remove duplicate advisory search reset/clear controls. Keep one labelled Clear search action that preserves the current tab. Update Figma first; record component provenance and auth/selection/calendar/recovery regression evidence.
 
 - Rename the ticket appbar to “Ticket details”; place the reference, a reliable copy action and compact status together in the body. Keep pull-to-refresh for current details and evidence; remove the separate evidence refresh button and raw coordinate row while retaining the map.
 - Require Continue to revisit report-type confirmation for multi-type categories, including retained selections. Appbar Back asks to exit the report module; the footer Back keeps step navigation and queued submissions remain protected. Move location actions below the map/details into one row and clarify description/action placeholders.

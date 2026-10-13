@@ -1,10 +1,11 @@
 import { useRef, useState } from "react";
 import { SectionList, View } from "react-native";
 import { useRouter } from "expo-router";
-import { Bell, Check, ChevronLeft, ChevronRight, FileText, Link, MapPin, Megaphone, Search, Settings, SlidersHorizontal, X } from "lucide-react-native";
+import { Bell, ChevronLeft, ChevronRight, FileText, Link, MapPin, Megaphone, Search, Settings, SlidersHorizontal, X } from "lucide-react-native";
 import { Badge } from "@/components/panelui/badge";
 import { BottomSheet } from "@/components/panelui/bottom-sheet";
 import { Button } from "@/components/panelui/button";
+import { RadioGroup } from "@/components/panelui/radio-group";
 import { InputGroup } from "@/components/panelui/input-group";
 import { DataState, DataNotice } from "@/components/data-state";
 import { Text } from "@/components/panelui/text";
@@ -71,9 +72,9 @@ function NotificationInbox({ access }: { access: NotificationAccess }) {
         {query ? <InputGroup.Suffix><Button variant="ghost" size="icon" style={{ width: 48, height: 48 }} accessibilityLabel="Clear notification search" onPress={() => setQuery("")}><X size={18} color={muted} /></Button></InputGroup.Suffix> : null}
       </InputGroup>
       <View className="flex-row gap-2">
-        <View className="flex-1 flex-row items-center rounded-xl bg-card px-1" style={{ minHeight: 44 }}>
-          {[false, true].map((value) => <Button key={String(value)} variant="ghost" size="sm" className="flex-1 px-1 min-h-11" accessibilityRole="tab" accessibilityState={{ selected: unread === value }} onPress={() => { setUnread(value); if (rows.length) list.current?.scrollToLocation({ sectionIndex: 0, itemIndex: 0, animated: false }); }}>
-            <View className={unread === value ? "w-full flex-row items-center justify-center gap-1 rounded-xl bg-card px-2" : "w-full flex-row items-center justify-center gap-1 px-2"} style={{ minHeight: 36 }}><Text size="xs" weight="semibold" className={unread === value ? "text-primary" : "text-muted-foreground"}>{value ? "Unread" : "All"}</Text>{value && count > 0 ? <Badge variant="secondary" className="rounded-md px-1 py-0" labelClassName="text-xs">{count}</Badge> : null}</View>
+        <View accessibilityRole="tablist" accessibilityLabel="Notification read status" className="flex-1 flex-row items-center rounded-xl bg-card px-1" style={{ minHeight: 44 }}>
+          {[false, true].map((value) => <Button key={String(value)} variant="ghost" size="sm" className="flex-1 px-1 min-h-11" role="tab" accessibilityRole="tab" aria-selected={unread === value} accessibilityState={{ selected: unread === value }} onPress={() => { setUnread(value); if (rows.length) list.current?.scrollToLocation({ sectionIndex: 0, itemIndex: 0, animated: false }); }}>
+            <View className={unread === value ? "w-full flex-row items-center justify-center gap-1 rounded-xl bg-accent px-2" : "w-full flex-row items-center justify-center gap-1 px-2"} style={{ minHeight: 36 }}><Text size="xs" weight="semibold" className="text-foreground">{value ? "Unread" : "All"}</Text>{value && count > 0 ? <Badge variant="secondary" className="self-center rounded-md px-1 py-0" labelClassName="text-xs">{count}</Badge> : null}</View>
           </Button>)}
         </View>
         <Button variant="outline" size="sm" className="min-h-11 rounded-xl px-4" labelClassName="text-xs" startContent={<SlidersHorizontal size={16} color={muted} />} onPress={openFilters}>Filters{category !== "all" || accountId !== "all" ? " · active" : ""}</Button>
@@ -114,17 +115,18 @@ function NotificationInbox({ access }: { access: NotificationAccess }) {
       <BottomSheet.Header><View className="flex-row items-center gap-2">{view === "preview" ? <Button variant="ghost" size="icon" accessibilityLabel="Back to filters" onPress={() => setView("filters")}><ChevronLeft size={20} color={primary} /></Button> : null}<Text size="lg" weight="semibold">{view === "preview" ? "Fixture notification states" : "Filter notifications"}</Text></View></BottomSheet.Header>
       <BottomSheet.Body className="gap-3" showsVerticalScrollIndicator={false}>
         {view === "preview" ? <><Text muted size="sm">Sample content and actions stay in memory. No live notification changes.</Text>{["loaded", "empty", "loading", "offline", "error", "read-error", "page-error"].map((state) => <Button key={state} variant="ghost" className="justify-start min-h-11" onPress={() => { setFixtureState(state); setSheet(false); }}>{state}</Button>)}</> : <>
-          <Text muted size="xs" weight="semibold">Category</Text>{notificationCategories.map(({ value, label }) => <FilterOption key={value} label={label} selected={draft.category === value} onPress={() => setDraft((before) => ({ ...before, category: value }))} />)}
-          <Text muted size="xs" weight="semibold">Service account</Text><FilterOption label="All accounts" selected={draft.account === "all"} onPress={() => setDraft((before) => ({ ...before, account: "all" }))} />
-          {access.account?.accounts.filter((account) => access.account!.authorizedServiceAccountIds.includes(account.id)).map((account) => <FilterOption key={account.id} label={`${account.registeredName}${account.accountNumber ? ` · ••${account.accountNumber.slice(-4)}` : ""}`} selected={draft.account === account.id} onPress={() => setDraft((before) => ({ ...before, account: account.id }))} />)}
+          <Text muted size="xs" weight="semibold">Category</Text>
+          <RadioGroup variant="card" value={draft.category} accessibilityLabel="Notification category" onValueChange={value => setDraft(before => ({ ...before, category: value as typeof category }))}>
+            {notificationCategories.map(({ value, label }) => <RadioGroup.Item key={value} value={value} label={label} />)}
+          </RadioGroup>
+          <Text muted size="xs" weight="semibold">Service account</Text>
+          <RadioGroup variant="card" value={draft.account} accessibilityLabel="Notification service account" onValueChange={value => setDraft(before => ({ ...before, account: value }))}>
+            <RadioGroup.Item value="all" label="All accounts" />
+            {access.account?.accounts.filter(account => access.account!.authorizedServiceAccountIds.includes(account.id)).map(account => <RadioGroup.Item key={account.id} value={account.id} label={`${account.registeredName}${account.accountNumber ? ` · ••${account.accountNumber.slice(-4)}` : ""}`} />)}
+          </RadioGroup>
         </>}
       </BottomSheet.Body>
       {view === "filters" ? <BottomSheet.Footer className="flex-row gap-2"><Button variant="outline" className="rounded-2xl min-h-12" onPress={() => setDraft({ category: "all", account: "all" })}>Reset</Button><Button className="flex-1 rounded-2xl min-h-12" onPress={() => { setCategory(draft.category); setSelectedAccount(draft.account); setSheet(false); }}>Show notifications</Button></BottomSheet.Footer> : null}
     </BottomSheet.Content></BottomSheet>
   </ReportPage>;
-}
-
-function FilterOption({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
-  const [primary, control] = useAppColors(["primary", "control"]);
-  return <Button variant="ghost" className={selected ? "justify-between min-h-11 rounded-xl bg-primary/5 px-3" : "justify-between min-h-11 rounded-xl px-3"} labelClassName="flex-1 text-left text-sm font-medium" accessibilityRole="radio" accessibilityState={{ checked: selected }} onPress={onPress} endContent={selected ? <Check size={16} color={primary} /> : <View style={{ width: 16, height: 16, backgroundColor: control, borderRadius: 8 }} />}>{label}</Button>;
 }

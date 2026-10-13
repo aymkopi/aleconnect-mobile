@@ -71,6 +71,7 @@ export default function AdvisoriesScreen() {
               value={query}
               onChangeText={setQuery}
               placeholder="Search recent advisories and posts"
+              isClearable={false}
             />
             <Tabs
               defaultValue="all"
@@ -96,18 +97,23 @@ export default function AdvisoriesScreen() {
               </Tabs.List>
             </Tabs>
             {query ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                onPress={() =>
-                  router.push({
-                    pathname: "/advisory/search",
-                    params: { q: query },
-                  })
-                }
-              >
-                View matching updates
-              </Button>
+              <View className="flex-row items-center gap-2">
+                <Button variant="ghost" size="sm" onPress={() => setQuery("")}>
+                  Clear search
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onPress={() =>
+                    router.push({
+                      pathname: "/advisory/search",
+                      params: { q: query },
+                    })
+                  }
+                >
+                  View matching updates
+                </Button>
+              </View>
             ) : null}
             {hasData &&
             (feed.data?.isStale ||
@@ -182,18 +188,11 @@ export default function AdvisoriesScreen() {
                   feed.data?.nextCursor
                     ? "There may be matches in earlier updates. Load more to keep searching."
                     : filtered
-                      ? "Try another topic or area, or reset this view."
+                      ? "Try another topic or area, or choose a different tab. Clear search removes only the search text."
                       : "Public advisories and community posts will appear here when ALECO publishes them."
                 }
-                actionLabel={
-                  filtered ? "Reset search and tabs" : "Explore services"
-                }
-                onAction={() => {
-                  if (filtered) {
-                    setQuery("");
-                    setTab("all");
-                  } else router.push("/services");
-                }}
+                actionLabel={filtered ? undefined : "Explore services"}
+                onAction={filtered ? undefined : () => router.push("/services")}
               />
             )}
           </View>

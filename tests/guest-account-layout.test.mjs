@@ -32,6 +32,7 @@ async function renderAccount(guest, retainedStates = [], loading = false) {
     "@/components/panelui/dialog": { Dialog: compound("Dialog", ["Content", "Header", "Body", "Footer", "Title", "Description"]) },
     "@/components/panelui/toast": { toast: { show: () => {} } },
     "@/components/panelui/label": { Label: "Label" },
+    "@/components/panelui/theme-selector": { ThemeSelector: "ThemeSelector" },
     "@/components/panelui/select": { Select: compound("Select", ["Trigger", "Content", "Item", "Value"]) },
     "@/hooks/use-auth-session": { useAuthSession: () => ({ session: guest ? null : { user: { name: "Private person" } }, signOut: async () => {} }) },
     "@/hooks/use-consumer-account": { useConsumerAccount: () => ({ isLoading: loading, accountContext: loading ? null : { defaultServiceAccountId: account.id, accounts: [account] } }) },

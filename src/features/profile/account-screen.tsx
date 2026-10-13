@@ -12,8 +12,6 @@ import {
   Link,
   ChevronRight,
   ChevronLeft,
-  Smartphone,
-  Sun,
   UserRound,
   KeyRound,
   Bell,
@@ -31,7 +29,7 @@ import { Button } from "@/components/panelui/button";
 import { BottomSheet } from "@/components/panelui/bottom-sheet";
 import { Dialog } from "@/components/panelui/dialog";
 import { toast } from "@/components/panelui/toast";
-import { Select } from "@/components/panelui/select";
+import { ThemeSelector } from "@/components/panelui/theme-selector";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useConsumerAccount } from "@/hooks/use-consumer-account";
 import { useConsumerProfile } from "@/hooks/use-consumer-profile";
@@ -120,7 +118,7 @@ export default function AccountScreen() {
     }
   }
   const [sheet, setSheet] = useState(false),
-    [primary, feature, muted] = useAppColors(["primary", "feature", "muted-foreground"]);
+    [primary, feature] = useAppColors(["primary", "feature"]);
   const name = guest ? "Guest" : fixtures
     ? "Justine Dela Cruz"
     : (profile?.fullName ?? session?.user.name ?? "Guest");
@@ -351,40 +349,16 @@ export default function AccountScreen() {
             </View>
           </BottomSheet.Header>
           <BottomSheet.Body>
-            <Select
-              presentation="content"
+            <ThemeSelector
               value={appearance}
-              listClassName="gap-3 pb-0"
+              applyTheme={false}
+              label="Choose your color theme"
               onValueChange={(value) => {
                 Uniwind.setTheme(value as "system" | "light" | "dark");
                 setSheet(false);
               }}
-            >
-              <Select.Item
-                value="system"
-                label="Use device settings"
-                description="Follows your device’s appearance"
-                startContent={<Smartphone size={20} color={muted} />}
-                className="min-h-16 gap-3 bg-card"
-                labelClassName="text-sm font-normal"
-              />
-              <Select.Item
-                value="light"
-                label="Light"
-                description="Always use the light theme"
-                startContent={<Sun size={20} color={muted} />}
-                className="min-h-16 gap-3 bg-card"
-                labelClassName="text-sm font-normal"
-              />
-              <Select.Item
-                value="dark"
-                label="Dark"
-                description="Always use the dark theme"
-                startContent={<Moon size={20} color={muted} />}
-                className="min-h-16 gap-3 bg-card"
-                labelClassName="text-sm font-normal"
-              />
-            </Select>
+            />
+            <Text muted size="xs">System follows your device’s light or dark appearance.</Text>
           </BottomSheet.Body>
         </BottomSheet.Content>
       </BottomSheet>

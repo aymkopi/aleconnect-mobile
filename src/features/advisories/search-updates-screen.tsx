@@ -28,14 +28,17 @@ export default function SearchUpdatesScreen() {
       title="Search updates"
       onBack={back}
       footer={
-        <Button
-          variant="outline"
-          fullWidth
-          disabled={!query}
-          onPress={() => setQuery("")}
-        >
-          Clear search
-        </Button>
+        <>
+          <Text muted size="xs">Clear the search text. Your selected tab stays active.</Text>
+          <Button
+            variant="outline"
+            fullWidth
+            disabled={!query}
+            onPress={() => setQuery("")}
+          >
+            Clear search
+          </Button>
+        </>
       }
     >
       <Field>
@@ -44,6 +47,7 @@ export default function SearchUpdatesScreen() {
           value={query}
           onChangeText={setQuery}
           placeholder="Topic, area or control number"
+          isClearable={false}
         />
         <Field.Description>
           Search loaded advisories and posts. Load older updates to search
@@ -101,7 +105,7 @@ export default function SearchUpdatesScreen() {
               />
             ))
           ) : (
-            <DataState icon={Search} title="No matching updates" description={feed.data?.nextCursor ? "There may be matches in earlier pages. Load older updates to keep searching." : "Try a different topic or area, or reset your search and tabs."} actionLabel="Reset search and tabs" onAction={() => { setQuery(""); setTab("all"); }} />
+            <DataState icon={Search} title="No matching updates" description={feed.data?.nextCursor ? "There may be matches in earlier pages. Load older updates to keep searching." : "Try another topic or area, or choose a different tab. Use Clear search below to remove the search text."} />
           )}
           {feed.error && feed.errorSource === "more" ? <DataNotice title="Earlier updates couldn’t load" description="The updates above are still available. Retry without losing your place." /> : null}
           {feed.data?.nextCursor && !feed.data.isStale ? <Button variant="outline" loading={feed.busy} onPress={() => void feed.loadMore()}>{feed.errorSource === "more" ? "Retry earlier updates" : "Load older updates"}</Button> : null}

@@ -1,4 +1,5 @@
 import { View } from "react-native";
+import { TriangleAlert } from "lucide-react-native";
 import { useUniwind } from "uniwind";
 import { consumerTicketStatusColors } from "./status";
 import { Text } from "@/components/panelui/text";
@@ -67,10 +68,13 @@ export function ReportTimeline({ report }: { report: ReportDetail }) {
               </Text>
             ) : null}
             {index === messageIndex && report.consumerMessage ? (
-              <View className="rounded-lg p-3 gap-1 mt-2" style={{ backgroundColor: consumerTicketStatusColors("under_review", dark).background }}>
-                <Text size="xs" weight="semibold">
-                  Part of an active incident
-                </Text>
+              <View className="rounded-lg bg-warning-soft p-3 gap-1.5 mt-2">
+                <View className="flex-row items-center gap-2">
+                  <TriangleAlert size={16} color={consumerTicketStatusColors("under_review", dark).foreground} />
+                  <Text size="xs" weight="semibold" className="flex-1">
+                    Linked to an active incident
+                  </Text>
+                </View>
                 <Text size="sm">{report.consumerMessage}</Text>
               </View>
             ) : null}

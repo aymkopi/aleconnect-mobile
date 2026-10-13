@@ -46,7 +46,7 @@ test("only a refreshed same-principal session with an explicit cleared requireme
 });
 
 
-test("legacy linking recovery retains its destination without transferring identity data", () => {
+test("sign-in lands on Home while retaining required password and identity gates", () => {
   const intent = signInIntent({ linking: "1" });
   assert.equal(intent.mode, "account");
   assert.equal(intent.returnTo, "/profile/link-account");
@@ -54,13 +54,13 @@ test("legacy linking recovery retains its destination without transferring ident
   assert.equal(signInIntent({ linking: "1", returnTo: "//evil" }).returnTo, "/home");
   const account = { user: { id: "target-account", sessionMode: "legacy" as const, mustChangePassword: false } };
   assert.deepEqual(signedInDestination(intent, account), {
-    pathname: "/required-password", params: { returnTo: "/profile/link-account", linking: "1" },
+    pathname: "/required-password", params: { returnTo: "/home", linking: "1" },
   });
   const identity = { user: { id: "email-owner", sessionMode: "identity" as const, mustChangePassword: false } };
-  assert.equal(signedInDestination(intent, identity), "/profile/link-account");
+  assert.equal(signedInDestination(intent, identity), "/home");
   assert.deepEqual(signedInDestination(signInIntent({ returnTo: "/reports/new" }), {
     user: { id: "owner", mustChangePassword: true },
-  }), { pathname: "/required-password", params: { returnTo: "/reports/new" } });
+  }), { pathname: "/required-password", params: { returnTo: "/home" } });
 });
 
 test("session-ended recovery uses allowlisted route targets and retains mandatory-route intent", () => {

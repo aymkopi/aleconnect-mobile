@@ -39,9 +39,9 @@ export function authResumeRoute(pathname: string, params: AuthSearchParams): Aut
 export function signedInDestination(intent: ReturnType<typeof signInIntent>, session: AuthSessionState) {
   return session.user.mustChangePassword || (intent.linking && session.user.sessionMode !== "identity")
     ? { pathname: "/required-password" as const, params: {
-        returnTo: intent.returnTo, ...(intent.linking ? { linking: "1" } : {}),
+        returnTo: "/home", ...(intent.linking ? { linking: "1" } : {}),
       } }
-    : intent.returnTo;
+    : "/home";
 }
 export function signInCopy(mode: SignInMode, context: SignInContext) {
   if (context === "session-ended") return {

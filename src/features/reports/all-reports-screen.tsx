@@ -13,7 +13,7 @@ import {
   Plus,
   Tag,
 } from "lucide-react-native";
-import { ReportCalendar } from "./components/report-calendar";
+import { Calendar } from "@/components/panelui/calendar";
 import { ReportPage } from "./components/report-page";
 import { ReportCard } from "./report-card";
 import { Button } from "@/components/panelui/button";
@@ -25,7 +25,6 @@ import { Select } from "@/components/panelui/select";
 import { BottomSheet } from "@/components/panelui/bottom-sheet";
 import { ContentSkeleton } from "@/components/content-skeleton";
 import { DataState, DataNotice } from "@/components/data-state";
-import { Input } from "@/components/panelui/input";
 import { SearchField } from "@/components/search-field";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
@@ -56,9 +55,13 @@ import {
   manilaDateKey,
   reportBrowseScope,
   validDateRange,
+  dateRangeWithinBounds,
+  reportPickerDate,
+  reportPickerDateKey,
   type BrowseFilters,
 } from "./browse-filter";
 import { parseApiInstant } from "@/utils/manila-time";
+import { calendarShortDate } from "@/lib/date";
 
 type FilterView =
   | "filters"
@@ -67,8 +70,6 @@ type FilterView =
   | "type"
   | "sort"
   | "period"
-  | "start"
-  | "end"
   | "preview";
 const sortLabels = {
   newest: "Newest first",
@@ -454,10 +455,6 @@ export default function AllReportsScreen() {
             ? "Sort reports"
             : view === "period"
               ? "Report period"
-              : view === "start"
-                ? "Choose a start date"
-                : view === "end"
-                  ? "Choose an end date"
                   : view === "preview"
                     ? "Fixture browse states"
                     : "Filter reports";
@@ -573,10 +570,7 @@ export default function AllReportsScreen() {
           onBack={
             view === "filters"
               ? undefined
-              : () =>
-                  setView(
-                    view === "start" || view === "end" ? "period" : "filters",
-                  )
+              : () => setView("filters")
           }
         >
           <BottomSheet.Header>
@@ -586,11 +580,7 @@ export default function AllReportsScreen() {
                   size="icon"
                   variant="ghost"
                   accessibilityLabel="Back to filters"
-                  onPress={() =>
-                    setView(
-                      view === "start" || view === "end" ? "period" : "filters",
-                    )
-                  }
+                  onPress={() => setView("filters")}
                 >
                   <ChevronLeft color={primary} size={20} />
                 </Button>
@@ -706,57 +696,20 @@ export default function AllReportsScreen() {
                   <Select.Item value="year" label="This year" />
                   <Select.Item value="custom" label="Custom dates" />
                 </Select>
+                <Text size="xs" weight="medium">Selected · {periodLabels[draft.period]}{draft.period === "custom" ? " · " + (validDateRange(draft.start, draft.start) ? calendarShortDate(reportPickerDate(draft.start), "gregory", "en-PH") : "Start date") + " – " + (validDateRange(draft.end, draft.end) ? calendarShortDate(reportPickerDate(draft.end), "gregory", "en-PH") : "End date") : ""}</Text>
                 {draft.period === "custom" ? (
                   <>
-                    <Input
-                      label="Start date"
-                      value={draft.start}
-                      placeholder="YYYY-MM-DD"
-                      onChangeText={(start) =>
-                        setDraft((d) => ({ ...d, start }))
-                      }
-                      startContent={<CalendarDays size={18} color={muted} />}
-                      interactiveContent={false}
-                      autoCapitalize="none"
-                    />
-                    <Button variant="outline" onPress={() => setView("start")}>
-                      Choose a start date
-                    </Button>
-                    <Input
-                      label="End date"
-                      value={draft.end}
-                      placeholder="YYYY-MM-DD"
-                      onChangeText={(end) => setDraft((d) => ({ ...d, end }))}
-                      startContent={<CalendarDays size={18} color={muted} />}
-                      interactiveContent={false}
-                      autoCapitalize="none"
-                    />
-                    <Button variant="outline" onPress={() => setView("end")}>
-                      Choose an end date
-                    </Button>
-                    {!validDateRange(draft.start, draft.end) ? (
-                      <Text size="sm" accessibilityRole="alert">
-                        Choose valid dates with the end on or after the start.
-                      </Text>
-                    ) : null}
-                    <Button
-                      disabled={!validDateRange(draft.start, draft.end)}
-                      onPress={() => setView("filters")}
-                    >
-                      Use these dates
-                    </Button>
+                    <Calendar mode="range" bordered={false} locale="en-PH" weekStartsOn="auto" selectOutsideDays
+                      defaultMonth={reportPickerDate(manilaDateKey(new Date()))} captionLayout="dropdown"
+                      minDate={reportPickerDate("2026-01-01")} maxDate={reportPickerDate(manilaDateKey(new Date()))}
+                      selected={validDateRange(draft.start, draft.start) ? { from: reportPickerDate(draft.start), ...(validDateRange(draft.end, draft.end) ? { to: reportPickerDate(draft.end) } : {}) } : undefined}
+                      onSelect={range => setDraft(d => ({ ...d, start: range ? reportPickerDateKey(range.from) : "", end: range?.to ? reportPickerDateKey(range.to) : "" }))} />
+                    <Text muted size="xs">Available from January 1, 2026 through today.</Text>
+                    {!dateRangeWithinBounds(draft.start, draft.end, { start: "2026-01-01", end: manilaDateKey(new Date()) }) ? <Text size="xs" accessibilityRole="alert" className="text-destructive">Choose both dates within the available range.</Text> : null}
+                    <Button disabled={!dateRangeWithinBounds(draft.start, draft.end, { start: "2026-01-01", end: manilaDateKey(new Date()) })} onPress={() => setView("filters")}>Use selected dates</Button>
                   </>
                 ) : null}
               </>
-            ) : view === "start" || view === "end" ? (
-              <ReportCalendar
-                key={view}
-                value={draft[view]}
-                onSelect={(date) => {
-                  setDraft((d) => ({ ...d, [view]: date, period: "custom" }));
-                  setView("period");
-                }}
-              />
             ) : (
               <Select
                 presentation="content"
@@ -822,7 +775,7 @@ export default function AllReportsScreen() {
                 fullWidth
                 disabled={
                   draft.period === "custom" &&
-                  !validDateRange(draft.start, draft.end)
+                  !dateRangeWithinBounds(draft.start, draft.end, { start: "2026-01-01", end: manilaDateKey(new Date()) })
                 }
                 onPress={() => {
                   setFilters(draft);

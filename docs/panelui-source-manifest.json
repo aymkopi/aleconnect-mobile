@@ -410,7 +410,7 @@
     },
     {
       "path": "src/components/panelui/search-bar.tsx",
-      "sha256": "1d961465053e1863a51a39f5f5c43031362865cb9228f10ddc8ae3a5bbaf2f3e"
+      "sha256": "fe5597384df1f49048f05465e1d020f45a283d964a25c08a93cabf0772486339"
     },
     {
       "path": "src/components/panelui/select.tsx",
@@ -519,6 +519,22 @@
     {
       "path": "src/lib/chart.ts",
       "sha256": "12160f7c56a4f37f117a8edfbf84c899b9043f57be97b43c13d62b5b25b80e6a"
+    },
+    {
+      "path": "src/components/panelui/radio-group.tsx",
+      "sha256": "c08fb8a637ca3cae82584a7dc89e2fe663a1e9ddfbdd8f8d4737d4db194ca7a8"
+    },
+    {
+      "path": "src/components/panelui/radio-group-value.ts",
+      "sha256": "2e0f1a09c2edc624c8867851c97a5e32d518f6fdfa874aaff8d08851b54a5115"
+    },
+    {
+      "path": "src/components/panelui/theme-selector.tsx",
+      "sha256": "0bfd1e9667c97803ad52b5b98cec13778f6c4d0ea1580808d213489fc88558b2"
+    },
+    {
+      "path": "src/components/panelui/theme-preview.tsx",
+      "sha256": "254ba9724992ef8d6906eea6df301e65dc67ab6f2fff47f9ed73acf678dfa34c"
     }
   ],
   "componentUpdates": {
@@ -593,9 +609,10 @@
     "select": {
       "referencePackage": "0.109.0",
       "adaptations": [
-        "ALEConnect aliases, existing typography, accessibility and theme adaptations retained"
+        "ALEConnect aliases, existing typography, accessibility and theme adaptations retained",
+        "RadioGroup option cards retain existing selection/search/disabled/single-sheet and same-value confirmation contracts"
       ],
-      "currentSha256": "4f427af2c2cf36f637ff9dc27b9fec8dac8e57358be5e6c5965f92bfb164cb46"
+      "currentSha256": "e82ba98872c060cbb09377b8ee29f5e7e8cd6b0d3d7a58ca3ea11d9a5544db51"
     },
     "tabs": {
       "referencePackage": "0.109.0",
@@ -669,6 +686,45 @@
         "ALEConnect aliases; published PanelUI encoder and quiet-zone canvas"
       ],
       "currentSha256": "43005545cbb4ae76420fb5c7f230d94801b63a88d57156cdcd58bef4bec4d995"
+    },
+    "radio-group": {
+      "retrieved": "2026-10-13",
+      "registry": "https://panelui.dev/r/radio-group.json",
+      "adaptations": [
+        "ALEConnect aliases and border-free semantic choice surfaces; native accessible item props; ignore repeated value changes while preserving explicit confirmation callbacks"
+      ],
+      "currentSha256": "c08fb8a637ca3cae82584a7dc89e2fe663a1e9ddfbdd8f8d4737d4db194ca7a8"
+    },
+    "radio-group-value": {
+      "retrieved": "2026-10-13",
+      "registry": "https://panelui.dev/r/radio-group.json",
+      "adaptations": [
+        "Small local guard for unchanged selections; covered by selection regressions"
+      ],
+      "currentSha256": "2e0f1a09c2edc624c8867851c97a5e32d518f6fdfa874aaff8d08851b54a5115"
+    },
+    "theme-selector": {
+      "retrieved": "2026-10-13",
+      "registry": "https://panelui.dev/r/theme-selector.json",
+      "adaptations": [
+        "ALEConnect aliases and border-free selection fill; existing appearance context owns theme application"
+      ],
+      "currentSha256": "0bfd1e9667c97803ad52b5b98cec13778f6c4d0ea1580808d213489fc88558b2"
+    },
+    "theme-preview": {
+      "retrieved": "2026-10-13",
+      "registry": "https://panelui.dev/r/theme-selector.json",
+      "adaptations": [
+        "Official PanelUI SVG window preview art; ALEConnect aliases"
+      ],
+      "currentSha256": "254ba9724992ef8d6906eea6df301e65dc67ab6f2fff47f9ed73acf678dfa34c"
+    },
+    "search-bar": {
+      "registry": "https://panelui.dev/r/search-bar.json",
+      "adaptations": [
+        "Retain focus recovery and support both native currentlyFocusedInput and RN-web currentlyFocusedField APIs"
+      ],
+      "currentSha256": "fe5597384df1f49048f05465e1d020f45a283d964a25c08a93cabf0772486339"
     }
   },
   "packageIntegrity": "sha512-Jv8dbRxqu14X3Pgs8+6ufGTbUz/Dahhjk+C1h4YzblKas2vWR+YEMGyhNYgLgAm8yr2AO8W3xnjw8lZlzhaPMA==",

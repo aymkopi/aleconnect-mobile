@@ -1,12 +1,10 @@
-import { useState } from "react";
 import { useUniwind } from "uniwind";
 import { consumerTicketStatusColors } from "./status";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ChevronRight, FileText } from "lucide-react-native";
+import { Archive, BadgeCheck, CircleCheck, CircleX, ClipboardList, Truck, Wrench } from "lucide-react-native";
 import { Button } from "@/components/panelui/button";
 import { Text } from "@/components/panelui/text";
-import { useAppColors } from "@/hooks/use-app-colors";
 import { ReportPage } from "./components/report-page";
 import { consumerTicketStatusLabel, type ConsumerTicketStatus } from "./data";
 import { reportStatusDescription } from "./detail-presentation";
@@ -20,14 +18,13 @@ const stages: ConsumerTicketStatus[] = [
   "closed",
   "rejected",
 ];
+const icons = { under_review: ClipboardList, verified: BadgeCheck, dispatched: Truck, in_progress: Wrench, resolved: CircleCheck, closed: Archive, rejected: CircleX };
 export default function ReportStatusScreen() {
   const router = useRouter();
   const { id, serviceAccountId } = useLocalSearchParams<{
     id?: string;
     serviceAccountId?: string;
   }>();
-  const [selected, setSelected] = useState<ConsumerTicketStatus | null>(null);
-  const [primary] = useAppColors(["primary"]);
   const { theme } = useUniwind();
   const dark = theme === "dark" || theme.endsWith("-dark");
   const viewReport = () => {
@@ -54,14 +51,12 @@ export default function ReportStatusScreen() {
         style={{ fontSize: 18, lineHeight: 26 }}
         accessibilityRole="header"
       >
-        From review to closure
+        Understand your report status
       </Text>
-      {stages.map((status) => (
-        <Pressable
+      {stages.map((status) => {
+        const Icon = icons[status];
+        return <View
           key={status}
-          accessibilityRole="button"
-          accessibilityState={{ expanded: selected === status }}
-          onPress={() => setSelected(selected === status ? null : status)}
           className="rounded-xl bg-card p-3 gap-2"
           style={{ minHeight: 64 }}
         >
@@ -70,7 +65,7 @@ export default function ReportStatusScreen() {
               className="rounded-xl items-center justify-center"
               style={{ width: 32, height: 32, backgroundColor: consumerTicketStatusColors(status, dark).background }}
             >
-              <FileText size={20} color={consumerTicketStatusColors(status, dark).foreground} />
+              <Icon size={18} color={consumerTicketStatusColors(status, dark).foreground} />
             </View>
             <View className="flex-1 gap-0.5">
               <Text weight="semibold" size="sm">
@@ -80,19 +75,11 @@ export default function ReportStatusScreen() {
                 {reportStatusDescription[status]}
               </Text>
             </View>
-            <ChevronRight size={18} color={primary} />
           </View>
-          {selected === status ? (
-            <Text size="sm">
-              This explains the status. Your report’s detail page shows the
-              updates ALECO has actually published.
-            </Text>
-          ) : null}
-        </Pressable>
-      ))}
+        </View>;
+      })}
       <Text muted size="sm">
-        Rejected ends the review branch with a reason. No arrival time is shown
-        unless ALECO provides one.
+        Your ticket shows the stages actually reached. Arrival and restoration times appear only when ALECO confirms them.
       </Text>
     </ReportPage>
   );
