@@ -530,8 +530,8 @@ test("late sign-in confirmation cannot navigate a different restored principal",
   );
   assert.equal(
     f.render().props.href,
-    "/reports/new",
-    "the newer principal remains signed in",
+    "/home",
+    "the newer principal remains signed in and lands on Home",
   );
 });
 test("loss of a mandatory session keeps the sign-in return target", async () => {

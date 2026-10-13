@@ -220,6 +220,22 @@
     "src/components/panelui/progress-button-hold.ts": {
       "item": "progress-button",
       "digest": "sha256:8ddd657e267b9d48c4dd2fce4ed4b627559c2543427b1b9327182ecdc10ca6c7"
+    },
+    "src/components/panelui/radio-group.tsx": {
+      "item": "radio-group",
+      "digest": "sha256:c08fb8a637ca3cae82584a7dc89e2fe663a1e9ddfbdd8f8d4737d4db194ca7a8"
+    },
+    "src/components/panelui/radio-group-value.ts": {
+      "item": "radio-group",
+      "digest": "sha256:2e0f1a09c2edc624c8867851c97a5e32d518f6fdfa874aaff8d08851b54a5115"
+    },
+    "src/components/panelui/theme-selector.tsx": {
+      "item": "theme-selector",
+      "digest": "sha256:0bfd1e9667c97803ad52b5b98cec13778f6c4d0ea1580808d213489fc88558b2"
+    },
+    "src/components/panelui/theme-preview.tsx": {
+      "item": "theme-selector",
+      "digest": "sha256:254ba9724992ef8d6906eea6df301e65dc67ab6f2fff47f9ed73acf678dfa34c"
     }
   },
   "roots": {
@@ -350,7 +366,8 @@
       "input",
       "keyboard-avoider",
       "use-keyboard-avoidance",
-      "label"
+      "label",
+      "radio-group"
     ],
     "bottom-sheet": [
       "bottom-sheet",
@@ -458,6 +475,18 @@
       "icons",
       "use-direction",
       "text"
+    ],
+    "radio-group": [
+      "radio-group",
+      "radio-group-value",
+      "cn",
+      "text"
+    ],
+    "theme-selector": [
+      "theme-selector",
+      "theme-preview",
+      "text",
+      "use-theme"
     ]
   },
   "legacyFiles": [],

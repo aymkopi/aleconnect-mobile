@@ -294,7 +294,7 @@ function SignInForm({ intent }: { intent: ReturnType<typeof signInIntent> }) {
             {resume ? <>
               <View className="gap-3">{fields}</View>
               <Text size="sm" muted className="text-center">
-                After sign-in, we’ll reopen the page you were using. Saved queue entries are available only to their original account.
+                After sign-in, we’ll take you to Home. Saved queue entries are available only to their original account.
               </Text>
             </> : null}
             <View className="gap-3">

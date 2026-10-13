@@ -11,7 +11,6 @@ import {
   ClipboardCheck,
   Cpu,
   Gauge,
-  House,
   Images,
   Lightbulb,
   MapPin,
@@ -32,6 +31,7 @@ import { Card } from "@/components/panelui/card";
 import { Field } from "@/components/panelui/field";
 import { Input } from "@/components/panelui/input";
 import { Select } from "@/components/panelui/select";
+import { RadioGroup } from "@/components/panelui/radio-group";
 import { Spinner } from "@/components/panelui/spinner";
 import { ContentSkeleton } from "@/components/content-skeleton";
 import { Text } from "@/components/panelui/text";
@@ -1124,43 +1124,12 @@ export default function NewReportScreen() {
                 <Heading description="Choose the service account connected to this issue.">
                   Which ALECO account?
                 </Heading>
-                {accounts.map((account) => (
-                  <Pressable
-                    key={account.id}
-                    accessibilityRole="radio"
-                    accessibilityState={{
-                      checked: accountId === account.id,
-                      disabled: submitting || pickerBusy,
-                    }}
-                    disabled={submitting || pickerBusy}
-                    onPress={() => selectAccount(account.id)}
-                    className={`flex-row items-center gap-3 rounded-xl px-4 py-4 ${accountId === account.id ? "bg-accent" : "bg-card"}`}
-                    style={{ minHeight: 80 }}
-                  >
-                    <View
-                      className={`h-5 w-5 rounded-full items-center justify-center ${accountId === account.id ? "bg-primary" : "bg-control"}`}
-                    >
-                      {accountId === account.id ? (
-                        <View className="h-2.5 w-2.5 rounded-full bg-primary-foreground" />
-                      ) : null}
-                    </View>
-                    <View className="flex-1 gap-1">
-                      <Text size="sm" weight="semibold">
-                        {account.registeredName} ·{" "}
-                        {account.accountNumber
-                          ? "•••• " + account.accountNumber.slice(-4)
-                          : "Number unavailable"}
-                      </Text>
-                      <Text muted size="xs">
-                        {account.address ?? "Service address unavailable"}
-                      </Text>
-                    </View>
-                    <House
-                      size={20}
-                      color={accountId === account.id ? primary : muted}
-                    />
-                  </Pressable>
-                ))}
+                <RadioGroup variant="card" value={accountId ?? undefined} onValueChange={selectAccount}
+                  disabled={submitting || pickerBusy} accessibilityLabel="ALECO service account">
+                  {accounts.map(account => <RadioGroup.Item key={account.id} value={account.id}
+                    label={account.registeredName + " · " + (account.accountNumber ? "•••• " + account.accountNumber.slice(-4) : "Number unavailable")}
+                    description={account.address ?? "Service address unavailable"} />)}
+                </RadioGroup>
                 {!accounts.length && !accountLoading ? (
                   <Text muted>
                     No linked service account is available. Refresh your account
@@ -1261,55 +1230,19 @@ export default function NewReportScreen() {
                       invalid={attempted && Boolean(errors.typeId)}
                     >
                       <Field.Label>Report type</Field.Label>
-                      <View
+                      <RadioGroup
                         className="gap-3"
-                        accessibilityRole="radiogroup"
+                        variant="card" value={form.typeId} onValueChange={id => selectIssue(form.categoryId, id)}
                         accessibilityLabel="Report type"
                       >
-                        {types.map((item) => {
-                          const checked = form.typeId === item.id;
-                          return (
-                            <Pressable
-                              key={item.id}
-                              accessibilityRole="radio"
-                              accessibilityLabel={item.title}
-                              accessibilityState={{ checked }}
-                              aria-checked={checked}
-                              accessibilityHint={
-                                editingReview
-                                  ? "Select, then press Continue to return to review"
-                                  : "Select, then press Continue to choose the issue location"
-                              }
-                              onPress={() => selectIssue(form.categoryId, item.id)}
-                            >
-                              <Card
-                                className={checked ? "bg-primary/5" : undefined}
-                              >
-                                <Card.Content className="min-h-14 flex-row items-center gap-3 p-4">
-                                  <View
-                                    className="h-5 w-5 shrink-0 items-center justify-center rounded-full"
-                                    style={{
-                                      backgroundColor: checked ? primary : muted,
-                                    }}
-                                  >
-                                    {checked ? (
-                                      <View className="h-2.5 w-2.5 rounded-full bg-primary-foreground" />
-                                    ) : null}
-                                  </View>
-                                  <Card.Title size="sm" weight="medium" className="flex-1">
-                                    {item.title}
-                                  </Card.Title>
-                                </Card.Content>
-                              </Card>
-                            </Pressable>
-                          );
-                        })}
+                        {types.map(item => <RadioGroup.Item key={item.id} value={item.id} label={item.title}
+                          accessibilityHint={editingReview ? "Select, then press Continue to return to review" : "Select, then press Continue to choose the issue location"} />)}
                         {!types.length ? (
                           <Text size="sm" muted>
                             No report types are available for this category. Choose another category or refresh the form.
                           </Text>
                         ) : null}
-                      </View>
+                      </RadioGroup>
                       {attempted && errors.typeId ? (
                         <Field.Error>{errors.typeId}</Field.Error>
                       ) : null}

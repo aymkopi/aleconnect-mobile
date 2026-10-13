@@ -41,7 +41,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { FadeIn, FadeOut, useAnimatedStyle, useSharedValue, withTiming, } from "react-native-reanimated";
 import { tv } from "tailwind-variants";
 import { useCSSVariable } from "uniwind";
-import { CheckIcon, ChevronDownIcon, SearchIcon, } from "@/components/panelui/icons";
+import { ChevronDownIcon, SearchIcon, } from "@/components/panelui/icons";
+import { RadioGroup } from "@/components/panelui/radio-group";
 import { NativeHost, getNativeUI } from "@/lib/native";
 import { Portal } from "@/components/panelui/portal";
 import { Text, textChildren } from "@/components/panelui/text";
@@ -63,9 +64,6 @@ const selectVariants = tv({
         options: "gap-1 pb-2",
         search: "pb-2",
         empty: "px-3 py-6 text-center text-sm text-muted-foreground",
-        item: "flex-row items-center gap-2 rounded-lg px-3 py-3",
-        itemLabel: "text-base font-medium text-foreground",
-        itemIndicator: "h-5 w-5 items-center justify-center",
         group: "gap-1",
         groupLabel: "px-3 pb-1 pt-2",
     },
@@ -97,14 +95,8 @@ const selectVariants = tv({
                 placeholder: "text-lg",
             },
         },
-        selected: {
-            true: { item: "bg-accent" },
-        },
         disabled: {
             true: { trigger: "opacity-[0.64]" },
-        },
-        itemDisabled: {
-            true: { item: "opacity-[0.64]" },
         },
         presentation: {
             sheet: {},
@@ -191,24 +183,16 @@ function SelectItem({ value, label, description, startContent, disabled, classNa
     if (!context) {
         throw new Error("Select.Item must be used within a <Select>");
     }
-    const selected = context.value === value;
-    const { item, itemLabel, itemIndicator } = selectVariants({
-        selected,
-        itemDisabled: !!disabled,
-    });
-    const checkColor = useCSSVariable("--color-muted-foreground");
-    return (<Pressable accessibilityRole="menuitem" accessibilityLabel={description ? label + ", " + description : label} accessibilityState={{ selected, disabled: !!disabled }} disabled={disabled} onPress={() => context.onSelect(value)} className={item({ className })}>
-      {startContent ? (<View className="h-5 w-5 items-center justify-center" accessible={false} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-          {startContent}
-        </View>) : null}
-      <View className="flex-1 gap-0.5">
-        <Text className={itemLabel({ className: labelClassName })}>{label}</Text>
-        {description ? <Text size="xs" muted>{description}</Text> : null}
-      </View>
-      <View className={itemIndicator()}>
-        {selected ? (<CheckIcon size={16} color={typeof checkColor === "string" ? checkColor : "#737373"}/>) : null}
-      </View>
-    </Pressable>);
+    return <RadioGroup.Item value={value} disabled={disabled}
+      onPress={() => { if (context.value === value) context.onSelect(value); }}
+      accessibilityLabel={description ? label + ", " + description : label}
+      label={startContent ? undefined : label} description={description}
+      className={className} labelClassName={cn("text-sm font-medium", labelClassName)}>
+      {startContent ? <View className="flex-row items-center gap-2">
+        <View accessible={false} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">{startContent}</View>
+        <Text className={cn("flex-1 text-sm font-medium", labelClassName)}>{label}</Text>
+      </View> : null}
+    </RadioGroup.Item>;
 }
 export interface SelectGroupProps {
     /**
@@ -604,9 +588,11 @@ function SelectRoot({ className, value, valueLabel, onValueChange, placeholder =
         <InputGroup.Input variant="filled" size="sm" className={searchInputClassName} containerClassName={searchContainerClassName} value={query} onChangeText={setQuery} placeholder={searchPlaceholder} accessibilityLabel={searchPlaceholder} autoCapitalize="none" autoCorrect={false} returnKeyType="search" clearButtonMode="while-editing"/>
       </InputGroup>
     </View>) : null;
-    const optionList = noMatches ? (<Text className={slots.empty({ className: emptyClassName })}>
+    const optionList = <RadioGroup variant="card" value={value} onValueChange={context.onSelect} className="gap-2">
+    {noMatches ? (<Text className={slots.empty({ className: emptyClassName })}>
       {emptyMessage}
-    </Text>) : filtered === null ? (textChildren(children)) : (filtered.kept);
+    </Text>) : filtered === null ? (textChildren(children)) : (filtered.kept)}
+    </RadioGroup>;
     if (presentation === "content") {
         return (<SelectContext.Provider value={context}>
         <View className={className}>

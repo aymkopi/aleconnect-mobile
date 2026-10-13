@@ -7,13 +7,13 @@ import { formatReportDate } from "./data.ts";
 import { parseApiInstant } from "../../utils/manila-time.ts";
 
 export const reportStatusDescription: Record<ConsumerTicketStatus, string> = {
-  under_review: "ALECO is reviewing the report.",
-  verified: "The concern has been validated.",
-  rejected: "The report was not accepted. See the reason from ALECO below.",
-  dispatched: "A field crew has been assigned. No arrival time is confirmed.",
-  in_progress: "Work is underway. No completion time is confirmed.",
-  resolved: "The concern has been addressed.",
-  closed: "ALECO has closed the report.",
+  under_review: "ALECO is checking the issue and service details you submitted.",
+  verified: "ALECO has validated the concern for action.",
+  rejected: "ALECO could not accept the report. Check its published reason.",
+  dispatched: "A field crew has been assigned to your concern.",
+  in_progress: "Work is underway to address your concern.",
+  resolved: "ALECO has marked the concern as addressed.",
+  closed: "ALECO has completed the report’s follow-up and closed it.",
 };
 
 export function reportDetailScope(input: {
