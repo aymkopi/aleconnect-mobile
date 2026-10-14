@@ -560,7 +560,7 @@ test("Appearance opens color themes directly, selection closes and Back leaves t
   assert.equal(nodes(root).filter(n => n.type === sheetParts && n.props.open).length, 1);
   const picker = nodes(root).find(n => n.type === "ThemeSelector");
   assert.equal(picker.props.applyTheme, false);
-  assert.equal(picker.props.label, "Choose your color theme");
+  assert.ok(nodes(root).some(n => n.type === "Text" && n.props.children === "Choose your color theme"));
   assert.ok(!nodes(root).some(n => n.type === "Button" && n.props.accessibilityLabel === "Color theme"));
   assert.ok(!nodes(root).some(n => n.type === "SheetFooter"));
   nodes(root).find(n => n.type === "Button" && n.props.accessibilityLabel === "Back to Account").props.onPress();

@@ -1,15 +1,15 @@
-import { Pressable, View } from "react-native";
-import { ChevronRight, Zap, MapPin } from "lucide-react-native";
-import { Text } from "@/components/panelui/text";
 import { Badge } from "@/components/panelui/badge";
-import { useAppColors } from "@/hooks/use-app-colors";
+import { Text } from "@/components/panelui/text";
 import { SoftRadial } from "@/components/soft-radial";
-import {
-  formatManilaDateTime,
-  formatManilaAdvisoryInterruptionRange,
-} from "@/utils/manila-time";
-import { advisorySchedule, updateTopicLabel } from "./presentation";
+import { useAppColors } from "@/hooks/use-app-colors";
 import type { MobilePublicUpdate } from "@/services/public-updates";
+import {
+  formatManilaAdvisoryInterruptionRange,
+  formatManilaDateTime,
+} from "@/utils/manila-time";
+import { ChevronRight, MapPin, Zap } from "lucide-react-native";
+import { Pressable, View } from "react-native";
+import { advisorySchedule, updateTopicLabel } from "./presentation";
 export function PublisherCard({
   item,
   onPress,
@@ -44,22 +44,27 @@ export function PublisherCard({
           <View className="flex-row gap-2 items-center">
             <Zap size={18} color={primary} />
             <Text className="text-primary" weight="semibold" size="sm">
-              {advisory ? item.type === "general" && item.topic ? updateTopicLabel(item.topic) : "Service advisory" : updateTopicLabel(item.topic)}
+              {advisory
+                ? item.type === "general" && item.topic
+                  ? updateTopicLabel(item.topic)
+                  : "Service advisory"
+                : updateTopicLabel(item.topic)}
             </Text>
           </View>
         ) : (
           <Text muted size="xs" numberOfLines={1} className="flex-1">
             {advisory
               ? (item.controlNumber ?? "ALECO advisory")
-              : [item.pageName ?? "ALECO", item.topic ? updateTopicLabel(item.topic) : null].filter(Boolean).join(" · ")}
+              : item.pageName ?? "ALECO"}
           </Text>
         )}
+        {!featured && !advisory && item.topic ? <Badge size="xs" variant="info">{updateTopicLabel(item.topic)}</Badge> : null}
         {advisory && ["high", "critical"].includes(item.severity) ? (
           <Badge
             size="xs"
             variant="destructive"
             className="rounded px-2 py-0.5"
-            labelClassName="text-[10px] leading-[14px]"
+            labelClassName="text-[11px] leading-[14px] font-medium"
           >
             Important
           </Badge>
@@ -75,7 +80,7 @@ export function PublisherCard({
       {advisory ? (
         <Text size="xs" numberOfLines={1}>
           {schedule?.label === "Restored at"
-            ? "Restored · " + formatManilaDateTime(schedule.start!)
+            ? "Restored at " + formatManilaDateTime(schedule.start!)
             : schedule
               ? (formatManilaAdvisoryInterruptionRange(
                   schedule.start,
@@ -95,7 +100,7 @@ export function PublisherCard({
             ? (item.audience ?? "Read full advisory")
             : featured
               ? "Latest news from ALECO"
-              : "Read story · ALECO feed"}
+              : "Read full story"}
         </Text>
         <ChevronRight size={18} color={primary} />
       </View>

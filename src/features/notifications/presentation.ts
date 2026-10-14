@@ -16,9 +16,9 @@ export function notificationIsAuthorized(item: MobileNotification, account: Cons
 
 export function notificationContext(item: MobileNotification) {
   const account = [item.accountName, item.accountNumber ? `••${item.accountNumber.slice(-4)}` : null].filter(Boolean).join(" ");
-  if (item.ticketNumber) return [item.ticketNumber, account].filter(Boolean).join(" · ");
-  if (item.entityType === "account_linking") return "Account access · System";
-  if (item.category === "advisories") return /billing|collection|payment/i.test(item.title) ? "Payment reminder · ALECO" : "Advisory";
+  if (item.ticketNumber) return account ? `Report ${item.ticketNumber} for ${account}` : item.ticketNumber;
+  if (item.entityType === "account_linking") return "Account access";
+  if (item.category === "advisories") return /billing|collection|payment/i.test(item.title) ? "Payment reminder" : "Advisory";
   return account || notificationCategories.find((category) => category.value === item.category)?.label || "ALECO update";
 }
 
@@ -41,7 +41,7 @@ export function notificationTime(item: MobileNotification, reference = new Date(
   if (!instant) return "Date unavailable";
   const group = manilaNotificationGroupTitle(item.createdAt, reference);
   const time = new Intl.DateTimeFormat("en-PH", { timeZone: "Asia/Manila", hour: "numeric", minute: "2-digit", hour12: true }).format(instant);
-  return group === "Today" || group === "Yesterday" ? time : `${new Intl.DateTimeFormat("en-PH", { timeZone: "Asia/Manila", month: "short", day: "numeric" }).format(instant)} · ${time}`;
+  return group === "Today" || group === "Yesterday" ? time : `${new Intl.DateTimeFormat("en-PH", { timeZone: "Asia/Manila", month: "short", day: "numeric" }).format(instant)} at ${time}`;
 }
 
 export function notificationRoute(item: MobileNotification, account: ConsumerAccountContext) {

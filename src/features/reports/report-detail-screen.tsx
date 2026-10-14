@@ -209,9 +209,8 @@ function ServiceUpdateView({
           <Text size="sm" weight="semibold">
             Your report
           </Text>
-          <Text muted size="xs">
-            {report.ticketNumber} · {consumerTicketStatusLabel(report.status)}
-          </Text>
+          <Text size="sm" weight="medium">{report.ticketNumber}</Text>
+          <Text muted size="xs">{consumerTicketStatusLabel(report.status)}</Text>
         </View>
         <Text muted size="sm">
           Updates may change as field work progresses. Times shown here are the
@@ -582,10 +581,9 @@ export default function ReportDetailScreen() {
             <DetailRow label="Desired action" value={report.actionDesired} />
             <DetailRow
               label="Account"
-              value={[report.accountNumber, report.accountName]
-                .filter(Boolean)
-                .join(" · ")}
+              value={report.accountName}
             />
+            <DetailRow label="Account number" value={report.accountNumber} />
             <DetailRow
               label="Category details"
               value={report.reportDetails?.categoryDescription}

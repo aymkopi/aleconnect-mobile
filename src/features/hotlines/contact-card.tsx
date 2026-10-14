@@ -101,9 +101,9 @@ export function ContactCard({
                 {contact.number}
               </Text>
               <Text muted style={{ fontSize: 10, lineHeight: 14 }}>
-                {[contact.label, contact.type].filter(Boolean).join(" · ") ||
-                  contact.group}
+                {contact.label || contact.group}
               </Text>
+              {contact.type && contact.type !== contact.label ? <Text muted style={{ fontSize: 10, lineHeight: 14 }}>{contact.type}</Text> : null}
             </View>
             <Button
               size="icon"

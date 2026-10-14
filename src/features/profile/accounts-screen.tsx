@@ -166,8 +166,9 @@ function Accounts({ identity }: { identity: ProfileIdentity }) {
             />
             <DetailRow
               label="Account to unlink"
-              value={unlink.registeredName + " · ALECO ••" + unlink.accountNumber?.slice(-4)}
+              value={unlink.registeredName}
             />
+            <DetailRow label="ALECO account number" value={"••" + (unlink.accountNumber?.slice(-4) || "—")} />
             {unlink.isDefault ? (
               <Field className="gap-1">
                 <Field.Label>New default account</Field.Label>
@@ -183,7 +184,8 @@ function Accounts({ identity }: { identity: ProfileIdentity }) {
                       <Select.Item
                         key={a.id}
                         value={a.id}
-                        label={a.registeredName + " · ••" + a.accountNumber?.slice(-4)}
+                        label={a.registeredName}
+                        description={"ALECO ••" + (a.accountNumber?.slice(-4) || "—")}
                       />
                     ))}
                 </Select>

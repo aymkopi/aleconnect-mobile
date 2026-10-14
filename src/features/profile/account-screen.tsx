@@ -1,43 +1,43 @@
 import { ContentSkeleton } from "@/components/content-skeleton";
 import { DataNotice } from "@/components/data-state";
-import { useCallback, useEffect, useState } from "react";
-import { ScrollView, View, Pressable, Image } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { Uniwind, useUniwind } from "uniwind";
-import {
-  House,
-  Eye,
-  EyeOff,
-  Link,
-  ChevronRight,
-  ChevronLeft,
-  UserRound,
-  KeyRound,
-  Bell,
-  Moon,
-  LifeBuoy,
-  Info,
-  ShieldCheck,
-  type LucideIcon,
-} from "lucide-react-native";
-import { useMainPageScroll } from "@/hooks/use-main-page-scroll";
+import { appScrollableBottomPadding } from "@/components/floating-app-bar";
 import { MainPageHeader } from "@/components/main-page-header";
-import { SoftRadial } from "@/components/soft-radial";
-import { Text } from "@/components/panelui/text";
-import { Button } from "@/components/panelui/button";
 import { BottomSheet } from "@/components/panelui/bottom-sheet";
+import { Button } from "@/components/panelui/button";
 import { Dialog } from "@/components/panelui/dialog";
-import { toast } from "@/components/panelui/toast";
+import { Text } from "@/components/panelui/text";
 import { ThemeSelector } from "@/components/panelui/theme-selector";
+import { toast } from "@/components/panelui/toast";
+import { PreviewLabel } from "@/components/preview-label";
+import { SoftRadial } from "@/components/soft-radial";
+import { useGuestAccess } from "@/context/guest-access-context";
+import { useVisualPreview } from "@/context/visual-preview-context";
+import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useConsumerAccount } from "@/hooks/use-consumer-account";
 import { useConsumerProfile } from "@/hooks/use-consumer-profile";
-import { useAppColors } from "@/hooks/use-app-colors";
-import { useVisualPreview } from "@/context/visual-preview-context";
-import { useGuestAccess } from "@/context/guest-access-context";
-import { PreviewLabel } from "@/components/preview-label";
-import { appScrollableBottomPadding } from "@/components/floating-app-bar";
+import { useMainPageScroll } from "@/hooks/use-main-page-scroll";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import {
+  Bell,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  EyeOff,
+  House,
+  Info,
+  KeyRound,
+  LifeBuoy,
+  Link,
+  Moon,
+  ShieldCheck,
+  UserRound,
+  type LucideIcon,
+} from "lucide-react-native";
+import { useCallback, useEffect, useState } from "react";
+import { Image, Pressable, ScrollView, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Uniwind, useUniwind } from "uniwind";
 const profileChildRoutes = {
   "Personal information": "/profile/details",
   "ALECO accounts": "/profile/accounts",
@@ -88,17 +88,33 @@ export default function AccountScreen() {
     router = useRouter(),
     { session, signOut } = useAuthSession(),
     { accountContext, isLoading: accountsLoading } = useConsumerAccount(),
-    { profile, isLoading: profileLoading, error, reload } = useConsumerProfile(),
+    {
+      profile,
+      isLoading: profileLoading,
+      error,
+      reload,
+    } = useConsumerProfile(),
     { fixtures, setFixtures } = useVisualPreview();
   const { guest, openFeature } = useGuestAccess();
   const params = useLocalSearchParams<{ appearance?: string }>();
   const { theme, hasAdaptiveThemes } = useUniwind(),
     appearance = hasAdaptiveThemes ? "system" : theme;
-  const scrollRef = useMainPageScroll<ScrollView>(useCallback(() => {
-    if (!fixtures && session) void reload({ forceNetwork: true });
-  }, [fixtures, session, reload]));
+  const scrollRef = useMainPageScroll<ScrollView>(
+    useCallback(() => {
+      if (!fixtures && session) void reload({ forceNetwork: true });
+    }, [fixtures, session, reload]),
+  );
   const [numberVisible, setNumberVisible] = useState(false);
-  useEffect(() => setNumberVisible(false), [accountContext?.defaultServiceAccountId, accountContext?.accessRevision, session?.user.id, guest, fixtures]);
+  useEffect(
+    () => setNumberVisible(false),
+    [
+      accountContext?.defaultServiceAccountId,
+      accountContext?.accessRevision,
+      session?.user.id,
+      guest,
+      fixtures,
+    ],
+  );
   const [logoutOpen, setLogoutOpen] = useState(false),
     [signingOut, setSigningOut] = useState(false);
   async function logout() {
@@ -119,9 +135,11 @@ export default function AccountScreen() {
   }
   const [sheet, setSheet] = useState(false),
     [primary, feature] = useAppColors(["primary", "feature"]);
-  const name = guest ? "Guest" : fixtures
-    ? "Justine Dela Cruz"
-    : (profile?.fullName ?? session?.user.name ?? "Guest");
+  const name = guest
+    ? "Guest"
+    : fixtures
+      ? "Justine Dela Cruz"
+      : (profile?.fullName ?? session?.user.name ?? "Guest");
   const account = accountContext?.accounts.find(
       (a) => a.id === accountContext.defaultServiceAccountId,
     ),
@@ -130,7 +148,7 @@ export default function AccountScreen() {
     if (guest) {
       setSheet(false);
       setLogoutOpen(false);
-    } else if (params.appearance === '1') {
+    } else if (params.appearance === "1") {
       setSheet(true);
       router.setParams({ appearance: undefined });
     }
@@ -162,7 +180,6 @@ export default function AccountScreen() {
   ] as const;
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
-
       <ScrollView
         className="flex-1"
         ref={scrollRef}
@@ -177,106 +194,176 @@ export default function AccountScreen() {
       >
         <PreviewLabel />
         <MainPageHeader title="Account" />
-        {!guest && !fixtures && profileLoading && !profile ? <ContentSkeleton layout="identity" count={1} label="Loading your profile" /> : <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Personal information"
-          accessibilityHint={guest ? "Sign in to view your profile details" : undefined}
-          onPress={() => openFeature("/profile/details")}
-          className="flex-row items-center gap-4 py-2"
-        >
-          {!guest && !fixtures && profile?.avatarUrl ? (
-            <Image
-              source={{ uri: profile.avatarUrl }}
-              style={{ width: 64, height: 64, borderRadius: 32 }}
-              accessibilityLabel="Profile photo"
-            />
-          ) : (
-            <View
-              className="rounded-full items-center justify-center"
-              style={{ width: 64, height: 64, backgroundColor: "#2250CF" }}
-            >
-              <Text
-                style={{
-                  color: "#FFFFFF",
-                  fontFamily: "Inter_600SemiBold",
-                  fontSize: 24,
-                }}
+        {!guest && !fixtures && profileLoading && !profile ? (
+          <ContentSkeleton
+            layout="identity"
+            count={1}
+            label="Loading your profile"
+          />
+        ) : (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Personal information"
+            accessibilityHint={
+              guest ? "Sign in to view your profile details" : undefined
+            }
+            onPress={() => openFeature("/profile/details")}
+            className="flex-row items-center gap-4 py-2"
+          >
+            {!guest && !fixtures && profile?.avatarUrl ? (
+              <Image
+                source={{ uri: profile.avatarUrl }}
+                style={{ width: 64, height: 64, borderRadius: 32 }}
+                accessibilityLabel="Profile photo"
+              />
+            ) : (
+              <View
+                className="rounded-full items-center justify-center"
+                style={{ width: 64, height: 64, backgroundColor: "#2250CF" }}
               >
-                {name
-                  .split(" ")
-                  .slice(0, 2)
-                  .map((p) => p[0])
-                  .join("")}
-              </Text>
-            </View>
-          )}
-          <View className="flex-1 gap-1">
-            <Text weight="semibold" style={{ fontSize: 18, lineHeight: 25 }}>
-              {name}
-            </Text>
-            <Text muted size="sm">
-              {guest ? "Browsing without signing in" : "Consumer profile"}
-            </Text>
-            <Text size="sm" className="text-primary">
-              {guest ? "Sign in to view your details" : "Personal information"}
-            </Text>
-          </View>
-          <ChevronRight size={18} color={primary} />
-        </Pressable>}
-        {error && !guest && !fixtures ? <DataNotice title={profile ? "Could not refresh your profile" : "Profile details unavailable"} description={profile ? "Your loaded profile is still available. Connect and refresh for current information." : "Reconnect and retry to load your personal and service details."} actionLabel="Refresh profile" onAction={() => void reload({ forceNetwork: true })} /> : null}
-        {!guest && !fixtures && accountsLoading && !accountContext ? <ContentSkeleton layout="profile" count={1} label="Loading your service accounts" /> : <View
-          className="rounded-xl overflow-hidden p-4 gap-3"
-          style={{ backgroundColor: feature }}
-        >
-          <SoftRadial />
-          <View className="flex-row gap-2 items-center">
-            <House size={20} color="#FFFFFF" />
-            <Text weight="semibold" size="xs" style={{ color: "#FFFFFF", flex: 1 }}>
-              ALECO accounts
-            </Text>
-            <Text size="xs" style={{ color: "#E5E7EB" }}>
-              {guest ? "Sign in required" : count + " linked"}
-            </Text>
-          </View>
-          <View className="flex-row justify-between gap-2">
-            <View className="flex-1 gap-1">
-              <Text size="lg" weight="semibold" style={{ color: "#FFFFFF" }}>
-                {guest ? "Connect your service" : fixtures ? "Home" : (account?.registeredName ?? "Connect your service")}
-              </Text>
-              <Text size="xs" style={{ color: "#E5E7EB" }}>
-                {guest ? "Sign in to link your ALECO account" : fixtures
-                  ? "Rawis, Legazpi City"
-                  : (account?.address ?? "Your linked accounts appear here")}
-              </Text>
-            </View>
-            {!guest ? <View className="items-end gap-1">
-              <View className="flex-row items-center gap-1">
-                <Button variant="ghost" size="icon" style={{ width: 32, height: 32 }} hitSlop={6}
-                  accessibilityLabel={numberVisible ? "Hide account number" : "Show account number"}
-                  onPress={() => setNumberVisible(v => !v)}>
-                  {numberVisible ? <EyeOff size={16} color="#FFFFFF" /> : <Eye size={16} color="#FFFFFF" />}
-                </Button>
-                <Text size="sm" weight="semibold" style={{ color: "#FFFFFF" }}>
-                  {numberVisible ? (fixtures ? "10004821" : account?.accountNumber || "Not available")
-                    : fixtures ? "••4821" : maskAccountNumber(account?.accountNumber)}
+                <Text
+                  style={{
+                    color: "#FFFFFF",
+                    fontFamily: "Inter_600SemiBold",
+                    fontSize: 24,
+                  }}
+                >
+                  {name
+                    .split(" ")
+                    .slice(0, 2)
+                    .map((p) => p[0])
+                    .join("")}
                 </Text>
               </View>
-              <Text size="xs" style={{ color: "#E5E7EB" }}>
-                {account?.isDefault || fixtures ? "Default" : ""}
+            )}
+            <View className="flex-1 gap-1">
+              <Text weight="semibold" style={{ fontSize: 18, lineHeight: 25 }}>
+                {name}
               </Text>
-            </View> : null}
-          </View>
-          <Button
-            variant="outline"
-            fullWidth
-            className="rounded-full bg-popover"
-            startContent={<Link size={18} color={primary} />}
-            labelClassName="text-primary"
-            onPress={() => openFeature("/profile/accounts")}
+              <Text muted size="sm">
+                {guest ? "Browsing without signing in" : "Consumer profile"}
+              </Text>
+              <Text size="sm" className="text-primary">
+                {guest
+                  ? "Sign in to view your details"
+                  : "Personal information"}
+              </Text>
+            </View>
+            <ChevronRight size={18} color={primary} />
+          </Pressable>
+        )}
+        {error && !guest && !fixtures ? (
+          <DataNotice
+            title={
+              profile
+                ? "Could not refresh your profile"
+                : "Profile details unavailable"
+            }
+            description={
+              profile
+                ? "Your loaded profile is still available. Connect and refresh for current information."
+                : "Reconnect and retry to load your personal and service details."
+            }
+            actionLabel="Refresh profile"
+            onAction={() => void reload({ forceNetwork: true })}
+          />
+        ) : null}
+        {!guest && !fixtures && accountsLoading && !accountContext ? (
+          <ContentSkeleton
+            layout="profile"
+            count={1}
+            label="Loading your service accounts"
+          />
+        ) : (
+          <View
+            className="rounded-xl overflow-hidden p-4 gap-3"
+            style={{ backgroundColor: feature }}
           >
-            Manage accounts
-          </Button>
-        </View>}
+            <SoftRadial />
+            <View className="flex-row gap-2 items-center">
+              <House size={20} color="#FFFFFF" />
+              <Text
+                weight="semibold"
+                size="xs"
+                style={{ color: "#FFFFFF", flex: 1 }}
+              >
+                ALECO accounts
+              </Text>
+              <Text size="xs" style={{ color: "#E5E7EB" }}>
+                {guest ? "Sign in required" : count + " linked"}
+              </Text>
+            </View>
+            <View className="flex-row justify-between gap-2">
+              <View className="flex-1 gap-1">
+                <Text size="lg" weight="semibold" style={{ color: "#FFFFFF" }}>
+                  {guest
+                    ? "Connect your service"
+                    : fixtures
+                      ? "Home"
+                      : (account?.registeredName ?? "Connect your service")}
+                </Text>
+                <Text size="xs" style={{ color: "#E5E7EB" }}>
+                  {guest
+                    ? "Sign in to link your ALECO account"
+                    : fixtures
+                      ? "Rawis, Legazpi City"
+                      : (account?.address ??
+                        "Your linked accounts appear here")}
+                </Text>
+              </View>
+              {!guest ? (
+                <View className="items-end gap-1">
+                  <View className="flex-row items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      style={{ width: 32, height: 32 }}
+                      hitSlop={6}
+                      accessibilityLabel={
+                        numberVisible
+                          ? "Hide account number"
+                          : "Show account number"
+                      }
+                      onPress={() => setNumberVisible((v) => !v)}
+                    >
+                      {numberVisible ? (
+                        <EyeOff size={16} color="#FFFFFF" />
+                      ) : (
+                        <Eye size={16} color="#FFFFFF" />
+                      )}
+                    </Button>
+                    <Text
+                      size="sm"
+                      weight="semibold"
+                      style={{ color: "#FFFFFF" }}
+                    >
+                      {numberVisible
+                        ? fixtures
+                          ? "10004821"
+                          : account?.accountNumber || "Not available"
+                        : fixtures
+                          ? "••4821"
+                          : maskAccountNumber(account?.accountNumber)}
+                    </Text>
+                  </View>
+                  <Text size="xs" style={{ color: "#E5E7EB" }}>
+                    {account?.isDefault || fixtures ? "Default" : ""}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+            <Button
+              variant="social"
+              fullWidth
+              className="rounded-full"
+              startContent={<Link size={18} color={primary} />}
+              labelClassName="text-primary"
+              onPress={() => openFeature("/profile/accounts")}
+            >
+              Manage accounts
+            </Button>
+          </View>
+        )}
         {groups.map((group) => (
           <View key={group.title} className="gap-2">
             <Text muted size="xs" weight="medium">
@@ -289,19 +376,25 @@ export default function AccountScreen() {
                   label={label}
                   Icon={Icon}
                   value={
-                    guest && group.title !== "About & support" ? "Sign in" : label === "Appearance"
-                      ? appearance === "system"
-                        ? "System"
-                        : appearance === "dark"
-                          ? "Dark"
-                          : "Light"
-                      : label === "ALECO accounts"
-                        ? !fixtures && accountsLoading && !accountContext ? "Loading…" : count + " linked"
-                        : undefined
+                    guest && group.title !== "About & support"
+                      ? "Sign in"
+                      : label === "Appearance"
+                        ? appearance === "system"
+                          ? "System"
+                          : appearance === "dark"
+                            ? "Dark"
+                            : "Light"
+                        : label === "ALECO accounts"
+                          ? !fixtures && accountsLoading && !accountContext
+                            ? "Loading…"
+                            : count + " linked"
+                          : undefined
                   }
                   onPress={() =>
                     label === "Appearance"
-                      ? guest ? openFeature("/profile?appearance=1") : setSheet(true)
+                      ? guest
+                        ? openFeature("/profile?appearance=1")
+                        : setSheet(true)
                       : openFeature(profileChildRoutes[label])
                   }
                 />
@@ -310,10 +403,20 @@ export default function AccountScreen() {
           </View>
         ))}
         {!session && !fixtures ? (
-          <Button variant="outline" onPress={() => router.push({ pathname: "/sign-in", params: { returnTo: "/profile" } })}>Sign in</Button>
+          <Button
+            variant="outline"
+            onPress={() =>
+              router.push({
+                pathname: "/sign-in",
+                params: { returnTo: "/profile" },
+              })
+            }
+          >
+            Sign in
+          </Button>
         ) : null}
         {session && !fixtures ? (
-          <Button variant="outline" onPress={() => setLogoutOpen(true)}>
+          <Button variant="secondary" onPress={() => setLogoutOpen(true)}>
             Sign out
           </Button>
         ) : null}
@@ -349,16 +452,23 @@ export default function AccountScreen() {
             </View>
           </BottomSheet.Header>
           <BottomSheet.Body>
-            <ThemeSelector
-              value={appearance}
-              applyTheme={false}
-              label="Choose your color theme"
-              onValueChange={(value) => {
-                Uniwind.setTheme(value as "system" | "light" | "dark");
-                setSheet(false);
-              }}
-            />
-            <Text muted size="xs">System follows your device’s light or dark appearance.</Text>
+            <Text size="sm" className="font-medium">
+              Choose your color theme
+            </Text>
+            <View className="w-full gap-3 items-center">
+              <ThemeSelector
+                value={appearance}
+                variant="card"
+                applyTheme={false}
+                onValueChange={(value) => {
+                  Uniwind.setTheme(value as "system" | "light" | "dark");
+                  setSheet(false);
+                }}
+              />
+            </View>
+            <Text muted size="xs">
+              System follows your device light or dark appearance.
+            </Text>
           </BottomSheet.Body>
         </BottomSheet.Content>
       </BottomSheet>
@@ -369,7 +479,11 @@ export default function AccountScreen() {
             Your saved reports and evidence stay on this device.
           </Dialog.Description>
           <Dialog.Footer>
-            <Button variant="outline" disabled={signingOut} onPress={() => setLogoutOpen(false)}>
+            <Button
+              variant="outline"
+              disabled={signingOut}
+              onPress={() => setLogoutOpen(false)}
+            >
               Cancel
             </Button>
             <Button loading={signingOut} onPress={() => void logout()}>

@@ -2,7 +2,7 @@
   "expo": {
     "name": "Aleconnect",
     "slug": "aleconnect-mobile",
-    "version": "1.0.0-alpha.1",
+    "version": "1.0.0-alpha.8",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "aleconnectmobile",
@@ -30,7 +30,7 @@
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION"
       ],
-      "versionCode": 55
+      "versionCode": 62
     },
     "web": {
       "output": "single",
@@ -70,6 +70,7 @@
       ],
       "expo-location",
       "./plugins/with-android-predictive-back-disabled",
+      "./plugins/with-android-short-native-paths",
       "./plugins/with-report-evidence-backup-exclusion",
       [
         "./plugins/with-android-production-signing-guard",

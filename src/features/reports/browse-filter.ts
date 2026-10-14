@@ -174,5 +174,5 @@ export const browseFixtureReports: Report[] = [
   accountName: i % 2 ? "Shop" : "Home",
   accountNumber: i % 2 ? "10006822" : "10004821",
   displayAddress:
-    i % 2 ? "Shop · Brgy. Bitano, Legazpi" : "Home · Brgy. Bigaa, Legazpi",
+    i % 2 ? "Shop, Brgy. Bitano, Legazpi" : "Home, Brgy. Bigaa, Legazpi",
 }));

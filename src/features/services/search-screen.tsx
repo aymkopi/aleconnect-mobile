@@ -131,8 +131,8 @@ export default function SearchScreen() {
               {rows.map((r) => (
                 <ServiceRow
                   key={r.id}
-                  title={r.ticketNumber + " · " + r.title}
-                  description={r.displayAddress ?? undefined}
+                  title={r.title}
+                  description={[r.ticketNumber, r.displayAddress].filter(Boolean).join("\n")}
                   onPress={() =>
                     router.push({
                       pathname: "/reports/[id]",

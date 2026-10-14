@@ -8,7 +8,7 @@ export function PreviewLabel() {
       size="xs"
       accessibilityRole="alert"
     >
-      Visual fixture · sample content · no live data
+      Visual fixture. Sample content; no live data.
     </Text>
   ) : null;
 }

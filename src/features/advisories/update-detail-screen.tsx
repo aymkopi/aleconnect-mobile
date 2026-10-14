@@ -180,7 +180,7 @@ function UpdateDetailScreen({ kind }: { kind: MobilePublicUpdate["kind"] }) {
             <>
               {read.data?.isStale || (fixtures && preview === "offline") ? (
                 <Text muted size="sm" accessibilityRole="alert">
-                  Saved post · reconnect and refresh for the latest information.
+                  Saved post. Reconnect and refresh for the latest information.
                 </Text>
               ) : null}
               {post?.photos.length ? (
@@ -267,8 +267,7 @@ function UpdateDetailScreen({ kind }: { kind: MobilePublicUpdate["kind"] }) {
                     </Text>
                   ) : null}
                   <Text muted size="xs">
-                    Published {formatManilaDateTime(advisory.publishedAt)} ·
-                    Philippine time
+                    Published {formatManilaDateTime(advisory.publishedAt)} (Philippine time)
                   </Text>
                 </Card>
               ) : (
@@ -286,10 +285,8 @@ function UpdateDetailScreen({ kind }: { kind: MobilePublicUpdate["kind"] }) {
                   >
                     {title}
                   </Text>
-                  <Text muted size="sm">
-                    {post?.pageName || "ALECO"} ·{" "}
-                    {formatManilaDateTime(item.publishedAt)}
-                  </Text>
+                  <Text size="sm" weight="medium">{post?.pageName || "ALECO"}</Text>
+                  <Text muted size="xs">{formatManilaDateTime(item.publishedAt)}</Text>
                 </View>
               )}
               {advisory?.audience ? (
@@ -464,7 +461,7 @@ function UpdateDetailScreen({ kind }: { kind: MobilePublicUpdate["kind"] }) {
                   {advisory.audience}
                 </Text>
                 <Text muted size="xs">
-                  Published audience · service availability is confirmed by
+                  Published audience. Service availability is confirmed by
                   ALECO
                 </Text>
               </Card>

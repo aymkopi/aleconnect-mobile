@@ -12,7 +12,7 @@
  *   <Item.Media variant="icon"><ReceiptIcon /></Item.Media>
  *   <Item.Content>
  *     <Item.Title>Invoice.pdf</Item.Title>
- *     <Item.Description>2.4 MB · Updated yesterday</Item.Description>
+ *     <Item.Description>Updated yesterday (2.4 MB)</Item.Description>
  *   </Item.Content>
  *   <Item.Actions><Button size="sm">Open</Button></Item.Actions>
  * </Item>

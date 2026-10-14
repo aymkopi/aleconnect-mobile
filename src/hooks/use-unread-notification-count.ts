@@ -10,29 +10,39 @@ import { useCallback, useState } from "react";
 export function useUnreadNotificationCount() {
   const { session } = useAuthSession();
   const { accountContext } = useConsumerAccount();
-  const [unreadCount, setUnreadCount] = useState(0);
+  const scope = session ? JSON.stringify([session.user.id, session.session.id, accountContext?.identityUserId, accountContext?.accessRevision]) : null;
+  const [unread, setUnread] = useState<{ scope: string | null; count: number }>({ scope: null, count: 0 });
 
   useFocusEffect(
     useCallback(() => {
       let isActive = true;
+      let loading = false, pending = false;
 
       if (!session) {
-        setUnreadCount(0);
         return;
       }
 
-      const load = () =>
+      const load = () => {
+        if (loading) { pending = true; return; }
+        loading = true;
         void fetchNotifications({
           userId: session.user.id,
+          sessionId: session.session.id,
           identityUserId: accountContext?.identityUserId,
           accessRevision: accountContext?.accessRevision,
+          force: true,
+          isCurrent: () => isActive,
         })
         .then((response) => {
-          if (isActive) setUnreadCount(response.unreadCount);
+          if (isActive && !pending) setUnread({ scope, count: response.unreadCount });
         })
         .catch(() => {
-          if (isActive) setUnreadCount(0);
+          // Keep the last accepted count during transient network failures.
+        }).finally(() => {
+          loading = false;
+          if (isActive && pending) { pending = false; load(); }
         });
+      };
       load();
       const unsubscribe = subscribeNotificationsChanged(load);
 
@@ -40,8 +50,8 @@ export function useUnreadNotificationCount() {
         isActive = false;
         unsubscribe();
       };
-    }, [accountContext?.accessRevision, accountContext?.identityUserId, session]),
+    }, [accountContext?.accessRevision, accountContext?.identityUserId, session, scope]),
   );
 
-  return unreadCount;
+  return unread.scope === scope ? unread.count : 0;
 }

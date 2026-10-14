@@ -78,7 +78,7 @@ test("image-free public posts have readable publisher and summary fallbacks", ()
     onPress() {},
   });
   assert.match(text(tree), /ALECO update/);
-  assert.match(text(tree), /Read story/);
+  assert.match(text(tree), /Read full story/);
   assert.doesNotMatch(text(tree), /Important|SO-/);
 });
 
