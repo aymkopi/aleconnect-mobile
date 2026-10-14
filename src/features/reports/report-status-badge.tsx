@@ -19,7 +19,7 @@ export function ReportStatusBadge({ status }: { status: unknown }) {
       style={{ backgroundColor: colors.background }}
     >
       <Text
-        className="text-[10px] leading-[14px]"
+        className="text-[11px] leading-[14px] font-medium"
         style={{ color: colors.foreground }}
       >
         {consumerTicketStatusLabel(status)}

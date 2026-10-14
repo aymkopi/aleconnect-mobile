@@ -159,7 +159,7 @@ function EmailSetup({ identity }: { identity: ProfileIdentity }) {
             {review ? (
               <View className="gap-3 rounded-xl bg-card p-4">
                 <DetailRow label="Email sign-in" value={email.trim().toLowerCase()} />
-                <DetailRow label="New password" value="Entered · hidden" />
+                <DetailRow label="New password" value="Entered securely" />
                 <DetailRow
                   label="ALECO account"
                   value={

@@ -411,7 +411,7 @@ export default function NewReportScreen() {
   ]
     .filter(Boolean)
     .join(", ");
-  const accountLabel = `${selected?.registeredName ?? "Service account"} · ${form.accountNumber ? "•••• " + form.accountNumber.slice(-4) : "Unavailable"}`;
+  const accountLabel = selected?.registeredName ?? "Service account";
   const update = <K extends keyof ComplaintFormState>(
     key: K,
     value: ComplaintFormState[K],
@@ -900,7 +900,7 @@ export default function NewReportScreen() {
               <View className="absolute inset-0 items-center justify-center bg-background/90 p-2">
                 <TriangleAlert color={muted} size={20} />
                 <Text size="xs" className="text-center">
-                  Failed · remove and retry
+                  Failed. Remove and retry
                 </Text>
               </View>
             ) : null}
@@ -997,7 +997,7 @@ export default function NewReportScreen() {
       <ReportReceipt
         ticketNumber={receipt.ticketNumber}
         title={form.categoryDescription || type?.title || "Report"}
-        issue={[category?.title, type?.title].filter(Boolean).join(" · ")}
+        issue={type?.title || category?.title || "Report"}
         account={accountLabel}
         address={address}
         photoCount={readyPhotos.length}
@@ -1127,8 +1127,8 @@ export default function NewReportScreen() {
                 <RadioGroup variant="card" value={accountId ?? undefined} onValueChange={selectAccount}
                   disabled={submitting || pickerBusy} accessibilityLabel="ALECO service account">
                   {accounts.map(account => <RadioGroup.Item key={account.id} value={account.id}
-                    label={account.registeredName + " · " + (account.accountNumber ? "•••• " + account.accountNumber.slice(-4) : "Number unavailable")}
-                    description={account.address ?? "Service address unavailable"} />)}
+                    label={account.registeredName}
+                    description={[(account.accountNumber ? "ALECO •••• " + account.accountNumber.slice(-4) : "Number unavailable"), account.address ?? "Service address unavailable"].join("\n")} />)}
                 </RadioGroup>
                 {!accounts.length && !accountLoading ? (
                   <Text muted>
@@ -1528,7 +1528,7 @@ export default function NewReportScreen() {
                 </View>
                 <View className="rounded-xl bg-card p-3 gap-2">
                   <EditRow
-                    title={`Photos · ${readyPhotos.length} attached`}
+                    title={`Attached photos (${readyPhotos.length})`}
                     onPress={() => edit(5)}
                   />
                   {photoStrip(false)}
@@ -1641,7 +1641,7 @@ export default function NewReportScreen() {
             </Button>
             {fixtures ? (
               <Text muted size="xs">
-                Visual fixture · adds a sample photo without opening your
+                Visual fixture; adds a sample photo without opening your
                 library.
               </Text>
             ) : null}

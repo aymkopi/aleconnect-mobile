@@ -91,9 +91,10 @@ export function ReportPage({
               }}
             />
           </View>
-          <Text size="xs" muted className="text-right">
-            Step {step.current} of {step.total} · {step.label}
-          </Text>
+          <View className="flex-row items-center justify-between gap-2">
+            <Text size="xs" weight="medium">{step.label}</Text>
+            <Text size="xs" muted>Step {step.current} of {step.total}</Text>
+          </View>
         </View>
       ) : null}
       {subtitle ? (

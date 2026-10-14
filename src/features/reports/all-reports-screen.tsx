@@ -1,5 +1,31 @@
-import { useEffect, useRef, useState } from "react";
-import { FlatList, View } from "react-native";
+import { ContentSkeleton } from "@/components/content-skeleton";
+import { DataNotice, DataState } from "@/components/data-state";
+import { Badge } from "@/components/panelui/badge";
+import { BottomSheet } from "@/components/panelui/bottom-sheet";
+import { Button } from "@/components/panelui/button";
+import { Calendar } from "@/components/panelui/calendar";
+import { Label } from "@/components/panelui/label";
+import { Select } from "@/components/panelui/select";
+import { Tabs } from "@/components/panelui/tabs";
+import { Text } from "@/components/panelui/text";
+import { SearchField } from "@/components/search-field";
+import { useReportQueue } from "@/context/report-queue-context";
+import { useVisualPreview } from "@/context/visual-preview-context";
+import { useAppColors } from "@/hooks/use-app-colors";
+import { useAuthSession } from "@/hooks/use-auth-session";
+import { useConsumerAccount } from "@/hooks/use-consumer-account";
+import { useScopedRead } from "@/hooks/use-scoped-read";
+import { calendarShortDate } from "@/lib/date";
+import { isQueuedReportVisible } from "@/services/report-queue-access";
+import {
+  subscribeReportRevalidationRequested,
+  subscribeReportStatusChanged,
+} from "@/services/report-sync-events";
+import {
+  fetchComplaintMeta,
+  fetchComplaintReportPage,
+} from "@/services/reports";
+import { parseApiInstant } from "@/utils/manila-time";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   ArrowDownUp,
@@ -13,55 +39,29 @@ import {
   Plus,
   Tag,
 } from "lucide-react-native";
-import { Calendar } from "@/components/panelui/calendar";
+import { useEffect, useRef, useState } from "react";
+import { FlatList, View } from "react-native";
+import {
+  browseFixtureReports,
+  compareFixtureReports,
+  dateRangeWithinBounds,
+  defaultBrowseFilters,
+  filterBrowseReports,
+  manilaDateKey,
+  reportBrowseScope,
+  reportPickerDate,
+  reportPickerDateKey,
+  validDateRange,
+  type BrowseFilters,
+} from "./browse-filter";
 import { ReportPage } from "./components/report-page";
-import { ReportCard } from "./report-card";
-import { Button } from "@/components/panelui/button";
-import { Text } from "@/components/panelui/text";
-import { Label } from "@/components/panelui/label";
-import { Badge } from "@/components/panelui/badge";
-import { Tabs } from "@/components/panelui/tabs";
-import { Select } from "@/components/panelui/select";
-import { BottomSheet } from "@/components/panelui/bottom-sheet";
-import { ContentSkeleton } from "@/components/content-skeleton";
-import { DataState, DataNotice } from "@/components/data-state";
-import { SearchField } from "@/components/search-field";
-import { useAppColors } from "@/hooks/use-app-colors";
-import { useAuthSession } from "@/hooks/use-auth-session";
-import { useConsumerAccount } from "@/hooks/use-consumer-account";
-import { useScopedRead } from "@/hooks/use-scoped-read";
-import { useVisualPreview } from "@/context/visual-preview-context";
-import { useReportQueue } from "@/context/report-queue-context";
-import {
-  fetchComplaintMeta,
-  fetchComplaintReportPage,
-} from "@/services/reports";
-import {
-  subscribeReportRevalidationRequested,
-  subscribeReportStatusChanged,
-} from "@/services/report-sync-events";
-import { isQueuedReportVisible } from "@/services/report-queue-access";
-import { CONSUMER_TICKET_STATUSES, consumerTicketStatusLabel } from "./status";
 import {
   filterReportTab,
   getReportTabCounts,
   type ReportTab,
 } from "./main-filter";
-import {
-  browseFixtureReports,
-  defaultBrowseFilters,
-  compareFixtureReports,
-  filterBrowseReports,
-  manilaDateKey,
-  reportBrowseScope,
-  validDateRange,
-  dateRangeWithinBounds,
-  reportPickerDate,
-  reportPickerDateKey,
-  type BrowseFilters,
-} from "./browse-filter";
-import { parseApiInstant } from "@/utils/manila-time";
-import { calendarShortDate } from "@/lib/date";
+import { ReportCard } from "./report-card";
+import { CONSUMER_TICKET_STATUSES, consumerTicketStatusLabel } from "./status";
 
 type FilterView =
   | "filters"
@@ -159,7 +159,9 @@ export default function AllReportsScreen() {
     start: params.start || "",
     end: params.end || "",
     sort:
-      params.sort === "oldest" || params.sort === "status" || params.sort === "updated"
+      params.sort === "oldest" ||
+      params.sort === "status" ||
+      params.sort === "updated"
         ? params.sort
         : "newest",
   });
@@ -257,7 +259,9 @@ export default function AllReportsScreen() {
       ? "Fixture: reports could not be loaded. Try again."
       : null
     : reports.error;
-  const hasData = fixtures ? !["loading", "error"].includes(fixtureState) : !!reports.data;
+  const hasData = fixtures
+    ? !["loading", "error"].includes(fixtureState)
+    : !!reports.data;
   const stale = fixtures ? fixtureState === "offline" : reports.data?.isStale;
   // The endpoint owns account/query/sort; status/type/date filter the pages loaded so far.
   const filtered = filterBrowseReports(loaded, {
@@ -355,7 +359,7 @@ export default function AllReportsScreen() {
           endContent={<ChevronDown size={16} color={muted} />}
           onPress={() => openFilters()}
         >
-          Filter · {filterCount || "All"}
+          Filter {filterCount || "All"}
         </Button>
         <Button
           variant="outline"
@@ -370,19 +374,22 @@ export default function AllReportsScreen() {
         defaultValue="all"
         value={tab}
         onValueChange={(v) => setTab(v as ReportTab)}
+        variant="pill"
+        size="sm"
       >
-        <Tabs.List>
+        <Tabs.List className="gap-1 min-h-12 items-center">
           {(["all", "open", "resolved"] as const).map((t) => (
             <Tabs.Trigger
               key={t}
               value={t}
-              className="min-h-11 flex-1"
+              className="min-h-8 py-1 px-3"
               badge={
                 <Badge
                   count={counts[t]}
                   variant="secondary"
                   accessibilityLabel={`${counts[t]} ${t} reports loaded`}
-                  labelClassName="text-[10px]"
+                  className="self-center h-5 min-w-5 items-center justify-center px-1 py-0"
+                  labelClassName="text-[10px] leading-[14px]"
                 />
               }
             >
@@ -393,7 +400,7 @@ export default function AllReportsScreen() {
       </Tabs>
       <Text muted size="xs">
         {rows.length} matching report{rows.length === 1 ? "" : "s"} loaded
-        {hasMore ? " · More reports available" : ""}. Status, type and period
+        {hasMore ? ". More reports available" : ""}. Status, type and period
         apply to loaded reports.
       </Text>
       {search ? (
@@ -422,7 +429,7 @@ export default function AllReportsScreen() {
       {stale ? (
         <View className="rounded-xl bg-card p-3 gap-2">
           <Text weight="semibold" size="sm">
-            Saved reports · updates may be delayed
+            Saved reports; updates may be delayed
           </Text>
           <Text muted size="sm">
             This saved view may be out of date. Connect and refresh to confirm
@@ -440,7 +447,17 @@ export default function AllReportsScreen() {
           </Button>
         </View>
       ) : null}
-      {hasData && error && reports.errorSource !== "more" ? <DataNotice title="Could not refresh reports" description="Your loaded reports are still available. Connect and refresh for current statuses." actionLabel="Refresh reports" busy={busy} onAction={() => fixtures ? setFixtureState("loaded") : void reports.reload(true)} /> : null}
+      {hasData && error && reports.errorSource !== "more" ? (
+        <DataNotice
+          title="Could not refresh reports"
+          description="Your loaded reports are still available. Connect and refresh for current statuses."
+          actionLabel="Refresh reports"
+          busy={busy}
+          onAction={() =>
+            fixtures ? setFixtureState("loaded") : void reports.reload(true)
+          }
+        />
+      ) : null}
     </View>
   );
   const title = query ? "Search reports" : "All reports";
@@ -455,9 +472,9 @@ export default function AllReportsScreen() {
             ? "Sort reports"
             : view === "period"
               ? "Report period"
-                  : view === "preview"
-                    ? "Fixture browse states"
-                    : "Filter reports";
+              : view === "preview"
+                ? "Fixture browse states"
+                : "Filter reports";
   return (
     <ReportPage
       title={title}
@@ -531,10 +548,42 @@ export default function AllReportsScreen() {
           );
         }}
         ListEmptyComponent={
-          !hasData && busy ? <DataState loading title="Loading your reports" />
-          : !session && !fixtures ? <DataState title="Sign in to see your reports" description="Reports belong to your signed-in account." actionLabel="Sign in" onAction={() => router.push({ pathname: "/sign-in", params: { returnTo: "/reports/list" } })} />
-          : !hasData && error ? <DataState title="Your reports couldn’t load" description="Reconnect and retry. Your search and filters are kept in place." actionLabel="Try again" onAction={() => fixtures ? setFixtureState("loaded") : void reports.reload(true)} />
-          : <DataState icon={FileText} title="No matching reports" description={hasMore ? "There may be matches in later pages. Load more reports or review your filters." : "Try another reference, issue or location, or review your filters."} actionLabel="Review filters" onAction={openFilters} />
+          !hasData && busy ? (
+            <DataState loading title="Loading your reports" />
+          ) : !session && !fixtures ? (
+            <DataState
+              title="Sign in to see your reports"
+              description="Reports belong to your signed-in account."
+              actionLabel="Sign in"
+              onAction={() =>
+                router.push({
+                  pathname: "/sign-in",
+                  params: { returnTo: "/reports/list" },
+                })
+              }
+            />
+          ) : !hasData && error ? (
+            <DataState
+              title="Your reports couldn’t load"
+              description="Reconnect and retry. Your search and filters are kept in place."
+              actionLabel="Try again"
+              onAction={() =>
+                fixtures ? setFixtureState("loaded") : void reports.reload(true)
+              }
+            />
+          ) : (
+            <DataState
+              icon={FileText}
+              title="No matching reports"
+              description={
+                hasMore
+                  ? "There may be matches in later pages. Load more reports or review your filters."
+                  : "Try another reference, issue or location, or review your filters."
+              }
+              actionLabel="Review filters"
+              onAction={openFilters}
+            />
+          )
         }
         refreshing={pullRefreshing}
         onRefresh={async () => {
@@ -542,18 +591,27 @@ export default function AllReportsScreen() {
           try {
             if (fixtures) setFixturePage({ scope: fixtureScope, count: 3 });
             else await reports.reload(true);
-          } finally { setPullRefreshing(false); }
+          } finally {
+            setPullRefreshing(false);
+          }
         }}
         ListFooterComponent={
           <View className="py-4 gap-2">
-            {reports.error && reports.errorSource === "more" ? <DataNotice title="More reports couldn’t load" description="The reports above are still available. Retry without losing your place." /> : null}
+            {reports.error && reports.errorSource === "more" ? (
+              <DataNotice
+                title="More reports couldn’t load"
+                description="The reports above are still available. Retry without losing your place."
+              />
+            ) : null}
             {hasMore && !stale ? (
               <Button
                 variant="outline"
                 loading={busy}
                 onPress={() => void more()}
               >
-                {reports.errorSource === "more" ? "Retry more reports" : "Load more reports"}
+                {reports.errorSource === "more"
+                  ? "Retry more reports"
+                  : "Load more reports"}
               </Button>
             ) : loaded.length ? (
               <Text muted size="xs" className="text-center">
@@ -567,11 +625,7 @@ export default function AllReportsScreen() {
         <BottomSheet.Content
           className="px-4"
           size="auto"
-          onBack={
-            view === "filters"
-              ? undefined
-              : () => setView("filters")
-          }
+          onBack={view === "filters" ? undefined : () => setView("filters")}
         >
           <BottomSheet.Header>
             <View className="flex-row items-center gap-2">
@@ -696,17 +750,83 @@ export default function AllReportsScreen() {
                   <Select.Item value="year" label="This year" />
                   <Select.Item value="custom" label="Custom dates" />
                 </Select>
-                <Text size="xs" weight="medium">Selected · {periodLabels[draft.period]}{draft.period === "custom" ? " · " + (validDateRange(draft.start, draft.start) ? calendarShortDate(reportPickerDate(draft.start), "gregory", "en-PH") : "Start date") + " – " + (validDateRange(draft.end, draft.end) ? calendarShortDate(reportPickerDate(draft.end), "gregory", "en-PH") : "End date") : ""}</Text>
+                <Text size="xs" weight="medium">
+                  Selected: {periodLabels[draft.period]}
+                  {draft.period === "custom"
+                    ? ": " +
+                      (validDateRange(draft.start, draft.start)
+                        ? calendarShortDate(
+                            reportPickerDate(draft.start),
+                            "gregory",
+                            "en-PH",
+                          )
+                        : "Start date") +
+                      " – " +
+                      (validDateRange(draft.end, draft.end)
+                        ? calendarShortDate(
+                            reportPickerDate(draft.end),
+                            "gregory",
+                            "en-PH",
+                          )
+                        : "End date")
+                    : ""}
+                </Text>
                 {draft.period === "custom" ? (
                   <>
-                    <Calendar mode="range" bordered={false} locale="en-PH" weekStartsOn="auto" selectOutsideDays
-                      defaultMonth={reportPickerDate(manilaDateKey(new Date()))} captionLayout="dropdown"
-                      minDate={reportPickerDate("2026-01-01")} maxDate={reportPickerDate(manilaDateKey(new Date()))}
-                      selected={validDateRange(draft.start, draft.start) ? { from: reportPickerDate(draft.start), ...(validDateRange(draft.end, draft.end) ? { to: reportPickerDate(draft.end) } : {}) } : undefined}
-                      onSelect={range => setDraft(d => ({ ...d, start: range ? reportPickerDateKey(range.from) : "", end: range?.to ? reportPickerDateKey(range.to) : "" }))} />
-                    <Text muted size="xs">Available from January 1, 2026 through today.</Text>
-                    {!dateRangeWithinBounds(draft.start, draft.end, { start: "2026-01-01", end: manilaDateKey(new Date()) }) ? <Text size="xs" accessibilityRole="alert" className="text-destructive">Choose both dates within the available range.</Text> : null}
-                    <Button disabled={!dateRangeWithinBounds(draft.start, draft.end, { start: "2026-01-01", end: manilaDateKey(new Date()) })} onPress={() => setView("filters")}>Use selected dates</Button>
+                    <Calendar
+                      mode="range"
+                      bordered={false}
+                      locale="en-PH"
+                      weekStartsOn="auto"
+                      selectOutsideDays
+                      defaultMonth={reportPickerDate(manilaDateKey(new Date()))}
+                      captionLayout="dropdown"
+                      minDate={reportPickerDate("2026-01-01")}
+                      maxDate={reportPickerDate(manilaDateKey(new Date()))}
+                      selected={
+                        validDateRange(draft.start, draft.start)
+                          ? {
+                              from: reportPickerDate(draft.start),
+                              ...(validDateRange(draft.end, draft.end)
+                                ? { to: reportPickerDate(draft.end) }
+                                : {}),
+                            }
+                          : undefined
+                      }
+                      onSelect={(range) =>
+                        setDraft((d) => ({
+                          ...d,
+                          start: range ? reportPickerDateKey(range.from) : "",
+                          end: range?.to ? reportPickerDateKey(range.to) : "",
+                        }))
+                      }
+                    />
+                    <Text muted size="xs">
+                      Available from January 1, 2026 through today.
+                    </Text>
+                    {!dateRangeWithinBounds(draft.start, draft.end, {
+                      start: "2026-01-01",
+                      end: manilaDateKey(new Date()),
+                    }) ? (
+                      <Text
+                        size="xs"
+                        accessibilityRole="alert"
+                        className="text-destructive"
+                      >
+                        Choose both dates within the available range.
+                      </Text>
+                    ) : null}
+                    <Button
+                      disabled={
+                        !dateRangeWithinBounds(draft.start, draft.end, {
+                          start: "2026-01-01",
+                          end: manilaDateKey(new Date()),
+                        })
+                      }
+                      onPress={() => setView("filters")}
+                    >
+                      Use selected dates
+                    </Button>
                   </>
                 ) : null}
               </>
@@ -724,7 +844,8 @@ export default function AllReportsScreen() {
                       <Select.Item
                         key={a.id}
                         value={a.id}
-                        label={`${a.registeredName} · ••${a.accountNumber?.slice(-4) || "—"}`}
+                        label={a.registeredName}
+                        description={`ALECO ••${a.accountNumber?.slice(-4) || "—"}`}
                       />
                     ))}
                   </>
@@ -749,7 +870,12 @@ export default function AllReportsScreen() {
                     {types.map((t) => (
                       <Select.Item key={t.id} value={t.id} label={t.title} />
                     ))}
-                    {meta.busy && types.length === 0 ? <ContentSkeleton layout="selection" label="Loading report types" /> : null}
+                    {meta.busy && types.length === 0 ? (
+                      <ContentSkeleton
+                        layout="selection"
+                        label="Loading report types"
+                      />
+                    ) : null}
                     {meta.error ? (
                       <Button
                         variant="outline"
@@ -775,7 +901,10 @@ export default function AllReportsScreen() {
                 fullWidth
                 disabled={
                   draft.period === "custom" &&
-                  !dateRangeWithinBounds(draft.start, draft.end, { start: "2026-01-01", end: manilaDateKey(new Date()) })
+                  !dateRangeWithinBounds(draft.start, draft.end, {
+                    start: "2026-01-01",
+                    end: manilaDateKey(new Date()),
+                  })
                 }
                 onPress={() => {
                   setFilters(draft);

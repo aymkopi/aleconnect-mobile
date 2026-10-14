@@ -5,6 +5,7 @@ import { Carousel } from "@/components/panelui/carousel";
 import { Text } from "@/components/panelui/text";
 import { PreviewLabel } from "@/components/preview-label";
 import { SearchField } from "@/components/search-field";
+import { NotificationButton } from "@/components/notification-button";
 import { useGuestAccess } from "@/context/guest-access-context";
 import { useVisualPreview } from "@/context/visual-preview-context";
 import { updateRoute } from "@/features/advisories/presentation";
@@ -135,8 +136,20 @@ export default function HomeScreen() {
   const scrollRef = useMainPageScroll<ScrollView>(updates.reload);
   const items = fixtures ? fixtureUpdates : (updates.data?.items ?? []);
   const name = fixtures
-    ? "Justine"
+    ? "ka-ALECO"
     : (session?.user.name?.split(" ")[0] ?? "there");
+
+  const hour = new Date().getHours();
+
+  const timeOfDay: "umaga" | "tanghali" | "hapon" | "gabi" =
+    hour >= 5 && hour < 11
+      ? "umaga"
+      : hour >= 11 && hour < 13
+        ? "tanghali"
+        : hour >= 13 && hour < 18
+          ? "hapon"
+          : "gabi";
+
   const bottom = appScrollableBottomPadding(insets.bottom);
   const layout = getHomeLayout({
     height,
@@ -219,16 +232,7 @@ export default function HomeScreen() {
                     : "Hello, " + name + "."
                   : "ALEConnect"}
               </Text>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="rounded-full bg-white/20"
-                style={{ width: 44, height: 44 }}
-                accessibilityLabel="Notifications"
-                onPress={() => openFeature("/notifications")}
-              >
-                <Bell size={20} color="#FFFFFF" />
-              </Button>
+              <NotificationButton overImage />
             </View>
             {!layout.denseHeader ? (
               <View className="gap-1">
@@ -245,7 +249,7 @@ export default function HomeScreen() {
                     ? "Discover ALEConnect."
                     : layout.compactHeader
                       ? "Hello, " + name + "."
-                      : "Magandang umaga,\n" + name + "."}
+                      : "Magandang " + timeOfDay + ", \n" + name + "."}
                 </Text>
                 {!layout.compactHeader ? (
                   <Text

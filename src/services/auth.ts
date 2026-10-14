@@ -227,3 +227,20 @@ export async function changeConsumerPassword(
     body: JSON.stringify({ currentPassword, newPassword }),
   });
 }
+
+export type PasswordChangeStatus = {
+  state: "verify" | "verified" | "complete";
+  flowId?: string | null;
+  verificationExpiresAt?: string | null;
+  cooldownUntil?: string | null;
+  serverNow: string;
+};
+
+export function requestPasswordChange(
+  body: { action: "status" | "verify" | "change" | "cancel"; flowId?: string | null; currentPassword?: string; newPassword?: string; confirmPassword?: string },
+  authToken: string,
+) {
+  return apiRequest<PasswordChangeStatus>("/api/mobile/auth/change-password", {
+    method: "POST", body: JSON.stringify(body),
+  }, { authToken });
+}

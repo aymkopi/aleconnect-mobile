@@ -15,8 +15,8 @@ test('report account field stays mounted while the selected profile is loading',
 });
 test('map pin address stays visible during geocoding and confirmation remains gated',async()=>{
  const source=await read('src/features/maps/report-location-picker.tsx');
- assert.ok(!source.includes('{resolving || locating ? ('));
- assert.ok(source.includes('{address}'));
+ // The pending spinner may change; the address remains outside that conditional.
+ assert.match(source, /<Spinner[\s\S]*?\) : null\}[\s\S]*?<\/View>\s*<Text[^>]*>\s*\{address\}\s*<\/Text>/);
  assert.ok(source.includes('disabled={!resolved || resolving || locating || Boolean(error)}'));
 });
 test('reports main uses the existing cached first-page shape and subscribes to submission changes',async()=>{
@@ -29,5 +29,6 @@ test('reports main uses the existing cached first-page shape and subscribes to s
 test('both Reports account selectors show registered names and complete account numbers',async()=>{
  const source=await read('src/features/reports/main-screen.tsx');
  assert.ok(!source.includes('accountNumber.slice(-4)'));
- assert.equal(source.split("label={`${a.registeredName} · ${a.accountNumber || \"Number unavailable\"}`}").length - 1,2);
+ assert.equal(source.split("label={a.registeredName}").length - 1,2);
+ assert.equal(source.split('description={a.accountNumber || "Number unavailable"}').length - 1,2);
 });

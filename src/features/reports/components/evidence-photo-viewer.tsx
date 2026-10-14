@@ -260,7 +260,7 @@ function EvidencePhotoContent({
               </GestureDetector>
               <View className="flex-row items-center gap-2">
                 <Text muted size="sm" className="flex-1">
-                  Pinch to zoom · Double tap to fit
+                  Pinch to zoom. Double tap to fit
                 </Text>
                 <Button
                   variant="ghost"

@@ -76,7 +76,7 @@ export function detailFixture(
     ...item,
     type: "scheduled_outage",
     content,
-    audience: "Rawis, Bigaa and Victory Village North · Legazpi City",
+    audience: "Rawis, Bigaa and Victory Village North, Legazpi City",
     ...variants[preview ?? ""],
   };
 }

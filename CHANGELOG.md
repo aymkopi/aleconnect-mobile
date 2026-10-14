@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased — Consumer security and navigation
+
+- Add numeric unread badges to main-page notification buttons, with99+ display and full accessible counts. Refresh invalidations are serialized; cached counts never leak across consumer/session/access scopes.
+- Add current-password verification, matching new-password fields with live validation/show-hide controls, cooldown/expiry/network recovery, guarded cancellation and completion to Security settings. Session-bound five-minute grants and all failure limits remain server-enforced; no sensitive value is persisted by the app.
+- Animate one continuous bottom-navigation pill with Reanimated springs, subtle stretch/contract, interrupted-switch support, reduced motion and icon/label color transitions. Page routing remains instant and tab geometry is unchanged.
+- State that Reports KPI counts describe fetched reports for the selected period/filters. Replace dotted metadata concatenation with labels, separate text levels and ordinary address/date punctuation.
+- Include the current manual Home, notification, Account, Alerts, report-list/status, radial-gradient and map edits. Preserve map minimum zoom9, the visible address while its spinner resolves, separate theme heading and48px adaptive Home icons. Add the Windows-only short CMake staging plugin for Expo development builds.
+- Update Light/Dark Figma password flows, bell badge examples and KPI scope; keep the dark page background#00060F. Bounded phone-emulator and tablet25040RP0AG fixture checks cover layout, form controls, completion and recorded pill motion without changing a real password or submitting saved queues.
+- Update five direct Expo57 patch dependencies and their resolved dependency versions; alignment and Doctor21/21 pass. Keep native animation/keyboard pins unchanged.
+- Deploy the compatible Staff password-change API before distributing this client. Existing required-password clients remain supported. Use the existing automatic alpha pipeline, retained package/signer and increasing Android version code; provider/push/private-password/native-iOS and store-production signing remain separate acceptance.
 ## 1.0.0-alpha.8 — 2026-10-13
 
 - Publish PR8 from merged source017f743 as Android code62. Original signer/package, live API, fixture-disabled non-debuggable runtime, GitHub/downloaded digests and all54-library ZIP/ELF16KB alignment are verified; prior alphas remain available. [Release](https://github.com/aymkopi/aleconnect-mobile/releases/tag/v1.0.0-alpha.8).

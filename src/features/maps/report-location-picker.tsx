@@ -1,10 +1,3 @@
-import { useIsFocused } from "expo-router/react-navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Modal, Platform, View } from "react-native";
-import * as Location from "expo-location";
-import type { CameraRef } from "@maplibre/maplibre-react-native";
-import { LocateFixed, MapPin, Minus, Plus, Search } from "lucide-react-native";
-import { ReportPage } from "@/features/reports/components/report-page";
 import { Button } from "@/components/panelui/button";
 import { Field } from "@/components/panelui/field";
 import { Input } from "@/components/panelui/input";
@@ -12,19 +5,32 @@ import { Select } from "@/components/panelui/select";
 import { Skeleton } from "@/components/panelui/skeleton";
 import { Spinner } from "@/components/panelui/spinner";
 import { Text } from "@/components/panelui/text";
-import { useAppColors } from "@/hooks/use-app-colors";
-import { isWithinAlbay } from "@/features/reports/contract";
+import type { HomeReportLocation } from "@/features/reports/address";
 import { findAlbayBarangay } from "@/features/reports/albay-barangays";
+import { ReportPage } from "@/features/reports/components/report-page";
+import { isWithinAlbay } from "@/features/reports/contract";
 import { creationFixtureLocation } from "@/features/reports/creation-fixtures";
 import type { ComplaintMeta } from "@/features/reports/data";
-import type { HomeReportLocation } from "@/features/reports/address";
-import { initialReportCoordinates, REPORT_MAP_BOUNDS, REPORT_MAP_MIN_ZOOM, REPORT_MAP_MAX_ZOOM, resolveReportPin } from "./report-location-state";
+import { useAppColors } from "@/hooks/use-app-colors";
+import type { CameraRef } from "@maplibre/maplibre-react-native";
+import * as Location from "expo-location";
+import { useIsFocused } from "expo-router/react-navigation";
+import { LocateFixed, MapPin, Minus, Plus, Search } from "lucide-react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Modal, Platform, View } from "react-native";
 import {
   loadMapLibreModule,
   MAP_LOAD_TIMEOUT_MS,
   MAP_STYLE_URL,
   type MapLibreModule,
 } from "./map-runtime";
+import {
+  initialReportCoordinates,
+  REPORT_MAP_BOUNDS,
+  REPORT_MAP_MAX_ZOOM,
+  REPORT_MAP_MIN_ZOOM,
+  resolveReportPin,
+} from "./report-location-state";
 import { WebLocationMap, type WebMapHandle } from "./web-location-map";
 type Coordinates = { latitude: number; longitude: number };
 async function withTimeout<T>(promise: Promise<T>, milliseconds: number) {
@@ -66,7 +72,9 @@ function ActiveReportLocationPicker({
   const focused = useIsFocused();
   const [module, setModule] = useState<MapLibreModule | null>(null),
     [coordinates, setCoordinates] = useState(
-      initialReportCoordinates(initialCoordinates ?? (fixture ? creationFixtureLocation : null)),
+      initialReportCoordinates(
+        initialCoordinates ?? (fixture ? creationFixtureLocation : null),
+      ),
     ),
     [streetAddress, setStreetAddress] = useState<
       (Coordinates & { street: string }) | null
@@ -81,7 +89,10 @@ function ActiveReportLocationPicker({
     [retry, setRetry] = useState(0);
   const [locationAllowed, setLocationAllowed] = useState(false);
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
-  const [initialCamera, setInitialCamera] = useState(() => ({ center: [coordinates.longitude, coordinates.latitude] as [number, number], zoom: 16 }));
+  const [initialCamera, setInitialCamera] = useState(() => ({
+    center: [coordinates.longitude, coordinates.latitude] as [number, number],
+    zoom: 16,
+  }));
   const [query, setQuery] = useState(""),
     [municipality, setMunicipality] = useState(""),
     [barangay, setBarangay] = useState(""),
@@ -108,7 +119,8 @@ function ActiveReportLocationPicker({
       coordinates.latitude,
       coordinates.longitude,
     );
-    if (fixture) return detected ? { ...creationFixtureLocation, ...coordinates } : null;
+    if (fixture)
+      return detected ? { ...creationFixtureLocation, ...coordinates } : null;
     return resolveReportPin(coordinates, detected?.barangayPsgc ?? null, meta);
   }, [coordinates, fixture, meta]);
   const resolved = pin
@@ -124,26 +136,38 @@ function ActiveReportLocationPicker({
   const pinError = !isWithinAlbay(coordinates.latitude, coordinates.longitude)
     ? "This point is outside Albay. Choose a location within Albay."
     : !pin
-      ? "Choose a point on land within Albay. Water and locations outside its boundaries cannot be selected."
+      ? "Choose a point within Albay. Locations outside its boundaries cannot be selected."
       : null;
   const error = locationError ?? pinError;
-  const resolving = Boolean(pin && resolvingPoint?.latitude === coordinates.latitude && resolvingPoint?.longitude === coordinates.longitude);
+  const resolving = Boolean(
+    pin &&
+    resolvingPoint?.latitude === coordinates.latitude &&
+    resolvingPoint?.longitude === coordinates.longitude,
+  );
   useEffect(() => {
     if (fixture) return;
     let active = true;
     let subscription: Location.LocationSubscription | undefined;
-    void Location.getForegroundPermissionsAsync().then(async permission => {
-      if (!active || !permission.granted) return;
-      setLocationAllowed(true);
-      if (Platform.OS === "web") {
-        const next = await Location.watchPositionAsync({ accuracy: Location.Accuracy.Balanced, distanceInterval: 10 }, position => {
-          if (active) setUserLocation(position.coords);
-        });
-        if (active) subscription = next;
-        else next.remove();
-      }
-    }).catch(() => {});
-    return () => { active = false; subscription?.remove(); };
+    void Location.getForegroundPermissionsAsync()
+      .then(async (permission) => {
+        if (!active || !permission.granted) return;
+        setLocationAllowed(true);
+        if (Platform.OS === "web") {
+          const next = await Location.watchPositionAsync(
+            { accuracy: Location.Accuracy.Balanced, distanceInterval: 10 },
+            (position) => {
+              if (active) setUserLocation(position.coords);
+            },
+          );
+          if (active) subscription = next;
+          else next.remove();
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+      subscription?.remove();
+    };
   }, [fixture, locationAllowed]);
   useEffect(() => {
     if (!open || Platform.OS === "web") return;
@@ -204,7 +228,10 @@ function ActiveReportLocationPicker({
     setCoordinates(next);
     setError(null);
     if (Platform.OS !== "web" && !camera.current)
-      setInitialCamera({ center: [next.longitude, next.latitude], zoom: zoom.current });
+      setInitialCamera({
+        center: [next.longitude, next.latitude],
+        zoom: zoom.current,
+      });
     (Platform.OS === "web" ? webCamera.current : camera.current)?.flyTo({
       center: [next.longitude, next.latitude],
       zoom: zoom.current,
@@ -360,7 +387,10 @@ function ActiveReportLocationPicker({
     setSearchView(false);
   };
   const openSearch = () => {
-    setInitialCamera({ center: [coordinates.longitude, coordinates.latitude], zoom: zoom.current });
+    setInitialCamera({
+      center: [coordinates.longitude, coordinates.latitude],
+      zoom: zoom.current,
+    });
     setSearchView(true);
   };
   const Map = module?.Map,
@@ -569,7 +599,9 @@ function ActiveReportLocationPicker({
                   minZoom={REPORT_MAP_MIN_ZOOM}
                   maxZoom={REPORT_MAP_MAX_ZOOM}
                 />
-                {locationAllowed && !fixture && UserLocation ? <UserLocation accuracy /> : null}
+                {locationAllowed && !fixture && UserLocation ? (
+                  <UserLocation accuracy />
+                ) : null}
               </Map>
             ) : (
               <View className="flex-1 items-center justify-center gap-3 px-8">
@@ -581,7 +613,10 @@ function ActiveReportLocationPicker({
                 <Button
                   variant="secondary"
                   onPress={() => {
-                    setInitialCamera({ center: [coordinates.longitude, coordinates.latitude], zoom: zoom.current });
+                    setInitialCamera({
+                      center: [coordinates.longitude, coordinates.latitude],
+                      zoom: zoom.current,
+                    });
                     setReady(false);
                     setMapError(null);
                     setRetry((current) => current + 1);
@@ -589,13 +624,17 @@ function ActiveReportLocationPicker({
                 >
                   Retry map
                 </Button>
-                <Button onPress={openSearch}>
-                  Find a location
-                </Button>
+                <Button onPress={openSearch}>Find a location</Button>
               </View>
             )}
             {!ready && !mapError ? (
-              <View pointerEvents="none" className="absolute inset-0"><Skeleton animated={focused} label="Loading map" className="absolute inset-0" /></View>
+              <View pointerEvents="none" className="absolute inset-0">
+                <Skeleton
+                  animated={focused}
+                  label="Loading map"
+                  className="absolute inset-0"
+                />
+              </View>
             ) : null}
             <View
               pointerEvents="none"
@@ -641,7 +680,10 @@ function ActiveReportLocationPicker({
                 className="bg-card rounded-xl"
                 accessibilityLabel="Zoom in"
                 onPress={() => {
-                  zoom.current = Math.min(REPORT_MAP_MAX_ZOOM, zoom.current + 1);
+                  zoom.current = Math.min(
+                    REPORT_MAP_MAX_ZOOM,
+                    zoom.current + 1,
+                  );
                   (Platform.OS === "web"
                     ? webCamera.current
                     : camera.current
@@ -656,7 +698,10 @@ function ActiveReportLocationPicker({
                 className="bg-card rounded-xl"
                 accessibilityLabel="Zoom out"
                 onPress={() => {
-                  zoom.current = Math.max(REPORT_MAP_MIN_ZOOM, zoom.current - 1);
+                  zoom.current = Math.max(
+                    REPORT_MAP_MIN_ZOOM,
+                    zoom.current - 1,
+                  );
                   (Platform.OS === "web"
                     ? webCamera.current
                     : camera.current
@@ -667,18 +712,29 @@ function ActiveReportLocationPicker({
               </Button>
             </View>
             <View className="absolute inset-x-4 bottom-8 rounded-xl bg-card p-4 gap-2">
-              <View className="flex-row items-center justify-between" style={{ minHeight: 20 }}>
-                <Text muted size="xs">Issue location</Text>
-                {resolving || locating ? <Spinner size="sm" label={locating ? "Finding your location" : "Confirming address"} /> : null}
+              <View
+                className="flex-row items-center justify-between"
+                style={{ minHeight: 20 }}
+              >
+                <Text muted size="xs">
+                  Issue location
+                </Text>
+                {resolving || locating ? (
+                  <Spinner
+                    size="sm"
+                    label={
+                      locating ? "Finding your location" : "Confirming address"
+                    }
+                  />
+                ) : null}
               </View>
-              <Text weight="semibold" size="sm" numberOfLines={2}>{address}</Text>
-              <View className="flex-row gap-2 items-center" style={{ minHeight: 20 }}>
-                <Text size="xs" muted>{locating ? "Finding your location" : resolving ? "Confirming Albay address…" : "Pin location"}</Text>
-              </View>
+              <Text weight="semibold" size="sm" numberOfLines={2}>
+                {address}
+              </Text>
               <Text size="xs" muted>
                 {fixture
-                  ? "Illustrative visual fixture · no device location used"
-                  : "Albay · Adjust the pin to the issue."}
+                  ? "Illustrative visual fixture; no device location used"
+                  : "Albay. Adjust the pin to the issue."}
               </Text>
               {error ? (
                 <Text

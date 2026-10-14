@@ -19,7 +19,7 @@ export const fixtureReports: Report[] = [
     typeId: "primary",
     createdAt: "2026-10-07T01:00:00Z",
     status: "verified",
-    displayAddress: "Purok 5, Bay 28 · Victory Village North, Legazpi",
+    displayAddress: "Purok 5, Bay 28, Victory Village North, Legazpi",
   },
   {
     id: "fixture-2",
@@ -34,7 +34,7 @@ export const fixtureReports: Report[] = [
     typeId: "service",
     createdAt: "2026-10-06T06:20:00Z",
     status: "in_progress",
-    displayAddress: "Rawis · Legazpi City",
+    displayAddress: "Rawis, Legazpi City",
   },
   {
     id: "fixture-3",
@@ -49,7 +49,7 @@ export const fixtureReports: Report[] = [
     typeId: "meter",
     createdAt: "2026-10-03T02:00:00Z",
     status: "resolved",
-    displayAddress: "Rawis · Legazpi City",
+    displayAddress: "Rawis, Legazpi City",
   },
 ];
 export const fixtureUpdates: MobilePublicUpdate[] = [
@@ -62,7 +62,7 @@ export const fixtureUpdates: MobilePublicUpdate[] = [
     content:
       "Plan ahead for today’s interruption. Maintenance helps keep our community connected.",
     severity: "high",
-    audience: "Rawis · Legazpi City",
+    audience: "Rawis, Legazpi City",
     effectiveAt: null,
     expiresAt: null,
     scheduledStartAt: "2026-10-07T00:00:00Z",
@@ -127,7 +127,7 @@ export const fixtureHotlines: HotlineCategory[] = [
       id: "fixture-police-office",
       categoryId: "fixture-category-0",
       name: "Community service desk",
-      description: "Sample agency · Public service and community assistance",
+      description: "Sample agency, Public service and community assistance",
       address: null,
       logoUrl: null,
       websiteLink: null,

@@ -15,6 +15,18 @@ Configure `EXPO_PUBLIC_ALECONNECT_API_URL` for the intended Staff API origin; th
 
 This app uses native modules: use a compatible development build for native acceptance. Check current app config and installed SDK before changing native projects. Preserve the existing signing key and incremental preview policy.
 
+For an Android development build, keep Node 24.21.0 on PATH and the connected device visible in `adb devices -l`:
+
+```powershell
+$env:EXPO_PUBLIC_ALECONNECT_API_URL = "https://api.aleconnect.app"
+npx expo prebuild --platform android --no-clean --no-install
+npx expo run:android --device
+```
+
+Select the phone when prompted. For wireless ADB, set `ANDROID_SERIAL` to its current serial and pass its model to `--device`, for example `--device 25069PTEBG`. Keep Metro running for live reload; subsequent sessions use `npx expo start --dev-client`. The Windows native-path plugin stages CMake output in a short, project-specific system temporary directory to avoid Ninja's path-length limit.
+
+The local Android version code must be at least the version installed on the device. Keep the matching `android/app/debug.keystore`; an uninstall is unnecessary when the signing certificate and version code match. See [development-build acceptance](docs/agent-harness/tasks/android-development-build.md).
+
 ## Verification
 
 ```powershell

@@ -88,7 +88,8 @@ test("recipient search filters stations and current feeders while keeping hidden
   const station = h.find("Checkbox", (node) => node.props.label === "Bitano substation");
   assert.equal(station.props.description, "2 of 3 feeders selected");
   assert.equal(station.props.indeterminate, true);
-  assert.ok(h.render().some((node) => textOf(node).includes("1 matching feeders · 3 selected overall")));
+  assert.ok(h.render().some((node) => textOf(node) === "1 matching feeders"));
+  assert.ok(h.render().some((node) => textOf(node) === "3 selected overall"));
   h.button("Choose feeders");
   assert.equal(h.find("InputGroup.Input").props.value, "");
   h.search("Bitano Feeder 3");
@@ -125,7 +126,8 @@ test("no-match state retains selection and uses one sheet with 48px labelled sea
   h.button("Choose feeders");
   h.search("Daraga north");
   assert.equal(h.render().filter((node) => nameOf(node) === "Checkbox").length, 0);
-  assert.ok(h.render().some((node) => textOf(node).includes("No matching feeders · 3 selected overall")));
+  assert.ok(h.render().some((node) => textOf(node) === "No matching feeders"));
+  assert.ok(h.render().some((node) => textOf(node) === "3 selected overall"));
   assert.ok(h.render().some((node) => textOf(node).includes("Try a feeder or substation name. Your existing selections are kept.")));
   assert.equal(h.find("InputGroup.Input").props.style.minHeight, 48);
   assert.equal(h.find("Search").props.size, 18);
@@ -140,6 +142,6 @@ test("no-match state retains selection and uses one sheet with 48px labelled sea
 test("device-ready confirmation disappears after notification permission is revoked", async () => {
   for (const permission of ["Allowed", "Blocked", "Not allowed"]) {
     const h = await harness({ permission, registered: true });
-    assert.equal(h.render().some(node => textOf(node) === "Visual fixture · device setup simulated"), permission === "Allowed");
+    assert.equal(h.render().some(node => textOf(node) === "Visual fixture; device setup simulated"), permission === "Allowed");
   }
 });

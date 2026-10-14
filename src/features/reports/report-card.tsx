@@ -33,7 +33,7 @@ export function ReportCard({
         <View className="flex-row items-center gap-1.5 pb-1">
           <BellDot size={14} color={primary} />
           <Text size="xs" weight="medium" className="text-primary">
-            New report update · Open to read
+            New report update. Open to read
           </Text>
         </View>
       ) : null}

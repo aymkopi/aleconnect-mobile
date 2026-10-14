@@ -370,10 +370,8 @@ function Details({
                   <Text size="sm" weight="semibold">
                     Service details
                   </Text>
-                  <Text size="sm" muted>
-                    {profile.serviceType ?? "Service class unavailable"} · Meter ••
-                    {profile.meterSerialNum?.slice(-4) ?? "—"}
-                  </Text>
+                  <DetailRow label="Service class" value={profile.serviceType ?? "Unavailable"} />
+                  <DetailRow label="Meter" value={"••" + (profile.meterSerialNum?.slice(-4) ?? "—")} />
                   <Text size="xs" muted>
                     Your name and service details are managed by ALECO.
                   </Text>
@@ -510,7 +508,7 @@ function Details({
                   <Text size="sm" muted>
                     {locationDraft.latitude === null
                       ? "Confirm the address pin on the map."
-                      : "Pin selected · " + addressText(locationDraft)}
+                      :  "Pin selected: " + addressText(locationDraft)}
                   </Text>
                   <Button
                     variant="outline"
@@ -527,20 +525,20 @@ function Details({
                 <View className="gap-4 rounded-xl bg-card p-4">
                   {phone.replace(/\D/g, "") !== (profile.contactNum ?? "") ? (
                     <>
-                      <DetailRow label="Contact · Before" value={profile.contactNum ?? "Not set"} />
+                      <DetailRow label="Previous contact" value={profile.contactNum ?? "Not set"} />
                       <DetailRow label="After" value={phone} />
                     </>
                   ) : null}
                   {emailEditable && email !== profile.email ? (
                     <>
-                      <DetailRow label="Email · Before" value={profile.email} />
+                      <DetailRow label="Previous email" value={profile.email} />
                       <DetailRow label="After" value={email} />
                     </>
                   ) : null}
                   {address ? (
                     <>
                       <DetailRow
-                        label="Location · Before"
+                        label="Previous location"
                         value={profile.fullAddress ?? "Not set"}
                       />
                       <DetailRow label="After" value={addressText(address)} />

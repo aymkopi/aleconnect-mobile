@@ -46,7 +46,8 @@ function NotificationMessage({ access }: { access: NotificationAccess }) {
       {item ? <>
         <NotificationNotice title={item.title}>ALECO has shared a message for your account.</NotificationNotice>
         {item.description ? <Text muted size="sm" style={{ lineHeight: 20 }}>{item.description}</Text> : null}
-        <Text muted size="sm" style={{ lineHeight: 20 }}>Received {manilaNotificationGroupTitle(item.createdAt, reference).toLocaleLowerCase()}, {notificationTime(item, reference)} · {notificationContext(item)}</Text>
+        <Text size="sm" weight="medium">{notificationContext(item)}</Text>
+        <Text muted size="xs">Received {manilaNotificationGroupTitle(item.createdAt, reference).toLocaleLowerCase()}, {notificationTime(item, reference)}</Text>
         {read.data?.isStale ? <NotificationNotice title="Showing a saved notification">Connect and refresh the inbox to confirm this update.</NotificationNotice> : null}
       </> : <NotificationNotice title={read.error ? "The message could not load" : "The linked item is unavailable"}>{read.error || "Return to your notifications, or sign in with the intended account to view its updates."}</NotificationNotice>}
       {read.error && item ? <DataNotice title="Could not refresh this notification" description="Your loaded notification remains visible. Reconnect and refresh for the latest information." actionLabel="Refresh notification" busy={read.busy} onAction={() => void read.reload(true)} /> : null}

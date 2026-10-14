@@ -83,7 +83,7 @@ export function SupportScreen({ kind, returnToReport = false }: { kind: "help" |
             ShieldCheck,
           )}
           <Text size="xs" muted>
-            ALEConnect · Version {Constants.expoConfig?.version ?? "1.0.0"}
+            ALEConnect version {Constants.expoConfig?.version ?? "1.0.0"}
           </Text>
         </>
       ) : kind === "privacy" ? (

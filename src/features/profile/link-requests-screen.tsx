@@ -174,9 +174,8 @@ function Requests({ identity, initial }: { identity: ProfileIdentity; initial?: 
                   <Text size="sm" weight="semibold" className="text-primary">
                     {consumerAccountLinkRequestStatusLabel(r.status)}
                   </Text>
-                  <Text size="sm" muted>
-                    ••{r.accountNumber.slice(-4)} · {r.registeredName}
-                  </Text>
+                  <Text size="sm" weight="medium">{r.registeredName}</Text>
+                  <Text size="xs" muted>ALECO ••{r.accountNumber.slice(-4)}</Text>
                   <Text size="xs" muted>
                     Sent {new Date(r.createdAt).toLocaleDateString("en-PH")}
                   </Text>

@@ -210,7 +210,7 @@ function LinkAccount({ identity }: { identity: ProfileIdentity }) {
             <View className="gap-4 rounded-xl bg-card p-4">
               <DetailRow label="ALECO account number" value={number} />
               <DetailRow label="Registered name" value={name} />
-              <DetailRow label="Account password" value="Entered · hidden" />
+              <DetailRow label="Account password" value="Entered securely" />
               <Button variant="outline" disabled={busy} onPress={() => setView("form")}>
                 Edit details
               </Button>

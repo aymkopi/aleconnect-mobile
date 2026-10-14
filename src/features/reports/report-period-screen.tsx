@@ -42,7 +42,7 @@ export default function ReportPeriodScreen() {
       })}>Apply period</Button>
     }>
       <Text muted size="sm">Choose the period for your report summary.</Text>
-      <Text size="xs" weight="medium" accessibilityLiveRegion="polite">Selected · {reportPeriodLabels[period as keyof typeof reportPeriodLabels]}</Text>
+      <Text size="xs" weight="medium" accessibilityLiveRegion="polite">Selected: {reportPeriodLabels[period as keyof typeof reportPeriodLabels]}</Text>
       <RadioGroup variant="card" value={period} onValueChange={setPeriod} accessibilityLabel="Reporting period">
         {Object.entries(reportPeriodLabels).map(([value, label]) => {
           const range = reportPeriodRange(value);
@@ -64,7 +64,7 @@ export default function ReportPeriodScreen() {
         <BottomSheet.Content size="auto">
           <BottomSheet.Header><Text size="lg" weight="semibold">Custom date range</Text></BottomSheet.Header>
           <BottomSheet.Body className="gap-3">
-            <Text size="sm" weight="medium" accessibilityLiveRegion="polite">Selected · {selectionLabel}</Text>
+            <Text size="sm" weight="medium" accessibilityLiveRegion="polite">Selected: {selectionLabel}</Text>
             <Calendar key={String(open)} mode="range" bordered={false} locale="en-PH" captionLayout="dropdown"
               defaultMonth={reportPickerDate(today)} selectOutsideDays weekStartsOn="auto"
               minDate={bounds ? reportPickerDate(first) : undefined} maxDate={reportPickerDate(today)}

@@ -103,14 +103,14 @@ export function ReportReceipt({
                   </Text>
                 </View>
                 <Text size="xs" muted>
-                  {photoCount} photos attached ·{" "}
-                  {fixture ? "Sample receipt" : "Received just now"}
+                  {photoCount} photos attached
                 </Text>
+                <Text size="xs" muted>{fixture ? "Sample receipt" : "Received just now"}</Text>
               </View>
             </View>
             {fixture ? (
               <Text size="xs" muted>
-                Simulated confirmation · no report was sent.
+                Simulated confirmation; no report was sent.
               </Text>
             ) : null}
             <View className="gap-1">

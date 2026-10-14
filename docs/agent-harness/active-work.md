@@ -1,5 +1,7 @@
 # Active work
 
+- [Android development build](tasks/android-development-build.md): Windows CMake staging, alpha.8/code 62 local config and isolated Metro cache; canonical native build/in-place install and Home/Account rendering pass on model 25069PTEBG. Metro 8081 serves the canonical project. Preserve the manual Account edit, device data, original signer and sibling servers; five available Expo patches remain an unrelated Doctor warning.
+
 - [Mobile selection/status refinements](../mobile-selection-refinements.md): Figma-first RadioGroup/Calendar/ThemeSelector, Home after sign-in, Verified incident context and clearer notification/search selections; 449 tests, types/scoped lint, fixture-free Android/Hermes+web exports and Light/Dark browser/review checks pass. PR8 merged as017f743 and alpha.8/code62 published through successful run38372229138; downloaded artifact/signer/bytecode/alignment and Desktop hash pass; preserve private/signing/provider/device queues and unrelated Staff work.
 
 - [Mobile flow refinements](../mobile-flow-refinements.md): PR7 merged as87daab0 after exact-head checks passed; Figma,444 tests, types/scoped lint/harness, Android/Hermes+web exports and Light/Dark browser/review gates pass. Automatic alpha run38293403614 succeeded and published alpha.6; physical/provider acceptance remains separate. Preserve device queues, signing configuration and unrelated Staff work.
@@ -34,3 +36,5 @@ Last verified: 449 tests, TypeScript/harness/whitespace and source review pass; 
 - [Android alpha releases](../android-alpha-releases.md): user-authorized default-branch CI build/prerelease, version policy and current release verification.
 
 - [BottomSheet normalization](../bottom-sheet-normalization.md): shared Light/Dark sheet surfaces, contact-card separation and latest manual edits; PR6 merged; source/cleanup and alpha.4 publication evidence complete.
+
+- [Consumer security and motion refinements](../mobile-security-motion-refinements.md): isolated implementation, Light/Dark Figma flows, focused security checks and bounded native fixture acceptance on a phone-sized Android 16 emulator and user-authorized tablet 25040RP0AG. Tablet preview uses native-only Metro 8101; task emulators are stopped. Phone 25069PTEBG belongs to the Lineman thread; server-first release and fresh primary reconciliation remain pending.

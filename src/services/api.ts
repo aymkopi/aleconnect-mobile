@@ -150,7 +150,7 @@ export async function consumeForcedLogoutReason(): Promise<string | null> {
   return reason;
 }
 
-async function markAuthInvalidated(token: string): Promise<void> {
+async function markAuthInvalidated(token: string, reason = forcedLogoutMessage): Promise<void> {
   const revision = authTokenRevision;
   if ((await getAuthToken()) !== token || revision !== authTokenRevision)
     return;
@@ -158,9 +158,9 @@ async function markAuthInvalidated(token: string): Promise<void> {
   // The common case is a newer device login replacing this device's session.
   await clearAuthToken();
   if (revision + 1 !== authTokenRevision) return;
-  await AsyncStorage.setItem(forcedLogoutReasonKey, forcedLogoutMessage);
+  await AsyncStorage.setItem(forcedLogoutReasonKey, reason);
   if (revision + 1 !== authTokenRevision) return;
-  authInvalidatedListeners.forEach((listener) => listener(forcedLogoutMessage));
+  authInvalidatedListeners.forEach((listener) => listener(reason));
 }
 
 async function readJson<T>(response: Response): Promise<T> {
@@ -219,15 +219,16 @@ async function performRequest<T>(
   }
 
   if (!response.ok) {
-    if (response.status === 401 && token) {
-      await markAuthInvalidated(token);
-    }
-
     const body = await readJson<{
       error?: string;
       message?: string;
       code?: string;
     }>(response).catch(() => null);
+    if (response.status === 401 && token) {
+      await markAuthInvalidated(token, body?.code === "PASSWORD_CHANGE_REAUTHENTICATE"
+        ? "Sign in again to continue changing your password. Ordinary sign-in remains available."
+        : forcedLogoutMessage);
+    }
     throw new ApiRequestError(
       body?.error ?? body?.message ?? `Request failed with ${response.status}`,
       response.status,

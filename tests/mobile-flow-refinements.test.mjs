@@ -57,7 +57,7 @@ test("report map starts at street zoom locally and rejects ocean and neighboring
     const fallback = initialReportCoordinates(point);
     assert.ok(findAlbayBarangay(fallback.latitude, fallback.longitude));
   }
-  assert.equal(REPORT_MAP_MIN_ZOOM, 10);
+  assert.equal(REPORT_MAP_MIN_ZOOM, 9);
   assert.deepEqual(REPORT_MAP_BOUNDS, [123.25, 12.9, 124, 13.55]);
 });
 

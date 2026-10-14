@@ -54,7 +54,7 @@ export function PublicUpdatePhotos({
       ) : null}
       <Text muted size="xs">
         Tap a photo to view full size
-        {photos.length > 1 ? " · " + photos.length + " photos" : ""}
+        {photos.length > 1 ? " (" + photos.length + " photos)" : ""}
       </Text>
       <EvidencePhotoViewer
         photos={viewable}

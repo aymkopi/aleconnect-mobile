@@ -54,11 +54,13 @@ type QueueSheet =
 function QueueRow({
   title,
   subtitle,
+  details,
   icon,
   onPress,
 }: {
   title: string;
   subtitle: string;
+  details?: string;
   icon?: React.ReactNode;
   onPress: () => void;
 }) {
@@ -66,7 +68,7 @@ function QueueRow({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${title}, ${subtitle}`}
+      accessibilityLabel={`${title}, ${subtitle}${details ? ", " + details : ""}`}
       onPress={onPress}
       className="flex-row items-center gap-3 rounded-xl bg-card p-3 min-h-16"
     >
@@ -80,6 +82,7 @@ function QueueRow({
         <Text muted size="xs">
           {subtitle}
         </Text>
+        {details ? <Text muted style={{ fontSize: 11, lineHeight: 16 }}>{details}</Text> : null}
       </View>
       <ChevronRight size={18} color={primary} />
     </Pressable>
@@ -217,7 +220,7 @@ export default function ReportQueueScreen() {
   const location = selected
     ? [selected.payload.purok, place, selected.payload.landmark]
         .filter(Boolean)
-        .join(" · ")
+        .join(", ")
     : "";
   function open(next: QueueSheet) {
     setCopied(false);
@@ -519,7 +522,7 @@ export default function ReportQueueScreen() {
       {PANELUI_PREVIEW && !fixtures ? (
         <View className="rounded-xl bg-card p-3 gap-1">
           <Text weight="semibold" size="sm">
-            Preview · device queue protected
+            Preview; device queue protected
           </Text>
           <Text muted size="sm">
             Replay, retry and discard are paused. Turn on fixture data to test
@@ -577,7 +580,8 @@ export default function ReportQueueScreen() {
           ) : null}
           <QueueRow
             title="Account"
-            subtitle={`${accountLabel} · ${maskedAccount}`}
+            subtitle={accountLabel}
+            details={maskedAccount}
             icon={<CreditCard size={20} color={primary} />}
             onPress={() => open("account")}
           />
@@ -673,7 +677,8 @@ export default function ReportQueueScreen() {
             <QueueRow
               key={item.id}
               title={item.title}
-              subtitle={`${presentQueuedReport(item, syncing).label} · ${item.evidence.length} photos · Saved ${formatManilaDateTime(item.createdAt)}`}
+              subtitle={presentQueuedReport(item, syncing).label}
+              details={`${item.evidence.length} photos\nSaved ${formatManilaDateTime(item.createdAt)}`}
               onPress={() => router.setParams({ id: item.id })}
             />
           ))}
@@ -841,8 +846,8 @@ export default function ReportQueueScreen() {
                           setViewer({ scope, itemId: selected.id, index });
                         }}
                       >
-                        Photo {index + 1} · {Math.round(photo.size / 1000)} KB
-                        {fixtures ? " · fixture" : ""}
+                        Photo {index + 1} ({Math.round(photo.size / 1000)} KB)
+                        {fixtures ? " (fixture)" : ""}
                       </Button>
                     ))
                   ) : (

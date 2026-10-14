@@ -219,7 +219,7 @@ export default function ReportsScreen() {
         : (() => {
             const a = accounts.find((a) => a.id === draft.account);
             return a
-              ? `${a.registeredName} · ${a.accountNumber || "Number unavailable"}`
+              ? a.registeredName
               : "Linked account";
           })(),
     status:
@@ -281,6 +281,9 @@ export default function ReportsScreen() {
             </Kpi>
           ))}
         </Kpi.Group>
+        <Text size="xs" className="text-white/80">
+          Counts reflect fetched reports matching this period and filters. Not your complete history.
+        </Text>
       </View>
       <View className="flex-row gap-3">
         <View className="flex-1 gap-1">
@@ -296,7 +299,8 @@ export default function ReportsScreen() {
               <Select.Item
                 key={a.id}
                 value={a.id}
-                label={`${a.registeredName} · ${a.accountNumber || "Number unavailable"}`}
+                label={a.registeredName}
+                description={a.accountNumber || "Number unavailable"}
               />
             ))}
           </Select>
@@ -641,7 +645,8 @@ export default function ReportsScreen() {
                       <Select.Item
                         key={a.id}
                         value={a.id}
-                        label={`${a.registeredName} · ${a.accountNumber || "Number unavailable"}`}
+                        label={a.registeredName}
+                        description={a.accountNumber || "Number unavailable"}
                       />
                     ))}
                   </>

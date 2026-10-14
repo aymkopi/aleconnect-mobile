@@ -27,6 +27,17 @@ Snapshot synchronized with the local Staff source at `2ec4ca51ba40ec13a7fb327408
 - Cache invalidation is bounded to committed affected families. Mobile private caches are consumer-scoped and may provide a bounded last-successful offline view, never an authorization bypass.
 - Public Updates are owned by Staff at `/api/mobile/public-updates`. Its opaque cursor pages the `kind: "advisory" | "facebook_post"` union; advisory records retain compatible fields plus optional ordered `photos`. Eligible standalone/imported Facebook posts are additive, while records with an `advisory_id` are excluded by that exact relationship so an advisory and its mirrored Page post never appear twice. Mobile keys the bounded cache by consumer identity/access revision and uses `/api/mobile/advisories` only for `404`, `405`, or `501`; release the backend contract before the mobile reader.
 
+
+- Guest reads use additive unauthenticated `/api/mobile/public/advisories` and `/api/mobile/public/updates` endpoints. Only eligible published/effective/unexpired All-target advisories and eligible standalone published posts are returned; unknown scopes fail closed. Authenticated scoped endpoints/caches are unchanged.
+- Consumer report lists accept additive `sort=updated`, ordering/continuing by exact `updated_at DESC, ticket_id DESC`; optional `updatedAt` preserves legacy DTO readers. Cursor precision remains six fractional digits. Counts from loaded records are not complete server totals.
+- Profile detail editing adds authenticated `field:details` with serviceAccountId/accessRevision, a selected-service password and reviewed field batch. Server ownership/revision and selected-service password validation precede atomic updates; active reports do not block profile edits, and profile mutations never advance ticket lifecycle. Legacy single-field payloads remain compatible. Mobile locks editing when capability metadata is absent. Production email re-verification is unavailable and must not be simulated.
+
+- Report list/detail add optional `unreadNotificationIds` from the existing owner/account/audience-scoped inbox rules. Opening a visible report uses the existing notification markRead endpoint; old readers ignore the field. Linked accounts add existing phone/readable PSGC address fields for account-card presentation; QR contains only the account identifier.
+
+- Standalone/imported Facebook posts add optional topic metadata (General/Billing/Communications/custom1-80-character names) to private and guest Public Updates. Topic-only Staff classification never changes provider caption or delivery state; advisory mirrors/comments remain separate. Deploy the additive nullable post_topic schema before the new Staff reader; legacy consumer caches without topic remain compatible.
+
+- Consumer password changes use `/api/mobile/auth/change-password` actions `status|verify|change|cancel`, with legacy single-request clients retained. Verification lasts five minutes and is bound to the live session and credential. Account-wide rolling limits pause verification after five failures in ten minutes and require fresh login after ten failures in 24 hours without banning the account. Generic consumer Better Auth password changes use the same gates; successful credential updates, other-session revocation, consumer notification and audit commit together.
+
 ## Compatibility and release order
 
 - Add backward-compatible server fields and readers first; preserve older mobile payload handling until the consumer release is verified.

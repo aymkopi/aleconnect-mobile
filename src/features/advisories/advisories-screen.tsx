@@ -63,7 +63,7 @@ export default function AdvisoriesScreen() {
               title="Advisories"
               subtitle={
                 guest
-                  ? "Public updates · Available to everyone"
+                  ? "Public updates for everyone"
                   : "Advisories, news & your community"
               }
             />
