@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased — Consumer security and navigation
+## 1.0.0-alpha.10 — 2026-10-14
+
+- Publish PR9/sourcefc43da8 as Android code64 through successful workflow38541261800. All three GitHub/downloaded asset digests match; the actual original signer/package, non-debuggable fixture-free HTTPS runtime and all54-library ZIP/ELF16KB alignment pass. [Release](https://github.com/aymkopi/aleconnect-mobile/releases/tag/v1.0.0-alpha.10).
 
 - Add numeric unread badges to main-page notification buttons, with99+ display and full accessible counts. Refresh invalidations are serialized; cached counts never leak across consumer/session/access scopes.
 - Add current-password verification, matching new-password fields with live validation/show-hide controls, cooldown/expiry/network recovery, guarded cancellation and completion to Security settings. Session-bound five-minute grants and all failure limits remain server-enforced; no sensitive value is persisted by the app.
