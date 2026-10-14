@@ -9,6 +9,7 @@ Inspect affected source first. Use only the matching row; read [active work](act
 | Notifications/background/permissions | Current registration, session, queue and OS permission paths; device evidence for the affected behavior |
 | Android/native/release | [README](../../README.md), package/lock/app config, [hardening tracker](../mobile-release-hardening-tracker.md) only for relevant release gates |
 | Prior result or rollback | Search [history](implementation-history.md) and its archive by topic/date |
+| Commit, PR, or release notes | [Categorized patch-note format](../commit-and-release-notes.md) and [editor template](../commit-message-template.txt) |
 | Other documentation | [Documentation map](../README.md) |
 
 Public Updates use the Staff-owned union feed with its documented legacy fallback. Native SDK upgrades do not by themselves change Staff contracts or authorize EAS/OTA/store publication.

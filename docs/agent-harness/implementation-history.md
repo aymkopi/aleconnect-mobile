@@ -522,3 +522,10 @@ Closeout: harness validation against the reviewed Staff companion and git diff -
 - Verification:456 tests, TypeScript, lint0 errors/181 existing warnings, Doctor21/21, harness, fixture-free Android/Hermes+web exports and independent review pass. CI standalone native build and immutable digest publication pass. All three downloaded asset digests, original certificate, manifest/code64, fixture-disabled Hermes, live HTTPS API and all54-library ZIP/ELF16KB checks pass; Desktop copy hash matchescc2889426f39e128370cb88118b9e51cea3373514b4ace3ee144c800529b5361.
 - Remaining risks: tablet disconnected before exact-APK install; earlier bounded fixture checks do not establish private-password/provider/native-iOS acceptance. Existing dependency advisories remain separate. No real password test, DB migration or device reset occurred; Staff's unpublished local work remains local.
 - Next: accept the exact published APK on a connected device. Docs-only closeout validates without producing a duplicate alpha.
+
+## 2026-10-14 — Categorized commit and release notes
+
+- Scope: adopt a short Conventional Commit title with applicable Added, Changed, Updated, Fixed, Security, Deprecated, Removed, Validation, and Migration body sections. Add the reusable editor template and guide; categorize alpha.10 changelog/release notes without changing the published source/tag/APK.
+- Verification: documentation harness and whitespace checks gate the commit. Published binary checks remain those of alpha.10; no app source or dependency changes enter this documentation update.
+- Remaining risks: the template assists editor commits rather than enforcing GitHub/manual-message commits. Existing exact-device/private/provider/native-iOS acceptance remains separate.
+- Next: use this format for subsequent commits, PRs, and releases; omit empty categories and preserve merged history.

@@ -1,0 +1,35 @@
+# <type>(<scope>): describe the result (72 characters max)
+# Types: feat, fix, refactor, perf, docs, test, build, ci, chore, revert.
+# Blank line after the title. Uncomment only applicable sections.
+# Describe this commit, not changes already shipped in an earlier commit.
+# Guidance: docs/commit-and-release-notes.md
+#
+# Added
+# - New feature and its purpose.
+#
+# Changed
+# - Existing behavior before and after the change.
+#
+# Updated
+# - Dependency/configuration versions and compatibility.
+#
+# Fixed
+# - Trigger, incorrect behavior, and corrected result.
+#
+# Security
+# - Authorization, validation, or protection improved.
+#
+# Deprecated
+# - Still-supported feature, replacement, and removal plan.
+#
+# Removed
+# - Removed feature and replacement or migration path.
+#
+# Validation
+# - Checks run and results; label unverified acceptance.
+#
+# Migration
+# - Required schema/data/client steps and deployment order.
+#
+# BREAKING CHANGE: real incompatibility and upgrade steps.
+# Refs: #<PR or issue>

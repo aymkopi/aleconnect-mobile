@@ -4,6 +4,12 @@ The [Android Alpha Release workflow](../.github/workflows/android-alpha-release.
 
 ## Version policy
 
+Use [categorized commit and release notes](commit-and-release-notes.md)
+for feature commits, PRs, changelogs, and published release descriptions.
+The [editor template](commit-message-template.txt) includes applicable
+change categories, validation, and migration notes. Omit empty sections
+and preserve published SHAs/assets.
+
 Source restarts at 1.0.0-alpha.1/code55. Each dedicated release workflow run uses 1.0.0-alpha.N and Android versionCode54+N. Version codes continue above the previous v54 build, retaining in-place update compatibility despite resetting the display version. Docs-only runs can leave gaps. Do not rename/reset this workflow counter without raising the version-code base first. Reruns preserve a published tag and its assets; existing drafts fail for inspection rather than silently overwrite. Build/publish jobs are serialized; a newer published alpha prevents an older run from publishing later.
 
 Keep the historical 2.0.0 preview release. EAS/OTA/store distribution and production signing are separate workflows. This alpha is non-debuggable and self-contained but deliberately retains the original public Expo preview/debug certificate, which is unsuitable for store production signing.

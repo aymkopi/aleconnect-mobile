@@ -2,16 +2,43 @@
 
 ## 1.0.0-alpha.10 — 2026-10-14
 
-- Publish PR9/sourcefc43da8 as Android code64 through successful workflow38541261800. All three GitHub/downloaded asset digests match; the actual original signer/package, non-debuggable fixture-free HTTPS runtime and all54-library ZIP/ELF16KB alignment pass. [Release](https://github.com/aymkopi/aleconnect-mobile/releases/tag/v1.0.0-alpha.10).
+### Added
 
-- Add numeric unread badges to main-page notification buttons, with99+ display and full accessible counts. Refresh invalidations are serialized; cached counts never leak across consumer/session/access scopes.
-- Add current-password verification, matching new-password fields with live validation/show-hide controls, cooldown/expiry/network recovery, guarded cancellation and completion to Security settings. Session-bound five-minute grants and all failure limits remain server-enforced; no sensitive value is persisted by the app.
-- Animate one continuous bottom-navigation pill with Reanimated springs, subtle stretch/contract, interrupted-switch support, reduced motion and icon/label color transitions. Page routing remains instant and tab geometry is unchanged.
-- State that Reports KPI counts describe fetched reports for the selected period/filters. Replace dotted metadata concatenation with labels, separate text levels and ordinary address/date punctuation.
-- Include the current manual Home, notification, Account, Alerts, report-list/status, radial-gradient and map edits. Preserve map minimum zoom9, the visible address while its spinner resolves, separate theme heading and48px adaptive Home icons. Add the Windows-only short CMake staging plugin for Expo development builds.
-- Update Light/Dark Figma password flows, bell badge examples and KPI scope; keep the dark page background#00060F. Bounded phone-emulator and tablet25040RP0AG fixture checks cover layout, form controls, completion and recorded pill motion without changing a real password or submitting saved queues.
-- Update five direct Expo57 patch dependencies and their resolved dependency versions; alignment and Doctor21/21 pass. Keep native animation/keyboard pins unchanged.
-- Deploy the compatible Staff password-change API before distributing this client. Existing required-password clients remain supported. Use the existing automatic alpha pipeline, retained package/signer and increasing Android version code; provider/push/private-password/native-iOS and store-production signing remain separate acceptance.
+- Numeric unread badges on main-page notification buttons, with 99+ display and full accessible counts.
+- Security settings and a two-step password flow with live validation, show/hide controls, cooldown/expiry/network recovery, guarded cancellation, and a completion screen.
+
+### Changed
+
+- Move one continuous navigation pill with Reanimated springs, subtle stretch/contract, interrupted-switch support, reduced motion, and icon/label transitions. Page routing remains instant and tab geometry stays the same.
+- State that Reports KPI counts describe fetched reports for the selected period/filters. Replace dotted metadata concatenation with labels, separate text levels, and ordinary address/date punctuation.
+- Include the current manual Home, notifications, Account, Alerts, report-list/status, radial-gradient, and map edits. Preserve minimum map zoom 9, the visible address during resolution, a separate theme heading, and 48px adaptive Home icons.
+- Align Light/Dark Figma password flows, bell badges, and KPI scope with the app; retain #00060F as the Dark page background.
+
+### Updated
+
+- Align five direct Expo 57 patches: Expo 57.0.28, Dev Client 57.0.20, Location 57.0.21, Router 57.0.26, and Splash Screen 57.0.10, with their resolved dependencies. Retain native animation/keyboard pins.
+
+### Fixed
+
+- Stage Windows native CMake builds under a shorter path through the existing Expo plugin flow.
+
+### Security
+
+- Keep password values and flow identifiers in memory. Five-minute session-bound verification, failure limits, authorization rechecks, and other-session revocation are enforced by the paired Staff API.
+- Serialize unread-count invalidations and isolate cached counts by consumer/session/access scope.
+
+### Validation and release
+
+- [PR #9](https://github.com/aymkopi/aleconnect-mobile/pull/9), source fc43da8, published as Android code 64 through [workflow 38541261800](https://github.com/aymkopi/aleconnect-mobile/actions/runs/38541261800). [Release and APK](https://github.com/aymkopi/aleconnect-mobile/releases/tag/v1.0.0-alpha.10).
+- 456 tests, TypeScript, lint with zero errors/181 existing warnings, Expo Doctor 21/21, and fixture-free Android/Hermes and web exports pass.
+- All three downloaded asset digests, the original signer/package, non-debuggable fixture-free HTTPS runtime, and all 54-library ZIP/ELF 16 KB alignment checks pass.
+- Bounded phone-emulator and Redmi Pad 2 fixture checks cover layout, forms, completion, #00060F pixels, and recorded pill motion. The tablet disconnected before installation of this exact release APK; private-password/provider/push/native-iOS and store-production signing acceptance remain separate.
+
+### Migration and compatibility
+
+- Staff PR #41 deployed the compatible password-change API before this release. No database migration is required; legacy required-password requests remain supported.
+- Retain the original package/certificate, increasing Android version code, prior releases, recovery stashes, and saved device queues.
+
 ## 1.0.0-alpha.8 — 2026-10-13
 
 - Publish PR8 from merged source017f743 as Android code62. Original signer/package, live API, fixture-disabled non-debuggable runtime, GitHub/downloaded digests and all54-library ZIP/ELF16KB alignment are verified; prior alphas remain available. [Release](https://github.com/aymkopi/aleconnect-mobile/releases/tag/v1.0.0-alpha.8).
