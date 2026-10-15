@@ -141,17 +141,18 @@ function verifiedFixture(t) {
 }
 
 test('publication verifies every uploaded digest and the actual tag source before publishing', t => {
-  for (const outcome of ['valid', 'digest', 'tag']) {
+  for (const outcome of ['valid', 'delayed', 'digest', 'tag']) {
     const f = verifiedFixture(t);
     let uploaded;
     let tagCreated = false;
+    let readbacks = 0;
     const calls = [];
     const run = (command, args) => {
       calls.push(args);
       assert.equal(command, 'gh');
       if (args[0] === 'api' && args.includes('POST')) { tagCreated = true; return ''; }
       if (args[0] === 'api' && args[1].includes('/git/matching-refs/')) return JSON.stringify(tagCreated ? [{ref: `refs/tags/${f.release.tag}`, object: {type: 'commit', sha: outcome === 'tag' && uploaded ? previous : source}}] : []);
-      if (args[0] === 'api') return JSON.stringify([[...(uploaded ? [uploaded] : [])]]);
+      if (args[0] === 'api') return JSON.stringify([[...(uploaded && (outcome !== 'delayed' || readbacks++ > 0) ? [uploaded] : [])]]);
       if (args[1] === 'create') {
         assert.equal(tagCreated, true, 'Explicitly create the tag; a draft alone may not create it');
         assert.ok(args.includes('--verify-tag'));
@@ -162,9 +163,9 @@ test('publication verifies every uploaded digest and the actual tag source befor
       if (args[1] === 'edit') return '';
       assert.fail(`Unexpected call ${args}`);
     };
-    if (outcome !== 'valid') assert.throws(() => publishRelease({...f, run}), /digest mismatch|tag points/);
+    if (!['valid', 'delayed'].includes(outcome)) assert.throws(() => publishRelease({...f, run}), /digest mismatch|tag points/);
     else assert.deepEqual(publishRelease({...f, run}), {skip: false, tag: f.release.tag});
-    assert.equal(calls.some(args => args.includes('--draft=false')), outcome === 'valid');
+    assert.equal(calls.some(args => args.includes('--draft=false')), ['valid', 'delayed'].includes(outcome));
   }
 });
 

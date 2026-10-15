@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Fixed
+- Retry a briefly missing GitHub draft readback before verifying assets and publishing; all source, digest and immutability guards remain enforced.
+
+## Unreleased
+
 ### Changed
 
 - Select alpha release versions from Conventional Commit patch/minor/major impact with manual overrides. Advance Android codes independently from published metadata and synchronize manifest root versions during builds.
