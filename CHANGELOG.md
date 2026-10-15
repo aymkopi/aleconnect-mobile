@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Select alpha release versions from Conventional Commit patch/minor/major impact with manual overrides. Advance Android codes independently from published metadata and synchronize manifest root versions during builds.
+- Continue from published alpha.10/code64; retain package/signing/provider identities and the verified standalone APK pipeline.
+
+### Fixed
+
+- Remove workflow-run numbering, so documentation/review runs no longer consume release versions. Skip duplicate/stale sources and verify every uploaded artifact digest before publication.
+
 ## 1.0.0-alpha.10 — 2026-10-14
 
 ### Added

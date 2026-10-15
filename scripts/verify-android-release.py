@@ -9,8 +9,9 @@ import tempfile
 import zipfile
 from pathlib import Path
 
-CERTIFICATE = "fac61745dc0903786fb9ede62a962b399f7348f0bb6f899b8332667591033b9c"
-PACKAGE = "com.kapecakes.aleconnectmobile"
+CONFIG = json.loads((Path(__file__).resolve().parents[1] / "release.config.json").read_text())
+CERTIFICATE = CONFIG["android"]["certificateSha256"]
+PACKAGE = CONFIG["android"]["package"]
 
 
 def fixture_mode_disabled(dump):
@@ -68,14 +69,8 @@ def verify():
             elf_load_alignments(archive.read(name))
         bundle = archive.read("assets/index.android.bundle")
         assert b"https://api.aleconnect.app" in bundle, "Live HTTPS API is missing"
-    with tempfile.TemporaryDirectory(prefix="aleconnect-apk-") as temporary:
-        bundle_path = Path(temporary) / "index.android.bundle"
-        bundle_path.write_bytes(bundle)
-        hermes_path = root / "node_modules/hermes-compiler/hermesc" / ("win64-bin/hermesc.exe" if os.name == "nt" else "linux64-bin/hermesc")
-        dump_path = Path(temporary) / "hermes.txt"
-        with dump_path.open("w", encoding="utf-8") as stream:
-            subprocess.run([str(hermes_path), "-b", "-dump-bytecode", str(bundle_path)], stdout=stream, check=True)
-        fixture_mode_disabled(dump_path.read_text(encoding="utf-8"))
+    if CONFIG["name"] == "aleconnect-mobile":
+        verify_fixture_bundle(root, bundle)
     payload = apk.read_bytes()
     digest = hashlib.sha256(payload).hexdigest()
     (output / metadata['fileName']).write_bytes(payload)
@@ -85,6 +80,17 @@ def verify():
                     zip16KbAligned=True, debuggable=False, fixtureMode=False, api="https://api.aleconnect.app")
     metadata_path.write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(metadata, indent=2))
+
+
+def verify_fixture_bundle(root, bundle):
+    with tempfile.TemporaryDirectory(prefix="aleconnect-apk-") as temporary:
+        bundle_path = Path(temporary) / "index.android.bundle"
+        bundle_path.write_bytes(bundle)
+        hermes_path = root / "node_modules/hermes-compiler/hermesc" / ("win64-bin/hermesc.exe" if os.name == "nt" else "linux64-bin/hermesc")
+        dump_path = Path(temporary) / "hermes.txt"
+        with dump_path.open("w", encoding="utf-8") as stream:
+            subprocess.run([str(hermes_path), "-b", "-dump-bytecode", str(bundle_path)], stdout=stream, check=True)
+        fixture_mode_disabled(dump_path.read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":
