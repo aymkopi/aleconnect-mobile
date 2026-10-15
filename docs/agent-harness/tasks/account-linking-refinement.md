@@ -2,7 +2,7 @@
 
 Owner: consumer Mobile; Staff owns the compatible API.
 Branch/base: codex/account-linking-refinement from cfd3e9f501fb8fcd1029fb331de0a8393177e276.
-Status: implementation of Staff planning PR #43; paired with [Staff PR #44](https://github.com/aymkopi/Aleconnect/pull/44); Mobile implementation PR follows. No merge, build publication or device installation.
+Status: implementation of Staff planning PR #43; paired with [Staff PR #44](https://github.com/aymkopi/Aleconnect/pull/44); [Mobile PR #10](https://github.com/aymkopi/aleconnect-mobile/pull/10) is open; current remote CI is tracked on both PRs. No merge, build publication or device installation.
 
 - Scope: optional isCurrentLink preserves old/malformed response compatibility. Approved+true is Linked; approved+false is Previously approved; missing metadata remains Approved without implying current access. Superseded is No longer active; unknown status stays neutral. Request history shows public decline reason and current ALECO-account guidance, with no history-driven forced sign-out.
 - Safety: metadata is presentation only. Existing identity/access-revision scoped reads, authoritative session handling, claim password clearing, new-intent/retry idempotency, account-scoped drafts/cache and notification routing remain in place. No claim queue, consumer submission-reason field, private notes or other-owner information added.
