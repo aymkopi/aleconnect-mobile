@@ -536,3 +536,10 @@ Closeout: harness validation against the reviewed Staff companion and git diff -
 - Verification: documentation harness and whitespace checks gate the commit. Published binary checks remain those of alpha.10; no app source or dependency changes enter this documentation update.
 - Remaining risks: the template assists editor commits rather than enforcing GitHub/manual-message commits. Existing exact-device/private/provider/native-iOS acceptance remains separate.
 - Next: use this format for subsequent commits, PRs, and releases; omit empty categories and preserve merged history.
+
+## 2026-10-16 - Release draft readback recovery
+
+- Scope: First hosted Staff publication exposed a brief missing draft readback after successful deployment/upload. Added a bounded read retry without weakening source, signer, asset digest or immutability guards.
+- Verification: The regression first failed on the observed assertion, then passed with delayed visibility. All ten allocator/publisher checks pass; Mobile workflow verification adds an eleventh passing check.
+- Remaining risks: Staff alpha1 draft was recovered only after verifying deployed release metadata, exact tag/source and uploaded asset hash. Mobile's pre-publication run was canceled to incorporate this shared correction. Lineman launch diagnosis remains in progress on the explicitly requested physical tablet; no operational data is cleared.
+- Next: Complete release workflows, validate real-device launch and signatures, sync primary checkouts and clean only task-owned worktrees.
