@@ -1,5 +1,7 @@
 # Active work
 
+- [Three-repository alpha versioning](../release-versioning.md): semantic alpha allocation above published code64; 464 tests, types, actual CI lint, verifier/config/harness and source review pass. Ready for PR integration; no APK publication.
+
 - [Android development build](tasks/android-development-build.md): Windows CMake staging, alpha.8/code 62 local config and isolated Metro cache; canonical native build/in-place install and Home/Account rendering pass on model 25069PTEBG. Metro 8081 serves the canonical project. Preserve the manual Account edit, device data, original signer and sibling servers; five available Expo patches remain an unrelated Doctor warning.
 
 - [Mobile selection/status refinements](../mobile-selection-refinements.md): Figma-first RadioGroup/Calendar/ThemeSelector, Home after sign-in, Verified incident context and clearer notification/search selections; 449 tests, types/scoped lint, fixture-free Android/Hermes+web exports and Light/Dark browser/review checks pass. PR8 merged as017f743 and alpha.8/code62 published through successful run38372229138; downloaded artifact/signer/bytecode/alignment and Desktop hash pass; preserve private/signing/provider/device queues and unrelated Staff work.

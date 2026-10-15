@@ -10,7 +10,7 @@ The [editor template](commit-message-template.txt) includes applicable
 change categories, validation, and migration notes. Omit empty sections
 and preserve published SHAs/assets.
 
-Source restarts at 1.0.0-alpha.1/code55. Each dedicated release workflow run uses 1.0.0-alpha.N and Android versionCode54+N. Version codes continue above the previous v54 build, retaining in-place update compatibility despite resetting the display version. Docs-only runs can leave gaps. Do not rename/reset this workflow counter without raising the version-code base first. Reruns preserve a published tag and its assets; existing drafts fail for inspection rather than silently overwrite. Build/publish jobs are serialized; a newer published alpha prevents an older run from publishing later.
+The [three-product alpha policy](release-versioning.md) replaces the historical workflow-run allocator. Auto releases select patch/minor/major from Conventional Commits and append alpha.1 to the new core; manual alpha advances only the prerelease ordinal. Published alpha.10/code64 is the current floor. Android codes increase independently, documentation/review runs consume no version, and published sources skip on rerun. Existing drafts fail for inspection rather than being overwritten. Build/publish jobs remain serialized, and stale sources cannot release backwards. Earlier release records below retain the historical numbering as evidence.
 
 Keep the historical 2.0.0 preview release. EAS/OTA/store distribution and production signing are separate workflows. This alpha is non-debuggable and self-contained but deliberately retains the original public Expo preview/debug certificate, which is unsuitable for store production signing.
 
