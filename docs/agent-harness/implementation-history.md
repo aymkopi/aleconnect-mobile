@@ -543,3 +543,10 @@ Closeout: harness validation against the reviewed Staff companion and git diff -
 - Verification: pinned Node24.21.0;12 focused tests pass, full suite459 pass/zero fail/one sibling-discovery skip, TypeScript/scoped lint and preview web export pass. Final paired contract/harness/rendered evidence is in the [task handoff](tasks/account-linking-refinement.md).
 - Remaining risks: Graphify refresh passed with generated output kept separate; production/provider/physical-device and native acceptance remain unverified. Browser fixture rendering is separate from real account/device acceptance.
 - Next: [Mobile PR10](https://github.com/aymkopi/aleconnect-mobile/pull/10) and [Staff PR44](https://github.com/aymkopi/Aleconnect/pull/44) are published for review; remote checks are tracked on each PR. Compatible Staff deployment must precede any separately authorized Mobile release; preserve signer, Metro and private device queues.
+
+## 2026-10-16 — Authorized paired account-linking merge
+
+- Scope: user authorized merging Mobile PR10 after Staff PR44 deployment and verification; preserve unrelated checkout/device/signing/Metro state. Integrated current master and corrected direct lookup of a newly created draft release, matching the Staff publisher fix while retaining source/digest/immutable-release guards.
+- Verification:10 publisher tests pass, including a stale release-list fixture. Final integrated tests/CI and merge/release evidence are in the task handoff.
+- Remaining risks: no physical-device installation, private account/provider or native-iOS acceptance. The existing default-branch workflow automatically builds/publishes Android alpha after a Mobile merge; that is distinct from device acceptance.
+- Next: verify Staff live first, then merge Mobile and preserve release metadata plus ignored evidence before task-only cleanup.

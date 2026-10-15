@@ -151,7 +151,8 @@ test('publication verifies every uploaded digest and the actual tag source befor
       assert.equal(command, 'gh');
       if (args[0] === 'api' && args.includes('POST')) { tagCreated = true; return ''; }
       if (args[0] === 'api' && args[1].includes('/git/matching-refs/')) return JSON.stringify(tagCreated ? [{ref: `refs/tags/${f.release.tag}`, object: {type: 'commit', sha: outcome === 'tag' && uploaded ? previous : source}}] : []);
-      if (args[0] === 'api') return JSON.stringify([[...(uploaded ? [uploaded] : [])]]);
+      if (args[0] === 'api' && args[1].includes('/releases/tags/')) return JSON.stringify(uploaded);
+      if (args[0] === 'api') return JSON.stringify([[]]);
       if (args[1] === 'create') {
         assert.equal(tagCreated, true, 'Explicitly create the tag; a draft alone may not create it');
         assert.ok(args.includes('--verify-tag'));
