@@ -546,7 +546,14 @@ Closeout: harness validation against the reviewed Staff companion and git diff -
 
 ## 2026-10-16 — Authorized paired account-linking merge
 
-- Scope: user authorized merging Mobile PR10 after Staff PR44 deployment and verification; preserve unrelated checkout/device/signing/Metro state. Integrated current master and corrected direct lookup of a newly created draft release, matching the Staff publisher fix while retaining source/digest/immutable-release guards.
+- Scope: user authorized merging Mobile PR10 after Staff PR44 deployment and verification; preserve unrelated checkout/device/signing/Metro state. Integrated current master and retained its concurrently landed bounded draft-readback correction, superseding this branch's direct-tag lookup while preserving source/digest/immutable-release guards.
 - Verification:10 publisher tests pass, including a stale release-list fixture. Final integrated tests/CI and merge/release evidence are in the task handoff.
 - Remaining risks: no physical-device installation, private account/provider or native-iOS acceptance. The existing default-branch workflow automatically builds/publishes Android alpha after a Mobile merge; that is distinct from device acceptance.
 - Next: verify Staff live first, then merge Mobile and preserve release metadata plus ignored evidence before task-only cleanup.
+
+## 2026-10-16 - Release draft readback recovery
+
+- Scope: First hosted Staff publication exposed a brief missing draft readback after successful deployment/upload. Added a bounded read retry without weakening source, signer, asset digest or immutability guards.
+- Verification: The regression first failed on the observed assertion, then passed with delayed visibility. All ten allocator/publisher checks pass; Mobile workflow verification adds an eleventh passing check.
+- Remaining risks: Staff alpha1 draft was recovered only after verifying deployed release metadata, exact tag/source and uploaded asset hash. Mobile's pre-publication run was canceled to incorporate this shared correction. Lineman launch diagnosis remains in progress on the explicitly requested physical tablet; no operational data is cleared.
+- Next: Complete release workflows, validate real-device launch and signatures, sync primary checkouts and clean only task-owned worktrees.
