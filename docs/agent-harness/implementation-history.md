@@ -1,5 +1,12 @@
 # Implementation history
 
+## 2026-10-16 - Independent alpha release versioning
+
+- Scope: replace CI-run-based versions with Conventional Commit patch/minor/major alpha targets, manual overrides and published-code allocation above64. Synchronize source alpha10 manifests, preserve the signer/provider/package and existing standalone verification, and strengthen digest checks for all uploaded assets.
+- Verification: 464 tests, TypeScript, actual Expo CI lint (zero errors/181 existing warnings), focused release lint, both Python verifier checks, Expo configuration, harness, graph refresh and source review pass; see docs/release-versioning.md.
+- Remaining risks: no new native build/publication, installed-device, private API, push or native-iOS acceptance. Original local edits and device data are preserved.
+- Next: finish source checks and read-only review; integrate the CI branch before an authorized alpha build.
+
 ## 2026-10-13 — Android Expo development build
 
 - Scope: reproduce Windows `expo prebuild` / `expo run:android --device` failures, persist short CMake staging through an Expo config plugin, align local app config to the installed alpha.8/code 62, and isolate Metro transforms per project while excluding generated cache/build files from its watcher. Preserve the user's uncommitted Account screen edit and original signing certificate; serve the canonical project through the Expo dev client.
