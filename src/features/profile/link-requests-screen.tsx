@@ -2,20 +2,17 @@ import { useState } from "react";
 import { View } from "react-native";
 import { type Href, useRouter, useLocalSearchParams } from "expo-router";
 import { Button } from "@/components/panelui/button";
-import { Dialog } from "@/components/panelui/dialog";
 import { Text } from "@/components/panelui/text";
 import { DataState, DataNotice } from "@/components/data-state";
 import { ReportPage } from "@/features/reports/components/report-page";
 import { useScopedRead } from "@/hooks/use-scoped-read";
-import { useAuthSession } from "@/hooks/use-auth-session";
 import { fetchAccountLinkRequests } from "@/services/account-link-requests";
-import { consumerAccountLinkRequestStatusLabel } from "@/features/accounts/status";
+import { consumerAccountLinkRequestStatusLabel, consumerAccountLinkRequestReviewMessage } from "@/features/accounts/status";
 import {
   ProfileGate,
   ProfileHeading,
   ProfileNotice,
   DetailRow,
-  useProfileTask,
   useProfileBackGuard,
   type ProfileIdentity,
 } from "./profile-ui";
@@ -34,13 +31,8 @@ export default function LinkRequestsScreen() {
   );
 }
 function Requests({ identity, initial }: { identity: ProfileIdentity; initial?: string }) {
-  const router = useRouter(),
-    current = useProfileTask(identity),
-    { signOut } = useAuthSession(),
-    [selected, setSelected] = useState(initial ?? ""),
-    [confirm, setConfirm] = useState(false),
-    [busy, setBusy] = useState(false),
-    [error, setError] = useState("");
+  const router = useRouter();
+  const [selected, setSelected] = useState(initial ?? "");
   const ready =
     identity.account.sessionMode === "identity" && identity.account.capabilities.accountLinking;
   const read = useScopedRead(ready ? identity.key : null, async () => {
@@ -52,7 +44,6 @@ function Requests({ identity, initial }: { identity: ProfileIdentity; initial?: 
   });
   const request = read.data?.find((r) => r.requestId === selected);
   const back = () => {
-    if (busy) return;
     if (selected) {
       setSelected("");
       return;
@@ -60,26 +51,7 @@ function Requests({ identity, initial }: { identity: ProfileIdentity; initial?: 
     if (router.canGoBack()) router.back();
     else router.replace("/profile/accounts");
   };
-  const allowLeave = useProfileBackGuard(busy || !!selected, back);
-  async function continueEmail() {
-    if (busy) return;
-    setBusy(true);
-    try {
-      if (!identity.fixture) {
-        allowLeave();
-        await signOut();
-        router.replace({ pathname: "/sign-in", params: { mode: "email", linked: "1" } });
-      } else {
-        setConfirm(false);
-        setError("Visual fixture: email sign-in would refresh account access.");
-      }
-    } catch (e) {
-      allowLeave(false);
-      if (current()) setError(e instanceof Error ? e.message : "Could not sign out.");
-    } finally {
-      if (current()) setBusy(false);
-    }
-  }
+  useProfileBackGuard(!!selected, back);
   return (
     <>
       <ReportPage
@@ -112,7 +84,7 @@ function Requests({ identity, initial }: { identity: ProfileIdentity; initial?: 
               />
             ) : (
               <>
-                <ProfileHeading title={consumerAccountLinkRequestStatusLabel(request.status)} />
+                <ProfileHeading title={consumerAccountLinkRequestStatusLabel(request.status, request.isCurrentLink)} />
                 <View className="gap-3 rounded-xl bg-card p-4">
                   <DetailRow
                     label="Requested account"
@@ -132,21 +104,10 @@ function Requests({ identity, initial }: { identity: ProfileIdentity; initial?: 
                 </View>
                 <ProfileNotice
                   title="ALECO review"
-                  description={
-                    request.consumerReason ??
-                    (request.status === "pending"
-                      ? "ALECO is checking your request."
-                      : request.status === "conflict"
-                        ? "Please contact consumer services to confirm the registered details."
-                        : request.status === "approved"
-                          ? "Sign out and continue with email to refresh your account access."
-                          : request.status === "superseded"
-                            ? "This request was replaced by a later request."
-                            : "Check your bill and contact ALECO if you need help.")
-                  }
+                  description={consumerAccountLinkRequestReviewMessage(request)}
                 />
                 {request.status === "approved" ? (
-                  <Button onPress={() => setConfirm(true)}>Sign out and continue</Button>
+                  <Button onPress={() => router.push("/profile/accounts")}>View ALECO accounts</Button>
                 ) : request.status === "denied" ? (
                   <Button onPress={() => router.push("/profile/link-account")}>Try again</Button>
                 ) : (
@@ -172,7 +133,7 @@ function Requests({ identity, initial }: { identity: ProfileIdentity; initial?: 
                   className="gap-2 rounded-xl bg-card p-3"
                 >
                   <Text size="sm" weight="semibold" className="text-primary">
-                    {consumerAccountLinkRequestStatusLabel(r.status)}
+                    {consumerAccountLinkRequestStatusLabel(r.status, r.isCurrentLink)}
                   </Text>
                   <Text size="sm" weight="medium">{r.registeredName}</Text>
                   <Text size="xs" muted>ALECO ••{r.accountNumber.slice(-4)}</Text>
@@ -197,26 +158,9 @@ function Requests({ identity, initial }: { identity: ProfileIdentity; initial?: 
             </Button>
           </>
         )}
-        {error ? <ProfileNotice title="Request update" description={error} danger /> : null}
         {read.error && read.data ? <DataNotice title="Could not refresh requests" description="Your loaded requests are still available. Refresh before sending another request." actionLabel="Refresh requests" onAction={() => void read.reload(true)} busy={read.busy} /> : null}
       </ReportPage>
-      <Dialog open={confirm} onOpenChange={(v) => !busy && setConfirm(v)}>
-        <Dialog.Content dismissible={!busy}>
-          <Dialog.Title>Continue with email sign-in?</Dialog.Title>
-          <Dialog.Description>
-            This signs you out so your approved account access can refresh. Your saved reports and
-            evidence remain on this device.
-          </Dialog.Description>
-          <Dialog.Footer>
-            <Button variant="outline" disabled={busy} onPress={() => setConfirm(false)}>
-              Stay signed in
-            </Button>
-            <Button loading={busy} onPress={() => void continueEmail()}>
-              Sign out and continue
-            </Button>
-          </Dialog.Footer>
-        </Dialog.Content>
-      </Dialog>
+
     </>
   );
 }

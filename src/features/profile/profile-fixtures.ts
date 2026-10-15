@@ -86,11 +86,14 @@ export const profileFixtureRequests: AccountLinkRequest[] = [
   "denied",
   "superseded",
   null,
+  "approved",
+  "approved",
 ].map((status, i) => ({
   requestId: "fixture-request-" + i,
   accountNumber: "1000" + (9138 + i),
   registeredName: "Maria Dela Cruz",
   status: status as AccountLinkRequest["status"],
+  isCurrentLink: i === 2 ? true : i === 6 ? false : undefined,
   consumerReason:
     status === "denied" ? "The registered details did not match. Check your bill." : null,
   createdAt: "2026-10-07T01:15:00Z",

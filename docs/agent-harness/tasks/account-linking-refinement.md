@@ -1,0 +1,13 @@
+# Account-linking refinement
+
+Owner: consumer Mobile; Staff owns the compatible API.
+Branch/base: codex/account-linking-refinement from cfd3e9f501fb8fcd1029fb331de0a8393177e276.
+Status: implementation of Staff planning PR #43; paired with [Staff PR #44](https://github.com/aymkopi/Aleconnect/pull/44); Mobile implementation PR follows. No merge, build publication or device installation.
+
+- Scope: optional isCurrentLink preserves old/malformed response compatibility. Approved+true is Linked; approved+false is Previously approved; missing metadata remains Approved without implying current access. Superseded is No longer active; unknown status stays neutral. Request history shows public decline reason and current ALECO-account guidance, with no history-driven forced sign-out.
+- Safety: metadata is presentation only. Existing identity/access-revision scoped reads, authoritative session handling, claim password clearing, new-intent/retry idempotency, account-scoped drafts/cache and notification routing remain in place. No claim queue, consumer submission-reason field, private notes or other-owner information added.
+- Verification: Node24.21.0;12 focused tests pass; full suite459 pass/zero fail/one skipped sibling-contract check (worktree sibling discovery). Explicit paired contract/harness suite43/43 passes with no skips; both paired harness validators report zero errors/warnings. TypeScript and scoped lint pass; preview web export passes. Two Chromium Light/Dark journeys pass at390px through the existing sign-in fixture and Account/ALECO accounts navigation: all eight statuses, historical approval, no forced sign-out, and public decline reason. Screenshots inspected.
+- Fixtures: eight labelled history states cover pending/conflict/current approval/decline/superseded/unknown/historical approval/old API approval. Fixture use cannot write account/device data.
+- Evidence: ignored .cache/account-link-evidence and .cache/account-link-web; browser screenshots/logs in Staff task's ignored .superpowers/sdd/2026-10-15-account-linking-refinement. Task-owned generated Uniwind type churn reverted; package/lock/native files unchanged.
+- Limits: Graphify refresh passed outside the sandbox (4037 nodes/7591 edges); generated output is retained separately from source commits. No Android/iOS/provider/private-real-account/screen-reader acceptance or release. Primary checkout, Metro, signer, saved device state/queues and unrelated worktrees are preserved.
+- Rollout: separately authorize compatible Staff API/web deployment first; then Mobile. Old API omitting isCurrentLink remains supported. Mobile UI rollback never restores membership/audit data or disables Staff owner/replay protections.

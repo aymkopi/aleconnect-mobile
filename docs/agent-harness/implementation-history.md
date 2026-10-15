@@ -529,3 +529,10 @@ Closeout: harness validation against the reviewed Staff companion and git diff -
 - Verification: documentation harness and whitespace checks gate the commit. Published binary checks remain those of alpha.10; no app source or dependency changes enter this documentation update.
 - Remaining risks: the template assists editor commits rather than enforcing GitHub/manual-message commits. Existing exact-device/private/provider/native-iOS acceptance remains separate.
 - Next: use this format for subsequent commits, PRs, and releases; omit empty categories and preserve merged history.
+
+## 2026-10-15 — Account-linking current-access history
+
+- Scope: implemented the consumer portion of Staff planning PR43 in an isolated branch. Optional current-link metadata separates current membership from historical approval; public decline reason remains visible and request history no longer forces sign-out from an old approval. Existing authoritative auth/claim/retry/scoped-cache contracts remain intact; shared contract text synchronized. No dependency/native/release configuration change.
+- Verification: pinned Node24.21.0;12 focused tests pass, full suite459 pass/zero fail/one sibling-discovery skip, TypeScript/scoped lint and preview web export pass. Final paired contract/harness/rendered evidence is in the [task handoff](tasks/account-linking-refinement.md).
+- Remaining risks: Graphify refresh passed with generated output kept separate; production/provider/physical-device and native acceptance remain unverified. Browser fixture rendering is separate from real account/device acceptance.
+- Next: publish the dependent Mobile implementation PR alongside Staff. Compatible Staff deployment must precede any separately authorized Mobile release; preserve signer, Metro and private device queues.
