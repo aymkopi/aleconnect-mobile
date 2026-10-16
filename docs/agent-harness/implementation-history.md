@@ -1,5 +1,12 @@
 # Implementation history
 
+## 2026-10-16 — Merged UI PRs and scoped cleanup
+
+- Scope: user-authorized Mobile PR #13 merged to master as `0639fa89008fad744174d53c25036fbe505ae7be`; Lineman PR #11 merged as `11fee4f92db39a0b62c72f7ef69adf8cd93ccb67`. Another session retargeted Lineman #11 from its preserved rebuild base to main during the merge operation; the resulting tree equals the reviewed head. Mobile master includes the concurrent account-linking changes. Canonical Mobile master and Lineman main/active acceptance branch were fast-forwarded without resetting work.
+- Verification: merged Mobile suite passes 499 tests with one expected skip and zero failures; both merged-head CI validation jobs pass tests, types and lint. All 201 pre-existing dirty Staff/Lineman files retain their SHA-256 hashes. Both PR worktrees are deregistered and physically removed; only their merged head branches and redundant task-owned Lineman promotion references are deleted. Git bundles, ignored tests/exports/screenshots and before/after evidence are retained at Staff `.worktrees/pr13-pr11-closeout-20261016`; original rebuild/promotion recovery, active acceptance branch, shared dependencies, stashes and unrelated worktrees remain. Exact merged-baseline and closeout harness checks report the same single inherited shared-contract documentation mismatch against the local Staff sibling; the closeout adds no harness errors.
+- Remaining risks: merge-triggered Android alpha workflows run independently; this closeout does not claim APK publication or physical/provider/iOS acceptance. Requested PanelUI 0.122.0 remains unpublished; both apps retain documented 0.112.0 copied source. Lineman's unrelated acceptance edits remain uncommitted on their owning branch.
+- Next: retain the recovery evidence and continue native/provider acceptance through the owning tasks; no additional product change or manual deployment is included.
+
 ## 2026-10-16 — Final photo-control verification
 
 - Scope: keep the report's built-in FileUpload add tile visible in live and visual-fixture flows, remove the separate fixture add button, replace profile selection's text button with a labelled camera badge, and add an account-scoped camera shortcut to Account information. Production compression and upload ownership are unchanged.
