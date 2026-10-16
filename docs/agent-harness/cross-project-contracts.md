@@ -1,7 +1,7 @@
 # ALEConnect cross-project contracts
 
 Authoritative source: `../aleconnect/docs/agent-harness/cross-project-contracts.md`
-Snapshot synchronized with the local Staff source at `2ec4ca51ba40ec13a7fb3274083eb9e9c7ff6604` on 2026-10-12.
+Snapshot synchronized with Staff account-linking refinement (server commit `e21c11f`, paired shared-contract update) on 2026-10-15.
 
 <!-- shared-contract:start -->
 ## Ownership and routes
@@ -37,6 +37,14 @@ Snapshot synchronized with the local Staff source at `2ec4ca51ba40ec13a7fb327408
 - Standalone/imported Facebook posts add optional topic metadata (General/Billing/Communications/custom1-80-character names) to private and guest Public Updates. Topic-only Staff classification never changes provider caption or delivery state; advisory mirrors/comments remain separate. Deploy the additive nullable post_topic schema before the new Staff reader; legacy consumer caches without topic remain compatible.
 
 - Consumer password changes use `/api/mobile/auth/change-password` actions `status|verify|change|cancel`, with legacy single-request clients retained. Verification lasts five minutes and is bound to the live session and credential. Account-wide rolling limits pause verification after five failures in ten minutes and require fresh login after ten failures in 24 hours without banning the account. Generic consumer Better Auth password changes use the same gates; successful credential updates, other-session revocation, consumer notification and audit commit together.
+
+## Account-link review refinement
+
+- Account-link requests keep submission snapshots separate from current membership. Consumer request reads add optional `isCurrentLink`, true only for the same identity, service account and membership request provenance. Missing metadata remains supported; historical approval is never authorization.
+- Staff adds nullable decision actor name/role and recorded-removal context. Public `consumerReason` remains the Staff-authored decline explanation; `internalReason` and other-owner information remain Staff-only. Known account-link audit notes are readable in existing Activity Logs without exposing raw metadata.
+- Staff transfer requires `expectedCurrentOwnerIdentityId`; missing returns 400 `EXPECTED_OWNER_REQUIRED`, changed owner returns 409 `CURRENT_OWNER_CHANGED`. The client must explicitly review the refreshed owner before retrying. Open pending/conflict actions use current locked ownership; ordinary approval never transfers another owner's account.
+- Matching terminal decisions replay without new access/delivery effects; opposing or closed decisions return 409 `LINK_REQUEST_CHANGED`. Same-owner reconciliation repairs provenance without granting access again. Restore requires a recorded removal plus current ownership/default/last-account checks.
+- Deploy compatible Staff API and UI before dependent Mobile release. Older Mobile ignores additive reads. Cached Staff transfer writes without reviewed-owner metadata fail closed with refresh guidance. No schema migration or status-value retirement is required.
 
 ## Compatibility and release order
 

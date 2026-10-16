@@ -12,6 +12,7 @@ export type AccountLinkRequest = {
   consumerReason: string | null;
   createdAt: string;
   decidedAt: string | null;
+  isCurrentLink?: boolean;
 };
 
 export async function fetchAccountLinkRequests() {
@@ -21,6 +22,7 @@ export async function fetchAccountLinkRequests() {
     requests: result.requests.map((request) => ({
       ...request,
       status: parseConsumerAccountLinkRequestStatus(request.status),
+      isCurrentLink: typeof request.isCurrentLink === "boolean" ? request.isCurrentLink : undefined,
     })),
   };
 }

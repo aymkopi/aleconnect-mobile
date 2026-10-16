@@ -40,3 +40,5 @@ Last verified: 449 tests, TypeScript/harness/whitespace and source review pass; 
 - [BottomSheet normalization](../bottom-sheet-normalization.md): shared Light/Dark sheet surfaces, contact-card separation and latest manual edits; PR6 merged; source/cleanup and alpha.4 publication evidence complete.
 
 - [Consumer security and motion refinements](../mobile-security-motion-refinements.md): PR9 merged and alpha10/code64 published through38541261800 after Staff PR41 deployed.456 tests, Doctor21/exports/review and all downloaded asset/signature/Hermes/54-library alignment checks pass. Manual edits and recovery stashes are preserved; tablet disconnected before exact-release install, leaving device/private/provider/iOS acceptance separate.
+
+- [Account-linking refinement](tasks/account-linking-refinement.md): approved Staff PR43 plan implemented; current/historical approval and legacy metadata behavior verified. Paired PR/check evidence in handoff; no native release or device change.
