@@ -10,8 +10,8 @@ Implementation tracker (2026-10-16):
 All products remain alpha releases. Staff and Lineman start at `1.0.0-alpha.1`;
 Mobile retains its published alpha history. CI/review run numbers never determine
 product versions. Existing release assets, native identities, signers, queues and
-unrelated local edits are preserved. This change does not deploy production,
-publish an APK, apply a database migration or modify API contracts.
+unrelated local edits are preserved. The versioning implementation does not change API contracts or automatically run
+database migrations. The authorized release acceptance is recorded below.
 
 ## Policy
 
@@ -103,7 +103,7 @@ Verified locally on the pinned Node24.21.0 runtime with clean lockfile installs:
 | Product | Passed checks |
 | --- | --- |
 | Staff | 118 deployment/harness tests; final release regressions; production frontend build; scoped lint and harness |
-| Mobile | 464/464 application tests; TypeScript; Expo lint (zero errors, 181 existing warnings); release-file lint; 2/2 Python verifier tests; harness and resolved alpha10/code64 Expo config |
+| Mobile | 464/464 application tests; TypeScript; Expo lint (zero errors, 181 existing warnings); release-file lint; 2/2 Python verifier tests; harness and resolved alpha10/code 64 Expo config |
 | Lineman | 344 application passes, one existing skip; TypeScript; Expo lint (zero errors, 50 existing warnings); release-file lint; 2/2 Python verifier tests; resolved alpha1/code1 Expo config |
 | Shared | All six changed workflows parse; allocator files are identical; whitespace checks; read-only GitHub inventory/metadata/tag lookup; scoped read-only review with all findings resolved |
 
@@ -125,7 +125,22 @@ Its normal isolated CI/harness validation remains separate from that comparison.
 Existing npm audit findings in the unchanged dependency locks remain: Staff30,
 Mobile41 and Lineman43; this CI-only change does not upgrade those dependencies.
 
-No production/native publication, actual new APK build, installed-device or store
-acceptance is claimed. Hosted PR validation and the first authorized default-branch
-deployment/native publication are distinct remaining integration gates. Failed
-publication can leave the documented unpublished tag/draft for inspection.
+The local checks above preceded integration. The following release acceptance supersedes their earlier publication/device limits; provider and store acceptance remain separate.
+
+## Release acceptance - 2026-10-16
+
+| Product | Published alpha | Android code | Application source | Workflow |
+| --- | --- | --- | --- | --- |
+| Staff | [1.0.1-alpha.1](https://github.com/aymkopi/Aleconnect/releases/tag/v1.0.1-alpha.1) | n/a | `6c979def` | [38854529003](https://github.com/aymkopi/Aleconnect/actions/runs/38854529003) |
+| Mobile | [1.0.1-alpha.1](https://github.com/aymkopi/aleconnect-mobile/releases/tag/v1.0.1-alpha.1) | 65 | `f4af0a20` | [38783769904](https://github.com/aymkopi/aleconnect-mobile/actions/runs/38783769904) |
+| Lineman | [1.0.0-alpha.1](https://github.com/aymkopi/aleconnect-lineman/releases/tag/v1.0.0-alpha.1) | 2 | `efbe880c` | [38784167469](https://github.com/aymkopi/aleconnect-lineman/actions/runs/38784167469) |
+
+- Staff PRs #46/#47, Mobile PRs #11/#12 and Lineman PR #10 are merged after green exact-head checks. The publisher recovery also passed a separate read-only review.
+- Staff's first publication stopped after deployment because GitHub briefly omitted its new draft from the release listing. The draft was published only after verifying the deployed source, exact tag and uploaded metadata digest. A red/green regression now covers delayed draft visibility; bounded retries retain all verification and immutable-release guards. Both native workflows and the final Staff workflow subsequently published automatically without this failure.
+- Production `https://aleconnect.app/release.json` matches Staff 1.0.1-alpha.1 and its exact application source. Six read-only site/session/consumer/field probes return expected 200/401 statuses. Pages deployment 97792024 is live. Cloudflare's automatic API version f6ce37d9 is active 100% and has the same script hash, bindings and runtime as CI version a0d4644f. No schema migration or operational write was performed.
+- All downloaded release assets match GitHub digests; release tags match recorded source commits. Independent verification of both APKs passes package/version, non-debuggable runtime, live HTTPS API, ZIP and every native ELF 16 KB alignment check; Mobile fixtures are compiled off. Mobile has 54 native libraries; Lineman 52.
+- Retained certificate SHA256: `fac61745dc0903786fb9ede62a962b399f7348f0bb6f899b8332667591033b9c`. This is the existing preview signer, not a new store-production key. APK SHA256: Mobile `a3a88b12095405ea84336b4cd696bfd7ce7c3e9ecb3c3552d9fb3c9cbdcf6d7b`; Lineman `f09f8f46292631b5fb7ca0b7c84af89ab9bfff068d77feebe30b8c9ed901921c`.
+- Both exact published APKs update in place on authorized physical device 25069PTEBG. Installed versions/codes match the table; each passes three cold launches with no app exception. Lineman renders Field access; Mobile retains its consumer session and renders Home. Existing APKs were saved before replacement; app data, signing/provider files and durable queues were not cleared. Earlier tablet checks are additional bounded evidence, not acceptance of the final phone APKs.
+- The old tablet crash log identifies a separate `com.aleconnect.lineman.paneluiqa` artifact with absent/non-HTTPS API configuration. Its current launch and the canonical release did not reproduce that exception. The release pipeline pins and verifies the production HTTPS origin; this does not claim every field/provider flow is stable.
+- Versioned APK copies under Desktop/AleconnectApps match the published hashes. External graph/release/device/recovery evidence remains outside the worktrees. Preserve unrelated edits, stashes, existing emulators and worktrees. Unpublished Staff local commits are retained on `codex/preserved-local-main-20261016` rather than being silently deployed with this CI change.
+- Remaining: authenticated Staff mutations, private password flows, real push/provider delivery, field replay/background GPS, native iOS and store acceptance are unverified. Existing lint/audit/optional sibling-doc findings above remain unchanged. Documentation-only closeout does not allocate another alpha or rebuild the application.
