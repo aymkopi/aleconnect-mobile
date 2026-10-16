@@ -1,5 +1,12 @@
 # Implementation history
 
+## 2026-10-17 - Mobile declutter design review
+
+- Scope: isolated `codex/mobile-declutter` branch and editable Figma review page for Reports filters, contact-type icons, Account/information, Alerts and Advisories. Original screens and application source remain unchanged. A separate requested chat owns the broader Reports redesign proposal.
+- Verification: inspected affected Mobile source, the Staff contact-type contract and existing Figma components/tokens; created 24 editable Light/Dark phone frames and reused component/style bindings. The user-requested unread revision uses the notification surface/dot without a separate banner, shown in two same-height comparison panels. Independent review identified an old calendar backdrop and a dark unread-instance paint mismatch; Reports behind one calendar sheet with Back and the materialized notification tint resolve them. Final dark screenshot/paint binding, baseline/draft harness and whitespace checks pass. Runtime acceptance remains separate.
+- Remaining risks: this is a design-stage draft, not implemented application behavior or accessibility/device acceptance. Preserve profile verification, device-registration state, all filter choices and single-sheet navigation during implementation.
+- Next: resolve the design review, obtain acceptance of the Figma direction and implement through existing shared components with focused source/render checks. No merge, release or backend migration is included.
+
 ## 2026-10-17 - Published alpha phone verification
 
 - Scope: finish PR13 release verification, preserve manual work and synchronize master; cleanup is limited to the release worktree after docs checks.
