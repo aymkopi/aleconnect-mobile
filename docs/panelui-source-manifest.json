@@ -1,8 +1,8 @@
 {
   "cli": "0.6.2",
-  "referencePackage": "0.109.0",
+  "referencePackage": "0.112.0",
   "registry": "https://panelui.dev/r",
-  "retrieved": "2026-10-12",
+  "retrieved": "2026-10-16",
   "license": "MIT",
   "cliIntegrity": "sha512-+8S54XWmMkNkkpvZcKlJdoDHaoM/5Afg+1jDFKR+NnMoB8S6/E+JixyNvRQW0XXV2/yMKfipAQCL1SIGDaSvsA==",
   "files": [
@@ -354,7 +354,7 @@
     },
     {
       "path": "src/components/panelui/icons.tsx",
-      "sha256": "adbe698fbd4bce41916d53ba080b38d9581a338e0a073a65802d803cb7d973e7"
+      "sha256": "d3783ecc1710ea1029f3353aa4e9198ee4e7f3a274f63e4f38d61c1af7e1340f"
     },
     {
       "path": "src/components/panelui/input-content-padding.ts",
@@ -535,6 +535,30 @@
     {
       "path": "src/components/panelui/theme-preview.tsx",
       "sha256": "254ba9724992ef8d6906eea6df301e65dc67ab6f2fff47f9ed73acf678dfa34c"
+    },
+    {
+      "path": "src/components/panelui/attachment.tsx",
+      "sha256": "a8598e14ab94d36addd6007081795608764ad5925fb4a54aec58f7aac26be109"
+    },
+    {
+      "path": "src/components/panelui/file-upload.tsx",
+      "sha256": "7d613048b4b38817af7ccf6a3b3e2c9cf68c5dd80fb088ef2c694764ea0fa9b6"
+    },
+    {
+      "path": "src/components/panelui/file-upload-core.ts",
+      "sha256": "c4a23ae577a909a8c58740fbbe58933d7f7fedcdb29e64285224ee8e47c79bee"
+    },
+    {
+      "path": "src/components/panelui/menu.tsx",
+      "sha256": "371a075b281d083b08377bdfdd3ede1ad946ab941d579156f082a04f5d9cf43a"
+    },
+    {
+      "path": "src/components/panelui/image-viewer.tsx",
+      "sha256": "754dcd891c5a614fd9d1b691df2af4c78d378f88fd37973c32496f7797a90791"
+    },
+    {
+      "path": "src/components/panelui/image-viewer-geometry.ts",
+      "sha256": "39042af2b14a76f2600ceb5b1a2e861ee516bbd8913f4d56565cb5f3333a544e"
     }
   ],
   "componentUpdates": {
@@ -725,10 +749,105 @@
         "Retain focus recovery and support both native currentlyFocusedInput and RN-web currentlyFocusedField APIs"
       ],
       "currentSha256": "fe5597384df1f49048f05465e1d020f45a283d964a25c08a93cabf0772486339"
+    },
+    "file-upload": {
+      "referencePackage": "0.112.0",
+      "source": "https://registry.npmjs.org/panelui-native/-/panelui-native-0.112.0.tgz",
+      "sourceFiles": [
+        {
+          "path": "src/components/file-upload/index.tsx",
+          "sha256": "c3e60d95fc91fde8a704822cf39efb32a5338ec4081342bdbfa2991346aede92"
+        },
+        {
+          "path": "src/components/file-upload/file-upload-core.ts",
+          "sha256": "24db3f39ac4a44481f644a547dff1bb0d06e679e8e61bd6172d35dfa625838b3"
+        }
+      ],
+      "adaptations": [
+        "ALEConnect flattened aliases; existing semantic primitives, typography, optional native modules and app-owned compression retained",
+        "Invalidate picker results/errors after unmount, disabling or clear; serialize system picker requests and recheck the current controlled count after await",
+        "Allow exact image/video MIME types and extensions in library source selection",
+        "Remove app-owned processing files when no upload handler exists; preserve cancel for real uploads"
+      ],
+      "currentSha256": "7d613048b4b38817af7ccf6a3b3e2c9cf68c5dd80fb088ef2c694764ea0fa9b6"
+    },
+    "attachment": {
+      "referencePackage": "0.112.0",
+      "source": "https://registry.npmjs.org/panelui-native/-/panelui-native-0.112.0.tgz",
+      "sourceFiles": [
+        {
+          "path": "src/components/attachment/index.tsx",
+          "sha256": "3dbc8756aa39573f23c20c6e011f28a6137036332168d0738d7000c465819e66"
+        }
+      ],
+      "adaptations": [
+        "ALEConnect flattened aliases and existing Item typography/accessibility",
+        "Retain static busy titles and optional progress bar; no masked-view dependency solely for shimmer"
+      ],
+      "currentSha256": "a8598e14ab94d36addd6007081795608764ad5925fb4a54aec58f7aac26be109"
+    },
+    "menu": {
+      "referencePackage": "0.112.0",
+      "source": "https://registry.npmjs.org/panelui-native/-/panelui-native-0.112.0.tgz",
+      "sourceFiles": [
+        {
+          "path": "src/components/menu/index.tsx",
+          "sha256": "dd49aef88c2b8f1a7c75b41f116a88f880b0860758afd2ca0dd05261879174d3"
+        }
+      ],
+      "adaptations": [
+        "ALEConnect flattened aliases; existing Popover, single-sheet behavior and optional haptics reused"
+      ],
+      "currentSha256": "371a075b281d083b08377bdfdd3ede1ad946ab941d579156f082a04f5d9cf43a"
+    },
+    "image-viewer": {
+      "referencePackage": "0.112.0",
+      "source": "https://registry.npmjs.org/panelui-native/-/panelui-native-0.112.0.tgz",
+      "sourceFiles": [
+        {
+          "path": "src/components/image-viewer/index.tsx",
+          "sha256": "0d5efeef3fe88166c14a3eefa7d8f19226e264337d89a39ed6a16221ee4e22f6"
+        },
+        {
+          "path": "src/components/image-viewer/image-viewer-geometry.ts",
+          "sha256": "39042af2b14a76f2600ceb5b1a2e861ee516bbd8913f4d56565cb5f3333a544e"
+        }
+      ],
+      "adaptations": [
+        "ALEConnect flattened aliases; existing ModalPortal, accessibility, theme hook, Scrim fallback and optional haptics reused"
+      ],
+      "currentSha256": "754dcd891c5a614fd9d1b691df2af4c78d378f88fd37973c32496f7797a90791"
+    },
+    "icons": {
+      "referencePackage": "0.112.0",
+      "source": "https://registry.npmjs.org/panelui-native/-/panelui-native-0.112.0.tgz",
+      "sourceFiles": [
+        {
+          "path": "src/icons/index.tsx",
+          "sha256": "fa0425316d2b7b1e24630d79985377d2b99500262caff4e31f15f266b4c9d232"
+        }
+      ],
+      "adaptations": [
+        "New UploadIcon, VideoIcon and RotateSquareIcon mapped through existing Lucide icon wrapper; prior app icon mappings retained"
+      ],
+      "currentSha256": "d3783ecc1710ea1029f3353aa4e9198ee4e7f3a274f63e4f38d61c1af7e1340f"
     }
   },
-  "packageIntegrity": "sha512-Jv8dbRxqu14X3Pgs8+6ufGTbUz/Dahhjk+C1h4YzblKas2vWR+YEMGyhNYgLgAm8yr2AO8W3xnjw8lZlzhaPMA==",
+  "packageIntegrity": "sha512-BTVnctJxfP4CHFVU7NUwLDx2PfVYBU8JKGPy31jP+LZIGcVsaVh0/whXrrNGdprAYaO9UC+axEs4d2lJZ62EuA==",
   "baseFilesReferencePackage": "0.107.1",
   "licenseFile": "src/components/panelui/LICENSE",
-  "licenseSource": "https://github.com/panel-ui/PanelUI/blob/main/LICENSE"
+  "licenseSource": "https://github.com/panel-ui/PanelUI/blob/main/LICENSE",
+  "upgradeReview": {
+    "from": "0.109.0",
+    "to": "0.112.0",
+    "requestedVersion": "0.122.0",
+    "requestedVersionAvailability": "npm E404; published 0.112.0 used after user continued",
+    "source": "https://registry.npmjs.org/panelui-native/-/panelui-native-0.112.0.tgz",
+    "existingUpstreamChanges": [
+      "icons/index.tsx adds UploadIcon, VideoIcon and RotateSquareIcon",
+      "providers/panel-ui-provider.tsx fixes optional KeyboardProvider resolution; local stable installed KeyboardProvider import retained",
+      "src/index.ts adds exports; copied-source app imports individual files"
+    ],
+    "unchangedComponents": "All previously existing upstream component source bodies are byte-identical between 0.109.0 and 0.112.0; local adaptations and newer individual registry overrides retained"
+  }
 }

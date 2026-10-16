@@ -7,6 +7,7 @@ import { RadioGroup } from "@/components/panelui/radio-group";
 import { Text } from "@/components/panelui/text";
 import { ReportPage } from "@/features/reports/components/report-page";
 import { useAppColors } from "@/hooks/use-app-colors";
+import { useManualRefresh } from "@/hooks/use-manual-refresh";
 import type {
   MobileNotification,
   MobileNotificationCategory,
@@ -94,8 +95,12 @@ function NotificationInbox({ access }: { access: NotificationAccess }) {
     setView("filters");
     setSheet(true);
   };
-  const refresh = () =>
-    access.fixtures ? setFixtureState("loaded") : void feed.reload(true);
+  const { refresh, refreshing } = useManualRefresh(
+    "notifications",
+    access.fixtures ? "fixture" : access.account?.identityUserId ?? access.options.userId,
+    () => access.fixtures ? setFixtureState("loaded") : feed.reload(true),
+    !access.fixtures && feed.busy,
+  );
   const open = async (item: MobileNotification) => {
     if (feed.mutation.busy) return;
     setRetryItem(item);
@@ -272,12 +277,7 @@ function NotificationInbox({ access }: { access: NotificationAccess }) {
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
         contentContainerStyle={{ paddingBottom: 24 }}
-        refreshing={
-          !access.fixtures &&
-          feed.busy &&
-          !feed.loadingMore &&
-          Boolean(feed.data)
-        }
+        refreshing={refreshing}
         onRefresh={refresh}
         renderSectionHeader={({ section }) => (
           <Text size="xs" weight="semibold" muted className="pb-2 pt-4">

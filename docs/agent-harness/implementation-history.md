@@ -1,5 +1,12 @@
 # Implementation history
 
+## 2026-10-16 — Manual refresh and FileUpload
+
+- Scope: add Hotlines/Notifications pull-to-refresh; share three-per-minute manual refresh budgets across related screens; use PanelUI FileUpload for report evidence and profile photos while retaining compression, private scope and durable queue ownership. Add active-pill dragging and relative navbar swiping that commit the nearest tab on release. Use published copied-source PanelUI 0.112.0 because requested 0.122.0 is unavailable. Document reproducible FileUpload source issues.
+- Verification: initial full suite passes 487 tests with one missing-sibling skip; real Staff harness comparison, TypeScript, zero-error scoped lint and Android/Hermes plus web exports pass. Twelve FileUpload source regressions, five photo integration checks, four gesture checks and 70 refresh-focused checks pass. Phone-width browser evidence confirms Grid selection/removal without horizontal overflow, profile photo preview, and navbar page commit only on release; drag-release click regression fixed. Final integration and review results are retained in the task record before publication.
+- Remaining risks: native camera/library/permission and pull gestures, real uploads and native iOS are unverified; no APK or deployment is included. The in-process refresh budget resets on app restart.
+- Next: complete checks, record final results and open the Mobile PR; retain the paired Lineman promotion/upgrade recovery separately.
+
 ## 2026-10-16 - Independent alpha release versioning
 
 - Scope: replace CI-run-based versions with Conventional Commit patch/minor/major alpha targets, manual overrides and published-code allocation above64. Synchronize source alpha10 manifests, preserve the signer/provider/package and existing standalone verification, and strengthen digest checks for all uploaded assets.

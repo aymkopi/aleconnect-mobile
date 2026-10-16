@@ -9,6 +9,8 @@ import { DataState, DataNotice } from "@/components/data-state";
 import { Phone, Search } from "lucide-react-native";
 import { Field } from "@/components/panelui/field";
 import { useScopedRead } from "@/hooks/use-scoped-read";
+import { useAuthSession } from "@/hooks/use-auth-session";
+import { useManualRefresh } from "@/hooks/use-manual-refresh";
 import { useVisualPreview } from "@/context/visual-preview-context";
 import { fixtureHotlines } from "@/features/main-fixtures";
 import { fetchHotlines } from "@/services/hotlines";
@@ -16,6 +18,7 @@ import { ContactCard } from "./contact-card";
 import { EmergencyCard } from "./emergency-card";
 export default function HotlineDirectoryScreen() {
   const router = useRouter(),
+    { session } = useAuthSession(),
     { publicFixtures: fixtures } = useVisualPreview();
   const params = useLocalSearchParams<{ q?: string }>();
   const [query, setQuery] = useState(
@@ -25,6 +28,11 @@ export default function HotlineDirectoryScreen() {
     [sort, setSort] = useState("az");
   const data = useScopedRead(fixtures ? null : "hotline-directory", (force) =>
     fetchHotlines({ force }),
+  );
+  const { refresh, refreshing } = useManualRefresh(
+    "hotlines", fixtures ? "fixture" : session?.user.id ?? "guest",
+    () => fixtures ? undefined : data.reload(true),
+    !fixtures && data.busy,
   );
   const categories = fixtures ? fixtureHotlines : (data.data?.categories ?? []);
   const groups = categories
@@ -54,6 +62,8 @@ export default function HotlineDirectoryScreen() {
   return (
     <ReportPage
       title="All hotlines"
+      refreshing={refreshing}
+      onRefresh={refresh}
       onBack={() =>
         router.canGoBack() ? router.back() : router.replace("/hotlines")
       }
@@ -90,8 +100,8 @@ export default function HotlineDirectoryScreen() {
         </>
       ) : null}
       {!fixtures && !data.data && data.busy ? <DataState loading loadingLayout="contact" title="Loading the hotline directory" /> : null}
-      {!fixtures && !data.data && data.error ? <DataState title="The directory couldn’t load" description="Reconnect and try again to get agency contacts. Emergency calling is still available on Hotlines." actionLabel="Try again" onAction={() => void data.reload(true)} /> : null}
-      {data.data && (data.error || data.data.isStale) ? <DataNotice title={data.error ? "Could not refresh contacts" : "Showing saved contacts"} description="The directory may have changed. Connect and refresh to check current contact details." actionLabel="Refresh directory" onAction={() => void data.reload(true)} busy={data.busy} /> : null}
+      {!fixtures && !data.data && data.error ? <DataState title="The directory couldn’t load" description="Reconnect and try again to get agency contacts. Emergency calling is still available on Hotlines." actionLabel="Try again" onAction={refresh} /> : null}
+      {data.data && (data.error || data.data.isStale) ? <DataNotice title={data.error ? "Could not refresh contacts" : "Showing saved contacts"} description="The directory may have changed. Connect and refresh to check current contact details." actionLabel="Refresh directory" onAction={refresh} busy={data.busy} /> : null}
       {groups.map((c) => (
         <View className="gap-2" key={c.id}>
           <Text muted size="xs">

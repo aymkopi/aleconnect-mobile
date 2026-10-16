@@ -55,14 +55,15 @@ export function FloatingTabsBar({ state, navigation }: BottomTabBarProps) {
           const route = state.routes[index];
 
           if (!route) {
-            return;
+            return false;
           }
 
-          if (guest && route.name === "reports") { requestSignIn("/reports", "reports"); return; }
+          if (guest && route.name === "reports") { requestSignIn("/reports", "reports"); return false; }
           const event = navigation.emit({ type: "tabPress", target: route.key, canPreventDefault: true });
-          if (event.defaultPrevented) return;
+          if (event.defaultPrevented) return false;
           if (route.name === "reports" || route.name === "profile") navigation.navigate(route.name, { screen: "index" });
           else navigation.navigate(route.name);
+          return true;
         }}
       />
     </View>

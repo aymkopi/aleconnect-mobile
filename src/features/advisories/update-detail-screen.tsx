@@ -22,6 +22,7 @@ import { SearchField } from "@/components/search-field";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useConsumerAccount } from "@/hooks/use-consumer-account";
 import { useScopedRead } from "@/hooks/use-scoped-read";
+import { useManualRefresh } from "@/hooks/use-manual-refresh";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useGuestAccess } from "@/context/guest-access-context";
 import { useVisualPreview } from "@/context/visual-preview-context";
@@ -63,7 +64,6 @@ function UpdateDetailScreen({ kind }: { kind: MobilePublicUpdate["kind"] }) {
   const { guest, requestSignIn } = useGuestAccess();
   const [areas, setAreas] = useState(fixtures && preview === "areas"),
     [query, setQuery] = useState("");
-  const [pullRefreshing, setPullRefreshing] = useState(false);
   const [foreground, primary] = useAppColors(["foreground", "primary"]);
   const options = {
     userId: session?.user.id ?? "guest",
@@ -124,10 +124,12 @@ function UpdateDetailScreen({ kind }: { kind: MobilePublicUpdate["kind"] }) {
   const unavailable = fixtures ? !item && !error : !!read.data?.unavailable;
   const back = () =>
     router.canGoBack() ? router.back() : router.replace("/advisories");
-  const retry = () => {
-    if (fixtures) router.setParams({ preview: undefined });
-    else void read.reload(true);
-  };
+  const { refresh: retry, refreshing } = useManualRefresh(
+    "advisories",
+    fixtures ? "fixture" : accountContext?.identityUserId ?? session?.user.id ?? "guest",
+    () => fixtures ? router.setParams({ preview: undefined }) : read.reload(true),
+    !fixtures && read.busy,
+  );
   const advisory = item?.kind === "advisory" ? item : null;
   const schedule = advisory ? advisorySchedule(advisory) : null;
   const post = item?.kind === "facebook_post" ? item : null;
@@ -136,15 +138,7 @@ function UpdateDetailScreen({ kind }: { kind: MobilePublicUpdate["kind"] }) {
   const pageTitle = kind === "advisory" ? "Advisory details" : "From ALECO";
   const body = advisory?.content ?? post?.message ?? "";
   return (
-    <ReportPage title={pageTitle} onBack={back} refreshing={pullRefreshing} onRefresh={async () => {
-      setPullRefreshing(true);
-      try {
-        if (fixtures) router.setParams({ preview: undefined });
-        else await read.reload(true);
-      } finally {
-        setPullRefreshing(false);
-      }
-    }}>
+    <ReportPage title={pageTitle} onBack={back} refreshing={refreshing} onRefresh={retry}>
       {busy ? (
         <DataState loading loadingLayout="detail" title="Loading this ALECO update" />
       ) : signIn ? (

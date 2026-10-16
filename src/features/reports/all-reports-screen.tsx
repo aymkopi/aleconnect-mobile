@@ -15,6 +15,7 @@ import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useConsumerAccount } from "@/hooks/use-consumer-account";
 import { useScopedRead } from "@/hooks/use-scoped-read";
+import { useManualRefresh } from "@/hooks/use-manual-refresh";
 import { calendarShortDate } from "@/lib/date";
 import { isQueuedReportVisible } from "@/services/report-queue-access";
 import {
@@ -168,7 +169,6 @@ export default function AllReportsScreen() {
   const [draft, setDraft] = useState(filters);
   const [view, setView] = useState<FilterView>("filters");
   const [sheet, setSheet] = useState(false);
-  const [pullRefreshing, setPullRefreshing] = useState(false);
   const [tab, setTab] = useState<ReportTab>("all");
   const [fixtureState, setFixtureState] = useState("loaded");
   const accounts = fixtures ? fixtureAccounts : accountContext?.accounts || [];
@@ -201,8 +201,19 @@ export default function AllReportsScreen() {
     sort: filters.sort,
     limit: 25,
   };
+  const refreshConsumerId = fixtures ? "fixture" : accountContext?.identityUserId ?? session?.user.id ?? null;
   const reports = useScopedRead(scope, (force) =>
     fetchComplaintReportPage({ ...options, force, revalidate: force }),
+  );
+  const { refresh, refreshing } = useManualRefresh(
+    "reports", refreshConsumerId,
+    () => {
+      if (fixtures) {
+        setFixtureState("loaded");
+        setFixturePage({ scope: fixtureScope, count: 3 });
+      } else return reports.reload(true);
+    },
+    !fixtures && reports.busy,
   );
   const meta = useScopedRead(
     !fixtures && session
@@ -214,6 +225,11 @@ export default function AllReportsScreen() {
         ])
       : null,
     (force) => fetchComplaintMeta({ force }),
+  );
+  const { refresh: refreshTypes } = useManualRefresh(
+    "reports", refreshConsumerId,
+    () => fixtures ? undefined : meta.reload(true),
+    !fixtures && (reports.busy || meta.busy),
   );
   const list = useRef<FlatList>(null);
   const reloadReports = reports.reload;
@@ -439,9 +455,7 @@ export default function AllReportsScreen() {
             variant="outline"
             size="sm"
             loading={busy}
-            onPress={() =>
-              fixtures ? setFixtureState("loaded") : void reports.reload(true)
-            }
+            onPress={refresh}
           >
             Refresh reports
           </Button>
@@ -453,9 +467,7 @@ export default function AllReportsScreen() {
           description="Your loaded reports are still available. Connect and refresh for current statuses."
           actionLabel="Refresh reports"
           busy={busy}
-          onAction={() =>
-            fixtures ? setFixtureState("loaded") : void reports.reload(true)
-          }
+          onAction={refresh}
         />
       ) : null}
     </View>
@@ -567,9 +579,7 @@ export default function AllReportsScreen() {
               title="Your reports couldn’t load"
               description="Reconnect and retry. Your search and filters are kept in place."
               actionLabel="Try again"
-              onAction={() =>
-                fixtures ? setFixtureState("loaded") : void reports.reload(true)
-              }
+              onAction={refresh}
             />
           ) : (
             <DataState
@@ -585,16 +595,8 @@ export default function AllReportsScreen() {
             />
           )
         }
-        refreshing={pullRefreshing}
-        onRefresh={async () => {
-          setPullRefreshing(true);
-          try {
-            if (fixtures) setFixturePage({ scope: fixtureScope, count: 3 });
-            else await reports.reload(true);
-          } finally {
-            setPullRefreshing(false);
-          }
-        }}
+        refreshing={refreshing}
+        onRefresh={refresh}
         ListFooterComponent={
           <View className="py-4 gap-2">
             {reports.error && reports.errorSource === "more" ? (
@@ -879,7 +881,7 @@ export default function AllReportsScreen() {
                     {meta.error ? (
                       <Button
                         variant="outline"
-                        onPress={() => void meta.reload(true)}
+                        onPress={refreshTypes}
                       >
                         Reload report types
                       </Button>

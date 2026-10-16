@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import ts from "typescript";
+import { manualRefreshHarness } from "./manual-refresh-harness.mjs";
 
 test("Hotline categories use one auto-sized searchable sheet without an ALECO launcher", async () => {
   const slots = [];
@@ -65,6 +66,7 @@ test("Hotline categories use one auto-sized searchable sheet without an ALECO la
         "react-native": {
           View: "View",
           ScrollView: "ScrollView",
+          RefreshControl: "RefreshControl",
           useWindowDimensions: () => ({ width: 402 }),
         },
         "expo-router": { useRouter: () => ({ push: () => {} }) },
@@ -80,6 +82,7 @@ test("Hotline categories use one auto-sized searchable sheet without an ALECO la
         },
         "@/hooks/use-app-colors": { useAppColors: () => ["blue"] },
         "@/hooks/use-main-page-scroll": { useMainPageScroll: () => ({ current: null }) },
+        "@/hooks/use-manual-refresh": manualRefreshHarness({ useState }),
         "@/components/panelui/button": { Button: "Button" },
         "@/hooks/use-scoped-read": {
           useScopedRead: () => ({ data: null, busy: false }),
@@ -103,6 +106,10 @@ test("Hotline categories use one auto-sized searchable sheet without an ALECO la
     return flatten(exports.default());
   };
   let nodes = render();
+  const pull = nodes.find(n => n.type === "ScrollView").props.refreshControl;
+  assert.equal(pull.type, "RefreshControl");
+  assert.equal(pull.props.refreshing, false);
+  await assert.doesNotReject(pull.props.onRefresh(), "fixture pulls must not call the live loader");
   assert.ok(!nodes.some(n => n.type === "ContactCard" && n.props.onViewContacts));
   nodes.find(n => n.type === "Button" && n.props.children === "Fire").props.onPress();
   nodes = render();

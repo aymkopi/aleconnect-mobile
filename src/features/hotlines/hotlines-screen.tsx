@@ -14,13 +14,14 @@ import { fixtureHotlines } from "@/features/main-fixtures";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useMainPageScroll } from "@/hooks/use-main-page-scroll";
+import { useManualRefresh } from "@/hooks/use-manual-refresh";
 import { useScopedRead } from "@/hooks/use-scoped-read";
 import { fetchHotlines, type HotlineCategory } from "@/services/hotlines";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { Building2, Flame, Hospital, ShieldCheck } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { ScrollView, View, useWindowDimensions } from "react-native";
+import { RefreshControl, ScrollView, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ContactCard } from "./contact-card";
 import { EmergencyCard } from "./emergency-card";
@@ -41,6 +42,11 @@ export default function HotlinesScreen() {
     fetchHotlines({ force }),
   );
   const scrollRef = useMainPageScroll<ScrollView>(data.reload);
+  const { refresh, refreshing } = useManualRefresh(
+    "hotlines", fixtures ? "fixture" : session?.user.id ?? "guest",
+    () => fixtures ? undefined : data.reload(true),
+    !fixtures && data.busy,
+  );
   const categories = fixtures ? fixtureHotlines : (data.data?.categories ?? []),
     agencies = categories.flatMap((c) => c.agencies);
   const aleco = agencies.find((a) => /aleco|albay electric/i.test(a.name)),
@@ -126,6 +132,7 @@ export default function HotlinesScreen() {
       <ScrollView
         className="flex-1"
         ref={scrollRef}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
         showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
@@ -155,7 +162,7 @@ export default function HotlinesScreen() {
             title="The directory couldn’t load"
             description="Reconnect and try again to get agency contacts. For an emergency, you can still hold to call 911."
             actionLabel="Try again"
-            onAction={() => void data.reload(true)}
+            onAction={refresh}
           />
         ) : query ? (
           matches.length ? (
@@ -188,7 +195,7 @@ export default function HotlinesScreen() {
             description="The directory may have changed. Connect and refresh to check current contact details."
             actionLabel="Refresh directory"
             busy={data.busy}
-            onAction={() => void data.reload(true)}
+            onAction={refresh}
           />
         ) : null}
         <View className="flex-row items-center justify-between">

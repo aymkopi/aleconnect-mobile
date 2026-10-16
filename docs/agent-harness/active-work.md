@@ -1,5 +1,7 @@
 # Active work
 
+- [Manual refresh and FileUpload](../mobile-refresh-file-upload.md): PR preparation for shared manual refresh limits, Hotlines/Notifications pull-to-refresh, compressed report/profile photo selection, and copied PanelUI 0.112.0. Requested 0.122.0 is unavailable; verification and native acceptance limits are recorded with the PR.
+
 - [Three-repository alpha versioning](../release-versioning.md): semantic alpha allocation above published code64; 464 tests, types, actual CI lint, verifier/config/harness and source review pass. Ready for PR integration; no APK publication.
 
 - [Android development build](tasks/android-development-build.md): Windows CMake staging, alpha.8/code 62 local config and isolated Metro cache; canonical native build/in-place install and Home/Account rendering pass on model 25069PTEBG. Metro 8081 serves the canonical project. Preserve the manual Account edit, device data, original signer and sibling servers; five available Expo patches remain an unrelated Doctor warning.
