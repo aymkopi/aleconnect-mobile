@@ -543,3 +543,17 @@ Closeout: harness validation against the reviewed Staff companion and git diff -
 - Verification: documentation harness and whitespace checks gate the commit. Published binary checks remain those of alpha.10; no app source or dependency changes enter this documentation update.
 - Remaining risks: the template assists editor commits rather than enforcing GitHub/manual-message commits. Existing exact-device/private/provider/native-iOS acceptance remains separate.
 - Next: use this format for subsequent commits, PRs, and releases; omit empty categories and preserve merged history.
+
+## 2026-10-16 - Release draft readback recovery
+
+- Scope: First hosted Staff publication exposed a brief missing draft readback after successful deployment/upload. Added a bounded read retry without weakening source, signer, asset digest or immutability guards.
+- Verification: The regression first failed on the observed assertion, then passed with delayed visibility. All ten allocator/publisher checks pass; Mobile workflow verification adds an eleventh passing check.
+- Remaining risks: Staff alpha1 draft was recovered only after verifying deployed release metadata, exact tag/source and uploaded asset hash. Mobile's pre-publication run was canceled to incorporate this shared correction. Lineman launch diagnosis remains in progress on the explicitly requested physical tablet; no operational data is cleared.
+- Next: Complete release workflows, validate real-device launch and signatures, sync primary checkouts and clean only task-owned worktrees.
+
+## 2026-10-16 - Three-repository alpha release closeout
+
+- Scope: merge the reviewed versioning PRs and publisher recovery, deploy Staff, publish both Android alphas, verify actual release artifacts and physical-device launch, synchronize primary checkouts and clean only task-owned branches/worktrees.
+- Verification: all exact-head PR checks and the three final publication workflows pass. Staff 1.0.1-alpha.1 matches its deployed source and six read-only production checks; the active automatic Worker equals the CI script/bindings/runtime. Mobile 1.0.1-alpha.1/code 65 and Lineman 1.0.0-alpha.1/code 2 match downloaded asset/tag/source/signature/native-alignment checks. Each exact APK passes three cold launches on 25069PTEBG; Mobile retains its session and Lineman renders Field access. No data clearing or migration. See the release-versioning acceptance table for immutable links and hashes.
+- Remaining risks: private operational/auth/provider actions, real notification delivery, field replay/background GPS, native iOS and store acceptance remain unverified. Existing audit/lint/optional sibling-doc findings are unchanged. Preserve external graph/release/APK backups, original signers and providers, manual edits/stashes and all unrelated worktrees; Staff's unpublished local history is on codex/preserved-local-main-20261016.
+- Next: publish this documentation-only closeout, fast-forward primary checkouts and remove/archive only these merged release worktrees/branches after source-equivalence and clean-state checks. Documentation must skip native publication and application deployment without consuming another alpha.

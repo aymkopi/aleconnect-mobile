@@ -1,15 +1,22 @@
 # Changelog
 
-## Unreleased
+## 1.0.1-alpha.1 - 2026-10-16
 
 ### Changed
 
 - Select alpha release versions from Conventional Commit patch/minor/major impact with manual overrides. Advance Android codes independently from published metadata and synchronize manifest root versions during builds.
-- Continue from published alpha.10/code64; retain package/signing/provider identities and the verified standalone APK pipeline.
+- Continue from published alpha.10/code 64; retain package/signing/provider identities and the verified standalone APK pipeline.
 
 ### Fixed
 
 - Remove workflow-run numbering, so documentation/review runs no longer consume release versions. Skip duplicate/stale sources and verify every uploaded artifact digest before publication.
+- Retry a newly-created draft briefly missing from GitHub's release listing, retaining source, digest and immutable-release guards.
+
+### Validation and release
+
+- PRs #11/#12 and exact-head checks pass. Workflow 38783769904 publishes source f4af0a20 as Android code 65. All three downloaded asset digests and tag/source checks pass, as do the retained signer, fixture-disabled standalone HTTPS runtime and all 54 native-library ZIP/ELF 16 KB checks.
+- This exact APK updates in place and passes three cold launches on 25069PTEBG with the consumer session retained and Home rendered. Hash-verified Desktop copy is available. Private mutations, provider/push/background and native-iOS/store acceptance remain separate.
+- No API or database migration; application behavior and dependency resolutions are unchanged by this release.
 
 ## 1.0.0-alpha.10 — 2026-10-14
 

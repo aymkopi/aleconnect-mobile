@@ -214,7 +214,12 @@ export function publishRelease(options) {
   assert.equal(remoteTagTarget(command, env.GITHUB_REPOSITORY, release.tag), release.sourceCommit, 'Reserved tag points to a different source');
   command('gh', ['release', 'create', release.tag, ...files.map(file => join(cwd, 'release', file)), '--repo', env.GITHUB_REPOSITORY,
     '--target', env.GITHUB_SHA, '--verify-tag', '--prerelease', '--draft', '--latest=false', '--title', `${config.name} ${release.version}`, '--notes-file', join(cwd, 'release/notes.md')]);
-  const uploaded = inventory().find(item => item.tag_name === release.tag);
+  let uploaded;
+  // GitHub can briefly omit a newly created draft from its release listing.
+  for (let attempt = 0; attempt < 10 && !uploaded; attempt++) {
+    if (attempt) Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 1000);
+    uploaded = inventory().find(item => item.tag_name === release.tag);
+  }
   assert.ok(uploaded?.draft, 'Expected a draft release before publication');
   assert.equal(remoteTagTarget(command, env.GITHUB_REPOSITORY, release.tag), release.sourceCommit, 'Draft tag points to a different source');
   for (const file of files) {
