@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { Linking, View } from "react-native";
+import { Camera } from "lucide-react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Button } from "@/components/panelui/button";
 import { Dialog } from "@/components/panelui/dialog";
@@ -10,6 +11,7 @@ import { ReportPage } from "@/features/reports/components/report-page";
 import { compressAvatarToStrictLimit } from "@/utils/avatar-image-processing";
 import { uploadCurrentUserAvatar } from "@/services/profile";
 import { clearConsumerProfileCaches } from "@/hooks/use-consumer-profile";
+import { useAppColors } from "@/hooks/use-app-colors";
 import {
   ProfileGate,
   ProfileHeading,
@@ -50,6 +52,7 @@ function Photo({
   serviceAccountId: string;
 }) {
   const router = useRouter(), current = useProfileTask(identity);
+  const [cameraForeground] = useAppColors(["primary-foreground"]);
   const [files, setFiles] = useState<FileUploadFile[]>([]),
     [busy, setBusy] = useState(false),
     [saved, setSaved] = useState(false),
@@ -105,7 +108,7 @@ function Photo({
       sources={["camera", "library"]}
       accept={["image/*"]}
       image={{ quality: 1, crop: { aspect: [1, 1] } }}
-      disabled={busy || identity.fixture}
+      disabled={busy}
       onError={(e) => { if (current()) { setError(e.message); setBlocked(/permission/i.test(e.message)); } }}
       onReject={(rejections) => { if (current()) setError(rejections.map((entry) => entry.message).join(" ")); }}
     >
@@ -114,12 +117,15 @@ function Photo({
       }>
         <ProfileHeading title={saved ? "Profile photo updated" : uri ? "Preview your photo" : "Choose a profile photo"} />
         <View className="gap-4 items-center rounded-xl bg-card p-4">
-          <Avatar size="xl" source={uri ? identity.fixture ? require("@/assets/aleconnect/mayon.jpeg") : { uri } : undefined} fallback={initials} accessibilityLabel={uri ? "Selected profile photo" : accountName} />
-          {identity.fixture ? (
-            <Button onPress={() => changeFiles([{ id: "fixture-photo", uri: "fixture-photo", name: "Profile photo", kind: "image", status: "idle" }])}>Choose sample photo</Button>
-          ) : (
-            <FileUpload.Trigger><Button variant="secondary" disabled={busy}>Change photo</Button></FileUpload.Trigger>
-          )}
+          <Avatar size="xl" className="self-center" source={uri ? { uri } : undefined} fallback={initials} accessibilityLabel={uri ? "Selected profile photo" : accountName}>
+            <Avatar.Badge style={{ top: "auto", bottom: -4 }}>
+              <FileUpload.Trigger>
+                <Button size="icon" className="h-9 w-9 rounded-full" hitSlop={6} disabled={busy} accessibilityLabel="Change profile photo">
+                  <Camera size={18} color={cameraForeground} />
+                </Button>
+              </FileUpload.Trigger>
+            </Avatar.Badge>
+          </Avatar>
           {uri && !saved ? <Button variant="ghost" disabled={busy} onPress={() => changeFiles([])}>Remove selected photo</Button> : null}
           <Text muted size="sm">{saved ? "Your new photo was saved." : "Choose a photo and crop it square before saving."}</Text>
         </View>

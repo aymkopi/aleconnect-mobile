@@ -563,26 +563,6 @@ export default function NewReportScreen() {
     }
     applyIssue(categoryId, typeId);
   };
-  const addFixturePhoto = () => {
-    const slot = fixtureImages[form.photoUploads.length];
-    if (!slot) return;
-    const uri = Asset.fromModule(slot)?.uri;
-    if (!uri) {
-      setPhotoError("Fixture photo is unavailable.");
-      return;
-    }
-    const photo = {
-      id: createLocalReportId(),
-      uri,
-      size: 30_000,
-      status: "ready" as const,
-    };
-    setForm((current) => ({
-      ...current,
-      photos: [...current.photos, uri],
-      photoUploads: [...current.photoUploads, photo],
-    }));
-  };
   const previewPhotos = (state: string) => {
     if (!fixtures) return;
     const photos = buildFixtureEvidence(
@@ -674,6 +654,15 @@ export default function NewReportScreen() {
     if (submittingRef.current || queued.current || !mounted.current ||
         photoGeneration !== draftGeneration.current || !latest.current.scopeCurrent) return;
     setPhotoError(null);
+    if (fixtures) {
+      // Visual fixtures select real local images without writing durable evidence.
+      setForm((current) => ({
+        ...current,
+        photos: files.map((file) => file.uri),
+        photoUploads: files.map((file) => ({ id: file.id, uri: file.uri, size: file.size ?? null, status: "ready" as const })),
+      }));
+      return;
+    }
     const kept = new Set(files.map((file) => file.id));
     form.photoUploads.filter((photo) => !kept.has(photo.id)).forEach((photo) => removePhoto(photo.id));
     const existing = new Set(form.photoUploads.map((photo) => photo.id));
@@ -1373,7 +1362,7 @@ export default function NewReportScreen() {
                       key={reportId.current + ":" + photoGeneration}
                       value={uploadFiles}
                       onValueChange={changePhotos}
-                      sources={fixtures ? [] : ["camera", "library"]}
+                      sources={["camera", "library"]}
                       accept={["image/*"]}
                       multiple
                       maxFiles={reportLimits.evidenceMax}
@@ -1382,9 +1371,8 @@ export default function NewReportScreen() {
                       onError={(error) => setPhotoError(error.message)}
                       onReject={(rejections) => setPhotoError(rejections.map((entry) => entry.message).join(" "))}
                     >
-                      <FileUpload.Grid columns={3} placeholders hideAdd={fixtures} addLabel="Add evidence photos" />
+                      <FileUpload.Grid columns={3} placeholders addLabel="Add photos" />
                     </FileUpload>
-                  {fixtures ? <Button variant="outline" disabled={form.photoUploads.length >= reportLimits.evidenceMax} onPress={addFixturePhoto}>Add sample photo</Button> : null}
                   <Text muted size="xs">{form.photoUploads.length} photos added</Text>
                   {form.photoUploads.map((photo) => photo.error ? (
                     <Text key={photo.id} size="xs" className="text-destructive" accessibilityRole="alert">{photo.error}</Text>

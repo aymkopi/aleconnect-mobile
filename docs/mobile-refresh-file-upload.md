@@ -18,6 +18,10 @@ The requested `panelui-native@0.122.0` returns npm E404. The available published
 
 New Report uses the [listing photos grid](https://panelui.dev/docs/components/file-upload#listing-photos); profile selection uses the [profile photo composition](https://panelui.dev/docs/components/file-upload#profile-photo). The component selects and displays local files. Existing services retain authority over actual uploads.
 
+The report grid is led by its built-in Add photos tile. With a three-photo limit, that tile occupies one of the three visible slots while space remains; at three photos it disappears, and removing a photo restores it. There is no standalone upload/add button. Live and labelled visual-fixture screens use the same picker/grid controls; fixtures keep selected images local without writing durable evidence or sending uploads.
+
+Profile selection uses a labelled camera icon in `Avatar.Badge`, wrapped by `FileUpload.Trigger`, instead of a text upload button. Account information shows the current avatar and a camera shortcut that retains the selected linked account when opening the photo editor. Explicit Save and removal of an unsaved selection retain their original behavior.
+
 ## Compression and saved work
 
 Report evidence still goes through `prepareEvidencePhoto`: 1400-pixel-wide WebP, adaptive quality, a verified maximum of 5,000,000 bytes, and a durable document-directory copy. FileUpload IDs are retained through preparation. Removing a preparing photo discards its late durable copy. A draft/account change rejects late picker results. Reports still upload through the existing durable queue when submitted.

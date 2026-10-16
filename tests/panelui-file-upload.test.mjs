@@ -87,6 +87,14 @@ function harness({ picker = {}, manipulator } = {}) {
     unmount() { for (const slot of slots) slot?.cleanup?.(); },
     tile(file) { return exports.gridTileForTest({ file, size: 88, cover: false, radius: 12 }); },
     item(file) { return exports.FileUpload.Item({ file }); },
+    grid(props = {}) {
+      const start = cursor;
+      exports.FileUpload.Grid(props).props.onLayout({ nativeEvent: { layout: { width: 300 } } });
+      cursor = start;
+      const tree = exports.FileUpload.Grid(props);
+      cursor = start;
+      return tree.props.children.props.children.props.children;
+    },
   };
 }
 
@@ -192,6 +200,18 @@ test('Grid removes app-owned processing files instead of canceling a nonexistent
   assert.equal(action.props.accessibilityLabel, 'Remove existing.jpg');
   action.props.onPress();
   assert.deepEqual(h.changes.at(-1), []);
+});
+
+test('Grid leads with the add tile, counts it within the visible limit, and restores it after removal', () => {
+  const h = harness();
+  for (const count of [0, 1, 2, 3, 2]) {
+    const files = Array.from({ length: count }, (_, index) => ({ ...existing, id: String(index) }));
+    h.render({ value: files, multiple: true, maxFiles: 3 });
+    const tiles = h.grid({ columns: 3, placeholders: true });
+    assert.equal(tiles.length, 3);
+    if (count < 3) assert.equal(tiles[0].props.children.props.accessibilityLabel, `Add photos, ${count} of 3`);
+    else assert.ok(tiles.every((tile) => tile.props.file));
+  }
 });
 
 test('List removes app-owned processing files and real upload actions retain cancel', () => {

@@ -1,5 +1,12 @@
 # Implementation history
 
+## 2026-10-16 — Final photo-control verification
+
+- Scope: keep the report's built-in FileUpload add tile visible in live and visual-fixture flows, remove the separate fixture add button, replace profile selection's text button with a labelled camera badge, and add an account-scoped camera shortcut to Account information. Production compression and upload ownership are unchanged.
+- Verification: full suite and focused photo checks pass with one expected missing-sibling skip and no failures; TypeScript, changed-screen lint (zero errors/warnings), web and Android/Hermes exports pass. Independent review reports no blocking findings. Browser selection/preview/removal, three-photo limit and add-tile restoration pass at 390 px and dark 360 px without horizontal overflow. Profile camera/menu and selected-account navigation pass. Graphify refresh passes; generated evidence stays outside the source diff.
+- Remaining risks: physical camera/library permissions, native crop/gestures, provider uploads and iOS still require device acceptance. Browser fixture map failures and the duplicate-chooser automation caveat are documented in the FileUpload issue notes. This task performs no merge, release or live write.
+- Next: push this correction to Mobile PR #13 and confirm both GitHub checks on its final commit; Lineman PR #11 remains unchanged and has passing CI.
+
 ## 2026-10-16 — Manual refresh and FileUpload
 
 - Scope: add Hotlines/Notifications pull-to-refresh; share three-per-minute manual refresh budgets across related screens; use PanelUI FileUpload for report evidence and profile photos while retaining compression, private scope and durable queue ownership. Add active-pill dragging and relative navbar swiping that commit the nearest tab on release. Use published copied-source PanelUI 0.112.0 because requested 0.122.0 is unavailable. Document reproducible FileUpload source issues.

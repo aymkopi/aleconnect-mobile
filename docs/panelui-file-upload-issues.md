@@ -39,7 +39,7 @@ Remove-Item Env:PANELUI_FILE_UPLOAD_SOURCE
 Remove-Item Env:PANELUI_FILE_UPLOAD_CORE
 ```
 
-The patched source passes all 12 checks. The published source fails the lifecycle, concurrent/count, exact media type and app-owned processing assertions. Single-file replacement and the known unknown-size behavior pass against both versions.
+The patched source passes all 13 checks, including the add-tile/limit/removal grid composition check. The published source fails the lifecycle, concurrent/count, exact media type and app-owned processing assertions. Single-file replacement and the known unknown-size behavior pass against both versions.
 
 ## Byte-limit limitation and app interaction
 
@@ -48,3 +48,9 @@ Upstream resizing sets the new file's `size` to `undefined`; `partitionFiles` de
 Report evidence continues through the existing `prepareEvidencePhoto` compression and byte checks; durable report submission owns network upload. Profile Save continues through the existing 300×300 WebP preparation and 20 KiB limit before `uploadCurrentUserAvatar`. FileUpload only owns selection and presentation here. Reset/account changes must remount the field with the app's draft/account key; the local unmount guard prevents late selection from reaching a new owner. Removing a processing report file reaches the app's existing ID cancellation/cleanup path.
 
 No new native modules were installed for FileUpload. Image-picker and image-manipulator already exist. Optional document-picker, haptics and blur calls remain inside direct `try` blocks; existing Scrim supplies its fallback. Physical camera/library permission flows, native crop behavior, gestures, iOS and account/device acceptance remain unverified by this harness. Export and broader app checks belong to the task handoff.
+
+## Browser verification caveat
+
+The final browser pass exercises the actual Grid add tile and profile camera badge with local image files. Do not resolve one web file chooser twice: combining `fileChooser.setFiles(...)` in a running Playwright script with the browser file-upload tool on that same chooser produced `NotFoundError: Failed to execute 'removeChild' on 'Node'`. The installed `expo-image-picker/src/ExponentImagePicker.web.ts` change listener calls `document.body.removeChild(input)` after resolving the selection; a second change can reach the removed input. Subsequent chooser completions handled once succeed. This records an automation/dependency interaction, not an established normal-use or native failure. No dependency source was patched.
+
+Labelled location fixtures deliberately use `account-link-preview.invalid` and can log map style/worker failures; the location placeholder remains usable. These are separate from the photo controls. Account/photo selection and ordinary single-completion picker actions showed no new photo-control exceptions.

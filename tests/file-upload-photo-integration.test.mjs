@@ -46,7 +46,7 @@ test("report FileUpload selection keeps IDs and sends original photos through du
   });
   const change = handler(reportPath, "changePhotos", {
     ...refs, submittingRef: { current: false }, queued: { current: false }, photoGeneration: 3,
-    setPhotoError() {}, form, removePhoto() {}, preparePhoto: prepare,
+    fixtures: false, setPhotoError() {}, form, removePhoto() {}, preparePhoto: prepare,
   });
   change([{ id: "picked-a", uri: "file://original.jpg" }]);
   assert.deepEqual(calls, [["file://original.jpg", "report-a", "picked-a"]]);
@@ -65,13 +65,28 @@ test("late report picker callbacks cannot move photos into a new draft or accoun
   const draftGeneration = { current: 4 }, latest = { current: { scopeCurrent: true } };
   const change = handler(reportPath, "changePhotos", {
     draftGeneration, latest, mounted: { current: true }, submittingRef: { current: false }, queued: { current: false }, photoGeneration: 3,
-    setPhotoError() {}, form: { photoUploads: [] }, removePhoto() {}, preparePhoto: (...args) => calls.push(args),
+    fixtures: false, setPhotoError() {}, form: { photoUploads: [] }, removePhoto() {}, preparePhoto: (...args) => calls.push(args),
   });
   change([{ id: "old", uri: "file://old.jpg" }]);
   draftGeneration.current = 3;
   latest.current.scopeCurrent = false;
   change([{ id: "old", uri: "file://old.jpg" }]);
   assert.deepEqual(calls, []);
+});
+
+test("visual report fixtures use real picker selections without writing durable evidence", () => {
+  let form = { photos: [], photoUploads: [] };
+  const change = handler(reportPath, "changePhotos", {
+    fixtures: true, mounted: { current: true }, submittingRef: { current: false }, queued: { current: false },
+    draftGeneration: { current: 1 }, photoGeneration: 1, latest: { current: { scopeCurrent: true } },
+    setPhotoError() {}, setForm: (update) => { form = update(form); },
+    preparePhoto: () => assert.fail("visual fixtures must not write durable evidence"),
+  });
+  change([{ id: "local", uri: "blob:local-image", size: 100 }]);
+  assert.deepEqual(form.photoUploads, [{ id: "local", uri: "blob:local-image", size: 100, status: "ready" }]);
+  change([]);
+  assert.deepEqual(form.photos, []);
+  assert.deepEqual(form.photoUploads, []);
 });
 
 test("profile FileUpload save compresses before upload, scopes the account, and prevents duplicate saves", async () => {
