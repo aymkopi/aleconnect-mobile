@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.1.0-alpha.1 - 2026-10-16
+
+### Added
+
+- Hotlines and Notifications pull-to-refresh with shared per-resource/consumer manual refresh budgets, minimum intervals and in-flight protection.
+- PanelUI FileUpload photo grids for report evidence and camera-badge profile controls, retaining existing compression, account scoping, explicit Save and durable submission paths.
+- Draggable active navbar pill and relative swipe selection with interruption, cancellation, guest gates and reduced-motion handling.
+
+### Changed
+
+- Use copied PanelUI0.112.0 source with provenance records; requested0.122.0 is unavailable. Display historical account approvals separately from current linked-account access.
+
+### Verification
+
+- PR13/source0639fa8 passes merged CI; workflow38892362976 publishes code67. Exact asset/source/tag, retained signer/package/manifest/Hermes/fixture-off and54-library ZIP/ELF16KB checks pass.
+- October17 phone25069PTEBG retains its session, passes three cold launches and renders all five main pages. Navbar drag works in both directions. Desktop APK hash matches the published artifact; device data/queues are retained.
+- Camera/library/crop, private provider uploads, refresh edge cases, accessibility and iOS remain separate acceptance.
+
 ## 1.0.1-alpha.1 - 2026-10-16
 
 ### Changed

@@ -32,6 +32,8 @@ Profile photos retain square device cropping and explicit Save. `compressAvatarT
 
 The PR verification record is maintained in the implementation history. Executable regressions cover the refresh window, rapid and overlapping attempts, screen wiring, stale picker/draft/account results, compression handoff, removal during preparation, and duplicate profile saves.
 
-Real-device camera/library and navbar gestures, permission dialogs, native pull-to-refresh, provider uploads, and native iOS require separate acceptance. No deployment, APK publication, device reset, or production write is part of this PR.
+PR13 merged as0639fa8; workflow38892362976 published [1.1.0-alpha.1/code67](https://github.com/aymkopi/aleconnect-mobile/releases/tag/v1.1.0-alpha.1). Exact asset/source/tag, retained signer/package, manifest, standalone Hermes/fixture-off and54-library ZIP/ELF16KB checks pass. APK SHA256: `8de27656fc1ef134a3f2c108948a04899719448feba10592224385c8e8e2d04d`.
+
+October17 phone25069PTEBG: published code67 retains its session, three cold launches pass without process-scoped crash errors, Home/Reports/Account rendering and active-pill drag in both directions are observed. This is release smoke, not full feature acceptance. Camera/library permission and cropping, provider uploads, refresh boundary behavior and native iOS remain unverified. No device reset or production business write was performed. Evidence and the hash-verified Desktop/AleconnectApps copy are retained outside temporary worktrees.
 
 See [FileUpload issue reproduction notes](panelui-file-upload-issues.md) for verified source defects, application adaptations, and reproduction tests.

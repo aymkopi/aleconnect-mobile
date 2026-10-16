@@ -1,6 +1,6 @@
 # Active work
 
-- [Manual refresh and FileUpload](../mobile-refresh-file-upload.md): [PR #13](https://github.com/aymkopi/aleconnect-mobile/pull/13) merged as `0639fa8`; local master is synchronized and the PR branch/worktree are removed. Post-merge tests and CI pass; alpha builds run through existing automation. PanelUI 0.122.0 is unavailable, so copied 0.112.0 is retained. Native/provider acceptance remains separate.
+- [Manual refresh and FileUpload](../mobile-refresh-file-upload.md): PR13 merged/source0639fa8, alpha1.1.0-alpha.1/code67 published and exact artifacts verified. October17 phone25069PTEBG passes three cold launches, retained session, main-page rendering and navbar drag. Default branch sync and scoped release-worktree cleanup follow docs checks. PanelUI0.112.0 retained; camera/provider/iOS acceptance remains separate.
 
 - [Three-repository alpha versioning](../release-versioning.md): PRs merged; Staff 1.0.1-alpha.1 deployed, Mobile 1.0.1-alpha.1/code 65 and Lineman 1.0.0-alpha.1/code 2 published. Exact downloaded assets/signatures/alignment and three cold launches per app on 25069PTEBG pass. Release evidence and scoped closeout are recorded; preserve unrelated edits, recovery branches/stashes and device state.
 

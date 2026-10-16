@@ -1,5 +1,12 @@
 # Implementation history
 
+## 2026-10-17 - Published alpha phone verification
+
+- Scope: finish PR13 release verification, preserve manual work and synchronize master; cleanup is limited to the release worktree after docs checks.
+- Verification: workflow38892362976/source0639fa8 publishes1.1.0-alpha.1/code67. Exact APK/assets/source/tag, signer/package/manifest/Hermes/fixture-off and54-library ZIP/ELF16KB checks pass. Phone25069PTEBG retains its session and passes three cold launches, main-page rendering and both navbar drag directions. Desktop APK hash matches the published artifact.
+- Remaining risks: camera/library permissions/cropping, private provider uploads, refresh edge cases, accessibility and iOS remain unverified. Device data, queues and unrelated work are retained.
+- Next: documentation-only CI and default-branch synchronization; remove only the clean release worktree and its merged branch, retaining external evidence.
+
 ## 2026-10-16 — Merged UI PRs and scoped cleanup
 
 - Scope: user-authorized Mobile PR #13 merged to master as `0639fa89008fad744174d53c25036fbe505ae7be`; Lineman PR #11 merged as `11fee4f92db39a0b62c72f7ef69adf8cd93ccb67`. Another session retargeted Lineman #11 from its preserved rebuild base to main during the merge operation; the resulting tree equals the reviewed head. Mobile master includes the concurrent account-linking changes. Canonical Mobile master and Lineman main/active acceptance branch were fast-forwarded without resetting work.
