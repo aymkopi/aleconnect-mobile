@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import ts from "typescript";
+import { manualRefreshHarness } from "./manual-refresh-harness.mjs";
 
 async function renderAdvisories(feed, query = "", tab = "all") {
   let slot = 0;
@@ -11,12 +12,14 @@ async function renderAdvisories(feed, query = "", tab = "all") {
   const Tabs = Object.assign("Tabs", { List: "Tabs.List", Trigger: "Tabs.Trigger" });
   const modules = {
     "react/jsx-runtime": { jsx, jsxs: jsx },
-    "react": { useState: () => { const i = slot++; return [state[i], value => { state[i] = value; }]; } },
+    "react": { useState: () => { const i = slot++; return [state[i], value => { state[i] = typeof value === "function" ? value(state[i]) : value; }]; } },
     "react-native": { View: "View", FlatList: "FlatList" },
     "expo-router": { useRouter: () => ({ push: path => calls.push(path) }) },
     "react-native-safe-area-context": { useSafeAreaInsets: () => ({ top: 0, bottom: 0 }) },
     "lucide-react-native": { Megaphone: "Megaphone", Search: "Search" },
     "@/context/guest-access-context": { useGuestAccess: () => ({ guest: false }) },
+    "@/hooks/use-auth-session": { useAuthSession: () => ({ session: { user: { id: "consumer" } } }) },
+    "@/hooks/use-consumer-account": { useConsumerAccount: () => ({ accountContext: { identityUserId: "consumer" } }) },
     "@/hooks/use-main-page-scroll": { useMainPageScroll: () => ({ current: null }) },
     "@/components/floating-app-bar": { appScrollableBottomPadding: () => 100 },
     "@/components/main-page-header": { MainPageHeader: "MainPageHeader" },
@@ -31,6 +34,7 @@ async function renderAdvisories(feed, query = "", tab = "all") {
     "./presentation": { matchesUpdate: item => !query || item.title.includes(query), updateRoute: item => item.id },
     "./use-update-feed": { useUpdateFeed: () => feed },
   };
+  modules["@/hooks/use-manual-refresh"] = manualRefreshHarness(modules.react);
   const exports = {};
   const source = await readFile(new URL("../src/features/advisories/advisories-screen.tsx", import.meta.url), "utf8");
   new Function("require", "exports", ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText)(id => { assert.ok(id in modules, "Unmocked " + id); return modules[id]; }, exports);
@@ -140,6 +144,7 @@ async function reportRecovery({ session = { user: { id: "user" }, session: { id:
     "@/features/maps/static-location-map": {},
     "expo-router/react-navigation": { useIsFocused: () => true },
   };
+  modules["@/hooks/use-manual-refresh"] = manualRefreshHarness(modules.react);
   const exports = {};
   const screen = await readFile(new URL("../src/features/reports/report-detail-screen.tsx", import.meta.url), "utf8");
   new Function("require", "exports", transpile(screen))(id => { assert.ok(id in modules, "Unmocked " + id); return modules[id]; }, exports);
@@ -193,6 +198,7 @@ async function notificationRecovery(preview, type = "Badge") {
     "./notification-ui": { NotificationGate: "NotificationGate", NotificationNotice: "NotificationNotice" },
     "./use-notifications": { useNotificationAccess: () => access, useNotifications: () => feed },
   };
+  modules["@/hooks/use-manual-refresh"] = manualRefreshHarness(modules.react);
   const exports = {};
   const source = await readFile(new URL("../src/features/notifications/notifications-screen.tsx", import.meta.url), "utf8");
   new Function("require", "exports", ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText)(id => { assert.ok(id in modules, "Unmocked " + id); return modules[id]; }, exports);
@@ -242,11 +248,15 @@ test("failed unread receipt keeps list metadata and exposes the retry explanatio
   assert.deepEqual(view.stateWrites,[false,true]);
 });
 
-test("advisory background refresh never activates pull spinner", async () => {
-  const view = await renderAdvisories({ ...base, busy: true, data: { items: [] } });
+test("advisory background refresh never activates pull spinner and manual pulls finalize", async () => {
+  const background = await renderAdvisories({ ...base, busy: true, data: { items: [] } });
+  assert.equal(background.list.props.refreshing,false);
+  await background.list.props.onRefresh();
+  assert.equal(background.state[0],false);
+  const view = await renderAdvisories({ ...base, data: { items: [] } });
   assert.equal(view.list.props.refreshing,false);
   const done = view.list.props.onRefresh();
-  assert.equal(view.state[0],true);
+  assert.ok(view.state[0]);
   await done;
-  assert.equal(view.state[0],false);
+  assert.equal(view.state[0],null);
 });

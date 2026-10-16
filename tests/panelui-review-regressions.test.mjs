@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import ts from "typescript";
+import { manualRefreshHarness } from "./manual-refresh-harness.mjs";
 import { getHomeLayout } from "../src/features/home/home-layout.ts";
 import * as reportBrowseFilter from "../src/features/reports/browse-filter.ts";
 import * as selection from "../src/features/accounts/selection.ts";
@@ -63,6 +64,7 @@ function hooks() {
 }
 async function load(file, mocks) {
   const exports = {};
+  const manualRefresh = manualRefreshHarness(mocks.react);
   const source = await readFile(new URL("../" + file, import.meta.url), "utf8");
   new Function(
     "require",
@@ -74,6 +76,7 @@ async function load(file, mocks) {
       },
     }).outputText,
   )((id) => {
+    if (id === "@/hooks/use-manual-refresh") return manualRefresh;
     if (id === "@/context/guest-access-context") return { useGuestAccess: () => ({ guest: false, openFeature: () => {}, requestSignIn: () => {} }) };
     if (id === "@/context/visual-preview-context" && mocks[id]) return { ...mocks[id], useVisualPreview: () => { const value = mocks[id].useVisualPreview(); return { publicFixtures: value.fixtures, ...value }; } };
     if (id === "@/components/panelui/radio-group") return { RadioGroup: Object.assign("RadioGroup", { Item: "RadioItem" }) };
@@ -1154,7 +1157,7 @@ test("Native Select preserves rich and disabled option semantics through the sty
   }
 });
 
-test("Reports background reads do not show pull-to-refresh and explicit pulls stay visible until complete", async () => {
+test("Reports manual pulls stay visible until complete and background reads stay silent", async () => {
   let finish;
   const pending = new Promise(resolve => { finish = resolve; });
   const h = hooks(),
@@ -1196,7 +1199,7 @@ test("Reports background reads do not show pull-to-refresh and explicit pulls st
             },
           ],
         },
-        busy: true,
+        busy: false,
         reload: () => pending,
       }),
     },

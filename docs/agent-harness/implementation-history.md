@@ -1,5 +1,20 @@
 # Implementation history
 
+## 2026-10-16 — Final photo-control verification
+
+- Scope: keep the report's built-in FileUpload add tile visible in live and visual-fixture flows, remove the separate fixture add button, replace profile selection's text button with a labelled camera badge, and add an account-scoped camera shortcut to Account information. Production compression and upload ownership are unchanged.
+- Verification: full suite and focused photo checks pass with one expected missing-sibling skip and no failures; TypeScript, changed-screen lint (zero errors/warnings), web and Android/Hermes exports pass. Independent review reports no blocking findings. Browser selection/preview/removal, three-photo limit and add-tile restoration pass at 390 px and dark 360 px without horizontal overflow. Profile camera/menu and selected-account navigation pass. Graphify refresh passes; generated evidence stays outside the source diff.
+- Remaining risks: physical camera/library permissions, native crop/gestures, provider uploads and iOS still require device acceptance. Browser fixture map failures and the duplicate-chooser automation caveat are documented in the FileUpload issue notes. This task performs no merge, release or live write.
+- Next: push this correction to Mobile PR #13 and confirm both GitHub checks on its final commit; Lineman PR #11 remains unchanged and has passing CI.
+
+## 2026-10-16 — Manual refresh and FileUpload
+
+- Scope: add Hotlines/Notifications pull-to-refresh; share three-per-minute manual refresh budgets across related screens; use PanelUI FileUpload for report evidence and profile photos while retaining compression, private scope and durable queue ownership. Add active-pill dragging and relative navbar swiping that commit the nearest tab on release. Use published copied-source PanelUI 0.112.0 because requested 0.122.0 is unavailable. Document reproducible FileUpload source issues.
+- Verification: after current master integration, full suite passes 491 tests with one missing-sibling skip and no failures; real Staff harness comparison, TypeScript, zero-error scoped lint and Android/Hermes plus web exports pass. Twelve FileUpload source regressions, five photo integration checks, four gesture checks and 70 refresh-focused checks pass. Phone-width browser evidence confirms Grid selection/removal without horizontal overflow, profile photo preview, and navbar page commit only on release; drag-release click regression fixed. Read-only review reports no blocking findings and independently passes 28 focused Mobile checks plus the Lineman upgrade check. Graphify refresh passes; generated graph/Uniwind evidence is retained separately.
+- CI follow-up: reproduced the navbar callback's React purity diagnostic with uncached ESLint, declared the release handler with `useCallback`, and retained the post-pan duplicate-click guard. Eleven navbar/navigation checks, TypeScript and actual full Expo lint pass (zero errors/272 remaining warnings); the small correction also passes read-only review. Mobile PR #13 and stacked Lineman PR #11 are open; Lineman CI passes, and Mobile CI is rerun for the correction.
+- Remaining risks: native camera/library/permission and pull gestures, real uploads and native iOS are unverified; no APK or deployment is included. The in-process refresh budget resets on app restart.
+- Next: review the Mobile PR and perform native device/provider acceptance before release; retain the paired Lineman promotion/upgrade recovery separately. No merge, deployment or APK publication is included.
+
 ## 2026-10-16 - Independent alpha release versioning
 
 - Scope: replace CI-run-based versions with Conventional Commit patch/minor/major alpha targets, manual overrides and published-code allocation above64. Synchronize source alpha10 manifests, preserve the signer/provider/package and existing standalone verification, and strengthen digest checks for all uploaded assets.

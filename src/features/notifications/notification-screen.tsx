@@ -4,6 +4,7 @@ import { DataState, DataNotice } from "@/components/data-state";
 import { Text } from "@/components/panelui/text";
 import { ReportPage } from "@/features/reports/components/report-page";
 import { useScopedRead } from "@/hooks/use-scoped-read";
+import { useManualRefresh } from "@/hooks/use-manual-refresh";
 import { fetchNotifications } from "@/services/notifications";
 import { manilaNotificationGroupTitle } from "@/utils/manila-time";
 import { notificationFixtureNow, notificationFixtures } from "./fixtures";
@@ -33,6 +34,12 @@ function NotificationMessage({ access }: { access: NotificationAccess }) {
       throw error;
     }
   });
+  const { refresh } = useManualRefresh(
+    "notifications",
+    access.fixtures ? "fixture" : access.account?.identityUserId ?? access.options.userId,
+    () => access.fixtures ? undefined : read.reload(true),
+    !access.fixtures && read.busy,
+  );
   const item = access.fixtures ? preview === "unavailable" || preview === "loading" ? null : notificationFixtures.find((row) => row.id === (id || "fixture-message")) ?? null : read.data?.item;
   const busy = read.busy && !item || preview === "loading";
   const unavailable = !busy && !item;
@@ -41,7 +48,7 @@ function NotificationMessage({ access }: { access: NotificationAccess }) {
     {read.data?.signIn ? <Button className="min-h-12 rounded-2xl" onPress={() => router.push("/sign-in")}>Sign in</Button> : item ? <Button className="min-h-12 rounded-2xl" onPress={() => router.push("/hotlines")}>Contact ALECO</Button> : null}
     <Button variant="outline" className="min-h-12 rounded-2xl" onPress={() => router.dismissTo("/notifications")}>Back to notifications</Button>
   </>}>
-    {busy ? <DataState loading loadingLayout="detail" title="Loading your notification" /> : read.error && !item ? <DataState title="This notification couldn’t load" description="Reconnect and retry. Your inbox is still available." actionLabel="Try again" onAction={() => void read.reload(true)} /> : <>
+    {busy ? <DataState loading loadingLayout="detail" title="Loading your notification" /> : read.error && !item ? <DataState title="This notification couldn’t load" description="Reconnect and retry. Your inbox is still available." actionLabel="Try again" onAction={refresh} /> : <>
       <Text accessibilityRole="header" style={{ fontFamily: "PlusJakartaSans_600SemiBold", fontSize: 18, lineHeight: 26 }}>{unavailable ? "This update can’t be opened" : "An update from ALECO"}</Text>
       {item ? <>
         <NotificationNotice title={item.title}>ALECO has shared a message for your account.</NotificationNotice>
@@ -50,7 +57,7 @@ function NotificationMessage({ access }: { access: NotificationAccess }) {
         <Text muted size="xs">Received {manilaNotificationGroupTitle(item.createdAt, reference).toLocaleLowerCase()}, {notificationTime(item, reference)}</Text>
         {read.data?.isStale ? <NotificationNotice title="Showing a saved notification">Connect and refresh the inbox to confirm this update.</NotificationNotice> : null}
       </> : <NotificationNotice title={read.error ? "The message could not load" : "The linked item is unavailable"}>{read.error || "Return to your notifications, or sign in with the intended account to view its updates."}</NotificationNotice>}
-      {read.error && item ? <DataNotice title="Could not refresh this notification" description="Your loaded notification remains visible. Reconnect and refresh for the latest information." actionLabel="Refresh notification" busy={read.busy} onAction={() => void read.reload(true)} /> : null}
+      {read.error && item ? <DataNotice title="Could not refresh this notification" description="Your loaded notification remains visible. Reconnect and refresh for the latest information." actionLabel="Refresh notification" busy={read.busy} onAction={refresh} /> : null}
     </>}
   </ReportPage>;
 }

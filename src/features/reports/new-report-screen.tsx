@@ -2,16 +2,13 @@ import { Asset } from "expo-asset";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BackHandler, Image, Pressable, View } from "react-native";
 import { useFocusEffect, useNavigation, useRouter } from "expo-router";
-import * as ImagePicker from "expo-image-picker";
 import {
   Activity,
-  Camera,
   Check,
   CircleEllipsis,
   ClipboardCheck,
   Cpu,
   Gauge,
-  Images,
   Lightbulb,
   MapPin,
   LocateFixed,
@@ -20,7 +17,6 @@ import {
   PowerOff,
   Scissors,
   TriangleAlert,
-  X,
   ZapOff,
   type LucideIcon,
 } from "lucide-react-native";
@@ -29,6 +25,7 @@ import { BottomSheet } from "@/components/panelui/bottom-sheet";
 import { Dialog } from "@/components/panelui/dialog";
 import { Card } from "@/components/panelui/card";
 import { Field } from "@/components/panelui/field";
+import { FileUpload, type FileUploadFile } from "@/components/panelui/file-upload";
 import { Input } from "@/components/panelui/input";
 import { Select } from "@/components/panelui/select";
 import { RadioGroup } from "@/components/panelui/radio-group";
@@ -191,10 +188,9 @@ export default function NewReportScreen() {
   } = useConsumerProfile();
   const { sync, refresh: refreshQueue, announceSubmission } = useReportQueue();
   const { fixtures } = useVisualPreview();
-  const [primary, muted, foreground, primaryForeground, danger] = useAppColors([
+  const [primary, muted, primaryForeground, danger] = useAppColors([
     "primary",
     "muted-foreground",
-    "foreground",
     "primary-foreground",
     "destructive",
   ]);
@@ -214,8 +210,6 @@ export default function NewReportScreen() {
     [submitting, setSubmitting] = useState(false);
   const [mapOpen, setMapOpen] = useState(false),
     [locateOnOpen, setLocateOnOpen] = useState(false),
-    [sourceOpen, setSourceOpen] = useState(false),
-    [pickerBusy, setPickerBusy] = useState(false),
     [photoError, setPhotoError] = useState<string | null>(null),
     [viewerIndex, setViewerIndex] = useState<number | null>(null);
   const [confirm, setConfirm] = useState<
@@ -402,6 +396,18 @@ export default function NewReportScreen() {
   const readyPhotos = form.photoUploads.filter(
     (photo) => photo.status === "ready",
   );
+  const pickerBusy = form.photoUploads.some((photo) => photo.status === "processing");
+  const photoGeneration = draftGeneration.current;
+  const uploadFiles: FileUploadFile[] = form.photoUploads.map((photo, index) => ({
+    id: photo.id,
+    uri: photo.uri,
+    name: `Evidence ${index + 1}.webp`,
+    kind: "image",
+    mimeType: "image/webp",
+    size: photo.size ?? undefined,
+    status: photo.status === "ready" ? "idle" : photo.status === "failed" ? "error" : "processing",
+    error: photo.error,
+  }));
   const address = [
     form.purok.trim(),
     meta.barangays.find((item) => item.code === form.barangayPsgc)?.name,
@@ -451,10 +457,6 @@ export default function NewReportScreen() {
       setMapOpen(false);
       return;
     }
-    if (sourceOpen) {
-      setSourceOpen(false);
-      return;
-    }
     if (viewerIndex != null) {
       setViewerIndex(null);
       return;
@@ -480,7 +482,6 @@ export default function NewReportScreen() {
     setAttempted(false);
   }, [
     mapOpen,
-    sourceOpen,
     viewerIndex,
     confirm,
     receipt,
@@ -562,26 +563,6 @@ export default function NewReportScreen() {
     }
     applyIssue(categoryId, typeId);
   };
-  const addFixturePhoto = () => {
-    const slot = fixtureImages[form.photoUploads.length];
-    if (!slot) return;
-    const uri = Asset.fromModule(slot)?.uri;
-    if (!uri) {
-      setPhotoError("Fixture photo is unavailable.");
-      return;
-    }
-    const photo = {
-      id: createLocalReportId(),
-      uri,
-      size: 30_000,
-      status: "ready" as const,
-    };
-    setForm((current) => ({
-      ...current,
-      photos: [...current.photos, uri],
-      photoUploads: [...current.photoUploads, photo],
-    }));
-  };
   const previewPhotos = (state: string) => {
     if (!fixtures) return;
     const photos = buildFixtureEvidence(
@@ -594,9 +575,8 @@ export default function NewReportScreen() {
       photoUploads: photos,
     }));
   };
-  const preparePhoto = async (uri: string, generation: number) => {
-    const id = createLocalReportId(),
-      localReportId = reportId.current;
+  const preparePhoto = async (uri: string, generation: number, id: string) => {
+    const localReportId = reportId.current;
     setForm((current) =>
       current.photoUploads.length >= reportLimits.evidenceMax
         ? current
@@ -611,7 +591,7 @@ export default function NewReportScreen() {
     );
     try {
       const prepared = await prepareEvidencePhoto(uri, localReportId, id);
-      if (!mounted.current || generation !== draftGeneration.current) {
+      if (!mounted.current || generation !== draftGeneration.current || !latest.current.scopeCurrent) {
         deleteEvidencePhoto(prepared.uri);
         return;
       }
@@ -656,68 +636,6 @@ export default function NewReportScreen() {
       }));
     }
   };
-  const pickPhotos = async (source: "camera" | "gallery") => {
-    setSourceOpen(false);
-    setPhotoError(null);
-    if (fixtures) {
-      addFixturePhoto();
-      return;
-    }
-    if (PANELUI_PREVIEW) {
-      setPhotoError(
-        "Photo preparation is paused in this preview. Enable visual fixtures in Account to use sample evidence.",
-      );
-      return;
-    }
-    if (pickerBusy || !scopeCurrent || queued.current) return;
-    const generation = draftGeneration.current,
-      available = reportLimits.evidenceMax - form.photoUploads.length;
-    if (available <= 0) return;
-    setPickerBusy(true);
-    try {
-      const permission =
-        source === "camera"
-          ? await ImagePicker.requestCameraPermissionsAsync()
-          : await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!permission.granted) {
-        setPhotoError(
-          source === "camera"
-            ? "Camera access was denied. Choose from gallery or enable access in device settings."
-            : "Photo access was denied. Take a photo or enable access in device settings.",
-        );
-        return;
-      }
-      const result =
-        source === "camera"
-          ? await ImagePicker.launchCameraAsync({
-              mediaTypes: ["images"],
-              quality: 0.8,
-            })
-          : await ImagePicker.launchImageLibraryAsync({
-              mediaTypes: ["images"],
-              allowsMultipleSelection: true,
-              selectionLimit: available,
-              quality: 0.8,
-            });
-      if (
-        result.canceled ||
-        generation !== draftGeneration.current ||
-        !latest.current.scopeCurrent
-      )
-        return;
-      await Promise.all(
-        result.assets
-          .slice(0, available)
-          .map((asset) => preparePhoto(asset.uri, generation)),
-      );
-    } catch {
-      setPhotoError(
-        "Could not open photos. Try again or choose another source.",
-      );
-    } finally {
-      if (mounted.current) setPickerBusy(false);
-    }
-  };
   const removePhoto = (id: string) => {
     if (submitting || queued.current) return;
     const removed = form.photoUploads.find((photo) => photo.id === id);
@@ -730,6 +648,26 @@ export default function NewReportScreen() {
         photos: remaining.map((photo) => photo.uri),
         photoUploads: remaining,
       };
+    });
+  };
+  const changePhotos = (files: FileUploadFile[]) => {
+    if (submittingRef.current || queued.current || !mounted.current ||
+        photoGeneration !== draftGeneration.current || !latest.current.scopeCurrent) return;
+    setPhotoError(null);
+    if (fixtures) {
+      // Visual fixtures select real local images without writing durable evidence.
+      setForm((current) => ({
+        ...current,
+        photos: files.map((file) => file.uri),
+        photoUploads: files.map((file) => ({ id: file.id, uri: file.uri, size: file.size ?? null, status: "ready" as const })),
+      }));
+      return;
+    }
+    const kept = new Set(files.map((file) => file.id));
+    form.photoUploads.filter((photo) => !kept.has(photo.id)).forEach((photo) => removePhoto(photo.id));
+    const existing = new Set(form.photoUploads.map((photo) => photo.id));
+    files.filter((file) => !existing.has(file.id)).forEach((file) => {
+      void preparePhoto(file.uri, photoGeneration, file.id);
     });
   };
   const submit = async () => {
@@ -851,15 +789,9 @@ export default function NewReportScreen() {
     setEditingReview(false);
     setAttempted(false);
   };
-  const photoStrip = (editable: boolean) => (
+  const photoStrip = () => (
     <View className="flex-row gap-2">
-      {(editable
-        ? Array.from(
-            { length: reportLimits.evidenceMax },
-            (_, index) => form.photoUploads[index],
-          )
-        : readyPhotos
-      ).map((photo, index) => (
+      {readyPhotos.map((photo, index) => (
         <View
           key={photo?.id ?? index}
           className="flex-1"
@@ -872,13 +804,12 @@ export default function NewReportScreen() {
                 ? `View evidence photo ${index + 1}, ${photo.status}`
                 : "Add evidence photo"
             }
-            disabled={submitting || (pickerBusy && !photo)}
+            disabled={submitting || !photo}
             onPress={() => {
               if (photo)
                 setViewerIndex(
                   form.photoUploads.findIndex((item) => item.id === photo.id),
                 );
-              else if (!photo) setSourceOpen(true);
             }}
             className="flex-1 rounded-xl overflow-hidden bg-muted items-center justify-center"
           >
@@ -889,7 +820,7 @@ export default function NewReportScreen() {
                 resizeMode="cover"
               />
             ) : (
-              <Camera size={24} color={muted} />
+              null
             )}
             {photo?.status === "processing" ? (
               <View className="absolute inset-0 items-center justify-center bg-background/80">
@@ -905,18 +836,7 @@ export default function NewReportScreen() {
               </View>
             ) : null}
           </Pressable>
-          {editable && photo ? (
-            <Button
-              size="icon"
-              variant="secondary"
-              className="absolute right-1 top-1 h-8 w-8 rounded-full"
-              disabled={submitting}
-              accessibilityLabel={`Remove evidence photo ${index + 1}`}
-              onPress={() => removePhoto(photo.id)}
-            >
-              <X size={16} color={foreground} />
-            </Button>
-          ) : null}
+
         </View>
       ))}
     </View>
@@ -1438,37 +1358,25 @@ export default function NewReportScreen() {
                   <Text muted size="xs">
                     Each prepared photo must be 5 MB or smaller.
                   </Text>
-                  {photoStrip(true)}
-                  <Text muted size="xs">
-                    {form.photoUploads.length} photos added
-                  </Text>
-                  {form.photoUploads.map((photo) =>
-                    photo.error ? (
-                      <Text
-                        key={photo.id}
-                        size="xs"
-                        className="text-destructive"
-                        accessibilityRole="alert"
-                      >
-                        {photo.error}
-                      </Text>
-                    ) : null,
-                  )}
-                  <Button
-                    variant="outline"
-                    disabled={
-                      form.photoUploads.length >= reportLimits.evidenceMax ||
-                      pickerBusy
-                    }
-                    loading={pickerBusy}
-                    onPress={() => {
-                      setPhotoError(null);
-                      setSourceOpen(true);
-                    }}
-                    startContent={<Camera size={18} color={primary} />}
-                  >
-                    Add photo
-                  </Button>
+                    <FileUpload
+                      key={reportId.current + ":" + photoGeneration}
+                      value={uploadFiles}
+                      onValueChange={changePhotos}
+                      sources={["camera", "library"]}
+                      accept={["image/*"]}
+                      multiple
+                      maxFiles={reportLimits.evidenceMax}
+                      image={{ quality: 1 }}
+                      disabled={submitting || !scopeCurrent || (PANELUI_PREVIEW && !fixtures)}
+                      onError={(error) => setPhotoError(error.message)}
+                      onReject={(rejections) => setPhotoError(rejections.map((entry) => entry.message).join(" "))}
+                    >
+                      <FileUpload.Grid columns={3} placeholders addLabel="Add photos" />
+                    </FileUpload>
+                  <Text muted size="xs">{form.photoUploads.length} photos added</Text>
+                  {form.photoUploads.map((photo) => photo.error ? (
+                    <Text key={photo.id} size="xs" className="text-destructive" accessibilityRole="alert">{photo.error}</Text>
+                  ) : null)}
                 </View>
                 {photoError ? (
                   <Text
@@ -1531,7 +1439,7 @@ export default function NewReportScreen() {
                     title={`Attached photos (${readyPhotos.length})`}
                     onPress={() => edit(5)}
                   />
-                  {photoStrip(false)}
+                  {photoStrip()}
                 </View>
               </>
             ) : null}
@@ -1616,38 +1524,6 @@ export default function NewReportScreen() {
           </Dialog.Footer>
         </Dialog.Content>
       </Dialog>
-      <BottomSheet
-        open={sourceOpen && scopeCurrent}
-        onOpenChange={setSourceOpen}
-      >
-        <BottomSheet.Content size="auto">
-          <BottomSheet.Header>
-            <Text weight="semibold">Add evidence photo</Text>
-          </BottomSheet.Header>
-          <BottomSheet.Body className="gap-3">
-            <Button
-              variant="outline"
-              startContent={<Camera size={20} color={primary} />}
-              onPress={() => void pickPhotos("camera")}
-            >
-              Take photo
-            </Button>
-            <Button
-              variant="outline"
-              startContent={<Images size={20} color={primary} />}
-              onPress={() => void pickPhotos("gallery")}
-            >
-              Choose from gallery
-            </Button>
-            {fixtures ? (
-              <Text muted size="xs">
-                Visual fixture; adds a sample photo without opening your
-                library.
-              </Text>
-            ) : null}
-          </BottomSheet.Body>
-        </BottomSheet.Content>
-      </BottomSheet>
       <BottomSheet
         open={fixtureSubmit && scopeCurrent}
         onOpenChange={setFixtureSubmit}

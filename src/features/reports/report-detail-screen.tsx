@@ -10,6 +10,7 @@ import { StaticLocationMap } from "@/features/maps/static-location-map";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useScopedRead } from "@/hooks/use-scoped-read";
+import { useManualRefresh } from "@/hooks/use-manual-refresh";
 import { markNotificationsRead } from "@/services/notifications";
 import { requestReportRevalidation } from "@/services/report-sync-events";
 import {
@@ -273,7 +274,6 @@ export default function ReportDetailScreen() {
     scope: string | null;
     update: ConsumerServiceMemoUpdate;
   } | null>(null);
-  const [pullRefreshing, setPullRefreshing] = useState(false);
   const [readReceiptError, setReadReceiptError] = useState(false);
   const markedUpdates = useRef<string>("");
   const read = useScopedRead<{
@@ -313,6 +313,12 @@ export default function ReportDetailScreen() {
     };
   });
   const { reload, data } = read;
+  const { refresh, refreshing } = useManualRefresh(
+    "reports",
+    fixtures ? "fixture" : accountContext?.identityUserId ?? session?.user.id ?? null,
+    () => read.reload(true),
+    !fixtures && read.busy,
+  );
   const report = data?.report;
   useLayoutEffect(() => {
     previous.current =
@@ -450,15 +456,8 @@ export default function ReportDetailScreen() {
     <ReportPage
       title="Ticket details"
       onBack={handleBack}
-      refreshing={pullRefreshing}
-      onRefresh={async () => {
-        setPullRefreshing(true);
-        try {
-          await read.reload(true);
-        } finally {
-          setPullRefreshing(false);
-        }
-      }}
+      refreshing={refreshing}
+      onRefresh={refresh}
     >
       {!report ? (
         waiting ? (
@@ -492,7 +491,7 @@ export default function ReportDetailScreen() {
               else if (reportUnavailable) router.replace("/reports");
               else if (!accountContext && !fixtures)
                 void refreshConsumerAccount().catch(() => {});
-              else void read.reload(true);
+              else void refresh();
             }}
           />
         )
@@ -537,7 +536,7 @@ export default function ReportDetailScreen() {
               description="Your report reference is still available. Refresh to confirm the latest status."
               actionLabel="Refresh report"
               busy={read.busy}
-              onAction={() => void read.reload(true)}
+              onAction={refresh}
             />
           ) : null}
           {report.status === "rejected" ? (

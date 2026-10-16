@@ -8,6 +8,9 @@ import { PreviewLabel } from "@/components/preview-label";
 import { SearchField } from "@/components/search-field";
 import { useGuestAccess } from "@/context/guest-access-context";
 import { useMainPageScroll } from "@/hooks/use-main-page-scroll";
+import { useAuthSession } from "@/hooks/use-auth-session";
+import { useConsumerAccount } from "@/hooks/use-consumer-account";
+import { useManualRefresh } from "@/hooks/use-manual-refresh";
 import { useRouter } from "expo-router";
 import { Megaphone, Search } from "lucide-react-native";
 import { useState } from "react";
@@ -21,7 +24,14 @@ export default function AdvisoriesScreen() {
     router = useRouter(),
     feed = useUpdateFeed();
   const scrollRef = useMainPageScroll<FlatList>(feed.reload);
-  const [pullRefreshing, setPullRefreshing] = useState(false);
+  const { session } = useAuthSession();
+  const { accountContext } = useConsumerAccount();
+  const { refresh, refreshing } = useManualRefresh(
+    "advisories",
+    feed.fixtures ? "fixture" : accountContext?.identityUserId ?? session?.user.id ?? "guest",
+    () => feed.fixtures ? undefined : feed.reload(true),
+    !feed.fixtures && feed.busy,
+  );
   const [query, setQuery] = useState(""),
     [tab, setTab] = useState("all");
   const { guest } = useGuestAccess();
@@ -51,11 +61,8 @@ export default function AdvisoriesScreen() {
           paddingTop: 8,
           paddingBottom: appScrollableBottomPadding(insets.bottom),
         }}
-        refreshing={pullRefreshing}
-        onRefresh={() => {
-          setPullRefreshing(true);
-          void feed.reload(true).finally(() => setPullRefreshing(false));
-        }}
+        refreshing={refreshing}
+        onRefresh={refresh}
         ListHeaderComponent={
           <View className="gap-3 pb-2">
             <PreviewLabel />
@@ -127,7 +134,7 @@ export default function AdvisoriesScreen() {
                 description="The updates already loaded are still available. Connect and refresh for the latest notices."
                 actionLabel="Refresh updates"
                 busy={feed.busy}
-                onAction={() => void feed.reload(true)}
+                onAction={refresh}
               />
             ) : null}
             {featured ? (
@@ -175,7 +182,7 @@ export default function AdvisoriesScreen() {
                 title="ALECO updates couldn’t load"
                 description="Reconnect and try again to get the latest notices."
                 actionLabel="Try again"
-                onAction={() => void feed.reload(true)}
+                onAction={refresh}
                 busy={feed.busy}
               />
             ) : (

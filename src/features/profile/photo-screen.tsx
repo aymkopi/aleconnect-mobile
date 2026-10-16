@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { Image, Linking, View } from "react-native";
+import { useRef, useState } from "react";
+import { Linking, View } from "react-native";
+import { Camera } from "lucide-react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import * as ImagePicker from "expo-image-picker";
-import { Camera, Images } from "lucide-react-native";
 import { Button } from "@/components/panelui/button";
 import { Dialog } from "@/components/panelui/dialog";
-import { BottomSheet } from "@/components/panelui/bottom-sheet";
+import { Avatar } from "@/components/panelui/avatar";
+import { FileUpload, type FileUploadFile } from "@/components/panelui/file-upload";
 import { Text } from "@/components/panelui/text";
 import { ReportPage } from "@/features/reports/components/report-page";
 import { compressAvatarToStrictLimit } from "@/utils/avatar-image-processing";
@@ -30,7 +30,7 @@ export default function PhotoScreen() {
             ? serviceAccountId
             : identity.account.defaultServiceAccountId;
         return identity.account.authorizedServiceAccountIds.includes(id) ? (
-          <Photo key={id} identity={identity} serviceAccountId={id} />
+          <Photo key={identity.key + ":" + id} identity={identity} serviceAccountId={id} />
         ) : (
           <ReportPage title="Profile photo">
             <ProfileNotice
@@ -51,68 +51,28 @@ function Photo({
   identity: ProfileIdentity;
   serviceAccountId: string;
 }) {
-  const router = useRouter(),
-    current = useProfileTask(identity),
-    [primary] = useAppColors(["primary"]);
-  const [uri, setUri] = useState(""),
-    [sheet, setSheet] = useState(true),
+  const router = useRouter(), current = useProfileTask(identity);
+  const [cameraForeground] = useAppColors(["primary-foreground"]);
+  const [files, setFiles] = useState<FileUploadFile[]>([]),
     [busy, setBusy] = useState(false),
     [saved, setSaved] = useState(false),
     [error, setError] = useState(""),
     [blocked, setBlocked] = useState(false),
     [discard, setDiscard] = useState(false);
+  const saving = useRef(false);
+  const uri = files[0]?.uri ?? "";
+  const accountName = identity.account.accounts.find((account) => account.id === serviceAccountId)?.registeredName ?? "ALECO account";
+  const initials = accountName.split(/\s+/).filter(Boolean).slice(0, 2).map((word) => word[0]).join("");
   function back() {
-    if (busy) return;
-    if (uri && !saved) {
-      setDiscard(true);
-      return;
-    }
+    if (saving.current) return;
+    if (uri && !saved) { setDiscard(true); return; }
     if (router.canGoBack()) router.back();
     else router.replace("/profile");
   }
   const allowLeave = useProfileBackGuard(busy || (!!uri && !saved), back);
-  async function pick(camera: boolean) {
-    if (busy) return;
-    setError("");
-    if (identity.fixture) {
-      setSheet(false);
-      setUri("fixture-photo");
-      return;
-    }
-    setBusy(true);
-    try {
-      const permission = camera
-        ? await ImagePicker.requestCameraPermissionsAsync()
-        : await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!current()) return;
-      if (!permission.granted) {
-        setBlocked(!permission.canAskAgain);
-        setError(
-          "Allow " + (camera ? "camera" : "photo library") + " access to choose a profile photo.",
-        );
-        return;
-      }
-      const result = await (
-        camera ? ImagePicker.launchCameraAsync : ImagePicker.launchImageLibraryAsync
-      )({
-        mediaTypes: ["images"],
-        allowsEditing: true,
-        allowsMultipleSelection: false,
-        aspect: [1, 1],
-        quality: 1,
-      });
-      if (current() && !result.canceled && result.assets?.[0]) {
-        setUri(result.assets[0].uri);
-        setSheet(false);
-      }
-    } catch (e) {
-      if (current()) setError(e instanceof Error ? e.message : "The photo picker could not open.");
-    } finally {
-      if (current()) setBusy(false);
-    }
-  }
   async function save() {
-    if (busy || !uri) return;
+    if (saving.current || !uri || !current()) return;
+    saving.current = true;
     setBusy(true);
     setError("");
     try {
@@ -121,151 +81,68 @@ function Photo({
         if (!current()) return;
         await uploadCurrentUserAvatar(
           { imageBytes: bytes, contentType: "image/webp" },
-          {
-            serviceAccountId,
-            accessRevision: identity.account.accessRevision,
-          },
+          { serviceAccountId, accessRevision: identity.account.accessRevision },
         );
         if (!current()) return;
         await clearConsumerProfileCaches();
       }
       if (current()) setSaved(true);
     } catch (e) {
-      if (current())
-        setError(
-          e instanceof Error ? e.message : "Your current photo is unchanged. Retry the upload.",
-        );
+      if (current()) setError(e instanceof Error ? e.message : "Your current photo is unchanged. Retry the upload.");
     } finally {
+      saving.current = false;
       if (current()) setBusy(false);
     }
   }
+  const changeFiles = (next: FileUploadFile[]) => {
+    if (saving.current || !current()) return;
+    setFiles(next);
+    setSaved(false);
+    setError("");
+    setBlocked(false);
+  };
   return (
-    <>
-      <ReportPage
-        title="Profile photo"
-        onBack={back}
-        footer={
-          uri ? (
-            <>
-              <Button
-                loading={busy}
-                onPress={() => (saved ? router.replace("/profile") : void save())}
-              >
-                {saved ? "Back to Account" : "Save photo"}
-              </Button>
-              {!saved ? (
-                <Button variant="outline" disabled={busy} onPress={() => setSheet(true)}>
-                  Choose another photo
+    <FileUpload
+      value={files}
+      onValueChange={changeFiles}
+      sources={["camera", "library"]}
+      accept={["image/*"]}
+      image={{ quality: 1, crop: { aspect: [1, 1] } }}
+      disabled={busy}
+      onError={(e) => { if (current()) { setError(e.message); setBlocked(/permission/i.test(e.message)); } }}
+      onReject={(rejections) => { if (current()) setError(rejections.map((entry) => entry.message).join(" ")); }}
+    >
+      <ReportPage title="Profile photo" onBack={back} footer={
+        uri ? <Button loading={busy} onPress={() => saved ? router.replace("/profile") : void save()}>{saved ? "Back to Account" : "Save photo"}</Button> : undefined
+      }>
+        <ProfileHeading title={saved ? "Profile photo updated" : uri ? "Preview your photo" : "Choose a profile photo"} />
+        <View className="gap-4 items-center rounded-xl bg-card p-4">
+          <Avatar size="xl" className="self-center" source={uri ? { uri } : undefined} fallback={initials} accessibilityLabel={uri ? "Selected profile photo" : accountName}>
+            <Avatar.Badge style={{ top: "auto", bottom: -4 }}>
+              <FileUpload.Trigger>
+                <Button size="icon" className="h-9 w-9 rounded-full" hitSlop={6} disabled={busy} accessibilityLabel="Change profile photo">
+                  <Camera size={18} color={cameraForeground} />
                 </Button>
-              ) : null}
-            </>
-          ) : (
-            <Button onPress={() => setSheet(true)}>Choose a photo</Button>
-          )
-        }
-      >
-        <ProfileHeading
-          title={
-            saved ? "Profile photo updated" : uri ? "Preview your photo" : "Choose a profile photo"
-          }
-        />
-        {uri ? (
-          <View className="gap-3 rounded-xl bg-card p-4">
-            <Image
-              accessibilityLabel="Selected profile photo"
-              source={identity.fixture ? require("@/assets/aleconnect/mayon.jpeg") : { uri }}
-              style={{ width: 96, height: 96, borderRadius: 48 }}
-            />
-            <Text size="sm" weight="semibold">
-              Selected photo
-            </Text>
-            <Text size="sm" muted>
-              {saved
-                ? "Your new photo was saved."
-                : "Review the crop from your device picker before uploading."}
-            </Text>
-          </View>
-        ) : null}
-        <Text size="sm" muted>
-          Your current photo stays until the upload succeeds. This photo does not change ALECO
-          account ownership.
-        </Text>
-        {error ? (
-          <ProfileNotice title="Photo could not be updated" description={error} danger />
-        ) : null}
-        {blocked ? (
-          <Button
-            variant="outline"
-            onPress={() =>
-              void Linking.openSettings().catch(() =>
-                setError("Open your device settings to allow photo access."),
-              )
-            }
-          >
-            Open device settings
-          </Button>
-        ) : null}
+              </FileUpload.Trigger>
+            </Avatar.Badge>
+          </Avatar>
+          {uri && !saved ? <Button variant="ghost" disabled={busy} onPress={() => changeFiles([])}>Remove selected photo</Button> : null}
+          <Text muted size="sm">{saved ? "Your new photo was saved." : "Choose a photo and crop it square before saving."}</Text>
+        </View>
+        <Text size="sm" muted>Your current photo stays until the upload succeeds. This photo does not change ALECO account ownership.</Text>
+        {error ? <ProfileNotice title="Photo could not be updated" description={error} danger /> : null}
+        {blocked ? <Button variant="outline" onPress={() => void Linking.openSettings().catch(() => setError("Open your device settings to allow photo access."))}>Open device settings</Button> : null}
       </ReportPage>
-      <BottomSheet open={sheet} onOpenChange={(v) => !busy && setSheet(v)}>
-        <BottomSheet.Content>
-          <BottomSheet.Header>
-            <Text size="lg" weight="semibold">
-              Choose a profile photo
-            </Text>
-          </BottomSheet.Header>
-          <BottomSheet.Body className="gap-3">
-            <Button
-              variant="outline"
-              startContent={<Camera size={18} color={primary} />}
-              disabled={busy}
-              onPress={() => void pick(true)}
-            >
-              Take a photo
-            </Button>
-            <Button
-              variant="outline"
-              startContent={<Images size={18} color={primary} />}
-              onPress={() => void pick(false)}
-            >
-              Choose from library
-            </Button>
-            <Text size="sm" muted>
-              Move and crop your photo in the device picker before saving.
-            </Text>
-            {error ? (
-              <Text size="sm" className="text-destructive">
-                {error}
-              </Text>
-            ) : null}
-          </BottomSheet.Body>
-          <BottomSheet.Footer>
-            <Button variant="outline" disabled={busy} onPress={() => setSheet(false)}>
-              Cancel
-            </Button>
-          </BottomSheet.Footer>
-        </BottomSheet.Content>
-      </BottomSheet>
       <Dialog open={discard} onOpenChange={setDiscard}>
         <Dialog.Content>
           <Dialog.Title>Discard selected photo?</Dialog.Title>
           <Dialog.Description>Your current profile photo has not changed.</Dialog.Description>
           <Dialog.Footer>
-            <Button variant="outline" onPress={() => setDiscard(false)}>
-              Keep photo
-            </Button>
-            <Button
-              variant="destructive"
-              onPress={() => {
-                allowLeave();
-                setUri("");
-                router.replace("/profile");
-              }}
-            >
-              Discard
-            </Button>
+            <Button variant="outline" onPress={() => setDiscard(false)}>Keep photo</Button>
+            <Button variant="destructive" onPress={() => { allowLeave(); setFiles([]); router.replace("/profile"); }}>Discard</Button>
           </Dialog.Footer>
         </Dialog.Content>
       </Dialog>
-    </>
+    </FileUpload>
   );
 }

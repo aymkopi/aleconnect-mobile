@@ -23,6 +23,7 @@ import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useConsumerAccount } from "@/hooks/use-consumer-account";
 import { useMainPageScroll } from "@/hooks/use-main-page-scroll";
+import { useManualRefresh } from "@/hooks/use-manual-refresh";
 import { useScopedRead } from "@/hooks/use-scoped-read";
 import {
   subscribeReportRevalidationRequested,
@@ -104,7 +105,6 @@ export default function ReportsScreen() {
   const [draft, setDraft] = useState(defaultBrowseFilters);
   const [query, setQuery] = useState(""),
     [search, setSearch] = useState("");
-  const [pullRefreshing, setPullRefreshing] = useState(false);
   const [tab, setTab] = useState<ReportTab>("all");
   const [filters, setFilters] = useState(false),
     [filterView, setFilterView] = useState<FilterView>("filters");
@@ -115,6 +115,7 @@ export default function ReportsScreen() {
     "feature",
   ]);
   const userId = session?.user.id;
+  const refreshConsumerId = fixtures ? "fixture" : accountContext?.identityUserId ?? userId ?? null;
   const accounts = fixtures
     ? fixtureReportAccounts
     : (accountContext?.accounts ?? []);
@@ -143,6 +144,11 @@ export default function ReportsScreen() {
   const reports = useScopedRead(scope, (force) =>
     fetchComplaintReportPage({ ...options, force, revalidate: force }),
   );
+  const { refresh, refreshing } = useManualRefresh(
+    "reports", refreshConsumerId,
+    () => fixtures ? undefined : reports.reload(true),
+    !fixtures && reports.busy,
+  );
   const scrollRef = useMainPageScroll<FlatList>(reports.reload);
   const reloadReports = reports.reload;
   useEffect(() => {
@@ -169,6 +175,11 @@ export default function ReportsScreen() {
         ])
       : null,
     (force) => fetchComplaintMeta({ force }),
+  );
+  const { refresh: refreshTypes } = useManualRefresh(
+    "reports", refreshConsumerId,
+    () => fixtures ? undefined : meta.reload(true),
+    !fixtures && (reports.busy || meta.busy),
   );
   const loaded = fixtures
     ? fixtureReports
@@ -427,7 +438,7 @@ export default function ReportsScreen() {
           description="Your loaded reports are still available. Connect and refresh to confirm current statuses."
           actionLabel="Refresh reports"
           busy={reports.busy}
-          onAction={() => void reports.reload(true)}
+          onAction={refresh}
         />
       ) : null}
     </View>
@@ -485,7 +496,7 @@ export default function ReportsScreen() {
               title="Your reports couldn’t load"
               description="Reconnect and try again. This does not mean you have no reports."
               actionLabel="Try again"
-              onAction={() => void reports.reload(true)}
+              onAction={refresh}
             />
           ) : (
             <DataState
@@ -511,15 +522,8 @@ export default function ReportsScreen() {
             />
           )
         }
-        refreshing={pullRefreshing}
-        onRefresh={async () => {
-          setPullRefreshing(true);
-          try {
-            await reports.reload(true);
-          } finally {
-            setPullRefreshing(false);
-          }
-        }}
+        refreshing={refreshing}
+        onRefresh={refresh}
         ListFooterComponent={
           <View className="pt-3 gap-3">
             {reports.error && reports.errorSource === "more" ? (
@@ -680,7 +684,7 @@ export default function ReportsScreen() {
                     {meta.error ? (
                       <Button
                         variant="outline"
-                        onPress={() => void meta.reload(true)}
+                        onPress={refreshTypes}
                       >
                         Reload report types
                       </Button>

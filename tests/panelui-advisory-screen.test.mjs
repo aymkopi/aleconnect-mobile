@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import ts from "typescript";
+import { manualRefreshHarness } from "./manual-refresh-harness.mjs";
 import * as presentation from "../src/features/advisories/presentation.ts";
 const source = await readFile(
   new URL(
@@ -171,6 +172,7 @@ function harness() {
         : name,
     };
   modules["@/components/panelui/toast"] = { toast: { show: () => {} } };
+  modules["@/hooks/use-manual-refresh"] = manualRefreshHarness(modules.react);
   const exports = {};
   new Function(
     "require",

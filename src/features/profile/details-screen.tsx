@@ -7,7 +7,8 @@ import {
   useFocusEffect,
   useNavigation,
 } from "expo-router";
-import { Mail, MapPin, Phone } from "lucide-react-native";
+import { Camera, Mail, MapPin, Phone } from "lucide-react-native";
+import { Avatar } from "@/components/panelui/avatar";
 import { Button } from "@/components/panelui/button";
 import { Dialog } from "@/components/panelui/dialog";
 import { Field } from "@/components/panelui/field";
@@ -18,6 +19,7 @@ import { ReportPage } from "@/features/reports/components/report-page";
 import { ReportLocationPicker } from "@/features/maps/report-location-picker";
 import { useScopedRead } from "@/hooks/use-scoped-read";
 import { useConsumerAccount } from "@/hooks/use-consumer-account";
+import { useAppColors } from "@/hooks/use-app-colors";
 import { setDefaultLinkedAccount } from "@/services/linked-accounts";
 import { clearConsumerProfileCaches } from "@/hooks/use-consumer-profile";
 import {
@@ -69,6 +71,7 @@ function Details({
   locked: boolean;
 }) {
   const { refreshConsumerAccount } = useConsumerAccount();
+  const [cameraForeground] = useAppColors(["primary-foreground"]);
   const [defaultDialog, setDefaultDialog] = useState(false), [defaultSaved, setDefaultSaved] = useState(false);
   const router = useRouter(),
     navigation = useNavigation(),
@@ -346,6 +349,16 @@ function Details({
           <>
             {view === "info" ? (
               <>
+                <Avatar size="xl" className="self-center" source={profile.avatarUrl ? { uri: profile.avatarUrl } : undefined}
+                  fallback={profile.fullName.split(/\s+/).filter(Boolean).slice(0, 2).map((word) => word[0]).join("")}
+                  accessibilityLabel="Profile photo">
+                  <Avatar.Badge style={{ top: "auto", bottom: -4 }}>
+                    <Button size="icon" className="h-9 w-9 rounded-full" hitSlop={6} disabled={busy} accessibilityLabel="Change profile photo"
+                      onPress={() => router.push(("/profile/photo?serviceAccountId=" + encodeURIComponent(id)) as Href)}>
+                      <Camera size={18} color={cameraForeground} />
+                    </Button>
+                  </Avatar.Badge>
+                </Avatar>
                 <ServiceAccountCard account={{
                   id, accountNumber: profile.accountNumber, registeredName: profile.fullName,
                   address: profile.fullAddress, phoneNumber: profile.contactNum,
@@ -376,16 +389,6 @@ function Details({
                     Your name and service details are managed by ALECO.
                   </Text>
                 </View>
-                <Button
-                  variant="outline"
-                  onPress={() =>
-                    router.push(
-                      ("/profile/photo?serviceAccountId=" + encodeURIComponent(id)) as Href,
-                    )
-                  }
-                >
-                  Change profile photo
-                </Button>
               </>
             ) : view === "edit" ? (
               <>
