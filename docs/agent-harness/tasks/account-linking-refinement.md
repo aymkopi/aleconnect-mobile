@@ -2,7 +2,7 @@
 
 Owner: consumer Mobile; Staff owns the compatible API.
 Branch/base: codex/account-linking-refinement from cfd3e9f501fb8fcd1029fb331de0a8393177e276.
-Status: implementation of Staff planning PR #43; paired with [Staff PR #44](https://github.com/aymkopi/Aleconnect/pull/44); [Mobile PR #10](https://github.com/aymkopi/aleconnect-mobile/pull/10) is open; current remote CI is tracked on both PRs. No merge, build publication or device installation.
+Status: Mobile PR #10 merged as2a911e5 after both final-head checks passed and Staff PR #44 was deployed/live-verified. Android1.0.2-alpha.1/code66 published through successful38858463619 with CI APK checks passing; no device installation.
 
 - Scope: optional isCurrentLink preserves old/malformed response compatibility. Approved+true is Linked; approved+false is Previously approved; missing metadata remains Approved without implying current access. Superseded is No longer active; unknown status stays neutral. Request history shows public decline reason and current ALECO-account guidance, with no history-driven forced sign-out.
 - Safety: metadata is presentation only. Existing identity/access-revision scoped reads, authoritative session handling, claim password clearing, new-intent/retry idempotency, account-scoped drafts/cache and notification routing remain in place. No claim queue, consumer submission-reason field, private notes or other-owner information added.
@@ -11,3 +11,11 @@ Status: implementation of Staff planning PR #43; paired with [Staff PR #44](http
 - Evidence: ignored .cache/account-link-evidence and .cache/account-link-web; browser screenshots/logs in Staff task's ignored .superpowers/sdd/2026-10-15-account-linking-refinement. Task-owned generated Uniwind type churn reverted; package/lock/native files unchanged.
 - Limits: Graphify refresh passed outside the sandbox (4037 nodes/7591 edges); generated output is retained separately from source commits. No Android/iOS/provider/private-real-account/screen-reader acceptance or release. Primary checkout, Metro, signer, saved device state/queues and unrelated worktrees are preserved.
 - Rollout: separately authorize compatible Staff API/web deployment first; then Mobile. Old API omitting isCurrentLink remains supported. Mobile UI rollback never restores membership/audit data or disables Staff owner/replay protections.
+
+## Merge acceptance — 2026-10-16
+
+- [Staff PR44](https://github.com/aymkopi/Aleconnect/pull/44) merged/deployed first: source27afca9, Staff1.0.2-alpha.1, successful workflow38858090012. Ten production entry assets match immutable Pages; eight anonymous authorization checks pass. API caa8f8ad is active100%, with unchanged21 bindings/runtime.
+- [Mobile PR10](https://github.com/aymkopi/aleconnect-mobile/pull/10) then merged as2a911e5b05cb245c711eeb14663675018515265f from final green head ef6cf3e. Both PR gates pass; integrated suite468/468 has no failures/skips. TypeScript, scoped lint, paired harness, preview export and Light/Dark history journeys pass. Merged product equals tested source; concurrent release-owner history/recovery fixes are retained.
+- [Android workflow38858463619](https://github.com/aymkopi/aleconnect-mobile/actions/runs/38858463619) succeeded and published [1.0.2-alpha.1/code66](https://github.com/aymkopi/aleconnect-mobile/releases/tag/v1.0.2-alpha.1). CI verifies retained signature, manifest, standalone Hermes, fixture mode and16KB alignment. No local download or installed-device acceptance is claimed.
+- Scoped Git bundle and hashed QA/graph/log evidence are preserved under C:/Users/Justine/.codex/tmp/account-linking-release-20261016 before task-only checkout/branch cleanup. Preserve primary edits, unrelated worktrees, Metro, signer, private device queues and release-owner recovery state.
+- No database/operational mutation, native install, account/cache reset or provider acceptance was performed. Rollback retains server ownership/replay guards and all membership/audit history.
