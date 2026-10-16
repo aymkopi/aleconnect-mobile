@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { FileText, Home, Megaphone, Phone, UserRound } from "lucide-react-native";
 import { Pressable, View, useWindowDimensions } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -64,13 +64,13 @@ export function FloatingAppBar({ currentIndex, onSelect }: {
   const pillStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: position.get() * slot }, { scaleX: stretch.get() }, { scaleY: 1 - (stretch.get() - 1) / 3 }],
   }));
-  const commitPan = (index: number) => {
+  const commitPan = useCallback((index: number) => {
     // RN-web can dispatch the underlying tab's click after the pan releases.
     suppressPressUntil.current = Date.now() + 200;
     const accepted = index === currentIndex || onSelect(index) !== false;
     const target = accepted ? index : currentIndex;
     position.set(reduced ? target : withSpring(target, { duration: 400, dampingRatio: 1, overshootClamping: true, reduceMotion: ReduceMotion.System }));
-  };
+  }, [currentIndex, onSelect, position, reduced]);
   const pan = Gesture.Pan()
     .activeOffsetX([-8, 8])
     .failOffsetY([-12, 12])

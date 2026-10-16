@@ -1,6 +1,6 @@
 # Active work
 
-- [Manual refresh and FileUpload](../mobile-refresh-file-upload.md): PR preparation for shared manual refresh limits, Hotlines/Notifications pull-to-refresh, compressed report/profile photo selection, navbar pill dragging/swiping, and copied PanelUI 0.112.0. Requested 0.122.0 is unavailable; verification and native acceptance limits are recorded with the PR.
+- [Manual refresh and FileUpload](../mobile-refresh-file-upload.md): [PR #13](https://github.com/aymkopi/aleconnect-mobile/pull/13) adds shared manual refresh limits, Hotlines/Notifications pull-to-refresh, compressed report/profile photo selection, navbar pill dragging/swiping, and copied PanelUI 0.112.0. Requested 0.122.0 is unavailable; verification and native acceptance limits are recorded with the PR.
 
 - [Three-repository alpha versioning](../release-versioning.md): PRs merged; Staff 1.0.1-alpha.1 deployed, Mobile 1.0.1-alpha.1/code 65 and Lineman 1.0.0-alpha.1/code 2 published. Exact downloaded assets/signatures/alignment and three cold launches per app on 25069PTEBG pass. Release evidence and scoped closeout are recorded; preserve unrelated edits, recovery branches/stashes and device state.
 

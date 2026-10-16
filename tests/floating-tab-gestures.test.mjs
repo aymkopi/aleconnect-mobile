@@ -9,7 +9,7 @@ function bar(index = 0, accepted = true, reduced = false) {
   const jsx = (type, props) => ({ type, props });
   const modules = {
     "react/jsx-runtime": { jsx, jsxs: jsx },
-    react: { useRef: () => ({ current: false }), useEffect: (effect) => effect() },
+    react: { useCallback: (callback) => callback, useRef: () => ({ current: false }), useEffect: (effect) => effect() },
     "lucide-react-native": {},
     "react-native": { View: "View", Pressable: "Pressable", useWindowDimensions: () => ({ width: 390, fontScale: 1 }) },
     "react-native-gesture-handler": { Gesture: { Pan: () => pan }, GestureDetector: "GestureDetector" },
