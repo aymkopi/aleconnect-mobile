@@ -3,7 +3,7 @@
 ## Status and ownership
 
 - Owner: consumer Mobile presentation. Branch: `codex/mobile-declutter`, based on Mobile `master` at `8b1af18`.
-- Stage: Figma revision prepared for acceptance. The user's requested unread-report revision now matches the existing unread notification state. Application implementation has not started. Keep this PR draft until the revised design is accepted and the implementation gates pass.
+- Stage: Figma revision prepared for acceptance. Unread reports now match unread notifications; the latest requested refinements restore submitted dates, use raw identity values and distinguish the Account profile with a card. Application implementation has not started. Keep this PR draft until the revised design is accepted and the implementation gates pass.
 - [Editable Figma review page](https://www.figma.com/design/6uIaVRM63oHA723WKgjo5k/Aleconnect-mobile?node-id=1184-24615). Original reference screens remain unchanged.
 - The separate user-requested chat, Reports accessible redesign proposal (`01a1461e-22c7-7d91-9653-68c2c6e2f3ea`), created a [new proposal page](https://www.figma.com/design/6uIaVRM63oHA723WKgjo5k/Aleconnect-mobile?node-id=1184-29946) with 12 editable Light/Dark report, filter, empty and loading frames. That broader redesign is outside this PR's implementation scope.
 
@@ -15,14 +15,15 @@ Keep the current visual identity, report cards, five destinations and existing s
 | --- | --- | --- | --- |
 | Reports | Remove account and period controls from the overview. Keep heading, New report, KPI scope notice, search, status tabs and report cards. Use a labeled Filters button. | `1184:24617` / `1188:1334` | Pending design acceptance |
 | Unread report state | Match unread notifications: the same full-card tint and small unread dot, with no separate update banner. Read and unread retain the same content, layout and fixture height. | Comparison `1204:2639` / `1204:2690`; component set `1203:2504` | Pending design acceptance |
+| Ticket dates | Preserve the submitted date/time already displayed by the application's ReportCard. Restore a separate date line on the review's normal cards and keep the same date on read/unread cards. | Reports `1184:24617` / `1188:1334`; scoped date masters `1216:4368` / `1216:4490` | Pending design acceptance |
 | Report filters | Put service account, reporting period, status, type and sort in the existing sheet. One Apply filters action; Reset restores defaults. | `1184:24669` / `1188:1385` | Pending design acceptance |
 | Period selection | Change the same sheet's content, with Back. Retain all dates, this month, last month, last 3 months, this year and custom dates. | `1186:2004` / `1188:1770` | Pending design acceptance |
 | Account selection | Change the same sheet's content, with Back. Show registered names and complete account numbers. | `1186:2079` / `1188:1837` | Pending design acceptance |
 | Custom dates | Reuse the existing bounded range calendar; retain January 1, 2026 through the current Manila date. Do not open a second sheet over the filter sheet. | `1187:1319` / `1188:1969` | Pending design acceptance |
 | Contact cards | Remove visible contact-type text; keep number, optional meaningful carrier/service label, website, Call and Copy. Prefix icons identify the type. | Hotlines `1185:696` / `1188:1723` | Pending design acceptance |
-| Account | Remove the redundant connected-account feature card and duplicate profile menu entry. Keep the profile entry, account management, security, preferences and support. Multiple-account subtitle uses the signed-in email. | `1184:24742` / `1188:1460` | Pending design acceptance |
-| Single account | Profile subtitle uses the account number. Loading, missing identity and guest states must not expose another identity's data. | `1186:2154` / `1188:1901` | Pending design acceptance |
-| Account information | One identity/photo-edit header, contact/email/location group and service details group. Remove the repeated flip card and introductory notice. Retain Edit profile, camera, verification and default-account functionality. | `1184:24810` / `1188:1528` | Pending design acceptance |
+| Account | Remove the redundant connected-account feature card and duplicate profile menu entry. Place the avatar, name, raw identifier and Account information affordance in a distinct borderless profile card. Keep account management, security, preferences and support. Multiple-account subtitle uses the signed-in email without a prefix. | `1184:24742` / `1188:1460` | Pending design acceptance |
+| Single account | Profile subtitle uses the raw account number, without concatenating an ALECO account label. Loading, missing identity and guest states must not expose another identity's data. | `1186:2154` / `1188:1901` | Pending design acceptance |
+| Account information | One identity/photo-edit header showing only the account number or appropriate session email, without a concatenated ALECO account prefix; contact/email/location group and service details group. Remove the repeated flip card and introductory notice. Retain Edit profile, camera, verification and default-account functionality. | `1184:24810` / `1188:1528` | Pending design acceptance |
 | Alerts and notifications | Keep delivery toggles together. Use a concise area summary with Change areas and sync status. Preserve permission/setup, errors, pending sync and autosave feedback. | `1184:24847` / `1188:1571` | Pending design acceptance |
 | Advisories | Remove the repeated intro/date heading and redundant Read story action. Keep search, tabs, notification bell, featured advisory and stories. | `1184:24898` / `1188:1623` | Pending design acceptance |
 | Advisory details | Use a neutral summary with a status badge, clear schedule, affected areas, message and safety guidance. Keep full content, photos, original-post access and relevant contacts. | `1184:24956` / `1188:1681` | Pending design acceptance |
@@ -60,6 +61,7 @@ Use existing `src/features/reports/main-screen.tsx`, shared `reports/report-card
 - [x] Inspect incumbent source, Staff contact-type values and existing Figma components/tokens.
 - [x] Create editable Light/Dark review frames and reusable contact assets without replacing canonical screens.
 - [x] Revise the unread report state after user feedback: reuse notification tint/dot, remove the banner and keep read/unread sizing consistent.
+- [x] Apply the next requested revision in both themes: raw identity values, a distinct Account profile card and restored submitted dates on ticket cards.
 - [x] Finish independent Figma review and record any remaining limitations.
 - [ ] Obtain design acceptance before changing application code.
 - [ ] Implement the accepted UI through existing shared PanelUI components.
@@ -71,7 +73,9 @@ Use existing `src/features/reports/main-screen.tsx`, shared `reports/report-card
 
 ## Verification and references
 
-Figma checks are design evidence only. All 24 phone frames have 402×874 bounds, with 12 per theme; two additional panels compare read/unread report states. Independent review identified an inherited custom-calendar backdrop and an inherited mode/rendered-paint mismatch on the dark unread-report instance. The calendar now shows Reports behind one sheet with Back. The unread card now materializes the same resolved notification tint while retaining its binding: Light `#F0F9FF`, Dark `#1A1F27`; the final dark screenshot has readable foregrounds and the intended surface. The comparison cards retain the same 136px fixture height. Runtime behavior and accessibility remain unverified.
+Figma checks are design evidence only. All 24 phone frames have 402×874 bounds, with 12 per theme; two additional panels compare read/unread report states. Independent review identified an inherited custom-calendar backdrop and an inherited mode/rendered-paint mismatch on the dark unread-report instance. The calendar now shows Reports behind one sheet with Back. The unread card now materializes the same resolved notification tint while retaining its binding: Light `#F0F9FF`, Dark `#1A1F27`; the final dark screenshot has readable foregrounds and the intended surface. The comparison cards retain the same 136px fixture height.
+
+The latest requested revision was visually checked on Light/Dark Reports, Account profile and Account information, plus the Dark read/unread comparison. Four single/multiple-account profile cards are 370×104 with 16px padding, token-bound 12px corners, semantic card fills and no borders/shadows. Their subtitles show only email or account number. Account information uses a full-width identity row with the raw account number in this sample. Existing ticket-date behavior is retained: read/unread fixtures show the same submitted date; normal cards are 114px high with their restored date line. Twenty scoped normal-card instances, including filter backdrops, use the two local date masters; original components/screens remain unchanged. Dates are illustrative fixture values, not live results. Runtime behavior and accessibility remain unverified.
 
 Baseline and draft documentation harness validation pass without errors/warnings; whitespace checks pass. No app tests, native build, physical-device check, merge, deployment or release has been performed for this draft.
 
