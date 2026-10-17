@@ -36,4 +36,7 @@ Free [Apple Personal Team provisioning](https://developer.apple.com/help/account
 
 ## Evidence and remaining work
 
-Pending: hosted native build, exact downloaded artifact/hash checks, local signing, USB installation and native-device acceptance. No Apple account login, device writes, public release, API deployment or store submission has occurred.
+- First [run 39033064614](https://github.com/aymkopi/aleconnect-mobile/actions/runs/39033064614): npm install and TypeScript passed. Alignment stopped on six existing patch recommendations (Expo, Asset, Constants, Linking, Notifications, Router). Locked dependencies are retained; alignment is advisory and Doctor skips only that same version recommendation check. Other Doctor/native checks remain required.
+- Local harness/whitespace and workflow YAML, trigger/permission, Bash/Python/Node syntax checks passed. Graphify code refresh completed (4,349 nodes / 8,151 edges); generated output is retained separately under ignored `.cache/ios-ipa/graphify-refresh`, with tracked graph files restored.
+- Apple Mobile Device Service is running; no connected iPhone was found in the Windows device inventory.
+- Pending: hosted native build, exact downloaded artifact/hash checks, local signing, USB installation and native-device acceptance. No Apple account login, device writes, public release, API deployment or store submission has occurred.
