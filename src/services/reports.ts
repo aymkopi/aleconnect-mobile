@@ -94,12 +94,13 @@ function patchReportPageStatus(
   const reports = page.reports.map((report) => {
     if (
       report.id !== projection.ticketId ||
-      report.status === projection.status
+      (report.status === projection.status && !report.statusChangedAt && !report.updatedAt)
     ) {
       return report;
     }
     changed = true;
-    return { ...report, status: projection.status };
+    // A push changes the status before its authoritative history date is fetched.
+    return { ...report, status: projection.status, statusChangedAt: null, updatedAt: null };
   });
   return {
     changed,

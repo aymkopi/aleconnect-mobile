@@ -1,4 +1,7 @@
 import type { NotificationSubstation } from "../../services/notification-settings";
+export function accountProfileIdentifier(count: number, email: string | null | undefined, accountNumber: string | null | undefined) {
+  return (count > 1 ? email?.trim() : accountNumber?.trim() || email?.trim()) || null;
+}
 export function expandAreas(
   stations: NotificationSubstation[],
   parents: string[],

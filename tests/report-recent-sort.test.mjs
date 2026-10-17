@@ -64,6 +64,18 @@ test("recent requests deduplicate only the identical sort, cursor and access sco
   await Promise.all(tasks);
 });
 
+test("an accepted same-status push clears an older status date until authoritative revalidation", async () => {
+  const h = await service(async () => ({ ...page, reports: [{ ...report, statusChangedAt: "2026-10-01T00:00:00Z" }] }));
+  await h.fetchComplaintReportPage(scope);
+  const key = [...h.storage.keys()][0];
+  const owner = key.replace("report_list_cache_v1:", "");
+  assert.equal(await h.projectComplaintReportStatus({ userId: owner, ticketId: report.id, status: report.status }), true);
+  const stored = JSON.parse(h.storage.get(key));
+  assert.equal(stored.value.reports[0].statusChangedAt, null);
+  assert.equal(stored.value.reports[0].updatedAt, null);
+  assert.equal(stored.value.reports[0].createdAt, report.createdAt);
+});
+
 test("recent order never reuses or overwrites the default newest offline cache", async () => {
   let fail = false;
   const urls = [], h = await service(async (url) => {

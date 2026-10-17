@@ -9,7 +9,6 @@ import { Text } from "@/components/panelui/text";
 import { ThemeSelector } from "@/components/panelui/theme-selector";
 import { toast } from "@/components/panelui/toast";
 import { PreviewLabel } from "@/components/preview-label";
-import { SoftRadial } from "@/components/soft-radial";
 import { useGuestAccess } from "@/context/guest-access-context";
 import { useVisualPreview } from "@/context/visual-preview-context";
 import { useAppColors } from "@/hooks/use-app-colors";
@@ -22,22 +21,19 @@ import {
   Bell,
   ChevronLeft,
   ChevronRight,
-  Eye,
-  EyeOff,
-  House,
   Info,
   KeyRound,
   LifeBuoy,
   Link,
   Moon,
   ShieldCheck,
-  UserRound,
   type LucideIcon,
 } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
 import { Image, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Uniwind, useUniwind } from "uniwind";
+import { accountProfileIdentifier } from "./profile-state";
 const profileChildRoutes = {
   "Personal information": "/profile/details",
   "ALECO accounts": "/profile/accounts",
@@ -104,17 +100,6 @@ export default function AccountScreen() {
       if (!fixtures && session) void reload({ forceNetwork: true });
     }, [fixtures, session, reload]),
   );
-  const [numberVisible, setNumberVisible] = useState(false);
-  useEffect(
-    () => setNumberVisible(false),
-    [
-      accountContext?.defaultServiceAccountId,
-      accountContext?.accessRevision,
-      session?.user.id,
-      guest,
-      fixtures,
-    ],
-  );
   const [logoutOpen, setLogoutOpen] = useState(false),
     [signingOut, setSigningOut] = useState(false);
   async function logout() {
@@ -134,7 +119,7 @@ export default function AccountScreen() {
     }
   }
   const [sheet, setSheet] = useState(false),
-    [primary, feature] = useAppColors(["primary", "feature"]);
+    [primary, primaryForeground] = useAppColors(["primary", "primary-foreground"]);
   const name = guest
     ? "Guest"
     : fixtures
@@ -144,6 +129,7 @@ export default function AccountScreen() {
       (a) => a.id === accountContext.defaultServiceAccountId,
     ),
     count = fixtures ? 2 : (accountContext?.accounts.length ?? 0);
+  const identifier = guest ? null : fixtures ? "justine@example.com" : accountProfileIdentifier(count, session?.user.email, account?.accountNumber);
   useEffect(() => {
     if (guest) {
       setSheet(false);
@@ -157,7 +143,6 @@ export default function AccountScreen() {
     {
       title: "Account & security",
       rows: [
-        ["Personal information", UserRound],
         ["ALECO accounts", Link],
         ["Change password", KeyRound],
       ],
@@ -203,12 +188,12 @@ export default function AccountScreen() {
         ) : (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Personal information"
+            accessibilityLabel="Account information"
             accessibilityHint={
               guest ? "Sign in to view your profile details" : undefined
             }
             onPress={() => openFeature("/profile/details")}
-            className="flex-row items-center gap-4 py-2"
+            className="flex-row items-center gap-3 p-4 rounded-xl bg-card"
           >
             {!guest && !fixtures && profile?.avatarUrl ? (
               <Image
@@ -219,11 +204,11 @@ export default function AccountScreen() {
             ) : (
               <View
                 className="rounded-full items-center justify-center"
-                style={{ width: 64, height: 64, backgroundColor: "#2250CF" }}
+                style={{ width: 64, height: 64, backgroundColor: primary }}
               >
                 <Text
                   style={{
-                    color: "#FFFFFF",
+                    color: primaryForeground,
                     fontFamily: "Inter_600SemiBold",
                     fontSize: 24,
                   }}
@@ -241,12 +226,12 @@ export default function AccountScreen() {
                 {name}
               </Text>
               <Text muted size="sm">
-                {guest ? "Browsing without signing in" : "Consumer profile"}
+                {guest ? "Browsing without signing in" : identifier ?? (accountsLoading ? "Loading account…" : "Account details unavailable")}
               </Text>
               <Text size="sm" className="text-primary">
                 {guest
                   ? "Sign in to view your details"
-                  : "Personal information"}
+                  : "Account information"}
               </Text>
             </View>
             <ChevronRight size={18} color={primary} />
@@ -268,102 +253,6 @@ export default function AccountScreen() {
             onAction={() => void reload({ forceNetwork: true })}
           />
         ) : null}
-        {!guest && !fixtures && accountsLoading && !accountContext ? (
-          <ContentSkeleton
-            layout="profile"
-            count={1}
-            label="Loading your service accounts"
-          />
-        ) : (
-          <View
-            className="rounded-xl overflow-hidden p-4 gap-3"
-            style={{ backgroundColor: feature }}
-          >
-            <SoftRadial />
-            <View className="flex-row gap-2 items-center">
-              <House size={20} color="#FFFFFF" />
-              <Text
-                weight="semibold"
-                size="xs"
-                style={{ color: "#FFFFFF", flex: 1 }}
-              >
-                ALECO accounts
-              </Text>
-              <Text size="xs" style={{ color: "#E5E7EB" }}>
-                {guest ? "Sign in required" : count + " linked"}
-              </Text>
-            </View>
-            <View className="flex-row justify-between gap-2">
-              <View className="flex-1 gap-1">
-                <Text size="lg" weight="semibold" style={{ color: "#FFFFFF" }}>
-                  {guest
-                    ? "Connect your service"
-                    : fixtures
-                      ? "Home"
-                      : (account?.registeredName ?? "Connect your service")}
-                </Text>
-                <Text size="xs" style={{ color: "#E5E7EB" }}>
-                  {guest
-                    ? "Sign in to link your ALECO account"
-                    : fixtures
-                      ? "Rawis, Legazpi City"
-                      : (account?.address ??
-                        "Your linked accounts appear here")}
-                </Text>
-              </View>
-              {!guest ? (
-                <View className="items-end gap-1">
-                  <View className="flex-row items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      style={{ width: 32, height: 32 }}
-                      hitSlop={6}
-                      accessibilityLabel={
-                        numberVisible
-                          ? "Hide account number"
-                          : "Show account number"
-                      }
-                      onPress={() => setNumberVisible((v) => !v)}
-                    >
-                      {numberVisible ? (
-                        <EyeOff size={16} color="#FFFFFF" />
-                      ) : (
-                        <Eye size={16} color="#FFFFFF" />
-                      )}
-                    </Button>
-                    <Text
-                      size="sm"
-                      weight="semibold"
-                      style={{ color: "#FFFFFF" }}
-                    >
-                      {numberVisible
-                        ? fixtures
-                          ? "10004821"
-                          : account?.accountNumber || "Not available"
-                        : fixtures
-                          ? "••4821"
-                          : maskAccountNumber(account?.accountNumber)}
-                    </Text>
-                  </View>
-                  <Text size="xs" style={{ color: "#E5E7EB" }}>
-                    {account?.isDefault || fixtures ? "Default" : ""}
-                  </Text>
-                </View>
-              ) : null}
-            </View>
-            <Button
-              variant="social"
-              fullWidth
-              className="rounded-full"
-              startContent={<Link size={18} color={primary} />}
-              labelClassName="text-primary"
-              onPress={() => openFeature("/profile/accounts")}
-            >
-              Manage accounts
-            </Button>
-          </View>
-        )}
         {groups.map((group) => (
           <View key={group.title} className="gap-2">
             <Text muted size="xs" weight="medium">

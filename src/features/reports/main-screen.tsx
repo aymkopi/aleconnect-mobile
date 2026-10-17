@@ -6,6 +6,8 @@ import { Badge } from "@/components/panelui/badge";
 import { BottomSheet } from "@/components/panelui/bottom-sheet";
 import { Button } from "@/components/panelui/button";
 import { Kpi } from "@/components/panelui/kpi";
+import { Calendar } from "@/components/panelui/calendar";
+import { RadioGroup } from "@/components/panelui/radio-group";
 import { Label } from "@/components/panelui/label";
 import { Select } from "@/components/panelui/select";
 import { Skeleton } from "@/components/panelui/skeleton";
@@ -39,10 +41,8 @@ import {
   ArrowDownUp,
   CalendarDays,
   Check,
-  CheckCircle2,
   ChevronDown,
   ChevronLeft,
-  Clock3,
   CreditCard,
   FileText,
   Plus,
@@ -55,7 +55,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   compareFixtureReports,
   defaultBrowseFilters,
-  fetchedReportDateBounds,
+  dateRangeWithinBounds,
+  manilaDateKey,
+  reportPickerDate,
+  reportPickerDateKey,
+  validDateRange,
   filterBrowseReports,
   reportPeriodLabels,
   type BrowseFilters,
@@ -76,6 +80,8 @@ const sortLabels = {
 };
 const filterTitles = {
   filters: "Filter reports",
+  period: "Reporting period",
+  dates: "Custom date range",
   account: "Service account",
   status: "Report status",
   type: "Report type",
@@ -94,14 +100,20 @@ export default function ReportsScreen() {
     start?: string;
     end?: string;
   }>();
-  const period =
+  const routePeriod =
     typeof params.period === "string" &&
     Object.keys(reportPeriodLabels).includes(params.period)
       ? params.period
       : "all";
   const start = typeof params.start === "string" ? params.start : "";
   const end = typeof params.end === "string" ? params.end : "";
-  const [applied, setApplied] = useState(defaultBrowseFilters);
+  const [applied, setApplied] = useState({ ...defaultBrowseFilters, period: routePeriod, start, end });
+  const period = applied.period;
+  useEffect(() => {
+    // Legacy period links still update the overview when returning to its mounted route.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setApplied((f) => ({ ...f, period: routePeriod, start, end }));
+  }, [routePeriod, start, end]);
   const [draft, setDraft] = useState(defaultBrowseFilters);
   const [query, setQuery] = useState(""),
     [search, setSearch] = useState("");
@@ -191,7 +203,9 @@ export default function ReportsScreen() {
         .sort((a, b) => compareFixtureReports(a, b, applied.sort))
     : (reports.data?.reports ?? []);
   const hasData = fixtures || !!reports.data;
-  const dateBounds = fetchedReportDateBounds(loaded);
+  const today = manilaDateKey(new Date());
+  const dateBounds = { start: "2026-01-01", end: today };
+  const rangeValid = dateRangeWithinBounds(draft.start, draft.end, dateBounds);
   const filteredView =
     !!search ||
     tab !== "all" ||
@@ -204,8 +218,8 @@ export default function ReportsScreen() {
     ...applied,
     account: fixtures ? applied.account : "all",
     period,
-    start,
-    end,
+    start: applied.start,
+    end: applied.end,
   });
   const counts = getReportTabCounts(periodRows),
     rows = filterReportTab(periodRows, tab);
@@ -224,6 +238,7 @@ export default function ReportsScreen() {
     ]).values(),
   ];
   const values = {
+    period: draft.period === "custom" && validDateRange(draft.start, draft.end) ? draft.start + " – " + draft.end : reportPeriodLabels[draft.period],
     account:
       draft.account === "all"
         ? "All linked accounts"
@@ -259,18 +274,18 @@ export default function ReportsScreen() {
         }
       />
       <View
-        className="rounded-xl overflow-hidden p-4 gap-3"
+        className="rounded-xl overflow-hidden p-3 gap-1"
         style={{ backgroundColor: feature }}
       >
         <SoftRadial />
         <Kpi.Group separated={false}>
           {[
-            { label: "Reports", value: counts.all, Icon: FileText },
-            { label: "Resolved", value: counts.resolved, Icon: CheckCircle2 },
-            { label: "Open", value: counts.open, Icon: Clock3 },
-          ].map(({ label, value, Icon }) => (
+            { label: "Reports made", value: counts.all },
+            { label: "Resolved", value: counts.resolved },
+            { label: "Still open", value: counts.open },
+          ].map(({ label, value }) => (
             <Kpi key={label} surface={false}>
-              <Kpi.Stat>
+              <Kpi.Stat className="items-center">
                 {!hasData && reports.busy ? (
                   <Skeleton
                     animated={focused}
@@ -282,63 +297,16 @@ export default function ReportsScreen() {
                     {hasData ? value : "—"}
                   </Kpi.Value>
                 )}
-                <View className="flex-row gap-1.5 items-center">
-                  <Icon size={16} color="#E5E7EB" />
                   <Kpi.Title className="text-white/90 text-xs">
                     {label}
                   </Kpi.Title>
-                </View>
               </Kpi.Stat>
             </Kpi>
           ))}
         </Kpi.Group>
         <Text size="xs" className="text-white/80">
-          Counts reflect fetched reports matching this period and filters. Not your complete history.
+          Counts show loaded reports for your filters.
         </Text>
-      </View>
-      <View className="flex-row gap-3">
-        <View className="flex-1 gap-1">
-          <Label>Service account</Label>
-          <Select
-            value={applied.account}
-            onValueChange={(account) => setApplied((f) => ({ ...f, account }))}
-            triggerClassName="min-h-12 py-2 rounded-xl bg-card"
-            valueClassName="text-sm"
-          >
-            <Select.Item value="all" label="All accounts" />
-            {accounts.map((a) => (
-              <Select.Item
-                key={a.id}
-                value={a.id}
-                label={a.registeredName}
-                description={a.accountNumber || "Number unavailable"}
-              />
-            ))}
-          </Select>
-        </View>
-        <View className="flex-1 gap-1">
-          <Label>Reporting period</Label>
-          <Button
-            variant="outline"
-            className="bg-card rounded-xl min-h-12 justify-between"
-            labelClassName="flex-1 text-left text-sm"
-            accessibilityLabel="Reporting period"
-            endContent={<CalendarDays size={18} color={primary} />}
-            onPress={() =>
-              router.push({
-                pathname: "/reports/period",
-                params: {
-                  period,
-                  start,
-                  end,
-                  firstReportDate: dateBounds?.start ?? "",
-                },
-              })
-            }
-          >
-            {reportPeriodLabels[period]}
-          </Button>
-        </View>
       </View>
       <View className="flex-row items-center gap-3">
         <View className="flex-1">
@@ -350,16 +318,16 @@ export default function ReportsScreen() {
         </View>
         <Button
           variant="outline"
-          size="icon"
-          style={{ width: 48, height: 48 }}
+          className="bg-card rounded-xl min-h-12"
           accessibilityLabel="Report filters"
+          startContent={<SlidersHorizontal size={18} color={primary} />}
           onPress={() => {
             setDraft(applied);
             setFilterView("filters");
             setFilters(true);
           }}
         >
-          <SlidersHorizontal size={18} color={primary} />
+          Filters
         </Button>
       </View>
       {query !== search ? (
@@ -384,7 +352,7 @@ export default function ReportsScreen() {
             <Tabs.Trigger
               key={value}
               value={value}
-              className="min-h-8 py-1 px-3"
+              className="min-h-8 py-1 px-2 gap-1"
               badge={
                 <Badge
                   variant="secondary"
@@ -417,7 +385,7 @@ export default function ReportsScreen() {
           onPress={() =>
             router.push({
               pathname: "/reports/list",
-              params: { ...applied, period, start, end, query: search },
+              params: { ...applied, query: search },
             })
           }
         >
@@ -573,7 +541,7 @@ export default function ReportsScreen() {
           onBack={
             filterView === "filters"
               ? undefined
-              : () => setFilterView("filters")
+              : () => setFilterView(filterView === "dates" ? "period" : "filters")
           }
         >
           <BottomSheet.Header>
@@ -583,7 +551,7 @@ export default function ReportsScreen() {
                   variant="ghost"
                   size="icon"
                   accessibilityLabel="Back to report filters"
-                  onPress={() => setFilterView("filters")}
+                  onPress={() => setFilterView(filterView === "dates" ? "period" : "filters")}
                 >
                   <ChevronLeft size={20} color={primary} />
                 </Button>
@@ -599,12 +567,9 @@ export default function ReportsScreen() {
           >
             {filterView === "filters" ? (
               <>
-                <Text muted size="sm">
-                  Filter by service account, status or report type. Status and
-                  type apply to loaded reports.
-                </Text>
-                {(["account", "status", "type", "sort"] as const).map((key) => {
+                {(["period", "account", "status", "type", "sort"] as const).map((key) => {
                   const Icon = {
+                    period: CalendarDays,
                     account: CreditCard,
                     status: Check,
                     type: Tag,
@@ -629,6 +594,31 @@ export default function ReportsScreen() {
                     </View>
                   );
                 })}
+              </>
+            ) : filterView === "period" ? (
+              <RadioGroup variant="card" value={draft.period} accessibilityLabel="Reporting period"
+                onValueChange={(value) => {
+                  if (value === "custom") {
+                    setDraft(d => ({ ...d, period: value, start: d.start || today, end: d.end || today }));
+                    setFilterView("dates");
+                  } else {
+                    setDraft(d => ({ ...d, period: value, start: "", end: "" }));
+                    setFilterView("filters");
+                  }
+                }}>
+                {Object.entries(reportPeriodLabels).map(([value, label]) => <RadioGroup.Item key={value} value={value} label={label} />)}
+                {draft.period === "custom" ? <Button variant="secondary" onPress={() => setFilterView("dates")}>Change dates</Button> : null}
+              </RadioGroup>
+            ) : filterView === "dates" ? (
+              <>
+                <Text size="sm" weight="medium" accessibilityLiveRegion="polite">Selected: {draft.start || "Start date"} – {draft.end || "End date"}</Text>
+                <Calendar mode="range" bordered={false} locale="en-PH" captionLayout="dropdown"
+                  defaultMonth={reportPickerDate(today)} selectOutsideDays weekStartsOn="auto"
+                  minDate={reportPickerDate(dateBounds.start)} maxDate={reportPickerDate(today)}
+                  selected={validDateRange(draft.start, draft.start) ? { from: reportPickerDate(draft.start), ...(validDateRange(draft.end, draft.end) ? { to: reportPickerDate(draft.end) } : {}) } : undefined}
+                  onSelect={range => setDraft(d => ({ ...d, period: "custom", start: range ? reportPickerDateKey(range.from) : "", end: range?.to ? reportPickerDateKey(range.to) : "" }))} />
+                <Text size="xs" muted>January 1, 2026 through today. Filters use the report’s submission date.</Text>
+                {!rangeValid ? <Text size="xs" className="text-destructive">Select a start date, then an end date.</Text> : null}
               </>
             ) : (
               <Select
@@ -702,13 +692,14 @@ export default function ReportsScreen() {
             <BottomSheet.Footer>
               <Button
                 fullWidth
+                disabled={draft.period === "custom" && !rangeValid}
                 onPress={() => {
                   setApplied(draft);
                   setTab("all");
                   setFilters(false);
                 }}
               >
-                Show reports
+                Apply filters
               </Button>
               <Button
                 variant="ghost"
@@ -718,7 +709,7 @@ export default function ReportsScreen() {
                 Reset filters
               </Button>
             </BottomSheet.Footer>
-          ) : null}
+          ) : filterView === "dates" ? <BottomSheet.Footer><Button fullWidth disabled={!rangeValid} onPress={() => setFilterView("filters")}>Use selected dates</Button></BottomSheet.Footer> : null}
         </BottomSheet.Content>
       </BottomSheet>
     </View>

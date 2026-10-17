@@ -64,6 +64,7 @@ export type Report = {
   typeTitle: string;
   createdAt: string;
   updatedAt?: string | null;
+  statusChangedAt?: string | null;
   status: ConsumerTicketStatus | null;
   ticketNumber: string;
   description?: string | null;
@@ -75,6 +76,13 @@ export type Report = {
   unreadNotificationIds?: string[];
 };
 
+export function reportCardDate(report: Pick<Report, "status" | "statusChangedAt" | "updatedAt" | "createdAt">) {
+  if (report.status && report.statusChangedAt && parseApiInstant(report.statusChangedAt))
+    return { label: consumerTicketStatusLabel(report.status), date: report.statusChangedAt };
+  if (report.updatedAt && parseApiInstant(report.updatedAt)) return { label: "Updated", date: report.updatedAt };
+  return { label: "Submitted", date: report.createdAt };
+}
+
 export function preserveKnownConsumerReportStatuses(
   reports: readonly Report[],
   previousReports: readonly Report[],
@@ -82,14 +90,14 @@ export function preserveKnownConsumerReportStatuses(
   const previousStatuses = new Map(
     previousReports
       .filter((report) => report.status)
-      .map((report) => [report.id, report.status]),
+      .map((report) => [report.id, report]),
   );
   let hasUnsupportedStatus = false;
   const preserved = reports.map((report) => {
     if (report.status) return report;
     hasUnsupportedStatus = true;
-    const previousStatus = previousStatuses.get(report.id) ?? null;
-    return previousStatus ? { ...report, status: previousStatus } : report;
+    const previous = previousStatuses.get(report.id);
+    return previous ? { ...report, status: previous.status, statusChangedAt: previous.statusChangedAt } : report;
   });
   return { reports: preserved, hasUnsupportedStatus };
 }
@@ -195,6 +203,7 @@ export function normalizeReportListItem(
 ): Report {
   return {
     ...report,
+    statusChangedAt: optionalInstant(report.statusChangedAt),
     unreadNotificationIds: normalizeUnreadReportNotificationIds(report.unreadNotificationIds),
     status: parseConsumerTicketStatus(report.status),
     ticketNumber: normalizeHumanReference(report.ticketNumber) ?? "",

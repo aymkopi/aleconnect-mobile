@@ -403,7 +403,7 @@ function NotificationInbox({ access }: { access: NotificationAccess }) {
               className={
                 item.isRead
                   ? "items-start justify-start gap-2.5 rounded-xl bg-card p-3"
-                  : "items-start justify-start gap-2.5 rounded-xl bg-primary/5 p-3"
+                  : "items-start justify-start gap-2.5 rounded-xl bg-notification-unread p-3"
               }
               style={{ minHeight: 44 }}
               accessibilityLabel={`${item.isRead ? "Read" : "Unread"}: ${item.title}. ${notificationContext(item)}`}

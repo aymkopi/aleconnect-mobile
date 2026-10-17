@@ -82,7 +82,7 @@ async function harness({ permission, registered } = {}) {
 
 test("recipient search filters stations and current feeders while keeping hidden selections and full station counts", async () => {
   const h = await harness();
-  h.button("Choose areas");
+  h.button("Change areas");
   h.search("  BITANO FEEDER 3  ");
   assert.equal(h.render().filter((node) => nameOf(node) === "Checkbox").length, 1);
   const station = h.find("Checkbox", (node) => node.props.label === "Bitano substation");
@@ -109,7 +109,7 @@ test("recipient search filters stations and current feeders while keeping hidden
 
 test("bulk search actions affect matching feeders and preserve all hidden selected IDs", async () => {
   const h = await harness();
-  h.button("Choose areas");
+  h.button("Change areas");
   h.search("Ligao Feeder 2");
   h.button("Select matches");
   assert.equal(h.find("Checkbox", (node) => node.props.label === "Ligao substation").props.description, "2 of 3 feeders selected");
@@ -122,7 +122,7 @@ test("bulk search actions affect matching feeders and preserve all hidden select
 
 test("no-match state retains selection and uses one sheet with 48px labelled search decorators", async () => {
   const h = await harness();
-  h.button("Choose areas");
+  h.button("Change areas");
   h.button("Choose feeders");
   h.search("Daraga north");
   assert.equal(h.render().filter((node) => nameOf(node) === "Checkbox").length, 0);

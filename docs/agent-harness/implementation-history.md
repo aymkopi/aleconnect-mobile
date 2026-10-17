@@ -1,5 +1,28 @@
 # Implementation history
 
+## 2026-10-17 — Declutter narrow-phone verification
+
+- Scope: reduce Reports tab horizontal padding and badge gap after the 320px rendered review exposed a clipped Resolved label. Preserve tab behavior, text sizes and card layouts.
+- Verification: Light/Dark changed-route and same-sheet filter journeys pass in the integrated browser; narrow-phone and tablet Reports fit. Fresh full suite503 pass/0 fail/1 expected skip, TypeScript, scoped lint, explicit-sibling harness and whitespace pass. The sandbox's temporary-Git write restriction is resolved by the unchanged elevated test run.
+- Remaining risks: exact released APK/device, larger-text, provider and native-iOS acceptance remain separate. Figma's final status-date annotation is blocked by its read-only tool state.
+- Next: deploy the additive Staff timestamp first, then merge Mobile PR14 and verify its immutable alpha plus retained-device launch.
+
+## 2026-10-17 - Approved declutter implementation
+
+- Scope: user-approved shipping of Mobile PR14; implement the reviewed Reports/filter, unread card, contact, Account/information, Alerts and Advisory refinements. Manual/canonical source is preserved in the isolated branch. Staff PR50 adds compatible statusChangedAt history metadata; no migration.
+- Verification:503 tests pass with1 expected skip, TypeScript and scoped lint0 errors/1 existing effect warning pass; source review's same-status stale-date defect is fixed with an executable regression. Browser verifies one-sheet account/calendar draft flow and status-specific dates; fixture-free Android/Hermes export passes. Phone-size Light/Dark fixture screenshots cover the changed surfaces; final hosted/release/tablet gates remain in progress.
+- Remaining risks: Figma's final date-label annotation is currently blocked by the MCP's read-only response. Full accessibility, private/provider and iOS acceptance remain separate; Graphify launcher has a missing runtime.
+- Next: finish exact-head/render/export checks, deploy Staff before Mobile, publish/verify the alpha and inspect it on connected tablet25040RP0AG via isolated ADB5042.
+
+
+## 2026-10-17 - Mobile declutter design review
+
+- Scope: isolated `codex/mobile-declutter` branch and editable Figma review page for Reports filters, contact-type icons, Account/information, Alerts and Advisories. Original screens and application source remain unchanged. A separate requested chat owns the broader Reports redesign proposal.
+- Verification: inspected affected Mobile source, the Staff contact-type contract and existing Figma components/tokens; created 24 editable Light/Dark phone frames and reused component/style bindings. The user-requested unread revision uses the notification surface/dot without a separate banner, shown in two same-height comparison panels. Independent review identified an old calendar backdrop and a dark unread-instance paint mismatch; Reports behind one calendar sheet with Back and the materialized notification tint resolve them. Final dark screenshot/paint binding, baseline/draft harness and whitespace checks pass. Runtime acceptance remains separate.
+- Latest design refinement: removed the concatenated ALECO account prefix from identity subtitles, placed the Account profile in a token-bound borderless card in single/multiple-account Light/Dark states, and restored submitted dates already present in the source ReportCard. Twenty scoped normal-card instances use local date masters, leaving original components unchanged; read/unread fixtures retain matching content and 136px height. Targeted Light/Dark screenshots and layout checks pass. No application source changed.
+- Remaining risks: this is a design-stage draft, not implemented application behavior or accessibility/device acceptance. Preserve profile verification, device-registration state, all filter choices and single-sheet navigation during implementation.
+- Next: resolve the design review, obtain acceptance of the Figma direction and implement through existing shared components with focused source/render checks. No merge, release or backend migration is included.
+
 ## 2026-10-17 - Published alpha phone verification
 
 - Scope: finish PR13 release verification, preserve manual work and synchronize master; cleanup is limited to the release worktree after docs checks.

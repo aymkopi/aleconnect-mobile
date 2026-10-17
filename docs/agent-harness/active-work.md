@@ -1,5 +1,7 @@
 # Active work
 
+- [Mobile declutter refinement](tasks/mobile-declutter.md): approved UI and current-status-date implementation for PR14. Source/render checks and release gates are in progress; deploy compatible Staff PR50 before Mobile alpha. Preserve manual edits, original Figma screens and the separate Reports proposal.
+
 - [Manual refresh and FileUpload](../mobile-refresh-file-upload.md): PR13 merged/source0639fa8, alpha1.1.0-alpha.1/code67 published and exact artifacts verified. October17 phone25069PTEBG passes three cold launches, retained session, main-page rendering and navbar drag. Default branch sync and scoped release-worktree cleanup follow docs checks. PanelUI0.112.0 retained; camera/provider/iOS acceptance remains separate.
 
 - [Three-repository alpha versioning](../release-versioning.md): PRs merged; Staff 1.0.1-alpha.1 deployed, Mobile 1.0.1-alpha.1/code 65 and Lineman 1.0.0-alpha.1/code 2 published. Exact downloaded assets/signatures/alignment and three cold launches per app on 25069PTEBG pass. Release evidence and scoped closeout are recorded; preserve unrelated edits, recovery branches/stashes and device state.
