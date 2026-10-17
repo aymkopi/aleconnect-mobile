@@ -1,3 +1,4 @@
+import { useAppReducedMotion } from "@/hooks/use-app-reduced-motion";
 /**
  * Tabs — segmented navigation between panels.
  *
@@ -36,7 +37,7 @@
 import { Children, createContext, Fragment, isValidElement, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode, } from "react";
 import { Pressable, ScrollView, View, type LayoutChangeEvent, type ViewProps, } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, { Easing, Extrapolation, FadeIn, interpolate, runOnJS, useAnimatedStyle, useReducedMotion, useSharedValue, withSpring, withTiming, } from "react-native-reanimated";
+import Animated, { Easing, Extrapolation, FadeIn, interpolate, runOnJS, useAnimatedStyle, useSharedValue, withSpring, withTiming, } from "react-native-reanimated";
 import { tv } from "tailwind-variants";
 import { useDirectionSign } from "@/hooks/use-direction";
 import { Text, textChildren } from "@/components/panelui/text";
@@ -457,7 +458,7 @@ function TabsPager({ panels, value, setValue, keepMounted, animationDisabled, }:
     animationDisabled: boolean;
 }) {
     const sign = useDirectionSign();
-    const reducedMotion = useReducedMotion();
+    const reducedMotion = useAppReducedMotion();
     const still = animationDisabled || reducedMotion;
     const order = useMemo(() => panels.map((panel) => panel.props.value), [panels]);
     const count = panels.length;
@@ -871,7 +872,7 @@ function ExpandingTrigger({ active, disabled, icon, badge, still, className, lab
     children: ReactNode;
 }) {
     const [labelWidth, setLabelWidth] = useState(0);
-    const reducedMotion = useReducedMotion();
+    const reducedMotion = useAppReducedMotion();
     const open = useSharedValue(active ? 1 : 0);
     useEffect(() => {
         if (reducedMotion || still) {

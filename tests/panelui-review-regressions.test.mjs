@@ -719,6 +719,7 @@ test("Carousel drag uses one frozen origin across movement events and advances o
       withSpring: (x) => x,
       runOnJS: (fn) => fn,
     },
+    "@/hooks/use-app-reduced-motion": { useAppReducedMotion: () => true },
     "@/components/panelui/controllable-state": {
       useControllableState: () => ({
         value: 2,

@@ -1,3 +1,4 @@
+import { useAppReducedMotion } from "@/hooks/use-app-reduced-motion";
 /**
  * Carousel — a run of slides, one at a time, dragged with a finger.
  *
@@ -68,7 +69,6 @@ import Animated, {
   interpolate,
   runOnJS,
   useAnimatedStyle,
-  useReducedMotion,
   useSharedValue,
   withSpring,
   withTiming,
@@ -273,7 +273,7 @@ const CarouselRoot = forwardRef<CarouselHandle, CarouselProps>(function Carousel
   const [count, setCountValue] = useState(0);
   const [countKnown, setCountKnown] = useState(false);
   const [touched, setTouched] = useState(false);
-  const reducedMotion = useReducedMotion();
+  const reducedMotion = useAppReducedMotion();
 
   const {
     value: requestedIndex,

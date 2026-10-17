@@ -1,10 +1,11 @@
+import { useAppReducedMotion } from "@/hooks/use-app-reduced-motion";
 import { useCallback, useEffect, useRef } from "react";
 import { FileText, Home, Megaphone, Phone, UserRound } from "lucide-react-native";
 import { Pressable, View, useWindowDimensions } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   cancelAnimation, interpolateColor, ReduceMotion, runOnJS, useAnimatedStyle,
-  useReducedMotion, useSharedValue, withSequence, withSpring, withTiming,
+  useSharedValue, withSequence, withSpring, withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text } from "@/components/panelui/text";
@@ -24,7 +25,7 @@ const AnimatedText = Animated.createAnimatedComponent(Text);
 function TabContent({ title, Icon, selected, primary, muted, fontSize }: {
   title: string; Icon: typeof items[number]["Icon"]; selected: boolean; primary: string; muted: string; fontSize: number;
 }) {
-  const progress = useSharedValue(selected ? 1 : 0), reduced = useReducedMotion();
+  const progress = useSharedValue(selected ? 1 : 0), reduced = useAppReducedMotion();
   useEffect(() => {
     progress.set(withTiming(selected ? 1 : 0, { duration: reduced ? 0 : 180, reduceMotion: ReduceMotion.System }));
   }, [selected, progress, reduced]);
@@ -51,7 +52,7 @@ export function FloatingAppBar({ currentIndex, onSelect }: {
   const position = useSharedValue(currentIndex), stretch = useSharedValue(1);
   const dragOrigin = useSharedValue(currentIndex), startsOnPill = useSharedValue(false);
   const mounted = useRef(false), suppressPressUntil = useRef(0);
-  const reduced = useReducedMotion(), slot = (width - 32 - 12) / items.length;
+  const reduced = useAppReducedMotion(), slot = (width - 32 - 12) / items.length;
   useEffect(() => {
     if (!mounted.current) { mounted.current = true; return; }
     if (reduced) { position.set(currentIndex); stretch.set(1); return; }

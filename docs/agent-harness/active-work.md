@@ -1,5 +1,7 @@
 # Active work
 
+- [iPhone motion and Reports follow-up](tasks/ios-usb-ipa.md): full motion requested despite iOS Reduce Motion; shared component preference and hold-timing regression prepared in codex/ios-reports-motion. Reports HTTP500 reproduced as Staff status-date query collation mismatch, with compatible correction isolated separately. Native rebuild, authorized API rollout and original-session device retry pending; preserve signer, app data and pairing backup.
+
 - [iPhone USB IPA](tasks/ios-usb-ipa.md): requested build/sign/USB install complete; user confirmed normal opening after own-profile trust. Independent readback confirms1.0.0/build2, Developer Mode enabled and profile expiry October25,12:35AM Manila; APNs unavailable. Anisette502 resolved with Jkcoxson (Windows). Broader native/private/provider acceptance stays separate. Preserve IPA, original pairing backup and unrelated device/signing state.
 
 - [Mobile declutter refinement](tasks/mobile-declutter.md): PR14/sourcef4130b9a merged after verified Staff1.1.1-alpha.1. Mobile1.2.0-alpha.1/code68 published; exact artifact/signature/alignment and three tablet25040RP0AG cold launches/public navigation pass. Both default branches are synchronized; finish docs-only closeout and task-only cleanup. Preserve manual edits, device data and the separate Reports proposal; private/provider/AT/iOS acceptance remains separate.

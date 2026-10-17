@@ -30,7 +30,7 @@ Not a marketing landing page, not a heavy staff dashboard, not an exact clone of
 
 ## Accessibility & Inclusion
 
-Use readable contrast, large tap targets, descriptive labels, reduced-motion-safe transitions, and plain language for consumers filing reports under stress.
+Use readable contrast, large tap targets, descriptive labels, and plain language for consumers filing reports under stress. By explicit product preference, app animations use full motion even when the operating system requests reduced motion. Keep hold-to-confirm timing and screen-reader actions independent of animation.
 
 ## Current consumer flows
 

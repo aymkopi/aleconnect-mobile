@@ -1,3 +1,4 @@
+import { useAppReducedMotion } from "@/hooks/use-app-reduced-motion";
 /**
  * ImageViewer — a picture that opens out of the page to fill the screen.
  *
@@ -82,7 +83,6 @@ import Animated, {
   useAnimatedProps,
   useAnimatedStyle,
   useDerivedValue,
-  useReducedMotion,
   useSharedValue,
   withDecay,
   withDelay,
@@ -612,7 +612,7 @@ function ViewerOverlay({
 
   const { width: W, height: H } = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  const reduced = useReducedMotion();
+  const reduced = useAppReducedMotion();
   const { mode } = useThemeMode();
   const foreground = useCSSVariable('--color-foreground');
   const pageWidth = W + PAGE_GAP;

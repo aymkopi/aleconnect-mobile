@@ -1,10 +1,10 @@
+import { useAppReducedMotion } from "@/hooks/use-app-reduced-motion";
 import { memo, useEffect } from 'react';
 import Animated, {
   Easing,
   cancelAnimation,
   interpolate,
   useAnimatedStyle,
-  useReducedMotion,
   useSharedValue,
   withRepeat,
   withTiming,
@@ -84,7 +84,7 @@ export const Spinner = memo(function Spinner({
   color,
   trackColor,
 }: SpinnerProps) {
-  const reducedMotion = useReducedMotion();
+  const reducedMotion = useAppReducedMotion();
   const progress = useSharedValue(0);
 
   useEffect(() => {

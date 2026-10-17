@@ -48,6 +48,7 @@ test("PanelUI skeleton pauses in background, off-route and reduced motion; clean
       "react-native":{AppState:{get currentState(){return currentState;},addEventListener:(name,fn)=>{assert.equal(name,"change");listener=fn;return {remove:()=>{removed=true;}};}}},
       "react-native-reanimated":{default:{View:"Animated.View"},cancelAnimation:()=>{cancellations++;},useAnimatedStyle:fn=>fn(),useReducedMotion:()=>reducedMotion,useSharedValue:()=>opacity,withRepeat:()=>{repeats++;return "pulse";},withTiming:value=>value},
       "@/lib/cn":{cn:(...values)=>values.filter(Boolean).join(" ")},
+      "@/hooks/use-app-reduced-motion":{useAppReducedMotion:()=>reducedMotion},
     });
     const tree=Skeleton({animated,children:"content"});
     assert.equal(tree.props.accessibilityElementsHidden,true);

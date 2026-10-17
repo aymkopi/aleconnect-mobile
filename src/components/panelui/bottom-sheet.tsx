@@ -1,3 +1,4 @@
+import { useAppReducedMotion } from "@/hooks/use-app-reduced-motion";
 import {
   cloneElement,
   createContext,
@@ -36,7 +37,6 @@ import Animated, {
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useComposedEventHandler,
-  useReducedMotion,
   useSharedValue,
   withSpring,
   withTiming,
@@ -484,7 +484,7 @@ function BottomSheetContent({
   const { open, setOpen } = context;
   const nativeSheet = useContext(NativeSheetContext);
   const { height: screenHeight, width: screenWidth } = useWindowDimensions();
-  const reducedMotion = useReducedMotion();
+  const reducedMotion = useAppReducedMotion();
   const keyboardHeight = useKeyboardHeight();
   const insets = useSafeAreaInsets();
   /*
