@@ -1,5 +1,12 @@
 # Implementation history
 
+## 2026-10-17 - iPhone USB build preparation
+
+- Scope: user requested an IPA for iPhone 11 using Windows and a free Apple account, plus GitHub tool research. Added a separate-branch macOS/Xcode build with Expo prebuild/CocoaPods, unsigned physical ARM64 archive, embedded bundle/API/permission checks and artifact provenance/hash. APNs is omitted only in the generated Personal Team test project.
+- Verification: harness/whitespace, workflow YAML/trigger/permission assertions and embedded Bash/Python/Node syntax pass. Hosted native build remains pending; current source/default-branch identity and public repository visibility were read back. xtool documents SwiftPM builds, so direct Xcode on GitHub is selected for this Expo app; iloader/AltServer handle local signing and USB installation.
+- Remaining risks: unsigned output needs local Apple authentication/provisioning, expires after seven days with a free account, and cannot prove reported iOS27.2 compatibility or native behavior. No account/device/live-data writes or store publication.
+- Next: validate/run the workflow, download and verify the exact IPA, then perform local signing/USB installation with user-entered credentials. See [handoff](tasks/ios-usb-ipa.md).
+
 ## 2026-10-17 — Approved declutter alpha release
 
 - Scope: ship the approved Figma refinement and current-status dates. Staff PR50 deploys1.1.1-alpha.1/source5c34ed3d first; Mobile PR14 then merges asf4130b9a with the exact tested product tree. Preserve manual source, signer, providers, queues and the separate Reports proposal.
