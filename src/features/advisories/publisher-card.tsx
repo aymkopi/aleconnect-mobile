@@ -96,11 +96,7 @@ export function PublisherCard({
       <View className="flex-row items-center gap-1">
         {featured && advisory ? <MapPin size={14} color={primary} /> : null}
         <Text muted size="xs" className="flex-1" numberOfLines={1}>
-          {advisory
-            ? (item.audience ?? "Read full advisory")
-            : featured
-              ? "Latest news from ALECO"
-              : "Read full story"}
+          {advisory ? (item.audience ?? "Read full advisory") : ""}
         </Text>
         <ChevronRight size={18} color={primary} />
       </View>

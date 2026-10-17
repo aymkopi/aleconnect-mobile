@@ -1,5 +1,13 @@
 # Implementation history
 
+## 2026-10-17 - Approved declutter implementation
+
+- Scope: user-approved shipping of Mobile PR14; implement the reviewed Reports/filter, unread card, contact, Account/information, Alerts and Advisory refinements. Manual/canonical source is preserved in the isolated branch. Staff PR50 adds compatible statusChangedAt history metadata; no migration.
+- Verification:503 tests pass with1 expected skip, TypeScript and scoped lint0 errors/1 existing effect warning pass; source review's same-status stale-date defect is fixed with an executable regression. Browser verifies one-sheet account/calendar draft flow and status-specific dates; fixture-free Android/Hermes export passes. Phone-size Light/Dark fixture screenshots cover the changed surfaces; final hosted/release/tablet gates remain in progress.
+- Remaining risks: Figma's final date-label annotation is currently blocked by the MCP's read-only response. Full accessibility, private/provider and iOS acceptance remain separate; Graphify launcher has a missing runtime.
+- Next: finish exact-head/render/export checks, deploy Staff before Mobile, publish/verify the alpha and inspect it on connected tablet25040RP0AG via isolated ADB5042.
+
+
 ## 2026-10-17 - Mobile declutter design review
 
 - Scope: isolated `codex/mobile-declutter` branch and editable Figma review page for Reports filters, contact-type icons, Account/information, Alerts and Advisories. Original screens and application source remain unchanged. A separate requested chat owns the broader Reports redesign proposal.

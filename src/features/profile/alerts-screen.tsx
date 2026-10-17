@@ -271,9 +271,6 @@ function Alerts({ identity }: { identity: ProfileIdentity }) {
   return (
     <>
       <ReportPage title="Alerts & notifications" onBack={back}>
-        <Text size="sm" muted>
-          Choose which updates reach you.
-        </Text>
         {!draft ? (
           loading ? (
             <DataState
@@ -302,7 +299,7 @@ function Alerts({ identity }: { identity: ProfileIdentity }) {
               />
             ) : null}
             <Text size="sm" weight="semibold" accessibilityRole="header">
-              Notifications
+              Receive notifications
             </Text>
             <View className="gap-3 rounded-xl bg-card p-3">
               <View className="flex-row items-center gap-2">
@@ -312,7 +309,7 @@ function Alerts({ identity }: { identity: ProfileIdentity }) {
                     Push notifications
                   </Text>
                   <Text size="xs" muted>
-                    Device alerts for your enabled updates.
+                    Alerts on this device.
                   </Text>
                 </View>
                 <Switch
@@ -330,7 +327,7 @@ function Alerts({ identity }: { identity: ProfileIdentity }) {
                     Power advisories
                   </Text>
                   <Text size="xs" muted>
-                    Outage, restoration and feeder advisories.
+                    Outages and restoration updates.
                   </Text>
                 </View>
                 <Switch
@@ -352,7 +349,7 @@ function Alerts({ identity }: { identity: ProfileIdentity }) {
               </View>
               <Button
                 size="sm"
-                variant="outline"
+                variant="ghost"
                 loading={deviceBusy}
                 onPress={() =>
                   permission === "Blocked"
@@ -427,20 +424,8 @@ function Alerts({ identity }: { identity: ProfileIdentity }) {
                   </Text>
                 </View>
               </View>
-              <View className="flex-row flex-wrap gap-2">
-                {feeders.map((f) => (
-                  <View
-                    key={f.id}
-                    className="rounded-lg bg-primary/10 px-3 py-1.5"
-                  >
-                    <Text size="xs" className="text-primary">
-                      {f.name}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-              <Text size="xs" muted>
-                ALECO broadcasts for your selected service areas.
+              <Text size="sm" muted>
+                {feeders.length ? feeders.slice(0, 2).map(f => f.name).join(", ") + (feeders.length > 2 ? " and " + (feeders.length - 2) + " more" : "") : "No broadcast areas selected"}
               </Text>
               <Button
                 variant="outline"
@@ -451,12 +436,11 @@ function Alerts({ identity }: { identity: ProfileIdentity }) {
                   setSheet(true);
                 }}
               >
-                Choose areas
+                Change areas
               </Button>
             </View>
             <Text size="xs" muted>
-              Report updates follow your ALECO account. Broadcast alerts follow
-              the areas you choose.
+              Report updates are sent to your ALECO account.
             </Text>
 
             {error ? (

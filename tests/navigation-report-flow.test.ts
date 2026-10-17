@@ -26,9 +26,9 @@ test('reports main uses the existing cached first-page shape and subscribes to s
  assert.ok(source.includes('revalidate: force'));
 });
 
-test('both Reports account selectors show registered names and complete account numbers',async()=>{
+test('Reports filter account selector show registered names and complete account numbers',async()=>{
  const source=await read('src/features/reports/main-screen.tsx');
  assert.ok(!source.includes('accountNumber.slice(-4)'));
- assert.equal(source.split("label={a.registeredName}").length - 1,2);
- assert.equal(source.split('description={a.accountNumber || "Number unavailable"}').length - 1,2);
+ assert.equal(source.split("label={a.registeredName}").length - 1,1);
+ assert.equal(source.split('description={a.accountNumber || "Number unavailable"}').length - 1,1);
 });

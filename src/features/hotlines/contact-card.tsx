@@ -3,6 +3,9 @@ import * as Clipboard from "expo-clipboard";
 import {
   Phone,
   Smartphone,
+  PhoneCall,
+  Printer,
+  ContactRound,
   Copy,
   Globe,
   ChevronRight,
@@ -11,7 +14,7 @@ import { Button } from "@/components/panelui/button";
 import { Text } from "@/components/panelui/text";
 import { toast } from "@/components/panelui/toast";
 import { useAppColors } from "@/hooks/use-app-colors";
-import { phoneUrl, websiteUrl } from "./contact-actions";
+import { contactPresentation, phoneUrl, websiteUrl } from "./contact-actions";
 import type { HotlineAgency } from "@/services/hotlines";
 export async function openContact(url: string | null) {
   if (!url) {
@@ -86,8 +89,8 @@ export function ContactCard({
         ) : null}
       </View>
       {agency.contacts.map((contact) => {
-        const mobile = /mobile|smart|globe/i.test(contact.type ?? ""),
-          Icon = mobile ? Smartphone : Phone,
+        const presentation = contactPresentation(contact.type, contact.label),
+          Icon = { Phone, Smartphone, PhoneCall, Printer, ContactRound }[presentation.icon],
           url = phoneUrl(contact.number);
         return (
           <View
@@ -95,21 +98,18 @@ export function ContactCard({
             className="bg-secondary rounded-full flex-row items-center pl-3 pr-1 gap-2"
             style={{ minHeight: 56 }}
           >
-            <Icon size={16} color={muted} />
+            <Icon size={16} color={muted} accessibilityLabel={presentation.type} />
             <View className="flex-1 py-1">
               <Text weight="medium" size="sm">
                 {contact.number}
               </Text>
-              <Text muted style={{ fontSize: 10, lineHeight: 14 }}>
-                {contact.label || contact.group}
-              </Text>
-              {contact.type && contact.type !== contact.label ? <Text muted style={{ fontSize: 10, lineHeight: 14 }}>{contact.type}</Text> : null}
+              {presentation.label ? <Text muted size="xs">{presentation.label}</Text> : null}
             </View>
             <Button
               size="icon"
               disabled={disableActions || !url}
               style={{ width: 48, height: 48, borderRadius: 999 }}
-              accessibilityLabel={"Open dialler for " + contact.number}
+              accessibilityLabel={"Open dialler for " + presentation.type.toLowerCase() + " " + contact.number}
               onPress={() => void openContact(url)}
             >
               <Phone size={18} color={buttonForeground} />

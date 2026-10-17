@@ -135,7 +135,7 @@ function UpdateDetailScreen({ kind }: { kind: MobilePublicUpdate["kind"] }) {
   const post = item?.kind === "facebook_post" ? item : null;
   const title =
     advisory?.title || post?.message.split(/[.!?\n]/)[0] || "ALECO update";
-  const pageTitle = kind === "advisory" ? "Advisory details" : "From ALECO";
+  const pageTitle = kind === "advisory" ? "Advisory" : "From ALECO";
   const body = advisory?.content ?? post?.message ?? "";
   return (
     <ReportPage title={pageTitle} onBack={back} refreshing={refreshing} onRefresh={retry}>
@@ -186,18 +186,7 @@ function UpdateDetailScreen({ kind }: { kind: MobilePublicUpdate["kind"] }) {
               ) : null}
               {advisory ? (
                 <Card
-                  className={
-                    "rounded-xl p-4 gap-3 shadow-none " +
-                    (advisory.type === "restoration"
-                      ? "bg-success/10"
-                      : [
-                            "scheduled_outage",
-                            "unscheduled_outage",
-                            "maintenance",
-                          ].includes(advisory.type ?? "")
-                        ? "bg-warning/10"
-                        : "bg-card")
-                  }
+                  className="rounded-xl p-4 gap-3 bg-card shadow-none"
                 >
                   <View className="flex-row flex-wrap items-center gap-2">
                     <Badge
@@ -217,8 +206,8 @@ function UpdateDetailScreen({ kind }: { kind: MobilePublicUpdate["kind"] }) {
                     accessibilityRole="header"
                     style={{
                       fontFamily: "PlusJakartaSans_700Bold",
-                      fontSize: 24,
-                      lineHeight: 34,
+                      fontSize: 22,
+                      lineHeight: 30,
                     }}
                   >
                     {title}
@@ -289,7 +278,7 @@ function UpdateDetailScreen({ kind }: { kind: MobilePublicUpdate["kind"] }) {
                     weight="semibold"
                     style={{ fontSize: 18, lineHeight: 26 }}
                   >
-                    Affected audience
+                    Affected areas
                   </Text>
                   <Pressable
                     accessibilityRole="button"
@@ -314,16 +303,9 @@ function UpdateDetailScreen({ kind }: { kind: MobilePublicUpdate["kind"] }) {
                 </View>
               ) : null}
               <View className="gap-2">
-                {advisory ? (
-                  <Text
-                    weight="semibold"
-                    style={{ fontSize: 18, lineHeight: 26 }}
-                  >
-                    Message from ALECO
-                  </Text>
-                ) : null}
                 <Card className="rounded-xl shadow-none">
                   <Card.Content className="p-4 gap-3">
+                    {advisory ? <Text weight="semibold" size="sm">Message from ALECO</Text> : null}
                     {body.trim() ? (
                       body
                         .split(/\n\s*\n/)
@@ -367,7 +349,7 @@ function UpdateDetailScreen({ kind }: { kind: MobilePublicUpdate["kind"] }) {
                 "weather_advisory",
                 "restoration",
               ].includes(advisory.type ?? "") ? (
-                <Card className="rounded-xl p-4 gap-2 bg-muted shadow-none">
+                <Card className="rounded-xl p-4 gap-2 bg-primary/10 shadow-none">
                   <View className="flex-row gap-2 items-center">
                     <ShieldCheck size={18} color={primary} />
                     <Text weight="semibold" size="sm">

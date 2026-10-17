@@ -19,6 +19,7 @@ import { ReportPage } from "@/features/reports/components/report-page";
 import { ReportLocationPicker } from "@/features/maps/report-location-picker";
 import { useScopedRead } from "@/hooks/use-scoped-read";
 import { useConsumerAccount } from "@/hooks/use-consumer-account";
+import { useAuthSession } from "@/hooks/use-auth-session";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { setDefaultLinkedAccount } from "@/services/linked-accounts";
 import { clearConsumerProfileCaches } from "@/hooks/use-consumer-profile";
@@ -43,8 +44,7 @@ import {
   type ProfileIdentity,
 } from "./profile-ui";
 import { fixtureProfile } from "./profile-fixtures";
-import { ServiceAccountCard } from "./service-account-card";
-import { profileEditAllowed, validateProfileDraft } from "./profile-state";
+import { accountProfileIdentifier, profileEditAllowed, validateProfileDraft } from "./profile-state";
 export default function ProfileDetailsScreen() {
   const params = useLocalSearchParams<{ serviceAccountId?: string; state?: string }>();
   return (
@@ -71,7 +71,8 @@ function Details({
   locked: boolean;
 }) {
   const { refreshConsumerAccount } = useConsumerAccount();
-  const [cameraForeground] = useAppColors(["primary-foreground"]);
+  const [primary] = useAppColors(["primary"]);
+  const { session } = useAuthSession();
   const [defaultDialog, setDefaultDialog] = useState(false), [defaultSaved, setDefaultSaved] = useState(false);
   const router = useRouter(),
     navigation = useNavigation(),
@@ -349,27 +350,21 @@ function Details({
           <>
             {view === "info" ? (
               <>
-                <Avatar size="xl" className="self-center" source={profile.avatarUrl ? { uri: profile.avatarUrl } : undefined}
-                  fallback={profile.fullName.split(/\s+/).filter(Boolean).slice(0, 2).map((word) => word[0]).join("")}
-                  accessibilityLabel="Profile photo">
-                  <Avatar.Badge style={{ top: "auto", bottom: -4 }}>
-                    <Button size="icon" className="h-9 w-9 rounded-full" hitSlop={6} disabled={busy} accessibilityLabel="Change profile photo"
-                      onPress={() => router.push(("/profile/photo?serviceAccountId=" + encodeURIComponent(id)) as Href)}>
-                      <Camera size={18} color={cameraForeground} />
-                    </Button>
-                  </Avatar.Badge>
-                </Avatar>
-                <ServiceAccountCard account={{
-                  id, accountNumber: profile.accountNumber, registeredName: profile.fullName,
-                  address: profile.fullAddress, phoneNumber: profile.contactNum,
-                  isDefault: defaultSaved || identity.account.defaultServiceAccountId === id,
-                }} />
+                <View className="flex-row items-center gap-3">
+                  <Button size="icon" variant="secondary" style={{ width: 48, height: 48, borderRadius: 24 }}
+                    disabled={busy} accessibilityLabel="Change profile photo"
+                    onPress={() => router.push(("/profile/photo?serviceAccountId=" + encodeURIComponent(id)) as Href)}>
+                    {profile.avatarUrl ? <Avatar size="sm" source={{ uri: profile.avatarUrl }} accessibilityLabel="Profile photo" /> : <Camera size={20} color={primary} />}
+                  </Button>
+                  <View className="flex-1 gap-1">
+                    <Text weight="semibold" style={{ fontSize: 22, lineHeight: 28 }}>{profile.fullName}</Text>
+                    <Text size="sm" muted>{accountProfileIdentifier(identity.account.accounts.length, identity.fixture ? "justine@example.com" : session?.user.email, profile.accountNumber) ?? "Account details unavailable"}</Text>
+                  </View>
+                </View>
                 {!defaultSaved && identity.account.defaultServiceAccountId !== id ? <Button variant="outline"
                   disabled={busy || identity.account.sessionMode !== "identity"} onPress={() => setDefaultDialog(true)}>Set as default</Button> : null}
-                <ProfileNotice title="Keep your details current"
-                  description="Verify your password to update contact details and home location. Active reports keep their original submitted details." />
                 <View className="gap-5 rounded-xl bg-card p-4">
-                  <DetailRow label="Contact" value={profile.contactNum ?? "No contact number"} />
+                  <DetailRow label="Contact number" value={profile.contactNum ?? "No contact number"} />
                   <DetailRow
                     label={emailEditable ? "Service account email" : "Email sign-in"}
                     value={profile.email || "No email on file"}
@@ -394,7 +389,7 @@ function Details({
               <>
                 <ProfileHeading
                   title="Update your details"
-                  description={"ALECO account ••" + profile.accountNumber?.slice(-4)}
+                  description={profile.accountNumber ?? profile.email}
                 />
                 <ProfileField
                   label="Contact number"

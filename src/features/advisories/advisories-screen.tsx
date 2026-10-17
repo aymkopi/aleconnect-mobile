@@ -6,7 +6,6 @@ import { Tabs } from "@/components/panelui/tabs";
 import { Text } from "@/components/panelui/text";
 import { PreviewLabel } from "@/components/preview-label";
 import { SearchField } from "@/components/search-field";
-import { useGuestAccess } from "@/context/guest-access-context";
 import { useMainPageScroll } from "@/hooks/use-main-page-scroll";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useConsumerAccount } from "@/hooks/use-consumer-account";
@@ -34,7 +33,6 @@ export default function AdvisoriesScreen() {
   );
   const [query, setQuery] = useState(""),
     [tab, setTab] = useState("all");
-  const { guest } = useGuestAccess();
   const items = feed.items.filter((item) => matchesUpdate(item, query, tab));
   const hasData = feed.fixtures || !!feed.data;
   const filtered = !!query.trim() || tab !== "all";
@@ -66,18 +64,11 @@ export default function AdvisoriesScreen() {
         ListHeaderComponent={
           <View className="gap-3 pb-2">
             <PreviewLabel />
-            <MainPageHeader
-              title="Advisories"
-              subtitle={
-                guest
-                  ? "Public updates for everyone"
-                  : "Advisories, news & your community"
-              }
-            />
+            <MainPageHeader title="Advisories" />
             <SearchField
               value={query}
               onChangeText={setQuery}
-              placeholder="Search recent advisories and posts"
+              placeholder="Search advisories and posts"
               isClearable={false}
             />
             <Tabs
@@ -139,12 +130,6 @@ export default function AdvisoriesScreen() {
             ) : null}
             {featured ? (
               <>
-                <Text
-                  weight="semibold"
-                  style={{ fontSize: 16, lineHeight: 22 }}
-                >
-                  Latest from ALECO
-                </Text>
                 <PublisherCard
                   item={featured}
                   featured

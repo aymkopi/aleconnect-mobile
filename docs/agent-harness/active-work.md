@@ -1,6 +1,6 @@
 # Active work
 
-- [Mobile declutter refinement](tasks/mobile-declutter.md): Figma-first draft for Reports filters, contact icons, Account/information, Alerts and Advisories. Requested revisions match unread notifications, restore ticket dates, use raw identity values and place the Account profile in a distinct card; acceptance precedes app implementation. Preserve original Figma screens, manual source changes and the separate Reports accessibility proposal.
+- [Mobile declutter refinement](tasks/mobile-declutter.md): approved UI and current-status-date implementation for PR14. Source/render checks and release gates are in progress; deploy compatible Staff PR50 before Mobile alpha. Preserve manual edits, original Figma screens and the separate Reports proposal.
 
 - [Manual refresh and FileUpload](../mobile-refresh-file-upload.md): PR13 merged/source0639fa8, alpha1.1.0-alpha.1/code67 published and exact artifacts verified. October17 phone25069PTEBG passes three cold launches, retained session, main-page rendering and navbar drag. Default branch sync and scoped release-worktree cleanup follow docs checks. PanelUI0.112.0 retained; camera/provider/iOS acceptance remains separate.
 

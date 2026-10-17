@@ -77,6 +77,7 @@
   --color-muted: unset;
   --color-muted-foreground: unset;
   --color-accent: unset;
+  --color-notification-unread: unset;
   --color-accent-foreground: unset;
   --color-destructive: unset;
   --color-destructive-foreground: unset;
@@ -207,6 +208,7 @@
       --color-foreground: #18202A;
 
       --color-card: #FFFFFF;
+      --color-notification-unread: #F0F9FF;
       --color-card-foreground: #18202A;
 
       --color-sheet-surface: #EFF2F6;
@@ -310,6 +312,7 @@
 
       /* white mix: 4% */
       --color-card: #141A22;
+      --color-notification-unread: #1A1F27;
       --color-card-foreground: #FFFFFF;
 
       /* white mix: 7% */
@@ -446,6 +449,7 @@
       --color-foreground: #08090a;
 
       --color-card: #ffffff;
+      --color-notification-unread: #F0F9FF;
       --color-card-foreground: #08090a;
 
       --color-sheet-surface: #EFF2F6;
@@ -537,6 +541,7 @@
       --color-foreground: #FFFFFF;
 
       --color-card: #141A22;
+      --color-notification-unread: #1A1F27;
       --color-card-foreground: #FFFFFF;
 
       --color-sheet-surface: #1A1F27;
@@ -634,6 +639,7 @@
       --color-foreground: #171717;
 
       --color-card: #ffffff;
+      --color-notification-unread: #F0F9FF;
       --color-card-foreground: #171717;
 
       --color-sheet-surface: #EFF2F6;
@@ -726,6 +732,7 @@
       --color-foreground: #FFFFFF;
 
       --color-card: #141A22;
+      --color-notification-unread: #1A1F27;
       --color-card-foreground: #FFFFFF;
 
       --color-sheet-surface: #1A1F27;

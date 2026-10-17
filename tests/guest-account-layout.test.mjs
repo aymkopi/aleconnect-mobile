@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import vm from "node:vm";
 import ts from "typescript";
+import { accountProfileIdentifier } from "../src/features/profile/profile-state.ts";
 
 async function renderAccount(guest, retainedStates = [], loading = false) {
   const actions = [], stateChanges = [], effects = [];
@@ -13,6 +14,7 @@ async function renderAccount(guest, retainedStates = [], loading = false) {
   const account = { id: "private-account", registeredName: "Private service", address: "Private address", accountNumber: "1234567890", isDefault: true };
   const router = { push: (...args) => actions.push(["router", ...args]), replace: () => {}, setParams: () => {} };
   const modules = {
+    "./profile-state": { accountProfileIdentifier },
     "@/components/content-skeleton": { ContentSkeleton: "ContentSkeleton" },
     "@/components/data-state": { DataState: "DataState", DataNotice: "DataNotice" },
     "react": { useCallback: fn => fn, useEffect: fn => effects.push(fn), useState: value => [retainedStates[stateIndex++] ?? value, next => stateChanges.push(next)] },
@@ -64,28 +66,27 @@ async function renderAccount(guest, retainedStates = [], loading = false) {
 
 test("Guest uses the Account layout without exposing retained private identity or linked data", async () => {
   const { text, nodes, button } = await renderAccount(true);
-  for (const label of ["Guest", "ALECO accounts", "Account & security", "Preferences", "About & support", "Manage accounts", "Sign in required"]) assert.ok(text.includes(label), label);
+  for (const label of ["Guest", "ALECO accounts", "Account & security", "Preferences", "About & support"]) assert.ok(text.includes(label), label);
   assert.doesNotMatch(text, /Private person|Private service|Private address|1234567890|••7890|Private profile failure|1 linked/);
   assert.equal(nodes.filter(n => typeof n === "object" && n.type === "Image").length, 0);
-  for (const label of ["Personal information", "ALECO accounts", "Change password", "Alerts & notifications", "Appearance"]) assert.match(button(label).props.accessibilityLabel, /Sign in$/);
+  for (const label of ["ALECO accounts", "Change password", "Alerts & notifications", "Appearance"]) assert.match(button(label).props.accessibilityLabel, /Sign in$/);
 });
 
 test("Guest private Account actions use the shared gate while support stays accessible", async () => {
   const result = await renderAccount(true);
-  for (const label of ["Personal information", "ALECO accounts", "Change password", "Alerts & notifications", "Appearance", "Help & support", "Privacy & terms", "About ALEConnect"]) result.button(label).props.onPress();
-  result.nodes.find(n => typeof n === "object" && n.type === "Button" && n.props.children === "Manage accounts").props.onPress();
+  for (const label of ["Account information", "ALECO accounts", "Change password", "Alerts & notifications", "Appearance", "Help & support", "Privacy & terms", "About ALEConnect"]) result.button(label).props.onPress();
   assert.deepEqual(result.actions, [
     ["feature", "/profile/details"], ["feature", "/profile/accounts"], ["feature", "/profile/change-password"],
     ["feature", "/notification-settings"], ["feature", "/profile?appearance=1"], ["feature", "/profile/help"],
-    ["feature", "/profile/privacy"], ["feature", "/profile/about"], ["feature", "/profile/accounts"],
+    ["feature", "/profile/privacy"], ["feature", "/profile/about"],
   ]);
   assert.deepEqual(result.stateChanges, []);
 });
 
 test("Signed-in Account retains its identity, linked account and local appearance sheet", async () => {
   const result = await renderAccount(false);
-  for (const label of ["Private person", "Private service", "Private address", "••7890", "1 linked", "Sign out"]) assert.ok(result.text.includes(label), label);
-  assert.doesNotMatch(result.button("Personal information").props.accessibilityLabel, /Sign in/);
+  for (const label of ["Private person", "1234567890", "1 linked", "Sign out"]) assert.ok(result.text.includes(label), label);
+  assert.doesNotMatch(result.button("Account information").props.accessibilityLabel, /Sign in/);
   result.button("Appearance").props.onPress();
   assert.deepEqual(result.stateChanges, [true]);
   assert.deepEqual(result.actions, []);
@@ -95,13 +96,13 @@ test("Session loss immediately hides retained private sheets and resets their st
   const result = await renderAccount(true, [true, false, true]);
   assert.doesNotMatch(result.text, /Color theme|Choose Light, Dark|Sign out of ALEConnect/);
   for (const effect of result.effects) effect();
-  assert.deepEqual(result.stateChanges, [false, false, false]);
+  assert.deepEqual(result.stateChanges, [false, false]);
   assert.deepEqual(result.actions, []);
 });
 
 test("initial profile and account loads use sized skeletons without a false zero-linked count", async () => {
   const result = await renderAccount(false, [], true);
   const skeletons = result.nodes.filter(n => typeof n === "object" && n.type === "ContentSkeleton");
-  assert.deepEqual(skeletons.map(n => n.props.layout), ["identity", "profile"]);
+  assert.deepEqual(skeletons.map(n => n.props.layout), ["identity"]);
   assert.doesNotMatch(result.text, /0 linked|Not available/);
 });

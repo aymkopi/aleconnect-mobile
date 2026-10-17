@@ -2,7 +2,7 @@ import assert from "node:assert/strict"
 import { readFile } from "node:fs/promises"
 import test from "node:test"
 
-test("public contacts retain cached agency avatars and explicit contact groups", async () => {
+test("public contacts retain cached agency avatars and accessible contact-type icons", async () => {
   const [service, screen] = await Promise.all([
     readFile(new URL("../src/services/hotlines.ts", import.meta.url), "utf8"),
     readFile(new URL("../src/features/hotlines/contact-card.tsx", import.meta.url), "utf8"),
@@ -13,5 +13,5 @@ test("public contacts retain cached agency avatars and explicit contact groups",
   assert.match(service, /Other service contacts/)
   assert.match(screen, /source=\{\{ uri: agency\.logoUrl \}\}/)
   assert.match(screen, /agency\.contacts\.map/)
-  assert.match(screen, /contact\.group/)
+  assert.match(screen, /contactPresentation/)
 })

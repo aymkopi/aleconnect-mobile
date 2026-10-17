@@ -3,7 +3,7 @@
 ## Status and ownership
 
 - Owner: consumer Mobile presentation. Branch: `codex/mobile-declutter`, based on Mobile `master` at `8b1af18`.
-- Stage: Figma revision prepared for acceptance. Unread reports now match unread notifications; the latest requested refinements restore submitted dates, use raw identity values and distinguish the Account profile with a card. Application implementation has not started. Keep this PR draft until the revised design is accepted and the implementation gates pass.
+- Stage: user approved app implementation and shipping on October17. The final instruction changes ticket-card dates to the latest event for the current status. Implementation is complete; final source/render/release verification is in progress. Staff PR50 deploys the compatible timestamp before Mobile PR14.
 - [Editable Figma review page](https://www.figma.com/design/6uIaVRM63oHA723WKgjo5k/Aleconnect-mobile?node-id=1184-24615). Original reference screens remain unchanged.
 - The separate user-requested chat, Reports accessible redesign proposal (`01a1461e-22c7-7d91-9653-68c2c6e2f3ea`), created a [new proposal page](https://www.figma.com/design/6uIaVRM63oHA723WKgjo5k/Aleconnect-mobile?node-id=1184-29946) with 12 editable Light/Dark report, filter, empty and loading frames. That broader redesign is outside this PR's implementation scope.
 
@@ -13,20 +13,20 @@ Keep the current visual identity, report cards, five destinations and existing s
 
 | Surface | Proposed change | Figma Light / Dark | Application status |
 | --- | --- | --- | --- |
-| Reports | Remove account and period controls from the overview. Keep heading, New report, KPI scope notice, search, status tabs and report cards. Use a labeled Filters button. | `1184:24617` / `1188:1334` | Pending design acceptance |
-| Unread report state | Match unread notifications: the same full-card tint and small unread dot, with no separate update banner. Read and unread retain the same content, layout and fixture height. | Comparison `1204:2639` / `1204:2690`; component set `1203:2504` | Pending design acceptance |
-| Ticket dates | Preserve the submitted date/time already displayed by the application's ReportCard. Restore a separate date line on the review's normal cards and keep the same date on read/unread cards. | Reports `1184:24617` / `1188:1334`; scoped date masters `1216:4368` / `1216:4490` | Pending design acceptance |
-| Report filters | Put service account, reporting period, status, type and sort in the existing sheet. One Apply filters action; Reset restores defaults. | `1184:24669` / `1188:1385` | Pending design acceptance |
-| Period selection | Change the same sheet's content, with Back. Retain all dates, this month, last month, last 3 months, this year and custom dates. | `1186:2004` / `1188:1770` | Pending design acceptance |
-| Account selection | Change the same sheet's content, with Back. Show registered names and complete account numbers. | `1186:2079` / `1188:1837` | Pending design acceptance |
-| Custom dates | Reuse the existing bounded range calendar; retain January 1, 2026 through the current Manila date. Do not open a second sheet over the filter sheet. | `1187:1319` / `1188:1969` | Pending design acceptance |
-| Contact cards | Remove visible contact-type text; keep number, optional meaningful carrier/service label, website, Call and Copy. Prefix icons identify the type. | Hotlines `1185:696` / `1188:1723` | Pending design acceptance |
-| Account | Remove the redundant connected-account feature card and duplicate profile menu entry. Place the avatar, name, raw identifier and Account information affordance in a distinct borderless profile card. Keep account management, security, preferences and support. Multiple-account subtitle uses the signed-in email without a prefix. | `1184:24742` / `1188:1460` | Pending design acceptance |
-| Single account | Profile subtitle uses the raw account number, without concatenating an ALECO account label. Loading, missing identity and guest states must not expose another identity's data. | `1186:2154` / `1188:1901` | Pending design acceptance |
-| Account information | One identity/photo-edit header showing only the account number or appropriate session email, without a concatenated ALECO account prefix; contact/email/location group and service details group. Remove the repeated flip card and introductory notice. Retain Edit profile, camera, verification and default-account functionality. | `1184:24810` / `1188:1528` | Pending design acceptance |
-| Alerts and notifications | Keep delivery toggles together. Use a concise area summary with Change areas and sync status. Preserve permission/setup, errors, pending sync and autosave feedback. | `1184:24847` / `1188:1571` | Pending design acceptance |
-| Advisories | Remove the repeated intro/date heading and redundant Read story action. Keep search, tabs, notification bell, featured advisory and stories. | `1184:24898` / `1188:1623` | Pending design acceptance |
-| Advisory details | Use a neutral summary with a status badge, clear schedule, affected areas, message and safety guidance. Keep full content, photos, original-post access and relevant contacts. | `1184:24956` / `1188:1681` | Pending design acceptance |
+| Reports | Remove account and period controls from the overview. Keep heading, New report, KPI scope notice, search, status tabs and report cards. Use a labeled Filters button. | `1184:24617` / `1188:1334` | Implemented; verification in progress |
+| Unread report state | Match unread notifications: the same full-card tint and small unread dot, with no separate update banner. Read and unread retain the same content, layout and fixture height. | Comparison `1204:2639` / `1204:2690`; component set `1203:2504` | Implemented; verification in progress |
+| Ticket dates | Show the current canonical status and its latest matching history timestamp. If history metadata is absent/invalid, use labelled Updated or Submitted fallbacks. Read/unread content remains identical. | Reports `1184:24617` / `1188:1334`; scoped date masters `1216:4368` / `1216:4490` | Implemented; verification in progress |
+| Report filters | Put service account, reporting period, status, type and sort in the existing sheet. One Apply filters action; Reset restores defaults. | `1184:24669` / `1188:1385` | Implemented; verification in progress |
+| Period selection | Change the same sheet's content, with Back. Retain all dates, this month, last month, last 3 months, this year and custom dates. | `1186:2004` / `1188:1770` | Implemented; verification in progress |
+| Account selection | Change the same sheet's content, with Back. Show registered names and complete account numbers. | `1186:2079` / `1188:1837` | Implemented; verification in progress |
+| Custom dates | Reuse the existing bounded range calendar; retain January 1, 2026 through the current Manila date. Do not open a second sheet over the filter sheet. | `1187:1319` / `1188:1969` | Implemented; verification in progress |
+| Contact cards | Remove visible contact-type text; keep number, optional meaningful carrier/service label, website, Call and Copy. Prefix icons identify the type. | Hotlines `1185:696` / `1188:1723` | Implemented; verification in progress |
+| Account | Remove the redundant connected-account feature card and duplicate profile menu entry. Place the avatar, name, raw identifier and Account information affordance in a distinct borderless profile card. Keep account management, security, preferences and support. Multiple-account subtitle uses the signed-in email without a prefix. | `1184:24742` / `1188:1460` | Implemented; verification in progress |
+| Single account | Profile subtitle uses the raw account number, without concatenating an ALECO account label. Loading, missing identity and guest states must not expose another identity's data. | `1186:2154` / `1188:1901` | Implemented; verification in progress |
+| Account information | One identity/photo-edit header showing only the account number or appropriate session email, without a concatenated ALECO account prefix; contact/email/location group and service details group. Remove the repeated flip card and introductory notice. Retain Edit profile, camera, verification and default-account functionality. | `1184:24810` / `1188:1528` | Implemented; verification in progress |
+| Alerts and notifications | Keep delivery toggles together. Use a concise area summary with Change areas and sync status. Preserve permission/setup, errors, pending sync and autosave feedback. | `1184:24847` / `1188:1571` | Implemented; verification in progress |
+| Advisories | Remove the repeated intro/date heading and redundant Read story action. Keep search, tabs, notification bell, featured advisory and stories. | `1184:24898` / `1188:1623` | Implemented; verification in progress |
+| Advisory details | Use a neutral summary with a status badge, clear schedule, affected areas, message and safety guidance. Keep full content, photos, original-post access and relevant contacts. | `1184:24956` / `1188:1681` | Implemented; verification in progress |
 
 The Figma frames show visual states, not a functional application prototype. Sample identities and notices come from existing design/fixture content. Permission allowed and device push registration remain separate facts; do not hide setup merely because permission is allowed. The Hotline reference uses the already implemented hold-to-call label; this change does not alter the existing duration or dialer behavior.
 
@@ -56,20 +56,20 @@ Existing copied components and contact helpers remain the implementation source.
 
 ## Affected source and checks for implementation
 
-Use existing `src/features/reports/main-screen.tsx`, shared `reports/report-card.tsx`, report period/calendar/filter helpers, `hotlines/contact-card.tsx`, `profile/account-screen.tsx`, `profile/details-screen.tsx`, `profile/alerts-screen.tsx` and advisory main/detail/publisher components. Inspect their shared callers and existing tests before edits. No API, schema, authentication contract, native configuration, dependency or release change is proposed.
+Use existing `src/features/reports/main-screen.tsx`, shared `reports/report-card.tsx`, report period/calendar/filter helpers, `hotlines/contact-card.tsx`, `profile/account-screen.tsx`, `profile/details-screen.tsx`, `profile/alerts-screen.tsx` and advisory main/detail/publisher components. Inspect their shared callers and existing tests before edits. Staff PR50 adds nullable statusChangedAt to the existing owned report-list payload; no schema, authentication, native configuration or dependency change is needed. Deploy and verify Staff first; then merge Mobile PR14 and publish its alpha through the existing pipeline.
 
 - [x] Inspect incumbent source, Staff contact-type values and existing Figma components/tokens.
 - [x] Create editable Light/Dark review frames and reusable contact assets without replacing canonical screens.
 - [x] Revise the unread report state after user feedback: reuse notification tint/dot, remove the banner and keep read/unread sizing consistent.
 - [x] Apply the next requested revision in both themes: raw identity values, a distinct Account profile card and restored submitted dates on ticket cards.
 - [x] Finish independent Figma review and record any remaining limitations.
-- [ ] Obtain design acceptance before changing application code.
-- [ ] Implement the accepted UI through existing shared PanelUI components.
-- [ ] Test filter apply/cancel/reset, account/period preservation and single-sheet navigation.
-- [ ] Test icon fallback, meaningful-label preservation and single/multiple/guest identity behavior.
-- [ ] Run focused tests, TypeScript, changed-file lint, harness and whitespace checks.
+- [x] User approved the revised design and shipping, with current-status dates replacing submitted-only dates.
+- [x] Implement the accepted UI through existing shared PanelUI components.
+- [x] Filter draft/Back/dismiss/Apply and account/period behavior pass executable regressions; browser verifies same-sheet account/range flow.
+- [x] Icon fallback/meaningful labels, single/multiple identity and guest data isolation pass regressions.
+- [x] 503 tests pass with1 expected missing-sibling skip; TypeScript, scoped lint0 errors/1 existing warning, explicit Staff-sibling harness and whitespace pass.
 - [ ] Render changed routes, filter states, guest/error states and both themes at phone/tablet widths with larger text. Device acceptance remains separate until actually checked.
-- [ ] Run Graphify after source changes; keep generated graph churn separate.
+- [x] Graphify refresh attempted; installed launcher references a missing Python runtime. No generated refresh claimed.
 
 ## Verification and references
 
@@ -83,4 +83,14 @@ The direction follows [W3C guidance for older users](https://www.w3.org/WAI/olde
 
 ## Remaining risks and next
 
-Ask the user to accept the revised Figma direction, then implement and run the listed checks. App behavior and accessibility remain unverified until implementation. Preserve unrelated source edits, existing source features and the separate Reports proposal; do not merge or release this draft automatically.
+Finish exact-head CI, deploy and verify Staff PR50, then merge Mobile PR14 and verify its published alpha assets/signature plus bounded tablet acceptance. The user authorized shipping. Preserve manual edits, queues, signing/provider configuration and the separate Reports proposal. Full accessibility, provider and iOS acceptance remain separate.
+
+## Approved implementation verification (2026-10-17)
+
+- Reused copied PanelUI0.112.0, existing routes, Calendar/RadioGroup/Select content and semantic surfaces. Reports has one non-detached sheet, with draft account/period/status/type/sort choices and bounded January1,2026–today custom dates.
+- Reused notification-style unread dot and a shared notification-unread token (Light #F0F9FF, Dark #1A1F27); removed the update banner. Status dates come from Staff history rather than ordinary edit time. Accepted push projections clear old dates even on same-status cycles; unknown statuses preserve their prior matching date.
+- Account removes the redundant service-account feature card and duplicate profile row. Its profile entry is a card with raw account/email identity. Information keeps photo editing, secure edits and default-account actions without repeating the flip card. Guest gates remain.
+- Alerts summarizes selected areas while retaining all selections, permission/setup, sync/retry and autosave behavior. Advisories removes repeated introductory/read-story labels; details uses a neutral summary and clearer content grouping. Source review found no remaining blocker after the cache-date correction.
+- Full regression run:503 pass,1 expected missing-sibling skip,0 failures. TypeScript passes; scoped lint has0 errors and1 existing Account effect warning. Final refinements retain the same passing full-suite/type/harness results; fixture-free Android/Hermes export passes.
+- Browser verification is isolated labelled fixture mode on localhost:8103, not production records. No secrets or .env.local were copied. The Figma MCP now returns read-only on the requested final status-date annotation; approved visuals remain available, and the final date semantics are documented here and tested in source.
+- Graphify refresh is required/attempted; the installed launcher references a missing Python runtime. Record the failure separately rather than committing unrelated generated churn.

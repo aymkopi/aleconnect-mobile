@@ -518,7 +518,7 @@ test("Reports replaces one sheet's content, preserves drafts on Back and discard
   root = render();
   await find(
     root,
-    (n) => n.type === "Button" && n.props.children === "Show reports",
+    (n) => n.type === "Button" && n.props.children === "Apply filters",
   ).props.onPress();
   root = render();
   assert.equal(sheet(root).props.open, false);
@@ -945,7 +945,7 @@ test("Reports and Profile child deep links hide tabs before nested navigation st
   assert.notEqual(module.FloatingTabsBar(props), null);
 });
 
-test("Reports exposes a dedicated period route and staged account/status/type selectors within one sheet", async () => {
+test("Reports stages period/account/status/type filters within one sheet and only Apply changes results", async () => {
   const h = hooks(),
     visits = [];
   const realMainFilter = await import("../src/features/reports/main-filter.ts");
@@ -994,17 +994,26 @@ test("Reports exposes a dedicated period route and staged account/status/type se
       (n) => n.type === "Button" && n.props.accessibilityLabel === label,
     );
   let root = render();
-  assert.ok(
-    button(root, "Reporting period"),
-    "missing dedicated overview period entry",
-  );
-  button(root, "Reporting period").props.onPress();
-  assert.deepEqual(visits[0], {
-    pathname: "/reports/period",
-    params: { period: "all", start: "", end: "", firstReportDate: "2026-10-09" },
-  });
+  assert.equal(button(nodes(root).find(n => n.type === "FlatList").props.ListHeaderComponent, "Reporting period"), undefined, "period is hidden from the overview");
   button(root, "Report filters").props.onPress();
   root = render();
+  assert.ok(button(root, "Reporting period"));
+  button(root, "Reporting period").props.onPress();
+  root = render();
+  nodes(root).find(n => n.props?.accessibilityLabel === "Reporting period" && n.props.onValueChange).props.onValueChange("custom");
+  root = render();
+  const calendar = nodes(root).find(n => n.props?.mode === "range");
+  assert.ok(calendar, "custom range replaces this sheet's content");
+  assert.equal(nodes(root).filter(n => n.type === sheetParts).length, 1);
+  assert.equal(calendar.props.minDate.getFullYear(), 2026);
+  assert.equal(calendar.props.minDate.getMonth(), 0);
+  assert.equal(calendar.props.minDate.getDate(), 1);
+  calendar.props.onSelect({ from: new Date(2026, 9, 1), to: new Date(2026, 9, 17) });
+  root = render();
+  nodes(root).find(n => n.type === "Button" && n.props.children === "Use selected dates").props.onPress();
+  root = render();
+  assert.equal(button(root, "Reporting period").props.children, "2026-10-01 – 2026-10-17");
+  assert.equal(visits.length, 0, "no route or nested sheet is opened");
   for (const label of [
     "Service account",
     "Report status",
@@ -1026,7 +1035,7 @@ test("Reports exposes a dedicated period route and staged account/status/type se
     "filter must remain staged",
   );
   nodes(root)
-    .find((n) => n.type === "Button" && n.props.children === "Show reports")
+    .find((n) => n.type === "Button" && n.props.children === "Apply filters")
     .props.onPress();
   root = render();
   assert.equal(
@@ -1139,9 +1148,13 @@ test("Main retains older reports without optional account ids in an account-scop
     return module.default();
   };
   let root = render();
-  nodes(root)
-    .find((n) => n.type === selectParts && n.props.presentation !== "content")
-    .props.onValueChange("home");
+  nodes(root).find(n => n.type === "Button" && n.props.accessibilityLabel === "Report filters").props.onPress();
+  root = render();
+  nodes(root).find(n => n.type === "Button" && n.props.accessibilityLabel === "Service account").props.onPress();
+  root = render();
+  nodes(root).find(n => n.type === selectParts && n.props.presentation === "content").props.onValueChange("home");
+  root = render();
+  nodes(root).find(n => n.type === "Button" && n.props.children === "Apply filters").props.onPress();
   root = render();
   assert.equal(
     nodes(root).find((n) => n.type === "FlatList").props.data.length,

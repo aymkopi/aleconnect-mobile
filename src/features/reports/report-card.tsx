@@ -1,9 +1,9 @@
 import { Text } from "@/components/panelui/text";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { formatManilaDateTime } from "@/utils/manila-time";
-import { BellDot, ChevronRight } from "lucide-react-native";
+import { ChevronRight } from "lucide-react-native";
 import { Pressable, View } from "react-native";
-import { consumerTicketStatusLabel, type Report } from "./data";
+import { consumerTicketStatusLabel, reportCardDate, type Report } from "./data";
 import { ReportStatusBadge } from "./report-status-badge";
 export function ReportCard({
   report,
@@ -12,8 +12,9 @@ export function ReportCard({
   report: Report;
   onPress: () => void;
 }) {
-  const [primary, accent] = useAppColors(["primary", "accent"]);
+  const [primary] = useAppColors(["primary"]);
   const unread = !!report.unreadNotificationIds?.length;
+  const date = reportCardDate(report);
   return (
     <Pressable
       accessibilityRole="button"
@@ -26,22 +27,14 @@ export function ReportCard({
         (unread ? ", unread report update" : "")
       }
       onPress={onPress}
-      className="rounded-xl bg-card p-3 gap-1.5"
-      style={unread ? { backgroundColor: accent } : undefined}
+      className={unread ? "rounded-xl bg-notification-unread p-3 gap-1" : "rounded-xl bg-card p-3 gap-1"}
     >
-      {unread ? (
-        <View className="flex-row items-center gap-1.5 pb-1">
-          <BellDot size={14} color={primary} />
-          <Text size="xs" weight="medium" className="text-primary">
-            New report update. Open to read
-          </Text>
-        </View>
-      ) : null}
       <View className="flex-row items-center justify-between gap-2">
         <Text size="xs" muted className="flex-1">
           {report.ticketNumber || "Reference pending"}
         </Text>
         <ReportStatusBadge status={report.status} />
+        <View className="h-1.5 w-1.5 rounded-full bg-primary" style={{ opacity: unread ? 1 : 0 }} accessibilityElementsHidden importantForAccessibility="no" />
       </View>
       <Text
         weight="bold"
@@ -50,7 +43,7 @@ export function ReportCard({
       >
         {report.typeTitle || report.title}
       </Text>
-      <Text size="xs">{formatManilaDateTime(report.createdAt)}</Text>
+      <Text size="xs" muted>{date.label} {formatManilaDateTime(date.date)}</Text>
       <View className="flex-row items-center gap-2">
         <Text muted size="xs" className="flex-1" numberOfLines={2}>
           {report.displayAddress ?? report.categoryTitle}

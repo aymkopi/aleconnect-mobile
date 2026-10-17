@@ -1,5 +1,24 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Move Reports account and period controls into one Filters sheet with staged Apply/Reset, content replacement and Back; retain bounded custom ranges, loaded-data KPI scope and existing report actions.
+- Align unread ticket cards with notifications using one tint and unread dot, without a separate banner. Show the current status's latest history date; label old-payload fallbacks honestly.
+- Replace repetitive contact-type text with accessible Lucide prefixes while retaining carrier/department labels and Call/Copy/website actions.
+- Put Account's profile entry in a distinct card with raw account number/email. Remove its redundant service-account feature card and simplify Account information while preserving secure edits, photo and default-account actions.
+- Simplify area summaries, Alerts and Advisories/detail using existing PanelUI, theme surfaces and accessible touch targets.
+
+### Fixed
+
+- Clear cached status dates on accepted push updates, including same-status cycles, so a later return to a status cannot display an older transition date.
+
+### Compatibility
+
+- Requires backward-compatible Staff PR50 for exact status-history dates. No database migration, new dependency, credential or signing change; older responses/caches remain supported.
+
+
 ## 1.1.0-alpha.1 - 2026-10-16
 
 ### Added
