@@ -1,5 +1,13 @@
 # Implementation history
 
+## 2026-10-18 - iPhone USB tooling and anisette recovery
+
+- Scope: continue the requested personal-iPhone install. Verified/installed official iloader2.3.9 per-user EXE after the all-user MSI required admin rights. Diagnosed the old USB pairing as invalid with automatic re-pairing disabled; administrator-approved exact-path/hash checks preserved that one record before standard pairing renewal. Original protected backup and replacement both exist; no phone app data reset.
+- Verification: USB model/OS readback passes; pairing command exited0, but later validation reported `SessionActive`, leaving Developer Mode unknown. The user's screenshot and public HTTP probes confirm the default Mac anisette service502. Both official built-in alternative client-info endpoints return200 with expected JSON fields. No credentials were sent by these probes. User then signed in locally with Jkcoxson (Windows); the authenticated iloader UI and selected phone independently confirm recovery. The unchanged IPA hash was rechecked before import.
+- Verification: after user selected the verified IPA, iloader reported successful signing/install. Independent installation-proxy readback confirms Aleconnect1.0.0/build2 on the USB phone, valid pairing, Developer Mode enabled and the matching personal provisioning profile expiring October25,12:35:52AM Manila with no APNs entitlement. Private suffix/account identifiers stay in ignored evidence. The prior `SessionActive` check redundantly validated an already established session; the corrected verifier passes without re-pairing.
+- Remaining risks: user completed own-profile trust in iPhone Settings and confirmed normal opening. First launch is user-confirmed; broader native interaction/private/provider behavior was not independently tested. APNs is unavailable, and free provisioning expires October25,12:35AM Manila.
+- Next: retain the unsigned IPA for renewal using the same local Apple account before expiration. Requested personal build/sign/USB install and first-launch handoff are complete; no default-branch merge, API deployment or store publication. See [handoff](tasks/ios-usb-ipa.md).
+
 ## 2026-10-17 - iPhone USB build preparation
 
 - Scope: user requested an IPA for iPhone 11 using Windows and a free Apple account, plus GitHub tool research. Added a separate-branch macOS/Xcode build with Expo prebuild/CocoaPods, unsigned physical ARM64 archive, embedded bundle/API/permission checks and artifact provenance/hash. APNs is omitted only in the generated Personal Team test project.
