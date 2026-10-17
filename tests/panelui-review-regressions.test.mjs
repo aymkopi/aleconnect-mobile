@@ -2,7 +2,6 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import ts from "typescript";
-import { getFocusedRouteNameFromRoute } from "./focused-route-harness.mjs";
 import { manualRefreshHarness } from "./manual-refresh-harness.mjs";
 import { getHomeLayout } from "../src/features/home/home-layout.ts";
 import * as reportBrowseFilter from "../src/features/reports/browse-filter.ts";
@@ -86,7 +85,7 @@ async function load(file, mocks) {
     if (id === "@/lib/cn") return { cn: (...classes) => classes.filter(Boolean).join(" ") };
     if (id === "@/lib/date") return dateHelpers;
     if (id === "@/components/panelui/kpi") return { Kpi: Object.assign(() => null, { Group: "KpiGroup", Stat: "KpiStat", Value: "Text", Title: "Text" }) };
-    if (id === "expo-router/react-navigation") return { getFocusedRouteNameFromRoute, useIsFocused: () => true, ...mocks[id] };
+    if (id === "expo-router/react-navigation") return { useIsFocused: () => true, ...mocks[id] };
     if (id === "expo-router")
       return { useLocalSearchParams: () => ({}), useFocusEffect: () => {}, ...mocks[id] };
     if (id === "@/features/main-fixtures")
@@ -890,66 +889,6 @@ test("report actions follow the keyboard and reserve the measured footer clearan
   );
 });
 
-test("Reports and Profile child deep links hide tabs before nested navigation state is available", async () => {
-  let pathname = "/reports/list";
-  const module = await load("src/components/floating-tabs-bar.tsx", {
-    "react/jsx-runtime": jsx,
-    "react-native": { View: "View" },
-    "expo-router": { usePathname: () => pathname },
-    "@/components/floating-app-bar": { FloatingAppBar: "FloatingAppBar" },
-  });
-  const props = {
-    state: { index: 1, routes: [{ name: "home" }, { name: "reports" }] },
-    navigation: { navigate() {} },
-  };
-  for (pathname of [
-    "/reports/new",
-    "/reports/list",
-    "/reports/queue",
-    "/reports/timeline",
-    "/reports/period",
-    "/reports/report-1",
-    ...[
-      "details",
-      "accounts",
-      "link-account",
-      "link-requests",
-      "change-password",
-      "photo",
-      "push-notifications",
-      "help",
-      "about",
-      "privacy",
-      "terms",
-    ].map((name) => "/profile/" + name),
-  ]) {
-    props.state.routes[1].name = pathname.split("/")[1];
-    assert.equal(
-      module.FloatingTabsBar(props).props.style.opacity,
-      0,
-      pathname + " must hide tabs without nested state",
-    );
-  }
-  for (pathname of [
-    "/home",
-    "/reports",
-    "/advisories",
-    "/hotlines",
-    "/profile",
-  ]) {
-    props.state.routes[1].name = pathname.split("/")[1];
-    assert.equal(
-      module.FloatingTabsBar(props).props.style.opacity,
-      1,
-      pathname + " keeps the main navigation",
-    );
-  }
-  pathname = "/reports/report-1";
-  props.state.routes[1].name = "reports";
-  props.state.routes[1].state = { index: 0, routes: [{ name: "[id]" }] };
-  assert.equal(module.FloatingTabsBar(props).props.style.opacity, 0);
-});
-
 test("Reports stages period/account/status/type filters within one sheet and only Apply changes results", async () => {
   const h = hooks(),
     visits = [];
@@ -1268,7 +1207,7 @@ test("legal notice return preserves report navigation and normal profile return"
   const h = hooks(), calls = [];
   const module = await load("src/features/profile/support-screen.tsx", {
     react: h.react, "react/jsx-runtime": jsx, "react-native": { View: "View", Linking: {} },
-    "expo-router": { useRouter: () => ({ canGoBack: () => true, back: () => calls.push("back"), replace: route => calls.push(route) }) },
+    "expo-router": { useRouter: () => ({ canGoBack: () => true, back: () => calls.push("back"), replace: route => calls.push(["replace", route]), dismissTo: route => calls.push(["dismissTo", route]) }) },
     "@/components/panelui/button": { Button: "Button" }, "@/components/panelui/text": { Text: "Text" },
     "@/hooks/use-app-colors": { useAppColors: () => ["blue"] }, "@/features/reports/components/report-page": { ReportPage: "ReportPage" },
   });
@@ -1276,7 +1215,7 @@ test("legal notice return preserves report navigation and normal profile return"
   assert.equal(legal.props.footer.props.children, "Back to report"); legal.props.footer.props.onPress();
   h.start(); const profile = module.SupportScreen({ kind: "privacy" });
   assert.equal(profile.props.footer.props.children, "Back to Account"); profile.props.footer.props.onPress();
-  assert.deepEqual(calls, ["back", "/profile"]);
+  assert.deepEqual(calls, ["back", ["dismissTo", "/profile"]]);
 });
 
 test("default compact tabs retain their 48-point touch target", async () => {

@@ -3,7 +3,7 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 import ts from "typescript";
 
-function bar(index = 0, accepted = true, reduced = false, hidden = false) {
+function bar(index = 0, accepted = true, reduced = false) {
   const values = [], calls = [], handlers = {};
   const pan = new Proxy({}, { get: (_, name) => (value) => { handlers[name] = value; return pan; } });
   const jsx = (type, props) => ({ type, props });
@@ -28,21 +28,12 @@ function bar(index = 0, accepted = true, reduced = false, hidden = false) {
   const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText;
   const exports = {};
   new Function("require", "exports", compiled)((id) => { if (!modules[id]) throw new Error(id); return modules[id]; }, exports);
-  const tree = exports.FloatingAppBar({ currentIndex: index, hidden, onSelect: (target) => { calls.push(target); return accepted; } });
-  const presses=[], buttons=[];
-  function walk(node){if(node?.type==='Pressable'){presses.push(node.props.onPress);buttons.push(node.props);} for(const child of [node?.props?.children].flat(Infinity))if(child)walk(child);}
+  const tree = exports.FloatingAppBar({ currentIndex: index, onSelect: (target) => { calls.push(target); return accepted; } });
+  const presses=[];
+  function walk(node){if(node?.type==='Pressable')presses.push(node.props.onPress); for(const child of [node?.props?.children].flat(Infinity))if(child)walk(child);}
   walk(tree);
-  return { handlers, values, calls, presses, buttons, slot: (390 - 32 - 12) / 5 };
+  return { handlers, values, calls, presses, slot: (390 - 32 - 12) / 5 };
 }
-
-test('a retained hidden bar disables the pan recognizer and every tab press target', () => {
- const hidden=bar(1,true,false,true), shown=bar(1);
- assert.equal(hidden.handlers.enabled,false);
- assert.equal(shown.handlers.enabled,true);
- assert.equal(hidden.buttons.length,5);
- assert.ok(hidden.buttons.every(button=>button.disabled===true));
- assert.ok(shown.buttons.every(button=>button.disabled===false));
-});
 
 test("pill drag follows the touch and commits the closest tab only on release", () => {
   const h = bar(1), x = 6 + h.slot * 1.5;
