@@ -51,8 +51,8 @@ test("link-request reader tolerates old and malformed current-link metadata; ret
   const module={exports:{}};
   new Function("require","module","exports",outputText)((id)=>{
     if(id.includes("features/accounts/status")) return status;
-    return {createApiRequestId:()=>"intent-"+(++nextId),apiRequest:async(path,options)=>{
-      calls.push({path,options});
+    return {createApiRequestId:()=>"intent-"+(++nextId),apiRequest:async(path,options,auth)=>{
+      calls.push({path,options,auth});
       return options ? {requestId:"request",status:"pending",replayed:false} : {accessRevision:3,requests:[{requestId:"request",status:"approved",consumerReason:"Public note",...(metadata===undefined?{}:{isCurrentLink:metadata})}]};
     }};
   },module,module.exports);
@@ -63,9 +63,11 @@ test("link-request reader tolerates old and malformed current-link metadata; ret
     assert.equal(read.requests[0].consumerReason,"Public note");
     assert.equal(read.accessRevision,3);
   }
-  const input={accountNumber:"123",registeredName:"Name",password:"private account password",idempotencyKey:"same-intent"};
-  await module.exports.submitAccountLinkRequest(input);
-  await module.exports.submitAccountLinkRequest(input);
+  const input={accountNumber:"123",registeredName:"Name",password:"private account password",idempotencyKey:"same-intent",verificationFlowId:"verified-flow"};
+  await module.exports.submitAccountLinkRequest(input,"pinned-session");
+  await module.exports.submitAccountLinkRequest(input,"pinned-session");
   const sent=calls.filter(c=>c.options).map(c=>JSON.parse(c.options.body));
   assert.deepEqual(sent.map(b=>b.idempotencyKey),["same-intent","same-intent"]);
+  assert.ok(sent.every(b=>b.verificationFlowId==="verified-flow"));
+  assert.ok(calls.filter(c=>c.options).every(c=>c.auth.authToken==="pinned-session"));
 });

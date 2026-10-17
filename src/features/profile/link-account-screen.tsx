@@ -3,10 +3,12 @@ import { View } from "react-native";
 import { type Href, useRouter, useFocusEffect } from "expo-router";
 import { IdCard, UserRound } from "lucide-react-native";
 import { Button } from "@/components/panelui/button";
+import { Text } from "@/components/panelui/text";
 import { Dialog } from "@/components/panelui/dialog";
 import { ReportPage } from "@/features/reports/components/report-page";
-import { submitAccountLinkRequest } from "@/services/account-link-requests";
-import { createApiRequestId } from "@/services/api";
+import { submitAccountLinkRequest, requestAccountLinkVerification } from "@/services/account-link-requests";
+import { createApiRequestId, getAuthToken, ApiRequestError } from "@/services/api";
+import type { PasswordChangeStatus } from "@/services/auth";
 import { presentAccountLinkError } from "@/features/accounts/contract";
 import { consumerAccountLinkRequestStatusLabel } from "@/features/accounts/status";
 import { useAuthSession } from "@/hooks/use-auth-session";
@@ -31,14 +33,40 @@ function LinkAccount({ identity }: { identity: ProfileIdentity }) {
   const [number, setNumber] = useState(""),
     [name, setName] = useState(""),
     [password, setPassword] = useState(""),
-    [view, setView] = useState<"form" | "review" | "sent" | "reset">("form"),
+    [currentPassword, setCurrentPassword] = useState(""),
+    [view, setView] = useState<"verify" | "form" | "review" | "sent" | "reset">("verify"),
     [status, setStatus] = useState("Under review"),
     [error, setError] = useState(""),
-    [busy, setBusy] = useState(false),
+    [busy, setBusy] = useState(!identity.fixture),
     [discard, setDiscard] = useState(false),
     [help, setHelp] = useState(false);
+  const [cooldown, setCooldown] = useState(0), [expires, setExpires] = useState(0),
+    [now, setNow] = useState(() => Date.now());
   const key = useRef(createApiRequestId()),
     sending = useRef(false);
+  const token = useRef<string | null>(null), flow = useRef<string | null>(null);
+  const focus = useRef(0), focused = useRef(false);
+  const applyVerification = useCallback((result: PasswordChangeStatus) => {
+    const localNow = Date.now(), serverNow = Date.parse(result.serverNow);
+    const deadline = (value?: string | null) => value ? localNow + Math.max(0, Date.parse(value) - serverNow) : 0;
+    setCooldown(deadline(result.cooldownUntil));
+    setExpires(deadline(result.verificationExpiresAt));
+    setNow(localNow);
+  }, []);
+  const remaining = Math.max(0, Math.ceil((cooldown - now) / 1000));
+  useEffect(() => {
+    if (!cooldown && !expires) return;
+    const timer = setInterval(() => {
+      const time = Date.now();
+      setNow(time);
+      if (expires && time >= expires && (view === "form" || view === "review")) {
+        flow.current = null;
+        setPassword(""); setCurrentPassword(""); setView("verify");
+        setError("Verification expired. Confirm your sign-in password again; your account details are kept.");
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [cooldown, expires, view]);
   useEffect(() => {
     key.current = createApiRequestId();
   }, [number, name]);
@@ -47,11 +75,12 @@ function LinkAccount({ identity }: { identity: ProfileIdentity }) {
   function back() {
     if (busy) return;
     setPassword("");
+    setCurrentPassword("");
     if (view === "review") {
       setView("form");
       return;
     }
-    if (view === "form" && (number || name || password)) {
+    if ((view === "form" || view === "verify") && (number || name || password || currentPassword)) {
       setDiscard(true);
       return;
     }
@@ -59,18 +88,68 @@ function LinkAccount({ identity }: { identity: ProfileIdentity }) {
     else router.replace("/profile/accounts");
   }
   const allowLeave = useProfileBackGuard(
-    busy || view === "review" || (view === "form" && !!(number || name || password)),
+    busy || view === "review" || !!(number || name || password || currentPassword),
     back,
   );
   useFocusEffect(
     useCallback(
-      () => () => {
-        setPassword("");
-        setView((v) => (v === "review" ? "form" : v));
+      () => {
+        focused.current = true;
+        focus.current++;
+        let active = true;
+        if (!identity.fixture && ready) {
+          setBusy(true);
+          void getAuthToken().then(async value => {
+            if (!active || !current() || !value) return;
+            token.current = value;
+            const status = await requestAccountLinkVerification({ action: "status" }, value);
+            if (active && current()) applyVerification(status);
+          }).catch(e => { if (active && current()) setError(e instanceof Error ? e.message : "Could not check account access."); })
+            .finally(() => { if (active && current()) setBusy(false); });
+        } else setBusy(false);
+        return () => {
+          focused.current = false;
+          focus.current++;
+          active = false;
+          setPassword(""); setCurrentPassword(""); setView("verify");
+          const authToken = token.current, flowId = flow.current;
+          token.current = null; flow.current = null;
+          if (authToken && flowId && !sending.current)
+            void requestAccountLinkVerification({ action: "cancel", flowId }, authToken).catch(() => {});
+        };
       },
-      [],
+      [identity.fixture, ready, current, applyVerification],
     ),
   );
+  async function verify() {
+    if (busy || sending.current || remaining || !currentPassword || !current()) return;
+    const generation = focus.current;
+    sending.current = true; setBusy(true); setError("");
+    const secret = currentPassword; setCurrentPassword("");
+    try {
+      const authToken = token.current ?? await getAuthToken();
+      if (!identity.fixture && !authToken) throw new Error("Sign in again to continue.");
+      if (!current() || !focused.current || generation !== focus.current) return;
+      token.current = authToken;
+      const result = identity.fixture ? { state: "verified" as const, flowId: "fixture-proof",
+        serverNow: new Date().toISOString(), verificationExpiresAt: new Date(Date.now() + 300_000).toISOString() }
+        : await requestAccountLinkVerification({ action: "verify", currentPassword: secret }, authToken!);
+      if (current() && focused.current && generation === focus.current) {
+        applyVerification(result); flow.current = result.flowId ?? null;
+        if (result.state === "verified" && flow.current) setView("form");
+      } else if (!identity.fixture && authToken && result.flowId) {
+        await requestAccountLinkVerification({ action: "cancel", flowId: result.flowId }, authToken).catch(() => {});
+      }
+    } catch (e) {
+      if (current() && focused.current && generation === focus.current) {
+        setError(e instanceof Error ? e.message : "Could not verify your password. Try again.");
+        if (token.current) try {
+          const result = await requestAccountLinkVerification({ action: "status" }, token.current);
+          if (current() && focused.current && generation === focus.current) applyVerification(result);
+        } catch {}
+      }
+    } finally { sending.current = false; if (current() && generation === focus.current) setBusy(false); }
+  }
   function review() {
     setError("");
     if (!number.trim() || !name.trim() || password.length < 8 || password.length > 128) {
@@ -86,7 +165,9 @@ function LinkAccount({ identity }: { identity: ProfileIdentity }) {
     setView("review");
   }
   async function submit() {
-    if (sending.current || !password) return;
+    if (sending.current || !password || !flow.current || !current() || !focused.current) return;
+    const generation = focus.current, proof = flow.current, authToken = token.current;
+    const active = () => current() && focused.current && generation === focus.current;
     sending.current = true;
     setBusy(true);
     setError("");
@@ -100,20 +181,26 @@ function LinkAccount({ identity }: { identity: ProfileIdentity }) {
             registeredName: name,
             password: secret,
             idempotencyKey: key.current,
-          });
-      if (current()) {
+            verificationFlowId: proof,
+          }, authToken!);
+      if (active()) {
         setStatus(consumerAccountLinkRequestStatusLabel(result.status));
+        flow.current = null;
         setView("sent");
       }
     } catch (e) {
-      if (current()) {
+      if (active()) {
         const p = presentAccountLinkError(e);
         setError(p.message);
-        setView(p.kind === "password-reset-required" ? "reset" : "form");
+        if (flow.current !== proof || (e instanceof ApiRequestError && e.code === "CURRENT_PASSWORD_VERIFICATION_REQUIRED")) {
+          flow.current = null; setView("verify");
+        } else setView(p.kind === "password-reset-required" ? "reset" : "form");
       }
     } finally {
+      if (!active() && !identity.fixture && authToken)
+        await requestAccountLinkVerification({ action: "cancel", flowId: proof }, authToken).catch(() => {});
       sending.current = false;
-      if (current()) setBusy(false);
+      if (active()) setBusy(false);
     }
   }
   async function resetSignIn() {
@@ -143,6 +230,10 @@ function LinkAccount({ identity }: { identity: ProfileIdentity }) {
         footer={
           !ready ? (
             <Button onPress={() => router.push("/email-setup")}>Get help with email setup</Button>
+          ) : view === "verify" ? (
+            <Button loading={busy} disabled={busy || !currentPassword || !!remaining} onPress={() => void verify()}>
+              Verify and continue
+            </Button>
           ) : view === "sent" ? (
             <Button onPress={() => router.replace("/profile/link-requests" as Href)}>
               View link requests
@@ -172,6 +263,17 @@ function LinkAccount({ identity }: { identity: ProfileIdentity }) {
               title="One email, your linked accounts"
               description="Your email becomes your login and contact email. Service-account details stay separate."
             />
+          </>
+        ) : view === "verify" ? (
+          <>
+            <Text size="xs" muted>Security check</Text>
+            <ProfileHeading title="Verify it’s you" description="Confirm your current sign-in password before linking another ALECO account." />
+            <ProfileField label="Current password" secret value={currentPassword} onChangeText={setCurrentPassword}
+              autoComplete="current-password" maxLength={128} editable={!busy && !remaining}
+              placeholder="Enter your sign-in password" description="Use your email sign-in password, not the password for the account you want to add." />
+            <ProfileNotice title="A secure, short check" description="Verification lasts 5 minutes and applies only to this session. Your password is never saved on this device." />
+            {remaining ? <ProfileNotice title={"Try again in " + Math.floor(remaining / 60) + ":" + String(remaining % 60).padStart(2, "0")}
+              description="Verification pauses after five incorrect attempts. Ordinary sign-in remains available." /> : null}
           </>
         ) : view === "sent" ? (
           <>
@@ -262,7 +364,7 @@ function LinkAccount({ identity }: { identity: ProfileIdentity }) {
           </>
         )}
         {error ? (
-          <ProfileNotice title="Check the account details" description={error} danger />
+          <ProfileNotice title={view === "verify" ? "Verification needs attention" : "Check the account details"} description={error} danger />
         ) : null}
       </ReportPage>
       <Dialog open={discard} onOpenChange={setDiscard}>
@@ -280,6 +382,7 @@ function LinkAccount({ identity }: { identity: ProfileIdentity }) {
                 setNumber("");
                 setName("");
                 setPassword("");
+                setCurrentPassword("");
                 setDiscard(false);
                 router.replace("/profile/accounts");
               }}
