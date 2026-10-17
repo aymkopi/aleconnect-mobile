@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.2.0-alpha.1 - 2026-10-17
 
 ### Changed
 
@@ -17,6 +17,13 @@
 ### Compatibility
 
 - Requires backward-compatible Staff PR50 for exact status-history dates. No database migration, new dependency, credential or signing change; older responses/caches remain supported.
+
+### Verification and release
+
+- PR14 merges asf4130b9a after Staff1.1.1-alpha.1 deployment/source/asset/access verification. Android workflow39029160520 publishes1.2.0-alpha.1/code68; tag/source and all three downloaded asset digests match.
+- Retained signer/package, non-debuggable live-API/fixture-off Hermes runtime and all54-library ZIP/ELF16KB checks pass. APK SHA256:30431a735f39ff15d51f5d3d2160e05e1542ee10da7e6b6f9abba2045cf3fefc. Desktop copy matches.
+- Exact APK updates tablet25040RP0AG in place, retains its first-install date and guest state, and passes three cold launches plus Home/Reports gate/Hotlines/category sheet/Account/Advisories/detail rendering. No app crash or React runtime error appears during the bounded checks.
+- Source:503 tests pass/0 fail/1 expected sibling skip; TypeScript, scoped lint and harness pass. Browser covers Light/Dark phone/tablet layouts and staged filter flow. Doctor20/21 flags six available Expo patches in the unchanged lockfile; private mutations, push/provider, large-text/TalkBack and iOS acceptance remain separate.
 
 
 ## 1.1.0-alpha.1 - 2026-10-16

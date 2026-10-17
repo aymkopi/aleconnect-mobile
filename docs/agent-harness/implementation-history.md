@@ -1,5 +1,14 @@
 # Implementation history
 
+## 2026-10-17 — Approved declutter alpha release
+
+- Scope: ship the approved Figma refinement and current-status dates. Staff PR50 deploys1.1.1-alpha.1/source5c34ed3d first; Mobile PR14 then merges asf4130b9a with the exact tested product tree. Preserve manual source, signer, providers, queues and the separate Reports proposal.
+- Verification: workflow39029160520 publishes1.2.0-alpha.1/code68. Downloaded tag/source/all3 asset digests and the repository APK verifier match: original certificate, package, standalone live HTTPS/fixture-off Hermes and all54-library ZIP/ELF16KB alignment. SHA25630431a735f39ff15d51f5d3d2160e05e1542ee10da7e6b6f9abba2045cf3fefc; Desktop copy matches.
+- Device: exact APK installs in place on25040RP0AG, retaining first-install date and guest state. Three cold launches and bounded Home/Reports sign-in gate/Hotlines/category-sheet/Account/Advisories/detail checks pass without app crash or React runtime error. No production mutation, call, permission or account change was used.
+- Design/source:503 tests pass/0 fail/1 expected sibling skip, TypeScript/scoped lint/harness and fixture-free Android export pass; Light/Dark phone/tablet browser/filter checks pass. Figma access recovered and its final status-date examples now match their status in both themes. Graphify's missing runtime remains separately recorded; Doctor20/21 flags six newer Expo patches without changing the lockfile.
+- Remaining risks: private authenticated flows, real push/provider delivery, large text/TalkBack and native iOS remain unverified on this device. Source/browser acceptance is distinct from those checks.
+- Next: publish this documentation-only closeout without allocating another alpha, fast-forward local master, retain external rollback/release/QA evidence and remove only this task's clean worktree/branches.
+
 ## 2026-10-17 — Declutter narrow-phone verification
 
 - Scope: reduce Reports tab horizontal padding and badge gap after the 320px rendered review exposed a clipped Resolved label. Preserve tab behavior, text sizes and card layouts.
