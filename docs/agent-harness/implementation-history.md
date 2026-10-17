@@ -661,3 +661,10 @@ Closeout: harness validation against the reviewed Staff companion and git diff -
 - Verification: three regression scenarios fail before/pass after; focused34 checks, full507-pass/one-existing-skip suite, TypeScript, scoped lint (zero errors/two existing test warnings), harness/whitespace and fresh read-only review pass. Initial sandbox temporary Git-fixture writes were denied; the unrestricted suite passes. Native IPA gates are tracked in the iPhone handoff.
 - Remaining risks: repeated navigation in the new IPA still needs physical iPhone acceptance. Motion and deployed Reports fixes are already user-accepted.
 - Next: compile and verify a new IPA, update the existing installation without clearing data, then repeat the reported flow on the iPhone. Graph refresh completes with4,360 nodes/8,270 edges; generated output stays under ignored .cache/navbar-graphify-refresh.
+
+## 2026-10-18 — Ticket-card status edge
+
+- Scope: user requests status at the chevron's right content edge unless an unread update dot is present. The shared Reports/main/archive card now omits the transparent dot's layout space for read tickets; unread styling, indicator accessibility and receipt behavior stay intact.
+- Verification: inspected both card consumers and the single shared badge/indicator row. Existing44 focused status/read/navigation checks, TypeScript, scoped card lint (zero errors/warnings), paired harness and whitespace pass. Fresh source review has no findings. Native build gates are retained.
+- Remaining risks: physical read/unread alignment acceptance remains pending in the combined IPA. Existing reports and motion acceptance is retained.
+- Next: replace the superseded navbar-only build with a combined native IPA and verify both requested fixes on the retained iPhone installation.

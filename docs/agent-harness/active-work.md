@@ -1,6 +1,6 @@
 # Active work
 
-- [iPhone motion, Reports and navigation](tasks/ios-usb-ipa.md): build3 is independently USB-verified and user accepts full pill/card motion with Reduce Motion enabled. Staff PR52 is merged/deployed as d6847897 (1.1.2-alpha.1); user confirms Reports loads. Reports > Ticket details > Back exposes navbar visibility disagreement: focused-stack correction and regressions pass; updated IPA/device acceptance pending. Preserve signer, app data and pairing backup.
+- [iPhone motion, Reports and navigation](tasks/ios-usb-ipa.md): build3 is independently USB-verified and user accepts full pill/card motion with Reduce Motion enabled. Staff PR52 is merged/deployed as d6847897 (1.1.2-alpha.1); user confirms Reports loads. Focused-stack navbar correction and regressions pass. Read ticket cards now omit the hidden update-dot spacer so status aligns with the chevron edge; combined IPA/device acceptance pending. Preserve signer, app data and pairing backup.
 
 - [iPhone USB IPA](tasks/ios-usb-ipa.md): requested build/sign/USB install complete; user confirmed normal opening after own-profile trust. Independent readback confirms1.0.0/build2, Developer Mode enabled and profile expiry October25,12:35AM Manila; APNs unavailable. Anisette502 resolved with Jkcoxson (Windows). Broader native/private/provider acceptance stays separate. Preserve IPA, original pairing backup and unrelated device/signing state.
 
