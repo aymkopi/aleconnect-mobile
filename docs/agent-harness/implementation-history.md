@@ -1,5 +1,12 @@
 # Implementation history
 
+## 2026-10-17 — Declutter narrow-phone verification
+
+- Scope: reduce Reports tab horizontal padding and badge gap after the 320px rendered review exposed a clipped Resolved label. Preserve tab behavior, text sizes and card layouts.
+- Verification: Light/Dark changed-route and same-sheet filter journeys pass in the integrated browser; narrow-phone and tablet Reports fit. Fresh full suite503 pass/0 fail/1 expected skip, TypeScript, scoped lint, explicit-sibling harness and whitespace pass. The sandbox's temporary-Git write restriction is resolved by the unchanged elevated test run.
+- Remaining risks: exact released APK/device, larger-text, provider and native-iOS acceptance remain separate. Figma's final status-date annotation is blocked by its read-only tool state.
+- Next: deploy the additive Staff timestamp first, then merge Mobile PR14 and verify its immutable alpha plus retained-device launch.
+
 ## 2026-10-17 - Approved declutter implementation
 
 - Scope: user-approved shipping of Mobile PR14; implement the reviewed Reports/filter, unread card, contact, Account/information, Alerts and Advisory refinements. Manual/canonical source is preserved in the isolated branch. Staff PR50 adds compatible statusChangedAt history metadata; no migration.

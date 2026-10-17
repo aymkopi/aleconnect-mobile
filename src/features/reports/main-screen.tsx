@@ -352,7 +352,7 @@ export default function ReportsScreen() {
             <Tabs.Trigger
               key={value}
               value={value}
-              className="min-h-8 py-1 px-3"
+              className="min-h-8 py-1 px-2 gap-1"
               badge={
                 <Badge
                   variant="secondary"
