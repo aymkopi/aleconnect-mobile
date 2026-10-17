@@ -1,48 +1,23 @@
 import { FloatingAppBar } from "@/components/floating-app-bar";
 import type { BottomTabBarProps } from "expo-router/js-tabs";
 import { usePathname } from "expo-router";
+import { getFocusedRouteNameFromRoute } from "expo-router/react-navigation";
 import { useGuestAccess } from "@/context/guest-access-context";
 import { View } from "react-native";
-
-type NestedRoute = {
-  name?: string;
-  state?: {
-    index?: number;
-    routes?: NestedRoute[];
-  };
-};
-
-function getFocusedNestedRouteName(route: NestedRoute): string | undefined {
-  const nestedState = route.state;
-  const nestedRoute = nestedState?.routes?.[nestedState.index ?? 0];
-
-  if (!nestedRoute) {
-    return undefined;
-  }
-
-  return getFocusedNestedRouteName(nestedRoute) ?? nestedRoute.name;
-}
 
 export function FloatingTabsBar({ state, navigation }: BottomTabBarProps) {
   const pathname = usePathname();
   const { guest, requestSignIn } = useGuestAccess();
   const activeRoute = state.routes[state.index];
   const nestedRouteName = activeRoute
-    ? getFocusedNestedRouteName(activeRoute as NestedRoute)
+    ? getFocusedRouteNameFromRoute(activeRoute)
     : undefined;
 
-  const reportDetail =
-    nestedRouteName === "[id]" && pathname.startsWith("/reports/");
+  // The URL may lag native Back; use it only while the active stack has no state.
   if (
-    [
-      "/reports/new",
-      "/reports/list",
-      "/reports/queue",
-      "/reports/timeline",
-      "/reports/period",
-    ].includes(pathname) ||
-    pathname.startsWith("/profile/") ||
-    (nestedRouteName && nestedRouteName !== "index" && !reportDetail)
+    nestedRouteName !== undefined
+      ? nestedRouteName !== "index"
+      : activeRoute && pathname.startsWith(`/${activeRoute.name}/`)
   ) {
     return null;
   }

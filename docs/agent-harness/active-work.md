@@ -1,6 +1,6 @@
 # Active work
 
-- [iPhone motion and Reports follow-up](tasks/ios-usb-ipa.md): full motion requested despite iOS Reduce Motion; shared component preference and hold-timing regression prepared in codex/ios-reports-motion. Reports HTTP500 reproduced as Staff status-date query collation mismatch, with compatible correction isolated separately. Native rebuild, authorized API rollout and original-session device retry pending; preserve signer, app data and pairing backup.
+- [iPhone motion, Reports and navigation](tasks/ios-usb-ipa.md): build3 is independently USB-verified and user accepts full pill/card motion with Reduce Motion enabled. Staff PR52 is merged/deployed as d6847897 (1.1.2-alpha.1); user confirms Reports loads. Reports > Ticket details > Back exposes navbar visibility disagreement: focused-stack correction and regressions pass; updated IPA/device acceptance pending. Preserve signer, app data and pairing backup.
 
 - [iPhone USB IPA](tasks/ios-usb-ipa.md): requested build/sign/USB install complete; user confirmed normal opening after own-profile trust. Independent readback confirms1.0.0/build2, Developer Mode enabled and profile expiry October25,12:35AM Manila; APNs unavailable. Anisette502 resolved with Jkcoxson (Windows). Broader native/private/provider acceptance stays separate. Preserve IPA, original pairing backup and unrelated device/signing state.
 

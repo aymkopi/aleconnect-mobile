@@ -2,14 +2,51 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import ts from 'typescript';
+import { CHILD_STATE, getFocusedRouteNameFromRoute } from './focused-route-harness.mjs';
 const read = path => readFile(new URL('../'+path, import.meta.url), 'utf8');
 async function load(path, mocks) {
  const exports = {};
- new Function('require','exports','React',ts.transpileModule(await read(path), {compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.React}}).outputText)(id=>mocks[id]??{},exports,react);
+ new Function('require','exports','React',ts.transpileModule(await read(path), {compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.React}}).outputText)(id=>id==='expo-router/react-navigation'?{getFocusedRouteNameFromRoute,...mocks[id]}:mocks[id]??{},exports,react);
  return exports;
 }
 const react = {createElement:(type,props,...children)=>({type,props:{...props,children}})};
 function find(node,type) { if(node?.type===type) return node; for(const child of node?.props?.children?.flat(Infinity)??[]) {const found=find(child,type); if(found)return found;} }
+
+test('tab visibility follows the focused stack through details and Back even when the URL lags', async () => {
+ let pathname='/reports';
+ const module=await load('src/components/floating-tabs-bar.tsx',{'react-native':{View:'View'},'expo-router':{usePathname:()=>pathname},'@/components/floating-app-bar':{FloatingAppBar:'FloatingAppBar'},'@/context/guest-access-context':{useGuestAccess:()=>({guest:false})}});
+ const route={name:'reports',state:{type:'stack',index:0,routes:[{name:'index'}]}};
+ const props={state:{index:0,routes:[route]},navigation:{}};
+ assert.notEqual(module.FloatingTabsBar(props),null);
+ route.state={type:'stack',index:1,routes:[{name:'index'},{name:'[id]'}]};
+ assert.equal(module.FloatingTabsBar(props),null,'pushing details hides tabs before the URL updates');
+ pathname='/reports/ticket-1';
+ assert.equal(module.FloatingTabsBar(props),null);
+ route.state={type:'stack',index:0,routes:[{name:'index'}]};
+ assert.notEqual(module.FloatingTabsBar(props),null,'Back shows tabs before the URL updates');
+ pathname='/reports/list';
+ assert.notEqual(module.FloatingTabsBar(props),null,'a stale utility URL cannot hide the focused main page');
+ route[CHILD_STATE]={type:'stack',index:1,routes:[{name:'index'},{name:'[id]'}]};
+ assert.equal(module.FloatingTabsBar(props),null,'the navigator child state takes precedence over its cached route state');
+});
+
+test('tab visibility resolves partial stacks and pending navigation without borrowing another tab URL', async () => {
+ let pathname='/reports';
+ const module=await load('src/components/floating-tabs-bar.tsx',{'react-native':{View:'View'},'expo-router':{usePathname:()=>pathname},'@/components/floating-app-bar':{FloatingAppBar:'FloatingAppBar'},'@/context/guest-access-context':{useGuestAccess:()=>({guest:false})}});
+ const route={name:'reports',state:{routes:[{name:'index'},{name:'[id]'}]}};
+ const props={state:{index:0,routes:[route]},navigation:{}};
+ assert.equal(module.FloatingTabsBar(props),null,'the last route is focused in a partial stack');
+ delete route.state;
+ route.params={screen:'[id]'};
+ assert.equal(module.FloatingTabsBar(props),null,'a pending child screen hides tabs before its state arrives');
+ route.params={screen:'index'};
+ pathname='/reports/ticket-1';
+ assert.notEqual(module.FloatingTabsBar(props),null,'an explicit root target wins over the old URL');
+ delete route.params;
+ route.name='home';
+ pathname='/profile/accounts';
+ assert.notEqual(module.FloatingTabsBar(props),null,'an unfocused tab URL cannot hide Home');
+});
 test('tab selection emits cancellable tabPress and explicitly targets nested roots',async()=>{
  const calls=[]; let prevented=false; const bar='FloatingAppBar';
  const module=await load('src/components/floating-tabs-bar.tsx',{'react-native':{View:'View'},'expo-router':{usePathname:()=>'/home'},'@/components/floating-app-bar':{FloatingAppBar:bar},'@/context/guest-access-context':{useGuestAccess:()=>({guest:false})}});

@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import ts from "typescript";
+import { getFocusedRouteNameFromRoute } from "./focused-route-harness.mjs";
 import { manualRefreshHarness } from "./manual-refresh-harness.mjs";
 import { getHomeLayout } from "../src/features/home/home-layout.ts";
 import * as reportBrowseFilter from "../src/features/reports/browse-filter.ts";
@@ -85,7 +86,7 @@ async function load(file, mocks) {
     if (id === "@/lib/cn") return { cn: (...classes) => classes.filter(Boolean).join(" ") };
     if (id === "@/lib/date") return dateHelpers;
     if (id === "@/components/panelui/kpi") return { Kpi: Object.assign(() => null, { Group: "KpiGroup", Stat: "KpiStat", Value: "Text", Title: "Text" }) };
-    if (id === "expo-router/react-navigation") return { useIsFocused: () => true, ...mocks[id] };
+    if (id === "expo-router/react-navigation") return { getFocusedRouteNameFromRoute, useIsFocused: () => true, ...mocks[id] };
     if (id === "expo-router")
       return { useLocalSearchParams: () => ({}), useFocusEffect: () => {}, ...mocks[id] };
     if (id === "@/features/main-fixtures")
@@ -907,6 +908,7 @@ test("Reports and Profile child deep links hide tabs before nested navigation st
     "/reports/queue",
     "/reports/timeline",
     "/reports/period",
+    "/reports/report-1",
     ...[
       "details",
       "accounts",
@@ -921,6 +923,7 @@ test("Reports and Profile child deep links hide tabs before nested navigation st
       "terms",
     ].map((name) => "/profile/" + name),
   ]) {
+    props.state.routes[1].name = pathname.split("/")[1];
     assert.equal(
       module.FloatingTabsBar(props),
       null,
@@ -930,11 +933,11 @@ test("Reports and Profile child deep links hide tabs before nested navigation st
   for (pathname of [
     "/home",
     "/reports",
-    "/reports/report-1",
     "/advisories",
     "/hotlines",
     "/profile",
   ]) {
+    props.state.routes[1].name = pathname.split("/")[1];
     assert.notEqual(
       module.FloatingTabsBar(props),
       null,
@@ -942,8 +945,9 @@ test("Reports and Profile child deep links hide tabs before nested navigation st
     );
   }
   pathname = "/reports/report-1";
+  props.state.routes[1].name = "reports";
   props.state.routes[1].state = { index: 0, routes: [{ name: "[id]" }] };
-  assert.notEqual(module.FloatingTabsBar(props), null);
+  assert.equal(module.FloatingTabsBar(props), null);
 });
 
 test("Reports stages period/account/status/type filters within one sheet and only Apply changes results", async () => {
