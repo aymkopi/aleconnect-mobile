@@ -925,8 +925,8 @@ test("Reports and Profile child deep links hide tabs before nested navigation st
   ]) {
     props.state.routes[1].name = pathname.split("/")[1];
     assert.equal(
-      module.FloatingTabsBar(props),
-      null,
+      module.FloatingTabsBar(props).props.style.opacity,
+      0,
       pathname + " must hide tabs without nested state",
     );
   }
@@ -938,16 +938,16 @@ test("Reports and Profile child deep links hide tabs before nested navigation st
     "/profile",
   ]) {
     props.state.routes[1].name = pathname.split("/")[1];
-    assert.notEqual(
-      module.FloatingTabsBar(props),
-      null,
+    assert.equal(
+      module.FloatingTabsBar(props).props.style.opacity,
+      1,
       pathname + " keeps the main navigation",
     );
   }
   pathname = "/reports/report-1";
   props.state.routes[1].name = "reports";
   props.state.routes[1].state = { index: 0, routes: [{ name: "[id]" }] };
-  assert.equal(module.FloatingTabsBar(props), null);
+  assert.equal(module.FloatingTabsBar(props).props.style.opacity, 0);
 });
 
 test("Reports stages period/account/status/type filters within one sheet and only Apply changes results", async () => {

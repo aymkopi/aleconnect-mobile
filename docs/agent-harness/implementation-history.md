@@ -668,3 +668,17 @@ Closeout: harness validation against the reviewed Staff companion and git diff -
 - Verification: inspected both card consumers and the single shared badge/indicator row. Existing44 focused status/read/navigation checks, TypeScript, scoped card lint (zero errors/warnings), paired harness and whitespace pass. Fresh source review has no findings. Native build gates are retained.
 - Remaining risks: physical read/unread alignment acceptance remains pending in the combined IPA. Existing reports and motion acceptance is retained.
 - Next: replace the superseded navbar-only build with a combined native IPA and verify both requested fixes on the retained iPhone installation.
+
+## 2026-10-18 — Combined iPhone build5 installed
+
+- Scope: resume the explicitly requested iloader installation after Computer Use was stopped; retain app data, own-account signer, all older IPAs and original pairing backup. Build5 includes the reviewed navbar and read-card status corrections; no dependency or API changes.
+- Verification: workflow39057062209 passes from92cc134; local exact-source/hash/physical-ARM64/Hermes/fixture-disabled and permissions checks pass. User selects the exact verified IPA in the unsupported native chooser; iloader shows successful signing/install. Independent installation-proxy readback confirms1.0.0/build5, valid USB trust and Developer Mode. Evidence remains in ignored release/ios/39057062209; no uninstall or reset.
+- Remaining risks: user accepts ticket-card alignment but reports navbar return still takes1–2seconds. Matching Personal Team profiles have no APNs and require renewal. Reports loading and prior full motion are already user-accepted.
+- Next: investigate remaining navbar return timing. Installation is complete; preserve source/artifact/device evidence and unrelated primary state.
+
+## 2026-10-18 — Retain the hidden navbar
+
+- Scope: after build5 device feedback, test whether destroying/recreating the animated bar on every child push/Back causes the remaining delay. Keep its component/native tree mounted with immediate opacity, disabled hidden gesture/press targets and hidden accessibility. No data, route, API or animation-timing change.
+- Verification: two retention/interaction regressions fail before/pass after;37 focused checks, full509-pass/one-existing-skip suite, TypeScript, paired harness, whitespace and fresh read-only review pass. Scoped lint has zero errors/one baseline refs warning. Graph refresh4,363 nodes/8,273 edges stays separate. Artifact/device checks follow in the iPhone handoff.
+- Remaining risks: the1–2second native return timing remains unverified until the next phone trial. Previously accepted status, motion and Reports fixes remain intact.
+- Next: package the interface update, install in place and repeat the same details/Back flow on the iPhone.

@@ -12,22 +12,49 @@ async function load(path, mocks) {
 const react = {createElement:(type,props,...children)=>({type,props:{...props,children}})};
 function find(node,type) { if(node?.type===type) return node; for(const child of node?.props?.children?.flat(Infinity)??[]) {const found=find(child,type); if(found)return found;} }
 
+test('hidden tabs retain the same bar subtree and disable touch and accessibility until Back', async () => {
+ let pathname='/reports';
+ const module=await load('src/components/floating-tabs-bar.tsx',{'react-native':{View:'View'},'expo-router':{usePathname:()=>pathname},'@/components/floating-app-bar':{FloatingAppBar:'FloatingAppBar'},'@/context/guest-access-context':{useGuestAccess:()=>({guest:false})}});
+ const route={name:'reports',state:{index:0,routes:[{name:'index'}]}};
+ const props={state:{index:0,routes:[route]},navigation:{}};
+ const initial=module.FloatingTabsBar(props);
+ for(let visit=0;visit<3;visit++) {
+  route.state={index:1,routes:[{name:'index'},{name:'[id]'}]}; pathname='/reports/ticket-1';
+  const hidden=module.FloatingTabsBar(props);
+  assert.ok(find(hidden,'FloatingAppBar'),'hiding must retain the animated bar instead of unmounting it');
+  assert.equal(hidden.type,initial.type);
+  assert.equal(hidden.props.style.opacity,0);
+  assert.equal(hidden.props.pointerEvents,'none');
+  assert.equal(hidden.props.accessibilityElementsHidden,true);
+  assert.equal(hidden.props.importantForAccessibility,'no-hide-descendants');
+  assert.equal(find(hidden,'FloatingAppBar').props.hidden,true);
+  route.state={index:0,routes:[{name:'index'}]};
+  const shown=module.FloatingTabsBar(props);
+  assert.equal(shown.type,initial.type);
+  assert.equal(shown.props.style.opacity,1);
+  assert.equal(shown.props.pointerEvents,'box-none');
+  assert.equal(shown.props.accessibilityElementsHidden,false);
+  assert.equal(shown.props.importantForAccessibility,'auto');
+  assert.equal(find(shown,'FloatingAppBar').props.hidden,false);
+ }
+});
+
 test('tab visibility follows the focused stack through details and Back even when the URL lags', async () => {
  let pathname='/reports';
  const module=await load('src/components/floating-tabs-bar.tsx',{'react-native':{View:'View'},'expo-router':{usePathname:()=>pathname},'@/components/floating-app-bar':{FloatingAppBar:'FloatingAppBar'},'@/context/guest-access-context':{useGuestAccess:()=>({guest:false})}});
  const route={name:'reports',state:{type:'stack',index:0,routes:[{name:'index'}]}};
  const props={state:{index:0,routes:[route]},navigation:{}};
- assert.notEqual(module.FloatingTabsBar(props),null);
+ assert.equal(module.FloatingTabsBar(props).props.style.opacity,1);
  route.state={type:'stack',index:1,routes:[{name:'index'},{name:'[id]'}]};
- assert.equal(module.FloatingTabsBar(props),null,'pushing details hides tabs before the URL updates');
+ assert.equal(module.FloatingTabsBar(props).props.style.opacity,0,'pushing details hides tabs before the URL updates');
  pathname='/reports/ticket-1';
- assert.equal(module.FloatingTabsBar(props),null);
+ assert.equal(module.FloatingTabsBar(props).props.style.opacity,0);
  route.state={type:'stack',index:0,routes:[{name:'index'}]};
- assert.notEqual(module.FloatingTabsBar(props),null,'Back shows tabs before the URL updates');
+ assert.equal(module.FloatingTabsBar(props).props.style.opacity,1,'Back shows tabs before the URL updates');
  pathname='/reports/list';
- assert.notEqual(module.FloatingTabsBar(props),null,'a stale utility URL cannot hide the focused main page');
+ assert.equal(module.FloatingTabsBar(props).props.style.opacity,1,'a stale utility URL cannot hide the focused main page');
  route[CHILD_STATE]={type:'stack',index:1,routes:[{name:'index'},{name:'[id]'}]};
- assert.equal(module.FloatingTabsBar(props),null,'the navigator child state takes precedence over its cached route state');
+ assert.equal(module.FloatingTabsBar(props).props.style.opacity,0,'the navigator child state takes precedence over its cached route state');
 });
 
 test('tab visibility resolves partial stacks and pending navigation without borrowing another tab URL', async () => {
@@ -35,17 +62,17 @@ test('tab visibility resolves partial stacks and pending navigation without borr
  const module=await load('src/components/floating-tabs-bar.tsx',{'react-native':{View:'View'},'expo-router':{usePathname:()=>pathname},'@/components/floating-app-bar':{FloatingAppBar:'FloatingAppBar'},'@/context/guest-access-context':{useGuestAccess:()=>({guest:false})}});
  const route={name:'reports',state:{routes:[{name:'index'},{name:'[id]'}]}};
  const props={state:{index:0,routes:[route]},navigation:{}};
- assert.equal(module.FloatingTabsBar(props),null,'the last route is focused in a partial stack');
+ assert.equal(module.FloatingTabsBar(props).props.style.opacity,0,'the last route is focused in a partial stack');
  delete route.state;
  route.params={screen:'[id]'};
- assert.equal(module.FloatingTabsBar(props),null,'a pending child screen hides tabs before its state arrives');
+ assert.equal(module.FloatingTabsBar(props).props.style.opacity,0,'a pending child screen hides tabs before its state arrives');
  route.params={screen:'index'};
  pathname='/reports/ticket-1';
- assert.notEqual(module.FloatingTabsBar(props),null,'an explicit root target wins over the old URL');
+ assert.equal(module.FloatingTabsBar(props).props.style.opacity,1,'an explicit root target wins over the old URL');
  delete route.params;
  route.name='home';
  pathname='/profile/accounts';
- assert.notEqual(module.FloatingTabsBar(props),null,'an unfocused tab URL cannot hide Home');
+ assert.equal(module.FloatingTabsBar(props).props.style.opacity,1,'an unfocused tab URL cannot hide Home');
 });
 test('tab selection emits cancellable tabPress and explicitly targets nested roots',async()=>{
  const calls=[]; let prevented=false; const bar='FloatingAppBar';

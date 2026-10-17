@@ -14,18 +14,21 @@ export function FloatingTabsBar({ state, navigation }: BottomTabBarProps) {
     : undefined;
 
   // The URL may lag native Back; use it only while the active stack has no state.
-  if (
-    nestedRouteName !== undefined
+  const hidden = Boolean(nestedRouteName !== undefined
       ? nestedRouteName !== "index"
-      : activeRoute && pathname.startsWith(`/${activeRoute.name}/`)
-  ) {
-    return null;
-  }
+      : activeRoute && pathname.startsWith(`/${activeRoute.name}/`));
 
   return (
-    <View style={{ flex: 0, pointerEvents: "box-none" }}>
+    <View
+      style={{ flex: 0, opacity: hidden ? 0 : 1 }}
+      pointerEvents={hidden ? "none" : "box-none"}
+      accessibilityElementsHidden={hidden}
+      importantForAccessibility={hidden ? "no-hide-descendants" : "auto"}
+      aria-hidden={hidden}
+    >
       <FloatingAppBar
         currentIndex={state.index}
+        hidden={hidden}
         onSelect={(index) => {
           const route = state.routes[index];
 

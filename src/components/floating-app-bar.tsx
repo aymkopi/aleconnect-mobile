@@ -44,8 +44,8 @@ function TabContent({ title, Icon, selected, primary, muted, fontSize }: {
     }, textStyle]}>{title}</AnimatedText>
   </>;
 }
-export function FloatingAppBar({ currentIndex, onSelect }: {
-  currentIndex: number; onSelect: (index: number) => boolean | void;
+export function FloatingAppBar({ currentIndex, onSelect, hidden = false }: {
+  currentIndex: number; onSelect: (index: number) => boolean | void; hidden?: boolean;
 }) {
   const { width, fontScale } = useWindowDimensions(), insets = useSafeAreaInsets();
   const [surface, primary, muted] = useAppColors(["card", "primary", "muted-foreground"]);
@@ -73,6 +73,7 @@ export function FloatingAppBar({ currentIndex, onSelect }: {
     position.set(reduced ? target : withSpring(target, { duration: 400, dampingRatio: 1, overshootClamping: true, reduceMotion: ReduceMotion.System }));
   }, [currentIndex, onSelect, position, reduced]);
   const pan = Gesture.Pan()
+    .enabled(!hidden)
     .activeOffsetX([-8, 8])
     .failOffsetY([-12, 12])
     .onBegin((event) => {
@@ -107,6 +108,7 @@ export function FloatingAppBar({ currentIndex, onSelect }: {
         width: slot, borderRadius: 999, backgroundColor: primary + "12",
       }, pillStyle]} />
       {items.map(({ title, Icon }, i) => <Pressable key={title}
+        disabled={hidden}
         accessibilityRole="tab" accessibilityLabel={title}
         accessibilityState={{ selected: i === currentIndex }}
         onPress={() => { if (Date.now() >= suppressPressUntil.current) onSelect(i); }}

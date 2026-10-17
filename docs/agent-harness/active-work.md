@@ -1,8 +1,6 @@
 # Active work
 
-- [iPhone motion, Reports and navigation](tasks/ios-usb-ipa.md): build3 is independently USB-verified and user accepts full pill/card motion with Reduce Motion enabled. Staff PR52 is merged/deployed as d6847897 (1.1.2-alpha.1); user confirms Reports loads. Focused-stack navbar correction and regressions pass. Read ticket cards now omit the hidden update-dot spacer so status aligns with the chevron edge; combined IPA/device acceptance pending. Preserve signer, app data and pairing backup.
-
-- [iPhone USB IPA](tasks/ios-usb-ipa.md): requested build/sign/USB install complete; user confirmed normal opening after own-profile trust. Independent readback confirms1.0.0/build2, Developer Mode enabled and profile expiry October25,12:35AM Manila; APNs unavailable. Anisette502 resolved with Jkcoxson (Windows). Broader native/private/provider acceptance stays separate. Preserve IPA, original pairing backup and unrelated device/signing state.
+- [iPhone motion, Reports and navigation](tasks/ios-usb-ipa.md): build5 from92cc134 is personally signed/installed and independently USB-verified. User accepts ticket-card alignment, prior motion and deployed Reports loading, but navbar still returns after1–2seconds. Testing a retained mounted bar with hidden touch/gesture/accessibility disabled; next IPA/device timing check pending. Preserve all IPAs, signer, app data and pairing backup; free profiles have no APNs.
 
 - [Mobile declutter refinement](tasks/mobile-declutter.md): PR14/sourcef4130b9a merged after verified Staff1.1.1-alpha.1. Mobile1.2.0-alpha.1/code68 published; exact artifact/signature/alignment and three tablet25040RP0AG cold launches/public navigation pass. Both default branches are synchronized; finish docs-only closeout and task-only cleanup. Preserve manual edits, device data and the separate Reports proposal; private/provider/AT/iOS acceptance remains separate.
 
