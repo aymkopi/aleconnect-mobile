@@ -1,6 +1,6 @@
 # Active work
 
-- [iPhone motion, Reports and navigation](tasks/ios-usb-ipa.md): builds5/6 are USB-verified; motion, Reports and status alignment are accepted but navbar delay remains. Sourcefd7a3da moves child pages above tabs and preserves return state/guards.508 tests and production Hermes/build7 IPA identity checks pass; iloader needs local Apple login before import/install and physical timing acceptance. Preserve IPAs, signer, app data, pairing backup and user-installed SideStore.
+- [iPhone fixes accepted](tasks/ios-usb-ipa.md): after receiving the verified build7 IPA, user confirms the navbar issue is fixed. Motion, Reports loading and status alignment were already accepted. Sourcefd7a3da and508 passing tests are retained; requested fixes are complete. Preserve the Desktop IPA, prior artifacts, signer, app data, pairing backup and user-installed SideStore. Broader device workflows and build7 USB version readback were not repeated.
 
 - [Mobile declutter refinement](tasks/mobile-declutter.md): PR14/sourcef4130b9a merged after verified Staff1.1.1-alpha.1. Mobile1.2.0-alpha.1/code68 published; exact artifact/signature/alignment and three tablet25040RP0AG cold launches/public navigation pass. Both default branches are synchronized; finish docs-only closeout and task-only cleanup. Preserve manual edits, device data and the separate Reports proposal; private/provider/AT/iOS acceptance remains separate.
 

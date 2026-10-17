@@ -696,3 +696,10 @@ Closeout: harness validation against the reviewed Staff companion and git diff -
 - Verification: production Hermes export, exact-source/allowlist, matching bytecode,35 unchanged assets and ZIP entry identity pass; only the bundle/build number change. Build7 SHA25627f68da1f80551d719307484dda185719cae4cd3b4d971cdb10b438824d289b5,21,035,688 bytes; independent ARM64/API/permissions/fixture-disabled checks pass. Artifact/metadata and generated/export recovery evidence are retained under ignored cache/release folders.
 - Remaining risks: build7 is not installed or timing-accepted yet. The reopened iloader requires local Apple login. Preserve the existing app, signing identity and user-installed SideStore.
 - Next: import the uniquely named build7 file after local login, independently read back installed version7 and repeat loaded Reports/Account child/Back flows plus deep-link/unsaved-change checks.
+
+## 2026-10-18 — User accepts build7 navbar fix
+
+- Scope: at the user's request, stop Computer Use and provide the build7 IPA in `C:/Users/Justine/Desktop/AleconnectApps/ipa/Aleconnect-build7-native-navigation.ipa`. Preserve any different existing file; source and copied artifact hashes match the verified build7 digest.
+- Verification: user subsequently reports **Fixed**, accepting the reported navbar delay after the native-stack correction. Prior motion, Reports and card alignment acceptance is retained; source508-pass/one-existing-skip and IPA identity evidence remains recorded above.
+- Remaining risks: no independent build7 USB version/signing readback or broader device workflow retest after manual handoff. This acceptance is user-reported; no new app/device/API changes are made.
+- Next: requested issues complete. Retain the accepted IPA, task branch/worktree, prior artifacts and protected app/signing/pairing/SideStore state; no further device input or cleanup.
