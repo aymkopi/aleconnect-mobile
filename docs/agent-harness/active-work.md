@@ -1,6 +1,6 @@
 # Active work
 
-- [iPhone USB IPA](tasks/ios-usb-ipa.md): user requested a physical-iPhone build from Windows with a free Apple account. Separate build branch prepares an unsigned ARM64 IPA for local signing; hosted build, downloaded-artifact checks and USB/device acceptance are pending. Preserve existing Android/device/signing state.
+- [iPhone USB IPA](tasks/ios-usb-ipa.md): separate-branch macOS build39033231341 and exact downloaded IPA/hash/ARM64/iPhoneOS/Hermes/fixture-off checks pass. iPhone11/iOS27.2 was read back over USB. Unsigned IPA and verified iloader installer are in ignored `release/ios`; local Apple signing, installation, Developer Mode and native acceptance remain pending. Preserve existing Android/device/signing state.
 
 - [Mobile declutter refinement](tasks/mobile-declutter.md): PR14/sourcef4130b9a merged after verified Staff1.1.1-alpha.1. Mobile1.2.0-alpha.1/code68 published; exact artifact/signature/alignment and three tablet25040RP0AG cold launches/public navigation pass. Both default branches are synchronized; finish docs-only closeout and task-only cleanup. Preserve manual edits, device data and the separate Reports proposal; private/provider/AT/iOS acceptance remains separate.
 
