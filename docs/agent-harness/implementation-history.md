@@ -725,3 +725,10 @@ Closeout: harness validation against the reviewed Staff companion and git diff -
 - Remaining risks: this new upload path is not yet exercised in GitHub. The app source remains accepted build7; no new device installation/provider/Apple acceptance is implied.
 - Next: finish checks/review, merge the scoped PR and verify a new alpha's APK/IPA/checksum/metadata assets and exact source. Preserve security drafts, old releases, artifacts and device state.
 - Final source gates:514 tests pass/one existing skip, types, scoped release lint (zero errors/warnings), harness/whitespace and YAML graph pass. Review's identical-source retry gap is corrected with verified-tag output and stale-source exclusion;17 focused tests pass independently and re-review is clear. Generated Graphify refresh is separate; app/native source is unchanged.
+
+## 2026-10-18 — IPA and APK available on the same release
+
+- Scope: PR18 merges asdf8a225919cf533304b4232cefeb264886ea85a6 after both exact-head checks; merged tree equals the reviewed source. Workflow39121661080 passes all four jobs, including the new same-source final IPA upload. Primary master is synchronized through the application merge; security drafts are excluded.
+- Verification: public1.2.2-alpha.1 has APK/code70, unsigned iOS1.0.0/build25, two metadata and two checksum files. Tag/target/both sources match; all six downloaded GitHub digests match. Independent APK retained signer/non-debuggable/SDK/54-library16KB/API/fixture-off and IPA ARM64/iPhoneOS/permissions/API/fixture-off checks pass. APK SHA256b3ef13b084fb9a5b5d9a75c0098c0c3359556f8d6dd7d2691dfba22fea7fd97c; IPA SHA2568ad53a068544bb3cefd5dd5b6054edf668e968874a59064528367251bb7120eb. Desktop IPA copy matches.
+- Remaining risks: new artifacts were not installed or signed. The unchanged app source was accepted in iPhone build7; Personal Team signing/APNs/provider/store limits remain. No old release asset or protected device state is replaced.
+- Next: merge this docs-only closeout, verify native/publication jobs skip and synchronize clean master. Product/workflow/new-release objectives are complete; preserve all existing evidence and excluded work.

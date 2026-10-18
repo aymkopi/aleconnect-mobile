@@ -88,7 +88,15 @@ keep human-curated deprecations, removals and security details in CHANGELOG.md.
 
 ## Manual use
 
-Mobile parallel-build acceptance (2026-10-18): PR16/source`0a5d5c1` passes
+Mobile combined-release acceptance (2026-10-18): PR18/source`df8a225` passes
+workflow`39121661080`, including both parallel builds and final IPA attachment.
+[1.2.2-alpha.1](https://github.com/aymkopi/aleconnect-mobile/releases/tag/v1.2.2-alpha.1)
+contains APK/code70 and unsigned iOS`1.0.0`/build25 with separate checksum and
+metadata files. All six downloaded digests, source/tag and native/runtime checks
+pass. Desktop IPA copy matches; fresh artifacts were not installed. The app source
+still equals user-accepted iPhone build7.
+
+Earlier parallel-build acceptance: PR16/source`0a5d5c1` passes
 workflow`39106196909`, with overlapping Android/iOS jobs after the shared checks.
 Android`1.2.1-alpha.1`/code69 is published; unsigned iOS`1.0.0`/build23 is an
 Actions artifact. Exact source/tag, downloaded hashes, retained APK signer and
