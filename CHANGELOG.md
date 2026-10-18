@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.3.1-alpha.1 - 2026-10-19
+
 ### Fixed
 
 - Apply one allocated alpha version to both native builds. iPhone IPAs use the
@@ -10,6 +12,20 @@
 - Reject IPA publication when its alpha, native version or build differs from
   the matching Android release. Preserve original assets on retries and resume
   a missing IPA without allocating another version or rebuilding Android.
+
+### Verification and release
+
+- PR #20 / source ff011146 passes the exact reviewed tree and fresh 551-pass
+  suite. Workflow 39148140791 succeeds across shared checks, one allocation,
+  parallel native builds and final IPA upload, publishing both platforms as
+  1.3.1-alpha.1 / build code 72.
+- All six published asset digests and source/tag checks pass. APK retains its
+  original signer/package, fixture-off HTTPS API runtime and 54-library ZIP/ELF
+  16 KB alignment. Actual IPA Info.plist is 1.3.1/build72; embedded About config
+  is 1.3.1-alpha.1. ARM64/archive/permissions/runtime checks pass.
+- New versioned Desktop IPA matches the published hash; all five previous IPA
+  files are unchanged. Manual work, signing and device data are preserved. No
+  installation, provider acceptance, Staff deployment or migration is claimed.
 
 ## 1.3.0-alpha.1 - 2026-10-18
 

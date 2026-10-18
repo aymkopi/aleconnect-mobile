@@ -20,8 +20,16 @@ new code automatically.
 - [x] Retain the full alpha in the app label; validate native core/build on upload.
 - [x] Verify configuration, production iOS export, source checks and review.
 - [x] Publish [Mobile PR #20](https://github.com/aymkopi/aleconnect-mobile/pull/20).
-- [x] Verify exact application-head CI (`4024c525`); integration/release remains separate.
-- [ ] Verify a newly built IPA and its installed iPhone version after release.
+- [x] Verify exact application-head and final PR-head CI (`4024c525`, `bd7a6730`).
+- [x] Merge the user-authorized PR as `ff011146` and fast-forward clean local master.
+- [x] Allocate `1.3.1-alpha.1` / code `72` once for both native jobs.
+- [x] Verify newly published IPA/APK versions, digests and original Android signer.
+- [x] Copy the new IPA to Desktop and verify existing IPA files are unchanged.
+
+The user explicitly authorizes merge/publication and the Desktop IPA copy on
+2026-10-19. Automatic combined release workflow `39148140791` owns both builds;
+do not dispatch a duplicate release. Device installation/signing is outside this
+request and remains separate from artifact acceptance.
 
 ## Implementation
 
@@ -55,6 +63,29 @@ intentionally skipped Android. Existing immutable digest/source guards remain.
 - Both GitHub checks pass for application head `4024c525`: harness/application
   validation run `39147111712` and Service Memo compatibility run `39147111713`.
   Documentation-only closeout follows without changing the tested app/workflows.
+- User-authorized PR #20 merges as `ff011146f29440ba14e568d385476a90edd040bb`
+  with the exact reviewed tree. Fresh premerge tests pass: 551/552, zero failed,
+  one existing skip. A sandbox-only Git-fixture write restriction disappears in
+  the authorized unsandboxed rerun; no source/test workaround is added.
+- Release workflow `39148140791` succeeds across all five jobs and publishes
+  [1.3.1-alpha.1](https://github.com/aymkopi/aleconnect-mobile/releases/tag/v1.3.1-alpha.1).
+  The tag and both native metadata sources match the merge; all six downloaded
+  asset digests match GitHub. Android manifest version `1.3.1-alpha.1` / code `72`,
+  original certificate/package, standalone HTTPS API/fixture-off runtime and all
+  54 libraries' ZIP/ELF 16 KB alignment verify independently.
+- The published IPA's actual Info.plist reads native `1.3.1` / build `72`.
+  Its embedded `EXConstants.bundle/app.config` contains full alpha
+  `1.3.1-alpha.1`; the About reader and updated profile flow are in its bundle.
+  Physical ARM64 Mach-O, archive integrity, permissions and fixture-off API
+  runtime pass. Published IPA bytes match the successful iOS Actions artifact.
+- Current APK SHA256:
+  `e079cc64042b3d0d8a53476119a80bedc390597ce950c02209f96d5a4b05f9af`.
+  Current IPA SHA256:
+  `da1e9db1307ac0458314fa713a8f2a29c0c6da311ff3f56ba9475f2c686290c3`.
+  The new Desktop copy is
+  `C:/Users/Justine/Desktop/AleconnectApps/ipa/Aleconnect-ios-1.3.1-alpha.1-build72.ipa`;
+  its hash matches, and all five pre-existing IPA files retain their recorded
+  hashes. No generic filename or prior signed/unsigned artifact is overwritten.
 - Expo alignment and full unmasked Doctor have a baseline failure: 20/21 Doctor
   checks pass; six existing Expo patch recommendations remain in the unchanged
   dependency files. Do not hide or broaden this release fix to upgrade them.
@@ -72,16 +103,18 @@ intentionally skipped Android. Existing immutable digest/source guards remain.
 
 ## Remaining risks
 
-This patch cannot change an immutable published IPA: build 27 has the new UI but
-still has the old native version label. New native compilation, combined GitHub
-release/rerun behavior, iPhone installation, Apple signing and provider acceptance
-remain unverified until an authorized release. Manual work, SideStore, pairing,
-signing, old binaries and device data are untouched. Six existing dependency
-patch recommendations remain separate.
+Old published binaries remain immutable: build 27 keeps its old native label;
+use the new alpha for the corrected label. New native compilation, happy-path
+combined publication and downloaded-binary versions are verified. Forced failed-job
+recovery has unit/source review coverage but was not induced in production.
+iPhone installation, Apple signing and provider acceptance remain separate.
+Manual work, SideStore, pairing, signing, old binaries and device data are
+untouched. Six existing dependency patch recommendations remain separate.
 
 ## Next
 
-PR #20 is ready for review. Merge/release only within the user's authorization,
-then verify both
-published native versions, source/digests and the original Android signer. No
-Staff deployment or migration is required.
+Requested merge/publication/version verification and Desktop delivery are complete.
+Finish docs-only closeout and synchronize clean master without creating another
+alpha. No Staff deployment or migration is required. Installed-iPhone acceptance
+can use the verified new IPA through the user's existing local signing process;
+no device installation or signing is part of this request.
