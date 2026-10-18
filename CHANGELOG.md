@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Build automation
+
+- Attach the unsigned iPhone IPA and separate iOS checksum/source metadata to the same GitHub Release as the APK after both parallel builds succeed. Verify the exact release source and all uploaded digests; preserve existing assets on retries.
+
 ## 1.2.1-alpha.1 - 2026-10-18
 
 ### Fixed

@@ -121,7 +121,11 @@ export function prepareRelease(options) {
   let current;
   if (latest) {
     const previousSource = command('git', ['rev-parse', `${latest.tag_name}^{commit}`]);
-    if (previousSource === env.GITHUB_SHA) return outputs(env, {skip: true, reason: 'Source already published'});
+    if (previousSource === env.GITHUB_SHA) {
+      assert.equal(metadata(latest.tag_name).sourceCommit, env.GITHUB_SHA, 'Published metadata has a different source');
+      assert.equal(remoteTagTarget(command, env.GITHUB_REPOSITORY, latest.tag_name), env.GITHUB_SHA, 'Published tag points to a different source');
+      return outputs(env, {skip: true, reason: 'Source already published', tag: latest.tag_name});
+    }
     try { command('git', ['merge-base', '--is-ancestor', previousSource, env.GITHUB_SHA]); }
     catch {
       command('git', ['merge-base', '--is-ancestor', env.GITHUB_SHA, previousSource]);
@@ -231,8 +235,45 @@ export function publishRelease(options) {
   return {skip: false, tag: release.tag};
 }
 
+export function publishIosRelease(options) {
+  const {cwd, env, config, command, inventory, metadata} = runtime(options);
+  assert.equal(config.name, 'aleconnect-mobile', 'iPhone assets belong to Mobile');
+  const tag = env.RELEASE_TAG;
+  assert.ok(isAlphaTag(tag), 'Require the exact Android alpha tag');
+  const published = inventory().find(release => release.tag_name === tag);
+  assert.ok(published && !published.draft, 'Require the published Android release');
+  assert.equal(metadata(tag).sourceCommit, env.GITHUB_SHA, 'Android release has a different source');
+  assert.equal(remoteTagTarget(command, env.GITHUB_REPOSITORY, tag), env.GITHUB_SHA, 'Release tag points to a different source');
+  const folder = join(cwd, 'release/ios');
+  const ios = readJson(join(folder, 'build-metadata.json'));
+  assert.equal(ios.sourceCommit, env.GITHUB_SHA, 'IPA has a different source');
+  assert.equal(ios.bundleIdentifier, readJson(join(cwd, 'app.json')).expo.ios.bundleIdentifier, 'Wrong iPhone app identity');
+  assert.equal(ios.platform, 'iPhoneOS', 'Require a physical-iPhone build');
+  assert.equal(ios.architecture, 'arm64', 'Require ARM64');
+  assert.equal(ios.apiOrigin, 'https://api.aleconnect.app', 'Require the live HTTPS API');
+  assert.equal(ios.signing, 'unsigned; sign locally before USB installation', 'Keep Apple signing local');
+  assert.equal(ios.remotePushSupported, false, 'Personal signing does not support remote push');
+  assert.equal(digest(join(folder, 'Aleconnect-unsigned.ipa')), ios.sha256, 'IPA checksum mismatch');
+  assert.equal(readFileSync(join(folder, 'SHA256SUMS'), 'utf8'), `${ios.sha256}  Aleconnect-unsigned.ipa\n`, 'IPA checksum manifest mismatch');
+  writeJson(join(folder, 'ios-build-metadata.json'), ios);
+  writeFileSync(join(folder, 'ios-SHA256SUMS'), readFileSync(join(folder, 'SHA256SUMS')));
+  const files = ['Aleconnect-unsigned.ipa', 'ios-build-metadata.json', 'ios-SHA256SUMS'];
+  // Keep Android metadata/checksums intact, and never replace an existing asset.
+  const missing = files.filter(file => {
+    const asset = published.assets.find(item => item.name === file);
+    if (asset) assert.equal(asset.digest, `sha256:${digest(join(folder, file))}`, `Published digest mismatch for ${file}`);
+    return !asset;
+  });
+  if (missing.length) command('gh', ['release', 'upload', tag, ...missing.map(file => join(folder, file)), '--repo', env.GITHUB_REPOSITORY]);
+  const uploaded = inventory().find(release => release.tag_name === tag);
+  for (const file of files) assert.equal(uploaded?.assets.find(asset => asset.name === file)?.digest, `sha256:${digest(join(folder, file))}`, `Uploaded digest mismatch for ${file}`);
+  assert.equal(remoteTagTarget(command, env.GITHUB_REPOSITORY, tag), env.GITHUB_SHA, 'Release tag changed during IPA upload');
+  return {skip: missing.length === 0, tag};
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  assert.ok(['prepare', 'publish'].includes(process.argv[2]), 'Use prepare or publish');
+  assert.ok(['prepare', 'publish', 'publish-ios'].includes(process.argv[2]), 'Use prepare, publish or publish-ios');
   if (process.argv[2] === 'prepare') prepareRelease();
-  else publishRelease();
+  else if (process.argv[2] === 'publish') publishRelease();
+  else publishIosRelease();
 }
