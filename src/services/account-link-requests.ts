@@ -1,5 +1,4 @@
 import { createApiRequestId, apiRequest } from "@/services/api";
-import type { PasswordChangeStatus } from "@/services/auth";
 import {
   parseConsumerAccountLinkRequestStatus,
   type ConsumerAccountLinkRequestStatus,
@@ -46,13 +45,4 @@ export async function submitAccountLinkRequest(input: {
     }),
   }, { idempotent: true, authToken });
   return { ...result, status: parseConsumerAccountLinkRequestStatus(result.status) };
-}
-
-export function requestAccountLinkVerification(
-  body: { action: "status" | "verify" | "cancel"; currentPassword?: string; flowId?: string | null },
-  authToken: string,
-) {
-  return apiRequest<PasswordChangeStatus>("/api/mobile/auth/account-link-verification", {
-    method: "POST", body: JSON.stringify(body),
-  }, { authToken });
 }

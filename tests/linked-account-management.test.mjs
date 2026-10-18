@@ -71,3 +71,12 @@ test("link-request reader tolerates old and malformed current-link metadata; ret
   assert.ok(sent.every(b=>b.verificationFlowId==="verified-flow"));
   assert.ok(calls.filter(c=>c.options).every(c=>c.auth.authToken==="pinned-session"));
 });
+
+test("unlink transmits its purpose-specific proof and target details with the selected session", async () => {
+  const ts = (await import("typescript")).default;
+  const source = await readFile(new URL("../src/services/linked-accounts.ts", import.meta.url), "utf8"), calls = [], exports = {};
+  new Function("require", "exports", ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText)(() => ({ apiRequest: async (...args) => { calls.push(args); return { reauthenticationRequired: true }; } }), exports);
+  await exports.unlinkLinkedAccount({ serviceAccountId: "service-a", currentAccountPassword: " exact service password ", accessRevision: 4, replacementDefaultServiceAccountId: "service-b", verificationFlowId: "unlink-proof" }, "pinned-session");
+  assert.deepEqual(JSON.parse(calls[0][1].body), { action: "unlink", serviceAccountId: "service-a", currentAccountPassword: " exact service password ", accessRevision: 4, replacementDefaultServiceAccountId: "service-b", verificationFlowId: "unlink-proof" });
+  assert.equal(calls[0][2].authToken, "pinned-session");
+});

@@ -4,6 +4,8 @@
 
 ### Security
 
+- Add current email-password confirmation before unlinking; share the existing linking verification gate while keeping purpose-specific server proofs. Preserve the service-account password, owned replacement-default selection and last-account safeguard. Protect newer sessions from delayed unlink cleanup and show committed link success even after local verification expiry.
+
 - Add current sign-in password verification before linking another ALECO account, with server-enforced cooldown and five-minute expiry. Keep target service-account credentials and Staff review separate, clear secrets on leave, and preserve account number/name when verification expires. Requires the paired Staff endpoint/guard before release; no dependency, native or signing change.
 
 ## 1.2.0-alpha.1 - 2026-10-17

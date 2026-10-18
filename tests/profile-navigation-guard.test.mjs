@@ -51,7 +51,8 @@ for (const scenario of [
   let outcome = "blocked", cleared = false;
   const router = { canGoBack: () => true, back: () => { outcome = "leave"; } };
   let currentCleared = false;
-  const callback = new Function("busy", "view", "number", "name", "password", "currentPassword", "setPassword", "setCurrentPassword", "setView", "setDiscard", "router", linkBack + "; return back;")(scenario.busy, scenario.view, "", "", scenario.password, scenario.currentPassword ?? "", () => { cleared = true; }, () => { currentCleared = true; }, value => { outcome = value; }, () => { outcome = "discard"; }, router);
+  const verification={password:scenario.currentPassword??"",setPassword:()=>{currentCleared=true;}};
+  const callback = new Function("busy", "view", "number", "name", "password", "verification", "verifying", "setPassword", "setView", "setDiscard", "router", linkBack + "; return back;")(scenario.busy, scenario.view, "", "", scenario.password, verification, scenario.view==="verify", () => { cleared = true; }, value => { outcome = value; }, () => { outcome = "discard"; }, router);
   callback();
   assert.equal(outcome, scenario.expected);
   assert.equal(cleared, !scenario.busy);
