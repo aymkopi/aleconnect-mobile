@@ -83,6 +83,14 @@ keep human-curated deprecations, removals and security details in CHANGELOG.md.
 
 ## Manual use
 
+Mobile parallel-build acceptance (2026-10-18): PR16/source`0a5d5c1` passes
+workflow`39106196909`, with overlapping Android/iOS jobs after the shared checks.
+Android`1.2.1-alpha.1`/code69 is published; unsigned iOS`1.0.0`/build23 is an
+Actions artifact. Exact source/tag, downloaded hashes, retained APK signer and
+native/runtime checks pass. The IPA is copied and hash-verified in the user's
+Desktop IPA folder. User-accepted iPhone build7 has the same app source; these
+fresh CI files were not installed. See the [iPhone handoff](agent-harness/tasks/ios-usb-ipa.md).
+
 On the default branch, run **Deploy Cloudflare** (Staff) or **Android Alpha
 Release** (Mobile/Lineman), then choose `auto`, `patch`, `minor`, `major` or
 `alpha`. For example:

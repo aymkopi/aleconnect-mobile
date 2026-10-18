@@ -1,6 +1,6 @@
 # Active work
 
-- [iPhone fixes and parallel release integration](tasks/ios-usb-ipa.md): build7 navbar, motion, Reports and card alignment are user-accepted. User authorizes master integration and parallel automatic iOS/Android builds, excluding draft security Mobile15/Staff55. Reuse iOS builder beside Android after shared checks; local/review/PR/native build gates are pending. Preserve Desktop IPA, prior artifacts, signer, app data, pairing backup and SideStore; no Computer Use.
+- [Published iPhone fixes and parallel builds](tasks/ios-usb-ipa.md): PR16 merges as0a5d5c1 after both checks; workflow39106196909 passes shared CI and concurrent Android/iOS jobs. Android1.2.1-alpha.1/code69 and unsigned iOS1.0.0/build23 downloads pass source/hash/native checks; Desktop IPA copy matches. Same app source was accepted on iPhone build7; no remaining product/build work. Docs-only closeout preserves native gates. Exclude security Mobile15/Staff55 and preserve source/artifacts/device/signing/SideStore state; no new installation or Computer Use.
 
 - [Mobile declutter refinement](tasks/mobile-declutter.md): PR14/sourcef4130b9a merged after verified Staff1.1.1-alpha.1. Mobile1.2.0-alpha.1/code68 published; exact artifact/signature/alignment and three tablet25040RP0AG cold launches/public navigation pass. Both default branches are synchronized; finish docs-only closeout and task-only cleanup. Preserve manual edits, device data and the separate Reports proposal; private/provider/AT/iOS acceptance remains separate.
 
