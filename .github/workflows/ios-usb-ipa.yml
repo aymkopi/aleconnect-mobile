@@ -2,9 +2,7 @@ name: iOS USB IPA
 
 on:
   workflow_dispatch:
-  push:
-    branches: [codex/ios-usb-ipa, codex/ios-reports-motion]
-    paths: [.github/workflows/ios-usb-ipa.yml]
+  workflow_call:
 
 permissions:
   contents: read
@@ -29,7 +27,7 @@ jobs:
       - run: npm ci --include=dev
       - run: npm run typecheck
       - name: Verify navigation, motion and hold timing
-        run: node --test tests/navigation-interactions.test.mjs tests/app-motion.test.ts tests/progress-button-component.test.mjs tests/floating-tab-gestures.test.mjs tests/content-loading.test.mjs tests/panelui-review-regressions.test.mjs tests/panelui-ux-fixes.test.ts
+        run: node --test tests/navigation-interactions.test.mjs tests/tab-stack-boundary.test.mjs tests/app-motion.test.ts tests/progress-button-component.test.mjs tests/floating-tab-gestures.test.mjs tests/content-loading.test.mjs tests/panelui-review-regressions.test.mjs tests/panelui-ux-fixes.test.ts
       - name: Report existing Expo patch recommendations
         continue-on-error: true
         run: npx expo install --check

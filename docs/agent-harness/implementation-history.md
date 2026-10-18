@@ -703,3 +703,10 @@ Closeout: harness validation against the reviewed Staff companion and git diff -
 - Verification: user subsequently reports **Fixed**, accepting the reported navbar delay after the native-stack correction. Prior motion, Reports and card alignment acceptance is retained; source508-pass/one-existing-skip and IPA identity evidence remains recorded above.
 - Remaining risks: no independent build7 USB version/signing readback or broader device workflow retest after manual handoff. This acceptance is user-reported; no new app/device/API changes are made.
 - Next: requested issues complete. Retain the accepted IPA, task branch/worktree, prior artifacts and protected app/signing/pairing/SideStore state; no further device input or cleanup.
+
+## 2026-10-18 — Publish accepted iPhone fixes and build both platforms
+
+- Scope: user authorizes default-master merge/publication of this chat's fixes and automatic iOS builds parallel with Android; explicitly exclude separate draft account-security Mobile15/Staff55. Reuse the existing iPhone builder as a sibling of Android release, both gated only by shared checks and default-branch application changes/manual dispatch. Keep unsigned/local Apple signing, Android allocator and device state intact.
+- Verification: new workflow regression fails before the caller exists and passes after adding the reusable iOS job. Full509 tests/one existing skip, TypeScript, full Expo lint (zero errors/271 warnings), harness and whitespace pass. Parsed YAML verifies exact parallel dependencies/gates. Fresh review reports no actionable issue and24 focused checks pass independently; app source exactly matches accepted build7. Graph refresh4,375 nodes/8,236 edges stays separate. PR/native gates follow.
+- Remaining risks: accepted build7 device behavior is retained, but the merged-source native artifacts/build outcomes are not yet verified. No new device installation, signing credentials, API deployment or security-PR merge.
+- Next: complete checks/review, create and merge the scoped PR, verify both native outputs from the merged source, then update this handoff without another app release.

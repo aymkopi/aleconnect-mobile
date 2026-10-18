@@ -1,6 +1,6 @@
 # Active work
 
-- [iPhone fixes accepted](tasks/ios-usb-ipa.md): after receiving the verified build7 IPA, user confirms the navbar issue is fixed. Motion, Reports loading and status alignment were already accepted. Sourcefd7a3da and508 passing tests are retained; requested fixes are complete. Preserve the Desktop IPA, prior artifacts, signer, app data, pairing backup and user-installed SideStore. Broader device workflows and build7 USB version readback were not repeated.
+- [iPhone fixes and parallel release integration](tasks/ios-usb-ipa.md): build7 navbar, motion, Reports and card alignment are user-accepted. User authorizes master integration and parallel automatic iOS/Android builds, excluding draft security Mobile15/Staff55. Reuse iOS builder beside Android after shared checks; local/review/PR/native build gates are pending. Preserve Desktop IPA, prior artifacts, signer, app data, pairing backup and SideStore; no Computer Use.
 
 - [Mobile declutter refinement](tasks/mobile-declutter.md): PR14/sourcef4130b9a merged after verified Staff1.1.1-alpha.1. Mobile1.2.0-alpha.1/code68 published; exact artifact/signature/alignment and three tablet25040RP0AG cold launches/public navigation pass. Both default branches are synchronized; finish docs-only closeout and task-only cleanup. Preserve manual edits, device data and the separate Reports proposal; private/provider/AT/iOS acceptance remains separate.
 
