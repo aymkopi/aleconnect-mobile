@@ -112,8 +112,34 @@ function releaseNotes(release, messages) {
   ].join('\n\n') + '\n';
 }
 
+const iosAssetNames = ['Aleconnect-unsigned.ipa', 'ios-build-metadata.json', 'ios-SHA256SUMS'];
+
+function stageRelease(cwd, release, notes, app) {
+  const pkg = readJson(join(cwd, 'package.json'));
+  const lockPath = join(cwd, 'package-lock.json');
+  const lock = existsSync(lockPath) ? readJson(lockPath) : null;
+  mkdirSync(join(cwd, 'release'), {recursive: true});
+  writeJson(join(cwd, 'package.json'), {...pkg, version: release.version});
+  if (lock) {
+    lock.version = release.version;
+    if (lock.packages?.['']) lock.packages[''].version = release.version;
+    writeJson(lockPath, lock);
+  }
+  if (app) {
+    app.expo.version = release.version;
+    app.expo.android.versionCode = release.versionCode;
+    writeJson(join(cwd, 'app.json'), app);
+  } else {
+    mkdirSync(join(cwd, 'public'), {recursive: true});
+    writeJson(join(cwd, 'public/release.json'), release);
+  }
+  writeJson(join(cwd, 'release/build-metadata.json'), release);
+  writeFileSync(join(cwd, 'release/notes.md'), notes);
+}
+
 export function prepareRelease(options) {
   const {cwd, env, config, command, inventory, metadata} = runtime(options);
+  const includeIos = config.name === 'aleconnect-mobile' && env.RELEASE_INCLUDE_IOS === 'true';
   assert.equal(command('git', ['rev-parse', 'HEAD']), env.GITHUB_SHA, 'Checkout must match the workflow SHA');
   const releases = inventory();
   assert.ok(!releases.some(release => release.draft && isAlphaTag(release.tag_name)), 'Inspect the unresolved alpha draft before releasing again');
@@ -122,9 +148,28 @@ export function prepareRelease(options) {
   if (latest) {
     const previousSource = command('git', ['rev-parse', `${latest.tag_name}^{commit}`]);
     if (previousSource === env.GITHUB_SHA) {
-      assert.equal(metadata(latest.tag_name).sourceCommit, env.GITHUB_SHA, 'Published metadata has a different source');
+      const published = metadata(latest.tag_name);
+      assert.equal(published.sourceCommit, env.GITHUB_SHA, 'Published metadata has a different source');
       assert.equal(remoteTagTarget(command, env.GITHUB_REPOSITORY, latest.tag_name), env.GITHUB_SHA, 'Published tag points to a different source');
-      return outputs(env, {skip: true, reason: 'Source already published', tag: latest.tag_name});
+      if (includeIos) {
+        const existing = iosAssetNames.filter(name => latest.assets?.some(asset => asset.name === name));
+        assert.ok(existing.length === 0 || existing.length === iosAssetNames.length,
+          'Incomplete IPA assets: rerun failed publish-ios with its original artifact; never replace published bytes');
+        if (!existing.length) {
+          assert.equal(published.version, latest.tag_name.slice(1), 'Published recovery version mismatch');
+          alphaParts(published.version);
+          assert.ok(Number.isInteger(published.versionCode) && published.versionCode > 0 && published.versionCode <= 2100000000, 'Invalid published iOS build');
+          assert.equal(published.tag, latest.tag_name, 'Published recovery tag mismatch');
+          assert.equal(published.fileName, `${config.name}-${published.version}.apk`, 'Published recovery filename mismatch');
+          assert.equal(published.package, config.android.package, 'Published recovery package mismatch');
+          assert.equal(published.certificateSha256, config.android.certificateSha256, 'Published recovery signer mismatch');
+          const app = readJson(join(cwd, 'app.json'));
+          assert.equal(app.expo.android.package, config.android.package, 'Keep the installed app identity');
+          stageRelease(cwd, published, latest.body ?? `# ${published.version}\n`, app);
+          return outputs(env, {...published, tag: latest.tag_name, skip: true, ios_needed: true});
+        }
+      }
+      return outputs(env, {skip: true, reason: 'Source already published', tag: latest.tag_name, ...(includeIos ? {ios_needed: false} : {})});
     }
     try { command('git', ['merge-base', '--is-ancestor', previousSource, env.GITHUB_SHA]); }
     catch {
@@ -157,28 +202,8 @@ export function prepareRelease(options) {
   }
   assert.ok(!releases.some(item => item.tag_name === release.tag), 'Version tag already reserved');
   assert.equal(remoteTagTarget(command, env.GITHUB_REPOSITORY, release.tag), null, 'An existing tag without a release requires inspection');
-  // Validate everything before mutating the ephemeral build checkout.
-  const pkg = readJson(join(cwd, 'package.json'));
-  const lockPath = join(cwd, 'package-lock.json');
-  const lock = existsSync(lockPath) ? readJson(lockPath) : null;
-  mkdirSync(join(cwd, 'release'), {recursive: true});
-  writeJson(join(cwd, 'package.json'), {...pkg, version: release.version});
-  if (lock) {
-    lock.version = release.version;
-    if (lock.packages?.['']) lock.packages[''].version = release.version;
-    writeJson(lockPath, lock);
-  }
-  if (app) {
-    app.expo.version = release.version;
-    app.expo.android.versionCode = release.versionCode;
-    writeJson(join(cwd, 'app.json'), app);
-  } else {
-    mkdirSync(join(cwd, 'public'), {recursive: true});
-    writeJson(join(cwd, 'public/release.json'), release);
-  }
-  writeJson(join(cwd, 'release/build-metadata.json'), release);
-  writeFileSync(join(cwd, 'release/notes.md'), releaseNotes(release, messages));
-  outputs(env, {skip: false, ...release});
+  stageRelease(cwd, release, releaseNotes(release, messages), app);
+  outputs(env, {skip: false, ...release, ...(includeIos ? {ios_needed: true} : {})});
   return release;
 }
 
@@ -235,6 +260,28 @@ export function publishRelease(options) {
   return {skip: false, tag: release.tag};
 }
 
+export function prepareIosReleaseConfig({cwd = process.cwd(), env = process.env} = {}) {
+  const version = env.RELEASE_VERSION;
+  const nativeVersion = alphaParts(version).slice(0, 3).join('.');
+  const buildNumber = env.RELEASE_BUILD_NUMBER;
+  assert.match(buildNumber ?? '', /^[1-9]\d*$/, 'Require an explicit positive native build number');
+  assert.ok(Number(buildNumber) <= 2100000000, 'Native build exceeds the shared Android code limit');
+  assert.match(env.GITHUB_SHA ?? '', /^[a-f0-9]{40}$/, 'Pin the full source SHA');
+  if (env.RELEASE_CONTEXT_REQUIRED === 'true') {
+    const release = readJson(join(cwd, 'release/build-metadata.json'));
+    assert.equal(release.sourceCommit, env.GITHUB_SHA, 'iOS release context has a different source');
+    assert.equal(release.version, version, 'iOS release context has a different version');
+    assert.equal(String(release.versionCode), buildNumber, 'iOS release context has a different build');
+  }
+  const app = readJson(join(cwd, 'app.json'));
+  assert.equal(app.expo.ios?.bundleIdentifier, 'com.kapecakes.aleconnectmobile', 'Wrong iPhone app identity');
+  app.expo.version = nativeVersion;
+  app.expo.ios.buildNumber = buildNumber;
+  app.expo.extra = {...app.expo.extra, releaseVersion: version};
+  writeJson(join(cwd, 'app.json'), app);
+  return {releaseVersion: version, nativeVersion, buildNumber};
+}
+
 export function publishIosRelease(options) {
   const {cwd, env, config, command, inventory, metadata} = runtime(options);
   assert.equal(config.name, 'aleconnect-mobile', 'iPhone assets belong to Mobile');
@@ -242,11 +289,16 @@ export function publishIosRelease(options) {
   assert.ok(isAlphaTag(tag), 'Require the exact Android alpha tag');
   const published = inventory().find(release => release.tag_name === tag);
   assert.ok(published && !published.draft, 'Require the published Android release');
-  assert.equal(metadata(tag).sourceCommit, env.GITHUB_SHA, 'Android release has a different source');
+  const android = metadata(tag);
+  assert.equal(android.sourceCommit, env.GITHUB_SHA, 'Android release has a different source');
+  assert.equal(`v${android.version}`, tag, 'Android release version differs from its tag');
   assert.equal(remoteTagTarget(command, env.GITHUB_REPOSITORY, tag), env.GITHUB_SHA, 'Release tag points to a different source');
   const folder = join(cwd, 'release/ios');
   const ios = readJson(join(folder, 'build-metadata.json'));
   assert.equal(ios.sourceCommit, env.GITHUB_SHA, 'IPA has a different source');
+  assert.equal(ios.releaseVersion, android.version, 'IPA has a different alpha version');
+  assert.equal(ios.version, alphaParts(android.version).slice(0, 3).join('.'), 'IPA has a different native version');
+  assert.equal(ios.buildNumber, String(android.versionCode), 'IPA has a different native build');
   assert.equal(ios.bundleIdentifier, readJson(join(cwd, 'app.json')).expo.ios.bundleIdentifier, 'Wrong iPhone app identity');
   assert.equal(ios.platform, 'iPhoneOS', 'Require a physical-iPhone build');
   assert.equal(ios.architecture, 'arm64', 'Require ARM64');
@@ -257,7 +309,7 @@ export function publishIosRelease(options) {
   assert.equal(readFileSync(join(folder, 'SHA256SUMS'), 'utf8'), `${ios.sha256}  Aleconnect-unsigned.ipa\n`, 'IPA checksum manifest mismatch');
   writeJson(join(folder, 'ios-build-metadata.json'), ios);
   writeFileSync(join(folder, 'ios-SHA256SUMS'), readFileSync(join(folder, 'SHA256SUMS')));
-  const files = ['Aleconnect-unsigned.ipa', 'ios-build-metadata.json', 'ios-SHA256SUMS'];
+  const files = iosAssetNames;
   // Keep Android metadata/checksums intact, and never replace an existing asset.
   const missing = files.filter(file => {
     const asset = published.assets.find(item => item.name === file);
@@ -272,8 +324,9 @@ export function publishIosRelease(options) {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  assert.ok(['prepare', 'publish', 'publish-ios'].includes(process.argv[2]), 'Use prepare, publish or publish-ios');
+  assert.ok(['prepare', 'publish', 'prepare-ios', 'publish-ios'].includes(process.argv[2]), 'Use prepare, publish, prepare-ios or publish-ios');
   if (process.argv[2] === 'prepare') prepareRelease();
   else if (process.argv[2] === 'publish') publishRelease();
+  else if (process.argv[2] === 'prepare-ios') console.log(JSON.stringify(prepareIosReleaseConfig()));
   else publishIosRelease();
 }
