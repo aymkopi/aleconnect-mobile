@@ -7,7 +7,7 @@ import {
   useFocusEffect,
   useNavigation,
 } from "expo-router";
-import { Camera, Mail, MapPin, Phone } from "lucide-react-native";
+import { Camera, Mail, MapPin, Phone, X } from "lucide-react-native";
 import { Avatar } from "@/components/panelui/avatar";
 import { FileUpload, type FileUploadFile } from "@/components/panelui/file-upload";
 import { Button } from "@/components/panelui/button";
@@ -80,7 +80,7 @@ function Details({
   initialEdit?: boolean;
 }) {
   const { refreshConsumerAccount } = useConsumerAccount();
-  const [primary, cameraForeground] = useAppColors(["primary", "primary-foreground"]);
+  const [primary, cameraForeground, foreground] = useAppColors(["primary", "primary-foreground", "foreground"]);
   const { session } = useAuthSession();
   const [defaultDialog, setDefaultDialog] = useState(false), [defaultSaved, setDefaultSaved] = useState(false);
   const router = useRouter(),
@@ -117,6 +117,8 @@ function Details({
     [discard, setDiscard] = useState(false),
     [help, setHelp] = useState(false);
   const profile = read.data;
+  const identifier = accountProfileIdentifier(identity.account.accounts.length,
+    identity.fixture ? "justine@example.com" : session?.user.email, profile?.accountNumber) ?? "Account details unavailable";
   const serviceEmail = profile?.serviceAccountEmail ??
     (identity.account.sessionMode !== "identity" ? profile?.email : "") ?? "";
   const emailEditable = profile?.serviceAccountEmailEditable === true ||
@@ -429,7 +431,7 @@ function Details({
                   </Button>
                   <View className="flex-1 gap-1">
                     <Text weight="semibold" style={{ fontSize: 22, lineHeight: 28 }}>{profile.fullName}</Text>
-                    <Text size="sm" muted>{accountProfileIdentifier(identity.account.accounts.length, identity.fixture ? "justine@example.com" : session?.user.email, profile.accountNumber) ?? "Account details unavailable"}</Text>
+                    <Text size="sm" muted>{identifier}</Text>
                   </View>
                 </View>
                 {!defaultSaved && identity.account.defaultServiceAccountId !== id ? <Button variant="outline"
@@ -459,25 +461,30 @@ function Details({
             ) : view === "edit" ? (
               <>
                 <ProfileHeading
-                  title="Update your profile"
-                  description={profile.accountNumber ?? profile.email}
+                  title={profile.fullName}
+                  description={identifier}
                 />
-                <View className="flex-row items-center gap-3 rounded-xl bg-card p-3">
-                  <Avatar size="xl" source={uri || savedAvatar || profile.avatarUrl ? { uri: uri || savedAvatar || profile.avatarUrl! } : undefined}
-                    fallback={profile.fullName.split(/\s+/).filter(Boolean).slice(0, 2).map((word) => word[0]).join("")}
-                    accessibilityLabel={uri ? "Selected profile photo" : "Profile photo"}>
-                    <Avatar.Badge style={{ top: "auto", bottom: -4 }}>
-                      <FileUpload.Trigger><Button size="icon" className="h-9 w-9 rounded-full" hitSlop={6} disabled={busy} accessibilityLabel="Change profile photo">
-                        <Camera size={18} color={cameraForeground} />
-                      </Button></FileUpload.Trigger>
-                    </Avatar.Badge>
-                  </Avatar>
-                  <View className="flex-1 gap-1">
-                    <Text size="sm" weight="semibold">Profile photo</Text>
-                    <FileUpload.Trigger><Button variant="ghost" disabled={busy}>{uri ? "Choose another photo" : "Change photo"}</Button></FileUpload.Trigger>
-                    {uri ? <Button size="sm" variant="ghost" disabled={busy} onPress={() => changeFiles([])}>Undo photo change</Button> : null}
+                <Field className="gap-1">
+                  <Field.Label>Profile photo</Field.Label>
+                  <View className="flex-row items-center gap-3 rounded-xl bg-card p-3">
+                    <Avatar size="xl" source={uri || savedAvatar || profile.avatarUrl ? { uri: uri || savedAvatar || profile.avatarUrl! } : undefined}
+                      fallback={profile.fullName.split(/\s+/).filter(Boolean).slice(0, 2).map((word) => word[0]).join("")}
+                      accessibilityLabel={uri ? "Selected profile photo" : "Profile photo"}>
+                      <Avatar.Badge style={{ top: "auto", bottom: -4 }}>
+                        <FileUpload.Trigger><Button size="icon" className="h-9 w-9 rounded-full" hitSlop={6} disabled={busy} accessibilityLabel="Change profile photo">
+                          <Camera size={18} color={cameraForeground} />
+                        </Button></FileUpload.Trigger>
+                      </Avatar.Badge>
+                    </Avatar>
+                    <View className="flex-1">
+                      <FileUpload.Trigger><Button variant="outline" disabled={busy}>Change photo</Button></FileUpload.Trigger>
+                    </View>
+                    {uri ? <Button size="icon" variant="ghost" style={{ width: 36, height: 36 }} hitSlop={6}
+                      accessibilityLabel="Clear selected photo" disabled={busy} onPress={() => changeFiles([])}>
+                      <X size={18} color={foreground} />
+                    </Button> : null}
                   </View>
-                </View>
+                </Field>
                 <ProfileField
                   label="Contact number"
                   Icon={Phone}
@@ -502,19 +509,19 @@ function Details({
                       : "Service email editing is unavailable. Refresh your account to check access."
                   }
                 />
-                <View className="gap-2 rounded-xl bg-card p-4">
-                  <Text size="sm" weight="semibold">
-                    Home location
-                  </Text>
-                  <Text size="sm" muted>
-                    {address
-                      ? addressText(address)
-                      : (baseline.fullAddress || "No location on file")}
-                  </Text>
-                  <Button variant="outline" onPress={location}>
-                    Change location
-                  </Button>
-                </View>
+                <Field className="gap-1">
+                  <Field.Label>Home location</Field.Label>
+                  <View className="gap-2 rounded-xl bg-card p-3">
+                    <Text size="sm">
+                      {address
+                        ? addressText(address)
+                        : (baseline.fullAddress || "No location on file")}
+                    </Text>
+                    <Button variant="outline" onPress={location}>
+                      Change location
+                    </Button>
+                  </View>
+                </Field>
               </>
             ) : view === "location" ? (
               <>
@@ -602,11 +609,14 @@ function Details({
               </>
             ) : view === "review" ? (
               <>
-                <ProfileHeading title="Review your changes" />
-                {uri ? <View className="flex-row items-center gap-3 rounded-xl bg-card p-3">
-                  <Avatar size="lg" source={{ uri }} accessibilityLabel="New profile photo" />
-                  <Text size="sm">New profile photo</Text>
-                </View> : null}
+                <ProfileHeading title={profile.fullName} description={identifier} />
+                {uri ? <Field className="gap-1">
+                  <Field.Label>Profile photo</Field.Label>
+                  <View className="flex-row items-center gap-3 rounded-xl bg-card p-3">
+                    <Avatar size="xl" source={{ uri }} accessibilityLabel="New profile photo" />
+                    <Text size="sm">New profile photo</Text>
+                  </View>
+                </Field> : null}
                 <View className="gap-4 rounded-xl bg-card p-4">
                   {phone.replace(/\D/g, "") !== baseline.phone ? (
                     <>

@@ -17,7 +17,16 @@ test("unified editor shows avatar controls and the selected service email, never
   assert.ok(button(tree, "Change location"));
   assert.ok(nodes(tree).find(n => n.props?.accessibilityLabel === "Change profile photo"));
   assert.deepEqual(tree.props.image.crop.aspect, [1, 1]);
-  assert.ok(nodes(f.render()).some(n => n.props?.title === "Update your profile"));
+  const heading = nodes(tree).find(n => n.type === "Heading");
+  assert.equal(heading.props.title, "Test Person");
+  assert.equal(heading.props.description, "222");
+  assert.equal(heading.props.onChangeText, undefined);
+  tree.props.onValueChange([photo]);
+  const clear = nodes(f.render()).find(n => n.props?.accessibilityLabel === "Clear selected photo");
+  clear.props.onPress();
+  assert.deepEqual(f.render().props.value, []);
+  assert.equal(field(f.render(), "Service account email").props.value, "home@example.com");
+  assert.equal(f.calls.length, 0);
 });
 test("photo-only save compresses, keeps the selected account/session, and prevents duplicate saves", async t => {
   let finish; const compression = new Promise(resolve => { finish = resolve; });

@@ -4,6 +4,7 @@
 
 ### Changed
 
+- Standardize profile photo/location labels and Light/Dark control colors. Keep name and email/account number read-only; replace Undo with an accessible clear-photo icon.
 - Combine profile photo, contact number, service-account email and home location into one Edit profile/review flow. Keep photo-only saves simple, preserve drafts on errors, and retry only the failed photo after details save.
 - Decode all seven service classes using Staff definitions; keep unknown values. Shorten profile labels/help and redirect legacy photo links to the unified editor with account scope intact.
 
