@@ -61,7 +61,7 @@ export function useAccountPasswordVerification(
     const timer = setInterval(() => {
       const time = Date.now(); setNow(time);
       if (cooldown && time >= cooldown) setCooldown(0);
-      if (expires && time >= expires) reset("Verification expired. Enter your password again.");
+      if (expires && time >= expires) reset("Verification expired. Confirm your password again to continue. Your account details are kept.");
     }, 1000);
     return () => clearInterval(timer);
   }, [cooldown, expires, reset]);
@@ -107,12 +107,12 @@ export function AccountPasswordVerificationFields({ verification }: {
 }) {
   const { password, setPassword, busy, remaining, error } = verification;
   return <>
-    <ProfileHeading title="Verify it’s you" />
+    <ProfileHeading title="Verify it’s you" description="Confirm your identity before changing linked accounts." />
     <ProfileField label="Current password" secret value={password} onChangeText={setPassword}
       autoComplete="current-password" maxLength={128} editable={!busy && !remaining}
-      placeholder="Enter your password" description="Use your email password." />
+      placeholder="Enter your password" description="Use your ALEConnect sign-in password, not the ALECO account password." />
     {remaining ? <ProfileNotice title={"Try again in " + Math.floor(remaining / 60) + ":" + String(remaining % 60).padStart(2, "0")}
-      description="Too many attempts. Sign-in is still available." /> : null}
+      description="Too many incorrect attempts. Try again when the timer ends. You can still sign in." /> : null}
     {error ? <ProfileNotice title="Unable to verify" description={error} danger /> : null}
   </>;
 }

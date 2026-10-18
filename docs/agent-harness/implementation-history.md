@@ -660,3 +660,10 @@ Closeout: harness validation against the reviewed Staff companion and git diff -
 - Verification: updated Light/Dark Figma composition/full-size review passes with101 editable text layers/140 instances and no session-information cards. All11 existing linking/unlinking interaction tests, TypeScript, scoped lint, paired documentation harness and whitespace checks pass.
 - Remaining risks: rendered-app/device acceptance remains pending. No backend, dependency, native, deployment or release change; preserve unrelated manual/iOS/device work.
 - Next: update draft Mobile15 and retain Figma parity before coordinated release acceptance.
+
+## 2026-10-18 — Balance confirmation context
+
+- Scope: replace overly terse guidance with one purpose sentence, an explicit ALEConnect-versus-ALECO password helper, actionable cooldown guidance and expiry reassurance that account details are kept. Keep the session-information card and Security check eyebrow removed. Match all12 editable Figma states and shared app copy; no security or business behavior changes.
+- Verification: Light/Dark composition/full-size review passes with113 editable text layers/140 instances, no session cards or content overflow. Existing11 confirmation-flow tests pass. TypeScript, scoped lint and paired harness/whitespace checks accompany the scoped commit; graph output remains separate.
+- Remaining risks: app/device/live acceptance remains pending; no merge, deployment or release. Preserve primary/manual/iOS/device state.
+- Next: retain this balanced copy in draft Mobile15/Staff55 for coordinated acceptance.
