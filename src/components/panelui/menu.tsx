@@ -1,3 +1,4 @@
+import { useAppReducedMotion } from "@/hooks/use-app-reduced-motion";
 /**
  * Menu — the list of things you can do to something.
  *
@@ -51,7 +52,6 @@ import {
 import { Pressable, View, type PressableProps, type ViewProps } from 'react-native';
 import Animated, {
   useAnimatedStyle,
-  useReducedMotion,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
@@ -159,7 +159,7 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
  * cannot express at all.
  */
 function useMenuPress(variant: MenuItemVariant) {
-  const reduced = useReducedMotion();
+  const reduced = useAppReducedMotion();
   const pressed = useSharedValue(0);
 
   const accent = useTint('--color-accent');
@@ -734,7 +734,7 @@ export interface MenuSubTriggerProps
 export function MenuSubTrigger({ className, children, icon, onSelect, ...props }: MenuSubTriggerProps) {
   const { open, toggle } = useMenuSub('Menu.SubTrigger');
   const sign = useDirectionSign();
-  const reducedMotion = useReducedMotion();
+  const reducedMotion = useAppReducedMotion();
   const chevronTint = useTint('--color-muted-foreground');
   const progress = useSharedValue(open ? 1 : 0);
 
@@ -798,7 +798,7 @@ export interface MenuSubContentProps extends ViewProps {
  */
 export function MenuSubContent({ className, children, ...props }: MenuSubContentProps) {
   const { open } = useMenuSub('Menu.SubContent');
-  const reducedMotion = useReducedMotion();
+  const reducedMotion = useAppReducedMotion();
   const [height, setHeight] = useState(0);
   const progress = useSharedValue(open ? 1 : 0);
 

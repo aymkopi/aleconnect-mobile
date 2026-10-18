@@ -66,3 +66,11 @@ Mobile15/Staff55 remain coordinated draft PRs. Finish rendered-app/browser and a
 
 
 Final gates: Staff85 focused tests, production TypeScript/Vite build and scoped lint pass; Mobile533 tests pass/zero failed/one existing isolated-sibling skip, types and scoped lint pass with ten pre-existing FileUpload warnings and no errors. Both explicit-sibling harness checks and whitespace pass. Read-only review's lock-order and error-copy findings are fixed; final16 Staff profile checks and12 Mobile editor checks pass. Both Graphify refreshes succeed; Staff omits oversized HTML visualization, while JSON/report output is preserved with hash-verified generated maps and gate logs outside the commits. No rendered-app/native/live/merge/release acceptance is implied.
+
+
+## 2026-10-18 - Authorized Staff-first release gate
+
+- Scope: user authorizes final checks, both PR merges, Staff deployment first and a new Mobile alpha. Integrate Staff main2348b904 and Mobile master8f79e1c without reverting the newer agency/contact fixes, iPhone private-route/motion work or combined IPA/APK pipeline. Resolve additive CI/history conflicts by retaining both; legacy photo route keeps the approved unified-editor redirect.
+- Verification: integrated Staff121 focused security/profile/account/directory tests and Mobile544 tests pass,zero failed; one existing isolated-sibling skip is checked by the paired harness. Read-only integration review independently passes36 checks and finds no actionable regression. Types/lint/build, hosted exact-head gates and release evidence follow below; no deployment is claimed yet.
+- Remaining risks: native/private/provider/real-MySQL concurrency acceptance remains separate; profile avatar endpoints retain existing session/ownership/revision guards. No new migration; do not repeat another task's agency schema work. Old apps need the paired Mobile update for new link/unlink actions.
+- Next: green exact-head CI, merge/deploy Staff55, verify deployed version/access boundaries, then merge Mobile15 and verify the new immutable alpha and original signer. Preserve primary/manual/iOS/device work and rollback evidence.

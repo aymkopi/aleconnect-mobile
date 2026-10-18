@@ -1,0 +1,122 @@
+name: iOS USB IPA
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 90
+    env:
+      EXPO_NO_DOTENV: '1'
+      EXPO_PUBLIC_PANELUI_PREVIEW: '0'
+      EXPO_PUBLIC_ALECONNECT_API_URL: https://api.aleconnect.app
+      CI: '1'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci --include=dev
+      - run: npm run typecheck
+      - name: Verify navigation, motion and hold timing
+        run: node --test tests/navigation-interactions.test.mjs tests/tab-stack-boundary.test.mjs tests/app-motion.test.ts tests/progress-button-component.test.mjs tests/floating-tab-gestures.test.mjs tests/content-loading.test.mjs tests/panelui-review-regressions.test.mjs tests/panelui-ux-fixes.test.ts
+      - name: Report existing Expo patch recommendations
+        continue-on-error: true
+        run: npx expo install --check
+      - run: npx expo-doctor
+        env:
+          # Keep locked source dependencies; their six patch recommendations are reported above.
+          EXPO_DOCTOR_SKIP_DEPENDENCY_VERSION_CHECK: '1'
+      - name: Generate the iPhone project
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const config = JSON.parse(fs.readFileSync('app.json', 'utf8'));
+          config.expo.version = config.expo.version.split('-')[0];
+          config.expo.ios.buildNumber = process.env.GITHUB_RUN_NUMBER;
+          fs.writeFileSync('app.json', JSON.stringify(config, null, 2) + '\n');
+          NODE
+          npx expo prebuild --platform ios --no-install
+          # Personal Teams cannot provision APNs; this affects only the generated test project.
+          python3 <<'PY'
+          import pathlib, plistlib
+          files = list(pathlib.Path('ios').glob('*/*.entitlements'))
+          assert len(files) == 1, files
+          with files[0].open('rb') as f:
+              entitlements = plistlib.load(f)
+          entitlements.pop('aps-environment', None)
+          with files[0].open('wb') as f:
+              plistlib.dump(entitlements, f)
+          PY
+      - name: Install CocoaPods dependencies
+        working-directory: ios
+        run: pod install
+      - name: Compile a standalone unsigned iPhone app
+        run: |
+          set -o pipefail
+          mkdir -p release/ios
+          xcodebuild -version
+          xcodebuild \
+            -workspace ios/Aleconnect.xcworkspace \
+            -scheme Aleconnect \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -archivePath release/ios/Aleconnect.xcarchive \
+            archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY='' \
+            2>&1 | tee release/ios/xcodebuild.log | xcbeautify
+      - name: Verify and package the IPA
+        run: |
+          python3 <<'PY'
+          import hashlib, json, os, pathlib, plistlib, shutil, subprocess, zipfile
+          output = pathlib.Path('release/ios')
+          app = output / 'Aleconnect.xcarchive/Products/Applications/Aleconnect.app'
+          with (app / 'Info.plist').open('rb') as f:
+              info = plistlib.load(f)
+          assert info['CFBundleIdentifier'] == 'com.kapecakes.aleconnectmobile'
+          assert info['CFBundleSupportedPlatforms'] == ['iPhoneOS']
+          assert info['CFBundleVersion'] == os.environ['GITHUB_RUN_NUMBER']
+          executable = app / info['CFBundleExecutable']
+          assert subprocess.check_output(['lipo', '-archs', str(executable)], text=True).strip() == 'arm64'
+          assert b'https://api.aleconnect.app' in (app / 'main.jsbundle').read_bytes()
+          for key in ('NSCameraUsageDescription', 'NSPhotoLibraryUsageDescription', 'NSLocationWhenInUseUsageDescription'):
+              assert info.get(key), key
+          assert not (app / 'embedded.mobileprovision').exists()
+          payload = output / 'Payload'
+          payload.mkdir()
+          shutil.copytree(app, payload / app.name, symlinks=True)
+          ipa = output / 'Aleconnect-unsigned.ipa'
+          subprocess.run(['zip', '--symlinks', '-qr', ipa.name, 'Payload'], cwd=output, check=True)
+          with zipfile.ZipFile(ipa) as archive:
+              assert archive.testzip() is None
+              assert f'Payload/{app.name}/main.jsbundle' in archive.namelist()
+          digest = hashlib.sha256(ipa.read_bytes()).hexdigest()
+          (output / 'SHA256SUMS').write_text(f'{digest}  {ipa.name}\n')
+          metadata = dict(sourceCommit=os.environ['GITHUB_SHA'], runUrl=f"https://github.com/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}", bundleIdentifier=info['CFBundleIdentifier'], version=info['CFBundleShortVersionString'], buildNumber=info['CFBundleVersion'], minimumIOS=info['MinimumOSVersion'], platform='iPhoneOS', architecture='arm64', signing='unsigned; sign locally before USB installation', remotePushSupported=False, apiOrigin=os.environ['EXPO_PUBLIC_ALECONNECT_API_URL'], sha256=digest)
+          (output / 'build-metadata.json').write_text(json.dumps(metadata, indent=2) + '\n')
+          print(json.dumps(metadata, indent=2))
+          PY
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Aleconnect-iPhone-unsigned
+          path: |
+            release/ios/Aleconnect-unsigned.ipa
+            release/ios/SHA256SUMS
+            release/ios/build-metadata.json
+          if-no-files-found: error
+          retention-days: 3
+          compression-level: 0
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: iOS-build-log
+          path: release/ios/xcodebuild.log
+          retention-days: 3

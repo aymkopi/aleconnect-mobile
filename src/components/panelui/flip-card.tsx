@@ -1,3 +1,4 @@
+import { useAppReducedMotion } from "@/hooks/use-app-reduced-motion";
 /**
  * FlipCard — two faces of one card, and a turn between them.
  *
@@ -63,7 +64,6 @@ import Animated, {
   interpolate,
   runOnJS,
   useAnimatedStyle,
-  useReducedMotion,
   useSharedValue,
   withSpring,
   type SharedValue,
@@ -207,7 +207,7 @@ const FlipCardRoot = forwardRef<View, FlipCardProps>(
     const progress = useSharedValue(defaultFlipped ? 1 : 0);
     const startProgress = useSharedValue(0);
     const span = useSharedValue(0);
-    const reduceMotion = useReducedMotion();
+    const reduceMotion = useAppReducedMotion();
 
     const { root, face } = flipCardVariants();
 

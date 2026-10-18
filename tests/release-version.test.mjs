@@ -87,11 +87,22 @@ test('prepare uses published metadata, keeps providers and updates all version m
 });
 
 test('a published source is idempotent and stale runs cannot release or deploy backwards', t => {
-  const f = fixture(t, {previousSource: source});
-  assert.equal(prepareRelease(f).skip, true);
+  const f = fixture(t, {previousSource: source, tagSource: source, metadata: {sourceCommit: source}});
+  const repeated = prepareRelease(f);
+  assert.equal(repeated.skip, true);
+  assert.equal(repeated.tag, 'v1.0.0-alpha.10', 'Keep the exact tag available for unfinished IPA upload');
+  assert.match(readFileSync(join(f.cwd, 'output'), 'utf8'), /tag=v1\.0\.0-alpha\.10/);
   const stale = fixture(t, {diverged: true});
   assert.equal(prepareRelease(stale).skip, true);
+  assert.equal(prepareRelease(stale).tag, undefined, 'Older source must not attach an IPA to a newer release');
   assert.equal(JSON.parse(readFileSync(join(stale.cwd, 'app.json'))).expo.android.versionCode, 62);
+});
+
+test('published-source recovery refuses mismatched remote tag or metadata',t=>{
+ for(const options of [
+  {previousSource:source,tagSource:previous,metadata:{sourceCommit:source}},
+  {previousSource:source,tagSource:source,metadata:{sourceCommit:previous}},
+ ]) assert.throws(()=>prepareRelease(fixture(t,options)),/different source/);
 });
 
 test('network failures, unresolved drafts, invalid metadata and wrong branches fail before mutation', t => {

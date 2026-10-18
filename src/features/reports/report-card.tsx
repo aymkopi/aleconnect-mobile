@@ -34,7 +34,7 @@ export function ReportCard({
           {report.ticketNumber || "Reference pending"}
         </Text>
         <ReportStatusBadge status={report.status} />
-        <View className="h-1.5 w-1.5 rounded-full bg-primary" style={{ opacity: unread ? 1 : 0 }} accessibilityElementsHidden importantForAccessibility="no" />
+        {unread && <View className="h-1.5 w-1.5 rounded-full bg-primary" accessibilityElementsHidden importantForAccessibility="no" />}
       </View>
       <Text
         weight="bold"

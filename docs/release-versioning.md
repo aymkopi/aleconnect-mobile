@@ -52,6 +52,19 @@ keep human-curated deprecations, removals and security details in CHANGELOG.md.
   standalone `preview` variant for ARM64 phones and x86_64 emulators. They retain
   package IDs, provider files and the original preview certificate. API origin
   remains `https://api.aleconnect.app`; no new credential or PAT is required.
+- Mobile also calls the reusable **iOS USB IPA** workflow after those checks.
+  On default-branch application updates, Android publication and the macOS iPhone
+  build run independently in parallel. Documentation-only pushes skip both;
+  manual dispatch remains available. The iPhone job uploads an unsigned ARM64 IPA,
+  SHA256SUMS and exact-source metadata as **Aleconnect-iPhone-unsigned** Actions
+  artifacts. Sign locally with iloader; no Apple credentials are stored in CI.
+  After both native jobs succeed, a final job attaches that same-source IPA to
+  the Android release tag. Releases contains **Aleconnect-unsigned.ipa**,
+  **ios-SHA256SUMS** and **ios-build-metadata.json**, alongside the APK and its
+  original metadata/checksum files. It verifies tag/source and uploaded digests,
+  preserves matching assets on retries and refuses to overwrite different bytes.
+  Its numeric bundle version/build number identify this personal USB build;
+  Android's existing alpha allocator, signing and publication remain unchanged.
 - Android `versionCode` is one greater than the maximum of the published APK
   code, checked-in native configuration and observed platform floor. Mobile's
   floor is 64; Lineman's is 1. A new SemVer core never resets the Android code.
@@ -74,6 +87,22 @@ keep human-curated deprecations, removals and security details in CHANGELOG.md.
   against the deployed source; a GitHub release alone is not deployment proof.
 
 ## Manual use
+
+Mobile combined-release acceptance (2026-10-18): PR18/source`df8a225` passes
+workflow`39121661080`, including both parallel builds and final IPA attachment.
+[1.2.2-alpha.1](https://github.com/aymkopi/aleconnect-mobile/releases/tag/v1.2.2-alpha.1)
+contains APK/code70 and unsigned iOS`1.0.0`/build25 with separate checksum and
+metadata files. All six downloaded digests, source/tag and native/runtime checks
+pass. Desktop IPA copy matches; fresh artifacts were not installed. The app source
+still equals user-accepted iPhone build7.
+
+Earlier parallel-build acceptance: PR16/source`0a5d5c1` passes
+workflow`39106196909`, with overlapping Android/iOS jobs after the shared checks.
+Android`1.2.1-alpha.1`/code69 is published; unsigned iOS`1.0.0`/build23 is an
+Actions artifact. Exact source/tag, downloaded hashes, retained APK signer and
+native/runtime checks pass. The IPA is copied and hash-verified in the user's
+Desktop IPA folder. User-accepted iPhone build7 has the same app source; these
+fresh CI files were not installed. See the [iPhone handoff](agent-harness/tasks/ios-usb-ipa.md).
 
 On the default branch, run **Deploy Cloudflare** (Staff) or **Android Alpha
 Release** (Mobile/Lineman), then choose `auto`, `patch`, `minor`, `major` or

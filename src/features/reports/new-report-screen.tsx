@@ -425,7 +425,7 @@ export default function NewReportScreen() {
   const leave = useCallback(
     (path: "/reports" | "/reports/queue" | "/home" = "/reports") => {
       leaving.current = true;
-      router.replace(path);
+      router.dismissTo(path);
     },
     [router],
   );

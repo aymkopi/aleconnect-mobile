@@ -10,14 +10,15 @@ async function load(path, mocks) {
 }
 const react = {createElement:(type,props,...children)=>({type,props:{...props,children}})};
 function find(node,type) { if(node?.type===type) return node; for(const child of node?.props?.children?.flat(Infinity)??[]) {const found=find(child,type); if(found)return found;} }
-test('tab selection emits cancellable tabPress and explicitly targets nested roots',async()=>{
+
+test('tab selection emits cancellable tabPress and targets the main tab pages',async()=>{
  const calls=[]; let prevented=false; const bar='FloatingAppBar';
  const module=await load('src/components/floating-tabs-bar.tsx',{'react-native':{View:'View'},'expo-router':{usePathname:()=>'/home'},'@/components/floating-app-bar':{FloatingAppBar:bar},'@/context/guest-access-context':{useGuestAccess:()=>({guest:false})}});
  const state={index:0,routes:[{key:'home-key',name:'home'},{key:'reports-key',name:'reports'},{key:'profile-key',name:'profile'}]};
  const navigation={navigate:(...args)=>calls.push(args),emit:event=>{calls.push(event);return {defaultPrevented:prevented};}};
  const onSelect=find(module.FloatingTabsBar({state,navigation}),bar).props.onSelect;
- onSelect(1); assert.deepEqual(calls,[{type:'tabPress',target:'reports-key',canPreventDefault:true},['reports',{screen:'index'}]]);
- calls.length=0; onSelect(2); assert.deepEqual(calls[1],['profile',{screen:'index'}]);
+ onSelect(1); assert.deepEqual(calls,[{type:'tabPress',target:'reports-key',canPreventDefault:true},['reports']]);
+ calls.length=0; onSelect(2); assert.deepEqual(calls[1],['profile']);
  calls.length=0; prevented=true;onSelect(0);assert.equal(calls.length,1);
  calls.length=0;onSelect(99);assert.equal(calls.length,0);
 });
@@ -46,7 +47,7 @@ test('guest Reports tab opens the feature sheet without navigating into private 
  const navigation={navigate:(...args)=>calls.push(['navigate',...args]),emit:()=>({defaultPrevented:false})};
  const onSelect=find(module.FloatingTabsBar({state,navigation}),bar).props.onSelect;
  onSelect(1);assert.deepEqual(calls,[['gate','/reports','reports']]);
- calls.length=0;onSelect(2);assert.deepEqual(calls,[['navigate','profile',{screen:'index'}]]);
+ calls.length=0;onSelect(2);assert.deepEqual(calls,[['navigate','profile']]);
 });
 
 test('guest gate clears for auth recovery and protects a direct appearance URL',async()=>{

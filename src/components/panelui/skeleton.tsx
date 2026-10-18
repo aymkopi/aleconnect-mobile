@@ -1,9 +1,9 @@
+import { useAppReducedMotion } from "@/hooks/use-app-reduced-motion";
 import { memo, useEffect } from 'react';
 import { AppState, type ViewProps } from 'react-native';
 import Animated, {
   cancelAnimation,
   useAnimatedStyle,
-  useReducedMotion,
   useSharedValue,
   withRepeat,
   withTiming,
@@ -66,7 +66,7 @@ export const Skeleton = memo(function Skeleton({
   children,
   animated = true,
 }: SkeletonProps) {
-  const reducedMotion = useReducedMotion();
+  const reducedMotion = useAppReducedMotion();
   const opacity = useSharedValue(reducedMotion ? RESTING_OPACITY : 1);
 
   useEffect(() => {

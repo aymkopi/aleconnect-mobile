@@ -1,3 +1,4 @@
+import { useAppReducedMotion } from "@/hooks/use-app-reduced-motion";
 import { forwardRef, useEffect } from 'react';
 import { View, type LayoutChangeEvent, type ViewProps } from 'react-native';
 import Animated, {
@@ -5,7 +6,6 @@ import Animated, {
   cancelAnimation,
   interpolate,
   useAnimatedStyle,
-  useReducedMotion,
   useSharedValue,
   withRepeat,
   withSpring,
@@ -200,7 +200,7 @@ export const Progress = forwardRef<View, ProgressProps>(
     const target = fractionOf(value, minValue, maxValue);
     const progress = useSharedValue(target);
     const slide = useSharedValue(0);
-    const reducedMotion = useReducedMotion();
+    const reducedMotion = useAppReducedMotion();
 
     /**
      * The loop is tied to `indeterminate` and to how much motion is wanted.

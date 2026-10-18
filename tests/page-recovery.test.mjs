@@ -117,7 +117,7 @@ async function reportRecovery({ session = { user: { id: "user" }, session: { id:
     "react": { useCallback: fn => fn, useEffect: fn => effects.push(fn), useLayoutEffect: fn => layouts.push(fn), useRef: value => ({ current: value }), useState: value => [value, next => stateWrites.push(next)] },
     "react-native": { BackHandler: {}, Modal: "Modal", Pressable: "Pressable", View: "View" },
     "expo-image": { Image: "Image" }, "expo-clipboard": {},
-    "expo-router": { useRouter: () => ({ push: path => calls.push(["push", path]), replace: path => calls.push(["replace", path]), canGoBack: () => false }), useLocalSearchParams: () => ({ id: "report", serviceAccountId }), useFocusEffect: () => {} },
+    "expo-router": { useRouter: () => ({ push: path => calls.push(["push", path]), replace: path => calls.push(["replace", path]), dismissTo: path => calls.push(["dismissTo", path]), canGoBack: () => false }), useLocalSearchParams: () => ({ id: "report", serviceAccountId }), useFocusEffect: () => {} },
     "lucide-react-native": {},
     "react-native-safe-area-context": { useSafeAreaInsets: () => ({ top: 0, bottom: 0 }) },
     "@/components/panelui/badge": { Badge: "Badge" },
@@ -160,9 +160,9 @@ async function reportRecovery({ session = { user: { id: "user" }, session: { id:
 test("report recovery leaves unavailable accounts and retries only requests with valid access", async () => {
   const local = await reportRecovery({ serviceAccountId: "removed" });
   assert.equal(local.props.actionLabel, "Back to reports");
-  assert.deepEqual(local.calls, [["replace", "/reports"]]);
+  assert.deepEqual(local.calls, [["dismissTo", "/reports"]]);
   const server = await reportRecovery({ data: { unavailableReason: "Access removed" } });
-  assert.deepEqual(server.calls, [["replace", "/reports"]]);
+  assert.deepEqual(server.calls, [["dismissTo", "/reports"]]);
   const connection = await reportRecovery();
   assert.equal(connection.props.actionLabel, "Try again");
   assert.deepEqual(connection.calls, [["reload", true]]);

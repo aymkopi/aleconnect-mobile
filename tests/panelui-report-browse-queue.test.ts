@@ -329,8 +329,8 @@ test("browse and queue routes use their screens and one sheet host each", async 
   const [browse, queue, listRoute, queueRoute] = await Promise.all([
     read("src/features/reports/all-reports-screen.tsx"),
     read("src/features/reports/queue-screen.tsx"),
-    read("src/app/(tabs)/reports/list.tsx"),
-    read("src/app/(tabs)/reports/queue.tsx"),
+    read("src/app/(private)/reports/list.tsx"),
+    read("src/app/(private)/reports/queue.tsx"),
   ]);
   assert.equal((browse.match(/<BottomSheet\s+open=/g) ?? []).length, 1);
   assert.equal((queue.match(/<BottomSheet\s+open=/g) ?? []).length, 1);

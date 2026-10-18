@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import ts from "typescript";
 import * as holdMath from "../src/components/panelui/progress-button-hold.ts";
+import { useAppReducedMotion } from "../src/hooks/use-app-reduced-motion.ts";
 const source = await readFile(
   new URL("../src/components/panelui/progress-button.tsx", import.meta.url),
   "utf8",
@@ -13,7 +14,9 @@ function mount(reader = false, platform = "android") {
     stateIndex = 0,
     sequence = 0;
   const timers = new Map(),
-    effects = [];
+    effects = [],
+    animations = [];
+  const linear = () => {}, stepped = () => {};
   const jsx = (type, props) => ({ type, props });
   const mocks = {
     react: {
@@ -52,10 +55,10 @@ function mount(reader = false, platform = "android") {
       }),
       useReducedMotion: () => true,
       cancelAnimation() {},
-      withTiming: (value) => value,
+      withTiming: (value, config) => { animations.push({ value, ...config }); return value; },
       withSpring: (value) => value,
       ReduceMotion: { Never: "never" },
-      Easing: { linear: () => {}, steps: () => {} },
+      Easing: { linear, steps: () => stepped },
     },
     "tailwind-variants": {
       tv: () => () =>
@@ -67,6 +70,7 @@ function mount(reader = false, platform = "android") {
         ),
     },
     "@/components/panelui/progress-button-hold": holdMath,
+    "@/hooks/use-app-reduced-motion": { useAppReducedMotion },
     "@/lib/haptics": { impactKnock() {}, selectionTick() {} },
   };
   const exports = {};
@@ -98,6 +102,8 @@ function mount(reader = false, platform = "android") {
   });
   effects.forEach((fn) => fn());
   return {
+    animations,
+    linear,
     props: tree.props.children.props,
     get completed() {
       return completed;
@@ -113,6 +119,19 @@ function mount(reader = false, platform = "android") {
     },
   };
 }
+
+test("full app motion uses a continuous hold fill even when system Reduce Motion is on", () => {
+  const h = mount(false, "ios");
+  h.props.onPressIn({ nativeEvent: {} });
+  const fill = h.animations.find((animation) => animation.value === 1);
+  assert.equal(fill.duration, 3000);
+  assert.equal(fill.reduceMotion, "never");
+  assert.equal(fill.easing, h.linear);
+  h.advance(2999);
+  assert.equal(h.completed, 0);
+  h.advance(1);
+  assert.equal(h.completed, 1);
+});
 test("pointer release cancels; a new hold still requires three full seconds with reduced motion", () => {
   const h = mount();
   h.props.onPressIn({ nativeEvent: {} });

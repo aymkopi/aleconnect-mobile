@@ -22,6 +22,35 @@
 
 - Add current sign-in password verification before linking another ALECO account, with server-enforced cooldown and five-minute expiry. Keep target service-account credentials and Staff review separate, clear secrets on leave, and preserve account number/name when verification expires. Requires the paired Staff endpoint/guard before release; no dependency, native or signing change.
 
+## 1.2.2-alpha.1 - 2026-10-18
+
+### Build automation
+
+- Attach the unsigned iPhone IPA and separate iOS checksum/source metadata to the same GitHub Release as the APK after both parallel builds succeed. Verify the exact release source and all uploaded digests; preserve existing assets on retries.
+
+### Verification and release
+
+- PR18/source df8a225 passes both checks; workflow39121661080 succeeds across shared validation, parallel native builds and the final IPA upload. Public1.2.2-alpha.1 contains APK/code70, unsigned iOS1.0.0/build25 and all four metadata/checksum files. Tag and both metadata sources match; all six downloaded asset digests and native/runtime checks pass.
+- The new IPA is hash-verified in the user's Desktop IPA folder. Existing build7/build23 and releases are preserved. App/native source is unchanged; no new installation or device/provider acceptance is claimed.
+
+## 1.2.1-alpha.1 - 2026-10-18
+
+### Fixed
+
+- Reveal the main navbar together with Reports and Account when returning from child pages; retain loaded tabs and existing unsaved-change prompts.
+- Keep read-ticket status aligned with the chevron edge while reserving update-dot spacing only for unread tickets.
+- Retain full app animations with system Reduce Motion enabled, including continuous hold-button progress and account-card flips.
+
+### Build automation
+
+- Build an unsigned physical-iPhone IPA alongside the Android alpha release after default-branch application checks. Download the IPA, checksum and source metadata from the Actions artifact, then sign locally with iloader.
+
+### Verification and release
+
+- PR16 merges as0a5d5c1 after both exact-head checks pass; workflow39106196909 succeeds with independently running Android and iOS jobs. Android1.2.1-alpha.1/code69 and unsigned iOS1.0.0/build23 identify the same merged source. Published tag and all downloaded asset hashes match.
+- Downloaded APK retains the original signer/package, fixture-off live-API Hermes runtime, non-debuggable manifest and all54-library ZIP/ELF16KB checks. Downloaded IPA passes checksum, physical ARM64 Mach-O, permissions, API and compiled fixture-off checks; its hash-verified copy is in the user's Desktop IPA folder.
+- Source509 tests pass/one existing skip; types/lint/harness/review pass. User accepted the same app source in build7 on iPhone; these fresh CI outputs were not installed. Personal signing, remote push/provider and broader device acceptance remain separate.
+
 ## 1.2.0-alpha.1 - 2026-10-17
 
 ### Changed

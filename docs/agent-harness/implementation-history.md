@@ -1,5 +1,20 @@
 # Implementation history
 
+## 2026-10-18 - iPhone USB tooling and anisette recovery
+
+- Scope: continue the requested personal-iPhone install. Verified/installed official iloader2.3.9 per-user EXE after the all-user MSI required admin rights. Diagnosed the old USB pairing as invalid with automatic re-pairing disabled; administrator-approved exact-path/hash checks preserved that one record before standard pairing renewal. Original protected backup and replacement both exist; no phone app data reset.
+- Verification: USB model/OS readback passes; pairing command exited0, but later validation reported `SessionActive`, leaving Developer Mode unknown. The user's screenshot and public HTTP probes confirm the default Mac anisette service502. Both official built-in alternative client-info endpoints return200 with expected JSON fields. No credentials were sent by these probes. User then signed in locally with Jkcoxson (Windows); the authenticated iloader UI and selected phone independently confirm recovery. The unchanged IPA hash was rechecked before import.
+- Verification: after user selected the verified IPA, iloader reported successful signing/install. Independent installation-proxy readback confirms Aleconnect1.0.0/build2 on the USB phone, valid pairing, Developer Mode enabled and the matching personal provisioning profile expiring October25,12:35:52AM Manila with no APNs entitlement. Private suffix/account identifiers stay in ignored evidence. The prior `SessionActive` check redundantly validated an already established session; the corrected verifier passes without re-pairing.
+- Remaining risks: user completed own-profile trust in iPhone Settings and confirmed normal opening. First launch is user-confirmed; broader native interaction/private/provider behavior was not independently tested. APNs is unavailable, and free provisioning expires October25,12:35AM Manila.
+- Next: retain the unsigned IPA for renewal using the same local Apple account before expiration. Requested personal build/sign/USB install and first-launch handoff are complete; no default-branch merge, API deployment or store publication. See [handoff](tasks/ios-usb-ipa.md).
+
+## 2026-10-17 - iPhone USB build preparation
+
+- Scope: user requested an IPA for iPhone 11 using Windows and a free Apple account, plus GitHub tool research. Added a separate-branch macOS/Xcode build with Expo prebuild/CocoaPods, unsigned physical ARM64 archive, embedded bundle/API/permission checks and artifact provenance/hash. APNs is omitted only in the generated Personal Team test project.
+- Verification: harness/whitespace, workflow YAML/trigger/permission assertions and embedded Bash/Python/Node syntax pass. Hosted run39033231341 fromac9cae8 passed TypeScript, Doctor, iOS prebuild/CocoaPods, Xcode archive and package checks. Exact downloaded21,051,493-byte IPA passes SHA256, source, physical ARM64/iPhoneOS Mach-O, iOS16.4 minimum, embedded Hermes/live API/fixture-off and permission checks; SHA256 is39e3ed98b8cada45af256e7a16cb48399de9ab2be001e189a64750f32e541d44. First-run six patch recommendations remain baseline evidence, with locked app dependencies retained. Graphify refresh is saved separately. USB discovery independently confirmed iPhone11/iOS27.2.
+- Remaining risks: unsigned output needs local Apple authentication/provisioning; free-account profiles expire after seven days. Signing/installation/Developer Mode/native behavior remain unverified. No account/device/live-data writes or store publication. The extra local Hermes header assertion initially used the wrong byte order; it was corrected against Hermes source and the existing disassembler/fixture checker passed.
+- Next: use the checksum-verified official iloader2.3.9 installer and local Apple login to sign/install the verified IPA, then accept native behavior. Artifacts are in ignored `release/ios/39033231341`; source stays on the separate build branch with default master unchanged. See [handoff](tasks/ios-usb-ipa.md).
+
 ## 2026-10-17 — Approved declutter alpha release
 
 - Scope: ship the approved Figma refinement and current-status dates. Staff PR50 deploys1.1.1-alpha.1/source5c34ed3d first; Mobile PR14 then merges asf4130b9a with the exact tested product tree. Preserve manual source, signer, providers, queues and the separate Reports proposal.
@@ -695,3 +710,96 @@ Closeout: harness validation against the reviewed Staff companion and git diff -
 
 
 Final gates: Staff85 focused tests, production TypeScript/Vite build and scoped lint pass; Mobile533 tests pass/zero failed/one existing isolated-sibling skip, types and scoped lint pass with ten pre-existing FileUpload warnings and no errors. Both explicit-sibling harness checks and whitespace pass. Read-only review's lock-order and error-copy findings are fixed; final16 Staff profile checks and12 Mobile editor checks pass. Both Graphify refreshes succeed; Staff omits oversized HTML visualization, while JSON/report output is preserved with hash-verified generated maps and gate logs outside the commits. No rendered-app/native/live/merge/release acceptance is implied.
+
+## 2026-10-18 — iPhone full motion and Reports diagnosis
+
+- Scope: user confirmed Reduce Motion shortened the bottom pill, hold fill and account-card turn, and explicitly requested full motion. All owned animation branches use one app preference and the stable PanelUI provider configures Reanimated before its subtree. OS settings, hold duration, cancellation and screen-reader confirmation are retained.
+- Verification: the continuous-fill test fails before the fix and passes afterward; initial focused35 tests pass. Final isolated suite passes505 tests with one existing skip; TypeScript, scoped lint (zero errors), paired harness and whitespace pass. The first full-suite attempt hit sandbox Git-fixture temp denials; the unrestricted retry passes. Graph refresh completed with generated output retained separately. Workflow39052821923 and the exact5934a5a build3 artifact pass native/local checks. Independent USB readback confirms build3; user confirms pill/card motion with Reduce Motion enabled. Scoped127 warnings exactly match baseline. Read-only Aiven checks reproduce the separate Reports HTTP500 as the status-date CAST collation mismatch; direct enum comparison succeeds.
+- Remaining risks: the full-motion IPA is installed and user-accepted for pill/card animation. Free signing still has no APNs capability. No dependency versions, records or schema change.
+- Next: Staff PR52 is complete: all five checks pass, merge d6847897 deploys through39055184577 as1.1.2-alpha.1. Live manifests, active API version/runtime/bindings and anonymous boundaries verify; user confirms Reports loads on the retained iPhone session. Preserve the old IPA, pairing backup and app data.
+
+## 2026-10-18 — iPhone navbar visibility
+
+- Scope: user reproduces reversed/delayed navbar through Reports > Ticket details > Back. Use the installed navigator focus helper instead of custom traversal and conflicting URL checks; hide all child screens, including Ticket details, as now requested. Cold deep links retain a fallback scoped to the active tab.
+- Verification: three regression scenarios fail before/pass after; focused34 checks, full507-pass/one-existing-skip suite, TypeScript, scoped lint (zero errors/two existing test warnings), harness/whitespace and fresh read-only review pass. Initial sandbox temporary Git-fixture writes were denied; the unrestricted suite passes. Native IPA gates are tracked in the iPhone handoff.
+- Remaining risks: repeated navigation in the new IPA still needs physical iPhone acceptance. Motion and deployed Reports fixes are already user-accepted.
+- Next: compile and verify a new IPA, update the existing installation without clearing data, then repeat the reported flow on the iPhone. Graph refresh completes with4,360 nodes/8,270 edges; generated output stays under ignored .cache/navbar-graphify-refresh.
+
+## 2026-10-18 — Ticket-card status edge
+
+- Scope: user requests status at the chevron's right content edge unless an unread update dot is present. The shared Reports/main/archive card now omits the transparent dot's layout space for read tickets; unread styling, indicator accessibility and receipt behavior stay intact.
+- Verification: inspected both card consumers and the single shared badge/indicator row. Existing44 focused status/read/navigation checks, TypeScript, scoped card lint (zero errors/warnings), paired harness and whitespace pass. Fresh source review has no findings. Native build gates are retained.
+- Remaining risks: physical read/unread alignment acceptance remains pending in the combined IPA. Existing reports and motion acceptance is retained.
+- Next: replace the superseded navbar-only build with a combined native IPA and verify both requested fixes on the retained iPhone installation.
+
+## 2026-10-18 — Combined iPhone build5 installed
+
+- Scope: resume the explicitly requested iloader installation after Computer Use was stopped; retain app data, own-account signer, all older IPAs and original pairing backup. Build5 includes the reviewed navbar and read-card status corrections; no dependency or API changes.
+- Verification: workflow39057062209 passes from92cc134; local exact-source/hash/physical-ARM64/Hermes/fixture-disabled and permissions checks pass. User selects the exact verified IPA in the unsupported native chooser; iloader shows successful signing/install. Independent installation-proxy readback confirms1.0.0/build5, valid USB trust and Developer Mode. Evidence remains in ignored release/ios/39057062209; no uninstall or reset.
+- Remaining risks: user accepts ticket-card alignment but reports navbar return still takes1–2seconds. Matching Personal Team profiles have no APNs and require renewal. Reports loading and prior full motion are already user-accepted.
+- Next: investigate remaining navbar return timing. Installation is complete; preserve source/artifact/device evidence and unrelated primary state.
+
+## 2026-10-18 — Retain the hidden navbar
+
+- Scope: after build5 device feedback, test whether destroying/recreating the animated bar on every child push/Back causes the remaining delay. Keep its component/native tree mounted with immediate opacity, disabled hidden gesture/press targets and hidden accessibility. No data, route, API or animation-timing change.
+- Verification: two retention/interaction regressions fail before/pass after;37 focused checks, full509-pass/one-existing-skip suite, TypeScript, paired harness, whitespace and fresh read-only review pass. Scoped lint has zero errors/one baseline refs warning. Graph refresh4,363 nodes/8,273 edges stays separate. Artifact/device checks follow in the iPhone handoff.
+- Remaining risks: the1–2second native return timing remains unverified until the next phone trial. Previously accepted status, motion and Reports fixes remain intact.
+- Next: package the interface update, install in place and repeat the same details/Back flow on the iPhone.
+
+## 2026-10-18 — Native stack reveals the main navigation
+
+- Scope: independent readback verifies build6 installed, but user reports retention did not fix the delay. Device comparison confirms Reports list is visible without its bar for1–2seconds while root-stack Advisory Back returns immediately. Move Reports/Account child routes above tabs, following the working native-stack pattern; retain all public URLs, existing feature screens and mandatory-password/guest/session safeguards.
+- Verification: route-boundary/unique-URL and private-layout password-return regressions fail before/pass after;44 initial focused checks pass. Review catches duplicate tabs on unconditional replace-to-main returns; use dismissTo for those exits, preserving Back/cold-entry/unsaved guards. Actual installed router-state regression fails before/passes after and retains period parameters. All20 moved wrappers match their original exports. Final508 tests/one existing skip, TypeScript, scoped lint (zero errors/one baseline warning), harness, whitespace and separate Graphify refresh pass. Follow-up reviewer is usage-limited; physical timing remains a separate acceptance gate.
+- Remaining risks: next IPA must verify deep links, report/archive/detail Back and Account child Back on the iPhone. Existing status alignment, motion and deployed Reports loading are accepted; prior two navbar hypotheses did not close timing.
+- Next: finish source/review gates, package using the verified unchanged native binary/assets, install in place and repeat the device comparison. Preserve all artifacts and user-installed SideStore; no app/account reset.
+
+## 2026-10-18 — Build7 ready for the navigation comparison
+
+- Scope: sourcefd7a3da is pushed; package the production iOS interface bundle using verified build5 native files. Do not merge or trigger an unrelated Android release.
+- Verification: production Hermes export, exact-source/allowlist, matching bytecode,35 unchanged assets and ZIP entry identity pass; only the bundle/build number change. Build7 SHA25627f68da1f80551d719307484dda185719cae4cd3b4d971cdb10b438824d289b5,21,035,688 bytes; independent ARM64/API/permissions/fixture-disabled checks pass. Artifact/metadata and generated/export recovery evidence are retained under ignored cache/release folders.
+- Remaining risks: build7 is not installed or timing-accepted yet. The reopened iloader requires local Apple login. Preserve the existing app, signing identity and user-installed SideStore.
+- Next: import the uniquely named build7 file after local login, independently read back installed version7 and repeat loaded Reports/Account child/Back flows plus deep-link/unsaved-change checks.
+
+## 2026-10-18 — User accepts build7 navbar fix
+
+- Scope: at the user's request, stop Computer Use and provide the build7 IPA in `C:/Users/Justine/Desktop/AleconnectApps/ipa/Aleconnect-build7-native-navigation.ipa`. Preserve any different existing file; source and copied artifact hashes match the verified build7 digest.
+- Verification: user subsequently reports **Fixed**, accepting the reported navbar delay after the native-stack correction. Prior motion, Reports and card alignment acceptance is retained; source508-pass/one-existing-skip and IPA identity evidence remains recorded above.
+- Remaining risks: no independent build7 USB version/signing readback or broader device workflow retest after manual handoff. This acceptance is user-reported; no new app/device/API changes are made.
+- Next: requested issues complete. Retain the accepted IPA, task branch/worktree, prior artifacts and protected app/signing/pairing/SideStore state; no further device input or cleanup.
+
+## 2026-10-18 — Publish accepted iPhone fixes and build both platforms
+
+- Scope: user authorizes default-master merge/publication of this chat's fixes and automatic iOS builds parallel with Android; explicitly exclude separate draft account-security Mobile15/Staff55. Reuse the existing iPhone builder as a sibling of Android release, both gated only by shared checks and default-branch application changes/manual dispatch. Keep unsigned/local Apple signing, Android allocator and device state intact.
+- Verification: new workflow regression fails before the caller exists and passes after adding the reusable iOS job. Full509 tests/one existing skip, TypeScript, full Expo lint (zero errors/271 warnings), harness and whitespace pass. Parsed YAML verifies exact parallel dependencies/gates. Fresh review reports no actionable issue and24 focused checks pass independently; app source exactly matches accepted build7. Graph refresh4,375 nodes/8,236 edges stays separate. PR/native gates follow.
+- Remaining risks: accepted build7 device behavior is retained, but the merged-source native artifacts/build outcomes are not yet verified. No new device installation, signing credentials, API deployment or security-PR merge.
+- Next: complete checks/review, create and merge the scoped PR, verify both native outputs from the merged source, then update this handoff without another app release.
+
+## 2026-10-18 — Both native builds published and verified
+
+- Scope: PR16 merges as0a5d5c15928b60a36d53c3574d79b86e91a9b477 after both exact-head checks; merged tree equals the reviewed head and accepted build7 app source. Primary Mobile master fast-forwards cleanly. Excluded security Mobile15/Staff55 remains draft/untouched.
+- Verification: workflow39106196909 succeeds. Shared CI precedes overlapping Android/iOS jobs; Android1.2.1-alpha.1/code69 tag/source and all three downloaded asset digests match. Independent signer/package/manifest/fixture-off/API/Hermes and54-library ZIP/ELF16KB checks pass. Unsigned iOS1.0.0/build23 exact-source/hash/ZIP/physical ARM64/permissions/API/fixture-off checks pass. APK SHA256be47d4a320fcb0453c990ca6039a1559bf0a10bb3c87a3714ef0a5fec3dfeb07; IPA SHA256f7adcf6b7cba07b71b22b2c9cbb3389b749bda2a20c176a8b24a7b9bad890de5. Desktop IPA copy matches; prior build7 remains intact.
+- Remaining risks: fresh CI artifacts were not installed; same app source was previously user-accepted on iPhone. Personal signing is local, with no APNs/store/provider acceptance. No device/Apple/account/API mutation occurs during this integration.
+- Next: no further product or native build work. Merge this docs-only record, verify native jobs skip and synchronize clean master. Retain artifacts, recovery branches/worktrees and protected device/signing/pairing/SideStore state; requested product and build/publication work is complete.
+
+## 2026-10-18 — Attach iPhone IPA to the Android release
+
+- Scope: user requests a new version with IPA and APK on Releases. Existing default-master automation builds both in parallel, but IPA is only an Actions artifact. Expose the allocated Android tag and add a gated final upload job/helper; keep existing asset identities, Android publication, app/native source and local Apple signing intact.
+- Verification:16 initial workflow/version/upload regressions pass after failing on the missing publication path. Source/tag/identity/checksum collisions fail before upload; matching existing assets are retained, partial uploads resume and remote digests are verified. Full source/CI/review and actual new combined release checks follow.
+- Remaining risks: this new upload path is not yet exercised in GitHub. The app source remains accepted build7; no new device installation/provider/Apple acceptance is implied.
+- Next: finish checks/review, merge the scoped PR and verify a new alpha's APK/IPA/checksum/metadata assets and exact source. Preserve security drafts, old releases, artifacts and device state.
+- Final source gates:514 tests pass/one existing skip, types, scoped release lint (zero errors/warnings), harness/whitespace and YAML graph pass. Review's identical-source retry gap is corrected with verified-tag output and stale-source exclusion;17 focused tests pass independently and re-review is clear. Generated Graphify refresh is separate; app/native source is unchanged.
+
+## 2026-10-18 — IPA and APK available on the same release
+
+- Scope: PR18 merges asdf8a225919cf533304b4232cefeb264886ea85a6 after both exact-head checks; merged tree equals the reviewed source. Workflow39121661080 passes all four jobs, including the new same-source final IPA upload. Primary master is synchronized through the application merge; security drafts are excluded.
+- Verification: public1.2.2-alpha.1 has APK/code70, unsigned iOS1.0.0/build25, two metadata and two checksum files. Tag/target/both sources match; all six downloaded GitHub digests match. Independent APK retained signer/non-debuggable/SDK/54-library16KB/API/fixture-off and IPA ARM64/iPhoneOS/permissions/API/fixture-off checks pass. APK SHA256b3ef13b084fb9a5b5d9a75c0098c0c3359556f8d6dd7d2691dfba22fea7fd97c; IPA SHA2568ad53a068544bb3cefd5dd5b6054edf668e968874a59064528367251bb7120eb. Desktop IPA copy matches.
+- Remaining risks: new artifacts were not installed or signed. The unchanged app source was accepted in iPhone build7; Personal Team signing/APNs/provider/store limits remain. No old release asset or protected device state is replaced.
+- Next: merge this docs-only closeout, verify native/publication jobs skip and synchronize clean master. Product/workflow/new-release objectives are complete; preserve all existing evidence and excluded work.
+
+
+## 2026-10-18 - Authorized Staff-first release gate
+
+- Scope: user authorizes final checks, both PR merges, Staff deployment first and a new Mobile alpha. Integrate Staff main2348b904 and Mobile master8f79e1c without reverting the newer agency/contact fixes, iPhone private-route/motion work or combined IPA/APK pipeline. Resolve additive CI/history conflicts by retaining both; legacy photo route keeps the approved unified-editor redirect.
+- Verification: integrated Staff121 focused security/profile/account/directory tests and Mobile544 tests pass,zero failed; one existing isolated-sibling skip is checked by the paired harness. Read-only integration review independently passes36 checks and finds no actionable regression. Types/lint/build, hosted exact-head gates and release evidence follow below; no deployment is claimed yet.
+- Remaining risks: native/private/provider/real-MySQL concurrency acceptance remains separate; profile avatar endpoints retain existing session/ownership/revision guards. No new migration; do not repeat another task's agency schema work. Old apps need the paired Mobile update for new link/unlink actions.
+- Next: green exact-head CI, merge/deploy Staff55, verify deployed version/access boundaries, then merge Mobile15 and verify the new immutable alpha and original signer. Preserve primary/manual/iOS/device work and rollback evidence.

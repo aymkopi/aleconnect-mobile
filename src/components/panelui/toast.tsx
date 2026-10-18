@@ -1,3 +1,4 @@
+import { useAppReducedMotion } from "@/hooks/use-app-reduced-motion";
 /**
  * Toast — transient notification.
  *
@@ -37,7 +38,6 @@ import Animated, {
   runOnJS,
   useAnimatedStyle,
   useDerivedValue,
-  useReducedMotion,
   useSharedValue,
   withDecay,
   withSpring,
@@ -335,7 +335,7 @@ function ToastSlot({
   const placement = item.placement ?? 'bottom';
   const translateY = useSharedValue(0);
   const scale = useSharedValue(1);
-  const reducedMotion = useReducedMotion();
+  const reducedMotion = useAppReducedMotion();
   const hide = useCallback(() => toastStore.hide(item.id), [item.id]);
 
   // Drop this toast's measurement when it leaves, so the map cannot grow
