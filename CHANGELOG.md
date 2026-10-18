@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.2.1-alpha.1 - 2026-10-18
 
 ### Fixed
 
@@ -11,6 +11,12 @@
 ### Build automation
 
 - Build an unsigned physical-iPhone IPA alongside the Android alpha release after default-branch application checks. Download the IPA, checksum and source metadata from the Actions artifact, then sign locally with iloader.
+
+### Verification and release
+
+- PR16 merges as0a5d5c1 after both exact-head checks pass; workflow39106196909 succeeds with independently running Android and iOS jobs. Android1.2.1-alpha.1/code69 and unsigned iOS1.0.0/build23 identify the same merged source. Published tag and all downloaded asset hashes match.
+- Downloaded APK retains the original signer/package, fixture-off live-API Hermes runtime, non-debuggable manifest and all54-library ZIP/ELF16KB checks. Downloaded IPA passes checksum, physical ARM64 Mach-O, permissions, API and compiled fixture-off checks; its hash-verified copy is in the user's Desktop IPA folder.
+- Source509 tests pass/one existing skip; types/lint/harness/review pass. User accepted the same app source in build7 on iPhone; these fresh CI outputs were not installed. Personal signing, remote push/provider and broader device acceptance remain separate.
 
 ## 1.2.0-alpha.1 - 2026-10-17
 
