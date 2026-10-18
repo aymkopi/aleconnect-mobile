@@ -1,3 +1,4 @@
+import { useAppReducedMotion } from "@/hooks/use-app-reduced-motion";
 /**
  * LineChart — a time series, drawn and animated on the UI thread.
  *
@@ -63,7 +64,6 @@ import Animated, {
   runOnJS,
   useAnimatedProps,
   useAnimatedStyle,
-  useReducedMotion,
   useSharedValue,
   withRepeat,
   withTiming,
@@ -243,7 +243,7 @@ const LineChartRoot = forwardRef<LineChartHandle, LineChartProps>(function LineC
   const domainMin = useSharedValue(0);
   const domainMax = useSharedValue(0);
   const activeIndex = useSharedValue(-1);
-  const reducedMotion = useReducedMotion();
+  const reducedMotion = useAppReducedMotion();
 
   const registerSeries = useMemo(
     () => (key: string, color: string) =>
@@ -750,7 +750,7 @@ function LineChartSkeleton({ duration = 1400, color }: LineChartSkeletonProps) {
   const gradientId = `panelui-chart-skeleton-${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
 
   const sweep = useSharedValue(0);
-  const reducedMotion = useReducedMotion();
+  const reducedMotion = useAppReducedMotion();
   const loading = status === 'loading';
 
   useEffect(() => {

@@ -23,13 +23,13 @@ export default function TabsLayout() {
       <Tabs.Screen name="home" options={{ title: "Home" }} />
       <Tabs.Screen
         name="reports"
-        options={{ title: "Reports", popToTopOnBlur: true }}
+        options={{ title: "Reports" }}
       />
       <Tabs.Screen name="advisories" options={{ title: "Advisories" }} />
       <Tabs.Screen name="hotlines" options={{ title: "Hotlines" }} />
       <Tabs.Screen
         name="profile"
-        options={{ title: "Account", popToTopOnBlur: true }}
+        options={{ title: "Account" }}
       />
     </Tabs>
   );

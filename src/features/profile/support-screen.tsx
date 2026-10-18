@@ -59,7 +59,7 @@ export function SupportScreen({ kind, returnToReport = false }: { kind: "help" |
       footer={
         <Button variant="outline" onPress={() => returnToReport
           ? (router.canGoBack() ? router.back() : router.replace("/reports"))
-          : router.replace("/profile")}>
+          : router.dismissTo("/profile")}>
           {returnToReport ? "Back to report" : "Back to Account"}
         </Button>
       }

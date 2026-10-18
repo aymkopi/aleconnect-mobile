@@ -52,6 +52,14 @@ keep human-curated deprecations, removals and security details in CHANGELOG.md.
   standalone `preview` variant for ARM64 phones and x86_64 emulators. They retain
   package IDs, provider files and the original preview certificate. API origin
   remains `https://api.aleconnect.app`; no new credential or PAT is required.
+- Mobile also calls the reusable **iOS USB IPA** workflow after those checks.
+  On default-branch application updates, Android publication and the macOS iPhone
+  build run independently in parallel. Documentation-only pushes skip both;
+  manual dispatch remains available. The iPhone job uploads an unsigned ARM64 IPA,
+  SHA256SUMS and exact-source metadata as **Aleconnect-iPhone-unsigned** Actions
+  artifacts. Sign locally with iloader; no Apple credentials are stored in CI.
+  Its numeric bundle version/build number identify this personal USB build;
+  Android's existing alpha allocator, signing and publication remain unchanged.
 - Android `versionCode` is one greater than the maximum of the published APK
   code, checked-in native configuration and observed platform floor. Mobile's
   floor is 64; Lineman's is 1. A new SemVer core never resets the Android code.

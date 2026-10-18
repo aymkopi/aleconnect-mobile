@@ -1,3 +1,4 @@
+import { useAppReducedMotion } from "@/hooks/use-app-reduced-motion";
 // PanelUI ProgressButton 0.108.0; completion requires an uninterrupted JS-clock hold.
 
 import {
@@ -29,7 +30,6 @@ import Animated, {
   ReduceMotion,
   cancelAnimation,
   useAnimatedStyle,
-  useReducedMotion,
   useSharedValue,
   withSpring,
   withTiming,
@@ -258,7 +258,7 @@ const ProgressButtonRoot = forwardRef<View, ProgressButtonProps>(
       disabled,
     });
     const duration = resolveHoldDuration(holdDuration);
-    const reducedMotion = useReducedMotion();
+    const reducedMotion = useAppReducedMotion();
     const [screenReader, setScreenReader] = useState(false);
     const nativeReader = Platform.OS !== "web" && screenReader;
     const accessibleAttempt = useRef(false);

@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Reveal the main navbar together with Reports and Account when returning from child pages; retain loaded tabs and existing unsaved-change prompts.
+- Keep read-ticket status aligned with the chevron edge while reserving update-dot spacing only for unread tickets.
+- Retain full app animations with system Reduce Motion enabled, including continuous hold-button progress and account-card flips.
+
+### Build automation
+
+- Build an unsigned physical-iPhone IPA alongside the Android alpha release after default-branch application checks. Download the IPA, checksum and source metadata from the Actions artifact, then sign locally with iloader.
+
 ## 1.2.0-alpha.1 - 2026-10-17
 
 ### Changed

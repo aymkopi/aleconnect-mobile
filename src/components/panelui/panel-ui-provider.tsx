@@ -2,6 +2,7 @@ import { type ReactNode } from 'react';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { Platform, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { ReducedMotionConfig, ReduceMotion } from 'react-native-reanimated';
 import {
   PortalHost,
   PortalProvider,
@@ -66,6 +67,7 @@ export function PanelUIProvider({
 
   return (
     <GestureHandlerRootView style={styles.root}>
+      <ReducedMotionConfig mode={ReduceMotion.Never} />
       {/* Passed through rather than defaulted: the controller warns about a
           value it has to ignore, and under edge-to-edge it ignores both. */}
       <KeyboardProvider

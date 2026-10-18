@@ -113,7 +113,7 @@ function Photo({
       onReject={(rejections) => { if (current()) setError(rejections.map((entry) => entry.message).join(" ")); }}
     >
       <ReportPage title="Profile photo" onBack={back} footer={
-        uri ? <Button loading={busy} onPress={() => saved ? router.replace("/profile") : void save()}>{saved ? "Back to Account" : "Save photo"}</Button> : undefined
+        uri ? <Button loading={busy} onPress={() => saved ? router.dismissTo("/profile") : void save()}>{saved ? "Back to Account" : "Save photo"}</Button> : undefined
       }>
         <ProfileHeading title={saved ? "Profile photo updated" : uri ? "Preview your photo" : "Choose a profile photo"} />
         <View className="gap-4 items-center rounded-xl bg-card p-4">
@@ -139,7 +139,7 @@ function Photo({
           <Dialog.Description>Your current profile photo has not changed.</Dialog.Description>
           <Dialog.Footer>
             <Button variant="outline" onPress={() => setDiscard(false)}>Keep photo</Button>
-            <Button variant="destructive" onPress={() => { allowLeave(); setFiles([]); router.replace("/profile"); }}>Discard</Button>
+            <Button variant="destructive" onPress={() => { allowLeave(); setFiles([]); router.dismissTo("/profile"); }}>Discard</Button>
           </Dialog.Footer>
         </Dialog.Content>
       </Dialog>

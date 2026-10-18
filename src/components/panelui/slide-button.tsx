@@ -1,3 +1,4 @@
+import { useAppReducedMotion } from "@/hooks/use-app-reduced-motion";
 /**
  * SlideButton — drag across to confirm, with the distance drawn on the button.
  *
@@ -58,7 +59,6 @@ import Animated, {
   cancelAnimation,
   runOnJS,
   useAnimatedStyle,
-  useReducedMotion,
   useSharedValue,
   withSpring,
   withTiming,
@@ -280,7 +280,7 @@ function SlideButtonRoot(
   }: SlideButtonProps,
   ref: React.Ref<View>
 ) {
-  const reducedMotion = useReducedMotion();
+  const reducedMotion = useAppReducedMotion();
   const sign = useDirectionSign();
 
   const progress = useSharedValue(0);

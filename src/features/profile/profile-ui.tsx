@@ -55,7 +55,7 @@ export function ProfileGate({ children }: { children: (identity: ProfileIdentity
   );
   if (PANELUI_PREVIEW && !fixture)
     return (
-      <ReportPage title="Account preview" onBack={() => router.replace("/profile")}>
+      <ReportPage title="Account preview" onBack={() => router.dismissTo("/profile")}>
         <ProfileNotice
           title="Live changes are paused"
           description="Open labelled sample screens to review the Profile flows without changing account or device data."
@@ -65,7 +65,7 @@ export function ProfileGate({ children }: { children: (identity: ProfileIdentity
     );
   if (!fixture && (!session || !account || !account.accounts.length))
     return (
-      <ReportPage title="Account" onBack={() => router.replace("/profile")}>
+      <ReportPage title="Account" onBack={() => router.dismissTo("/profile")}>
         <ProfileHeading
           title={isLoading || accountsLoading ? "Loading account" : "Sign in to continue"}
           description="Your personal and service details belong to your signed-in account."

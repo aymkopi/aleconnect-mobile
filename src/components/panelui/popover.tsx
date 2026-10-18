@@ -1,3 +1,4 @@
+import { useAppReducedMotion } from "@/hooks/use-app-reduced-motion";
 /**
  * Popover — a panel anchored to the thing that opened it.
  *
@@ -54,7 +55,6 @@ import {
 import Animated, {
   FadeOut,
   useAnimatedStyle,
-  useReducedMotion,
   useSharedValue,
   withSpring,
   withTiming,
@@ -600,7 +600,7 @@ function PopoverContent({
    */
   const appear = useSharedValue(0);
   const settle = useSharedValue(0);
-  const reducedMotion = useReducedMotion();
+  const reducedMotion = useAppReducedMotion();
   const placed = !!position;
 
   useEffect(() => {

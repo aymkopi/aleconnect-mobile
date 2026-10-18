@@ -1,5 +1,7 @@
 # Active work
 
+- [iPhone fixes and parallel release integration](tasks/ios-usb-ipa.md): build7 navbar, motion, Reports and card alignment are user-accepted. User authorizes master integration and parallel automatic iOS/Android builds, excluding draft security Mobile15/Staff55. Reuse iOS builder beside Android after shared checks; local/review/PR/native build gates are pending. Preserve Desktop IPA, prior artifacts, signer, app data, pairing backup and SideStore; no Computer Use.
+
 - [Mobile declutter refinement](tasks/mobile-declutter.md): PR14/sourcef4130b9a merged after verified Staff1.1.1-alpha.1. Mobile1.2.0-alpha.1/code68 published; exact artifact/signature/alignment and three tablet25040RP0AG cold launches/public navigation pass. Both default branches are synchronized; finish docs-only closeout and task-only cleanup. Preserve manual edits, device data and the separate Reports proposal; private/provider/AT/iOS acceptance remains separate.
 
 - [Manual refresh and FileUpload](../mobile-refresh-file-upload.md): PR13 merged/source0639fa8, alpha1.1.0-alpha.1/code67 published and exact artifacts verified. October17 phone25069PTEBG passes three cold launches, retained session, main-page rendering and navbar drag. Default branch sync and scoped release-worktree cleanup follow docs checks. PanelUI0.112.0 retained; camera/provider/iOS acceptance remains separate.

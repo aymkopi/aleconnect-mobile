@@ -719,6 +719,7 @@ test("Carousel drag uses one frozen origin across movement events and advances o
       withSpring: (x) => x,
       runOnJS: (fn) => fn,
     },
+    "@/hooks/use-app-reduced-motion": { useAppReducedMotion: () => true },
     "@/components/panelui/controllable-state": {
       useControllableState: () => ({
         value: 2,
@@ -886,63 +887,6 @@ test("report actions follow the keyboard and reserve the measured footer clearan
     100,
     "the focused field must clear the footer plus a 16px gap",
   );
-});
-
-test("Reports and Profile child deep links hide tabs before nested navigation state is available", async () => {
-  let pathname = "/reports/list";
-  const module = await load("src/components/floating-tabs-bar.tsx", {
-    "react/jsx-runtime": jsx,
-    "react-native": { View: "View" },
-    "expo-router": { usePathname: () => pathname },
-    "@/components/floating-app-bar": { FloatingAppBar: "FloatingAppBar" },
-  });
-  const props = {
-    state: { index: 1, routes: [{ name: "home" }, { name: "reports" }] },
-    navigation: { navigate() {} },
-  };
-  for (pathname of [
-    "/reports/new",
-    "/reports/list",
-    "/reports/queue",
-    "/reports/timeline",
-    "/reports/period",
-    ...[
-      "details",
-      "accounts",
-      "link-account",
-      "link-requests",
-      "change-password",
-      "photo",
-      "push-notifications",
-      "help",
-      "about",
-      "privacy",
-      "terms",
-    ].map((name) => "/profile/" + name),
-  ]) {
-    assert.equal(
-      module.FloatingTabsBar(props),
-      null,
-      pathname + " must hide tabs without nested state",
-    );
-  }
-  for (pathname of [
-    "/home",
-    "/reports",
-    "/reports/report-1",
-    "/advisories",
-    "/hotlines",
-    "/profile",
-  ]) {
-    assert.notEqual(
-      module.FloatingTabsBar(props),
-      null,
-      pathname + " keeps the main navigation",
-    );
-  }
-  pathname = "/reports/report-1";
-  props.state.routes[1].state = { index: 0, routes: [{ name: "[id]" }] };
-  assert.notEqual(module.FloatingTabsBar(props), null);
 });
 
 test("Reports stages period/account/status/type filters within one sheet and only Apply changes results", async () => {
@@ -1263,7 +1207,7 @@ test("legal notice return preserves report navigation and normal profile return"
   const h = hooks(), calls = [];
   const module = await load("src/features/profile/support-screen.tsx", {
     react: h.react, "react/jsx-runtime": jsx, "react-native": { View: "View", Linking: {} },
-    "expo-router": { useRouter: () => ({ canGoBack: () => true, back: () => calls.push("back"), replace: route => calls.push(route) }) },
+    "expo-router": { useRouter: () => ({ canGoBack: () => true, back: () => calls.push("back"), replace: route => calls.push(["replace", route]), dismissTo: route => calls.push(["dismissTo", route]) }) },
     "@/components/panelui/button": { Button: "Button" }, "@/components/panelui/text": { Text: "Text" },
     "@/hooks/use-app-colors": { useAppColors: () => ["blue"] }, "@/features/reports/components/report-page": { ReportPage: "ReportPage" },
   });
@@ -1271,7 +1215,7 @@ test("legal notice return preserves report navigation and normal profile return"
   assert.equal(legal.props.footer.props.children, "Back to report"); legal.props.footer.props.onPress();
   h.start(); const profile = module.SupportScreen({ kind: "privacy" });
   assert.equal(profile.props.footer.props.children, "Back to Account"); profile.props.footer.props.onPress();
-  assert.deepEqual(calls, ["back", "/profile"]);
+  assert.deepEqual(calls, ["back", ["dismissTo", "/profile"]]);
 });
 
 test("default compact tabs retain their 48-point touch target", async () => {

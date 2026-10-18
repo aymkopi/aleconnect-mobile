@@ -22,6 +22,7 @@ function bar(index = 0, accepted = true, reduced = false) {
     "react-native-safe-area-context": { useSafeAreaInsets: () => ({ bottom: 0 }) },
     "@/components/panelui/text": { Text: "Text" },
     "@/hooks/use-app-colors": { useAppColors: () => ["white", "blue", "gray"] },
+    "@/hooks/use-app-reduced-motion": { useAppReducedMotion: () => reduced },
   };
   const source = readFileSync(new URL("../src/components/floating-app-bar.tsx", import.meta.url), "utf8");
   const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText;

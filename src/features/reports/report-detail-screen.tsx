@@ -488,7 +488,7 @@ export default function ReportDetailScreen() {
             }
             onAction={() => {
               if (!session && !fixtures) router.push("/sign-in");
-              else if (reportUnavailable) router.replace("/reports");
+              else if (reportUnavailable) router.dismissTo("/reports");
               else if (!accountContext && !fixtures)
                 void refreshConsumerAccount().catch(() => {});
               else void refresh();
