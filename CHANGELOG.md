@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.3.0-alpha.1 - 2026-10-18
+
 ### Changed
 
 - Reuse the compact docked photo-source sheet for profile photos and New Report evidence, with Camera/Photo library descriptions and Cancel. Preserve the manually removed cropping hint and existing processing/file limits.
@@ -21,6 +23,11 @@
 - Add current email-password confirmation before unlinking; share the existing linking verification gate while keeping purpose-specific server proofs. Preserve the service-account password, owned replacement-default selection and last-account safeguard. Protect newer sessions from delayed unlink cleanup and show committed link success even after local verification expiry.
 
 - Add current sign-in password verification before linking another ALECO account, with server-enforced cooldown and five-minute expiry. Keep target service-account credentials and Staff review separate, clear secrets on leave, and preserve account number/name when verification expires. Requires the paired Staff endpoint/guard before release; no dependency, native or signing change.
+
+### Verification and release
+
+- PR #15 / source dc6ed48b merges only after verified Staff 2.0.0-alpha.1. Workflow 39139461658 passes all jobs and publishes 1.3.0-alpha.1 / Android code 71, plus the unsigned iOS build 27 companion. Exact source/tag and all six downloaded asset digests match.
+- Downloaded APK retains the original signer/package, standalone live-API/fixture-off Hermes runtime and all 54 libraries' ZIP/ELF 16 KB alignment; versioned Desktop copy matches. IPA source/checksum, physical ARM64 archive, permissions and fixture-off API bundle verify. 544 source tests pass / zero failures / one existing isolated-sibling skip; types/lint/harness and review pass. Manual/iPhone work is preserved. No device installation, provider or authenticated-production acceptance is claimed.
 
 ## 1.2.2-alpha.1 - 2026-10-18
 
