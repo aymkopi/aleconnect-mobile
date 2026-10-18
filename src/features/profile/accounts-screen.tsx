@@ -183,7 +183,7 @@ function Accounts({ identity }: { identity: ProfileIdentity }) {
         footer={footer}
       >
         {unlink && verifying ? (
-          <AccountPasswordVerificationFields verification={verification} action="unlinking" />
+          <AccountPasswordVerificationFields verification={verification} />
         ) : unlink ? (
           <>
             <ProfileHeading

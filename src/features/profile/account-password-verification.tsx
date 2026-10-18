@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFocusEffect } from "expo-router";
-import { Text } from "@/components/panelui/text";
 import { getAuthToken } from "@/services/api";
 import { requestAccountVerification, type PasswordChangeStatus } from "@/services/auth";
 import { ProfileField, ProfileHeading, ProfileNotice, useProfileTask, type ProfileIdentity } from "./profile-ui";
@@ -62,7 +61,7 @@ export function useAccountPasswordVerification(
     const timer = setInterval(() => {
       const time = Date.now(); setNow(time);
       if (cooldown && time >= cooldown) setCooldown(0);
-      if (expires && time >= expires) reset("Verification expired. Confirm your sign-in password again; your account details are kept.");
+      if (expires && time >= expires) reset("Verification expired. Enter your password again.");
     }, 1000);
     return () => clearInterval(timer);
   }, [cooldown, expires, reset]);
@@ -103,20 +102,17 @@ export function useAccountPasswordVerification(
   return { proof, password, setPassword, busy, error, remaining, verify, reset };
 }
 
-export function AccountPasswordVerificationFields({ verification, action }: {
+export function AccountPasswordVerificationFields({ verification }: {
   verification: ReturnType<typeof useAccountPasswordVerification>;
-  action: "linking" | "unlinking";
 }) {
   const { password, setPassword, busy, remaining, error } = verification;
   return <>
-    <Text size="xs" muted>Security check</Text>
-    <ProfileHeading title="Verify it’s you" description={"Confirm your current sign-in password before " + action + " an ALECO account."} />
+    <ProfileHeading title="Verify it’s you" />
     <ProfileField label="Current password" secret value={password} onChangeText={setPassword}
       autoComplete="current-password" maxLength={128} editable={!busy && !remaining}
-      placeholder="Enter your sign-in password" description="Use your email sign-in password, not the service-account password." />
-    <ProfileNotice title="For this session only" description="Verification lasts 5 minutes. Your password is never saved on this device." />
+      placeholder="Enter your password" description="Use your email password." />
     {remaining ? <ProfileNotice title={"Try again in " + Math.floor(remaining / 60) + ":" + String(remaining % 60).padStart(2, "0")}
-      description="Verification pauses after five incorrect attempts. Ordinary sign-in remains available." /> : null}
-    {error ? <ProfileNotice title="Verification needs attention" description={error} danger /> : null}
+      description="Too many attempts. Sign-in is still available." /> : null}
+    {error ? <ProfileNotice title="Unable to verify" description={error} danger /> : null}
   </>;
 }

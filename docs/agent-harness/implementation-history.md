@@ -653,3 +653,10 @@ Closeout: harness validation against the reviewed Staff companion and git diff -
 - Verification: composition and full-size Light/Dark visual checks pass after correcting notice fill opacity/text contrast. Existing component instances, Inter/Plus Jakarta Sans,16px gutters,12px sections,48px actions and #00060F Dark background are retained.149 editable text layers/152 instances, no image fills or overflowing content. Empty expiry/cooldown states disable Continue. No app/API/source behavior changes in this pass; paired documentation harness and whitespace checks pass.
 - Remaining risks: state designs have no new prototype connections. Rendered app/browser/device, live mutations and real-MySQL concurrency acceptance remain separate; no merge, deployment or APK publication. Preserve primary manual/iOS/device work.
 - Next: retain the Figma state ledger outside Git, update draft Mobile15/Staff55 with this design handoff and finish app visual acceptance before release.
+
+## 2026-10-18 — Simplify account-confirmation copy
+
+- Scope: remove the “For this session only” card, Security check eyebrow and repeated intro from all12 Figma states and the shared linking/unlinking app UI. Keep one short email-password helper and concise cooldown/expiry messages. Remove the unused action prop; security policy and business behavior remain unchanged.
+- Verification: updated Light/Dark Figma composition/full-size review passes with101 editable text layers/140 instances and no session-information cards. All11 existing linking/unlinking interaction tests, TypeScript, scoped lint, paired documentation harness and whitespace checks pass.
+- Remaining risks: rendered-app/device acceptance remains pending. No backend, dependency, native, deployment or release change; preserve unrelated manual/iOS/device work.
+- Next: update draft Mobile15 and retain Figma parity before coordinated release acceptance.

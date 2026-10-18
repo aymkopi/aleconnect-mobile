@@ -176,7 +176,7 @@ function LinkAccount({ identity }: { identity: ProfileIdentity }) {
             />
           </>
         ) : verifying ? (
-          <AccountPasswordVerificationFields verification={verification} action="linking" />
+          <AccountPasswordVerificationFields verification={verification} />
         ) : view === "sent" ? (
           <>
             <ProfileHeading
