@@ -231,6 +231,8 @@ async function performRequest<T>(
         ? "Sign in again to continue linking an account. Ordinary sign-in remains available."
         : body?.code === "ACCOUNT_UNLINK_REAUTHENTICATE"
         ? "Sign in again to continue unlinking an account. Ordinary sign-in remains available."
+        : body?.code === "PROFILE_EDIT_REAUTHENTICATE"
+        ? "Sign in again to continue editing your profile. Ordinary sign-in remains available."
         : forcedLogoutMessage);
     }
     throw new ApiRequestError(

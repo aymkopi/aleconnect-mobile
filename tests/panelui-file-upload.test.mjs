@@ -72,9 +72,11 @@ function harness({ picker = {}, manipulator } = {}) {
     if (id.endsWith('/image-viewer')) return { ImageViewer: Object.assign('ImageViewer', { Trigger: 'ImageViewer.Trigger' }) };
     if (id.endsWith('/icons')) return {};
     if (id.endsWith('/attachment')) return { Attachment: Object.fromEntries(['Media', 'Content', 'Title', 'Description', 'Actions', 'Action'].map((part) => [part, `Attachment.${part}`])) };
-    if (id.endsWith('/menu')) return {};
+    if (id.endsWith('/bottom-sheet')) return { BottomSheet: Object.assign('BottomSheet', { Trigger: 'Sheet.Trigger', Content: 'Sheet.Content', Header: 'Sheet.Header', Body: 'Sheet.Body', Footer: 'Sheet.Footer' }) };
+    if (id.endsWith('/button')) return { Button: 'Button' };
+    if (id.endsWith('/separator')) return { Separator: 'Separator' };
     throw new Error(`Unexpected FileUpload import: ${id}`);
-  }, '\nexports.gridTileForTest = GridTile;');
+  }, '\nexports.gridTileForTest = GridTile; exports.sourceChooserForTest = SourceChooser;');
   return {
     changes, errors, rejected,
     render(next = props ?? {}) {
@@ -95,8 +97,28 @@ function harness({ picker = {}, manipulator } = {}) {
       cursor = start;
       return tree.props.children.props.children.props.children;
     },
+    chooser() { cursor = 100; const tree = exports.sourceChooserForTest({ children: jsx('Add', {}) });
+      while (effects.length) effects.shift()(); return tree; },
   };
 }
+
+test('photo chooser uses one docked sheet, source descriptions and Cancel without cropping copy', async t => {
+  const h = harness({ picker: { launchCameraAsync: async () => result('camera.jpg'), requestCameraPermissionsAsync: async () => ({ granted: true }) } });
+  h.render({ sources: ['camera', 'library'], sourceTitle: 'Add evidence photos', multiple: true, maxFiles: 3 });
+  const nodes = tree => !tree || typeof tree !== 'object' ? [] : Array.isArray(tree) ? tree.flatMap(nodes) : [tree, ...nodes(tree.props?.children)];
+  let tree = h.chooser(); tree.props.onOpenChange(true); tree = h.chooser();
+  const content = nodes(tree).find(n => n.type === 'Sheet.Content');
+  assert.equal(content.props.detached, false); assert.equal(content.props.size, 'auto');
+  assert.equal(nodes(tree).find(n => n.type === 'Sheet.Header').props.title, 'Add evidence photos');
+  assert.ok(!JSON.stringify(tree).includes('crop'));
+  const cancel = nodes(tree).find(n => n.type === 'Button' && n.props.children === 'Cancel');
+  cancel.props.onPress(); assert.equal(h.chooser().props.open, false); assert.equal(h.changes.length, 0);
+  tree = h.chooser(); tree.props.onOpenChange(true); tree = h.chooser();
+  const camera = nodes(tree).find(n => n.props?.accessibilityLabel === 'Take a photo');
+  camera.props.onPress(); camera.props.onPress(); assert.equal(h.chooser().props.open, false);
+  await new Promise(resolve => setTimeout(resolve, 350));
+  assert.equal(h.changes.length, 1); h.unmount();
+});
 
 test('library permits exact image/video MIME types and extensions', () => {
   for (const accept of [['image/png'], ['.png'], ['.webp'], [' IMAGE/HEIC ']]) assert.deepEqual(core.libraryMediaTypes(accept), ['images']);

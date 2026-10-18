@@ -158,6 +158,7 @@ export async function updateVerifiedConsumerDetails(
   currentAccountPassword: string,
   scope: ConsumerProfileScope,
   authToken?: string | null,
+  verificationFlowId?: string,
 ): Promise<ConsumerProfileView> {
   const response = await apiRequest<{ updated: true; profile: MobileProfileResponse }>(
     profilePath(scope),
@@ -166,7 +167,7 @@ export async function updateVerifiedConsumerDetails(
       body: JSON.stringify({
         field: "details",
         value,
-        currentAccountPassword,
+        ...(verificationFlowId ? { verificationFlowId } : { currentAccountPassword }),
         ...scopeBody(scope),
       }),
     },

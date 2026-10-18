@@ -7,6 +7,7 @@ import { profileEditor, nodes } from "./helpers/profile-editor.mjs";
 test("Account information opens the same inline editor for the selected account", async t => {
   const f = await profileEditor(t);
   nodes(f.render()).find(n => n.props?.accessibilityLabel === "Change profile photo").props.onPress();
+  f.render(); await f.verify();
   assert.equal(f.routes.length, 0);
   const tree = f.render();
   assert.deepEqual(tree.props.sources, ["camera", "library"]);

@@ -246,8 +246,8 @@ export function requestPasswordChange(
 }
 
 export function requestAccountVerification(
-  purpose: "account-link" | "account-unlink",
-  body: { action: "status" | "verify" | "cancel"; currentPassword?: string; flowId?: string | null },
+  purpose: "account-link" | "account-unlink" | "profile-edit",
+  body: { action: "status" | "verify" | "cancel"; currentPassword?: string; flowId?: string | null; serviceAccountId?: string; accessRevision?: number },
   authToken: string,
 ) {
   return apiRequest<PasswordChangeStatus>("/api/mobile/auth/" + purpose + "-verification", {

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Linking, View } from "react-native";
 import {
-  type Href,
   useLocalSearchParams,
   useRouter,
   useFocusEffect,
@@ -23,7 +22,8 @@ import { useConsumerAccount } from "@/hooks/use-consumer-account";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { setDefaultLinkedAccount } from "@/services/linked-accounts";
-import { getAuthToken } from "@/services/api";
+import { ApiRequestError } from "@/services/api";
+import { AccountPasswordVerificationFields, useAccountPasswordVerification } from "./account-password-verification";
 import { clearConsumerProfileCaches } from "@/hooks/use-consumer-profile";
 import {
   fetchCurrentConsumerProfileView,
@@ -100,8 +100,7 @@ function Details({
   const { reload: refreshDetails } = read;
   const [view, setView] = useState<"info" | "edit" | "location" | "review" | "saved">("info"),
     [phone, setPhone] = useState(""),
-    [email, setEmail] = useState(""),
-    [password, setPassword] = useState("");
+    [email, setEmail] = useState("");
   const [files, setFiles] = useState<FileUploadFile[]>([]),
     [photoBlocked, setPhotoBlocked] = useState(false),
     [savedAvatar, setSavedAvatar] = useState<string | null>(null),
@@ -114,8 +113,7 @@ function Details({
     [map, setMap] = useState(false),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
-    [discard, setDiscard] = useState(false),
-    [help, setHelp] = useState(false);
+    [discard, setDiscard] = useState(false);
   const profile = read.data;
   const identifier = accountProfileIdentifier(identity.account.accounts.length,
     identity.fixture ? "justine@example.com" : session?.user.email, profile?.accountNumber) ?? "Account details unavailable";
@@ -130,9 +128,18 @@ function Details({
       address),
   );
   const changes = detailsChanged || Boolean(uri);
+  const editing = view !== "info" && view !== "saved";
+  const resetVerification = useCallback(() => {
+    setMap(false);
+    photoGeneration.current++;
+    setPickerGeneration(photoGeneration.current);
+  }, []);
+  const verification = useAccountPasswordVerification(identity, "profile-edit", available && editing, resetVerification, scope);
+  const verifying = editing && !verification.proof;
+  const { busy: verificationBusy, password: verificationPassword, setPassword: setVerificationPassword } = verification;
   const exit = useCallback(() => {
-    if (busy) return;
-    setPassword("");
+    if (busy || verificationBusy) return;
+    setVerificationPassword("");
     if (view === "location") {
       setView("edit");
       return;
@@ -141,7 +148,7 @@ function Details({
       setView("edit");
       return;
     }
-    if (view === "edit" && changes) {
+    if (view === "edit" && (changes || verificationPassword)) {
       setDiscard(true);
       return;
     }
@@ -151,7 +158,7 @@ function Details({
     }
     if (router.canGoBack()) router.back();
     else router.replace("/profile");
-  }, [busy, changes, router, view]);
+  }, [busy, changes, router, view, verificationBusy, verificationPassword, setVerificationPassword]);
   useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", (event) => {
       if (busy || view === "location" || view === "review" || (view === "edit" && changes)) {
@@ -164,7 +171,7 @@ function Details({
   useFocusEffect(
     useCallback(() => {
       void refreshDetails(true);
-      return () => { photoGeneration.current++; setPassword(""); };
+      return () => { photoGeneration.current++; };
     }, [refreshDetails]),
   );
   const startEdit = () => {
@@ -187,7 +194,7 @@ function Details({
     // This is a one-shot compatibility entry; refreshed data must not reset drafts.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile, read.busy, read.error]);
-  const photoCurrent = () => !saving.current && current() && view === "edit" &&
+  const photoCurrent = () => !saving.current && current() && verification.proof?.isCurrent() && view === "edit" &&
     pickerGeneration === photoGeneration.current;
   const changeFiles = (next: FileUploadFile[]) => {
     if (!photoCurrent()) return;
@@ -235,11 +242,11 @@ function Details({
       .filter(Boolean)
       .join(", ");
   async function save() {
-    if (saving.current || !profile || !changes || !current() || (detailsChanged && !password)) return;
+    const proof = verification.proof;
+    if (saving.current || !profile || !changes || !current() || !proof?.isCurrent()) return;
     saving.current = true;
     setBusy(true);
     setError("");
-    const secret = password;
     const reviewed = {
       ...(phone.replace(/\D/g, "") !== baseline.phone
         ? { phone: phone.replace(/\D/g, "") }
@@ -252,16 +259,14 @@ function Details({
       ...(address ? { address } : {}),
     };
     let detailsSaved = false, committed = false;
-    setPassword("");
     try {
-      const authToken = identity.fixture ? null : await getAuthToken();
-      if (!current()) return;
-      if (!identity.fixture && !authToken) throw new Error("Sign in again to save your changes.");
+      const authToken = proof.authToken;
+      if (!current() || !proof.isCurrent()) return;
       const bytes = uri && !identity.fixture ? await compressAvatarToStrictLimit(uri) : null;
-      if (!current()) return;
+      if (!current() || !proof.isCurrent()) return;
       if (!identity.fixture) {
         const fresh = await fetchCurrentConsumerProfileView(scope, authToken);
-        if (!current()) return;
+        if (!current() || !proof.isCurrent()) return;
         if (!profileEditAllowed(fresh?.profileEditing)) {
           await read.reload(true);
           setView("info");
@@ -270,11 +275,11 @@ function Details({
           );
         }
         if (detailsChanged) {
-          await updateVerifiedConsumerDetails(reviewed, secret, scope, authToken);
+          await updateVerifiedConsumerDetails(reviewed, "", scope, authToken, proof.flowId);
           committed = true;
         }
       }
-      if (!current()) return;
+      if (!current() || !proof.isScopeCurrent()) return;
       if (detailsChanged) {
         detailsSaved = true;
         setBaseline({ phone: phone.replace(/\D/g, ""), email: email.trim().toLowerCase(),
@@ -291,11 +296,13 @@ function Details({
         setFiles([]);
       }
       if (current()) {
+        verification.reset();
         setView("saved");
       }
     } catch (e) {
       if (current()) {
         const message = e instanceof Error ? e.message : "Could not save. Please try again.";
+        if (e instanceof ApiRequestError && e.code === "CURRENT_PASSWORD_VERIFICATION_REQUIRED") verification.reset(message);
         setError(detailsSaved ? "Details saved. Your photo was not updated. " + message : message);
         if (detailsSaved) setView("edit");
       }
@@ -322,14 +329,17 @@ function Details({
     } catch (e) { if (current()) setError(e instanceof Error ? e.message : "Could not change the default account."); }
     finally { if (current()) setBusy(false); }
   }
-  const title = {
+  const title = verifying ? "Edit profile" : {
     info: "Account information",
     edit: "Edit profile",
     location: "Update location",
-    review: "Review & verify",
+    review: "Review changes",
     saved: "Details updated",
   }[view];
-  const footer = !available ? null : view === "info" ? (
+  const footer = !available ? null : verifying ? (
+    <Button loading={verification.busy} disabled={verification.busy || !verification.password || !!verification.remaining}
+      onPress={() => void verification.verify()}>Verify and continue</Button>
+  ) : view === "info" ? (
     <Button
       disabled={
         !profile || read.busy || !!read.error || !profileEditAllowed(profile.profileEditing)
@@ -381,8 +391,8 @@ function Details({
       Use this address
     </Button>
   ) : view === "review" ? (
-    <Button loading={busy} disabled={detailsChanged && !password} onPress={() => void save()}>
-      {detailsChanged ? "Verify & save" : "Save photo"}
+    <Button loading={busy} onPress={() => void save()}>
+      {detailsChanged ? "Save changes" : "Save photo"}
     </Button>
   ) : (
     <Button
@@ -396,7 +406,8 @@ function Details({
   );
   return (
     <FileUpload key={pickerGeneration} value={files} onValueChange={changeFiles} sources={["camera", "library"]}
-      accept={["image/*"]} image={{ quality: 1, crop: { aspect: [1, 1] } }} disabled={busy || view !== "edit"}
+      sourceTitle="Choose a profile photo"
+      accept={["image/*"]} image={{ quality: 1, crop: { aspect: [1, 1] } }} disabled={busy || view !== "edit" || verifying}
       onError={(e) => { if (photoCurrent()) { setError(e.message); setPhotoBlocked(/permission/i.test(e.message)); } }}
       onReject={(rejections) => { if (photoCurrent()) setError(rejections.map((item) => item.message).join(" ")); }}>
       <Dialog open={defaultDialog} onOpenChange={setDefaultDialog}>
@@ -421,7 +432,8 @@ function Details({
           <>
             {error ? <ProfileNotice title="Check your details" description={error} danger /> : null}
             {photoBlocked ? <Button variant="outline" onPress={() => void Linking.openSettings().catch(() => setError("Allow photo access in device settings."))}>Open device settings</Button> : null}
-            {view === "info" ? (
+            {verifying ? <AccountPasswordVerificationFields verification={verification}
+              description="Confirm your password before editing your profile." /> : view === "info" ? (
               <>
                 <View className="flex-row items-center gap-3">
                   <Button size="icon" variant="secondary" style={{ width: 48, height: 48, borderRadius: 24 }}
@@ -643,19 +655,6 @@ function Details({
                     Edit changes
                   </Button>
                 </View>
-                {detailsChanged ? <ProfileField
-                  label="Current ALECO account password"
-                  secret
-                  editable={!busy}
-                  value={password}
-                  onChangeText={setPassword}
-                  autoComplete="current-password"
-                  maxLength={128}
-                  description="Use this service account’s password, not your ALEConnect sign-in password."
-                /> : null}
-                {detailsChanged ? <Button variant="ghost" disabled={busy} onPress={() => setHelp(true)}>
-                  Account password help
-                </Button> : null}
               </>
             ) : (
               <ProfileNotice
@@ -672,7 +671,7 @@ function Details({
         )}
       </ReportPage>
       <ReportLocationPicker
-        open={map}
+        open={map && !verifying}
         meta={meta}
         fixture={identity.fixture}
         initialCoordinates={
@@ -700,35 +699,13 @@ function Details({
               onPress={() => {
                 photoGeneration.current++;
                 setDiscard(false);
-                setPassword("");
+                verification.reset();
                 setFiles([]);
                 setAddress(null);
                 setView("info");
               }}
             >
               Discard changes
-            </Button>
-          </Dialog.Footer>
-        </Dialog.Content>
-      </Dialog>
-      <Dialog open={help} onOpenChange={setHelp}>
-        <Dialog.Content>
-          <Dialog.Title>Account password help</Dialog.Title>
-          <Dialog.Description>
-            ALECO can help reset the service account password. If you were given a temporary
-            password, sign in with that account and complete its required password change.
-          </Dialog.Description>
-          <Dialog.Footer>
-            <Button variant="outline" onPress={() => setHelp(false)}>
-              Close
-            </Button>
-            <Button
-              onPress={() => {
-                setHelp(false);
-                router.push("/profile/help" as Href);
-              }}
-            >
-              Contact ALECO
             </Button>
           </Dialog.Footer>
         </Dialog.Content>

@@ -767,9 +767,10 @@
         "ALEConnect flattened aliases; existing semantic primitives, typography, optional native modules and app-owned compression retained",
         "Invalidate picker results/errors after unmount, disabling or clear; serialize system picker requests and recheck the current controlled count after await",
         "Allow exact image/video MIME types and extensions in library source selection",
-        "Remove app-owned processing files when no upload handler exists; preserve cancel for real uploads"
+        "Remove app-owned processing files when no upload handler exists; preserve cancel for real uploads",
+        "Use one docked auto-height source BottomSheet with caller title, descriptive source rows and Cancel; close before system picker and clear pending timer on unmount"
       ],
-      "currentSha256": "7d613048b4b38817af7ccf6a3b3e2c9cf68c5dd80fb088ef2c694764ea0fa9b6"
+      "currentSha256": "263b73d99ce160a6901a26cad78b3fe06eabaaa675a3fe4957e85084404ec76e"
     },
     "attachment": {
       "referencePackage": "0.112.0",

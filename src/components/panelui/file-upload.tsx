@@ -75,6 +75,7 @@ import { tv } from 'tailwind-variants';
 import { useCSSVariable } from 'uniwind';
 import {
   CameraIcon,
+  ChevronRightIcon,
   CheckCircleIcon,
   FileIcon,
   FolderIcon,
@@ -93,7 +94,9 @@ import { cn } from '@/lib/cn';
 import { Attachment, type AttachmentState } from '@/components/panelui/attachment';
 import { useFieldLabelledBy } from '@/components/panelui/field';
 import { ImageViewer } from '@/components/panelui/image-viewer';
-import { Menu } from '@/components/panelui/menu';
+import { BottomSheet } from '@/components/panelui/bottom-sheet';
+import { Button } from '@/components/panelui/button';
+import { Separator } from '@/components/panelui/separator';
 import {
   createFileId,
   describeRules,
@@ -314,6 +317,8 @@ export interface FileUploadProps {
   onUploadComplete?: (file: FileUploadFile) => void;
   /** Labels for the sources in the chooser. */
   sourceLabels?: Partial<Record<FileUploadSource, string>>;
+  /** Heading for the source sheet; shared by avatar and evidence pickers. */
+  sourceTitle?: string;
   /** Nothing can be added, removed or retried. */
   disabled?: boolean;
   /** Draw the dropzone in its error state, for a form that failed validation. */
@@ -325,6 +330,7 @@ interface FileUploadContextValue {
   files: FileUploadFile[];
   sources: FileUploadSource[];
   sourceLabels: Record<FileUploadSource, string>;
+  sourceTitle: string;
   accept?: string[];
   maxFiles?: number;
   maxSize?: number;
@@ -358,8 +364,8 @@ export function useFileUpload(): FileUploadContextValue {
 const DEFAULT_SOURCES: FileUploadSource[] = ['library', 'files'];
 
 const DEFAULT_LABELS: Record<FileUploadSource, string> = {
-  camera: 'Take photo',
-  library: 'Choose from library',
+  camera: 'Take a photo',
+  library: 'Choose a photo',
   files: 'Browse files',
 };
 
@@ -389,6 +395,7 @@ function FileUploadRoot({
   autoUpload = true,
   onUploadComplete,
   sourceLabels,
+  sourceTitle = 'Choose a source',
   disabled = false,
   invalid = false,
   children,
@@ -709,6 +716,7 @@ function FileUploadRoot({
       files: value,
       sources,
       sourceLabels: { ...DEFAULT_LABELS, ...sourceLabels },
+      sourceTitle,
       accept,
       maxFiles,
       maxSize,
@@ -739,6 +747,7 @@ function FileUploadRoot({
       remove,
       retry,
       sourceLabels,
+      sourceTitle,
       sources,
       uploadHandler,
       uploadNow,
@@ -820,6 +829,11 @@ const SOURCE_ICONS: Record<FileUploadSource, (color?: string) => ReactNode> = {
   library: (color) => <ImageIcon size={18} color={color} />,
   files: (color) => <FolderIcon size={18} color={color} />,
 };
+const SOURCE_DESCRIPTIONS: Record<FileUploadSource, string> = {
+  camera: 'Open your device camera',
+  library: 'Pick from your photo library',
+  files: 'Browse files on your device',
+};
 
 /**
  * Wraps one pressable. With one source the press opens its picker; with more,
@@ -827,8 +841,11 @@ const SOURCE_ICONS: Record<FileUploadSource, (color?: string) => ReactNode> = {
  * the two never animate over each other.
  */
 function SourceChooser({ children }: { children: ReactElement<{ onPress?: (...args: unknown[]) => void }> }) {
-  const { sources, sourceLabels, pick, canAddMore } = useFileUpload();
-  const iconColor = useCSSVariable('--color-foreground');
+  const { sources, sourceLabels, sourceTitle, pick, canAddMore } = useFileUpload();
+  const [open, setOpen] = useState(false);
+  const pending = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (pending.current) clearTimeout(pending.current); }, []);
+  const iconColor = useCSSVariable('--color-primary');
   const color = typeof iconColor === 'string' ? iconColor : undefined;
 
   if (sources.length <= 1) {
@@ -844,20 +861,41 @@ function SourceChooser({ children }: { children: ReactElement<{ onPress?: (...ar
   if (!canAddMore) return children;
 
   const choose = (source: FileUploadSource) => {
-    setTimeout(() => void pick(source), CHOOSER_EXIT_MS);
+    if (pending.current) return;
+    setOpen(false);
+    pending.current = setTimeout(() => {
+      pending.current = null;
+      void pick(source);
+    }, CHOOSER_EXIT_MS);
   };
 
   return (
-    <Menu presentation="bottom-sheet">
-      <Menu.Trigger>{children}</Menu.Trigger>
-      <Menu.Content>
-        {sources.map((source) => (
-          <Menu.Item key={source} icon={SOURCE_ICONS[source](color)} onSelect={() => choose(source)}>
-            {sourceLabels[source]}
-          </Menu.Item>
-        ))}
-      </Menu.Content>
-    </Menu>
+    <BottomSheet open={open} onOpenChange={setOpen}>
+      <BottomSheet.Trigger>{children}</BottomSheet.Trigger>
+      <BottomSheet.Content detached={false} size="auto" showClose={false} showGrabber={false} className="px-4">
+        <BottomSheet.Header title={sourceTitle} className="min-h-0 pe-0" />
+        <BottomSheet.Body className="gap-3" showsVerticalScrollIndicator={false}>
+          {sources.map((source) => (
+            <AnimatedPressable key={source} accessibilityRole="button" accessibilityLabel={sourceLabels[source]}
+              accessibilityHint={SOURCE_DESCRIPTIONS[source]} onPress={() => choose(source)}
+              className="min-h-16 flex-row items-center gap-3 rounded-xl px-3 py-2">
+              <View className="h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                {SOURCE_ICONS[source](color)}
+              </View>
+              <View className="flex-1 gap-1">
+                <Text size="sm" weight="semibold">{sourceLabels[source]}</Text>
+                <Text size="xs" muted>{SOURCE_DESCRIPTIONS[source]}</Text>
+              </View>
+              <ChevronRightIcon size={18} color={color} />
+            </AnimatedPressable>
+          ))}
+        </BottomSheet.Body>
+        <BottomSheet.Footer className="gap-3 pt-0">
+          <Separator />
+          <Button variant="ghost" onPress={() => setOpen(false)}>Cancel</Button>
+        </BottomSheet.Footer>
+      </BottomSheet.Content>
+    </BottomSheet>
   );
 }
 

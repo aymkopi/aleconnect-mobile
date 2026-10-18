@@ -14,9 +14,10 @@ export type AccountVerificationProof = {
 
 export function useAccountPasswordVerification(
   identity: ProfileIdentity,
-  purpose: "account-link" | "account-unlink",
+  purpose: "account-link" | "account-unlink" | "profile-edit",
   enabled: boolean,
   onReset: () => void,
+  accountScope?: { serviceAccountId: string; accessRevision: number },
 ) {
   const current = useProfileTask(identity);
   const [proof, setProof] = useState<AccountVerificationProof | null>(null);
@@ -44,7 +45,7 @@ export function useAccountPasswordVerification(
       void getAuthToken().then(async value => {
         if (!active || !current() || !value) return;
         token.current = value;
-        const status = await requestAccountVerification(purpose, { action: "status" }, value);
+        const status = await requestAccountVerification(purpose, { ...accountScope, action: "status" }, value);
         if (active && current()) apply(status);
       }).catch(e => { if (active && current()) setError(e instanceof Error ? e.message : "Could not check account access."); })
         .finally(() => { if (active && current()) setBusy(false); });
@@ -55,7 +56,7 @@ export function useAccountPasswordVerification(
     };
     // The gate is keyed by identity; refreshed context must not cancel a valid flow.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled, identity.fixture, purpose, apply, reset]));
+  }, [enabled, identity.fixture, purpose, apply, reset, accountScope?.serviceAccountId, accountScope?.accessRevision]));
   useEffect(() => {
     if (!cooldown && !expires) return;
     const timer = setInterval(() => {
@@ -79,10 +80,10 @@ export function useAccountPasswordVerification(
       token.current = authToken;
       const result = identity.fixture ? { state: "verified" as const, flowId: "fixture-" + purpose,
         serverNow: new Date().toISOString(), verificationExpiresAt: new Date(Date.now() + 300_000).toISOString() }
-        : await requestAccountVerification(purpose, { action: "verify", currentPassword: secret }, authToken!);
+        : await requestAccountVerification(purpose, { ...accountScope, action: "verify", currentPassword: secret }, authToken!);
       if (result.state !== "verified" || !result.flowId) throw new Error("Confirm your current password to continue.");
       const flowId = result.flowId;
-      const cancel = () => identity.fixture ? Promise.resolve() : requestAccountVerification(purpose, { action: "cancel", flowId }, authToken!);
+      const cancel = () => identity.fixture ? Promise.resolve() : requestAccountVerification(purpose, { ...accountScope, action: "cancel", flowId }, authToken!);
       if (!active()) { await cancel().catch(() => {}); return; }
       apply(result);
       const verified = { flowId, authToken: authToken ?? "fixture", cancel,
@@ -93,7 +94,7 @@ export function useAccountPasswordVerification(
       if (active()) {
         setError(e instanceof Error ? e.message : "Could not verify your password. Try again.");
         if (token.current) try {
-          const result = await requestAccountVerification(purpose, { action: "status" }, token.current);
+          const result = await requestAccountVerification(purpose, { ...accountScope, action: "status" }, token.current);
           if (active()) apply(result);
         } catch {}
       }
@@ -102,12 +103,13 @@ export function useAccountPasswordVerification(
   return { proof, password, setPassword, busy, error, remaining, verify, reset };
 }
 
-export function AccountPasswordVerificationFields({ verification }: {
+export function AccountPasswordVerificationFields({ verification, description = "Confirm your identity before changing linked accounts." }: {
   verification: ReturnType<typeof useAccountPasswordVerification>;
+  description?: string;
 }) {
   const { password, setPassword, busy, remaining, error } = verification;
   return <>
-    <ProfileHeading title="Verify it’s you" description="Confirm your identity before changing linked accounts." />
+    <ProfileHeading title="Verify it’s you" description={description} />
     <ProfileField label="Current password" secret value={password} onChangeText={setPassword}
       autoComplete="current-password" maxLength={128} editable={!busy && !remaining}
       placeholder="Enter your password" description="Use your ALEConnect sign-in password, not the ALECO account password." />
