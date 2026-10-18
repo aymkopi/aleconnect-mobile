@@ -19,7 +19,8 @@ new code automatically.
 - [x] Share allocated version/build context before the parallel native jobs.
 - [x] Retain the full alpha in the app label; validate native core/build on upload.
 - [x] Verify configuration, production iOS export, source checks and review.
-- [ ] Verify exact-head PR CI, then obtain integration/release authorization.
+- [x] Publish [Mobile PR #20](https://github.com/aymkopi/aleconnect-mobile/pull/20).
+- [x] Verify exact application-head CI (`4024c525`); integration/release remains separate.
 - [ ] Verify a newly built IPA and its installed iPhone version after release.
 
 ## Implementation
@@ -51,6 +52,9 @@ intentionally skipped Android. Existing immutable digest/source guards remain.
   byte-for-byte after validation.
 - YAML/reusable-input and embedded Python syntax checks pass. Harness,
   whitespace, Graphify and exact-head PR outcomes are recorded in history.
+- Both GitHub checks pass for application head `4024c525`: harness/application
+  validation run `39147111712` and Service Memo compatibility run `39147111713`.
+  Documentation-only closeout follows without changing the tested app/workflows.
 - Expo alignment and full unmasked Doctor have a baseline failure: 20/21 Doctor
   checks pass; six existing Expo patch recommendations remain in the unchanged
   dependency files. Do not hide or broaden this release fix to upgrade them.
@@ -77,7 +81,7 @@ patch recommendations remain separate.
 
 ## Next
 
-Finish docs/harness/Graphify checks, create the Mobile PR and verify its exact
-head. Merge/release only within the user's authorization, then verify both
+PR #20 is ready for review. Merge/release only within the user's authorization,
+then verify both
 published native versions, source/digests and the original Android signer. No
 Staff deployment or migration is required.
