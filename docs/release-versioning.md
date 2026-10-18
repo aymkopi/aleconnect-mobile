@@ -58,6 +58,11 @@ keep human-curated deprecations, removals and security details in CHANGELOG.md.
   manual dispatch remains available. The iPhone job uploads an unsigned ARM64 IPA,
   SHA256SUMS and exact-source metadata as **Aleconnect-iPhone-unsigned** Actions
   artifacts. Sign locally with iloader; no Apple credentials are stored in CI.
+  After both native jobs succeed, a final job attaches that same-source IPA to
+  the Android release tag. Releases contains **Aleconnect-unsigned.ipa**,
+  **ios-SHA256SUMS** and **ios-build-metadata.json**, alongside the APK and its
+  original metadata/checksum files. It verifies tag/source and uploaded digests,
+  preserves matching assets on retries and refuses to overwrite different bytes.
   Its numeric bundle version/build number identify this personal USB build;
   Android's existing alpha allocator, signing and publication remain unchanged.
 - Android `versionCode` is one greater than the maximum of the published APK
