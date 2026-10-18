@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
-import { View } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Linking, View } from "react-native";
 import {
   type Href,
   useLocalSearchParams,
@@ -9,6 +9,7 @@ import {
 } from "expo-router";
 import { Camera, Mail, MapPin, Phone } from "lucide-react-native";
 import { Avatar } from "@/components/panelui/avatar";
+import { FileUpload, type FileUploadFile } from "@/components/panelui/file-upload";
 import { Button } from "@/components/panelui/button";
 import { Dialog } from "@/components/panelui/dialog";
 import { Field } from "@/components/panelui/field";
@@ -22,10 +23,12 @@ import { useConsumerAccount } from "@/hooks/use-consumer-account";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { setDefaultLinkedAccount } from "@/services/linked-accounts";
+import { getAuthToken } from "@/services/api";
 import { clearConsumerProfileCaches } from "@/hooks/use-consumer-profile";
 import {
   fetchCurrentConsumerProfileView,
   updateVerifiedConsumerDetails,
+  uploadCurrentUserAvatar,
   type ConsumerProfileScope,
   type StructuredProfileAddressInput,
 } from "@/services/profile";
@@ -34,6 +37,8 @@ import { creationFixtureMeta } from "@/features/reports/creation-fixtures";
 import { emptyComplaintMeta } from "@/features/reports/data";
 import { readReportCoordinates } from "@/features/reports/address";
 import { isWithinAlbay } from "@/features/reports/contract";
+import { compressAvatarToStrictLimit } from "@/utils/avatar-image-processing";
+import { formatAccountClass } from "@/lib/account-class";
 import {
   ProfileGate,
   ProfileHeading,
@@ -46,12 +51,14 @@ import {
 import { fixtureProfile } from "./profile-fixtures";
 import { accountProfileIdentifier, profileEditAllowed, validateProfileDraft } from "./profile-state";
 export default function ProfileDetailsScreen() {
-  const params = useLocalSearchParams<{ serviceAccountId?: string; state?: string }>();
+  const params = useLocalSearchParams<{ serviceAccountId?: string; state?: string; edit?: string }>();
   return (
     <ProfileGate>
       {(identity) => (
         <Details
+          key={identity.key + ":" + (params.serviceAccountId ?? identity.account.defaultServiceAccountId)}
           identity={identity}
+          initialEdit={params.edit === "1"}
           requested={
             typeof params.serviceAccountId === "string" ? params.serviceAccountId : undefined
           }
@@ -65,13 +72,15 @@ function Details({
   identity,
   requested,
   locked,
+  initialEdit = false,
 }: {
   identity: ProfileIdentity;
   requested?: string;
   locked: boolean;
+  initialEdit?: boolean;
 }) {
   const { refreshConsumerAccount } = useConsumerAccount();
-  const [primary] = useAppColors(["primary"]);
+  const [primary, cameraForeground] = useAppColors(["primary", "primary-foreground"]);
   const { session } = useAuthSession();
   const [defaultDialog, setDefaultDialog] = useState(false), [defaultSaved, setDefaultSaved] = useState(false);
   const router = useRouter(),
@@ -93,6 +102,13 @@ function Details({
     [phone, setPhone] = useState(""),
     [email, setEmail] = useState(""),
     [password, setPassword] = useState("");
+  const [files, setFiles] = useState<FileUploadFile[]>([]),
+    [photoBlocked, setPhotoBlocked] = useState(false),
+    [savedAvatar, setSavedAvatar] = useState<string | null>(null),
+    [baseline, setBaseline] = useState({ phone: "", email: "", fullAddress: "" });
+  const saving = useRef(false), editRequested = useRef(initialEdit), photoGeneration = useRef(0);
+  const [pickerGeneration, setPickerGeneration] = useState(0);
+  const uri = files[0]?.uri ?? "";
   const [address, setAddress] = useState<StructuredProfileAddressInput | null>(null),
     [meta, setMeta] = useState(emptyComplaintMeta),
     [map, setMap] = useState(false),
@@ -100,14 +116,18 @@ function Details({
     [busy, setBusy] = useState(false),
     [discard, setDiscard] = useState(false),
     [help, setHelp] = useState(false);
-  const profile = read.data,
-    emailEditable = profile?.emailEditable === true && identity.account.sessionMode !== "identity";
-  const changes = Boolean(
+  const profile = read.data;
+  const serviceEmail = profile?.serviceAccountEmail ??
+    (identity.account.sessionMode !== "identity" ? profile?.email : "") ?? "";
+  const emailEditable = profile?.serviceAccountEmailEditable === true ||
+    (profile?.emailEditable === true && identity.account.sessionMode !== "identity");
+  const detailsChanged = Boolean(
     profile &&
-    (phone.replace(/\D/g, "") !== (profile.contactNum ?? "") ||
-      (emailEditable && email.trim().toLowerCase() !== profile.email.toLowerCase()) ||
+    (phone.replace(/\D/g, "") !== baseline.phone ||
+      (emailEditable && email.trim().toLowerCase() !== baseline.email.toLowerCase()) ||
       address),
   );
+  const changes = detailsChanged || Boolean(uri);
   const exit = useCallback(() => {
     if (busy) return;
     setPassword("");
@@ -142,16 +162,34 @@ function Details({
   useFocusEffect(
     useCallback(() => {
       void refreshDetails(true);
-      return () => setPassword("");
+      return () => { photoGeneration.current++; setPassword(""); };
     }, [refreshDetails]),
   );
   const startEdit = () => {
     if (!profileEditAllowed(profile?.profileEditing)) return;
+    photoGeneration.current++;
+    setPickerGeneration(photoGeneration.current);
     setPhone(profile?.contactNum ?? "");
-    setEmail(profile?.email ?? "");
+    setEmail(serviceEmail);
+    setBaseline({ phone: profile?.contactNum ?? "", email: serviceEmail, fullAddress: profile?.fullAddress ?? "" });
+    setFiles([]);
+    setPhotoBlocked(false);
     setAddress(null);
     setError("");
     setView("edit");
+  };
+  useEffect(() => {
+    if (!editRequested.current || !profile || read.busy || read.error) return;
+    editRequested.current = false;
+    startEdit();
+    // This is a one-shot compatibility entry; refreshed data must not reset drafts.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile, read.busy, read.error]);
+  const photoCurrent = () => !saving.current && current() && view === "edit" &&
+    pickerGeneration === photoGeneration.current;
+  const changeFiles = (next: FileUploadFile[]) => {
+    if (!photoCurrent()) return;
+    setFiles(next); setPhotoBlocked(false); setError("");
   };
   const openLocation = async () => {
     setError("");
@@ -195,23 +233,32 @@ function Details({
       .filter(Boolean)
       .join(", ");
   async function save() {
-    if (busy || !profile || !password) return;
+    if (saving.current || !profile || !changes || !current() || (detailsChanged && !password)) return;
+    saving.current = true;
     setBusy(true);
     setError("");
     const secret = password;
     const reviewed = {
-      ...(phone.replace(/\D/g, "") !== (profile.contactNum ?? "")
+      ...(phone.replace(/\D/g, "") !== baseline.phone
         ? { phone: phone.replace(/\D/g, "") }
         : {}),
-      ...(emailEditable && email.trim().toLowerCase() !== profile.email.toLowerCase()
-        ? { email: email.trim().toLowerCase() }
+      ...(emailEditable && email.trim().toLowerCase() !== baseline.email.toLowerCase()
+        ? profile.serviceAccountEmailEditable
+          ? { serviceAccountEmail: email.trim().toLowerCase() }
+          : { email: email.trim().toLowerCase() }
         : {}),
       ...(address ? { address } : {}),
     };
+    let detailsSaved = false, committed = false;
     setPassword("");
     try {
+      const authToken = identity.fixture ? null : await getAuthToken();
+      if (!current()) return;
+      if (!identity.fixture && !authToken) throw new Error("Sign in again to save your changes.");
+      const bytes = uri && !identity.fixture ? await compressAvatarToStrictLimit(uri) : null;
+      if (!current()) return;
       if (!identity.fixture) {
-        const fresh = await fetchCurrentConsumerProfileView(scope);
+        const fresh = await fetchCurrentConsumerProfileView(scope, authToken);
         if (!current()) return;
         if (!profileEditAllowed(fresh?.profileEditing)) {
           await read.reload(true);
@@ -220,23 +267,42 @@ function Details({
             "Secure editing is unavailable. Refresh account access before saving.",
           );
         }
-        await updateVerifiedConsumerDetails(reviewed, secret, scope);
+        if (detailsChanged) {
+          await updateVerifiedConsumerDetails(reviewed, secret, scope, authToken);
+          committed = true;
+        }
+      }
+      if (!current()) return;
+      if (detailsChanged) {
+        detailsSaved = true;
+        setBaseline({ phone: phone.replace(/\D/g, ""), email: email.trim().toLowerCase(),
+          fullAddress: address ? addressText(address) : baseline.fullAddress });
+        setAddress(null);
+      }
+      if (uri) {
+        const avatarUrl = identity.fixture ? uri : await uploadCurrentUserAvatar(
+          { imageBytes: bytes!, contentType: "image/webp" }, scope, authToken,
+        );
+        committed = true;
         if (!current()) return;
-        await clearConsumerProfileCaches();
-        await read.reload(true);
+        setSavedAvatar(avatarUrl);
+        setFiles([]);
       }
       if (current()) {
         setView("saved");
-        setAddress(null);
       }
     } catch (e) {
-      if (current())
-        setError(
-          e instanceof Error
-            ? e.message
-            : "Your changes were not saved. Re-enter the password and retry.",
-        );
+      if (current()) {
+        const message = e instanceof Error ? e.message : "Could not save. Please try again.";
+        setError(detailsSaved ? "Details saved. Your photo was not updated. " + message : message);
+        if (detailsSaved) setView("edit");
+      }
     } finally {
+      if (committed && current()) {
+        await clearConsumerProfileCaches().catch(() => {});
+        if (current()) await read.reload(true);
+      }
+      saving.current = false;
       if (current()) setBusy(false);
     }
   }
@@ -274,7 +340,7 @@ function Details({
     <Button
       disabled={!changes}
       onPress={() => {
-        const problem = validateProfileDraft({ phone, email }, emailEditable);
+        const problem = detailsChanged ? validateProfileDraft({ phone, email }, emailEditable) : null;
         if (problem) setError(problem);
         else {
           setError("");
@@ -313,8 +379,8 @@ function Details({
       Use this address
     </Button>
   ) : view === "review" ? (
-    <Button loading={busy} disabled={!password} onPress={() => void save()}>
-      Verify & save
+    <Button loading={busy} disabled={detailsChanged && !password} onPress={() => void save()}>
+      {detailsChanged ? "Verify & save" : "Save photo"}
     </Button>
   ) : (
     <Button
@@ -327,7 +393,10 @@ function Details({
     </Button>
   );
   return (
-    <>
+    <FileUpload key={pickerGeneration} value={files} onValueChange={changeFiles} sources={["camera", "library"]}
+      accept={["image/*"]} image={{ quality: 1, crop: { aspect: [1, 1] } }} disabled={busy || view !== "edit"}
+      onError={(e) => { if (photoCurrent()) { setError(e.message); setPhotoBlocked(/permission/i.test(e.message)); } }}
+      onReject={(rejections) => { if (photoCurrent()) setError(rejections.map((item) => item.message).join(" ")); }}>
       <Dialog open={defaultDialog} onOpenChange={setDefaultDialog}>
         <Dialog.Content><View className="gap-2"><Dialog.Title>Set as default account?</Dialog.Title>
           <Dialog.Description>Use this account for new activity. Existing reports keep their original account.</Dialog.Description></View>
@@ -348,13 +417,15 @@ function Details({
           <DataState title="Your details couldn’t load" description="Reconnect and retry. Editing stays unavailable until your details and account access can be checked." actionLabel="Try again" onAction={() => void read.reload(true)} />
         ) : (
           <>
+            {error ? <ProfileNotice title="Check your details" description={error} danger /> : null}
+            {photoBlocked ? <Button variant="outline" onPress={() => void Linking.openSettings().catch(() => setError("Allow photo access in device settings."))}>Open device settings</Button> : null}
             {view === "info" ? (
               <>
                 <View className="flex-row items-center gap-3">
                   <Button size="icon" variant="secondary" style={{ width: 48, height: 48, borderRadius: 24 }}
                     disabled={busy} accessibilityLabel="Change profile photo"
-                    onPress={() => router.push(("/profile/photo?serviceAccountId=" + encodeURIComponent(id)) as Href)}>
-                    {profile.avatarUrl ? <Avatar size="sm" source={{ uri: profile.avatarUrl }} accessibilityLabel="Profile photo" /> : <Camera size={20} color={primary} />}
+                    onPress={startEdit}>
+                    {savedAvatar || profile.avatarUrl ? <Avatar size="sm" source={{ uri: savedAvatar ?? profile.avatarUrl! }} accessibilityLabel="Profile photo" /> : <Camera size={20} color={primary} />}
                   </Button>
                   <View className="flex-1 gap-1">
                     <Text weight="semibold" style={{ fontSize: 22, lineHeight: 28 }}>{profile.fullName}</Text>
@@ -366,11 +437,11 @@ function Details({
                 <View className="gap-5 rounded-xl bg-card p-4">
                   <DetailRow label="Contact number" value={profile.contactNum ?? "No contact number"} />
                   <DetailRow
-                    label={emailEditable ? "Service account email" : "Email sign-in"}
-                    value={profile.email || "No email on file"}
+                    label="Service account email"
+                    value={serviceEmail || "No email on file"}
                   />
                   <DetailRow
-                    label="Location"
+                    label="Home location"
                     value={profile.fullAddress ?? "No location on file"}
                   />
                 </View>
@@ -378,7 +449,7 @@ function Details({
                   <Text size="sm" weight="semibold">
                     Service details
                   </Text>
-                  <DetailRow label="Service class" value={profile.serviceType ?? "Unavailable"} />
+                  <DetailRow label="Service class" value={formatAccountClass(profile.serviceType) ?? "Unavailable"} />
                   <DetailRow label="Meter" value={"••" + (profile.meterSerialNum?.slice(-4) ?? "—")} />
                   <Text size="xs" muted>
                     Your name and service details are managed by ALECO.
@@ -388,9 +459,25 @@ function Details({
             ) : view === "edit" ? (
               <>
                 <ProfileHeading
-                  title="Update your details"
+                  title="Update your profile"
                   description={profile.accountNumber ?? profile.email}
                 />
+                <View className="flex-row items-center gap-3 rounded-xl bg-card p-3">
+                  <Avatar size="xl" source={uri || savedAvatar || profile.avatarUrl ? { uri: uri || savedAvatar || profile.avatarUrl! } : undefined}
+                    fallback={profile.fullName.split(/\s+/).filter(Boolean).slice(0, 2).map((word) => word[0]).join("")}
+                    accessibilityLabel={uri ? "Selected profile photo" : "Profile photo"}>
+                    <Avatar.Badge style={{ top: "auto", bottom: -4 }}>
+                      <FileUpload.Trigger><Button size="icon" className="h-9 w-9 rounded-full" hitSlop={6} disabled={busy} accessibilityLabel="Change profile photo">
+                        <Camera size={18} color={cameraForeground} />
+                      </Button></FileUpload.Trigger>
+                    </Avatar.Badge>
+                  </Avatar>
+                  <View className="flex-1 gap-1">
+                    <Text size="sm" weight="semibold">Profile photo</Text>
+                    <FileUpload.Trigger><Button variant="ghost" disabled={busy}>{uri ? "Choose another photo" : "Change photo"}</Button></FileUpload.Trigger>
+                    {uri ? <Button size="sm" variant="ghost" disabled={busy} onPress={() => changeFiles([])}>Undo photo change</Button> : null}
+                  </View>
+                </View>
                 <ProfileField
                   label="Contact number"
                   Icon={Phone}
@@ -398,10 +485,10 @@ function Details({
                   maxLength={20}
                   value={phone}
                   onChangeText={setPhone}
-                  description="Use an 11-digit Philippine mobile number."
+                  description="11-digit mobile number."
                 />
                 <ProfileField
-                  label={emailEditable ? "Service account email" : "Email sign-in"}
+                  label="Service account email"
                   Icon={Mail}
                   editable={emailEditable}
                   value={email}
@@ -411,8 +498,8 @@ function Details({
                   maxLength={255}
                   description={
                     emailEditable
-                      ? "Used for this service account."
-                      : "Changing your email sign-in requires email verification, which is not available yet."
+                      ? "For this service account. Your sign-in email stays unchanged."
+                      : "Service email editing is unavailable. Refresh your account to check access."
                   }
                 />
                 <View className="gap-2 rounded-xl bg-card p-4">
@@ -422,16 +509,12 @@ function Details({
                   <Text size="sm" muted>
                     {address
                       ? addressText(address)
-                      : (profile.fullAddress ?? "No location on file")}
+                      : (baseline.fullAddress || "No location on file")}
                   </Text>
                   <Button variant="outline" onPress={location}>
                     Change location
                   </Button>
                 </View>
-                <ProfileNotice
-                  title="Before saving"
-                  description="Review your changes and confirm this ALECO account’s password. Editing stays locked while reports are active."
-                />
               </>
             ) : view === "location" ? (
               <>
@@ -520,33 +603,37 @@ function Details({
             ) : view === "review" ? (
               <>
                 <ProfileHeading title="Review your changes" />
+                {uri ? <View className="flex-row items-center gap-3 rounded-xl bg-card p-3">
+                  <Avatar size="lg" source={{ uri }} accessibilityLabel="New profile photo" />
+                  <Text size="sm">New profile photo</Text>
+                </View> : null}
                 <View className="gap-4 rounded-xl bg-card p-4">
-                  {phone.replace(/\D/g, "") !== (profile.contactNum ?? "") ? (
+                  {phone.replace(/\D/g, "") !== baseline.phone ? (
                     <>
-                      <DetailRow label="Previous contact" value={profile.contactNum ?? "Not set"} />
-                      <DetailRow label="After" value={phone} />
+                      <DetailRow label="Previous contact" value={baseline.phone || "Not set"} />
+                      <DetailRow label="New contact number" value={phone} />
                     </>
                   ) : null}
-                  {emailEditable && email !== profile.email ? (
+                  {emailEditable && email.trim().toLowerCase() !== baseline.email.toLowerCase() ? (
                     <>
-                      <DetailRow label="Previous email" value={profile.email} />
-                      <DetailRow label="After" value={email} />
+                      <DetailRow label="Previous service email" value={baseline.email || "Not set"} />
+                      <DetailRow label="New service email" value={email} />
                     </>
                   ) : null}
                   {address ? (
                     <>
                       <DetailRow
                         label="Previous location"
-                        value={profile.fullAddress ?? "Not set"}
+                        value={baseline.fullAddress || "Not set"}
                       />
-                      <DetailRow label="After" value={addressText(address)} />
+                      <DetailRow label="New home location" value={addressText(address)} />
                     </>
                   ) : null}
                   <Button variant="outline" disabled={busy} onPress={() => setView("edit")}>
                     Edit changes
                   </Button>
                 </View>
-                <ProfileField
+                {detailsChanged ? <ProfileField
                   label="Current ALECO account password"
                   secret
                   editable={!busy}
@@ -554,28 +641,23 @@ function Details({
                   onChangeText={setPassword}
                   autoComplete="current-password"
                   maxLength={128}
-                  description="Use this service account’s password, not your email sign-in password."
-                />
-                <Button variant="ghost" disabled={busy} onPress={() => setHelp(true)}>
+                  description="Use this service account’s password, not your ALEConnect sign-in password."
+                /> : null}
+                {detailsChanged ? <Button variant="ghost" disabled={busy} onPress={() => setHelp(true)}>
                   Account password help
-                </Button>
-                <ProfileNotice
-                  title="Secure update"
-                  description="Your changes are saved together after ALECO verifies the password and checks for active reports."
-                />
+                </Button> : null}
               </>
             ) : (
               <ProfileNotice
-                title="Your details are updated"
+                title="Profile updated"
                 description={
                   identity.fixture
                     ? "Visual fixture saved locally. No live account was changed."
-                    : "Your changes were saved securely to this service account."
+                    : "Your changes are saved to this service account."
                 }
               />
             )}
-            {error ? <ProfileNotice title="Check your details" description={error} danger /> : null}
-            {read.error ? <DataNotice title="Could not refresh your details" description="Your loaded details remain visible. Refresh before editing to check current information and report eligibility." actionLabel="Refresh details" busy={read.busy} onAction={() => void read.reload(true)} /> : null}
+            {read.error ? <DataNotice title="Could not refresh your details" description="Your last loaded details are shown. Refresh to check current account access." actionLabel="Refresh details" busy={read.busy} onAction={() => void read.reload(true)} /> : null}
           </>
         )}
       </ReportPage>
@@ -598,7 +680,7 @@ function Details({
       <Dialog open={discard} onOpenChange={setDiscard}>
         <Dialog.Content>
           <Dialog.Title>Discard your changes?</Dialog.Title>
-          <Dialog.Description>Your account details have not been updated.</Dialog.Description>
+          <Dialog.Description>Unsaved changes will be discarded.</Dialog.Description>
           <Dialog.Footer>
             <Button variant="outline" onPress={() => setDiscard(false)}>
               Keep editing
@@ -606,8 +688,11 @@ function Details({
             <Button
               variant="destructive"
               onPress={() => {
+                photoGeneration.current++;
                 setDiscard(false);
                 setPassword("");
+                setFiles([]);
+                setAddress(null);
                 setView("info");
               }}
             >
@@ -638,6 +723,6 @@ function Details({
           </Dialog.Footer>
         </Dialog.Content>
       </Dialog>
-    </>
+    </FileUpload>
   );
 }

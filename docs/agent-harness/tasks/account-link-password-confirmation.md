@@ -27,3 +27,21 @@ Figma editing was restored on October18. [Account confirmation states](https://w
 October18 extension verification:26 focused gate/auth-token/service tests independently pass on re-review, covering purpose isolation, duplicate presses, expiry/default-selection recovery, late success, cancellation and session replacement. Full suite520:519 pass,zero failed,one existing sibling-path skip; explicit paired harness/types pass. Scoped lint has no errors with two baseline auth-context warnings. Server64 focused checks/build/scoped lint/harness pass. Refreshed code maps and Figma state ledger stay outside commits. No schema/dependency/native/signing change, deployment or APK.
 
 Mobile15/Staff55 remain coordinated draft PRs. Finish rendered-app/browser and authorized device acceptance before merge/release; Figma design acceptance is now verified. Preserve primary manual/iOS work and device state.
+
+### Approved profile-editor extension — completed source/Figma pass
+
+- [x] Figma first: unified photo/contact/service-email/location editor with review, saving, permission, partial-save, source-picker and completion states in both themes. [18 editable frames](https://www.figma.com/design/6uIaVRM63oHA723WKgjo5k/Aleconnect-mobile?node-id=1309-24926).
+- [x] Staff: additive serviceAccountEmail/serviceAccountEmailEditable; explicit selected-service email update under existing password/ownership/revision checks. Identity-email guard and legacy fields retained; no migration.
+- [x] Mobile: one scoped edit/review/save flow; photo-only save, partial-success retry, discarded-picker generation guard, session-pinned uploads and compatible photo-route redirect.
+- [x] All seven class definitions match Staff: RM Residential Mainland; RI Residential Island; LVM Low Voltage Mainland; LVI Low Voltage Island; HV High Voltage; CM Commercial Mainland; CI Commercial Island. Unknown values remain readable.
+- [x] Focused/full source checks and read-only review; CI includes new Staff profile tests. Final evidence and acceptance limits are in implementation history. Both PRs remain drafts; no merge/deploy/release.
+
+
+## 2026-10-18 — Approved unified profile editor
+
+- Scope: combine profile photo selection/preview with contact number, service-account email and home location; shorten labels without removing password/account context. Redirect old photo links with the selected service account. Decode RM/RI/LVM/LVI/HV/CM/CI exactly as Staff, preserving unknown values.
+- Figma: [18 editable Light/Dark editor, review and recovery frames](https://www.figma.com/design/6uIaVRM63oHA723WKgjo5k/Aleconnect-mobile?node-id=1309-24926); reused one photo-editor component with camera badge, choice/undo states, crop source sheet, photo-only review, saving, permission, partial-save and completion states. Canonical Edit profile is updated; the standalone photo-only section is marked as superseded. Final visual checks include Dark notice contrast and Camera/Image prefixes; 282 text layers/218 instances. No prototype connections added.
+- Contract: additive selected-service email fields retain identity email separation, legacy fields, password checks, ownership/revision locks and audit. Photo-only upload does not add a password requirement; combined saves handle partial success honestly and pin session/scope. Late discarded picker callbacks cannot replace a newer draft. No migration/dependency/native/signing change.
+- Verification: Mobile full suite529:528 pass,zero failed,one existing isolated-sibling skip; final11 editor/picker tests, TypeScript and scoped lint pass. Staff16 profile tests, production build and scoped lint pass; the existing account-audit workflow now includes all profile tests. Independent read-only re-review found no remaining actionable issue. Paired harness, whitespace and source-map refresh accompany the scoped commits.
+- Remaining risks: local browser use is disabled in Work settings, so rendered-app acceptance is unverified. Native camera/library/crop/real upload, live DB and new APK acceptance remain separate. Draft Staff55/Mobile15 are not merged or deployed; preserve primary/manual/iOS/device work.
+- Next: run draft CI and complete app/native acceptance, then separately authorize coordinated Staff-first merge/release.

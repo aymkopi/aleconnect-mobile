@@ -25,6 +25,8 @@ type MobileProfileResponse = {
   accessRevision?: number;
   emailScope?: "identity" | "service_account";
   emailEditable?: boolean;
+  serviceAccountEmail?: string;
+  serviceAccountEmailEditable?: boolean;
   profileEditing?: { version: number; activeReportCount: number };
 };
 
@@ -41,6 +43,8 @@ function toProfileRow(profile: MobileProfileResponse): Record<string, unknown> {
       .join(", ") || null;
   return {
     email_editable: profile.emailEditable,
+    service_account_email: profile.serviceAccountEmail,
+    service_account_email_editable: profile.serviceAccountEmailEditable,
     profile_editing: profile.profileEditing,
     profile_id: profile.serviceAccountId ?? profile.id,
     account_number: profile.username,
@@ -67,9 +71,10 @@ function toProfileRow(profile: MobileProfileResponse): Record<string, unknown> {
 
 export async function fetchCurrentConsumerProfileView(
   scope?: ConsumerProfileScope,
+  authToken?: string | null,
 ): Promise<ConsumerProfileView | null> {
   return toConsumerProfileView(
-    toProfileRow(await apiRequest<MobileProfileResponse>(profilePath(scope))),
+    toProfileRow(await apiRequest<MobileProfileResponse>(profilePath(scope), {}, { authToken })),
   );
 }
 
@@ -122,6 +127,7 @@ export type UploadProfileAvatarInput = { imageBytes: ArrayBuffer; contentType: s
 export async function uploadCurrentUserAvatar(
   { imageBytes, contentType }: UploadProfileAvatarInput,
   scope?: ConsumerProfileScope,
+  authToken?: string | null,
 ): Promise<string> {
   const query = scope
     ? `?${new URLSearchParams({ serviceAccountId: scope.serviceAccountId }).toString()}`
@@ -129,6 +135,7 @@ export async function uploadCurrentUserAvatar(
   const { uploadUrl, key } = await apiRequest<{ uploadUrl: string; key: string }>(
     `/api/mobile/profile/avatar-upload${query}`,
     { method: "POST", body: JSON.stringify({ contentType, ...scopeBody(scope) }) },
+    { authToken },
   );
   const uploadResponse = await fetch(uploadUrl, {
     method: "PUT",
@@ -139,6 +146,7 @@ export async function uploadCurrentUserAvatar(
   const { avatarUrl } = await apiRequest<{ avatarUrl: string }>(
     "/api/mobile/profile/avatar-complete",
     { method: "POST", body: JSON.stringify({ key, ...scopeBody(scope) }) },
+    { authToken },
   );
   return avatarUrl;
 }
@@ -146,9 +154,10 @@ export async function uploadCurrentUserAvatar(
 export { ConsumerProfileView };
 
 export async function updateVerifiedConsumerDetails(
-  value: { phone?: string; email?: string; address?: StructuredProfileAddressInput },
+  value: { phone?: string; email?: string; serviceAccountEmail?: string; address?: StructuredProfileAddressInput },
   currentAccountPassword: string,
   scope: ConsumerProfileScope,
+  authToken?: string | null,
 ): Promise<ConsumerProfileView> {
   const response = await apiRequest<{ updated: true; profile: MobileProfileResponse }>(
     profilePath(scope),
@@ -161,6 +170,7 @@ export async function updateVerifiedConsumerDetails(
         ...scopeBody(scope),
       }),
     },
+    { authToken },
   );
   return toConsumerProfileView(toProfileRow(response.profile));
 }

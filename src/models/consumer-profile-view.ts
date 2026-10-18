@@ -20,6 +20,8 @@ export interface ConsumerProfileView {
   readonly createdAt: Date;
   readonly updatedAt: Date;
   readonly emailEditable?: boolean;
+  readonly serviceAccountEmail?: string;
+  readonly serviceAccountEmailEditable?: boolean;
   readonly profileEditing?: { version: number; activeReportCount: number };
 }
 
@@ -75,6 +77,8 @@ export function toConsumerProfileView(row: Record<string, unknown>): ConsumerPro
   return {
     profileId: String(row.profile_id ?? ""),
     emailEditable: row.email_editable === true,
+    serviceAccountEmail: typeof row.service_account_email === "string" ? row.service_account_email : undefined,
+    serviceAccountEmailEditable: row.service_account_email_editable === true,
     profileEditing:
       row.profile_editing && typeof row.profile_editing === "object"
         ? (row.profile_editing as { version: number; activeReportCount: number })
