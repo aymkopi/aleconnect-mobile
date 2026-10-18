@@ -51,8 +51,8 @@ test("link-request reader tolerates old and malformed current-link metadata; ret
   const module={exports:{}};
   new Function("require","module","exports",outputText)((id)=>{
     if(id.includes("features/accounts/status")) return status;
-    return {createApiRequestId:()=>"intent-"+(++nextId),apiRequest:async(path,options)=>{
-      calls.push({path,options});
+    return {createApiRequestId:()=>"intent-"+(++nextId),apiRequest:async(path,options,auth)=>{
+      calls.push({path,options,auth});
       return options ? {requestId:"request",status:"pending",replayed:false} : {accessRevision:3,requests:[{requestId:"request",status:"approved",consumerReason:"Public note",...(metadata===undefined?{}:{isCurrentLink:metadata})}]};
     }};
   },module,module.exports);
@@ -63,9 +63,20 @@ test("link-request reader tolerates old and malformed current-link metadata; ret
     assert.equal(read.requests[0].consumerReason,"Public note");
     assert.equal(read.accessRevision,3);
   }
-  const input={accountNumber:"123",registeredName:"Name",password:"private account password",idempotencyKey:"same-intent"};
-  await module.exports.submitAccountLinkRequest(input);
-  await module.exports.submitAccountLinkRequest(input);
+  const input={accountNumber:"123",registeredName:"Name",password:"private account password",idempotencyKey:"same-intent",verificationFlowId:"verified-flow"};
+  await module.exports.submitAccountLinkRequest(input,"pinned-session");
+  await module.exports.submitAccountLinkRequest(input,"pinned-session");
   const sent=calls.filter(c=>c.options).map(c=>JSON.parse(c.options.body));
   assert.deepEqual(sent.map(b=>b.idempotencyKey),["same-intent","same-intent"]);
+  assert.ok(sent.every(b=>b.verificationFlowId==="verified-flow"));
+  assert.ok(calls.filter(c=>c.options).every(c=>c.auth.authToken==="pinned-session"));
+});
+
+test("unlink transmits its purpose-specific proof and target details with the selected session", async () => {
+  const ts = (await import("typescript")).default;
+  const source = await readFile(new URL("../src/services/linked-accounts.ts", import.meta.url), "utf8"), calls = [], exports = {};
+  new Function("require", "exports", ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText)(() => ({ apiRequest: async (...args) => { calls.push(args); return { reauthenticationRequired: true }; } }), exports);
+  await exports.unlinkLinkedAccount({ serviceAccountId: "service-a", currentAccountPassword: " exact service password ", accessRevision: 4, replacementDefaultServiceAccountId: "service-b", verificationFlowId: "unlink-proof" }, "pinned-session");
+  assert.deepEqual(JSON.parse(calls[0][1].body), { action: "unlink", serviceAccountId: "service-a", currentAccountPassword: " exact service password ", accessRevision: 4, replacementDefaultServiceAccountId: "service-b", verificationFlowId: "unlink-proof" });
+  assert.equal(calls[0][2].authToken, "pinned-session");
 });

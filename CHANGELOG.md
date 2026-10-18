@@ -1,5 +1,27 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Reuse the compact docked photo-source sheet for profile photos and New Report evidence, with Camera/Photo library descriptions and Cancel. Preserve the manually removed cropping hint and existing processing/file limits.
+- Standardize profile photo/location labels and Light/Dark control colors. Keep name and email/account number read-only; replace Undo with an accessible clear-photo icon.
+- Combine profile photo, contact number, service-account email and home location into one Edit profile/review flow. Keep photo-only saves simple, preserve drafts on errors, and retry only the failed photo after details save.
+- Decode all seven service classes using Staff definitions; keep unknown values. Shorten profile labels/help and redirect legacy photo links to the unified editor with account scope intact.
+
+### Fixed
+
+- Pin the selected session throughout avatar presign/completion and prevent late picker results from a discarded draft replacing a newer photo. Preserve the separate sign-in email on older profile responses.
+
+
+### Security
+
+- Confirm the current sign-in password before Edit profile. Use a short-lived session/service-bound proof at Save, clear the password immediately, and preserve drafts when confirmation expires. Remove the final password input; keep photo partial-save recovery. Requires the paired Staff endpoint before release.
+
+- Add current email-password confirmation before unlinking; share the existing linking verification gate while keeping purpose-specific server proofs. Preserve the service-account password, owned replacement-default selection and last-account safeguard. Protect newer sessions from delayed unlink cleanup and show committed link success even after local verification expiry.
+
+- Add current sign-in password verification before linking another ALECO account, with server-enforced cooldown and five-minute expiry. Keep target service-account credentials and Staff review separate, clear secrets on leave, and preserve account number/name when verification expires. Requires the paired Staff endpoint/guard before release; no dependency, native or signing change.
+
 ## 1.2.2-alpha.1 - 2026-10-18
 
 ### Build automation

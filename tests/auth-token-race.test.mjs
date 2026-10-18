@@ -3,6 +3,27 @@ import test from "node:test";
 import { readFile } from "node:fs/promises";
 import ts from "typescript";
 const tick = () => new Promise((resolve) => setImmediate(resolve));
+for (const stage of ["token-clear", "cache-clear"])
+  test("sign-out cannot clear a newer session after " + stage + " awaits", async () => {
+    const source = await readFile(new URL("../src/context/auth-session-context.ts", import.meta.url), "utf8");
+    const ast = ts.createSourceFile("auth.ts", source, ts.ScriptTarget.Latest, true);
+    let callback;
+    function visit(node) {
+      if (ts.isVariableDeclaration(node) && node.name.getText(ast) === "signOut") callback = node.initializer.arguments[0].getText(ast);
+      ts.forEachChild(node, visit);
+    }
+    visit(ast); assert.ok(callback);
+    const pause = deferred(); let revision = 1, changes = 0, cacheClears = 0;
+    const compiled = ts.transpileModule("const handler = " + callback + "; return handler;", { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
+    const signOut = new Function("authGeneration", "getAuthTokenRevision", "getAuthToken", "apiRequest", "clearAuthToken", "clearCachedSession", "setSession", compiled)(
+      { current: 0 }, () => revision, async () => "old-token", async () => {},
+      async () => { revision++; if (stage === "token-clear") await pause.promise; },
+      async () => { cacheClears++; if (stage === "cache-clear") await pause.promise; },
+      () => changes++,
+    );
+    const pending = signOut(); await tick(); revision++; pause.resolve(); await pending;
+    assert.equal(changes, 0); assert.equal(cacheClears, stage === "cache-clear" ? 1 : 0);
+  });
 function deferred() {
   let resolve;
   const promise = new Promise((done) => (resolve = done));

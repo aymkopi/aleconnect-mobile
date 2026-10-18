@@ -32,7 +32,8 @@ export async function submitAccountLinkRequest(input: {
   registeredName: string;
   password: string;
   idempotencyKey?: string;
-}) {
+  verificationFlowId: string;
+}, authToken: string) {
   const result = await apiRequest<{ requestId: string; status: unknown; replayed: boolean }>("/api/mobile/account-link-requests", {
     method: "POST",
     body: JSON.stringify({
@@ -40,7 +41,8 @@ export async function submitAccountLinkRequest(input: {
       registeredName: input.registeredName.trim(),
       password: input.password,
       idempotencyKey: input.idempotencyKey ?? createApiRequestId(),
+      verificationFlowId: input.verificationFlowId,
     }),
-  }, { idempotent: true });
+  }, { idempotent: true, authToken });
   return { ...result, status: parseConsumerAccountLinkRequestStatus(result.status) };
 }

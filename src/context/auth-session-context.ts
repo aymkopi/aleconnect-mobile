@@ -159,7 +159,9 @@ export function AuthSessionProvider({ children }: PropsWithChildren) {
     }
     if (tokenRevision !== getAuthTokenRevision()) return;
     await clearAuthToken();
+    if (tokenRevision + 1 !== getAuthTokenRevision()) return;
     await clearCachedSession();
+    if (tokenRevision + 1 !== getAuthTokenRevision()) return;
     setSession(null);
   }, []);
 

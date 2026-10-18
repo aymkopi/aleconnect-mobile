@@ -648,6 +648,69 @@ Closeout: harness validation against the reviewed Staff companion and git diff -
 - Remaining risks: Android workflow38858463619 succeeded and published1.0.2-alpha.1/code66 with CI signature/manifest/Hermes/16KB-alignment checks passing. Installed-device/private/provider/native-iOS acceptance remains separate; no installation or account/data reset.
 - Next: retain external recovery/QA evidence, finish only verified task checkout/branch cleanup; retain successful Android publication evidence. [Handoff](tasks/account-linking-refinement.md) records exact source/order and limits.
 
+## 2026-10-18 — Account-link current-password confirmation (implementation)
+
+- Scope: confirm current email sign-in password before revealing target ALECO account fields; use server-owned expiry/cooldown, memory-only session-pinned proof, generation-specific cancellation and existing PanelUI components. Preserve target credentials, review and Staff approval.
+- Verification: full suite512 checks:511 pass,zero failures,one existing shared-contract skip because the conventional sibling path is absent in the isolated worktree; explicit paired harness passes against the real Staff path. Final TypeScript/scoped lint pass. Independent re-review passes; six focused gate tests cover secret clearing, wrong password, expired server proof and both late-submission races (blur/local expiry). Existing navigation fixtures include both verification-back cases. Both code maps were refreshed; generated evidence remains separate.
+- Remaining risks: Figma connector is read-only and local browser use is disabled; new frames and browser/device/live mutation/real-MySQL concurrency acceptance remain pending. Requires the paired Staff guard before release; older clients must update for new linking requests. No native/dependency/signing change or release. Primary manual/iOS work is untouched.
+- Next: open coordinated draft PRs, enable Figma edit/browser access and finish visual acceptance before merging or publishing.
+
+## 2026-10-18 — Unlink password-confirmation extension (implementation)
+
+- Scope: require current email-password confirmation before unlinking, sharing the link verification UI/hook with separate server purpose. Pin proof and mutation session; retain target password, last-account restriction, owned replacement default and destructive confirmation. Clear secrets on cancel/expiry; preserve replacement selection. Protect newer sessions during delayed unlink sign-out; acknowledge committed link success even after local expiry.
+- Verification:26 focused gate/auth-token/service tests independently pass on re-review. Mobile full suite520:519 pass,zero failed,one existing missing-sibling-path skip covered by explicit paired harness. Types/harness pass; scoped lint has no errors with two baseline auth-context warnings. Server64 focused security/link/unlink checks/build/scoped lint/paired harness pass. Both code maps were refreshed, with generated evidence preserved separately.
+- Remaining risks: Figma is read-only, browser use disabled; frames/native/live mutations/real MySQL concurrency unverified. Older apps must update to link/unlink after guarded server deployment. No dependency/native/signing/schema or release change; primary iOS/manual/device work is untouched.
+- Next: publish the verified extension to draft Mobile15/Staff55 and inspect CI. Finish Figma/render acceptance before merging/releasing.
+
+## 2026-10-18 — Account confirmation Figma access and design completion
+
+- Scope: restore the authorized design work after Figma link editing becomes available. Add12 editable Light/Dark linking/unlinking verification, cooldown and expiry frames in Service accounts section09.06; preserve all existing account forms and confirmation flows.
+- Verification: composition and full-size Light/Dark visual checks pass after correcting notice fill opacity/text contrast. Existing component instances, Inter/Plus Jakarta Sans,16px gutters,12px sections,48px actions and #00060F Dark background are retained.149 editable text layers/152 instances, no image fills or overflowing content. Empty expiry/cooldown states disable Continue. No app/API/source behavior changes in this pass; paired documentation harness and whitespace checks pass.
+- Remaining risks: state designs have no new prototype connections. Rendered app/browser/device, live mutations and real-MySQL concurrency acceptance remain separate; no merge, deployment or APK publication. Preserve primary manual/iOS/device work.
+- Next: retain the Figma state ledger outside Git, update draft Mobile15/Staff55 with this design handoff and finish app visual acceptance before release.
+
+## 2026-10-18 — Simplify account-confirmation copy
+
+- Scope: remove the “For this session only” card, Security check eyebrow and repeated intro from all12 Figma states and the shared linking/unlinking app UI. Keep one short email-password helper and concise cooldown/expiry messages. Remove the unused action prop; security policy and business behavior remain unchanged.
+- Verification: updated Light/Dark Figma composition/full-size review passes with101 editable text layers/140 instances and no session-information cards. All11 existing linking/unlinking interaction tests, TypeScript, scoped lint, paired documentation harness and whitespace checks pass.
+- Remaining risks: rendered-app/device acceptance remains pending. No backend, dependency, native, deployment or release change; preserve unrelated manual/iOS/device work.
+- Next: update draft Mobile15 and retain Figma parity before coordinated release acceptance.
+
+## 2026-10-18 — Balance confirmation context
+
+- Scope: replace overly terse guidance with one purpose sentence, an explicit ALEConnect-versus-ALECO password helper, actionable cooldown guidance and expiry reassurance that account details are kept. Keep the session-information card and Security check eyebrow removed. Match all12 editable Figma states and shared app copy; no security or business behavior changes.
+- Verification: Light/Dark composition/full-size review passes with113 editable text layers/140 instances, no session cards or content overflow. Existing11 confirmation-flow tests pass. TypeScript, scoped lint and paired harness/whitespace checks accompany the scoped commit; graph output remains separate.
+- Remaining risks: app/device/live acceptance remains pending; no merge, deployment or release. Preserve primary/manual/iOS/device state.
+- Next: retain this balanced copy in draft Mobile15/Staff55 for coordinated acceptance.
+
+## 2026-10-18 — Approved unified profile editor
+
+- Scope: combine profile photo selection/preview with contact number, service-account email and home location; shorten labels without removing password/account context. Redirect old photo links with the selected service account. Decode RM/RI/LVM/LVI/HV/CM/CI exactly as Staff, preserving unknown values.
+- Figma: [18 editable Light/Dark editor, review and recovery frames](https://www.figma.com/design/6uIaVRM63oHA723WKgjo5k/Aleconnect-mobile?node-id=1309-24926); reused one photo-editor component with camera badge, choice/undo states, crop source sheet, photo-only review, saving, permission, partial-save and completion states. Canonical Edit profile is updated; the standalone photo-only section is marked as superseded. Final visual checks include Dark notice contrast and Camera/Image prefixes; 282 text layers/218 instances. No prototype connections added.
+- Contract: additive selected-service email fields retain identity email separation, legacy fields, password checks, ownership/revision locks and audit. Photo-only upload does not add a password requirement; combined saves handle partial success honestly and pin session/scope. Late discarded picker callbacks cannot replace a newer draft. No migration/dependency/native/signing change.
+- Verification: Mobile full suite529:528 pass,zero failed,one existing isolated-sibling skip; final11 editor/picker tests, TypeScript and scoped lint pass. Staff16 profile tests, production build and scoped lint pass; the existing account-audit workflow now includes all profile tests. Independent read-only re-review found no remaining actionable issue. Paired harness, whitespace and source-map refresh accompany the scoped commits.
+- Remaining risks: local browser use is disabled in Work settings, so rendered-app acceptance is unverified. Native camera/library/crop/real upload, live DB and new APK acceptance remain separate. Draft Staff55/Mobile15 are not merged or deployed; preserve primary/manual/iOS/device work.
+- Next: run draft CI and complete app/native acceptance, then separately authorize coordinated Staff-first merge/release.
+
+## 2026-10-18 — Profile field layout and color refinement
+
+- Scope: move Profile photo and Home location labels above their surfaces using PanelUI Field; replace Undo photo change with an accessible X that clears only the pending selection. Retain read-only full name and the established email/account-number identifier in Edit and Review. Service email remains a separate editable field.
+- Figma: updated all18 unified-profile states and both canonical editor entry frames. Reused the photo component with explicit editable/read-only properties; replaced stale instance overrides that clipped selected images. Normalize bound Light/Dark paint values, neutral choose/location actions and contrasting loading labels. Final Light/Dark selected-photo and review checks pass; all16 photo fields are126px with clipping disabled and no Undo text remains. Multiple-account examples show sign-in email; single-account examples retain the raw account number.
+- Verification:11 executable editor/picker tests, TypeScript and scoped lint pass; the existing interaction test confirms clearing the photo neither changes service email nor sends a request. Paired documentation harness and whitespace pass. The initial sandbox run hit16 temporary Git-fixture permission failures; the final elevated suite passes528 tests,zero failures,one existing sibling-path skip. Independent read-only re-review passes and independently reruns all11 editor/picker tests. No API, dependency, schema, native or signing change.
+- Remaining risks: initial usage/sandbox approval limits were resolved after continuing; the full suite, re-review and Graphify refresh now pass. Generated maps and both test-run logs are preserved outside Git. Rendered-app/native camera/crop/upload acceptance remains unverified. Preserve primary/manual/iOS/device work; no merge, release or production mutation.
+- Next: retain pushed source7b5267a in draft Mobile15 and complete rendered/native acceptance before the paired Staff55 server-first release gate.
+
+
+## 2026-10-18 - Password-first profile editing and shared evidence picker
+
+- Scope: current ALEConnect password confirmation precedes Edit profile; final review saves through a five-minute session/credential/service/revision-bound proof. Add the separate profile-edit purpose/route, retain legacy selected-service password clients and required-password-reset policy, and fix proof/business lock ordering. Reuse the manually refined compact docked photo-source sheet for profile and report evidence without restoring cropping copy. Figma has24 editable unified-profile states and both report picker themes; canonical review/recovery frames match.
+- Verification: Staff85 focused security/profile tests and Mobile533 tests pass,zero failures; one existing isolated-sibling skip is covered by paired harness. Wrong-password clearing, proof-only save, expired-proof draft recovery, partial-photo retry and picker cancellation pass. Production build, types, scoped lint, paired harness, whitespace, code-map and read-only review results are finalized in the task handoff. New source warnings are not hidden by the full-test result.
+- Remaining risks: avatar endpoints retain existing session/ownership/revision checks, not a mandatory new server password-proof policy. Rendered-app, native picker/crop/R2, live MySQL concurrency and new APK acceptance remain unverified. No migration/dependency/native/signing change, merge or deployment; primary/manual/iOS/device work is preserved.
+- Next: complete hosted draft checks and app/native acceptance, then separately authorize coordinated Staff55-before-Mobile15 merge/release.
+
+
+Final gates: Staff85 focused tests, production TypeScript/Vite build and scoped lint pass; Mobile533 tests pass/zero failed/one existing isolated-sibling skip, types and scoped lint pass with ten pre-existing FileUpload warnings and no errors. Both explicit-sibling harness checks and whitespace pass. Read-only review's lock-order and error-copy findings are fixed; final16 Staff profile checks and12 Mobile editor checks pass. Both Graphify refreshes succeed; Staff omits oversized HTML visualization, while JSON/report output is preserved with hash-verified generated maps and gate logs outside the commits. No rendered-app/native/live/merge/release acceptance is implied.
+
 ## 2026-10-18 — iPhone full motion and Reports diagnosis
 
 - Scope: user confirmed Reduce Motion shortened the bottom pill, hold fill and account-card turn, and explicitly requested full motion. All owned animation branches use one app preference and the stable PanelUI provider configures Reanimated before its subtree. OS settings, hold duration, cancellation and screen-reader confirmation are retained.
@@ -732,3 +795,11 @@ Closeout: harness validation against the reviewed Staff companion and git diff -
 - Verification: public1.2.2-alpha.1 has APK/code70, unsigned iOS1.0.0/build25, two metadata and two checksum files. Tag/target/both sources match; all six downloaded GitHub digests match. Independent APK retained signer/non-debuggable/SDK/54-library16KB/API/fixture-off and IPA ARM64/iPhoneOS/permissions/API/fixture-off checks pass. APK SHA256b3ef13b084fb9a5b5d9a75c0098c0c3359556f8d6dd7d2691dfba22fea7fd97c; IPA SHA2568ad53a068544bb3cefd5dd5b6054edf668e968874a59064528367251bb7120eb. Desktop IPA copy matches.
 - Remaining risks: new artifacts were not installed or signed. The unchanged app source was accepted in iPhone build7; Personal Team signing/APNs/provider/store limits remain. No old release asset or protected device state is replaced.
 - Next: merge this docs-only closeout, verify native/publication jobs skip and synchronize clean master. Product/workflow/new-release objectives are complete; preserve all existing evidence and excluded work.
+
+
+## 2026-10-18 - Authorized Staff-first release gate
+
+- Scope: user authorizes final checks, both PR merges, Staff deployment first and a new Mobile alpha. Integrate Staff main2348b904 and Mobile master8f79e1c without reverting the newer agency/contact fixes, iPhone private-route/motion work or combined IPA/APK pipeline. Resolve additive CI/history conflicts by retaining both; legacy photo route keeps the approved unified-editor redirect.
+- Verification: integrated Staff121 focused security/profile/account/directory tests and Mobile544 tests pass,zero failed; one existing isolated-sibling skip is checked by the paired harness. Read-only integration review independently passes36 checks and finds no actionable regression. Types/lint/build, hosted exact-head gates and release evidence follow below; no deployment is claimed yet.
+- Remaining risks: native/private/provider/real-MySQL concurrency acceptance remains separate; profile avatar endpoints retain existing session/ownership/revision guards. No new migration; do not repeat another task's agency schema work. Old apps need the paired Mobile update for new link/unlink actions.
+- Next: green exact-head CI, merge/deploy Staff55, verify deployed version/access boundaries, then merge Mobile15 and verify the new immutable alpha and original signer. Preserve primary/manual/iOS/device work and rollback evidence.

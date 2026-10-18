@@ -1,12 +1,13 @@
 import { useCallback, useRef, useState, useEffect } from "react";
 import { View } from "react-native";
-import { type Href, useRouter, useFocusEffect } from "expo-router";
+import { type Href, useRouter } from "expo-router";
 import { IdCard, UserRound } from "lucide-react-native";
 import { Button } from "@/components/panelui/button";
 import { Dialog } from "@/components/panelui/dialog";
 import { ReportPage } from "@/features/reports/components/report-page";
 import { submitAccountLinkRequest } from "@/services/account-link-requests";
-import { createApiRequestId } from "@/services/api";
+import { createApiRequestId, ApiRequestError } from "@/services/api";
+import { AccountPasswordVerificationFields, useAccountPasswordVerification } from "./account-password-verification";
 import { presentAccountLinkError } from "@/features/accounts/contract";
 import { consumerAccountLinkRequestStatusLabel } from "@/features/accounts/status";
 import { useAuthSession } from "@/hooks/use-auth-session";
@@ -37,21 +38,21 @@ function LinkAccount({ identity }: { identity: ProfileIdentity }) {
     [busy, setBusy] = useState(false),
     [discard, setDiscard] = useState(false),
     [help, setHelp] = useState(false);
-  const key = useRef(createApiRequestId()),
-    sending = useRef(false);
-  useEffect(() => {
-    key.current = createApiRequestId();
-  }, [number, name]);
-  const ready =
-    identity.account.sessionMode === "identity" && identity.account.capabilities.accountLinking;
+  const key = useRef(createApiRequestId()), sending = useRef(false);
+  const ready = identity.account.sessionMode === "identity" && identity.account.capabilities.accountLinking;
+  const resetDraft = useCallback(() => { setPassword(""); setView("form"); setError(""); }, []);
+  const verification = useAccountPasswordVerification(identity, "account-link", ready, resetDraft);
+  const verifying = ready && view !== "sent" && !verification.proof;
+  useEffect(() => { key.current = createApiRequestId(); }, [number, name]);
   function back() {
     if (busy) return;
     setPassword("");
+    verification.setPassword("");
     if (view === "review") {
       setView("form");
       return;
     }
-    if (view === "form" && (number || name || password)) {
+    if ((view === "form" || verifying) && (number || name || password || verification.password)) {
       setDiscard(true);
       return;
     }
@@ -59,17 +60,8 @@ function LinkAccount({ identity }: { identity: ProfileIdentity }) {
     else router.replace("/profile/accounts");
   }
   const allowLeave = useProfileBackGuard(
-    busy || view === "review" || (view === "form" && !!(number || name || password)),
+    busy || view === "review" || !!(number || name || password || verification.password),
     back,
-  );
-  useFocusEffect(
-    useCallback(
-      () => () => {
-        setPassword("");
-        setView((v) => (v === "review" ? "form" : v));
-      },
-      [],
-    ),
   );
   function review() {
     setError("");
@@ -86,7 +78,9 @@ function LinkAccount({ identity }: { identity: ProfileIdentity }) {
     setView("review");
   }
   async function submit() {
-    if (sending.current || !password) return;
+    const proof = verification.proof;
+    if (sending.current || !password || !proof?.isCurrent() || !current()) return;
+    const active = () => current() && proof.isCurrent();
     sending.current = true;
     setBusy(true);
     setError("");
@@ -100,16 +94,20 @@ function LinkAccount({ identity }: { identity: ProfileIdentity }) {
             registeredName: name,
             password: secret,
             idempotencyKey: key.current,
-          });
-      if (current()) {
+            verificationFlowId: proof.flowId,
+          }, proof.authToken);
+      if (current() && proof.isScopeCurrent()) {
         setStatus(consumerAccountLinkRequestStatusLabel(result.status));
+        verification.reset();
         setView("sent");
       }
     } catch (e) {
-      if (current()) {
+      if (active()) {
         const p = presentAccountLinkError(e);
         setError(p.message);
-        setView(p.kind === "password-reset-required" ? "reset" : "form");
+        if (e instanceof ApiRequestError && e.code === "CURRENT_PASSWORD_VERIFICATION_REQUIRED") {
+          verification.reset(p.message);
+        } else setView(p.kind === "password-reset-required" ? "reset" : "form");
       }
     } finally {
       sending.current = false;
@@ -143,6 +141,10 @@ function LinkAccount({ identity }: { identity: ProfileIdentity }) {
         footer={
           !ready ? (
             <Button onPress={() => router.push("/email-setup")}>Get help with email setup</Button>
+          ) : verifying ? (
+            <Button loading={verification.busy || busy} disabled={busy || verification.busy || !verification.password || !!verification.remaining} onPress={() => void verification.verify()}>
+              Verify and continue
+            </Button>
           ) : view === "sent" ? (
             <Button onPress={() => router.replace("/profile/link-requests" as Href)}>
               View link requests
@@ -173,6 +175,8 @@ function LinkAccount({ identity }: { identity: ProfileIdentity }) {
               description="Your email becomes your login and contact email. Service-account details stay separate."
             />
           </>
+        ) : verifying ? (
+          <AccountPasswordVerificationFields verification={verification} />
         ) : view === "sent" ? (
           <>
             <ProfileHeading
@@ -280,6 +284,7 @@ function LinkAccount({ identity }: { identity: ProfileIdentity }) {
                 setNumber("");
                 setName("");
                 setPassword("");
+                verification.setPassword("");
                 setDiscard(false);
                 router.replace("/profile/accounts");
               }}

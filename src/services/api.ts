@@ -227,6 +227,12 @@ async function performRequest<T>(
     if (response.status === 401 && token) {
       await markAuthInvalidated(token, body?.code === "PASSWORD_CHANGE_REAUTHENTICATE"
         ? "Sign in again to continue changing your password. Ordinary sign-in remains available."
+        : body?.code === "ACCOUNT_LINK_REAUTHENTICATE"
+        ? "Sign in again to continue linking an account. Ordinary sign-in remains available."
+        : body?.code === "ACCOUNT_UNLINK_REAUTHENTICATE"
+        ? "Sign in again to continue unlinking an account. Ordinary sign-in remains available."
+        : body?.code === "PROFILE_EDIT_REAUTHENTICATE"
+        ? "Sign in again to continue editing your profile. Ordinary sign-in remains available."
         : forcedLogoutMessage);
     }
     throw new ApiRequestError(

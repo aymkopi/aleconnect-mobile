@@ -1,6 +1,6 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { View } from "react-native";
-import { type Href, useRouter, useFocusEffect } from "expo-router";
+import { type Href, useRouter } from "expo-router";
 import { Link as LinkIcon } from "lucide-react-native";
 import { Button } from "@/components/panelui/button";
 import { Dialog } from "@/components/panelui/dialog";
@@ -25,6 +25,8 @@ import {
   type ProfileIdentity,
 } from "./profile-ui";
 import { ServiceAccountCard } from "./service-account-card";
+import { AccountPasswordVerificationFields, useAccountPasswordVerification } from "./account-password-verification";
+import { ApiRequestError, getAuthToken, getAuthTokenRevision } from "@/services/api";
 export default function AccountsScreen() {
   return <ProfileGate>{(identity) => <Accounts identity={identity} />}</ProfileGate>;
 }
@@ -43,9 +45,14 @@ function Accounts({ identity }: { identity: ProfileIdentity }) {
     [error, setError] = useState(""),
     [done, setDone] = useState("");
   const emailReady = identity.account.sessionMode === "identity";
+  const sending = useRef(false);
+  const resetDraft = useCallback(() => { setPassword(""); setError(""); }, []);
+  const verification = useAccountPasswordVerification(identity, "account-unlink", !!unlink && emailReady, resetDraft);
+  const verifying = !!unlink && !verification.proof;
   function back() {
     if (busy) return;
     if (unlink) {
+      verification.reset();
       setUnlink(null);
       setPassword("");
       setError("");
@@ -55,7 +62,6 @@ function Accounts({ identity }: { identity: ProfileIdentity }) {
     else router.replace("/profile");
   }
   const allowLeave = useProfileBackGuard(busy || !!unlink, back);
-  useFocusEffect(useCallback(() => () => setPassword(""), []));
   async function changeDefault() {
     if (busy || !defaultId) return;
     setBusy(true);
@@ -81,12 +87,15 @@ function Accounts({ identity }: { identity: ProfileIdentity }) {
     }
   }
   async function confirmUnlink() {
-    if (busy || !unlink || !password) return;
+    const proof = verification.proof;
+    if (sending.current || busy || !unlink || !password || !proof?.isCurrent()) return;
+    const active = () => current() && proof.isCurrent();
     if (unlink.isDefault && !replacement) {
       setError("Choose a new default account first.");
       return;
     }
     const secret = password;
+    sending.current = true;
     setPassword("");
     setBusy(true);
     setError("");
@@ -101,6 +110,7 @@ function Accounts({ identity }: { identity: ProfileIdentity }) {
             })),
         );
         setUnlink(null);
+        verification.reset();
         setDone("Visual fixture: account unlinked. No live access changed.");
       } else {
         const result = await unlinkLinkedAccount({
@@ -108,28 +118,42 @@ function Accounts({ identity }: { identity: ProfileIdentity }) {
           currentAccountPassword: secret,
           accessRevision: identity.account.accessRevision,
           replacementDefaultServiceAccountId: unlink.isDefault ? replacement : undefined,
-        });
+          verificationFlowId: proof.flowId,
+        }, proof.authToken);
         if (!current()) return;
         await clearConsumerProfileCaches();
         if (result.reauthenticationRequired) {
+          const revision = getAuthTokenRevision(), authToken = await getAuthToken();
+          if (!current() || getAuthTokenRevision() !== revision || authToken !== proof.authToken) return;
           allowLeave();
           clearConsumerAccount();
           await signOut();
-          router.replace("/sign-in");
+          const signedOutRevision = getAuthTokenRevision(), remainingToken = await getAuthToken();
+          if (!remainingToken && getAuthTokenRevision() === signedOutRevision) router.replace("/sign-in");
           return;
         }
         setUnlink(null);
+        verification.reset();
         await refreshConsumerAccount();
 
       }
     } catch (e) {
-      allowLeave(false);
-      if (current()) setError(presentAccountUnlinkError(e).message);
+      if (active()) {
+        allowLeave(false);
+        const message = presentAccountUnlinkError(e).message;
+        if (e instanceof ApiRequestError && e.code === "CURRENT_PASSWORD_VERIFICATION_REQUIRED") verification.reset(message);
+        else setError(message);
+      }
     } finally {
+      sending.current = false;
       if (current()) setBusy(false);
     }
   }
-  const footer = unlink ? (
+  const footer = unlink ? verifying ? (
+    <Button loading={verification.busy || busy} disabled={busy || verification.busy || !verification.password || !!verification.remaining} onPress={() => void verification.verify()}>
+      Verify and continue
+    </Button>
+  ) : (
     <View className="flex-row gap-2">
       <Button className="flex-1" variant="outline" disabled={busy} onPress={back}>
         Keep linked
@@ -138,7 +162,7 @@ function Accounts({ identity }: { identity: ProfileIdentity }) {
         className="flex-1"
         variant="destructive"
         loading={busy}
-        disabled={!password || (unlink.isDefault && !replacement)}
+        disabled={busy || !password || (unlink.isDefault && !replacement)}
         onPress={() => void confirmUnlink()}
       >
         Unlink account
@@ -158,7 +182,9 @@ function Accounts({ identity }: { identity: ProfileIdentity }) {
         onBack={back}
         footer={footer}
       >
-        {unlink ? (
+        {unlink && verifying ? (
+          <AccountPasswordVerificationFields verification={verification} />
+        ) : unlink ? (
           <>
             <ProfileHeading
               title={unlink.isDefault ? "Choose a new default first" : "Unlink this account?"}
@@ -246,6 +272,7 @@ function Accounts({ identity }: { identity: ProfileIdentity }) {
                     variant="ghost"
                     disabled={!emailReady || accounts.length < 2 || busy}
                     onPress={() => {
+                      verification.reset();
                       setUnlink(a);
                       setPassword("");
                       setReplacement("");

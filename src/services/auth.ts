@@ -244,3 +244,13 @@ export function requestPasswordChange(
     method: "POST", body: JSON.stringify(body),
   }, { authToken });
 }
+
+export function requestAccountVerification(
+  purpose: "account-link" | "account-unlink" | "profile-edit",
+  body: { action: "status" | "verify" | "cancel"; currentPassword?: string; flowId?: string | null; serviceAccountId?: string; accessRevision?: number },
+  authToken: string,
+) {
+  return apiRequest<PasswordChangeStatus>("/api/mobile/auth/" + purpose + "-verification", {
+    method: "POST", body: JSON.stringify(body),
+  }, { authToken });
+}

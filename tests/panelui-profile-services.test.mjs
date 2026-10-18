@@ -63,6 +63,22 @@ test("verified details keep all reviewed fields, exact password and selected rev
   });
   assert.deepEqual(result.profile_editing, { version: 1, activeReportCount: 0 });
 });
+test("entry-confirmed details send only the scoped proof instead of a retained password", async () => {
+  const calls = [];
+  const api = await load("src/services/profile.ts", {
+    "@/services/api": { apiRequest: async (...args) => { calls.push(args); return { updated: true, profile }; } },
+    "@/models/consumer-profile-view": { toConsumerProfileView: row => row },
+  });
+  await api.updateVerifiedConsumerDetails({ phone: "09171234567" }, "must-not-send",
+    { serviceAccountId: "service-b", accessRevision: 7 }, "pinned-session", "scoped-proof");
+  const body = JSON.parse(calls[0][1].body);
+  assert.equal(body.verificationFlowId, "scoped-proof");
+  assert.equal("currentAccountPassword" in body, false);
+  assert.equal(body.serviceAccountId, "service-b");
+  assert.equal(body.accessRevision, 7);
+  assert.equal(calls[0][2].authToken, "pinned-session");
+});
+
 test("photo upload and completion both retain the selected nondefault account", async () => {
   const calls = [];
   const api = await load(
@@ -84,6 +100,7 @@ test("photo upload and completion both retain the selected nondefault account", 
     await api.uploadCurrentUserAvatar(
       { imageBytes: new ArrayBuffer(2), contentType: "image/webp" },
       { serviceAccountId: "service-b", accessRevision: 7 },
+      "original-session",
     ),
     "https://assets.example/avatar",
   );
@@ -92,6 +109,25 @@ test("photo upload and completion both retain the selected nondefault account", 
     const body = JSON.parse(options.body);
     assert.equal(body.serviceAccountId, "service-b");
     assert.equal(body.accessRevision, 7);
+  }
+  for (const call of calls) assert.equal(call[2].authToken, "original-session");
+});
+
+test("explicit service email stays separate from identity email and is absent on old responses", async () => {
+  for (const extra of [{}, { serviceAccountEmail: "home@example.com", serviceAccountEmailEditable: true }]) {
+    const calls = [];
+    const api = await load("src/services/profile.ts", {
+      "@/services/api": { apiRequest: async (...args) => { calls.push(args); return {
+        updated: true, profile: { ...profile, email: "signin@example.com", emailEditable: false, ...extra },
+      }; } },
+      "@/models/consumer-profile-view": { toConsumerProfileView: row => row },
+    });
+    const result = await api.updateVerifiedConsumerDetails({ serviceAccountEmail: "new@example.com" },
+      "service-secret", { serviceAccountId: "service-b", accessRevision: 7 }, "pinned-session");
+    assert.equal(result.email, "signin@example.com");
+    assert.equal(result.service_account_email, extra.serviceAccountEmail);
+    assert.deepEqual(JSON.parse(calls[0][1].body).value, { serviceAccountEmail: "new@example.com" });
+    assert.equal(calls[0][2].authToken, "pinned-session");
   }
 });
 class ApiRequestError extends Error {

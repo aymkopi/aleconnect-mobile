@@ -24,7 +24,8 @@ export async function unlinkLinkedAccount(input: {
   currentAccountPassword: string;
   accessRevision: number;
   replacementDefaultServiceAccountId?: string;
-}) {
+  verificationFlowId: string;
+}, authToken: string) {
   return apiRequest<{
     defaultServiceAccountId: string;
     accessRevision: number;
@@ -37,6 +38,7 @@ export async function unlinkLinkedAccount(input: {
       currentAccountPassword: input.currentAccountPassword,
       accessRevision: input.accessRevision,
       replacementDefaultServiceAccountId: input.replacementDefaultServiceAccountId ?? "",
+      verificationFlowId: input.verificationFlowId,
     }),
-  });
+  }, { authToken });
 }

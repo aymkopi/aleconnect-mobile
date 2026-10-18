@@ -1363,6 +1363,7 @@ export default function NewReportScreen() {
                       value={uploadFiles}
                       onValueChange={changePhotos}
                       sources={["camera", "library"]}
+                      sourceTitle="Add evidence photos"
                       accept={["image/*"]}
                       multiple
                       maxFiles={reportLimits.evidenceMax}
