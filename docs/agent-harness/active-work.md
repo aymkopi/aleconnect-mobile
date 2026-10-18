@@ -1,6 +1,6 @@
 # Active work
 
-- [Publish IPA alongside APK](tasks/ios-usb-ipa.md): accepted iPhone fixes/parallel builds are on master viaPR16/17. User now requests a new release containing both files; add a final same-source IPA upload after both parallel jobs, preserving Android assets and local Apple signing.16 initial regressions pass; full checks/review/merge/combined release acceptance pending. Exclude security Mobile15/Staff55 and preserve artifacts/device/signing/SideStore; no Computer Use.
+- [Combined IPA/APK release complete](tasks/ios-usb-ipa.md): PR18/source df8a225 and workflow39121661080 pass, including parallel native builds and final IPA upload. Public1.2.2-alpha.1 includes APK/code70, unsigned iOS/build25 and separate metadata/checksums; all six downloaded digests and native/runtime checks pass. Desktop IPA copy matches. No product work remains; docs-only closeout skips native jobs. Exclude security Mobile15/Staff55; preserve old artifacts/device/signing/SideStore, with no new installation or Computer Use.
 
 - [Mobile declutter refinement](tasks/mobile-declutter.md): PR14/sourcef4130b9a merged after verified Staff1.1.1-alpha.1. Mobile1.2.0-alpha.1/code68 published; exact artifact/signature/alignment and three tablet25040RP0AG cold launches/public navigation pass. Both default branches are synchronized; finish docs-only closeout and task-only cleanup. Preserve manual edits, device data and the separate Reports proposal; private/provider/AT/iOS acceptance remains separate.
 

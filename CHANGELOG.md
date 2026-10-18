@@ -1,10 +1,15 @@
 # Changelog
 
-## Unreleased
+## 1.2.2-alpha.1 - 2026-10-18
 
 ### Build automation
 
 - Attach the unsigned iPhone IPA and separate iOS checksum/source metadata to the same GitHub Release as the APK after both parallel builds succeed. Verify the exact release source and all uploaded digests; preserve existing assets on retries.
+
+### Verification and release
+
+- PR18/source df8a225 passes both checks; workflow39121661080 succeeds across shared validation, parallel native builds and the final IPA upload. Public1.2.2-alpha.1 contains APK/code70, unsigned iOS1.0.0/build25 and all four metadata/checksum files. Tag and both metadata sources match; all six downloaded asset digests and native/runtime checks pass.
+- The new IPA is hash-verified in the user's Desktop IPA folder. Existing build7/build23 and releases are preserved. App/native source is unchanged; no new installation or device/provider acceptance is claimed.
 
 ## 1.2.1-alpha.1 - 2026-10-18
 
