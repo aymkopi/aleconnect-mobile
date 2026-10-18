@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Fixed
+
+- Apply one allocated alpha version to both native builds. iPhone IPAs use the
+  release's numeric core and allocated build number; About retains the full
+  alpha label instead of displaying the stale checked-in version.
+- Reject IPA publication when its alpha, native version or build differs from
+  the matching Android release. Preserve original assets on retries and resume
+  a missing IPA without allocating another version or rebuilding Android.
+
 ## 1.3.0-alpha.1 - 2026-10-18
 
 ### Changed

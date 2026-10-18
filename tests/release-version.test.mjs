@@ -105,6 +105,31 @@ test('published-source recovery refuses mismatched remote tag or metadata',t=>{
  ]) assert.throws(()=>prepareRelease(fixture(t,options)),/different source/);
 });
 
+test('same-source combined recovery keeps the published version and only resumes a missing IPA',t=>{
+ const published={version:'1.0.0-alpha.10',tag:'v1.0.0-alpha.10',versionCode:64,sourceCommit:source,package:config.android.package,certificateSha256:config.android.certificateSha256,fileName:'aleconnect-mobile-1.0.0-alpha.10.apk'};
+ const f=fixture(t,{previousSource:source,tagSource:source,metadata:published});
+ f.env.RELEASE_INCLUDE_IOS='true';
+ const resumed=prepareRelease(f);
+ assert.equal(resumed.skip,true,'Do not rebuild or republish Android');
+ assert.equal(resumed.ios_needed,true);
+ assert.equal(resumed.version,published.version);
+ assert.equal(resumed.versionCode,published.versionCode);
+ assert.deepEqual(JSON.parse(readFileSync(join(f.cwd,'release/build-metadata.json'))),published);
+ assert.equal(JSON.parse(readFileSync(join(f.cwd,'app.json'))).expo.version,published.version);
+ const complete=fixture(t,{previousSource:source,tagSource:source,metadata:published,releases:[{tag_name:published.tag,draft:false,assets:['Aleconnect-unsigned.ipa','ios-build-metadata.json','ios-SHA256SUMS'].map(name=>({name}))}]});
+ complete.env.RELEASE_INCLUDE_IOS='true';
+ assert.equal(prepareRelease(complete).ios_needed,false);
+ for(const patch of [{version:'1.0.0-alpha.9'},{versionCode:0},{package:'foreign.app'}]) {
+  const bad=fixture(t,{previousSource:source,tagSource:source,metadata:{...published,...patch}});
+  bad.env.RELEASE_INCLUDE_IOS='true';
+  assert.throws(()=>prepareRelease(bad));
+  assert.equal(JSON.parse(readFileSync(join(bad.cwd,'app.json'))).expo.android.versionCode,62);
+ }
+ const partial=fixture(t,{previousSource:source,tagSource:source,metadata:published,releases:[{tag_name:published.tag,draft:false,assets:[{name:'Aleconnect-unsigned.ipa'}]}]});
+ partial.env.RELEASE_INCLUDE_IOS='true';
+ assert.throws(()=>prepareRelease(partial),/rerun.*publish-ios.*original/i);
+});
+
 test('network failures, unresolved drafts, invalid metadata and wrong branches fail before mutation', t => {
   for (const options of [{releases: [{tag_name: 'v1.0.0-alpha.11', draft: true}]}, {metadata: {version: '1.0.0-alpha.8', versionCode: 64}}, {metadata: {version: '1.0.0-alpha.10', versionCode: 0, sourceCommit: previous}}]) {
     const f = fixture(t, options);

@@ -16,7 +16,7 @@ function fixture(t, options = {}) {
  writeFileSync(join(cwd,'release.config.json'),JSON.stringify({name:'aleconnect-mobile',branch:'master'}));
  writeFileSync(join(cwd,'app.json'),JSON.stringify({expo:{ios:{bundleIdentifier:'com.kapecakes.aleconnectmobile'}}}));
  const payload = Buffer.from('verified-unsigned-IPA-test-double');
- const metadata = {sourceCommit:source,bundleIdentifier:'com.kapecakes.aleconnectmobile',platform:'iPhoneOS',architecture:'arm64',signing:'unsigned; sign locally before USB installation',remotePushSupported:false,apiOrigin:'https://api.aleconnect.app',sha256:sha(payload),...options.ios};
+ const metadata = {sourceCommit:source,releaseVersion:tag.slice(1),version:'1.2.2',buildNumber:'70',bundleIdentifier:'com.kapecakes.aleconnectmobile',platform:'iPhoneOS',architecture:'arm64',signing:'unsigned; sign locally before USB installation',remotePushSupported:false,apiOrigin:'https://api.aleconnect.app',sha256:sha(payload),...options.ios};
  writeFileSync(join(folder,'Aleconnect-unsigned.ipa'),payload);
  writeFileSync(join(folder,'build-metadata.json'),JSON.stringify(metadata));
  writeFileSync(join(folder,'SHA256SUMS'),`${sha(payload)}  Aleconnect-unsigned.ipa\n`);
@@ -28,7 +28,7 @@ function fixture(t, options = {}) {
   assert.equal(program,'gh');
   if(args[0]==='api' && args[1].includes('git/matching-refs')) return JSON.stringify([{ref:`refs/tags/${tag}`,object:{type:'commit',sha:options.tagSource??source}}]);
   if(args[0]==='api') return JSON.stringify([[published]]);
-  if(args[1]==='download') return JSON.stringify({sourceCommit:options.releaseSource??source});
+  if(args[1]==='download') return JSON.stringify({sourceCommit:options.releaseSource??source,version:tag.slice(1),versionCode:70});
   if(args[1]==='upload') {
    assert.equal(args[2],tag); assert.ok(!args.includes('--clobber')); uploads++;
    for(const path of args.filter(arg=>arg.startsWith(folder))) {
@@ -77,4 +77,12 @@ test('IPA publication reports a remote digest mismatch as failure',t=>{
  const f=fixture(t,{badReadback:true});
  assert.throws(()=>releases.publishIosRelease(f),/digest mismatch/i);
  assert.equal(f.uploads,1);
+});
+
+test('IPA publication rejects an old native version or a different alpha/build before upload',t=>{
+ for(const ios of [{version:'1.0.0'},{releaseVersion:'1.2.1-alpha.1'},{releaseVersion:undefined},{buildNumber:'25'}]) {
+  const f=fixture(t,{ios});
+  assert.throws(()=>releases.publishIosRelease(f),/version|build/i);
+  assert.equal(f.uploads,0);
+ }
 });

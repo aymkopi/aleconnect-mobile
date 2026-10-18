@@ -52,19 +52,19 @@ keep human-curated deprecations, removals and security details in CHANGELOG.md.
   standalone `preview` variant for ARM64 phones and x86_64 emulators. They retain
   package IDs, provider files and the original preview certificate. API origin
   remains `https://api.aleconnect.app`; no new credential or PAT is required.
-- Mobile also calls the reusable **iOS USB IPA** workflow after those checks.
-  On default-branch application updates, Android publication and the macOS iPhone
-  build run independently in parallel. Documentation-only pushes skip both;
-  manual dispatch remains available. The iPhone job uploads an unsigned ARM64 IPA,
-  SHA256SUMS and exact-source metadata as **Aleconnect-iPhone-unsigned** Actions
-  artifacts. Sign locally with iloader; no Apple credentials are stored in CI.
-  After both native jobs succeed, a final job attaches that same-source IPA to
-  the Android release tag. Releases contains **Aleconnect-unsigned.ipa**,
-  **ios-SHA256SUMS** and **ios-build-metadata.json**, alongside the APK and its
-  original metadata/checksum files. It verifies tag/source and uploaded digests,
-  preserves matching assets on retries and refuses to overwrite different bytes.
-  Its numeric bundle version/build number identify this personal USB build;
-  Android's existing alpha allocator, signing and publication remain unchanged.
+- Mobile allocates one alpha/build context after shared checks, then runs Android
+  publication and the reusable **iOS USB IPA** workflow in parallel. Documentation
+  pushes skip native work. The iPhone native version is the alpha's numeric core;
+  its build number uses the allocated Android code. `extra.releaseVersion` keeps
+  the full alpha in About. Workflow run numbers never supply either value.
+  The unsigned ARM64 IPA, SHA256SUMS and exact-source metadata use an
+  **Aleconnect-iPhone-unsigned-ATTEMPT** Actions artifact. Sign locally with
+  iloader; no Apple credentials are stored in CI.
+  After successful native jobs, a final job attaches that same-source IPA to the
+  Android release tag. Releases contains **Aleconnect-unsigned.ipa**,
+  **ios-SHA256SUMS** and **ios-build-metadata.json**, alongside the original APK
+  files. Publication validates alpha/native version/build, tag/source and uploaded
+  digests. Existing matching assets are retained; different bytes are rejected.
 - Android `versionCode` is one greater than the maximum of the published APK
   code, checked-in native configuration and observed platform floor. Mobile's
   floor is 64; Lineman's is 1. A new SemVer core never resets the Android code.
@@ -78,6 +78,12 @@ keep human-curated deprecations, removals and security details in CHANGELOG.md.
 - The same published source skips a rerun. Older queued runs skip before building
   or deploying when a newer release contains that source. Diverged history,
   missing/invalid native metadata and API failures stop before file mutation.
+- Mobile serializes the whole combined workflow around allocation/build/upload.
+  If Android is already published but all IPA assets are missing, a rerun reuses
+  the published version/code and builds only iOS. Partial IPA assets require
+  **Re-run failed jobs** on the original publisher with its retained artifact;
+  do not rebuild or replace immutable bytes. Attempt-qualified context/IPA names
+  flow through retained job outputs so retries use the correct original artifact.
 - A failed build reserves no version. After build/deploy verification, publication
   atomically reserves an exact-source tag and creates a draft. A failed GitHub
   operation can leave that unpublished tag and/or a draft for inspection: compare
@@ -118,6 +124,19 @@ These commands deploy/publish and require release authorization. PR validation
 only runs checks; it receives no publication or production credentials. A run
 against an already published source skips even if a manual bump was selected.
 Use a new reviewed commit for a changed artifact.
+
+For an explicitly authorized standalone unsigned iPhone preview, provide both
+version inputs instead of inheriting the stale source version:
+
+```sh
+gh workflow run ios-usb-ipa.yml --repo aymkopi/aleconnect-mobile --ref master -f release_version=1.3.1-alpha.1 -f build_number=72
+```
+
+The values above are examples, not a published release. A combined release uses
+the allocator automatically. Standalone dispatch builds an Actions artifact and
+does not attach it to a GitHub release. Installing an old IPA does not download
+new code automatically; this project has no configured OTA updater. See the
+[iOS version investigation](agent-harness/tasks/ios-release-version.md).
 
 ## Standards
 

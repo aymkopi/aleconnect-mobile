@@ -2,7 +2,30 @@ name: iOS USB IPA
 
 on:
   workflow_dispatch:
+    inputs:
+      release_version:
+        description: Full alpha version for this preview (for example, 1.3.1-alpha.1)
+        type: string
+        required: true
+      build_number:
+        description: Native build number; use the allocated Android code for a combined release
+        type: string
+        required: true
   workflow_call:
+    inputs:
+      release_version:
+        type: string
+        required: true
+      build_number:
+        type: string
+        required: true
+      release_context_artifact:
+        type: string
+        default: ''
+    outputs:
+      ipa_artifact:
+        description: Exact IPA artifact retained for failed-job retries
+        value: ${{ jobs.build.outputs.artifact_name }}
 
 permissions:
   contents: read
@@ -11,11 +34,16 @@ jobs:
   build:
     runs-on: macos-26
     timeout-minutes: 90
+    outputs:
+      artifact_name: Aleconnect-iPhone-unsigned-${{ github.run_attempt }}
     env:
       EXPO_NO_DOTENV: '1'
       EXPO_PUBLIC_PANELUI_PREVIEW: '0'
       EXPO_PUBLIC_ALECONNECT_API_URL: https://api.aleconnect.app
       CI: '1'
+      RELEASE_VERSION: ${{ inputs.release_version }}
+      RELEASE_BUILD_NUMBER: ${{ inputs.build_number }}
+      RELEASE_CONTEXT_REQUIRED: ${{ inputs.release_context_artifact != '' }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -24,6 +52,13 @@ jobs:
         with:
           node-version-file: .node-version
           cache: npm
+      - uses: actions/download-artifact@v8
+        if: inputs.release_context_artifact != ''
+        with:
+          name: ${{ inputs.release_context_artifact }}
+          path: .
+      - name: Apply and validate the explicit iOS release version
+        run: node scripts/release-version.mjs prepare-ios
       - run: npm ci --include=dev
       - run: npm run typecheck
       - name: Verify navigation, motion and hold timing
@@ -37,13 +72,6 @@ jobs:
           EXPO_DOCTOR_SKIP_DEPENDENCY_VERSION_CHECK: '1'
       - name: Generate the iPhone project
         run: |
-          node <<'NODE'
-          const fs = require('node:fs');
-          const config = JSON.parse(fs.readFileSync('app.json', 'utf8'));
-          config.expo.version = config.expo.version.split('-')[0];
-          config.expo.ios.buildNumber = process.env.GITHUB_RUN_NUMBER;
-          fs.writeFileSync('app.json', JSON.stringify(config, null, 2) + '\n');
-          NODE
           npx expo prebuild --platform ios --no-install
           # Personal Teams cannot provision APNs; this affects only the generated test project.
           python3 <<'PY'
@@ -83,7 +111,11 @@ jobs:
               info = plistlib.load(f)
           assert info['CFBundleIdentifier'] == 'com.kapecakes.aleconnectmobile'
           assert info['CFBundleSupportedPlatforms'] == ['iPhoneOS']
-          assert info['CFBundleVersion'] == os.environ['GITHUB_RUN_NUMBER']
+          release_version = os.environ['RELEASE_VERSION']
+          config = json.loads(pathlib.Path('app.json').read_text())['expo']
+          assert info['CFBundleShortVersionString'] == release_version.split('-')[0] == config['version']
+          assert info['CFBundleVersion'] == os.environ['RELEASE_BUILD_NUMBER'] == config['ios']['buildNumber']
+          assert config['extra']['releaseVersion'] == release_version
           executable = app / info['CFBundleExecutable']
           assert subprocess.check_output(['lipo', '-archs', str(executable)], text=True).strip() == 'arm64'
           assert b'https://api.aleconnect.app' in (app / 'main.jsbundle').read_bytes()
@@ -100,13 +132,13 @@ jobs:
               assert f'Payload/{app.name}/main.jsbundle' in archive.namelist()
           digest = hashlib.sha256(ipa.read_bytes()).hexdigest()
           (output / 'SHA256SUMS').write_text(f'{digest}  {ipa.name}\n')
-          metadata = dict(sourceCommit=os.environ['GITHUB_SHA'], runUrl=f"https://github.com/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}", bundleIdentifier=info['CFBundleIdentifier'], version=info['CFBundleShortVersionString'], buildNumber=info['CFBundleVersion'], minimumIOS=info['MinimumOSVersion'], platform='iPhoneOS', architecture='arm64', signing='unsigned; sign locally before USB installation', remotePushSupported=False, apiOrigin=os.environ['EXPO_PUBLIC_ALECONNECT_API_URL'], sha256=digest)
+          metadata = dict(sourceCommit=os.environ['GITHUB_SHA'], runUrl=f"https://github.com/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}", bundleIdentifier=info['CFBundleIdentifier'], releaseVersion=release_version, version=info['CFBundleShortVersionString'], buildNumber=info['CFBundleVersion'], minimumIOS=info['MinimumOSVersion'], platform='iPhoneOS', architecture='arm64', signing='unsigned; sign locally before USB installation', remotePushSupported=False, apiOrigin=os.environ['EXPO_PUBLIC_ALECONNECT_API_URL'], sha256=digest)
           (output / 'build-metadata.json').write_text(json.dumps(metadata, indent=2) + '\n')
           print(json.dumps(metadata, indent=2))
           PY
       - uses: actions/upload-artifact@v7
         with:
-          name: Aleconnect-iPhone-unsigned
+          name: Aleconnect-iPhone-unsigned-${{ github.run_attempt }}
           path: |
             release/ios/Aleconnect-unsigned.ipa
             release/ios/SHA256SUMS
@@ -117,6 +149,6 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
-          name: iOS-build-log
+          name: iOS-build-log-${{ github.run_attempt }}
           path: release/ios/xcodebuild.log
           retention-days: 3
