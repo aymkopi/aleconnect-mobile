@@ -94,6 +94,16 @@ keep human-curated deprecations, removals and security details in CHANGELOG.md.
 
 ## Manual use
 
+Mobile iOS-version alignment acceptance (2026-10-19): PR20/source `ff011146`
+passes workflow `39148140791` across all five jobs. Published
+[1.3.1-alpha.1](https://github.com/aymkopi/aleconnect-mobile/releases/tag/v1.3.1-alpha.1)
+uses Android version/code `1.3.1-alpha.1`/`72` and iOS native version/build
+`1.3.1`/`72`. The IPA's embedded About configuration retains `1.3.1-alpha.1`.
+Exact source/tag, all six asset digests, original APK signer, compiled fixture-off
+HTTPS API runtime and native alignment/archive checks pass. Desktop IPA copy is
+hash-verified; all five older files remain unchanged. No new installation or
+Apple signing is performed. See the [version handoff](agent-harness/tasks/ios-release-version.md).
+
 Mobile combined-release acceptance (2026-10-18): PR18/source`df8a225` passes
 workflow`39121661080`, including both parallel builds and final IPA attachment.
 [1.2.2-alpha.1](https://github.com/aymkopi/aleconnect-mobile/releases/tag/v1.2.2-alpha.1)
