@@ -14,6 +14,7 @@ const emailSetupDismissalKeyPrefix = "email_setup_dismissed_v1:";
 export type ConsumerIdentitySetupInput = {
   email: string;
   password: string;
+  confirmPassword?: string;
   verification: "mock";
   idempotencyKey: string;
 };
@@ -68,6 +69,7 @@ export async function setupConsumerIdentity(
       body: JSON.stringify({
         email: input.email.trim().toLowerCase(),
         password: input.password,
+          confirmPassword: input.confirmPassword,
         verification: "mock",
         idempotencyKey: input.idempotencyKey,
       }),

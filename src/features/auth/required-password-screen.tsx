@@ -12,6 +12,7 @@ import { useAuthSession } from "@/hooks/use-auth-session";
 import { changeConsumerPassword } from "@/services/auth";
 import { signInIntent, passwordChangeConfirmed } from "./auth-state";
 import { AuthPasswordField } from "./auth-password-field";
+import { PasswordRequirements } from "./password-requirements";
 
 export default function RequiredPasswordScreen() {
   const { session } = useAuthSession();
@@ -76,20 +77,21 @@ function RequiredPasswordForm({ returnToEmail, onReturnToEmail }: {
     allowLeave();
     router.replace(returnTo);
   }
+  const personal = [session?.user.name ?? "", session?.user.email ?? "", session?.user.username ?? ""];
   async function save() {
     if (submitting.current || !session || confirmed || (!updated && !session.user.mustChangePassword)) return;
-    const problem = updated ? null : validatePasswordChange(current, next, confirmation);
+    const problem = updated ? null : validatePasswordChange(current, next, confirmation, personal);
     if (problem) { setError(problem); return; }
-    const userId = session.user.id, a = current, b = next;
+    const userId = session.user.id, a = current, b = next, c = confirmation;
     const isCurrent = () => mounted.current && principal.current === userId;
     submitting.current = true;
     setBusy(true); setError("");
-    setCurrent(""); setNext(""); setConfirmation("");
+    setCurrent("");
     try {
       if (!updated) {
-        await changeConsumerPassword(a, b);
+        await changeConsumerPassword(a, b, c);
         if (!isCurrent()) return;
-        setUpdated(true);
+        setNext(""); setConfirmation(""); setUpdated(true);
       }
       const refreshed = await refreshSession({ forceNetwork: true });
       if (!isCurrent()) return;
@@ -155,10 +157,7 @@ function RequiredPasswordForm({ returnToEmail, onReturnToEmail }: {
         <AuthPasswordField label="Confirm password" value={confirmation} onChangeText={setConfirmation}
           placeholder="Re-enter new password" autoComplete="new-password" maxLength={128}
           editable={!busy} onSubmitEditing={() => void save()} />
-        <View className="gap-1 rounded-xl bg-card p-4">
-          <Text size="sm" weight="semibold">Keep your account secure</Text>
-          <Text size="sm" muted>Choose a password that’s hard to guess.</Text>
-        </View>
+        <PasswordRequirements password={next} confirmation={confirmation} personal={personal} />
       </>}
       {error ? <ProfileNotice title={updated ? "Confirm your session" : "Check your password"} description={error} danger /> : null}
     </ReportPage>

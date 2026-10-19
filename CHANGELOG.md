@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Security
+
+- Add shared live consumer password requirements and confirmation to password changes, mandatory replacements and email setup. Reject weak, common and known personal-information choices locally, with authoritative Staff policy and private breach detection on submission. Preserve verification, current-password reuse protection and retry-safe drafts.
+
 ### Fixed
 
 - Apply one allocated alpha version to both native builds. iPhone IPAs use the

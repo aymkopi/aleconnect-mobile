@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { View } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
-import { Check, Circle, ShieldCheck } from "lucide-react-native";
+import { ShieldCheck } from "lucide-react-native";
 import { Button } from "@/components/panelui/button";
 import { Text } from "@/components/panelui/text";
 import { Dialog } from "@/components/panelui/dialog";
@@ -11,6 +11,8 @@ import { requestPasswordChange, type PasswordChangeStatus } from "@/services/aut
 import { ApiRequestError, getAuthToken } from "@/services/api";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useAppColors } from "@/hooks/use-app-colors";
+import { PasswordRequirements } from "@/features/auth/password-requirements";
+import { consumerPasswordError } from "@/lib/consumer-password-policy";
 import {
   ProfileGate, ProfileHeading, ProfileNotice, ProfileField, useProfileTask,
   useProfileBackGuard, type ProfileIdentity,
@@ -21,8 +23,8 @@ export default function PasswordScreen() {
 }
 function Password({ identity }: { identity: ProfileIdentity }) {
   const router = useRouter(), currentTask = useProfileTask(identity);
-  const { refreshSession } = useAuthSession();
-  const [primary, muted] = useAppColors(["primary", "muted-foreground"]);
+  const { session, refreshSession } = useAuthSession();
+  const [primary] = useAppColors(["primary"]);
   const [verifiedStep, setStep] = useState<"verify" | "verified" | "complete">("verify");
   const [old, setOld] = useState(""), [next, setNext] = useState(""), [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(!identity.fixture), [error, setError] = useState("");
@@ -69,8 +71,8 @@ function Password({ identity }: { identity: ProfileIdentity }) {
   const step = expired ? "verify" : verifiedStep;
   const remaining = Math.max(0, Math.ceil((cooldown - now) / 1000));
   const cooldownLabel = Math.floor(remaining / 60) + ":" + String(remaining % 60).padStart(2, "0");
-  const lengthValid = next.length >= 8 && next.length <= 128;
-  const matches = !!next && next === confirm;
+  const personal = [session?.user.name ?? "", session?.user.email ?? "", session?.user.username ?? "", ...identity.account.accounts.flatMap(account => [account.accountNumber ?? "", account.registeredName, account.phoneNumber ?? ""])];
+  const passwordIssue = consumerPasswordError(next, confirm, personal);
   function back() {
     if (submitting.current || busy) return;
     if (step !== "complete" && (old || next || confirm || step === "verified")) { setDiscard(true); return; }
@@ -94,7 +96,7 @@ function Password({ identity }: { identity: ProfileIdentity }) {
   async function save() {
     if (submitting.current || busy || (step === "verify" && remaining) || (!identity.fixture && !token.current)) return;
     if (step === "verify" && !old) { setError("Enter your current password."); return; }
-    if (step === "verified" && (!lengthValid || !matches)) { setError("Use 8–128 characters and match both new-password fields."); return; }
+    if (step === "verified" && passwordIssue) { setError(passwordIssue); return; }
     submitting.current = true; setBusy(true); setError("");
     try {
       const result = identity.fixture ? {
@@ -136,7 +138,7 @@ function Password({ identity }: { identity: ProfileIdentity }) {
   return <>
     <ReportPage title={step === "complete" ? "Password updated" : "Change password"} onBack={back}
       footer={<Button loading={busy}
-        disabled={busy || (step === "verify" && !!remaining) || (step === "verify" ? !old : step === "verified" ? !lengthValid || !matches : false)}
+        disabled={busy || (step === "verify" && !!remaining) || (step === "verify" ? !old : step === "verified" ? !!passwordIssue : false)}
         onPress={() => step === "complete" ? void leave() : void save()}>
         {step === "complete" ? "Back to Security settings" : step === "verify" ? "Verify current password" : "Update password"}
       </Button>}>
@@ -158,14 +160,7 @@ function Password({ identity }: { identity: ProfileIdentity }) {
             autoComplete="new-password" maxLength={128} placeholder="Enter a new password" />
           <ProfileField label="Confirm new password" secret editable={!busy} value={confirm} onChangeText={setConfirm}
             autoComplete="new-password" maxLength={128} placeholder="Re-enter your new password" />
-          <View className="gap-2" accessibilityLiveRegion="polite">
-            {[{ valid: lengthValid, label: "8–128 characters" }, { valid: matches, label: "Both passwords match" }].map(rule => {
-              const Icon = rule.valid ? Check : Circle;
-              return <View key={rule.label} className="flex-row items-center gap-2"><Icon size={14} color={rule.valid ? primary : muted} />
-                <Text size="xs" muted={!rule.valid}>{rule.label}</Text></View>;
-            })}
-            <Text size="xs" muted>A different password is checked securely when you save.</Text>
-          </View>
+          <PasswordRequirements password={next} confirmation={confirm} personal={personal} />
         </>}
         {remaining && step === "verify" ? <ProfileNotice title={"Try again in " + cooldownLabel}
           description="Verification pauses for 10 minutes after five incorrect attempts. Ordinary sign-in remains available." /> : null}

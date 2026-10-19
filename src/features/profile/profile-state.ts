@@ -1,4 +1,5 @@
 import type { NotificationSubstation } from "../../services/notification-settings";
+import { consumerPasswordError } from "../../lib/consumer-password-policy.ts";
 export function accountProfileIdentifier(count: number, email: string | null | undefined, accountNumber: string | null | undefined) {
   return (count > 1 ? email?.trim() : accountNumber?.trim() || email?.trim()) || null;
 }
@@ -39,10 +40,10 @@ export function validateProfileDraft(
     return "Enter a valid email address (up to 255 characters).";
   return null;
 }
-export function validatePasswordChange(current: string, next: string, confirmation: string) {
+export function validatePasswordChange(current: string, next: string, confirmation: string, personal: readonly string[] = []) {
   if (!current) return "Enter your current password.";
-  if (next.length < 8 || next.length > 128) return "Use 8–128 characters for your new password.";
+  const policy = consumerPasswordError(next, confirmation, personal);
+  if (policy) return policy;
   if (next === current) return "Choose a different password.";
-  if (next !== confirmation) return "New passwords must match.";
   return null;
 }

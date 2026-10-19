@@ -1,5 +1,9 @@
 # ALEConnect cross-project contracts
 
+## Consumer password policy (2026-10-19, not deployed)
+
+Consumer password writers enforce 8–128 input characters with uppercase/lowercase ASCII letters, a digit, a punctuation/symbol character, common/personal-information rejection and a server HIBP range check before opening write transactions. The minimum counts NFKC-normalized Unicode code points; the raw128 ceiling is retained. New forms send matching confirmation; legacy omitted confirmation remains compatible, and supplied mismatches fail. The current two-step proof/cooldown/session-revocation contract is unchanged. Provider failures return retryable503 PASSWORD_BREACH_CHECK_UNAVAILABLE without credential writes; breached choices return400 PASSWORD_COMPROMISED. Do not query while typing or persist secrets. No password-history table or migration is added; current-password reuse is still prevented. Deploy Staff before the paired Mobile release after integration approval; no deployment occurs in this task.
+
 Authoritative source: `../aleconnect/docs/agent-harness/cross-project-contracts.md`
 Snapshot synchronized with Staff account-linking refinement (server commit `e21c11f`, paired shared-contract update) on 2026-10-15.
 

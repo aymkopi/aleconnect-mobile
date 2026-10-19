@@ -50,9 +50,9 @@ test("profile and password validation preserves server limits and exact secrets"
   );
   assert.match(validateProfileDraft({ phone: "09171234567", email: "bad" }, true) ?? "", /email/);
   assert.equal(validateProfileDraft({ phone: "09171234567", email: "bad" }, false), null);
-  assert.equal(validatePasswordChange("current", "newpassword", "newpassword"), null);
+  assert.equal(validatePasswordChange("current", "Frosty-River!93", "Frosty-River!93"), null);
   assert.match(validatePasswordChange("current", "short", "short") ?? "", /8–128/);
-  assert.match(validatePasswordChange("current", "newpassword", "different") ?? "", /match/);
-  assert.match(validatePasswordChange("samepass", "samepass", "samepass") ?? "", /different/);
-  assert.equal(validatePasswordChange(" current ", " newpassword ", " newpassword "), null);
+  assert.match(validatePasswordChange("current", "Frosty-River!93", "different") ?? "", /match/);
+  assert.match(validatePasswordChange("Frosty-River!93", "Frosty-River!93", "Frosty-River!93") ?? "", /different/);
+  assert.equal(validatePasswordChange(" current ", " Frosty-River!93 ", " Frosty-River!93 "), null);
 });

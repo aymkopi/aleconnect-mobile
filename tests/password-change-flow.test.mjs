@@ -1,3 +1,4 @@
+import { consumerPasswordError } from "../src/lib/consumer-password-policy.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
@@ -28,7 +29,9 @@ async function fixture(t, responder) {
     "@/components/panelui/dialog":{Dialog:Object.assign("Dialog",{Content:"DialogContent",Title:"DialogTitle",Description:"DialogDescription",Footer:"DialogFooter"})},
     "@/components/panelui/toast":{toast:{show:options=>toasts.push(options)}},
     "@/features/reports/components/report-page":{ReportPage:"Page"},
-    "@/hooks/use-auth-session":{useAuthSession:()=>({refreshSession:async()=>{}})},
+    "@/hooks/use-auth-session":{useAuthSession:()=>({session:{user:{name:"Justine Dela Cruz",email:"justine@example.com",username:"0123456789"}},refreshSession:async()=>{}})},
+    "@/lib/consumer-password-policy":{consumerPasswordError},
+    "@/features/auth/password-requirements":{PasswordRequirements:"Requirements"},
     "@/hooks/use-app-colors":{useAppColors:()=>["#006DBB","#64748B"]},
     "./profile-ui":{ProfileGate:"Gate",ProfileHeading:"Heading",ProfileNotice:"Notice",ProfileField:"Field",useProfileTask:()=>()=>true,useProfileBackGuard:()=>()=>{}},
     "@/services/api":api,
@@ -43,7 +46,7 @@ async function fixture(t, responder) {
   let code=await readFile(new URL("../src/features/profile/password-screen.tsx",import.meta.url),"utf8");
   code=code.replace("function Password(","export function Password(");
   const exports={};new Function("require","exports",ts.transpileModule(code,{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText)(id=>mocks[id]??{},exports);
-  const identity={key:"consumer-fixture",fixture:false,account:{sessionMode:"identity"}};
+  const identity={key:"consumer-fixture",fixture:false,account:{sessionMode:"identity",accounts:[]}};
   const render=()=>{h.start();const tree=exports.Password({identity});h.flush();return tree;};
   t.after(()=>h.dispose());render();await tick();
   return {render,calls,routes,toasts,h};
@@ -58,14 +61,14 @@ test("two-step password flow verifies once, validates matching new values, clear
   verify.props.onPress();verify.props.onPress();await tick();tree=f.render();
   assert.equal(f.calls.filter(c=>c.body.action==="verify").length,1);
   assert.equal(field(tree,"Current password"),undefined);
-  field(tree,"New password").props.onChangeText("fixture-new");
+  field(tree,"New password").props.onChangeText("Frosty-River!93");
   field(tree,"Confirm new password").props.onChangeText("mismatch");tree=f.render();
   assert.equal(button(tree,"Update password").props.disabled,true);
-  field(tree,"Confirm new password").props.onChangeText("fixture-new");tree=f.render();
+  field(tree,"Confirm new password").props.onChangeText("Frosty-River!93");tree=f.render();
   assert.equal(button(tree,"Update password").props.disabled,false);
   button(tree,"Update password").props.onPress();await tick();tree=f.render();
   assert.ok(button(tree,"Back to Security settings"));
-  assert.ok(!f.h.slots.includes("fixture-current")&&!f.h.slots.includes("fixture-new"));
+  assert.ok(!f.h.slots.includes("fixture-current")&&!f.h.slots.includes("Frosty-River!93"));
   assert.equal(f.calls.find(c=>c.body.action==="change").body.flowId,"grant-a");
   assert.equal(f.calls.find(c=>c.body.action==="change").body.currentPassword,undefined);
   assert.equal(f.toasts[0].label,"Password updated");
@@ -81,12 +84,12 @@ test("expired server authorization returns to verification and keeps the legitim
   });
   let tree=f.render();field(tree,"Current password").props.onChangeText("fixture-current");tree=f.render();
   button(tree,"Verify current password").props.onPress();await tick();tree=f.render();
-  field(tree,"New password").props.onChangeText("fixture-draft");field(tree,"Confirm new password").props.onChangeText("fixture-draft");
+  field(tree,"New password").props.onChangeText("Distant-Lake!92");field(tree,"Confirm new password").props.onChangeText("Distant-Lake!92");
   tree=f.render();button(tree,"Update password").props.onPress();await tick();tree=f.render();
-  assert.ok(field(tree,"Current password"));assert.ok(f.h.slots.includes("fixture-draft"));
+  assert.ok(field(tree,"Current password"));assert.ok(f.h.slots.includes("Distant-Lake!92"));
   field(tree,"Current password").props.onChangeText("fixture-current");tree=f.render();
   button(tree,"Verify current password").props.onPress();await tick();tree=f.render();
-  assert.equal(field(tree,"New password").props.value,"fixture-draft");
+  assert.equal(field(tree,"New password").props.value,"Distant-Lake!92");
 });
 test("discard clears values immediately and waits for generation-bound server cancellation before leaving",async t=>{
   const cancel=deferred();
@@ -96,9 +99,9 @@ test("discard clears values immediately and waits for generation-bound server ca
   });
   let tree=f.render();field(tree,"Current password").props.onChangeText("fixture-current");tree=f.render();
   button(tree,"Verify current password").props.onPress();await tick();tree=f.render();
-  field(tree,"New password").props.onChangeText("fixture-draft");tree=f.render();
+  field(tree,"New password").props.onChangeText("Distant-Lake!92");tree=f.render();
   nodes(tree).find(n=>n.type==="Page").props.onBack();tree=f.render();button(tree,"Discard").props.onPress();tree=f.render();
-  assert.ok(!f.h.slots.includes("fixture-draft"));assert.deepEqual(f.routes,[]);
+  assert.ok(!f.h.slots.includes("Distant-Lake!92"));assert.deepEqual(f.routes,[]);
   assert.equal(f.calls.at(-1).body.flowId,"grant-a");
   cancel.resolve({state:"verify",serverNow:new Date().toISOString()});await tick();
   assert.deepEqual(f.routes,["/profile/security"]);
@@ -111,10 +114,10 @@ test("an uncertain commit response recovers completion without repeating the mut
     return {state:changed?"complete":verified?"verified":"verify",flowId:"grant-a",serverNow:new Date().toISOString(),verificationExpiresAt:new Date(Date.now()+300_000).toISOString()};
   });
   let tree=f.render();field(tree,"Current password").props.onChangeText("fixture-current");tree=f.render();button(tree,"Verify current password").props.onPress();await tick();
-  tree=f.render();field(tree,"New password").props.onChangeText("fixture-new");field(tree,"Confirm new password").props.onChangeText("fixture-new");
+  tree=f.render();field(tree,"New password").props.onChangeText("Frosty-River!93");field(tree,"Confirm new password").props.onChangeText("Frosty-River!93");
   tree=f.render();button(tree,"Update password").props.onPress();await tick();tree=f.render();
   assert.ok(button(tree,"Back to Security settings"));assert.equal(f.calls.filter(c=>c.body.action==="change").length,1);
-  assert.ok(!f.h.slots.includes("fixture-new"));
+  assert.ok(!f.h.slots.includes("Frosty-River!93"));
 });
 
 
@@ -123,8 +126,8 @@ test("a verification cooldown does not block saving an already verified password
     serverNow:new Date().toISOString(),cooldownUntil:new Date(Date.now()+600_000).toISOString(),
     verificationExpiresAt:new Date(Date.now()+300_000).toISOString()}));
   let tree=f.render();
-  field(tree,"New password").props.onChangeText("fixture-new");
-  field(tree,"Confirm new password").props.onChangeText("fixture-new");tree=f.render();
+  field(tree,"New password").props.onChangeText("Frosty-River!93");
+  field(tree,"Confirm new password").props.onChangeText("Frosty-River!93");tree=f.render();
   assert.equal(button(tree,"Update password").props.disabled,false);
   button(tree,"Update password").props.onPress();await tick();tree=f.render();
   assert.equal(f.calls.filter(c=>c.body.action==="change").length,1);

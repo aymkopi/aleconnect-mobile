@@ -8,6 +8,8 @@ import { ReportPage } from "@/features/reports/components/report-page";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { setupConsumerIdentity, clearEmailSetupDismissal } from "@/services/consumer-identity";
 import { createApiRequestId } from "@/services/api";
+import { PasswordRequirements } from "@/features/auth/password-requirements";
+import { consumerPasswordError } from "@/lib/consumer-password-policy";
 import {
   ProfileGate,
   ProfileHeading,
@@ -24,9 +26,10 @@ export default function EmailSetupScreen() {
 function EmailSetup({ identity }: { identity: ProfileIdentity }) {
   const router = useRouter(),
     current = useProfileTask(identity),
-    { refreshSession } = useAuthSession();
+    { session, refreshSession } = useAuthSession();
   const [email, setEmail] = useState(""),
     [password, setPassword] = useState(""),
+    [confirmation, setConfirmation] = useState(""),
     [review, setReview] = useState(false),
     [complete, setComplete] = useState(false),
     [busy, setBusy] = useState(false),
@@ -40,6 +43,7 @@ function EmailSetup({ identity }: { identity: ProfileIdentity }) {
     useCallback(
       () => () => {
         setPassword("");
+        setConfirmation("");
         setReview(false);
       },
       [],
@@ -55,26 +59,28 @@ function EmailSetup({ identity }: { identity: ProfileIdentity }) {
     if (review) {
       setReview(false);
       setPassword("");
+      setConfirmation("");
       return;
     }
-    if (!done && (email || password)) {
+    if (!done && (email || password || confirmation)) {
       setDiscard(true);
       return;
     }
     if (router.canGoBack()) router.back();
     else router.replace("/profile/accounts");
   }
-  const allowLeave = useProfileBackGuard(busy || (!done && !!(review || email || password)), back);
+  const allowLeave = useProfileBackGuard(busy || (!done && !!(review || email || password || confirmation)), back);
+  const personal = [email, session?.user.name ?? "", session?.user.email ?? "", session?.user.username ?? "", ...identity.account.accounts.flatMap(account => [account.accountNumber ?? "", account.registeredName, account.phoneNumber ?? ""])];
   function next() {
     if (
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) ||
-      email.length > 255 ||
-      password.length < 8 ||
-      password.length > 128
+      email.length > 255
     ) {
-      setError("Enter a valid email and an 8–128 character password.");
+      setError("Enter a valid email address.");
       return;
     }
+    const problem = consumerPasswordError(password, confirmation, personal);
+    if (problem) { setError(problem); return; }
     setError("");
     setReview(true);
   }
@@ -83,13 +89,13 @@ function EmailSetup({ identity }: { identity: ProfileIdentity }) {
     setBusy(true);
     setError("");
     const secret = password;
-    setPassword("");
     try {
       if (!identity.fixture) {
         await setupConsumerIdentity(
           {
             email,
             password: secret,
+            confirmPassword: confirmation,
             verification: "mock",
             idempotencyKey: attempt.current,
           },
@@ -99,7 +105,7 @@ function EmailSetup({ identity }: { identity: ProfileIdentity }) {
         await clearEmailSetupDismissal(identity.account.defaultServiceAccountId);
         await refreshSession({ forceNetwork: true });
       }
-      if (current()) setComplete(true);
+      if (current()) { setPassword(""); setConfirmation(""); setComplete(true); }
     } catch (e) {
       if (current()) {
         setError(
@@ -193,8 +199,12 @@ function EmailSetup({ identity }: { identity: ProfileIdentity }) {
                   editable={!busy}
                   maxLength={128}
                   autoComplete="new-password"
-                  description="Use 8–128 characters. Your service-account password is kept separate."
+                  description="Your service-account password stays separate."
                 />
+                <ProfileField label="Confirm password" secret value={confirmation}
+                  onChangeText={setConfirmation} editable={!busy} maxLength={128}
+                  autoComplete="new-password" placeholder="Re-enter your new password" />
+                <PasswordRequirements password={password} confirmation={confirmation} personal={personal} />
               </>
             )}
             <Button
@@ -221,6 +231,7 @@ function EmailSetup({ identity }: { identity: ProfileIdentity }) {
               onPress={() => {
                 allowLeave();
                 setPassword("");
+                setConfirmation("");
                 router.replace("/profile/accounts");
               }}
             >
