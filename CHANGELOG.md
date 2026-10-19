@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.4.0-alpha.1 - 2026-10-19
+
 ### Security
 
 - Add shared live consumer password requirements and confirmation to password changes, mandatory replacements and email setup. Reject weak, common and known personal-information choices locally, with authoritative Staff policy and private breach detection on submission. Preserve verification, current-password reuse protection and retry-safe drafts.

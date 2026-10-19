@@ -1,6 +1,6 @@
 # Active work
 
-- [Consumer password policy](tasks/consumer-password-policy.md): implementation and initial review complete; final authorized PR/release checks are running. ALECO directory consumer creation/reset and Mobile replacement share policy enforcement. Preserve manual/primary state; deploy and verify Staff before merging Mobile for its paired alpha APK/IPA. No migration.
+- [Consumer password policy](tasks/consumer-password-policy.md): Staff PR56/Mobile PR22 merged after green exact-head checks. Staff1.3.0-alpha.1 deployed and verified before Mobile1.4.0-alpha.1/code73 APK and unsigned IPA publication. Versions, original Android signer, six asset digests, native metadata and Desktop copies verify. No migration; primary manual changes remain preserved. Physical-device/authenticated password mutation and iOS push acceptance remain separate.
 
 - [iOS alpha version alignment](tasks/ios-release-version.md): PR #20 shares one alpha/build allocation across parallel native jobs, keeps the full alpha in About and rejects mismatched IPA metadata. Source/config/export, review and both exact application-head GitHub checks pass. Build 25 predates the approved profile update; exact published build 27 contains it but both report stale native 1.0.0. Merge/new native publication/installation remain separate. Preserve manual edits and all iPhone/signing/artifact state.
 
