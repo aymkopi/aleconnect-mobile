@@ -221,10 +221,11 @@ export async function signInWithEmail(
 export async function changeConsumerPassword(
   currentPassword: string,
   newPassword: string,
+  confirmPassword?: string,
 ): Promise<void> {
   await apiRequest<{ ok: true }>("/api/mobile/auth/change-password", {
     method: "POST",
-    body: JSON.stringify({ currentPassword, newPassword }),
+    body: JSON.stringify({ currentPassword, newPassword, confirmPassword }),
   });
 }
 

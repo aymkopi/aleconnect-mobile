@@ -35,7 +35,7 @@ test("mandatory password completion keeps server length, difference and confirma
   assert.ok(validatePasswordChange("temporary", "a".repeat(129), "a".repeat(129)));
   assert.ok(validatePasswordChange("temporary", "temporary", "temporary"));
   assert.ok(validatePasswordChange("temporary", "new-secret", "different"));
-  assert.equal(validatePasswordChange("temporary", "new-secret", "new-secret"), null);
+  assert.equal(validatePasswordChange("temporary", "Frosty-River!93", "Frosty-River!93"), null);
 });
 test("only a refreshed same-principal session with an explicit cleared requirement confirms completion", () => {
   assert.equal(passwordChangeConfirmed("owner", null), false);

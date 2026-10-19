@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFile } from "node:fs/promises";
 import ts from "typescript";
+import { consumerPasswordError } from '../src/lib/consumer-password-policy.ts';
 
 const source = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 function evaluate(code, modules, fileName = "module.ts") {
@@ -12,7 +13,7 @@ function evaluate(code, modules, fileName = "module.ts") {
   }, exports);
   return exports;
 }
-const areas = evaluate(await source("src/features/profile/profile-state.ts"), {});
+const areas = evaluate(await source("src/features/profile/profile-state.ts"), { '../../lib/consumer-password-policy.ts': { consumerPasswordError } });
 const settings = {
   preferences: { receivePushNotifications: true, receiveAdvisories: true },
   selectedSubstationIds: [], selectedFeederIds: ["bitano-1", "bitano-2", "ligao-1"],

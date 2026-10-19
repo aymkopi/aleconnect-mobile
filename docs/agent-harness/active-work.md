@@ -1,5 +1,7 @@
 # Active work
 
+- [Consumer password policy](tasks/consumer-password-policy.md): implementation and initial review complete; final authorized PR/release checks are running. ALECO directory consumer creation/reset and Mobile replacement share policy enforcement. Preserve manual/primary state; deploy and verify Staff before merging Mobile for its paired alpha APK/IPA. No migration.
+
 - [iOS alpha version alignment](tasks/ios-release-version.md): PR #20 shares one alpha/build allocation across parallel native jobs, keeps the full alpha in About and rejects mismatched IPA metadata. Source/config/export, review and both exact application-head GitHub checks pass. Build 25 predates the approved profile update; exact published build 27 contains it but both report stale native 1.0.0. Merge/new native publication/installation remain separate. Preserve manual edits and all iPhone/signing/artifact state.
 
 - [Account linking/unlinking and unified profile editor](tasks/account-link-password-confirmation.md): Staff PR #55 deploys verified 2.0.0-alpha.1 first; Mobile PR #15 merges as dc6ed48b and workflow 39139461658 publishes 1.3.0-alpha.1 / code 71, with unsigned iOS / build 27 companion. Exact sources/tags, all six asset digests, original APK signer, standalone fixture-off API runtime and native alignment pass; Desktop APK hash matches. No migration. Manual/iPhone/device state is preserved; private/provider/native acceptance remains separate.

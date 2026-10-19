@@ -292,8 +292,8 @@ async function requiredFixture({ linking = false, result = "confirmed" } = {}) {
   h.flush();
   for (const [label, value] of [
     ["Temporary password", "temporary"],
-    ["New password", "new-secret"],
-    ["Confirm password", "new-secret"],
+    ["New password", "Frosty-River!93"],
+    ["Confirm password", "Frosty-River!93"],
   ])
     nodes(page)
       .find((n) => n.type === "PasswordField" && n.props.label === label)
@@ -319,11 +319,11 @@ test("mandatory password success clears secrets and waits on Continue after fres
   const submit = button(f.page, "Update password");
   submit.props.onPress();
   submit.props.onPress();
-  assert.deepEqual(f.changes, [["temporary", "new-secret"]]);
+  assert.deepEqual(f.changes, [["temporary", "Frosty-River!93", "Frosty-River!93"]]);
   assert.ok(
     nodes(f.render())
       .filter((n) => n.type === "PasswordField")
-      .every((n) => n.props.value === ""),
+      .every((n) => n.props.label === "Temporary password" ? n.props.value === "" : n.props.value === "Frosty-River!93"),
   );
   f.pendingChange.resolve();
   await tick();
