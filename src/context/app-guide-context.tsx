@@ -99,7 +99,7 @@ export function AppGuideProvider({ children }: PropsWithChildren) {
 
   return (
     <Context.Provider value={{ guide, guest, startGuide, stopGuide, registerActivation }}>
-      <Tour open={!!guide} step={step} onOpenChange={(open) => { if (!open) stopGuide(); }}
+      <Tour open={!!guide} step={step} dismissOnBackdropPress={false} onOpenChange={(open) => { if (!open) stopGuide(); }}
         onStepChange={setStep} cardClassName="bg-card shadow-none">
         {children}
       </Tour>
