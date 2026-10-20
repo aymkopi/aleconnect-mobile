@@ -1,6 +1,6 @@
 /** A measured Tour card height tied to the step that produced it. */
 export interface TourCardMeasurement {
-  owner: object | undefined;
+  order: number | undefined;
   height: number;
 }
 
@@ -10,20 +10,21 @@ export interface TourCardMeasurement {
  * place the next card incorrectly before that card's first layout pass.
  */
 export function currentTourCardHeight(
-  owner: object | undefined,
+  order: number | undefined,
   measurement: TourCardMeasurement | null
 ): number | null {
-  return measurement && measurement.owner === owner ? measurement.height : null;
+  return measurement && measurement.order === order ? measurement.height : null;
 }
 
 /** Stores a card height without churning state for sub-pixel layout noise. */
 export function nextTourCardMeasurement(
-  owner: object | undefined,
+  order: number | undefined,
   height: number,
   current: TourCardMeasurement | null
-): TourCardMeasurement {
-  if (current && current.owner === owner && Math.abs(current.height - height) < 1) {
+): TourCardMeasurement | null {
+  if (!Number.isFinite(height) || height <= 0) return current;
+  if (current && current.order === order && Math.abs(current.height - height) < 1) {
     return current;
   }
-  return { owner, height };
+  return { order, height };
 }

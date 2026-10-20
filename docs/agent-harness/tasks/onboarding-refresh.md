@@ -81,3 +81,19 @@ Actual compatible feature release: `1.5.0-alpha.1`; Android/iOS build74. No Staf
 - APK SHA256 `166ceb67ca99148a5d9b922fd96d705de91cf792dd2777b2b86e19909de3d400`; IPA SHA256 `062444ffafa37811e12f6d094fd1fb3496886fa23c9455f70bfc4174f6f8b5e1`.
 - Hash-verified Desktop files: `C:/Users/Justine/Desktop/AleconnectApps/aleconnect-mobile-1.5.0-alpha.1.apk` and `C:/Users/Justine/Desktop/AleconnectApps/ipa/Aleconnect-ios-1.5.0-alpha.1-build74.ipa`. Private checks, Graphify refresh, original manual snapshots and public release metadata are retained at `C:/Users/Justine/.codex/artifacts/onboarding-release-20261020`.
 - No physical-device install, real credential mutation, native screen-reader or provider acceptance is claimed. The unsigned IPA needs local signing; personal-team remote push remains unsupported. No additional Mobile alpha is needed for documentation closeout.
+
+## Post-release Tour recovery (2026-10-20)
+
+The user reports the spotlight without its description on both Android and iOS, and a single tap ends the guide. A target relayout creates a new registered entry for the same step; the previous object-identity measurement then becomes invalid without a new card layout event. This reproduces the invisible-card state. Backdrop dismissal was also enabled by default.
+
+- [x] Key card measurements to the stable step order and reject zero/invalid content sizes.
+- [x] Bound the native ScrollView viewport and measure intrinsic content; cap long copy to the safe area.
+- [x] Ignore callbacks from an old step after advancing.
+- [x] Ignore accidental backdrop taps in app guides, retaining explicit dismissal and platform Back/Escape.
+- [x] Reproduce and fix the description container intercepting the End tour touch area.
+- [x] Full suite:569 total,568 passed,0 failures,1 existing skip. Types pass; scoped lint has0 errors/4 baseline warnings. Independent read-only review has no findings.
+- [x] Fresh exported-app render checks: public Home/Hotlines/Advisories chapters on regular Light phone, compact Dark phone and Dark tablet; card and ancestor opacity, description text, resizing, background/body taps, Next/Back/Done/Skip/End tour, no page errors.
+- [x] Fixture-free production Android/iOS Hermes exports pass. Graph refresh produces4575 nodes/8637 edges; generated graph/Uniwind copies are hash-verified outside the product diff. Final harness/whitespace checks pass with the existing isolated-sibling warning.
+- [ ] Corrective APK/IPA publication, version/signature verification and native acceptance.
+
+The browser check fulfills only files from the fresh export in a private browser context, without a local server; all external requests are intercepted. Starting an Expo preview server was rejected by automatic approval review with no detailed reason. No existing browser session or device data is touched. The25040RP0AG tablet reappears in ADB with1.2.0-alpha.1/code68; native behavior of the new fix remains separately unverified.

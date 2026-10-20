@@ -46,6 +46,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -58,7 +59,6 @@ import {
   StyleSheet,
   useWindowDimensions,
   View,
-  type LayoutChangeEvent,
   type LayoutRectangle,
   type ViewProps,
 } from 'react-native';
@@ -266,6 +266,8 @@ export interface TourProps {
   placement?: TourPlacement;
   /** Ending the tour by pressing the dimmed area, or Android back. Default true. */
   dismissible?: boolean;
+  /** End the tour on a backdrop tap. Default true; explicit controls remain available when false. */
+  dismissOnBackdropPress?: boolean;
   /** Show "2 of 5" above the step's title. Default true. */
   showProgress?: boolean;
   /** Show the skip control. Default true. */
@@ -307,6 +309,7 @@ function TourRoot({
   shape = 'rect',
   placement = 'auto',
   dismissible = true,
+  dismissOnBackdropPress = true,
   showProgress = true,
   showSkip = true,
   interactive = false,
@@ -413,6 +416,7 @@ function TourRoot({
             shape={shape}
             placement={placement}
             dismissible={dismissible}
+            dismissOnBackdropPress={dismissOnBackdropPress}
             showProgress={showProgress}
             showSkip={showSkip}
             interactive={interactive}
@@ -440,6 +444,7 @@ interface TourOverlayProps {
   shape: TourShape;
   placement: TourPlacement;
   dismissible: boolean;
+  dismissOnBackdropPress: boolean;
   showProgress: boolean;
   showSkip: boolean;
   interactive: boolean;
@@ -462,6 +467,7 @@ function TourOverlay({
   shape,
   placement,
   dismissible,
+  dismissOnBackdropPress = true,
   showProgress,
   showSkip,
   interactive,
@@ -479,7 +485,11 @@ function TourOverlay({
   const [cardMeasurement, setCardMeasurement] = useState<TourCardMeasurement | null>(
     null
   );
-  const cardHeight = currentTourCardHeight(active, cardMeasurement);
+  const measuredHeight = currentTourCardHeight(active?.order, cardMeasurement);
+  const maxCardHeight = Math.max(96, screenHeight - insets.top - insets.bottom - SCREEN_MARGIN * 2);
+  const cardHeight = measuredHeight === null ? null : Math.min(measuredHeight, maxCardHeight);
+  const activeOrder = useRef(active?.order);
+  useLayoutEffect(() => { activeOrder.current = active?.order; }, [active?.order]);
   const cardRef = useRef<ScrollView>(null);
 
   useEffect(() => {
@@ -612,10 +622,10 @@ function TourOverlay({
     insets,
   });
 
-  const onCardLayout = (event: LayoutChangeEvent) => {
-    const measured = event.nativeEvent.layout.height;
+  const onCardContentSizeChange = (_width: number, height: number) => {
+    if (activeOrder.current !== active?.order) return;
     setCardMeasurement((current) =>
-      nextTourCardMeasurement(active, measured, current)
+      nextTourCardMeasurement(active?.order, height, current)
     );
   };
 
@@ -630,7 +640,7 @@ function TourOverlay({
       */}
       <TourBackdrop
         interactive={interactive}
-        dismissible={dismissible}
+        dismissible={dismissible && dismissOnBackdropPress}
         spot={spot}
         screenWidth={screenWidth}
         screenHeight={screenHeight}
@@ -673,7 +683,7 @@ function TourOverlay({
       >
         <ScrollView
           ref={cardRef}
-          onLayout={onCardLayout}
+          onContentSizeChange={onCardContentSizeChange}
           role="dialog"
           aria-modal={!interactive}
           aria-label={active?.title}
@@ -688,7 +698,8 @@ function TourOverlay({
             // the card has to be laid out to be measured, and its height is
             // what decides whether it goes above the target or below it.
             opacity: cardHeight === null ? 0 : 1,
-            maxHeight: Math.max(96, screenHeight - insets.top - insets.bottom - SCREEN_MARGIN * 2),
+            // Native ScrollView needs a bounded viewport to measure its content.
+            height: cardHeight ?? maxCardHeight,
           }}
           className={cn(
             'rounded-2xl bg-card shadow-none',
@@ -701,7 +712,7 @@ function TourOverlay({
               size="icon"
               accessibilityLabel={words.close}
               onPress={onSkip}
-              className="absolute end-1 top-1 h-12 w-12"
+              className="absolute end-1 top-1 z-10 h-12 w-12"
             >
               <XIcon size={20} />
             </Button>

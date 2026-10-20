@@ -1,5 +1,13 @@
 # Implementation history
 
+## 2026-10-20 - Shared Tour description and dismissal recovery
+
+- Scope: reproduce the reported Android/iOS spotlight-only guide and accidental dismissal in the shared PanelUI Tour. Retain measured card height across the same target's relayout, measure intrinsic content in a bounded native viewport, ignore stale step callbacks and invalid measurements, and opt app guides out of backdrop dismissal. Raise the existing End tour button above its description container. No dependency, API, storage, provider or signing change.
+- Verification: the three new overlay regressions fail against the released implementation and pass after the fix. The full suite has569 tests:568 pass,0 fail,1 existing isolated-sibling skip. TypeScript passes; scoped lint has0 errors and4 existing lifecycle-effect warnings. Exported-app browser checks cover Home, Hotlines and Advisories across402x874 Light,360x640 Dark and820x1180 Dark, with explicit computed-opacity assertions, resize, background/card taps, Next/Back/Done/Skip/End tour and no page errors. Read-only review reports no findings.
+- Remaining risks: browser results use an isolated exported app with all network requests intercepted; no real submission, call or preference write. The25040RP0AG tablet reappears in ADB after browser checks; no new native binary has been installed. Native positioning, screen readers and large native text remain unverified. APK/IPA publication is separate from source/export checks. Manual primary edits and previous artifacts remain preserved.
+- Verification: fixture-free Android/iOS Hermes exports pass. Graph refresh produces4575 nodes/8637 edges; generated graph/Uniwind files are hash-verified in private evidence and restored out of the source diff. Harness/whitespace pass with the existing isolated-sibling warning.
+- Next: ship the corrective patch through the existing Mobile PR/release workflow and verify its artifacts, then check the connected tablet. See [onboarding tracker](tasks/onboarding-refresh.md).
+
 ## 2026-10-18 - iPhone USB tooling and anisette recovery
 
 - Scope: continue the requested personal-iPhone install. Verified/installed official iloader2.3.9 per-user EXE after the all-user MSI required admin rights. Diagnosed the old USB pairing as invalid with automatic re-pairing disabled; administrator-approved exact-path/hash checks preserved that one record before standard pairing renewal. Original protected backup and replacement both exist; no phone app data reset.

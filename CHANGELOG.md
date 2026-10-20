@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Fixed
+
+- Keep tour descriptions and navigation controls visible when a highlighted component changes size. Bound long guide cards to the available screen height on Android and iOS.
+- Ignore accidental taps outside the tour card. Keep Back, Next, Done, Skip and the explicit End tour control available, including its previously covered touch area.
+
 ## 1.5.0-alpha.1 - 2026-10-20
 
 ### Added
