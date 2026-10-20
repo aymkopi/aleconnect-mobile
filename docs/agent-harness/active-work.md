@@ -1,6 +1,6 @@
 # Active work
 
-- [Onboarding and contextual guidance](tasks/onboarding-refresh.md): isolated `codex/onboarding-refresh` implements three welcome pages, optional secure-sign-in setup and six replayable PanelUI Tour chapters. Figma Light/Dark, 563 tests, types, scoped lint, harness, web/Android exports and integrated-browser flows pass; graph evidence is preserved separately. Ready for integration review; native acceptance/publication remain separate. Primary manual history/security changes remain preserved.
+- [Onboarding and contextual guidance](tasks/onboarding-refresh.md): PR23 merges as73f2f1e after green final-head checks/review;564 tests pass with one existing skip. Workflow39384834070 publishes1.5.0-alpha.1/code74 APK and unsigned iOS1.5.0/build74. Six downloaded digests, native/embedded versions, new bundled UI, original signer, alignment and Desktop copies verify. Primary manual history/security changes and prior artifacts are preserved. No onboarding API/migration change; native/device/provider acceptance remains separate.
 
 - [Consumer password policy](tasks/consumer-password-policy.md): Staff PR56/Mobile PR22 merged after green exact-head checks. Staff1.3.0-alpha.1 deployed and verified before Mobile1.4.0-alpha.1/code73 APK and unsigned IPA publication. Versions, original Android signer, six asset digests, native metadata and Desktop copies verify. No migration; primary manual changes remain preserved. Physical-device/authenticated password mutation and iOS push acceptance remain separate.
 

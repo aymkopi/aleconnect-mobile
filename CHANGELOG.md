@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.5.0-alpha.1 - 2026-10-20
+
 ### Added
 
 - Introduce three skippable, illustrated welcome pages with Sign in and Explore as a guest choices, matching the refreshed editable Light/Dark Figma designs.
@@ -17,6 +19,11 @@
 ### Fixed
 
 - Remeasure guide targets when fetched content replaces a loading skeleton, while retaining consumer layout callbacks and avoiding updates for unchanged bounds.
+
+### Verification and release
+
+- PR23 merges as73f2f1e after both final-head checks pass and the independent review has no remaining blocker. The merged tree matches the reviewed tree.564 tests pass, zero fail, one existing skip; types, scoped lint, harness, browser flows and exports pass.
+- Combined workflow39384834070 passes all five jobs and publishes matching APK/code74 and unsigned iOS1.5.0/build74. All six downloaded digests, source/tag, embedded alpha labels and original Android signer verify; both binaries contain the new welcome/setup/guide code with preview fixtures compiled off. Desktop copies match. Primary manual edits remain preserved; native-device/provider acceptance remains separate.
 
 ## 1.4.0-alpha.1 - 2026-10-19
 
