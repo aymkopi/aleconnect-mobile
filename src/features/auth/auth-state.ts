@@ -9,7 +9,7 @@ const returnRoutes = [
   "/home", "/reports", "/reports/new", "/reports/list", "/reports/queue",
   "/profile", "/profile/details", "/profile/change-password", "/notification-settings", "/profile/accounts", "/profile/link-account", "/profile/link-requests",
   "/notifications", "/advisories", "/hotlines", "/services",
-  "/profile?appearance=1", "/services/request/lighting", "/services/request/disconnection",
+  "/profile?appearance=1", "/profile/setup", "/services/request/lighting", "/services/request/disconnection",
 ] as const;
 export type AuthReturnRoute = (typeof returnRoutes)[number];
 type AuthSessionState = {

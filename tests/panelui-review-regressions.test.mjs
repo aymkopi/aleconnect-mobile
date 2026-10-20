@@ -77,6 +77,7 @@ async function load(file, mocks) {
     }).outputText,
   )((id) => {
     if (id === "@/hooks/use-manual-refresh") return manualRefresh;
+    if (id === "@/context/app-guide-context") return { GuideStep: "View", useAppGuide: () => ({ guide: null, stopGuide: () => {} }) };
     if (id === "@/context/guest-access-context") return { useGuestAccess: () => ({ guest: false, openFeature: () => {}, requestSignIn: () => {} }) };
     if (id === "@/context/visual-preview-context" && mocks[id]) return { ...mocks[id], useVisualPreview: () => { const value = mocks[id].useVisualPreview(); return { publicFixtures: value.fixtures, ...value }; } };
     if (id === "@/components/panelui/radio-group") return { RadioGroup: Object.assign("RadioGroup", { Item: "RadioItem" }) };
@@ -98,6 +99,7 @@ async function load(file, mocks) {
         "./browse-filter": reportBrowseFilter,
         "./home-layout": { getHomeLayout },
         "./status": reportStatuses,
+        "./report-card": { ReportCard: "ReportCard" },
         "@/features/accounts/selection": selection,
         "./auth-state": authState,
       }[id] ??
@@ -804,16 +806,16 @@ test("Reports entry actions open real child routes and preserve detail account c
   const tree = module.default();
   const list = nodes(tree).find((n) => n.type === "FlatList");
   const header = list.props.ListHeaderComponent;
-  nodes(header)
-    .find((n) => n.props.title === "Reports")
-    .props.action.props.onPress();
+  nodes(nodes(header).find((n) => n.props.title === "Reports").props.action)
+    .find((n) => n.type === "Button").props.onPress();
   nodes(header)
     .find(
       (n) =>
         n.type === "Button" && n.props.children?.props?.children === "View all",
     )
     .props.onPress();
-  list.props.renderItem({ item: report }).props.onPress();
+  nodes(list.props.renderItem({ item: report, index: 0 }))
+    .find((n) => n.type === "ReportCard").props.onPress();
   assert.deepEqual(visits, [
     "/reports/new",
     {

@@ -12,7 +12,8 @@ import { useConsumerAccount } from "@/hooks/use-consumer-account";
 import { useManualRefresh } from "@/hooks/use-manual-refresh";
 import { useRouter } from "expo-router";
 import { Megaphone, Search } from "lucide-react-native";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { GuideStep } from "@/context/app-guide-context";
 import { FlatList, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { matchesUpdate, updateRoute } from "./presentation";
@@ -23,6 +24,7 @@ export default function AdvisoriesScreen() {
     router = useRouter(),
     feed = useUpdateFeed();
   const scrollRef = useMainPageScroll<FlatList>(feed.reload);
+  const feedOffset = useRef(0);
   const { session } = useAuthSession();
   const { accountContext } = useConsumerAccount();
   const { refresh, refreshing } = useManualRefresh(
@@ -65,12 +67,15 @@ export default function AdvisoriesScreen() {
           <View className="gap-3 pb-2">
             <PreviewLabel />
             <MainPageHeader title="Advisories" />
+            <GuideStep chapter="advisories" target="search" onActivate={() => scrollRef.current?.scrollToOffset({ offset: 0, animated: false })}>
             <SearchField
               value={query}
               onChangeText={setQuery}
               placeholder="Search advisories and posts"
               isClearable={false}
             />
+            </GuideStep>
+            <GuideStep chapter="advisories" target="tabs" onActivate={() => scrollRef.current?.scrollToOffset({ offset: 0, animated: false })}>
             <Tabs
               defaultValue="all"
               value={tab}
@@ -94,6 +99,7 @@ export default function AdvisoriesScreen() {
                 ))}
               </Tabs.List>
             </Tabs>
+            </GuideStep>
             {query ? (
               <View className="flex-row items-center gap-2">
                 <Button variant="ghost" size="sm" onPress={() => setQuery("")}>
@@ -128,6 +134,10 @@ export default function AdvisoriesScreen() {
                 onAction={refresh}
               />
             ) : null}
+            <GuideStep chapter="advisories" target="feed"
+              title={featured ? undefined : feed.error && !hasData ? "Reconnect for updates" : "Updates appear here"}
+              description={featured ? undefined : feed.error && !hasData ? "The feed could not load. Close the guide and choose Try again to reconnect. Public notices remain available to guests." : "Published notices and posts will appear here. Open an available card for schedules, affected areas and the full message."}
+              onLayout={(event) => { feedOffset.current = event.nativeEvent.layout.y; }} onActivate={() => scrollRef.current?.scrollToOffset({ offset: feedOffset.current, animated: false })}>
             {featured ? (
               <>
                 <PublisherCard
@@ -187,6 +197,7 @@ export default function AdvisoriesScreen() {
                 onAction={filtered ? undefined : () => router.push("/services")}
               />
             )}
+            </GuideStep>
           </View>
         }
         ListFooterComponent={

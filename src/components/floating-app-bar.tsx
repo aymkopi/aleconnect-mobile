@@ -10,6 +10,7 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text } from "@/components/panelui/text";
 import { useAppColors } from "@/hooks/use-app-colors";
+import { GuideStep } from "@/context/app-guide-context";
 const APP_BAR_HEIGHT = 64;
 export function appScrollableBottomPadding(bottom: number) {
   return APP_BAR_HEIGHT + Math.max(bottom, 8) + 24;
@@ -44,8 +45,8 @@ function TabContent({ title, Icon, selected, primary, muted, fontSize }: {
     }, textStyle]}>{title}</AnimatedText>
   </>;
 }
-export function FloatingAppBar({ currentIndex, onSelect }: {
-  currentIndex: number; onSelect: (index: number) => boolean | void;
+export function FloatingAppBar({ currentIndex, onSelect, guideNavigation = false }: {
+  currentIndex: number; onSelect: (index: number) => boolean | void; guideNavigation?: boolean;
 }) {
   const { width, fontScale } = useWindowDimensions(), insets = useSafeAreaInsets();
   const [surface, primary, muted] = useAppColors(["card", "primary", "muted-foreground"]);
@@ -94,7 +95,7 @@ export function FloatingAppBar({ currentIndex, onSelect }: {
     .onFinalize((_event, success) => {
       if (!success) position.set(reduced ? currentIndex : withSpring(currentIndex, { duration: 400, dampingRatio: 1, overshootClamping: true, reduceMotion: ReduceMotion.System }));
     });
-  return <View pointerEvents="box-none" style={{
+  return <GuideStep chapter="home" target={guideNavigation ? "navigation" : ""} pointerEvents="box-none" style={{
     position: "absolute", left: 16, right: 16, bottom: Math.max(insets.bottom, 8),
   }}>
     <GestureDetector gesture={pan}>
@@ -116,5 +117,5 @@ export function FloatingAppBar({ currentIndex, onSelect }: {
       </Pressable>)}
     </View>
     </GestureDetector>
-  </View>;
+  </GuideStep>;
 }

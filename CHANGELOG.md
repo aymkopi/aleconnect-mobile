@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### Added
+
+- Introduce three skippable, illustrated welcome pages with Sign in and Explore as a guest choices, matching the refreshed editable Light/Dark Figma designs.
+- Offer optional account setup after the first secure interactive sign-in on this device. Review the existing profile, service accounts and alert settings without a mandatory setup checklist.
+- Add six replayable PanelUI Tour chapters with twenty contextual steps across Home, Reports, Create a report, Advisories, Hotlines and Account. Help & support keeps guides and account setup accessible; guests receive only the three public chapters.
+
+### Changed
+
+- Keep restored sessions out of onboarding, and complete any required password replacement before offering setup. Account-scoped local offer hints never grant access or replace server verification.
+- Measure guide spotlights against actual controls, scroll targets into view and remeasure after window or font-scale changes. Preserve report drafts and existing navigation behavior; guides never submit reports, place calls or change preferences.
+- Use local SVG artwork, semantic Light/Dark surfaces, reduced-motion support, accessible controls and keyboard navigation. No new dependency, API contract, native identity or signing change.
+
 ## 1.4.0-alpha.1 - 2026-10-19
 
 ### Security

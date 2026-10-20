@@ -49,7 +49,8 @@ import {
   SlidersHorizontal,
   Tag,
 } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { GuideStep } from "@/context/app-guide-context";
 import { FlatList, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -162,6 +163,7 @@ export default function ReportsScreen() {
     !fixtures && reports.busy,
   );
   const scrollRef = useMainPageScroll<FlatList>(reports.reload);
+  const headerHeight = useRef(0);
   const reloadReports = reports.reload;
   useEffect(() => {
     if (!userId || fixtures) return;
@@ -264,6 +266,7 @@ export default function ReportsScreen() {
       <MainPageHeader
         title="Reports"
         action={
+          <GuideStep chapter="reports" target="create" onActivate={() => scrollRef.current?.scrollToOffset({ offset: 0, animated: false })}>
           <Button
             size="sm"
             startContent={<Plus size={18} color={buttonForeground} />}
@@ -271,6 +274,7 @@ export default function ReportsScreen() {
           >
             New report
           </Button>
+          </GuideStep>
         }
       />
       <View
@@ -309,13 +313,14 @@ export default function ReportsScreen() {
         </Text>
       </View>
       <View className="flex-row items-center gap-3">
-        <View className="flex-1">
+        <GuideStep chapter="reports" target="search" className="flex-1" onActivate={() => scrollRef.current?.scrollToOffset({ offset: 0, animated: false })}>
           <SearchField
             value={query}
             onChangeText={setQuery}
             placeholder="Search your reports"
           />
-        </View>
+        </GuideStep>
+        <GuideStep chapter="reports" target="filters" onActivate={() => scrollRef.current?.scrollToOffset({ offset: 0, animated: false })}>
         <Button
           variant="outline"
           className="bg-card rounded-xl min-h-12"
@@ -329,6 +334,7 @@ export default function ReportsScreen() {
         >
           Filters
         </Button>
+        </GuideStep>
       </View>
       {query !== search ? (
         <Button
@@ -420,7 +426,8 @@ export default function ReportsScreen() {
         showsHorizontalScrollIndicator={false}
         data={rows}
         keyExtractor={(r) => r.id}
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
+          <GuideStep chapter="reports" target={index === 0 ? "list" : ""} onActivate={() => scrollRef.current?.scrollToOffset({ offset: headerHeight.current, animated: false })}>
           <ReportCard
             report={item}
             onPress={() =>
@@ -435,6 +442,7 @@ export default function ReportsScreen() {
               })
             }
           />
+          </GuideStep>
         )}
         ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
         contentContainerStyle={{
@@ -443,8 +451,10 @@ export default function ReportsScreen() {
           paddingBottom: appScrollableBottomPadding(insets.bottom),
           // Rows have one 12px separator; headers keep their own spacing.
         }}
-        ListHeaderComponent={<View className="pb-2">{header}</View>}
+        ListHeaderComponent={<View className="pb-2" onLayout={(event) => { headerHeight.current = event.nativeEvent.layout.height; }}>{header}</View>}
         ListEmptyComponent={
+          <GuideStep chapter="reports" target="list" onActivate={() => scrollRef.current?.scrollToOffset({ offset: headerHeight.current, animated: false })}>
+          {
           !session && !fixtures ? (
             <DataState
               title="Sign in to see your reports"
@@ -488,7 +498,8 @@ export default function ReportsScreen() {
                 } else router.push("/reports/new");
               }}
             />
-          )
+          )}
+          </GuideStep>
         }
         refreshing={refreshing}
         onRefresh={refresh}

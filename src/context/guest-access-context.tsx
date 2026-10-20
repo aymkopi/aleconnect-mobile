@@ -8,7 +8,7 @@ import { useVisualPreview } from '@/context/visual-preview-context';
 import { authReturnRoute } from '@/features/auth/auth-state';
 import { guestGateDescriptions, guestRouteAccess, type GuestGateKind } from '@/features/auth/guest-access';
 
-const Context = createContext<{ guest: boolean; openFeature: (path: string, previewReport?: boolean) => void; requestSignIn: (path: string, kind?: GuestGateKind) => void } | null>(null);
+const Context = createContext<{ guest: boolean; gateOpen: boolean; openFeature: (path: string, previewReport?: boolean) => void; requestSignIn: (path: string, kind?: GuestGateKind) => void } | null>(null);
 export function GuestAccessProvider({ children }: PropsWithChildren) {
   const router = useRouter(), pathname = usePathname();
   const params = useGlobalSearchParams<{ appearance?: string | string[] }>();
@@ -40,7 +40,7 @@ export function GuestAccessProvider({ children }: PropsWithChildren) {
     } else if (!guest) setGate(null);
   }, [guest, isLoading, pathname, targetPath, requestSignIn, router]);
   return (
-    <Context.Provider value={{ guest, openFeature, requestSignIn }}>
+    <Context.Provider value={{ guest, gateOpen: !!gate, openFeature, requestSignIn }}>
       {children}
       <BottomSheet open={!!gate} onOpenChange={(open) => { if (!open) dismissGate(); }}>
         <BottomSheet.Content size="auto" showClose={false} showGrabber={false} className="px-6 pt-6">
