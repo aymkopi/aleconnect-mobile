@@ -2,10 +2,17 @@
 
 ## Unreleased
 
+## 1.5.1-alpha.1 - 2026-10-20
+
 ### Fixed
 
 - Keep tour descriptions and navigation controls visible when a highlighted component changes size. Bound long guide cards to the available screen height on Android and iOS.
 - Ignore accidental taps outside the tour card. Keep Back, Next, Done, Skip and the explicit End tour control available, including its previously covered touch area.
+
+### Verification and release
+
+- PR #24 merges as b5ce1c9a with the tested product tree. The full suite passes 568 tests with one existing skip; TypeScript, scoped lint, harness, both native exports and 12 exported-app browser journeys pass. Independent review has no findings.
+- Combined workflow 39434693032 publishes matching Android 1.5.1-alpha.1/code 75 and unsigned iOS 1.5.1/build 75. All six asset digests, native/embedded versions, bundled Tour fix, original Android signer and native-library alignment verify. Desktop copies match. Manual edits are preserved; physical-device and native iOS interaction checks remain separate.
 
 ## 1.5.0-alpha.1 - 2026-10-20
 
