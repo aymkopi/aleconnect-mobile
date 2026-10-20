@@ -44,7 +44,7 @@ Account setup links to the existing profile editor, service accounts and alert p
 
 ## Current evidence and limits
 
-- Full suite: 564 tests, 563 passed, zero failures, one existing isolated-sibling skip. Added checks cover hydration and welcome eligibility, bundled vectors, restored versus interactive sessions, required-password precedence, principal-scoped offer records, public guide routes and per-step card measurement.
+- Final release suite: 565 tests, 564 passed, zero failures, one existing isolated-sibling skip. Added checks cover hydration and welcome eligibility, bundled vectors, restored versus interactive sessions, required-password precedence, principal-scoped offer records, public guide routes, per-step card measurement and asynchronous target resizing.
 - TypeScript passes after Metro regenerates the new Expo route types. Scoped lint has zero errors and fourteen warnings, including existing hook/test warnings and the imported Tour/provider lifecycle effects; no rule was weakened for this task.
 - Production web and Android/Hermes exports pass with the explicit HTTPS API and preview fixtures disabled. These are bundle checks, not native APK/IPA builds or installation evidence.
 - Codex integrated-browser checks cover the three-screen welcome controls, explicit guest entry, attached first-access offer, guest-only guide hub, labelled private fixtures, optional setup links, all six guide chapters, Back/Next/Done, Help replay, actual navigation spotlight, keyboard Tab/Escape and compact/Dark geometry. Finishing the report guide leaves the form at its original step. No report is submitted, call placed or preference changed by a guide.
@@ -65,8 +65,8 @@ Finish the authorized release below; do not reopen the completed password-policy
 
 - [x] Confirm base/default branch `c1c5bbc4d4c95438c0be191dc98c083d0e942120` and retain unrelated documentation PR21.
 - [x] Snapshot/hash the five primary manual documentation files outside the source tree; preserve unrelated Staff edits and previous native artifacts.
-- [ ] Run fresh full tests, types, lint, harness and whitespace checks, then close the independent read-only review.
-- [ ] Create the scoped feature PR with detailed Added/Changed/Compatibility/Validation notes and a changelog entry.
+- [x] Run fresh full tests, types, lint, harness and whitespace checks, then close the independent read-only review. Review found and resolved stale spotlight bounds after async content replaces a skeleton; the regression fails before the fix and all eleven focused checks pass afterward. No remaining review blocker.
+- [x] Create [PR23](https://github.com/aymkopi/aleconnect-mobile/pull/23) with detailed Added/Changed/Compatibility/Validation notes and a changelog entry. Preserve unrelated PR21.
 - [ ] Require both exact-head GitHub checks, merge with a feature Conventional Commit and verify the merged application tree.
 - [ ] Let the existing combined release workflow allocate/build/publish APK and unsigned IPA from the same source and version context.
 - [ ] Verify both metadata sources, tag, version/build, six asset digests, original Android signer and native/runtime integrity. Copy versioned binaries to Desktop/AleconnectApps without overwriting previous files.

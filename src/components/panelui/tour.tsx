@@ -59,6 +59,7 @@ import {
   useWindowDimensions,
   View,
   type LayoutChangeEvent,
+  type LayoutRectangle,
   type ViewProps,
 } from 'react-native';
 import Animated, {
@@ -140,6 +141,7 @@ interface TourStepEntry {
   radius?: number;
   placement?: TourPlacement;
   target: RefObject<View | null>;
+  layout: LayoutRectangle | null;
 }
 
 interface TourContextValue {
@@ -948,10 +950,12 @@ function TourStep({
   placement,
   className,
   children,
+  onLayout,
   ...props
 }: TourStepProps) {
   const { register, unregister } = useTour('Tour.Step');
   const target = useRef<View>(null);
+  const [layout, setLayout] = useState<LayoutRectangle | null>(null);
 
   const entry = useMemo<TourStepEntry>(
     () => ({
@@ -963,8 +967,9 @@ function TourStep({
       radius,
       placement,
       target,
+      layout,
     }),
-    [order, title, description, shape, padding, radius, placement]
+    [order, title, description, shape, padding, radius, placement, layout]
   );
 
   useEffect(() => {
@@ -973,7 +978,12 @@ function TourStep({
   }, [entry, register, unregister]);
 
   return (
-    <View ref={target} collapsable={false} className={className} {...props}>
+    <View ref={target} collapsable={false} className={className} {...props} onLayout={(event) => {
+      const next = event.nativeEvent.layout;
+      // Async content can resize a target without changing its guide copy.
+      setLayout((current) => current && current.x === next.x && current.y === next.y && current.width === next.width && current.height === next.height ? current : next);
+      onLayout?.(event);
+    }}>
       {children}
     </View>
   );

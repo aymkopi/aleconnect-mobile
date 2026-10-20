@@ -14,6 +14,10 @@
 - Measure guide spotlights against actual controls, scroll targets into view and remeasure after window or font-scale changes. Preserve report drafts and existing navigation behavior; guides never submit reports, place calls or change preferences.
 - Use local SVG artwork, semantic Light/Dark surfaces, reduced-motion support, accessible controls and keyboard navigation. No new dependency, API contract, native identity or signing change.
 
+### Fixed
+
+- Remeasure guide targets when fetched content replaces a loading skeleton, while retaining consumer layout callbacks and avoiding updates for unchanged bounds.
+
 ## 1.4.0-alpha.1 - 2026-10-19
 
 ### Security
