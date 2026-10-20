@@ -9,6 +9,7 @@ import { toast } from "@/components/panelui/toast";
 import { PreviewLabel } from "@/components/preview-label";
 import { SearchField } from "@/components/search-field";
 import { useGuestAccess } from "@/context/guest-access-context";
+import { GuideStep } from "@/context/app-guide-context";
 import { useVisualPreview } from "@/context/visual-preview-context";
 import { fixtureHotlines } from "@/features/main-fixtures";
 import { useAppColors } from "@/hooks/use-app-colors";
@@ -20,7 +21,7 @@ import { fetchHotlines, type HotlineCategory } from "@/services/hotlines";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { Building2, Flame, Hospital, ShieldCheck } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { RefreshControl, ScrollView, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ContactCard } from "./contact-card";
@@ -42,6 +43,7 @@ export default function HotlinesScreen() {
     fetchHotlines({ force }),
   );
   const scrollRef = useMainPageScroll<ScrollView>(data.reload);
+  const alecoOffset = useRef(0);
   const { refresh, refreshing } = useManualRefresh(
     "hotlines", fixtures ? "fixture" : session?.user.id ?? "guest",
     () => fixtures ? undefined : data.reload(true),
@@ -150,7 +152,10 @@ export default function HotlinesScreen() {
           onChangeText={setQuery}
           placeholder="Search a hotline or category"
         />
-        <EmergencyCard />
+        <GuideStep chapter="hotlines" target="emergency" onActivate={() => scrollRef.current?.scrollTo({ y: 0, animated: false })}>
+          <EmergencyCard />
+        </GuideStep>
+        <GuideStep chapter="hotlines" target="aleco" onLayout={(event) => { alecoOffset.current = event.nativeEvent.layout.y; }} onActivate={() => scrollRef.current?.scrollTo({ y: alecoOffset.current, animated: false })}>
         {!fixtures && !data.data && data.busy ? (
           <DataState
             loading
@@ -185,6 +190,7 @@ export default function HotlinesScreen() {
             description="Browse other agencies below. Emergency calling is still available above."
           />
         )}
+        </GuideStep>
         {data.data && (data.error || data.data.isStale) ? (
           <DataNotice
             title={
@@ -198,6 +204,7 @@ export default function HotlinesScreen() {
             onAction={refresh}
           />
         ) : null}
+        <GuideStep chapter="hotlines" target="categories" className="gap-3" onActivate={() => scrollRef.current?.scrollToEnd({ animated: false })}>
         <View className="flex-row items-center justify-between">
           <Text weight="semibold" style={{ fontSize: 16, lineHeight: 22 }}>
             {guest ? "Browse categories" : "Pinned categories"}
@@ -256,6 +263,7 @@ export default function HotlinesScreen() {
         >
           View all hotlines
         </Button>
+        </GuideStep>
       </ScrollView>
 
       <BottomSheet

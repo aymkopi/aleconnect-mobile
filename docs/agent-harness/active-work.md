@@ -1,5 +1,7 @@
 # Active work
 
+- [Onboarding and contextual guidance](tasks/onboarding-refresh.md): isolated `codex/onboarding-refresh` implements three welcome pages, optional secure-sign-in setup and six replayable PanelUI Tour chapters. Figma Light/Dark, 563 tests, types, scoped lint, harness, web/Android exports and integrated-browser flows pass; graph evidence is preserved separately. Ready for integration review; native acceptance/publication remain separate. Primary manual history/security changes remain preserved.
+
 - [Consumer password policy](tasks/consumer-password-policy.md): Staff PR56/Mobile PR22 merged after green exact-head checks. Staff1.3.0-alpha.1 deployed and verified before Mobile1.4.0-alpha.1/code73 APK and unsigned IPA publication. Versions, original Android signer, six asset digests, native metadata and Desktop copies verify. No migration; primary manual changes remain preserved. Physical-device/authenticated password mutation and iOS push acceptance remain separate.
 
 - [iOS alpha version alignment](tasks/ios-release-version.md): PR #20 shares one alpha/build allocation across parallel native jobs, keeps the full alpha in About and rejects mismatched IPA metadata. Source/config/export, review and both exact application-head GitHub checks pass. Build 25 predates the approved profile update; exact published build 27 contains it but both report stale native 1.0.0. Merge/new native publication/installation remain separate. Preserve manual edits and all iPhone/signing/artifact state.

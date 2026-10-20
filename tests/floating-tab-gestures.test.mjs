@@ -8,6 +8,7 @@ function bar(index = 0, accepted = true, reduced = false) {
   const pan = new Proxy({}, { get: (_, name) => (value) => { handlers[name] = value; return pan; } });
   const jsx = (type, props) => ({ type, props });
   const modules = {
+    "@/context/app-guide-context": { GuideStep: "View" },
     "react/jsx-runtime": { jsx, jsxs: jsx },
     react: { useCallback: (callback) => callback, useRef: () => ({ current: false }), useEffect: (effect) => effect() },
     "lucide-react-native": {},

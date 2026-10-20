@@ -11,6 +11,7 @@ import { Button } from "@/components/panelui/button";
 import { Text } from "@/components/panelui/text";
 import { PreviewLabel } from "@/components/preview-label";
 import { useAppColors } from "@/hooks/use-app-colors";
+import { GuideStep } from "@/context/app-guide-context";
 
 export function ReportPage({
   title,
@@ -24,6 +25,7 @@ export function ReportPage({
   scroll = true,
   refreshing = false,
   onRefresh,
+  guideReport = false,
 }: {
   title: string;
   children: ReactNode;
@@ -36,6 +38,7 @@ export function ReportPage({
   scroll?: boolean;
   refreshing?: boolean;
   onRefresh?: () => void;
+  guideReport?: boolean;
 }) {
   const insets = useSafeAreaInsets();
   const [footerHeight, setFooterHeight] = useState(0);
@@ -77,7 +80,7 @@ export function ReportPage({
         {headerAction ?? <View style={{ width: 44 }} />}
       </View>
       {step ? (
-        <View className="gap-1 px-4 pb-1">
+        <GuideStep chapter="report-new" target={guideReport ? "progress" : ""} className="gap-1 px-4 pb-1">
           <View
             className="h-1 rounded-full bg-muted overflow-hidden"
             accessibilityRole="progressbar"
@@ -95,7 +98,7 @@ export function ReportPage({
             <Text size="xs" weight="medium">{step.label}</Text>
             <Text size="xs" muted>Step {step.current} of {step.total}</Text>
           </View>
-        </View>
+        </GuideStep>
       ) : null}
       {subtitle ? (
         <Text muted size="sm" className="px-4 pb-2">
@@ -119,7 +122,7 @@ export function ReportPage({
           }}
         >
           <PreviewLabel />
-          {children}
+          {guideReport ? <GuideStep chapter="report-new" target="fields" className="gap-3">{children}</GuideStep> : children}
         </KeyboardAwareScrollView>
 
       ) : (
@@ -130,7 +133,7 @@ export function ReportPage({
       )}
       {footer ? (
         <KeyboardStickyView>
-          <View
+          <GuideStep chapter="report-new" target={guideReport ? "continue" : ""}
             onLayout={(event) =>
               setFooterHeight(event.nativeEvent.layout.height)
             }
@@ -138,7 +141,7 @@ export function ReportPage({
             style={{ paddingBottom: Math.max(insets.bottom, 12) }}
           >
             {footer}
-          </View>
+          </GuideStep>
         </KeyboardStickyView>
       ) : null}
     </View>

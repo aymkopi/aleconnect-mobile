@@ -8,6 +8,8 @@ import {
   LifeBuoy,
   ShieldCheck,
   MessageCircle,
+  BookOpen,
+  UserRound,
 } from "lucide-react-native";
 import Constants from "expo-constants";
 import { Button } from "@/components/panelui/button";
@@ -15,7 +17,9 @@ import { Text } from "@/components/panelui/text";
 import { ReportPage } from "@/features/reports/components/report-page";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { ProfileHeading, ProfileNotice } from "./profile-ui";
+import { useGuestAccess } from "@/context/guest-access-context";
 export function SupportScreen({ kind, returnToReport = false }: { kind: "help" | "about" | "privacy" | "terms"; returnToReport?: boolean }) {
+  const { guest } = useGuestAccess();
   const router = useRouter(),
     [primary] = useAppColors(["primary"]),
     [error, setError] = useState("");
@@ -131,6 +135,8 @@ export function SupportScreen({ kind, returnToReport = false }: { kind: "help" |
             title="How can we help?"
             description="Find official contacts and get help with your ALECO service account."
           />
+          {row("App guide", "Learn the controls with short, replayable tours", () => router.push("/guide"), BookOpen)}
+          {!guest ? row("Account setup", "Review your profile, service accounts and alerts", () => router.push("/profile/setup"), UserRound) : null}
           {row(
             "Call ALECO",
             "View official hotlines and contact details",

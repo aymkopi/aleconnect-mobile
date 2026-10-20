@@ -12,7 +12,8 @@ async function renderAdvisories(feed, query = "", tab = "all") {
   const Tabs = Object.assign("Tabs", { List: "Tabs.List", Trigger: "Tabs.Trigger" });
   const modules = {
     "react/jsx-runtime": { jsx, jsxs: jsx },
-    "react": { useState: () => { const i = slot++; return [state[i], value => { state[i] = typeof value === "function" ? value(state[i]) : value; }]; } },
+    "react": { useRef: value => ({ current: value }), useState: () => { const i = slot++; return [state[i], value => { state[i] = typeof value === "function" ? value(state[i]) : value; }]; } },
+    "@/context/app-guide-context": { GuideStep: "View" },
     "react-native": { View: "View", FlatList: "FlatList" },
     "expo-router": { useRouter: () => ({ push: path => calls.push(path) }) },
     "react-native-safe-area-context": { useSafeAreaInsets: () => ({ top: 0, bottom: 0 }) },

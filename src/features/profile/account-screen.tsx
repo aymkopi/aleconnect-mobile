@@ -10,6 +10,7 @@ import { ThemeSelector } from "@/components/panelui/theme-selector";
 import { toast } from "@/components/panelui/toast";
 import { PreviewLabel } from "@/components/preview-label";
 import { useGuestAccess } from "@/context/guest-access-context";
+import { GuideStep } from "@/context/app-guide-context";
 import { useVisualPreview } from "@/context/visual-preview-context";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useAuthSession } from "@/hooks/use-auth-session";
@@ -29,7 +30,7 @@ import {
   ShieldCheck,
   type LucideIcon,
 } from "lucide-react-native";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Image, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Uniwind, useUniwind } from "uniwind";
@@ -102,6 +103,7 @@ export default function AccountScreen() {
   );
   const [logoutOpen, setLogoutOpen] = useState(false),
     [signingOut, setSigningOut] = useState(false);
+  const settingsOffset = useRef(0);
   async function logout() {
     setSigningOut(true);
     try {
@@ -179,6 +181,7 @@ export default function AccountScreen() {
       >
         <PreviewLabel />
         <MainPageHeader title="Account" />
+        <GuideStep chapter="account" target="profile" onActivate={() => scrollRef.current?.scrollTo({ y: 0, animated: false })}>
         {!guest && !fixtures && profileLoading && !profile ? (
           <ContentSkeleton
             layout="identity"
@@ -237,6 +240,7 @@ export default function AccountScreen() {
             <ChevronRight size={18} color={primary} />
           </Pressable>
         )}
+        </GuideStep>
         {error && !guest && !fixtures ? (
           <DataNotice
             title={
@@ -254,7 +258,7 @@ export default function AccountScreen() {
           />
         ) : null}
         {groups.map((group) => (
-          <View key={group.title} className="gap-2">
+          <GuideStep key={group.title} chapter="account" target={group.title === "Preferences" ? "settings" : group.title === "About & support" ? "help" : "service-accounts"} className="gap-2" onLayout={(event) => { if (group.title === "Preferences") settingsOffset.current = event.nativeEvent.layout.y; }} onActivate={() => group.title === "About & support" ? scrollRef.current?.scrollToEnd({ animated: false }) : scrollRef.current?.scrollTo({ y: settingsOffset.current, animated: false })}>
             <Text muted size="xs" weight="medium">
               {group.title}
             </Text>
@@ -289,7 +293,7 @@ export default function AccountScreen() {
                 />
               ))}
             </View>
-          </View>
+          </GuideStep>
         ))}
         {!session && !fixtures ? (
           <Button

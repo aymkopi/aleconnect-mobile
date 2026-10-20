@@ -2,6 +2,8 @@ import { Asset } from "expo-asset";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BackHandler, Image, Pressable, View } from "react-native";
 import { useFocusEffect, useNavigation, useRouter } from "expo-router";
+import { useAppGuide } from "@/context/app-guide-context";
+import { toast } from "@/components/panelui/toast";
 import {
   Activity,
   Check,
@@ -170,6 +172,7 @@ function draftHasContent(form: ComplaintFormState) {
 }
 
 export default function NewReportScreen() {
+  const { guide, stopGuide } = useAppGuide();
   const router = useRouter(),
     navigation = useNavigation();
   const { session, isLoading: authLoading } = useAuthSession();
@@ -273,6 +276,11 @@ export default function NewReportScreen() {
         scope.serviceAccountId,
       )),
   );
+  useEffect(() => {
+    if (guide?.id !== "report-new" || (!metaError && !stale)) return;
+    stopGuide();
+    toast.show({ label: "Guide unavailable", description: "Load the report form, then try this guide again from Help & support." });
+  }, [guide?.id, metaError, stale, stopGuide]);
   const latest = useRef({ currentScope, scopeCurrent, fixtures, accountId });
   latest.current = { currentScope, scopeCurrent, fixtures, accountId };
   useEffect(
@@ -967,6 +975,7 @@ export default function NewReportScreen() {
         title="New report"
         onBack={requestClose}
         step={{ current: step, total: 6, label: stepLabels[step - 1] }}
+        guideReport={!metaLoading && !metaError && !stale}
         footer={
           <>
             {step === 6 ? (

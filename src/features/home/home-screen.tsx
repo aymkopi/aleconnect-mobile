@@ -7,6 +7,7 @@ import { PreviewLabel } from "@/components/preview-label";
 import { SearchField } from "@/components/search-field";
 import { NotificationButton } from "@/components/notification-button";
 import { useGuestAccess } from "@/context/guest-access-context";
+import { GuideStep, useAppGuide } from "@/context/app-guide-context";
 import { useVisualPreview } from "@/context/visual-preview-context";
 import { updateRoute } from "@/features/advisories/presentation";
 import { PublisherCard } from "@/features/advisories/publisher-card";
@@ -97,6 +98,7 @@ const actions = [
   },
 ] as const;
 export default function HomeScreen() {
+  const { guide } = useAppGuide();
   const { theme } = useUniwind();
   const insets = useSafeAreaInsets(),
     { height, width, fontScale } = useWindowDimensions(),
@@ -262,6 +264,7 @@ export default function HomeScreen() {
                 ) : null}
               </View>
             ) : null}
+            <GuideStep chapter="home" target="search" onActivate={() => scrollRef.current?.scrollTo({ y: 0, animated: false })}>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Search services, reports and hotlines"
@@ -283,9 +286,10 @@ export default function HomeScreen() {
                 />
               </View>
             </Pressable>
+            </GuideStep>
           </View>
         </ImageBackground>
-        <View className="px-4" style={{ gap: layout.gap }}>
+        <GuideStep chapter="home" target="shortcuts" className="px-4" style={{ gap: layout.gap }} onActivate={() => scrollRef.current?.scrollTo({ y: layout.scrollRequired ? layout.headerHeight : 0, animated: false })}>
           <PreviewLabel />
           <Text weight="semibold" style={{ fontSize: 16, lineHeight: 22 }}>
             Quick Actions
@@ -342,8 +346,8 @@ export default function HomeScreen() {
               ))}
             </View>
           </View>
-        </View>
-        <View style={{ gap: 8 }}>
+        </GuideStep>
+        <GuideStep chapter="home" target="updates" style={{ gap: 8 }} onActivate={() => scrollRef.current?.scrollToEnd({ animated: false })}>
           <View
             className="px-4 flex-row items-center justify-between"
             style={{ height: layout.headingHeight }}
@@ -385,7 +389,7 @@ export default function HomeScreen() {
                 itemSize={width - 32}
                 gap={24}
                 loop
-                autoplay={focused}
+                autoplay={focused && guide?.id !== "home"}
                 autoplayInterval={3000}
               >
                 <Carousel.Content style={{ height: carouselCardHeight }}>
@@ -444,7 +448,7 @@ export default function HomeScreen() {
               ) : null}
             </View>
           )}
-        </View>
+        </GuideStep>
         <View
           className="mx-4 rounded-xl bg-card px-3 py-2 flex-row items-center justify-between gap-3"
           style={{ minHeight: layout.ctaHeight }}

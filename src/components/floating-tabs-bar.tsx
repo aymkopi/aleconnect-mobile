@@ -9,6 +9,7 @@ export function FloatingTabsBar({ state, navigation }: BottomTabBarProps) {
   return (
     <View style={{ flex: 0 }} pointerEvents="box-none">
       <FloatingAppBar
+        guideNavigation
         currentIndex={state.index}
         onSelect={(index) => {
           const route = state.routes[index];

@@ -1,5 +1,6 @@
 import { VisualPreviewProvider } from "@/context/visual-preview-context";
 import { GuestAccessProvider } from "@/context/guest-access-context";
+import { AppGuideProvider } from "@/context/app-guide-context";
 import { PANELUI_PREVIEW } from "@/constants/panelui-preview";
 import NetInfo from "@react-native-community/netinfo";
 import { useFonts } from "expo-font";
@@ -368,6 +369,7 @@ export default function RootLayout() {
           <ConsumerAccountProvider>
             <ReportQueueProvider syncEnabled={!PANELUI_PREVIEW}>
               <GuestAccessProvider>
+              <AppGuideProvider>
               <ForcedLogoutRedirect />
               <ComplaintSubmissionToastHost />
               <PushTokenBridge />
@@ -375,6 +377,7 @@ export default function RootLayout() {
                 <Stack screenOptions={{ headerShown: false, animation: "none", contentStyle: { backgroundColor: background } }} />
                 <AppStatusBar photo={photo} />
               </View>
+              </AppGuideProvider>
               </GuestAccessProvider>
             </ReportQueueProvider>
           </ConsumerAccountProvider>

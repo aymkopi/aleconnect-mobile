@@ -58,7 +58,8 @@ test("Hotline categories use one auto-sized searchable sheet without an ALECO la
   )(
     (id) =>
       ({
-        react: { useState, useEffect: () => {} },
+        react: { useState, useEffect: () => {}, useRef: value => ({ current: value }) },
+        "@/context/app-guide-context": { GuideStep: "View" },
         "react/jsx-runtime": {
           jsx: (type, props) => ({ type, props }),
           jsxs: (type, props) => ({ type, props }),
