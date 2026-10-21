@@ -526,13 +526,6 @@ function TourOverlay({
   const stepRadius = active?.radius ?? radius;
   const stepShape = active?.shape ?? shape;
 
-  /*
-   * Measured when the step becomes current and again whenever the window
-   * changes size. The second half is the part that is easy to leave out and
-   * impossible to miss once it is wrong: a rect taken in portrait describes
-   * nothing after a rotation, and the hole ends up over the wrong half of a
-   * screen the target is no longer on.
-   */
   useEffect(() => {
     const target = active?.target.current;
     if (!target) {
@@ -541,20 +534,26 @@ function TourOverlay({
     }
 
     let cancelled = false;
-    // A frame late on purpose: a step whose target was just scrolled back into
-    // view is measured where it lands, not where it was leaving.
-    const frame = requestAnimationFrame(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    // Ancestor scrolling moves window bounds without triggering the target's onLayout.
+    const measureTarget = () => {
       target.measureInWindow((x, y, width, height) => {
-        if (cancelled || (width === 0 && height === 0)) return;
-        setSpot(
-          spotlightFor({ x, y, width, height }, stepShape, stepPadding, stepRadius)
-        );
+        if (cancelled) return;
+        if (width > 0 && height > 0) {
+          const next = spotlightFor({ x, y, width, height }, stepShape, stepPadding, stepRadius);
+          setSpot(current => current && current.x === next.x && current.y === next.y &&
+            current.width === next.width && current.height === next.height &&
+            current.radius === next.radius ? current : next);
+        }
+        timer = setTimeout(measureTarget, 100);
       });
-    });
+    };
+    const frame = requestAnimationFrame(measureTarget);
 
     return () => {
       cancelled = true;
       cancelAnimationFrame(frame);
+      if (timer !== undefined) clearTimeout(timer);
     };
   }, [active, stepShape, stepPadding, stepRadius, screenWidth, screenHeight, fontScale]);
 

@@ -5,7 +5,10 @@ import ts from "typescript";
 
 function overlayHarness() {
   const slots = [], effects = [];
-  let cursor = 0;
+  let cursor = 0, stateChanges = 0, clockId = 0;
+  const frames = new Map(), timers = new Map();
+  const schedule = queue => (callback, delay) => { const id = ++clockId; queue.set(id, { callback, delay }); return id; };
+  const runNext = queue => { const next = queue.entries().next().value; if (!next) return; queue.delete(next[0]); next[1].callback(); };
   const same = (a, b) => a?.length === b?.length && a.every((value, i) => Object.is(value, b[i]));
   const react = {
     createContext: () => ({}),
@@ -13,7 +16,11 @@ function overlayHarness() {
     useState(initial) {
       const i = cursor++;
       if (!(i in slots)) slots[i] = initial;
-      return [slots[i], next => { slots[i] = typeof next === "function" ? next(slots[i]) : next; }];
+      return [slots[i], next => {
+        const value = typeof next === "function" ? next(slots[i]) : next;
+        if (!Object.is(value, slots[i])) stateChanges++;
+        slots[i] = value;
+      }];
     },
     useEffect(effect, deps) {
       const i = cursor++;
@@ -40,9 +47,9 @@ function overlayHarness() {
   };
   const source = readFileSync(new URL("../src/components/panelui/tour.tsx", import.meta.url), "utf8") + "\nexport const testOverlay = TourOverlay;";
   const exports = {};
-  new Function("require", "exports", "requestAnimationFrame", "cancelAnimationFrame", compile(source))(id => {
+  new Function("require", "exports", "requestAnimationFrame", "cancelAnimationFrame", "setTimeout", "clearTimeout", compile(source))(id => {
     assert.ok(id in modules, "Unmocked Tour dependency: " + id); return modules[id];
-  }, exports, callback => { callback(); return 1; }, () => {});
+  }, exports, schedule(frames), id => frames.delete(id), schedule(timers), id => timers.delete(id));
   const renderTree = (active, overrides = {}) => {
       cursor = 0;
       const tree = exports.testOverlay({ active, index: active.order, total: 2, isFirst: active.order === 0, isLast: active.order === 1,
@@ -55,6 +62,12 @@ function overlayHarness() {
   return {
     render: (active, overrides) => renderTree(active, overrides).props.children.at(-1).props.children,
     renderTree,
+    position: (active) => renderTree(active).props.children.at(-1).props.style,
+    runFrame: () => runNext(frames),
+    runTimer: () => runNext(timers),
+    pending: () => frames.size + timers.size,
+    stateChanges: () => stateChanges,
+    unmount: () => slots.forEach(slot => slot?.cleanup?.()),
   };
 }
 const entry = (order = 0) => ({ order, title: "Find what you need", description: "Search services and updates.", target: { current: null }, layout: null });
@@ -108,4 +121,44 @@ test("native Tour cards measure content inside a bounded viewport and cap tall c
   assert.equal(h.render(next).props.style.opacity, 1);
   previousContentSizeChange(370, 240);
   assert.equal(h.render(next).props.style.opacity, 1, "late measurements from an unmounted step must not hide the current card");
+});
+
+
+test("a scrolled ancestor moves the current spotlight without re-registering its target", () => {
+  const h = overlayHarness(), active = entry();
+  let y = 240;
+  active.target.current = { measureInWindow: done => done(10, y, 300, 60) };
+  h.render(active);
+  h.runFrame();
+  measure(h.render(active), 160);
+  const before = h.position(active).top;
+  y = 60;
+  h.runTimer();
+  const after = h.render(active);
+  assert.equal(h.position(active).top, before - 180, "ancestor scrolling must move the spotlight/card by the real offset");
+  assert.equal(after.props.style.opacity, 1, "remeasuring position must not hide the description");
+  const changes = h.stateChanges();
+  h.runTimer();
+  h.render(active);
+  assert.equal(h.stateChanges(), changes, "stationary targets must not cause React state churn");
+  h.unmount();
+  assert.equal(h.pending(), 0, "position tracking ends with the overlay");
+});
+
+test("a late target measurement cannot overwrite a newer step or restart tracking", () => {
+  const h = overlayHarness(), first = entry(), next = entry(1);
+  let finishFirst;
+  first.target.current = { measureInWindow: done => { finishFirst = done; } };
+  next.target.current = { measureInWindow: done => done(10, 60, 300, 60) };
+  h.render(first);
+  h.runFrame();
+  h.render(next);
+  h.runFrame();
+  measure(h.render(next), 160);
+  const currentTop = h.position(next).top;
+  finishFirst(10, 500, 300, 60);
+  assert.equal(h.position(next).top, currentTop);
+  h.unmount();
+  finishFirst(10, 600, 300, 60);
+  assert.equal(h.pending(), 0);
 });
