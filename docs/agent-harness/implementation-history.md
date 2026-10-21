@@ -2,10 +2,11 @@
 
 ## 2026-10-22 - Advisory integration acceptance
 
-- Scope: revalidate the paired advisory changes against current defaults and prepare the user-authorized commit/push/fast-forward merge with `[skip ci]`, preserving unrelated work, existing apps and APKs. Staff base10c75a04 retains the newer Lineman password change; Mobile base84667cfb is unchanged.
+- Scope: revalidate the paired advisory changes against current defaults and complete the user-authorized commit/push/fast-forward merge with `[skip ci]`, preserving unrelated work, existing apps and APKs. Staff base9ea1eafa retains the newer Lineman password/field Inbox changes; Mobile base84667cfb is unchanged.
 - Verification: Staff27 tests/build/API lint and Mobile569 tests/types/scoped lint pass, as do both explicit-sibling harnesses and whitespace checks. Browser phone/tablet widths and the connected Redmi Pad 2 pass mapped/unmapped account coverage, no manual picker, both switches/local autosave and Advisories navigation using sample data. Graph refresh evidence is saved separately; temporary QA configuration is excluded.
 - Remaining risks: no deployment, live data/token/preference write, real push/provider delivery or production Mobile publication. Final tablet log/foreground restoration is unverified after disconnection. Real feeder delivery still needs mappings; inspect older queued audiences before a separately authorized deployment.
-- Next: record the integrated commit refs and zero Actions runs; preserve the tested fixture APK and the original release APK. See [handoff](tasks/account-advisory-alerts.md).
+- Integration: October22: [Staff b3c6a9ac](https://github.com/aymkopi/Aleconnect/commit/b3c6a9ac3dea7a3cfab94641328827b3b4949a6b) and [Mobile 56deee3](https://github.com/aymkopi/aleconnect-mobile/commit/56deee35b7a310f77f29f20a200823dd90808e17) are pushed and fast-forward merged into remote/local Staff `main` and Mobile `master`. Both source commits use `[skip ci]`; GitHub reports zero Actions runs for each SHA. Cloudflare Workers Builds completes as skipped, so no automatic deployment occurs. The feature worktrees are clean. All197 original Staff files and5 Mobile files are preserved; the restored Mobile manual history patch is identical, and both original/tested APK SHA256 values are unchanged. Recovery stashes and worktrees are retained.
+- Next: separately authorize the compatible Staff deployment before Mobile distribution, inspect older queued audiences, and retain the provider/mapping acceptance gates. See [handoff](tasks/account-advisory-alerts.md).
 
 ## 2026-10-21 - Automatic advisory coverage from account locations
 

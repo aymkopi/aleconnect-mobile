@@ -1,6 +1,6 @@
 # Active work
 
-- [Account-location advisory alerts](tasks/account-advisory-alerts.md): paired account-derived targeting and read-only coverage pass Staff27/Mobile569 tests, build/types/lint, browser and connected-tablet fixture acceptance. October22 user authorizes integration with `[skip ci]`; record refs and zero Actions runs next. Retain both APKs and unrelated work; deployment, real mapping/provider delivery and publication stay separate.
+- [Account-location advisory alerts](tasks/account-advisory-alerts.md): Staffb3c6a9ac/Mobile56deee3 merged into main/master with `[skip ci]`; zero Actions runs and Cloudflare build skipped. Staff27/Mobile569 tests, build/types/lint, browser and connected-tablet fixture acceptance pass. Both APKs and all unrelated work are preserved. Deployment, old queued audiences and real mapping/provider delivery remain separate gates.
 
 - [Tour recovery](tasks/onboarding-refresh.md#post-release-tour-recovery-2026-10-20): PR #24 merged as b5ce1c9a; workflow 39434693032 publishes 1.5.1-alpha.1/build 75 APK and unsigned IPA. 568 tests pass/1 existing skip; types, scoped lint, native exports and 12 Light/Dark exported-browser journeys pass; independent review has no findings. Six asset digests, versions, bundled fix, original signer, alignment and Desktop copies verify. Manual primary work is preserved. Native acceptance is deferred while the tablet is reserved for Lineman; iPhone interaction remains unverified.
 

@@ -23,7 +23,9 @@ Retain `aleconnect-mobile-advisory-qa-20261022-arm64.apk` in the user's Desktop 
 
 Fresh checks on Staff base `9ea1eafa` and Mobile base `84667cfb`: Staff27 focused tests, production build/API lint; Mobile569 tests, TypeScript/scoped lint; both paired harnesses and whitespace checks pass. The newer Staff field Inbox change is retained. Graphify refresh succeeds (Staff11749 nodes/22138 edges; Mobile4578 nodes/8621 edges before the field-only base refresh); all nine generated files are hash-preserved outside the scoped commits. Temporary native QA config/transport is excluded from product source.
 
-The user authorizes scoped commit, push and fast-forward integration into Staff `main` and Mobile `master`, with `[skip ci]` on every new commit. Verify remote refs and zero Actions runs after integration. Preserve recovery stashes, unrelated primary work and both APKs. No deployment, live preference write, mapping mutation or native publication is authorized.
+October22: [Staff b3c6a9ac](https://github.com/aymkopi/Aleconnect/commit/b3c6a9ac3dea7a3cfab94641328827b3b4949a6b) and [Mobile 56deee3](https://github.com/aymkopi/aleconnect-mobile/commit/56deee35b7a310f77f29f20a200823dd90808e17) are pushed and fast-forward merged into remote/local Staff `main` and Mobile `master`. Both source commits use `[skip ci]`; GitHub reports zero Actions runs for each SHA. Cloudflare Workers Builds completes as skipped, so no automatic deployment occurs. The feature worktrees are clean. All197 original Staff files and5 Mobile files are preserved; the restored Mobile manual history patch is identical, and both original/tested APK SHA256 values are unchanged. Recovery stashes and worktrees are retained.
+
+No deployment, live preference write, mapping mutation or native publication is included.
 
 ## Rollout, rollback and remaining risks
 
@@ -33,4 +35,4 @@ Deploy Staff's compatible API and advisory delivery runtime before releasing Mob
 
 Rollback restores prior source; legacy manual follow rows remain intact. New Mobile safely renders omitted coverage from an older server but depends on Staff's new policy for targeting enforcement.
 
-Next: complete the authorized source integration and record remote commits/Actions evidence; retain the separate deployment/provider gates.
+Next: separately authorize deployment and production Mobile distribution when ready. Inspect older persisted audience snapshots before deployment; real feeder-specific delivery needs real mappings.
