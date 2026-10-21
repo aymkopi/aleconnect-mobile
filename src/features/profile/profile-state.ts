@@ -1,26 +1,6 @@
-import type { NotificationSubstation } from "../../services/notification-settings";
 import { consumerPasswordError } from "../../lib/consumer-password-policy.ts";
 export function accountProfileIdentifier(count: number, email: string | null | undefined, accountNumber: string | null | undefined) {
   return (count > 1 ? email?.trim() : accountNumber?.trim() || email?.trim()) || null;
-}
-export function expandAreas(
-  stations: NotificationSubstation[],
-  parents: string[],
-  children: string[],
-) {
-  return stations.flatMap((s) =>
-    s.feeders.filter((f) => parents.includes(s.id) || children.includes(f.id)).map((f) => f.id),
-  );
-}
-export function compactAreas(stations: NotificationSubstation[], selected: string[]) {
-  const selectedSubstationIds: string[] = [],
-    selectedFeederIds: string[] = [];
-  for (const s of stations) {
-    const ids = s.feeders.filter((f) => selected.includes(f.id)).map((f) => f.id);
-    if (ids.length && ids.length === s.feeders.length) selectedSubstationIds.push(s.id);
-    else selectedFeederIds.push(...ids);
-  }
-  return { selectedSubstationIds, selectedFeederIds };
 }
 export function profileEditAllowed(
   editing?: { version: number; activeReportCount: number } | null,

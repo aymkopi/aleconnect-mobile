@@ -57,28 +57,14 @@ export function fixtureProfile(id: string, locked = false) {
 }
 export const profileFixtureSettings: NotificationSettingsResult = {
   preferences: { receivePushNotifications: true, receiveAdvisories: true },
-  selectedSubstationIds: [],
-  selectedFeederIds: ["bitano-1", "bitano-2"],
-  substations: [
-    {
-      id: "bitano",
-      name: "Bitano substation",
-      feeders: [
-        { id: "bitano-1", name: "Bitano Feeder 1" },
-        { id: "bitano-2", name: "Bitano Feeder 2" },
-        { id: "bitano-3", name: "Bitano Feeder 3" },
-      ],
-    },
-    {
-      id: "ligao",
-      name: "Ligao substation",
-      feeders: [
-        { id: "ligao-1", name: "Ligao Feeder 1" },
-        { id: "ligao-2", name: "Ligao Feeder 2" },
-        { id: "ligao-3", name: "Ligao Feeder 3" },
-      ],
-    },
+  coverageMode: "account_locations",
+  accountCoverage: [
+    { serviceAccountId: "fixture-home", barangayPsgc: "fixture-rawis", feeders: [{ id: "bitano-1", name: "Bitano Feeder 1" }] },
+    { serviceAccountId: "fixture-family", barangayPsgc: "fixture-bigaa", feeders: [] },
   ],
+  selectedSubstationIds: [],
+  selectedFeederIds: [],
+  substations: [],
   isStale: false,
 };
 export const profileFixtureRequests: AccountLinkRequest[] = [

@@ -3,36 +3,8 @@ import assert from "node:assert/strict";
 import {
   validateProfileDraft,
   validatePasswordChange,
-  expandAreas,
-  compactAreas,
   profileEditAllowed,
 } from "../src/features/profile/profile-state.ts";
-const stations = [
-  {
-    id: "s",
-    name: "Bitano",
-    feeders: [
-      { id: "a", name: "A" },
-      { id: "b", name: "B" },
-    ],
-  },
-  { id: "t", name: "Ligao", feeders: [] },
-];
-test("subscription round trip compresses complete substations and partial feeders", () => {
-  assert.deepEqual(expandAreas(stations, ["s"], ["a", "unknown"]), ["a", "b"]);
-  assert.deepEqual(compactAreas(stations, ["a", "b", "unknown"]), {
-    selectedSubstationIds: ["s"],
-    selectedFeederIds: [],
-  });
-  assert.deepEqual(compactAreas(stations, ["b"]), {
-    selectedSubstationIds: [],
-    selectedFeederIds: ["b"],
-  });
-  assert.deepEqual(compactAreas(stations, []), {
-    selectedSubstationIds: [],
-    selectedFeederIds: [],
-  });
-});
 test("secure profile editing remains available with active reports", () => {
   for (const activeReportCount of [0, 2, -1, NaN])
     assert.equal(profileEditAllowed({ version: 1, activeReportCount }), true);

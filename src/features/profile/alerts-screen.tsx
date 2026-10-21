@@ -1,10 +1,6 @@
 import { DataNotice, DataState } from "@/components/data-state";
-import { BottomSheet } from "@/components/panelui/bottom-sheet";
 import { Button } from "@/components/panelui/button";
-import { Checkbox } from "@/components/panelui/checkbox";
 import { Dialog } from "@/components/panelui/dialog";
-import { InputGroup } from "@/components/panelui/input-group";
-import { Spinner } from "@/components/panelui/spinner";
 import { Switch } from "@/components/panelui/switch";
 import { Text } from "@/components/panelui/text";
 import { PANELUI_PREVIEW } from "@/constants/panelui-preview";
@@ -24,11 +20,10 @@ import {
 import NetInfo from "@react-native-community/netinfo";
 import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
-import { Bell, Check, ChevronLeft, Search, X, Zap } from "lucide-react-native";
+import { Bell, Zap } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { AppState, Linking, View } from "react-native";
 import { profileFixtureSettings } from "./profile-fixtures";
-import { compactAreas, expandAreas } from "./profile-state";
 import {
   ProfileGate,
   ProfileNotice,
@@ -39,8 +34,6 @@ import {
 function payload(value: NotificationSettingsResult) {
   return {
     ...value.preferences,
-    selectedSubstationIds: value.selectedSubstationIds,
-    selectedFeederIds: value.selectedFeederIds,
   };
 }
 export default function AlertsScreen() {
@@ -55,7 +48,7 @@ function Alerts({ identity }: { identity: ProfileIdentity }) {
   const read = useScopedRead(identity.key, () =>
     identity.fixture
       ? Promise.resolve(profileFixtureSettings)
-      : fetchNotificationSettings(identity.principalId),
+      : fetchNotificationSettings(identity.key),
   );
   const [draft, setDraft] = useState<NotificationSettingsResult | null>(null),
     [saved, setSaved] = useState(""),
@@ -68,10 +61,6 @@ function Alerts({ identity }: { identity: ProfileIdentity }) {
     ),
     [deviceBusy, setDeviceBusy] = useState(false),
     [deviceError, setDeviceError] = useState(""),
-    [sheet, setSheet] = useState(false),
-    [station, setStation] = useState(""),
-    [areaQuery, setAreaQuery] = useState(""),
-    [areaDraft, setAreaDraft] = useState<string[]>([]),
     [discard, setDiscard] = useState(false);
   const [deviceRegistered, setDeviceRegistered] = useState(false);
   const hydrated = useRef<NotificationSettingsResult | null>(null);
@@ -136,7 +125,7 @@ function Alerts({ identity }: { identity: ProfileIdentity }) {
       void (
         identity.fixture
           ? Promise.resolve({ ...draft, isStale: false })
-          : saveNotificationSettings(identity.principalId, value)
+          : saveNotificationSettings(identity.key, value)
       )
         .then((next) => {
           if (current()) {
@@ -169,7 +158,7 @@ function Alerts({ identity }: { identity: ProfileIdentity }) {
     loading,
     loaded?.isStale,
     identity.fixture,
-    identity.principalId,
+    identity.key,
     current,
     refresh,
     retry,
@@ -187,17 +176,6 @@ function Alerts({ identity }: { identity: ProfileIdentity }) {
     leave();
   }
   const allowLeave = useProfileBackGuard(saving || deviceBusy || dirty, back);
-  const ids = draft
-    ? expandAreas(
-        draft.substations,
-        draft.selectedSubstationIds,
-        draft.selectedFeederIds,
-      )
-    : [];
-  const feeders =
-    draft?.substations
-      .flatMap((s) => s.feeders)
-      .filter((f) => ids.includes(f.id)) ?? [];
   function update(
     field: "receivePushNotifications" | "receiveAdvisories",
     value: boolean,
@@ -250,24 +228,6 @@ function Alerts({ identity }: { identity: ProfileIdentity }) {
       if (current()) setDeviceBusy(false);
     }
   }
-  const selectedStation = draft?.substations.find((s) => s.id === station);
-  const areaTerm = areaQuery.trim().toLocaleLowerCase();
-  const matchesArea = (name: string) =>
-    name.toLocaleLowerCase().includes(areaTerm);
-  const matchingStations =
-    draft?.substations.filter(
-      (s) =>
-        matchesArea(s.name) ||
-        s.feeders.some((f) => matchesArea(`${s.name} ${f.name}`)),
-    ) ?? [];
-  const matchingFeeders = (
-    selectedStation ? [selectedStation] : (draft?.substations ?? [])
-  ).flatMap((s) => s.feeders.filter((f) => matchesArea(`${s.name} ${f.name}`)));
-  function chooseStation(value: string) {
-    setStation(value);
-    setAreaQuery("");
-  }
-  const changeIds = (values: string[]) => setAreaDraft([...new Set(values)]);
   return (
     <>
       <ReportPage title="Alerts & notifications" onBack={back}>
@@ -387,58 +347,45 @@ function Alerts({ identity }: { identity: ProfileIdentity }) {
                   : "Device alerts are ready"}
               </Text>
             ) : null}
-            <Text size="sm" weight="semibold" accessibilityRole="header">
-              Broadcast areas
+            <Text size="xs" muted accessibilityLiveRegion="polite">
+              {saving || loading
+                ? "Saving preferences…"
+                : error || read.error
+                  ? "Preferences not synced"
+                  : dirty || !online || loaded?.isStale
+                    ? "Preferences waiting to sync"
+                    : identity.fixture ? "Local preview" : "Preferences synced"}
             </Text>
-            <View className="gap-2 rounded-xl bg-card p-3">
-              <View className="flex-row gap-2">
-                <Text size="sm" weight="semibold" className="flex-1">
-                  {draft.substations
-                    .filter((s) => s.feeders.some((f) => ids.includes(f.id)))
-                    .map((s) => s.name)
-                    .join(" & ") || "Choose your service areas"}
-                </Text>
-                <View
-                  className="flex-row items-center gap-1"
-                  accessibilityLiveRegion="polite"
-                >
-                  {saving || loading ? (
-                    <Spinner size="sm" />
-                  ) : !dirty &&
-                    online &&
-                    !loaded?.isStale &&
-                    !error &&
-                    !read.error ? (
-                    <Check size={14} color={primary} />
-                  ) : null}
-                  <Text size="xs" className="text-primary">
-                    {saving || loading
-                      ? "Syncing"
-                      : error || read.error
-                        ? "Not synced"
-                        : dirty || !online || loaded?.isStale
-                          ? "Pending sync"
-                          : identity.fixture
-                            ? "Local preview"
-                            : "Synced"}
+            <Text size="sm" weight="semibold" accessibilityRole="header">
+              Automatic account coverage
+            </Text>
+            <Text size="sm" muted>
+              Advisory alerts follow the selected location of every linked ALECO account. Coverage updates automatically when an account location changes.
+            </Text>
+            {identity.account.accounts.map((account) => {
+              const coverage = draft.accountCoverage?.find((item) => item.serviceAccountId === account.id);
+              return (
+                <View key={account.id} className="gap-2 rounded-xl bg-card p-3">
+                  <Text size="sm" weight="semibold">{account.accountNumber || account.registeredName || "ALECO account"}</Text>
+                  <Text size="sm" muted>{account.address || "No account location selected"}</Text>
+                  <Text size="sm">
+                    {coverage?.feeders.length
+                      ? coverage.feeders.map((feeder) => feeder.name).join(", ")
+                      : !coverage
+                        ? "Refresh settings to load this account’s coverage."
+                        : !coverage.barangayPsgc
+                          ? "Select this account’s location in Account details to set up feeder coverage."
+                          : "Feeder coverage is not available for this account location yet."}
                   </Text>
                 </View>
-              </View>
-              <Text size="sm" muted>
-                {feeders.length ? feeders.slice(0, 2).map(f => f.name).join(", ") + (feeders.length > 2 ? " and " + (feeders.length - 2) + " more" : "") : "No broadcast areas selected"}
-              </Text>
-              <Button
-                variant="outline"
-                disabled={saving}
-                onPress={() => {
-                  setAreaDraft(ids);
-                  chooseStation("");
-                  setSheet(true);
-                }}
-              >
-                Change areas
-              </Button>
-            </View>
+              );
+            })}
+            <Text size="xs" muted>
+              Accounts without feeder coverage receive only advisories addressed to everyone. You can browse all advisories at any time.
+            </Text>
+            <Button variant="outline" onPress={() => router.push("/advisories")}>
+              Browse all advisories
+            </Button>
             <Text size="xs" muted>
               Report updates are sent to your ALECO account.
             </Text>
@@ -479,192 +426,6 @@ function Alerts({ identity }: { identity: ProfileIdentity }) {
           </>
         )}
       </ReportPage>
-      <BottomSheet
-        open={sheet}
-        onOpenChange={(open) => {
-          setSheet(open);
-          if (!open) setAreaQuery("");
-        }}
-      >
-        <BottomSheet.Content
-          className="px-4"
-          onBack={station ? () => chooseStation("") : undefined}
-        >
-          <BottomSheet.Header>
-            <View className="flex-row gap-2 items-center">
-              {station ? (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  accessibilityLabel="Back to broadcast areas"
-                  onPress={() => chooseStation("")}
-                >
-                  <ChevronLeft size={20} color={primary} />
-                </Button>
-              ) : null}
-              <Text size="lg" weight="semibold">
-                {selectedStation?.name ?? "Broadcast areas"}
-              </Text>
-            </View>
-          </BottomSheet.Header>
-          <BottomSheet.Body
-            className="gap-3"
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-          >
-            <Text size="lg" weight="semibold" accessibilityRole="header">
-              Find your service area
-            </Text>
-            <Text size="sm">
-              Search by feeder or substation. Your selection stays in place when
-              you clear the search.
-            </Text>
-            <InputGroup>
-              <InputGroup.Prefix isDecorative>
-                <Search size={18} color={muted} />
-              </InputGroup.Prefix>
-              <InputGroup.Input
-                accessibilityLabel="Search feeders or substations"
-                placeholder="Search feeders or substations"
-                value={areaQuery}
-                onChangeText={setAreaQuery}
-                autoCorrect={false}
-                className="min-h-12 rounded-xl bg-card text-sm"
-                style={{ minHeight: 48, fontSize: 14, lineHeight: 20 }}
-              />
-              {areaQuery ? (
-                <InputGroup.Suffix>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    style={{ width: 48, height: 48 }}
-                    accessibilityLabel="Clear area search"
-                    onPress={() => setAreaQuery("")}
-                  >
-                    <X size={18} color={muted} />
-                  </Button>
-                </InputGroup.Suffix>
-              ) : null}
-            </InputGroup>
-            <View className="gap-0.5" accessibilityLiveRegion="polite">
-            <Text size="sm" weight="medium">
-              {matchingFeeders.length
-                ? `${matchingFeeders.length} ${areaTerm ? "matching" : "available"} feeders`
-                : "No matching feeders"}
-            </Text>
-            <Text muted size="xs">{areaDraft.length} selected overall</Text>
-            </View>
-            {!matchingFeeders.length ? (
-              <View className="rounded-xl bg-card p-4">
-                <Text muted size="sm">
-                  Try a feeder or substation name. Your existing selections are
-                  kept.
-                </Text>
-              </View>
-            ) : null}
-            {station ? (
-              matchingFeeders.map((f) => (
-                <View key={f.id} className="rounded-xl bg-card p-3">
-                  <Checkbox
-                    checked={areaDraft.includes(f.id)}
-                    label={f.name}
-                    onCheckedChange={(v) =>
-                      changeIds(
-                        v
-                          ? [...areaDraft, f.id]
-                          : areaDraft.filter((id) => id !== f.id),
-                      )
-                    }
-                  />
-                </View>
-              ))
-            ) : (
-              <>
-                {matchingStations.map((s) => {
-                  const n = s.feeders.filter((f) =>
-                    areaDraft.includes(f.id),
-                  ).length;
-                  return (
-                    <View key={s.id} className="gap-1 rounded-xl bg-card p-3">
-                      <Checkbox
-                        checked={n === s.feeders.length && n > 0}
-                        indeterminate={n > 0 && n < s.feeders.length}
-                        disabled={!s.feeders.length}
-                        label={s.name}
-                        description={
-                          n + " of " + s.feeders.length + " feeders selected"
-                        }
-                        onCheckedChange={(v) =>
-                          changeIds(
-                            v
-                              ? [...areaDraft, ...s.feeders.map((f) => f.id)]
-                              : areaDraft.filter(
-                                  (id) => !s.feeders.some((f) => f.id === id),
-                                ),
-                          )
-                        }
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        disabled={!s.feeders.length}
-                        onPress={() => chooseStation(s.id)}
-                      >
-                        Choose feeders
-                      </Button>
-                    </View>
-                  );
-                })}
-                <View className="flex-row gap-2">
-                  <Button
-                    className="flex-1"
-                    variant="outline"
-                    disabled={!matchingFeeders.length}
-                    onPress={() =>
-                      changeIds([
-                        ...areaDraft,
-                        ...matchingFeeders.map((f) => f.id),
-                      ])
-                    }
-                  >
-                    {areaTerm ? "Select matches" : "Select all"}
-                  </Button>
-                  <Button
-                    className="flex-1"
-                    variant="outline"
-                    disabled={!matchingFeeders.length}
-                    onPress={() =>
-                      changeIds(
-                        areaDraft.filter(
-                          (id) => !matchingFeeders.some((f) => f.id === id),
-                        ),
-                      )
-                    }
-                  >
-                    {areaTerm ? "Clear matches" : "Clear all"}
-                  </Button>
-                </View>
-              </>
-            )}
-          </BottomSheet.Body>
-          <BottomSheet.Footer>
-            <Button
-              onPress={() => {
-                if (!draft) return;
-                setDraft({
-                  ...draft,
-                  ...compactAreas(draft.substations, areaDraft),
-                });
-                setError("");
-                setAreaQuery("");
-                setSheet(false);
-              }}
-            >
-              Use selected areas
-            </Button>
-          </BottomSheet.Footer>
-        </BottomSheet.Content>
-      </BottomSheet>
       <Dialog open={discard} onOpenChange={setDiscard}>
         <Dialog.Content>
           <Dialog.Title>Leave unsaved preferences?</Dialog.Title>

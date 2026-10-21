@@ -21,6 +21,12 @@ export type NotificationPreferences = {
 };
 
 export type NotificationSettings = {
+  readonly coverageMode?: "account_locations";
+  readonly accountCoverage?: {
+    readonly serviceAccountId: string;
+    readonly barangayPsgc: string | null;
+    readonly feeders: NotificationFeeder[];
+  }[];
   readonly preferences: NotificationPreferences;
   readonly selectedSubstationIds: string[];
   readonly selectedFeederIds: string[];
@@ -34,8 +40,6 @@ export type NotificationSettingsResult = NotificationSettings & {
 export type SaveNotificationSettingsInput = {
   readonly receivePushNotifications: boolean;
   readonly receiveAdvisories: boolean;
-  readonly selectedSubstationIds: string[];
-  readonly selectedFeederIds: string[];
 };
 
 type NotificationSettingsCache = {

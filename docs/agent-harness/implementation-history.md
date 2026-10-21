@@ -1,5 +1,19 @@
 # Implementation history
 
+## 2026-10-22 - Advisory integration acceptance
+
+- Scope: revalidate the paired advisory changes against current defaults and prepare the user-authorized commit/push/fast-forward merge with `[skip ci]`, preserving unrelated work, existing apps and APKs. Staff base10c75a04 retains the newer Lineman password change; Mobile base84667cfb is unchanged.
+- Verification: Staff27 tests/build/API lint and Mobile569 tests/types/scoped lint pass, as do both explicit-sibling harnesses and whitespace checks. Browser phone/tablet widths and the connected Redmi Pad 2 pass mapped/unmapped account coverage, no manual picker, both switches/local autosave and Advisories navigation using sample data. Graph refresh evidence is saved separately; temporary QA configuration is excluded.
+- Remaining risks: no deployment, live data/token/preference write, real push/provider delivery or production Mobile publication. Final tablet log/foreground restoration is unverified after disconnection. Real feeder delivery still needs mappings; inspect older queued audiences before a separately authorized deployment.
+- Next: record the integrated commit refs and zero Actions runs; preserve the tested fixture APK and the original release APK. See [handoff](tasks/account-advisory-alerts.md).
+
+## 2026-10-21 - Automatic advisory coverage from account locations
+
+- Scope: replace optional feeder/substation controls with read-only coverage for every linked ALECO account. Retain both switches, device setup and unsaved-edit handling; show missing-location/mapping and old-response guidance, scope cached settings by identity/access revision, and link to all advisories. Coordinate with Staff's automatic account-location push/inbox policy and compatible additive settings response.
+- Verification: full569 tests, TypeScript/scoped lint, fixture web export, three responsive browser widths, Light/Dark coverage screenshots, switch saving and Advisories navigation pass. All API requests are intercepted. Initial missing generated map assets are supplied by the existing sync script before the passing full rerun. Staff27 focused tests, production build/API lint, both explicit-sibling harnesses, whitespace and source review pass. Graphify refresh succeeds; generated graph/type evidence stays separate from the scoped source diff.
+- Remaining risks: no production preference write, push send, mapping/schema mutation, publication or device/provider/native acceptance. New targeting needs Staff API/delivery deployment before Mobile; older queued audiences need inspection at release. Primary manual/security changes, signing and device state remain preserved.
+- Next: review the paired source and authorize integration/release separately. See [handoff](tasks/account-advisory-alerts.md).
+
 ## 2026-10-20 - Shared Tour description and dismissal recovery
 
 - Scope: reproduce the reported Android/iOS spotlight-only guide and accidental dismissal in the shared PanelUI Tour. Retain measured card height across the same target's relayout, measure intrinsic content in a bounded native viewport, ignore stale step callbacks and invalid measurements, and opt app guides out of backdrop dismissal. Raise the existing End tour button above its description container. No dependency, API, storage, provider or signing change.
