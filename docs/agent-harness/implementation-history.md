@@ -1,5 +1,24 @@
 # Implementation history
 
+## 2026-10-22 - Reports Tour delayed-scroll alignment
+
+- Scope: fix the shared PanelUI Tour target measurement after an ancestor FlatList scroll. Reuse the isolated task worktree on current master; preserve the five primary manual documentation files, previous acceptance evidence, signing identity and tablet data. No API, dependency, schema or navigation change.
+- Verification: the delayed-scroll regression fails against the old one-frame measurement (top320 instead of140) and passes after active-target tracking. A second test rejects stale step callbacks; stationary measurements avoid state churn and tracking cancels on close. All571 tests and TypeScript pass; scoped lint has zero errors/two unchanged lifecycle warnings. Graphify refresh is hash-preserved outside the source diff. Expo Doctor passes20/21 checks and reports seven available baseline Expo patches; no dependency upgrade is made.
+- Native verification: standalone ARM641.5.1-alpha.1-tour-scroll/code75 builds and verifies the original signer, fixture-off API bundle,27 native libraries and ZIP/ELF16KB alignment. APK SHA25699d375d2285be602bb377274144c54f6363591d2846cf6400932fed0f88ed6e6 installs in place on25040RP0AG. Four Reports descriptions and four final-step entries are visually correct; Back/Next/Done/End tour and isolated body/outside taps pass. Session, first-install time, CE/DE identifiers and first-report unread state remain; scoped crash patterns are zero. Five primary manual hashes match. No form submission, discard, call, logout or business mutation occurs.
+- Remaining risks: one early ref-based input sequence unexpectedly reaches an empty New report form; it closes cleanly without discard, and fresh-coordinate replays at the original/alternate outside coordinates do not reproduce it. Cause is unconfirmed and recorded, not silently passed. Native iOS, other sizes, rotation, large text and screen readers remain unverified; seven Expo patch recommendations remain baseline. No public release, merge or push is performed.
+- Next: requested fix and tablet retest are complete in codex/reports-tour-scroll-target. Preserve private evidence, installed test APK, rollback APK and manual work; integration/publication requires separate scope. See the corrected [Tour handoff](tasks/onboarding-refresh.md#reports-spotlight-scroll-correction-2026-10-22).
+
+
+## 2026-10-20 - Real-tablet Tour acceptance
+
+- Scope: after Lineman's explicit device release, verify and install the exact 1.5.1-alpha.1/code 75 APK in place on Redmi Pad 2 model25040RP0AG, then exercise all six Tour chapters. Preserve primary manual history/security files, Mobile data and Lineman's saved work.
+- Verification: original signer, released hash and native versions match. adb install -r succeeds with the original August6 first-install timestamp and both data-directory inode identifiers unchanged. Guest state persists; the user signs in locally for private chapters without sharing credentials. All20 descriptions remain visible; Next/Back/Done and ignored outside/body taps pass across six chapters. Explicit Skip/End tour replays pass. Twenty screenshots are visually checked and hash-copied to ignored evidence; scoped Mobile process logs have zero crash-pattern matches. New report field/selection values remain identical, with form Continue/Submit untouched.
+- Remaining risks: Reports step4 spotlight is offset toward a later report after automatic list scrolling; description/controls remain visible. Record this as a visual failure requiring remeasurement investigation, not complete visual acceptance. iPhone, other native sizes, rotation, large text and screen readers remain unverified.
+- Preservation:1600x2560, existing318dpi override, font1.0, animation scales1.0 and ADB mappings are unchanged. No report, call, profile edit, logout, uninstall, data clear or draft discard is performed. Lineman packages/data are untouched; Mobile remains on its original New report account step. Acceptance follow-up is paused. Private per-step results, screenshots, package snapshots/logs and rollback APK are retained at C:/Users/Justine/VSCodeProjects/aleconnect-mobile/.cache/tour-native-acceptance-1.5.1.
+- Next: fix/recheck the Reports spotlight offset in a scoped follow-up; no additional release or application/API/schema change is part of this test pass. See [acceptance handoff](tasks/onboarding-refresh.md#physical-tablet-acceptance-2026-10-20).
+
+
+
 ## 2026-10-22 - Advisory integration acceptance
 
 - Scope: revalidate the paired advisory changes against current defaults and complete the user-authorized commit/push/fast-forward merge with `[skip ci]`, preserving unrelated work, existing apps and APKs. Staff base9ea1eafa retains the newer Lineman password/field Inbox changes; Mobile base84667cfb is unchanged.
