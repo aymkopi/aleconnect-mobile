@@ -1,4 +1,11 @@
 # Implementation history
+## 2026-10-22 - Reports Tour PR25 integrated without Actions
+
+- Scope: user authorizes PR, scoped commit/push and default-branch merge while preserving unrelated work/tested APK and avoiding GitHub Actions. Only consumer Mobile changes; no Staff/Lineman, API/schema, dependency, native config, public release or deployment change.
+- Verification: all571 fresh local tests, TypeScript, explicit-sibling harness and whitespace checks pass. Scoped lint has zero errors/two unchanged warnings; independent read-only review has no actionable findings. Previous matching-signer code75 tablet acceptance is retained rather than claimed as a new device run. PR25 source797e734 merges into master as92b05ab; merged tree exactly matches the reviewed head. Both commits include [skip ci], and the GitHub runs API confirms zero Actions runs for each SHA.
+- Preservation: tested APK hash99d375d2285be602bb377274144c54f6363591d2846cf6400932fed0f88ed6e6 and published build75 hash8d7c979c9554a168a12aa6d1f0cb88cae2b4d2df666a2d3f96116a2579221143 are unchanged. An extra APK/metadata/results copy is hash-verified in the primary ignored task cache; retain the task worktree and rollback evidence. Primary manual history/security snapshots and history patch are retained for guarded local synchronization; unrelated work and all existing stashes remain excluded from the commit.
+- Remaining risks: native iOS, other native sizes/accessibility configurations and the documented unreproduced automated-input navigation anomaly remain unverified; seven baseline Expo patch recommendations remain outside this fix. No hosted CI result is claimed because Actions were intentionally skipped.
+- Next: finish local master fast-forward and restore/verify its unrelated manual patch and security-file hashes, then verify zero Actions runs on the documentation closeout as well. No further release or application change is required. See [Tour integration](tasks/onboarding-refresh.md#reports-tour-pr-integration-2026-10-22).
 
 ## 2026-10-22 - Reports Tour delayed-scroll alignment
 
