@@ -1,6 +1,6 @@
 # Active work
 
-- [Mobile service UX](tasks/mobile-service-ux.md): isolated Mobile/Staff PRs in preparation; simpler Login, four Home actions, official links, shared card pilot and searchable report types. The merged PR25 Tour fix is preserved and reverified. Migration/deployment/native acceptance remain separate.
+- [Mobile service UX](tasks/mobile-service-ux.md): Staff59/Mobile26 merged;27-type migration and Staff-first API deployment verified. PR27 unifies Report/Advisory/Facebook cards with equal padding and restores Report locations/separate Advisory feeder rows; Figma and the exact unpublished tablet APK verify. No Actions/releases; PR27 is open for review.
 
 - [Account-location advisory alerts](tasks/account-advisory-alerts.md): Staffb3c6a9ac/Mobile56deee3 merged into main/master with `[skip ci]`; zero Actions runs and Cloudflare build skipped. Staff27/Mobile569 tests, build/types/lint, browser and connected-tablet fixture acceptance pass. Both APKs and all unrelated work are preserved. Deployment, old queued audiences and real mapping/provider delivery remain separate gates.
 

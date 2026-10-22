@@ -7,6 +7,7 @@ export function ReportCard({ report, onPress }: { report: Report; onPress: () =>
   const date = reportCardDate(report);
   return <ActivityCard reference={report.ticketNumber || "Reference pending"}
     title={report.typeTitle || report.title} metadata={date.label + ": " + formatManilaDateTime(date.date)}
+    footer={report.displayAddress ?? report.categoryTitle}
     badge={<ReportStatusBadge status={report.status} />} unread={unread} onPress={onPress}
-    accessibilityLabel={[report.ticketNumber, report.typeTitle, consumerTicketStatusLabel(report.status), date.label, formatManilaDateTime(date.date), unread ? "unread report update" : ""].filter(Boolean).join(", ")} />;
+    accessibilityLabel={[report.ticketNumber, report.typeTitle, consumerTicketStatusLabel(report.status), date.label, formatManilaDateTime(date.date), report.displayAddress ?? report.categoryTitle, unread ? "unread report update" : ""].filter(Boolean).join(", ")} />;
 }

@@ -142,7 +142,6 @@ export default function AdvisoriesScreen() {
               <>
                 <PublisherCard
                   item={featured}
-                  featured
                   onPress={() => router.push(updateRoute(featured))}
                 />
                 {stories.length ? (
