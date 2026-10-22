@@ -1,5 +1,12 @@
 # Implementation history
 
+## 2026-10-23 — Report field and pin master integration
+
+- Scope: source4d6907d is rebased onto the existing service UX mergef19b920, fast-forwarded into master and pushed to GitHub. Both task entries are retained; no product merge conflict or API/schema change occurs. The source and documentation closeout use `[skip ci]` under the user's no-release-CI authorization.
+- Verification:573 combined tests, TypeScript, scoped lint, harness validation and whitespace checks pass. Prior browser field limits and matching pin geometry remain recorded in the [task handoff](tasks/new-report-pin-limits.md). GitHub master equals source4d6907d and Actions reports0 runs for that source; final documentation-head/ref/Actions checks are retained in ignored integration evidence after its push.
+- Remaining risks: native/GPS/provider acceptance remains unverified; no build, workflow dispatch, tag or publication is authorized. The unrelated manual history edit has exact-byte backup and a named recovery stash; all four security documents retain their hashes.
+- Next: preserve the task worktree and recovery evidence; native acceptance precedes any later separately authorized release. This integration creates no build, tag or publication.
+
 ## 2026-10-23 — New report limits and map pin
 
 - Scope: client inputs and validation limit purok/landmark to20 and category/type descriptions/action desired to100; location-step errors include landmark. Picker and static maps share the filled pin with its pointed edge at the selected map center. Profile picker/report-detail map consumers inherit the same icon alignment; API/queue contracts are unchanged.

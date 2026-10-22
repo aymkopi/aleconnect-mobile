@@ -1,6 +1,6 @@
 # Active work
 
-- [New report limits and map pin](tasks/new-report-pin-limits.md): isolated source complete; 20-character address details, 100-character descriptions/action and shared tip-aligned pin. 572 tests/types/scoped lint and 402x874 browser fixtures pass; integration/native acceptance/release remain separate.
+- [New report limits and map pin](tasks/new-report-pin-limits.md): source4d6907d merged/pushed to master with `[skip ci]`; exact remote head and zero Actions runs verify. Address details20, descriptions/action100 and shared tip-aligned pin pass combined573 tests/types/scoped lint/harness; prior402x874 browser fixtures verify limits/geometry. Native acceptance/release remain separate.
 
 - [Mobile service UX](tasks/mobile-service-ux.md): isolated Mobile/Staff PRs in preparation; simpler Login, four Home actions, official links, shared card pilot and searchable report types. The merged PR25 Tour fix is preserved and reverified. Migration/deployment/native acceptance remain separate.
 
