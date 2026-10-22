@@ -2,7 +2,7 @@
 
 ## Scope
 
-PR-only work, coordinated with Staff's report-type-description companion. Primary checkouts, existing open work, device data and signing state are preserved.
+Coordinated Mobile UI work with Staff's report-type-description companion. Primary checkouts, existing open work, device data and signing state are preserved.
 
 - Session expiry uses the regular Login form immediately. Both methods, contextual help, principal-race checks and saved-report recovery remain.
 - Four Home shortcuts, always two rows of two: Report an issue, Request Billing, Request Connection, Explore services. Rectangular cards keep icons on the left and two-line labels. The existing one-third header, fixed advisory/CTA heights and compact-screen scroll fallback remain.
@@ -13,13 +13,13 @@ PR-only work, coordinated with Staff's report-type-description companion. Primar
 
 ## Figma
 
-[Editable pilot](https://www.figma.com/design/6uIaVRM63oHA723WKgjo5k?node-id=1438-4) is isolated on `Mobile · Service UX refinements · Pilot`. Shared component `1438:5`, Light `1438:17`, Dark `1438:63`; eight instances share the same master. Editable text properties cover reference, title, metadata and badge, with optional unread/status visibility and an icon instance-swap property. Existing pages remain intact. Auto-layout, existing variables/styles, one-line badges and 96px minimum cards are retained.
+[Editable pilot](https://www.figma.com/design/6uIaVRM63oHA723WKgjo5k?node-id=1438-4) is isolated on `Mobile · Service UX refinements · Pilot`. Shared component `1438:5`, Light `1438:17`, Dark `1438:63`; eight instances share the same master. Editable text properties cover reference, title, metadata and badge, with optional unread/status visibility and an icon instance-swap property. Existing pages remain intact. Auto-layout, existing variables/styles, one-line badges and content-driven cards with equal12px padding are retained.
 
 ## Compatibility and rollout
 
 Apply and verify Staff's additive `ticket_type.description VARCHAR(500) NULL` migration before deploying its metadata reader, then release Mobile. Old Mobile ignores the extra field; new Mobile tolerates older API/cache payloads. No ticket identity, authorization, validation, priority, submission, notification or offline-queue contract changes.
 
-The Staff script defaults to inspection; applying requires an exact database target and explicit production confirmation. It backs up the schema/catalog before DDL, fills only blank reviewed descriptions and preserves custom wording. Restore only reverts unchanged seeded descriptions and retains the additive column for deployed readers. Live mutation and disposable-MySQL rehearsal are pending separately.
+The Staff script defaults to inspection; applying requires an exact database target and explicit production confirmation. It backs up the schema/catalog before DDL, fills only blank reviewed descriptions and preserves custom wording. Restore only reverts unchanged seeded descriptions and retains the additive column for deployed readers. The 27-type disposable rehearsal, production backfill and Staff API deployment are verified; see Staff PR59.
 
 ## Verification
 
@@ -30,4 +30,8 @@ The Staff script defaults to inspection; applying requires an exact database tar
 
 ## Remaining risks and next steps
 
-Independent read-only review has no blocking findings; final synchronized tests, export, browser, harness and whitespace checks pass. Next: review the paired PRs and authorize the separate migration rehearsal/release when ready. No migration application, deployment, merge, native/store build, installation, real credential mutation, real report submission or device acceptance is included. Physical Android/iOS Tour timing remains a release acceptance gate.
+PR26 and Staff PR59 are merged with CI skipped. The user authorized the migration and Staff-first deployment, then excluded GitHub release publication/Actions. The unpublished same-signer code75 APK passed native tablet Home, official links, shared cards, full account number, live description search/empty state, and Reports Tour Back/Next scroll alignment. The signed-in session, original install/data inodes and unread report state are retained. iOS, real report submission and provider delivery remain unverified.
+
+## Equal card padding follow-up — 2026-10-22
+
+The tablet review prompted a shared spacing correction: remove the96px minimum height that left unused space below short card content. Both Report and Advisory list cards now hug their content with12px padding on every side and4px row gaps. Fixed-height Home carousel cards center the content stack within their existing allocation. Figma master1438:5 and eight Light/Dark instances match, with measured12px top/bottom padding and86–90px single-line height. The follow-up stays separate from merged PR26; Actions/releases remain excluded. Native reinspection of this spacing correction is pending.

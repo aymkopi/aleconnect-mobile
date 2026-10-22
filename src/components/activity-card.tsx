@@ -16,8 +16,8 @@ export function ActivityCard({ reference, title, metadata, badge, unread = false
 }) {
   const [primary] = useAppColors(["primary"]);
   return <Pressable accessibilityRole="button" accessibilityLabel={accessibilityLabel ?? [reference, title, metadata].join(", ")}
-    onPress={onPress} style={{ minHeight: 96, height }}
-    className={unread ? "rounded-xl bg-notification-unread p-3 gap-1" : "rounded-xl bg-card p-3 gap-1"}>
+    onPress={onPress} style={{ height }}
+    className={unread ? "rounded-xl bg-notification-unread p-3 gap-1 justify-center" : "rounded-xl bg-card p-3 gap-1 justify-center"}>
     <View className="flex-row items-center gap-2">
       <Text size="xs" muted className="flex-1" numberOfLines={1}>{reference}</Text>
       {badge}
