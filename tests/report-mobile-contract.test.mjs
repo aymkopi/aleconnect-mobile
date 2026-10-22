@@ -2,6 +2,27 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
+test("new report fields accept their limit and reject one character over", async () => {
+  const { validateReportForm } = await import("../src/features/reports/contract.ts");
+  const { initialComplaintForm } = await import("../src/features/reports/data.ts");
+  const { creationStepErrors } = await import("../src/features/reports/creation-state.ts");
+  for (const [field, limit, step] of [
+    ["purok", 20, 3], ["landmark", 20, 3],
+    ["categoryDescription", 100, 4], ["typeDescription", 100, 4],
+    ["desiredAction", 100, 4],
+  ]) {
+    const validate = value => validateReportForm(
+      { ...initialComplaintForm, [field]: value },
+      undefined, undefined, { barangays: [] },
+    );
+    assert.equal(validate("a".repeat(limit))[field], undefined, `${field} at limit`);
+    const errors = validate("a".repeat(limit + 1));
+    assert.ok(errors[field], `${field} over limit`);
+    assert.ok(creationStepErrors(step, errors, true).includes(errors[field]));
+    assert.ok(validate("a".repeat(limit) + " ")[field], `${field} counts spaces`);
+  }
+});
+
 const read = (path) =>
   readFile(new URL(`../${path}`, import.meta.url), "utf8");
 

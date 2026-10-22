@@ -1,4 +1,11 @@
 # Implementation history
+
+## 2026-10-23 — New report limits and map pin
+
+- Scope: client inputs and validation limit purok/landmark to20 and category/type descriptions/action desired to100; location-step errors include landmark. Picker and static maps share the filled pin with its pointed edge at the selected map center. Profile picker/report-detail map consumers inherit the same icon alignment; API/queue contracts are unchanged.
+- Verification:572 tests, TypeScript, scoped lint and 402x874 labelled browser fixtures pass. Paste limits20/100 and matching pin geometry verify; visible tips are0.125 CSS pixels below map centers. See [task handoff](tasks/new-report-pin-limits.md) for evidence and final harness/whitespace results. Graphify refresh is saved separately from source.
+- Remaining risks: native device/GPS/provider/release acceptance is unverified; no live submission occurred. An existing React Native Web accessibility-prop warning raises a development toast that intercepts clicks; fixture checks use keyboard/dispatched clicks. Unrelated primary documentation/security work is preserved.
+- Next: integrate the isolated `codex/new-report-pin-limits` branch when requested, then verify native pin placement before release.
 ## 2026-10-22 - Reports Tour PR25 integrated without Actions
 
 - Scope: user authorizes PR, scoped commit/push and default-branch merge while preserving unrelated work/tested APK and avoiding GitHub Actions. Only consumer Mobile changes; no Staff/Lineman, API/schema, dependency, native config, public release or deployment change.

@@ -6,8 +6,10 @@ import type {
 } from "./data.ts";
 
 export const reportLimits = {
-  description: 2_000,
-  actionDesired: 2_000,
+  purok: 20,
+  landmark: 20,
+  description: 100,
+  actionDesired: 100,
   registeredName: 160,
   evidenceMin: 1,
   evidenceMax: 3,
@@ -60,6 +62,7 @@ export type ReportFormErrors = Partial<
     | "barangayPsgc"
     | "location"
     | "purok"
+    | "landmark"
     | "categoryDescription"
     | "typeDescription"
     | "currentRegisteredName"
@@ -123,6 +126,12 @@ export function validateReportForm(
   );
 
   if (!form.purok.trim()) errors.purok = "Enter the purok or street of the issue.";
+  else if (form.purok.length > reportLimits.purok) {
+    errors.purok = `Keep this under ${reportLimits.purok} characters.`;
+  }
+  if (form.landmark.length > reportLimits.landmark) {
+    errors.landmark = `Keep this under ${reportLimits.landmark} characters.`;
+  }
 
   if (!form.municipalityCode) {
     errors.municipalityCode = "Report location has no matched municipality.";
@@ -146,13 +155,13 @@ export function validateReportForm(
 
   if (category?.requiresDescription && !categoryDescription) {
     errors.categoryDescription = "Describe the category-specific concern.";
-  } else if (categoryDescription.length > reportLimits.description) {
+  } else if (form.categoryDescription.length > reportLimits.description) {
     errors.categoryDescription = `Keep this under ${reportLimits.description.toLocaleString()} characters.`;
   }
 
   if (type?.requiresDescription && !typeDescription) {
     errors.typeDescription = "Describe the report type-specific concern.";
-  } else if (typeDescription.length > reportLimits.description) {
+  } else if (form.typeDescription.length > reportLimits.description) {
     errors.typeDescription = `Keep this under ${reportLimits.description.toLocaleString()} characters.`;
   }
 

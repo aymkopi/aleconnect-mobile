@@ -12,6 +12,7 @@ import {
   type MapLibreModule,
 } from "./map-runtime";
 import { WebLocationMap } from "./web-location-map";
+import { LocationPin } from "./location-pin";
 export type StaticLocationMapProps = {
   latitude: number;
   longitude: number;
@@ -32,7 +33,7 @@ export function StaticLocationMap({
   const [module, setModule] = useState<MapLibreModule | null>(null),
     [ready, setReady] = useState(false),
     [failed, setFailed] = useState(false);
-  const [primary, primaryForeground] = useAppColors(["primary", "primary-foreground"]);
+  const [primary] = useAppColors(["primary"]);
   useEffect(() => {
     if (Platform.OS === "web") return;
     let active = true;
@@ -53,8 +54,7 @@ export function StaticLocationMap({
     return () => clearTimeout(timeout);
   }, [ready, failed]);
   const Map = module?.Map,
-    Camera = module?.Camera,
-    Marker = module?.Marker;
+    Camera = module?.Camera;
   return (
     <View
       accessible
@@ -76,37 +76,30 @@ export function StaticLocationMap({
             onReady={() => setReady(true)}
             onError={() => setFailed(true)}
           />
-          <View
-            pointerEvents="none"
-            className="absolute inset-0 items-center justify-center"
-          >
-            <MapPin size={28} color={primary} />
-          </View>
+          <LocationPin />
         </>
-      ) : Map && Camera && Marker && !failed ? (
-        <Map
-          style={{ flex: 1 }}
-          mapStyle={MAP_STYLE_URL}
-          androidView="texture"
-          dragPan={false}
-          touchZoom={false}
-          touchRotate={false}
-          touchPitch={false}
-          doubleTapZoom={false}
-          compass={false}
-          logo={false}
-          attribution={false}
-          onDidFinishLoadingMap={() => setReady(true)}
-          onDidFinishLoadingStyle={() => setReady(true)}
-          onDidFailLoadingMap={() => setFailed(true)}
-        >
-          <Camera center={[longitude, latitude]} zoom={zoom} />
-          <Marker id="report-location" lngLat={[longitude, latitude]}>
-            <View className="h-9 w-9 rounded-full bg-primary items-center justify-center">
-              <MapPin size={20} color={primaryForeground} />
-            </View>
-          </Marker>
-        </Map>
+      ) : Map && Camera && !failed ? (
+        <>
+          <Map
+            style={{ flex: 1 }}
+            mapStyle={MAP_STYLE_URL}
+            androidView="texture"
+            dragPan={false}
+            touchZoom={false}
+            touchRotate={false}
+            touchPitch={false}
+            doubleTapZoom={false}
+            compass={false}
+            logo={false}
+            attribution={false}
+            onDidFinishLoadingMap={() => setReady(true)}
+            onDidFinishLoadingStyle={() => setReady(true)}
+            onDidFailLoadingMap={() => setFailed(true)}
+          >
+            <Camera center={[longitude, latitude]} zoom={zoom} />
+          </Map>
+          <LocationPin />
+        </>
       ) : (
         <View className="flex-1 items-center justify-center px-4 gap-2">
           <MapPin size={28} color={primary} />

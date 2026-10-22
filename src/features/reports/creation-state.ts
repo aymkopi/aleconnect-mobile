@@ -10,7 +10,7 @@ export type ReportDraftScope = {
 const stageFields = {
   1: ["accountNumber"],
   2: ["categoryId", "typeId"],
-  3: ["municipalityCode", "barangayPsgc", "location", "purok"],
+  3: ["municipalityCode", "barangayPsgc", "location", "purok", "landmark"],
   4: [
     "categoryDescription",
     "typeDescription",

@@ -36,7 +36,7 @@ test("dark surfaces derive from the near-black anchor and text remains readable 
 });
 
 test("primary-filled app controls use the theme's contrasting icon and label colors", async () => {
- for (const [path,icon] of [["auth/sign-in-screen.tsx","IdentityIcon"],["maps/static-location-map.tsx","MapPin"],["reports/new-report-screen.tsx","Check"],["profile/accounts-screen.tsx","LinkIcon"]]) {
+ for (const [path,icon] of [["auth/sign-in-screen.tsx","IdentityIcon"],["reports/new-report-screen.tsx","Check"],["profile/accounts-screen.tsx","LinkIcon"]]) {
   const source=await readFile(new URL("../src/features/"+path,import.meta.url),"utf8");
   assert.match(source,new RegExp('<'+icon+' size=\\{\\d+\\} color=\\{primaryForeground\\}'),path);
  }

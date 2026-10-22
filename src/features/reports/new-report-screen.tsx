@@ -1291,12 +1291,15 @@ export default function NewReportScreen() {
                 <Input
                   label="Purok / street"
                   isRequired
+                  maxLength={reportLimits.purok}
                   errorMessage={attempted ? errors.purok : undefined}
                   value={form.purok}
                   onChangeText={(value) => update("purok", value)}
                 />
                 <Input
                   label="Landmark (optional)"
+                  maxLength={reportLimits.landmark}
+                  errorMessage={attempted ? errors.landmark : undefined}
                   value={form.landmark}
                   onChangeText={(value) => update("landmark", value)}
                 />

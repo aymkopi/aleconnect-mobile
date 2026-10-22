@@ -1,5 +1,7 @@
 # Active work
 
+- [New report limits and map pin](tasks/new-report-pin-limits.md): isolated source complete; 20-character address details, 100-character descriptions/action and shared tip-aligned pin. 572 tests/types/scoped lint and 402x874 browser fixtures pass; integration/native acceptance/release remain separate.
+
 - [Mobile service UX](tasks/mobile-service-ux.md): isolated Mobile/Staff PRs in preparation; simpler Login, four Home actions, official links, shared card pilot and searchable report types. The merged PR25 Tour fix is preserved and reverified. Migration/deployment/native acceptance remain separate.
 
 - [Account-location advisory alerts](tasks/account-advisory-alerts.md): Staffb3c6a9ac/Mobile56deee3 merged into main/master with `[skip ci]`; zero Actions runs and Cloudflare build skipped. Staff27/Mobile569 tests, build/types/lint, browser and connected-tablet fixture acceptance pass. Both APKs and all unrelated work are preserved. Deployment, old queued audiences and real mapping/provider delivery remain separate gates.

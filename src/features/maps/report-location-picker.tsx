@@ -32,6 +32,7 @@ import {
   resolveReportPin,
 } from "./report-location-state";
 import { WebLocationMap, type WebMapHandle } from "./web-location-map";
+import { LocationPin } from "./location-pin";
 type Coordinates = { latitude: number; longitude: number };
 async function withTimeout<T>(promise: Promise<T>, milliseconds: number) {
   let timeout: ReturnType<typeof setTimeout> | undefined;
@@ -636,17 +637,7 @@ function ActiveReportLocationPicker({
                 />
               </View>
             ) : null}
-            <View
-              pointerEvents="none"
-              className="absolute inset-0 items-center justify-center"
-            >
-              <MapPin
-                size={46}
-                color={primary}
-                fill={primary}
-                strokeWidth={1}
-              />
-            </View>
+            <LocationPin />
             <View className="absolute inset-x-4 top-3 gap-2">
               <Button
                 variant="outline"
