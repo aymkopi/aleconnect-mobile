@@ -1,5 +1,12 @@
 # Implementation history
 
+## 2026-10-23 — Merged report-pin worktree cleanup
+
+- Scope: verified clean task branch4d6907d is an ancestor of master9c7a157, detached only its primary-dependency junction, then removed the registered `.cache/new-report-pin-limits` folder and local `codex/new-report-pin-limits` branch without force. No remote task branch existed.
+- Verification: all16 evidence files (12,754,671 bytes) copied and SHA256-verified in `.cache/recovery/new-report-pin-limits-20261023`; primary dirty status/six file hashes, all18 existing stash refs and all seven remaining worktree registrations match the baseline. The archive includes original manual bytes/patches, browser image, test logs, Graphify patch and GitHub no-CI proof; see [task handoff](tasks/new-report-pin-limits.md).
+- Remaining risks: native/GPS/provider acceptance remains unverified. Cleanup changes no product code, device/signing state, build, tag or release; the documentation closeout retains `[skip ci]`.
+- Next: retain the recovery archive and original recovery stash; check native pin placement before any separately authorized release. Restore the temporary manual-history preservation state after the scoped cleanup record, and verify remote/no-CI evidence.
+
 ## 2026-10-23 — Report field and pin master integration
 
 - Scope: source4d6907d is rebased onto the existing service UX mergef19b920, fast-forwarded into master and pushed to GitHub. Both task entries are retained; no product merge conflict or API/schema change occurs. The source and documentation closeout use `[skip ci]` under the user's no-release-CI authorization.
