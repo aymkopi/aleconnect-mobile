@@ -15,6 +15,7 @@ export function PublisherCard({ item, onPress, height }: {
         : "Published: " + formatManilaDateTime(item.publishedAt);
     return <ActivityCard reference={item.controlNumber ?? "ALECO advisory"}
       title={advisoryCardTitle(item)} metadata={metadata} height={height} onPress={onPress}
+      footer={item.audience?.trim() || "Read full advisory"}
       badge={["high", "critical"].includes(item.severity) ? <Badge size="xs" variant="destructive">Important</Badge> : undefined} />;
   }
   const title = item.message.split(/[.!?\n]/)[0] || "ALECO update";
