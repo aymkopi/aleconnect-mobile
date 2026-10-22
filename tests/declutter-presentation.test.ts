@@ -6,9 +6,9 @@ import { accountProfileIdentifier } from "../src/features/profile/profile-state.
 
 test("ticket dates follow the latest current-status event, not unrelated edits", () => {
   const row = { status: "resolved" as const, statusChangedAt: "2026-10-16T02:00:00Z", updatedAt: "2026-10-17T02:00:00Z", createdAt: "2026-10-01T02:00:00Z" };
-  assert.deepEqual(reportCardDate(row), { label: "Resolved", date: row.statusChangedAt });
-  assert.equal(reportCardDate({ ...row, status: "under_review" }).label, "Under review");
-  assert.deepEqual(reportCardDate({ ...row, statusChangedAt: null }), { label: "Updated", date: row.updatedAt });
+  assert.deepEqual(reportCardDate(row), { label: "Latest update", date: row.statusChangedAt });
+  assert.equal(reportCardDate({ ...row, status: "under_review" }).label, "Latest update");
+  assert.deepEqual(reportCardDate({ ...row, statusChangedAt: null }), { label: "Latest update", date: row.updatedAt });
   assert.deepEqual(reportCardDate({ ...row, statusChangedAt: "invalid", updatedAt: "invalid" }), { label: "Submitted", date: row.createdAt });
 });
 

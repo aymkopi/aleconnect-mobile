@@ -24,7 +24,7 @@ export type EvidenceUpload = {
   uploadUrl: string;
 };
 
-const complaintMetaCacheKey = "complaint_meta_cache_v2";
+const complaintMetaCacheKey = "complaint_meta_cache_v3";
 const complaintMetaCacheTtlMs = 90 * 24 * 60 * 60 * 1000;
 const complaintReportsCacheTtlMs = 60 * 1000;
 const complaintReportsStaleTtlMs = 90 * 24 * 60 * 60 * 1000;

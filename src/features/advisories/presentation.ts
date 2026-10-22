@@ -54,6 +54,11 @@ export function matchesUpdate(
       : [item.message, updateTopicLabel(item.topic)].join(" ");
   return text.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase());
 }
+export function advisoryCardTitle(item: MobileAdvisory) {
+  const title = ["scheduled_outage", "unscheduled_outage", "restoration", "maintenance"].includes(item.type ?? "")
+    ? advisoryTypeLabel(item.type) : item.title.trim() || advisoryTypeLabel(item.type);
+  return item.audience?.trim() ? title + " - " + item.audience.trim() : title;
+}
 export function updateRoute(item: MobilePublicUpdate) {
   return item.kind === "advisory"
     ? { pathname: "/advisory/[id]" as const, params: { id: item.id } }

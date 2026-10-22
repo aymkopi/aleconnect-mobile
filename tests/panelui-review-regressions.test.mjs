@@ -244,7 +244,7 @@ test("sign-in redirects authenticated users and preserves mandatory password set
     "restoring session must not expose sign-in",
   );
 });
-test("Home keeps normal phone layouts fixed and reveals at most three shortcut rows", async () => {
+test("Home keeps normal phone layouts fixed and reveals exactly four shortcuts on every screen", async () => {
   const h = hooks();
   let isStale = false, readError = null;
   let items = [], fontScale = 1, height = 874, insets = { top: 24, bottom: 24 };
@@ -295,15 +295,15 @@ test("Home keeps normal phone layouts fixed and reveals at most three shortcut r
   }
   assert.equal(scroll().props.scrollEnabled, false, "Normal phones keep Home fixed");
   assert.ok(nodes(scroll()).some(n => n.props?.children === "Quick Actions"));
-  for (const device of [{ height: 740, rows: 2, scroll: true }, { height: 874, rows: 2, scroll: false }, { height: 932, rows: 2, scroll: false }, { height: 1200, rows: 3, scroll: false }]) {
+  for (const device of [{ height: 740, rows: 2, scroll: true }, { height: 874, rows: 2, scroll: false }, { height: 932, rows: 2, scroll: false }, { height: 1200, rows: 2, scroll: false }]) {
     height = device.height; insets = { top: 62, bottom: 34 };
-    const tiles = nodes(scroll()).filter(n => n.type === "Pressable" && n.props.style?.width === "25%");
-    assert.equal(tiles.length, device.rows * 4);
+    const tiles = nodes(scroll()).filter(n => n.type === "Pressable" && n.props.style?.flexDirection === "row" && typeof n.props.style?.height === "number");
+    assert.equal(tiles.length, 4);
     assert.equal(tiles.at(-1).props.accessibilityLabel, "Explore services");
     assert.ok(tiles[0].props.style.height >= 80, "48px icon tiles and labels retain their space");
     assert.equal(scroll().props.scrollEnabled, device.scroll);
     const iconTiles = nodes(scroll()).filter(n => n.type === "View" && n.props.style?.width === 48 && n.props.style?.height === 48);
-    assert.equal(iconTiles.length, device.rows * 4);
+    assert.equal(iconTiles.length, 4);
     const header = nodes(scroll()).find(n => n.type === "ImageBackground");
     assert.ok(Math.abs(header.props.style.height - height / 3) < 0.001);
     assert.equal(header.props.style.borderBottomLeftRadius, 28);

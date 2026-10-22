@@ -30,6 +30,8 @@ import { Field } from "@/components/panelui/field";
 import { FileUpload, type FileUploadFile } from "@/components/panelui/file-upload";
 import { Input } from "@/components/panelui/input";
 import { Select } from "@/components/panelui/select";
+import { SearchField } from "@/components/search-field";
+import { filterComplaintOptions } from "./issue-search";
 import { RadioGroup } from "@/components/panelui/radio-group";
 import { Spinner } from "@/components/panelui/spinner";
 import { ContentSkeleton } from "@/components/content-skeleton";
@@ -223,6 +225,7 @@ export default function NewReportScreen() {
     categoryId: string;
     typeId: string;
   } | null>(null);
+  const [issueQuery, setIssueQuery] = useState("");
   const [issueView, setIssueView] = useState<"category" | "type">("category");
   const [submissionPhase, setSubmissionPhase] = useState<
     "saving" | "sending" | "checking"
@@ -398,6 +401,7 @@ export default function NewReportScreen() {
   const types = meta.types.filter(
     (item) => item.categoryId === form.categoryId,
   );
+  const options = filterComplaintOptions(meta, issueQuery, issueView === "type" ? form.categoryId : undefined);
   const errors = validateReportForm(form, category, type, meta),
     stepErrors = creationStepErrors(step, errors, accountReady);
   const summaryErrors = step === 5 ? [] : stepErrors.filter(message => step !== 3 || message !== errors.purok);
@@ -1057,7 +1061,7 @@ export default function NewReportScreen() {
                   disabled={submitting || pickerBusy} accessibilityLabel="ALECO service account">
                   {accounts.map(account => <RadioGroup.Item key={account.id} value={account.id}
                     label={account.registeredName}
-                    description={[(account.accountNumber ? "ALECO •••• " + account.accountNumber.slice(-4) : "Number unavailable"), account.address ?? "Service address unavailable"].join("\n")} />)}
+                    description={[(account.accountNumber ? "ALECO " + account.accountNumber : "Number unavailable"), account.address ?? "Service address unavailable"].join("\n")} />)}
                 </RadioGroup>
                 {!accounts.length && !accountLoading ? (
                   <Text muted>
@@ -1089,10 +1093,10 @@ export default function NewReportScreen() {
                     </Button>
                   </>
                 ) : null}
-                <Input
+                {accountReady && !(fixtures ? selected?.accountNumber : profile?.accountNumber) ? <Input
                     label="Account number"
                     value={accountReady ? form.accountNumber : selected?.accountNumber ?? ""}
-                    disabled={!accountReady || Boolean(fixtures || profile?.accountNumber)}
+                    disabled={submitting || pickerBusy}
                     onChangeText={(value) => update("accountNumber", value)}
                     isRequired
                     errorMessage={attempted ? errors.accountNumber : undefined}
@@ -1101,7 +1105,7 @@ export default function NewReportScreen() {
                         ? "Confirmed from your linked service account"
                         : "Enter the account number for this linked service account"
                     }
-                  />
+                  /> : null}
               </>
             ) : null}
             {step === 2 ? (
@@ -1119,19 +1123,22 @@ export default function NewReportScreen() {
                       ? formatComplaintCategoryTitle(category.title)
                       : "Select type"}
                 </Heading>
+                <SearchField value={issueQuery} onChangeText={setIssueQuery} placeholder="Search categories and report types" />
+                {!(issueView === "category" ? options.categories.length : options.types.length) && issueQuery.trim() ? <Text muted size="sm" accessibilityLiveRegion="polite">No matching issues. Try another word or clear the search.</Text> : null}
                 {issueView === "category" ? (
                   <View className="flex-row flex-wrap" style={{ gap: 12 }}>
-                    {meta.categories.map((item, index) => {
-                      const Icon = categoryIcons[index % categoryIcons.length];
+                    {options.categories.map((item) => {
+                      const Icon = categoryIcons[meta.categories.indexOf(item) % categoryIcons.length];
                       return (
                         <Pressable
                           key={item.id}
-                          onPress={() =>
+                          onPress={() => {
+                            setIssueQuery("");
                             selectIssue(
                               item.id,
                               singleCategoryTypeId(meta.types, item.id),
-                            )
-                          }
+                            );
+                          }}
                           accessibilityRole="radio"
                           accessibilityState={{
                             checked: form.categoryId === item.id,
@@ -1164,7 +1171,7 @@ export default function NewReportScreen() {
                         variant="card" value={form.typeId} onValueChange={id => selectIssue(form.categoryId, id)}
                         accessibilityLabel="Report type"
                       >
-                        {types.map(item => <RadioGroup.Item key={item.id} value={item.id} label={item.title}
+                        {options.types.map(item => <RadioGroup.Item key={item.id} value={item.id} label={item.title} description={item.description ?? undefined}
                           accessibilityHint={editingReview ? "Select, then press Continue to return to review" : "Select, then press Continue to choose the issue location"} />)}
                         {!types.length ? (
                           <Text size="sm" muted>
@@ -1178,7 +1185,7 @@ export default function NewReportScreen() {
                     </Field>
                     <Button
                       variant="ghost"
-                      onPress={() => setIssueView("category")}
+                      onPress={() => { setIssueView("category"); setIssueQuery(""); }}
                     >
                       Change category
                     </Button>
