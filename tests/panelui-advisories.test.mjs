@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import ts from "typescript";
-import { advisorySchedule, advisoryCardTitle } from "../src/features/advisories/presentation.ts";
+import { advisorySchedule, advisoryCardTitle, updateTopicLabel } from "../src/features/advisories/presentation.ts";
 const source = await readFile(
   new URL("../src/features/advisories/publisher-card.tsx", import.meta.url),
   "utf8",
@@ -10,7 +10,7 @@ const source = await readFile(
 const rangeCalls = [],
   jsx = (type, props) => ({ type, props });
 const mocks = {
-    "./presentation": { advisorySchedule, advisoryCardTitle },
+    "./presentation": { advisorySchedule, advisoryCardTitle, updateTopicLabel },
     "@/components/activity-card": { ActivityCard: "ActivityCard" },
     "react/jsx-runtime": { jsx, jsxs: jsx },
     "react-native": { Pressable: "Pressable", View: "View" },
@@ -60,7 +60,6 @@ test("scheduled publisher cards use source range, including unknown restoration 
         audience: "Rawis",
       },
       onPress() {},
-      featured: true,
     });
     assert.deepEqual(rangeCalls.at(-1), ["2026-10-07T00:00:00Z", end]);
     assert.match(tree.props.metadata, end ? /Start – End/ : /Starts at time/);
@@ -79,10 +78,27 @@ test("image-free public posts have readable publisher and summary fallbacks", ()
     },
     onPress() {},
   });
-  assert.match(text(tree), /ALECO update/);
-  assert.match(text(tree), /ALECO/);
-  assert.doesNotMatch(text(tree), /Read full story/);
-  assert.doesNotMatch(text(tree), /Important|SO-/);
+  assert.equal(tree.type, "ActivityCard");
+  assert.equal(tree.props.reference, "ALECO");
+  assert.equal(tree.props.title, "ALECO update");
+  assert.equal(tree.props.metadata, "Published: Published date");
+  assert.equal(tree.props.badge, undefined);
+});
+
+test("Facebook list and Home cards share layout, publisher, date and navigation", () => {
+  let opened = 0;
+  const item = { kind: "facebook_post", message: "Service reminder. Full post stays available in the detail.", pageName: "ALECO", topic: "general", publishedAt: "2026-10-22T01:00:00Z" };
+  for (const height of [undefined, 112]) {
+    const card = exports.PublisherCard({ item, height, onPress() { opened++; } });
+    assert.equal(card.type, "ActivityCard");
+    assert.equal(card.props.height, height);
+    assert.equal(card.props.reference, "ALECO");
+    assert.equal(card.props.title, "Service reminder");
+    assert.equal(card.props.metadata, "Published: Published date");
+    assert.equal(text(card.props.badge), "General");
+    card.props.onPress();
+  }
+  assert.equal(opened, 2);
 });
 
 test("fixed-height carousel cards truncate the title while retaining full accessible navigation", () => {

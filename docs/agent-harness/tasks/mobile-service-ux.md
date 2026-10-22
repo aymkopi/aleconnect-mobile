@@ -35,3 +35,7 @@ PR26 and Staff PR59 are merged with CI skipped. The user authorized the migratio
 ## Equal card padding follow-up — 2026-10-22
 
 The tablet review prompted a shared spacing correction: remove the96px minimum height that left unused space below short card content. Both Report and Advisory list cards now hug their content with12px padding on every side and4px row gaps. Fixed-height Home carousel cards center the content stack within their existing allocation. Figma master1438:5 and eight Light/Dark instances match, with measured12px top/bottom padding and86–90px single-line height. The follow-up stays separate from merged PR26; Actions/releases remain excluded. Native reinspection of this spacing correction is pending.
+
+### Facebook cards
+
+Facebook list/search/Home cards now use the same `ActivityCard` as reports and advisories: publisher reference, first-sentence title, Published date, optional topic badge and the shared open cue. The full post remains in its existing detail route. The duplicate body preview and unused featured-card branch are removed; other UI components are retained. Regression coverage checks list/Home reuse, fallback labels, topic badge, date and navigation. Figma Light/Dark pilots include matching editable Facebook instances.
