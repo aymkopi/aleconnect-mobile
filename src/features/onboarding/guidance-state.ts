@@ -18,8 +18,8 @@ export const appGuides = [
       {
         "target": "shortcuts",
         "title": "Your everyday actions",
-        "description": "Use these shortcuts to report an issue, check updates or find help. Explore services shows the full list.",
-        "guestDescription": "Use shortcuts for public updates and contacts. Reporting and account actions will ask you to sign in."
+        "description": "Report an issue, request billing information or start a connection request. Explore services shows the full list.",
+        "guestDescription": "Open ALECO’s billing and connection guides, or explore services. Creating a report will ask you to sign in."
       },
       {
         "target": "updates",
@@ -59,7 +59,7 @@ export const appGuides = [
       {
         "target": "list",
         "title": "Follow the latest update",
-        "description": "A report card shows its current status and latest status date. Highlighted cards have an update you have not opened."
+        "description": "A report card shows its current status and latest update date. Highlighted cards have an update you have not opened."
       }
     ]
   },

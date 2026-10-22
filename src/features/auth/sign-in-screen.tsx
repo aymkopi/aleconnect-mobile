@@ -58,22 +58,9 @@ function SignInForm({ intent }: { intent: ReturnType<typeof signInIntent> }) {
     insets = useSafeAreaInsets();
   const { session, isLoading, refreshSession } = useAuthSession();
   const [mode, setMode] = useState(intent.mode);
-  const [resume, setResume] = useState(false);
-  const isResume = intent.context === "session-ended";
-  const [foreground, muted, primaryForeground, input] = useAppColors([
-    "foreground",
-    "muted-foreground",
-    "primary-foreground",
-    "input",
-  ]);
-  const iconColor = isResume ? muted : "white";
-  const fieldStyle = [
-    styles.field,
-    isResume && {
-      color: foreground,
-      backgroundColor: input,
-    },
-  ];
+  const [primaryForeground] = useAppColors(["primary-foreground"]);
+  const iconColor = "white";
+  const fieldStyle = styles.field;
   const linkingParams = intent.linking ? { linking: "1" } : {};
   const [identity, setIdentity] = useState("");
   const [password, setPassword] = useState("");
@@ -101,10 +88,6 @@ function SignInForm({ intent }: { intent: ReturnType<typeof signInIntent> }) {
     if (busy) return;
     setPassword("");
     setVisible(false);
-    if (isResume && resume) {
-      setResume(false);
-      return;
-    }
     if (router.canGoBack()) router.back();
     else router.replace("/home");
   }
@@ -165,7 +148,7 @@ function SignInForm({ intent }: { intent: ReturnType<typeof signInIntent> }) {
     <>
       <View className="gap-1.5">
         <Label>
-          <Label.Text style={isResume ? undefined : styles.label}>
+          <Label.Text style={styles.label}>
             {mode === "account" ? "Account number" : "Email address"}
           </Label.Text>
         </Label>
@@ -187,7 +170,7 @@ function SignInForm({ intent }: { intent: ReturnType<typeof signInIntent> }) {
             placeholder={
               mode === "account" ? "Enter account number" : "you@example.com"
             }
-            placeholderTextColor={isResume ? muted : "rgba(255,255,255,0.64)"}
+            placeholderTextColor={"rgba(255,255,255,0.64)"}
             style={[fieldStyle, { paddingEnd: 16 }]}
             onSubmitEditing={() => void submit()}
           />
@@ -195,7 +178,7 @@ function SignInForm({ intent }: { intent: ReturnType<typeof signInIntent> }) {
       </View>
       <View className="gap-1.5">
         <Label>
-          <Label.Text style={isResume ? undefined : styles.label}>
+          <Label.Text style={styles.label}>
             Password
           </Label.Text>
         </Label>
@@ -213,7 +196,7 @@ function SignInForm({ intent }: { intent: ReturnType<typeof signInIntent> }) {
             autoCorrect={false}
             autoComplete="current-password"
             placeholder="Enter password"
-            placeholderTextColor={isResume ? muted : "rgba(255,255,255,0.64)"}
+            placeholderTextColor={"rgba(255,255,255,0.64)"}
             style={fieldStyle}
             onSubmitEditing={() => void submit()}
           />
@@ -231,7 +214,7 @@ function SignInForm({ intent }: { intent: ReturnType<typeof signInIntent> }) {
           </InputGroup.Suffix>
         </InputGroup>
       </View>
-      {!isResume ? <Button
+      <Button
         variant="ghost"
         disabled={busy}
         accessibilityLabel="Forgot password?"
@@ -252,13 +235,12 @@ function SignInForm({ intent }: { intent: ReturnType<typeof signInIntent> }) {
         <Text style={styles.help}>
           Forgot password?
         </Text>
-      </Button> : null}
+      </Button>
       {error ? (
         <Text
           accessibilityRole="alert"
           accessibilityLiveRegion="polite"
-          style={isResume ? undefined : styles.error}
-          className={isResume ? "text-destructive" : undefined}
+          style={styles.error}
         >
           {error}
         </Text>
@@ -272,62 +254,6 @@ function SignInForm({ intent }: { intent: ReturnType<typeof signInIntent> }) {
       </View>
     );
   if (session && !busy && !error) return <Redirect href={destination} />;
-  if (isResume)
-    return (
-      <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
-        <KeyboardAwareScrollView
-          className="flex-1"
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          showsHorizontalScrollIndicator={false}
-          bottomOffset={24}
-          contentContainerStyle={[styles.content, { paddingBottom: Math.max(insets.bottom, 16) }]}
-        >
-          <View style={styles.body}>
-            <View className="gap-3">
-              <Text style={[styles.brand, { color: foreground }]}>ALEConnect</Text>
-              <Text accessibilityRole="header" style={[styles.heading, { color: foreground }]}>
-                {resume ? intent.returnTo === "/reports/new" ? "Resume your report" : "Resume sign-in" : "Sign in to continue"}
-              </Text>
-              {!resume ? <Text size="sm" muted className="text-center">{copy.description}</Text> : null}
-            </View>
-            {resume ? <>
-              <View className="gap-3">{fields}</View>
-              <Text size="sm" muted className="text-center">
-                After sign-in, we’ll take you to Home. Saved queue entries are available only to their original account.
-              </Text>
-            </> : null}
-            <View className="gap-3">
-              {resume ? <>
-                <Button loading={busy} disabled={!identity.trim() || !password || busy} onPress={() => void submit()} style={styles.submit} accessibilityLabel="Sign in">
-                  <Text size="sm" weight="semibold" className="text-primary-foreground">Sign in</Text>
-                </Button>
-                <Button variant="outline" disabled={busy} style={styles.submit} accessibilityLabel="Need help signing in?" onPress={() => {
-                  setPassword("");
-                  router.push({ pathname: "/sign-in-help", params: { mode, context: intent.context, returnTo: intent.returnTo, ...linkingParams } });
-                }}>
-                  <Text size="sm" weight="semibold">Need help signing in?</Text>
-                </Button>
-              </> : (["account", "email"] as const).map((method) => {
-                const MethodIcon = method === "account" ? Contact : Mail;
-                return <Button key={method} variant={method === "account" ? "primary" : "outline"} style={styles.submit}
-                  startContent={<MethodIcon size={20} color={method === "account" ? primaryForeground : foreground} />}
-                  accessibilityLabel={"Sign in with " + (method === "account" ? "account number" : "email")}
-                  onPress={() => { setMode(method); setIdentity(""); setPassword(""); setVisible(false); setError(""); setResume(true); }}>
-                  <Text size="sm" weight="semibold" className={method === "account" ? "text-primary-foreground" : undefined}>
-                    Sign in with {method === "account" ? "account number" : "email"}
-                  </Text>
-                </Button>;
-              })}
-              <Button variant="ghost" disabled={busy} style={{ minHeight: 44 }} onPress={leave}
-                accessibilityLabel={resume ? "Use another sign-in method" : "Back to browsing"}>
-                <Text size="sm" weight="semibold">{resume ? "Use another sign-in method" : "Back to browsing"}</Text>
-              </Button>
-            </View>
-          </View>
-        </KeyboardAwareScrollView>
-      </View>
-    );
   return (
     <View
       style={{ flex: 1, backgroundColor: "#00060F", paddingTop: insets.top }}

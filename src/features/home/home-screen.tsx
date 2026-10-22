@@ -19,23 +19,7 @@ import { useMainPageScroll } from "@/hooks/use-main-page-scroll";
 import { useScopedRead } from "@/hooks/use-scoped-read";
 import { fetchPublicUpdates } from "@/services/public-updates";
 import { useFocusEffect, useRouter } from "expo-router";
-import {
-  Bell,
-  BellRing,
-  ChevronRight,
-  CreditCard,
-  FileText,
-  Link,
-  Link2,
-  ListChecks,
-  Megaphone,
-  Phone,
-  PlugZap,
-  Plus,
-  ShieldCheck,
-  UserRound,
-  Zap,
-} from "lucide-react-native";
+import { ChevronRight, FileText, PlugZap, Plus } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import {
   ImageBackground,
@@ -47,55 +31,12 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useUniwind } from "uniwind";
 import { getHomeLayout } from "./home-layout";
+import { openContact } from "@/features/hotlines/contact-card";
 const actions = [
-  {
-    label: "Report\nan issue",
-    icon: Plus,
-    route: "/reports/new",
-  },
-  {
-    label: "Track\nreports",
-    icon: FileText,
-    route: "/reports",
-  },
-  { label: "Call\nALECO", icon: Phone, route: "/hotlines" },
-  {
-    label: "Latest\nUpdates",
-    icon: Megaphone,
-    route: "/advisories",
-  },
-  { label: "My\nAccount", icon: Link, route: "/profile" },
-  {
-    label: "Emergency\nHelp",
-    icon: ShieldCheck,
-    route: "/hotlines",
-  },
-  {
-    label: "Service\nRequests",
-    icon: Zap,
-    route: "/services/requests",
-  },
-  {
-    label: "Request\nConnection",
-    icon: PlugZap,
-    route: "/services/connection",
-  },
-  { label: "Pay\nBills", icon: CreditCard, route: "/services/payment" },
-  { label: "Notifications", icon: Bell, route: "/notifications" },
-  { label: "Report\nHistory", icon: ListChecks, route: "/reports/list" },
-  { label: "Link an\naccount", icon: Link2, route: "/profile/link-account" },
-  { label: "Link\nrequests", icon: FileText, route: "/profile/link-requests" },
-  {
-    label: "Personal\ninformation",
-    icon: UserRound,
-    route: "/profile/details",
-  },
-  { label: "Alert\nsettings", icon: BellRing, route: "/notification-settings" },
-  {
-    label: "Explore\nservices",
-    icon: ChevronRight,
-    route: "/services",
-  },
+  { label: "Report\nan issue", icon: Plus, route: "/reports/new" },
+  { label: "Request\nBilling", icon: FileText, route: "https://web.alecoinc.com.ph/billing-inquiry.html" },
+  { label: "Request\nConnection", icon: PlugZap, route: "https://web.alecoinc.com.ph/newconnection.html" },
+  { label: "Explore\nservices", icon: ChevronRight, route: "/services" },
 ] as const;
 export default function HomeScreen() {
   const { guide } = useAppGuide();
@@ -163,10 +104,6 @@ export default function HomeScreen() {
   const carouselCardHeight = layout.cardHeight;
   const refreshFailed = items.length > 0 && Boolean(updates.error);
   const savedUpdates = Boolean(updates.data?.isStale);
-  const visibleActions = [
-    ...actions.slice(0, layout.rows * 4 - 1),
-    actions[actions.length - 1],
-  ];
   return (
     <View className="flex-1 bg-background">
       <ScrollView
@@ -295,54 +232,56 @@ export default function HomeScreen() {
             Quick Actions
           </Text>
           <View
-            className="rounded-xl bg-card"
             style={{
               paddingVertical: layout.gridPadding,
-              paddingHorizontal: 8,
+              paddingHorizontal: 4,
             }}
           >
             <View
               className="flex-row flex-wrap"
               style={{ rowGap: layout.rowGap }}
             >
-              {visibleActions.map(({ label, icon: Icon, route }) => (
+              {actions.map(({ label, icon: Icon, route }) => (
+                <View key={label} style={{ width: "50%", paddingHorizontal: 4 }}>
                 <Pressable
-                  key={label}
+                  className="rounded-xl bg-card"
                   accessibilityRole="button"
                   accessibilityLabel={label.replace("\n", " ")}
-                  onPress={() => openFeature(route, true)}
+                  onPress={() => route.startsWith("https://") ? void openContact(route) : openFeature(route, true)}
                   style={{
-                    width: "25%",
+                    flexDirection: "row",
+                    paddingHorizontal: width < 360 ? 8 : 12,
                     height: layout.tileHeight,
                     alignItems: "center",
-                    justifyContent: "center",
-                    gap: 4,
+                    justifyContent: "flex-start",
+                    gap: 8,
                   }}
                 >
                   <View
                     style={{
-                      height: layout.iconTileSize,
-                      width: layout.iconTileSize,
+                      height: width < 360 ? 40 : layout.iconTileSize,
+                      width: width < 360 ? 40 : layout.iconTileSize,
                       borderRadius: 10,
                       alignItems: "center",
                       justifyContent: "center",
                     }}
                     className="bg-surface-secondary"
                   >
-                    <Icon size={24} color={foreground} />
+                    <Icon size={32} color={foreground} />
                   </View>
                   <Text
                     weight="medium"
                     numberOfLines={2}
                     style={{
-                      fontSize: 11,
-                      lineHeight: 14,
-                      textAlign: "center",
+                      flex: 1,
+                      fontSize: width < 360 ? 12 : 13,
+                      lineHeight: 18,
                     }}
                   >
                     {label}
                   </Text>
                 </Pressable>
+                </View>
               ))}
             </View>
           </View>

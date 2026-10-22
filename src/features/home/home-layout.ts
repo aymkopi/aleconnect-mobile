@@ -42,13 +42,10 @@ export function getHomeLayout({
     ),
   );
   const gridBudget = available - fixed - gap * gapCount;
-  const rows = gridBudget >= minimumTile * 3 + rowGap * 2 ? 3 : 2;
+  const rows = 2;
   const tileHeight = Math.max(
     minimumTile,
-    Math.min(
-      Math.ceil(104 * scale),
-      Math.floor((gridBudget - (rows - 1) * rowGap) / rows),
-    ),
+    Math.floor((gridBudget - rowGap) / rows),
   );
   const scrollRequired =
     tileHeight * rows + (rows - 1) * rowGap > gridBudget + 0.5;

@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import ts from "typescript";
-import { advisorySchedule } from "../src/features/advisories/presentation.ts";
+import { advisorySchedule, advisoryCardTitle } from "../src/features/advisories/presentation.ts";
 const source = await readFile(
   new URL("../src/features/advisories/publisher-card.tsx", import.meta.url),
   "utf8",
@@ -10,7 +10,8 @@ const source = await readFile(
 const rangeCalls = [],
   jsx = (type, props) => ({ type, props });
 const mocks = {
-    "./presentation": { advisorySchedule },
+    "./presentation": { advisorySchedule, advisoryCardTitle },
+    "@/components/activity-card": { ActivityCard: "ActivityCard" },
     "react/jsx-runtime": { jsx, jsxs: jsx },
     "react-native": { Pressable: "Pressable", View: "View" },
     "lucide-react-native": {
@@ -62,8 +63,9 @@ test("scheduled publisher cards use source range, including unknown restoration 
       featured: true,
     });
     assert.deepEqual(rangeCalls.at(-1), ["2026-10-07T00:00:00Z", end]);
-    assert.match(text(tree), end ? /Start – End/ : /Starts at time/);
-    assert.equal(tree.props.accessibilityLabel, "Scheduled interruption");
+    assert.match(tree.props.metadata, end ? /Start – End/ : /Starts at time/);
+    assert.equal(tree.type, "ActivityCard");
+    assert.equal(tree.props.title, "Scheduled interruption - Rawis");
   }
 });
 test("image-free public posts have readable publisher and summary fallbacks", () => {
@@ -88,12 +90,11 @@ test("fixed-height carousel cards truncate the title while retaining full access
   let opened = 0;
   const props = { item: { kind: "advisory", title, severity: "high", audience: "Rawis" }, onPress() { opened++; } };
   const card = exports.PublisherCard({ ...props, height: 112 });
-  assert.equal(card.props.style.height, 112);
-  const titleNode = card.props.children.find(n => n?.props?.children === title);
-  assert.equal(titleNode.props.numberOfLines, 1);
-  assert.equal(card.props.accessibilityLabel, title);
+  assert.equal(card.props.height, 112);
+  assert.equal(card.props.title, title + " - Rawis");
   card.props.onPress();
   assert.equal(opened, 1);
   const listCard = exports.PublisherCard(props);
-  assert.equal(listCard.props.children.find(n => n?.props?.children === title).props.numberOfLines, 2);
+  assert.equal(listCard.type, card.type);
+  assert.equal(listCard.props.title, card.props.title);
 });

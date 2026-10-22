@@ -66,7 +66,7 @@ export const fixtureUpdates: MobilePublicUpdate[] = [
     content:
       "Plan ahead for today’s interruption. Maintenance helps keep our community connected.",
     severity: "high",
-    audience: "Rawis, Legazpi City",
+    audience: "F1, F2, F3",
     effectiveAt: null,
     expiresAt: null,
     scheduledStartAt: "2026-10-07T00:00:00Z",

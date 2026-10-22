@@ -474,20 +474,22 @@ async function signInFixture({
     },
   };
 }
-test("session-ended methods open the themed resume form and preserve destination through help", async () => {
+test("session-ended opens the regular Login form and preserves recovery context through help", async () => {
   const f = await signInFixture();
   assert.ok(nodes(f.page).some(n => n.type === "Text" && n.props.accessibilityRole === "header" && n.props.children === "Sign in to continue"));
   assert.equal(nodes(f.page).some(n => n.type === "Page"), false);
+  assert.ok(nodes(f.page).some(n => n.type === "Input" && n.props.accessibilityLabel === "Account number"));
+  assert.equal(nodes(f.page).some(n => n.type === "Text" && /Resume/.test(String(n.props.children))), false);
   button(f.page, "Sign in with email").props.onPress();
   const resumed = f.render();
-  assert.ok(nodes(resumed).some(n => n.type === "Text" && n.props.accessibilityRole === "header" && n.props.children === "Resume your report"));
+  assert.ok(nodes(resumed).some(n => n.type === "Text" && n.props.accessibilityRole === "header" && n.props.children === "Sign in to continue"));
   assert.ok(
     nodes(resumed).find(
       (n) =>
         n.type === "Input" && n.props.accessibilityLabel === "Email address",
     ),
   );
-  button(resumed, "Need help signing in?").props.onPress();
+  button(resumed, "Forgot password?").props.onPress();
   assert.deepEqual(f.routes, [
     {
       pathname: "/sign-in-help",
@@ -501,7 +503,6 @@ test("session-ended methods open the themed resume form and preserve destination
 });
 test("late sign-in confirmation cannot navigate a different restored principal", async () => {
   const f = await signInFixture();
-  button(f.page, "Sign in with account number").props.onPress();
   let page = f.render();
   for (const [label, value] of [
     ["Account number", "001"],
@@ -511,7 +512,7 @@ test("late sign-in confirmation cannot navigate a different restored principal",
       .find((n) => n.type === "Input" && n.props.accessibilityLabel === label)
       .props.onChangeText(value);
   page = f.render();
-  button(page, "Sign in").props.onPress();
+  button(page, "Sign in with account number").props.onPress();
   assert.equal(
     nodes(f.render()).find(
       (n) => n.type === "Input" && n.props.accessibilityLabel === "Password",
@@ -645,7 +646,7 @@ test("a session response for an older token cannot publish or cache a principal"
 
 
 test("sign-in contexts have one centered heading and no appbar while preserving both methods", async () => {
-  for (const context of ["new", "current", "new-device", "returning"]) {
+  for (const context of ["new", "current", "new-device", "returning", "session-ended"]) {
     for (const mode of ["account", "email"]) {
       const f = await signInFixture({ context, mode });
       assert.equal(button(f.page, "Back"), undefined, context + ": no appbar");
@@ -665,7 +666,7 @@ test("sign-in fields keep balanced decorators, border-free fills and clear metho
   const f = await signInFixture({ context: "new" });
   for (const label of ["Account number", "Password"]) {
     const field = nodes(f.page).find(n => n.type === "Input" && n.props.accessibilityLabel === label);
-    const styles = field.props.style.flat(Infinity).filter(Boolean);
+    const styles = [field.props.style].flat(Infinity).filter(Boolean);
     assert.ok(styles.every(s => !s.borderWidth));
     assert.equal(styles.find(s => s.height !== undefined)?.height, 48);
     field.props.onChangeText(label === "Password" ? "secret" : "001");

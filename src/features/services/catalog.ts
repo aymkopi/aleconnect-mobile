@@ -52,15 +52,15 @@ export const services = [
     id: "connection",
     title: "Request Connection",
     description: "Start a new electrical connection",
-    route: "/services/connection",
+    route: "https://web.alecoinc.com.ph/newconnection.html",
     icon: "power",
   },
   {
-    id: "payment",
-    title: "Pay Bills",
-    description: "Find an authorized payment channel",
-    route: "/services/payment",
-    icon: "payment",
+    id: "billing",
+    title: "Request Billing",
+    description: "View your bill through ALECO’s official billing inquiry",
+    route: "https://web.alecoinc.com.ph/billing-inquiry.html",
+    icon: "report",
   },
 ] as const;
 export const serviceGroups = [
@@ -90,47 +90,3 @@ export function searchServices(query: string) {
     (s.title + " " + s.description).toLowerCase().includes(term),
   );
 }
-export const paymentChannels = [
-  {
-    id: "gcash",
-    title: "GCash",
-    description: "Mobile wallet",
-    url: "https://help.gcash.com/hc/en-us",
-  },
-  {
-    id: "bayad",
-    title: "Bayad Center",
-    description: "Payment centers",
-    url: "https://www.bayad.com/",
-  },
-  {
-    id: "ecpay",
-    title: "ECPay",
-    description: "7-Eleven and partner outlets",
-    url: "https://ecpay.com.ph/",
-  },
-  {
-    id: "bdo",
-    title: "BDO",
-    description: "Over-the-counter at branches",
-    url: "https://www.bdo.com.ph/",
-  },
-  {
-    id: "unionbank",
-    title: "UnionBank",
-    description: "Bank payment channel",
-    url: "https://www.unionbankph.com/",
-  },
-  {
-    id: "camalig",
-    title: "Camalig Bank",
-    description: "Bank payment channel",
-    url: "https://www.camaligbank.com/",
-  },
-  {
-    id: "aleco",
-    title: "ALECO offices",
-    description: "Service and Collection Offices",
-    url: "https://web.alecoinc.com.ph/",
-  },
-] as const;

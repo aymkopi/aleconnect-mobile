@@ -30,6 +30,7 @@ export type ComplaintType = {
   id: string;
   categoryId: string;
   title: string;
+  description?: string | null;
   priority: string | null;
   requiresDescription: boolean;
   descriptionLabel?: string;
@@ -78,8 +79,8 @@ export type Report = {
 
 export function reportCardDate(report: Pick<Report, "status" | "statusChangedAt" | "updatedAt" | "createdAt">) {
   if (report.status && report.statusChangedAt && parseApiInstant(report.statusChangedAt))
-    return { label: consumerTicketStatusLabel(report.status), date: report.statusChangedAt };
-  if (report.updatedAt && parseApiInstant(report.updatedAt)) return { label: "Updated", date: report.updatedAt };
+    return { label: "Latest update", date: report.statusChangedAt };
+  if (report.updatedAt && parseApiInstant(report.updatedAt)) return { label: "Latest update", date: report.updatedAt };
   return { label: "Submitted", date: report.createdAt };
 }
 

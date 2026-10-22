@@ -1,5 +1,7 @@
 # Active work
 
+- [Mobile service UX](tasks/mobile-service-ux.md): isolated Mobile/Staff PRs in preparation; simpler Login, four Home actions, official links, shared card pilot and searchable report types. The merged PR25 Tour fix is preserved and reverified. Migration/deployment/native acceptance remain separate.
+
 - [Account-location advisory alerts](tasks/account-advisory-alerts.md): Staffb3c6a9ac/Mobile56deee3 merged into main/master with `[skip ci]`; zero Actions runs and Cloudflare build skipped. Staff27/Mobile569 tests, build/types/lint, browser and connected-tablet fixture acceptance pass. Both APKs and all unrelated work are preserved. Deployment, old queued audiences and real mapping/provider delivery remain separate gates.
 
 - [Tour recovery](tasks/onboarding-refresh.md#reports-tour-pr-integration-2026-10-22): [PR25](https://github.com/aymkopi/aleconnect-mobile/pull/25) merged as92b05ab after571 local tests/types/harness, scoped lint and independent review. Source797e734 and merge use [skip ci]; GitHub reports zero Actions runs for both. The tested same-signer code75 Tour-scroll APK is retained in both task/primary ignored caches; published alpha assets, manual edits and device data are preserved. No release/deployment; native iOS and the documented unreproduced input anomaly remain acceptance limits.

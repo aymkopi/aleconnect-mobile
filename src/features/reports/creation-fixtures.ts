@@ -2,14 +2,14 @@ import type { ComplaintMeta, ComplaintPhotoUpload } from "./data.ts";
 export const creationFixtureAccounts = [
   {
     id: "fixture-home",
-    accountNumber: "4821",
+    accountNumber: "10004821",
     registeredName: "Home",
     isDefault: true,
     address: "Rawis, Legazpi City",
   },
   {
     id: "fixture-family",
-    accountNumber: "7604",
+    accountNumber: "10007604",
     registeredName: "Family home",
     isDefault: false,
     address: "Bigaa, Legazpi City",
@@ -45,6 +45,7 @@ export const creationFixtureMeta: ComplaintMeta = {
       id: `fixture-type-${index}`,
       categoryId: "fixture-category-0",
       title,
+      description: ["An outage affecting several streets or a wider area.", "Nearby homes on the same local line have no power.", "Your home has no electricity while nearby homes have power."][index],
       priority: null,
       requiresDescription: false,
       requiresKwhmTransfer: false,
