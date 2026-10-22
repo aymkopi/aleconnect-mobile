@@ -1,7 +1,7 @@
 import { ActivityCard } from "@/components/activity-card";
 import { Badge } from "@/components/panelui/badge";
 import type { MobilePublicUpdate } from "@/services/public-updates";
-import { formatManilaAdvisoryInterruptionRange, formatManilaDateTime } from "@/utils/manila-time";
+import { formatManilaAdvisoryInterruptionRange, formatManilaDateTime, parseApiInstant } from "@/utils/manila-time";
 import { advisoryCardTitle, advisorySchedule, updateTopicLabel } from "./presentation";
 export function PublisherCard({ item, onPress, height }: {
   item: MobilePublicUpdate; onPress: () => void; height?: number;
@@ -19,6 +19,6 @@ export function PublisherCard({ item, onPress, height }: {
   }
   const title = item.message.split(/[.!?\n]/)[0] || "ALECO update";
   return <ActivityCard reference={item.pageName ?? "ALECO"} title={title}
-    metadata={"Published: " + formatManilaDateTime(item.publishedAt)} height={height} onPress={onPress}
+    metadata={parseApiInstant(item.publishedAt) ? "Published: " + formatManilaDateTime(item.publishedAt) : "Facebook post"} height={height} onPress={onPress}
     badge={item.topic ? <Badge size="xs" variant="info">{updateTopicLabel(item.topic)}</Badge> : undefined} />;
 }

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import ts from "typescript";
 import { advisorySchedule, advisoryCardTitle, updateTopicLabel } from "../src/features/advisories/presentation.ts";
+import { parseApiInstant } from "../src/utils/manila-time.ts";
 const source = await readFile(
   new URL("../src/features/advisories/publisher-card.tsx", import.meta.url),
   "utf8",
@@ -24,6 +25,7 @@ const mocks = {
     "@/hooks/use-app-colors": { useAppColors: () => ["blue"] },
     "@/components/soft-radial": { SoftRadial: "Radial" },
     "@/utils/manila-time": {
+      parseApiInstant,
       formatManilaDateTime: () => "Published date",
       formatManilaAdvisoryInterruptionRange: (start, end) => {
         rangeCalls.push([start, end]);
@@ -81,7 +83,7 @@ test("image-free public posts have readable publisher and summary fallbacks", ()
   assert.equal(tree.type, "ActivityCard");
   assert.equal(tree.props.reference, "ALECO");
   assert.equal(tree.props.title, "ALECO update");
-  assert.equal(tree.props.metadata, "Published: Published date");
+  assert.equal(tree.props.metadata, "Facebook post");
   assert.equal(tree.props.badge, undefined);
 });
 
