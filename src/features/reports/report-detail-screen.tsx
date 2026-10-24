@@ -1,6 +1,8 @@
 import { DataNotice, DataState } from "@/components/data-state";
 import { appScrollableBottomPadding } from "@/components/floating-app-bar";
 import { Button } from "@/components/panelui/button";
+import { ConsumerUpdatesSection } from "./consumer-updates-section";
+import { ServiceRequestProgressCard } from "@/features/services/service-request-fields";
 import { Skeleton } from "@/components/panelui/skeleton";
 import { Text } from "@/components/panelui/text";
 import { toast } from "@/components/panelui/toast";
@@ -616,6 +618,8 @@ export default function ReportDetailScreen() {
               />
             ) : null}
           </View>
+          {!fixtures && session && accountContext && report.serviceAccountId && accountContext.authorizedServiceAccountIds.includes(report.serviceAccountId) ? <ConsumerUpdatesSection key={`${scope}:consumer-updates`} ticketId={report.id} serviceAccountId={report.serviceAccountId} scope={{ principalId: session.user.id, identityUserId: accountContext.identityUserId, accessRevision: accountContext.accessRevision, authorizedServiceAccountIds: accountContext.authorizedServiceAccountIds }} featureAvailable={accountContext.capabilities.reportUpdates === true} serviceFeedbackAvailable={accountContext.capabilities.serviceFeedback === true} active={focused} /> : null}
+          {report.serviceRequest ? <ServiceRequestProgressCard value={report.serviceRequest} /> : null}
           <View className="gap-2">
             <Text weight="medium" size="sm">
               Evidence

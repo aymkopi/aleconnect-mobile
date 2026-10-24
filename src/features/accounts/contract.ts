@@ -13,6 +13,13 @@ export type ConsumerCapabilities = {
   accountLinking: boolean;
   accountNumberLogin: boolean;
   mockEmailVerification: boolean;
+  reportUpdates?: boolean;
+  areaOutageStatus?: boolean;
+  outageAcknowledgements?: boolean;
+  advisoryReminders?: boolean;
+  serviceFeedback?: boolean;
+  serviceRequests?: boolean;
+  appFeedback?: boolean;
 };
 
 export type ConsumerAccessContext = {
@@ -115,6 +122,13 @@ function capabilities(value: unknown, sessionMode: "legacy" | "identity"): Consu
       ? source.accountNumberLogin
       : sessionMode === "legacy",
     mockEmailVerification: source.mockEmailVerification === true,
+    ...(source.reportUpdates === true ? { reportUpdates: true } : {}),
+    ...(source.areaOutageStatus === true ? { areaOutageStatus: true } : {}),
+    ...(source.outageAcknowledgements === true ? { outageAcknowledgements: true } : {}),
+    ...(source.advisoryReminders === true ? { advisoryReminders: true } : {}),
+    ...(source.serviceFeedback === true ? { serviceFeedback: true } : {}),
+    ...(source.serviceRequests === true ? { serviceRequests: true } : {}),
+    ...(source.appFeedback === true ? { appFeedback: true } : {}),
   };
 }
 

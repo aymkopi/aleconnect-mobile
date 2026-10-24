@@ -114,6 +114,7 @@ async function reportRecovery({ session = { user: { id: "user" }, session: { id:
   const transpile = source => ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText;
   new Function("require", "exports", transpile(source))(() => ({}), presentation);
   const modules = {
+    "./consumer-updates-section": { ConsumerUpdatesSection: "ConsumerUpdatesSection" },
     "react/jsx-runtime": { jsx, jsxs: jsx },
     "react": { useCallback: fn => fn, useEffect: fn => effects.push(fn), useLayoutEffect: fn => layouts.push(fn), useRef: value => ({ current: value }), useState: value => [value, next => stateWrites.push(next)] },
     "react-native": { BackHandler: {}, Modal: "Modal", Pressable: "Pressable", View: "View" },
@@ -130,7 +131,7 @@ async function reportRecovery({ session = { user: { id: "user" }, session: { id:
     "@/components/data-state": { DataState: "DataState", DataNotice: "DataNotice" },
     "@/components/panelui/text": { Text: "Text" },
     "@/components/floating-app-bar": { appScrollableBottomPadding: () => 100 },
-    "@/context/consumer-account-context": { useConsumerAccountContext: () => ({ accountContext: account, isLoading: false, refreshConsumerAccount: async () => calls.push(["refresh-account"]) }) },
+    "@/context/consumer-account-context": { useConsumerAccountContext: () => ({ accountContext: account ? { capabilities: {}, ...account } : null, isLoading: false, refreshConsumerAccount: async () => calls.push(["refresh-account"]) }) },
     "@/context/visual-preview-context": { useVisualPreview: () => ({ fixtures: false }) },
     "@/hooks/use-auth-session": { useAuthSession: () => ({ session, isLoading: false }) },
     "@/hooks/use-app-colors": { useAppColors: () => [] },
@@ -143,6 +144,7 @@ async function reportRecovery({ session = { user: { id: "user" }, session: { id:
     "./data": { formatReportDate: () => "Oct 12", consumerTicketStatusLabel: () => "Verified" }, "./detail-fixtures": {}, "./detail-presentation": presentation,
     "./extended-outage-status-card": {}, "./report-timeline": {},
     "@/features/maps/static-location-map": {},
+    "@/features/services/service-request-fields": { ServiceRequestProgressCard: "ServiceRequestProgressCard" },
     "expo-router/react-navigation": { useIsFocused: () => true },
   };
   modules["@/hooks/use-manual-refresh"] = manualRefreshHarness(modules.react);

@@ -137,6 +137,7 @@ export function SupportScreen({ kind, returnToReport = false }: { kind: "help" |
           />
           {row("App guide", "Learn the controls with short, replayable tours", () => router.push("/guide"), BookOpen)}
           {!guest ? row("Account setup", "Review your profile, service accounts and alerts", () => router.push("/profile/setup"), UserRound) : null}
+          {!guest ? row("App feedback", "Send a suggestion or report a problem using ALEConnect", () => router.push("/profile/feedback"), MessageCircle) : null}
           {row(
             "Call ALECO",
             "View official hotlines and contact details",

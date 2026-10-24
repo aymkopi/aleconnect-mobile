@@ -3,6 +3,7 @@ import {
   parseApiInstant,
 } from "../../utils/manila-time.ts";
 import { normalizeHumanReference } from "../../utils/human-reference.ts";
+import { normalizeServiceRequestProgress, type ServiceRequestKind, type ServiceRequestKindMetadata, type ServiceRequestProgress } from "../services/service-request-contract.ts";
 import {
   consumerTicketStatusLabel,
   isSupportedConsumerStatusModelVersion,
@@ -27,6 +28,7 @@ export type ComplaintCategory = {
 };
 
 export type ComplaintType = {
+  knownOutageEligible?: boolean;
   id: string;
   categoryId: string;
   title: string;
@@ -50,6 +52,7 @@ export type ComplaintBarangay = {
 };
 
 export type ComplaintMeta = {
+  serviceRequestKinds?: ServiceRequestKindMetadata[];
   categories: ComplaintCategory[];
   types: ComplaintType[];
   municipalities: ComplaintMunicipality[];
@@ -150,6 +153,7 @@ export type ConsumerServiceMemoUpdate = {
 };
 
 export type ReportDetail = Report & {
+  serviceRequest?: ServiceRequestProgress | null;
   imageUrlsExpiresAt: string | null;
   consumerMessage: string | null;
   actionDesired: string | null;
@@ -393,6 +397,7 @@ export function parseReportDetailResponse(value: unknown): ReportDetail {
     history,
     publicUpdates,
     consumerUpdates,
+    serviceRequest: normalizeServiceRequestProgress(report.serviceRequest),
     imageUrls: Array.isArray(report.imageUrls)
       ? report.imageUrls.filter(isHttpUrl)
       : [],
@@ -407,6 +412,8 @@ export function parseReportDetailResponse(value: unknown): ReportDetail {
 }
 
 export type ComplaintFormState = {
+  serviceRequestKind?: ServiceRequestKind | null;
+  requestedServiceDate?: string;
   serviceAccountId: string | null;
   accessRevision: number | null;
   categoryId: string;

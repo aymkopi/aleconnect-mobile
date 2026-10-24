@@ -1,4 +1,7 @@
 import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { fetchComplaintMeta } from "@/services/reports";
+import { normalizeServiceRequestKinds, selectServiceRequest, type ServiceRequestKindMetadata } from "./service-request-contract";
 import { useGuestAccess } from "@/context/guest-access-context";
 import { ReportPage } from "@/features/reports/components/report-page";
 import { Text } from "@/components/panelui/text";
@@ -77,6 +80,18 @@ export function PaymentChannelScreen() { return <Redirect href="/services" />; }
 export function ServiceRequestScreen() {
   const router = useRouter(),
     { kind } = useLocalSearchParams<{ kind: string }>();
+  const [service, setService] = useState<ServiceRequestKindMetadata | null>(null);
+  const [loading, setLoading] = useState(true), [error, setError] = useState("");
+  const [retry, setRetry] = useState(0);
+  useEffect(() => {
+    let active = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- A changed service route must clear the previous catalog choice.
+    setLoading(true); setError(""); setService(null);
+    fetchComplaintMeta({ force: true }).then(meta => {
+      if (active) setService(selectServiceRequest(normalizeServiceRequestKinds(meta.serviceRequestKinds, meta.types), kind));
+    }).catch(() => { if (active) setError("Service details could not be loaded. You can still use the standard report form or contact ALECO."); }).finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [kind, retry]);
   const title =
     kind === "lighting"
       ? "Temporary lighting"
@@ -94,8 +109,8 @@ export function ServiceRequestScreen() {
       footer={
         title ? (
           <>
-            <Button onPress={() => router.push("/reports/new")}>
-              Continue to report
+            <Button disabled={loading} onPress={() => service ? router.push({ pathname: "/reports/new", params: { serviceRequest: service.kind } }) : router.push("/reports/new")}>
+              {loading ? "Loading service details…" : service ? "Start service request" : "Continue to report"}
             </Button>
             <Button variant="outline" onPress={() => router.push("/hotlines")}>
               Contact ALECO
@@ -116,17 +131,11 @@ export function ServiceRequestScreen() {
       </Card>
       {title ? (
         <>
+          {error ? <><Text size="sm" className="text-destructive" accessibilityRole="alert">{error}</Text><Button variant="outline" onPress={() => setRetry(value => value + 1)}>Retry service details</Button></> : null}
+          {service?.requirements.map(label => <Text key={label} size="sm">• {label}</Text>)}
           <Text muted size="sm">
-            ALECO will review the request. Any requirements, fees and schedule
-            are confirmed by consumer services.
+            ALECO will review the request using the same fields as a report. A requested date is a preference; consumer services confirms the schedule separately.
           </Text>
-          <ServiceRow
-            title="Official forms and requirements"
-            description="Read the ALECO service guide"
-            onPress={() =>
-              void openContact("https://web.alecoinc.com.ph/newconnection.html")
-            }
-          />
         </>
       ) : null}
     </ReportPage>

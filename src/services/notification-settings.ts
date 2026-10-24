@@ -110,7 +110,7 @@ export async function saveNotificationSettings(
   return { ...response, isStale: false };
 }
 
-export async function registerDevicePushToken(expoPushToken: string) {
+export async function registerDevicePushToken(expoPushToken: string, authToken?: string) {
   if (Platform.OS !== "ios" && Platform.OS !== "android") return null;
 
   return apiRequest<{ ok: boolean }>("/api/mobile/push-notifications", {
@@ -121,5 +121,5 @@ export async function registerDevicePushToken(expoPushToken: string) {
       platform: Platform.OS,
       deviceId: Device.osInternalBuildId ?? Device.deviceName ?? null,
     }),
-  });
+  }, { authToken });
 }

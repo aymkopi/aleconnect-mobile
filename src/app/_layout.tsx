@@ -31,6 +31,7 @@ import {
   accountLinkingPushFromData,
   ticketIdFromPushData,
   ticketStatusChangedEventFromPushData,
+  consumerReportUpdatePushFromData,
 } from "@/services/notification-navigation";
 import { invalidateNotifications } from "@/services/notifications";
 import { clearReportListCache } from "@/services/reports";
@@ -148,7 +149,7 @@ function PushTokenBridge() {
             requestReportRevalidation(userId);
           }
         }
-        const ticket = ticketStatusChangedEventFromPushData(data);
+        const ticket = ticketStatusChangedEventFromPushData(data) ?? consumerReportUpdatePushFromData(data);
         router.push({
           pathname: "/report/[id]",
           params: {

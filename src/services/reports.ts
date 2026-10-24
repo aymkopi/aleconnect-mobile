@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { assertServiceRequestReceipt, normalizeServiceRequestKinds, type ServiceRequestInput } from "@/features/services/service-request-contract";
 
 import {
   normalizeReportListItem,
@@ -149,7 +150,8 @@ async function readComplaintMetaCache(
     complaintMetaMemoryCache &&
     Date.now() - complaintMetaMemoryCache.fetchedAt <= complaintMetaCacheTtlMs
   ) {
-    return complaintMetaMemoryCache.value;
+    const value = complaintMetaMemoryCache.value;
+    return { ...value, serviceRequestKinds: normalizeServiceRequestKinds(value.serviceRequestKinds, value.types) };
   }
 
   const raw = await AsyncStorage.getItem(complaintMetaCacheKey);
@@ -167,7 +169,7 @@ async function readComplaintMetaCache(
     }
 
     complaintMetaMemoryCache = parsed;
-    return parsed.value;
+    return { ...parsed.value, serviceRequestKinds: normalizeServiceRequestKinds(parsed.value.serviceRequestKinds, parsed.value.types) };
   } catch {
     return null;
   }
@@ -292,6 +294,7 @@ export async function fetchComplaintMeta(options?: {
     { phase: "metadata", timeoutMs: 15_000 },
   )
     .then(async (meta) => {
+      meta = { ...meta, serviceRequestKinds: normalizeServiceRequestKinds(meta.serviceRequestKinds, meta.types) };
       await writeComplaintMetaCache(meta);
       return meta;
     })
@@ -586,6 +589,7 @@ export type SubmitComplaintInput = {
   currentRegisteredName?: string | null;
   requestedRegisteredName?: string | null;
   reportDetails?: {
+    serviceRequest?: ServiceRequestInput;
     version: 1;
     categoryDescription: string | null;
     typeDescription: string | null;
@@ -613,6 +617,8 @@ export async function submitComplaint(
       idempotent: true,
     },
   );
+  try { assertServiceRequestReceipt(input.reportDetails?.serviceRequest, response); }
+  catch (error) { throw new ApiRequestError(error instanceof Error ? error.message : "Service-request receipt is incomplete.", 409, undefined, "final submit", false, "SERVICE_REQUEST_RECEIPT_MISMATCH"); }
   complaintReportsMemoryCache = null;
   return response;
 }

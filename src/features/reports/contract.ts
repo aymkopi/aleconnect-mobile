@@ -5,6 +5,7 @@ import type {
   ComplaintType,
 } from "./data.ts";
 
+import { serviceRequestDateError } from "../services/service-request-contract.ts";
 export const reportLimits = {
   purok: 20,
   landmark: 20,
@@ -68,6 +69,7 @@ export type ReportFormErrors = Partial<
     | "currentRegisteredName"
     | "requestedRegisteredName"
     | "desiredAction"
+    | "requestedServiceDate"
     | "evidence",
     string
   >
@@ -209,12 +211,17 @@ export function validateReportForm(
     errors.evidence = "Each prepared photo must be 5 MB or smaller.";
   }
 
+  if (form.serviceRequestKind) {
+    const dateError = serviceRequestDateError(form.requestedServiceDate ?? "");
+    if (dateError) errors.requestedServiceDate = dateError;
+  }
   return errors;
 }
 
 export function reportDetails(form: ComplaintFormState) {
   return {
     version: 1 as const,
+    ...(form.serviceRequestKind ? { serviceRequest: { kind: form.serviceRequestKind, requestedDate: form.requestedServiceDate || null } } : {}),
     categoryDescription: form.categoryDescription.trim() || null,
     typeDescription: form.typeDescription.trim() || null,
     kwhmTransfer:

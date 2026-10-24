@@ -10,6 +10,7 @@ async function background(preview) {
   const queue = [{id:"retained", status:"queued", evidence:[{localUri:"private://evidence/a"}], accessRevision:3}];
   const before = JSON.stringify(queue);
   const mocks = {
+    "@/services/consumer-update-queue": {syncConsumerUpdateQueue:async()=>{calls.push(["follow-up-sync"]);return [];}},
     "expo-background-task": {BackgroundTaskResult:{Success:"success",Failed:"failed"}},
     "expo-task-manager": {defineTask:(_name, fn)=>{task=fn;}},
     "react-native": {Platform:{OS:"android"}},
@@ -31,6 +32,7 @@ test("normal background callback retains authorization and completion behavior",
   const r=await background(false);
   assert.deepEqual(r.calls[1],["sync",{identityUserId:"owner",authorizedServiceAccountIds:["service"],accessRevision:3}]);
   assert.equal(r.calls[2][0],"completion");
+  assert.equal(r.calls[3][0],"follow-up-sync");
 });
 test("preview provider defers replay, retry/removal and pending receipt consumption",async()=>{
   const source=await readFile(new URL("../src/context/report-queue-context.tsx",import.meta.url),"utf8");
