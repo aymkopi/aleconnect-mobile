@@ -57,3 +57,10 @@
 - Preservation:5 unrelated Mobile primary files and205 Staff primary files are hash-pinned in ignored Staff integration evidence. Dirty primaries, original Phase3 source and private/device artifacts remain untouched. No environment, signing key, APK or device state is copied or changed.
 - Verification: fresh full Mobile tests/types/scoped lint and paired Staff checks are recorded at final integration closeout. Schema-before-Staff-deployment and matching-build native acceptance remain separate gates.
 - Merge policy: source-only default-branch merge uses [skip ci] to suppress automatic Android/iOS publication. PR checks may run. No deployment, live DDL/data/flag, provider send or native operation is included.
+
+## Verified local integration candidate (2026-10-24)
+
+- Verification:609 full Mobile tests, complete types and scoped lint exit0 (5 existing hook warnings retained), paired harness and whitespace pass. Staff121 regressions+67 harness tests, types/scoped lint and3.06s production build pass against current main with the newer report-type descriptions preserved. Product persistence/UI logic remains the reviewed Phase1–4 source; existing migration/browser evidence is retained.
+- Both source branches are committed and prepared for local main/master fast-forward with manual changes retained using scoped tracked-file stash recovery. Final refs/status/manual overlays are recorded in ignored integration evidence. Primary private/untracked assets, original Phase3 source and device artifacts remain preserved.
+- Remote publication is blocked: automatic approval review rejected the Staff branch push for missing explicit push/destination authorization and rejected Mobile disclosure to the existing public aymkopi/aleconnect-mobile repository. No push, PR, remote merge or release occurred. Source-only local closeout commits use [skip ci].
+- Remaining risks/next: request explicit push and source-only merge authorization for both GitHub destinations. Additive Staff schema/deployment/enablement, provider/native publication/acceptance and billing remain outside this integration.
