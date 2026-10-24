@@ -1,6 +1,6 @@
 # Active work
 
-- [Consumer service improvements](tasks/consumer-service-improvements.md): Phase 4 service requests/durable app feedback and paired Staff review/triage are source-complete with existing PanelUI. One fresh review's fixes and paired regressions pass; Phase 1–3/private state is preserved and capabilities remain off. Migration-first Staff deployment, billing and production/native/provider acceptance remain separate.
+- [Consumer service improvements](tasks/consumer-service-improvements.md): Phases1–4 merged through Mobile PR28 and Staff PR60/61 with zero Actions. Six guarded live migrations and Staff1.4.0-alpha.1 verification pass; local Mobile1.6.0-alpha.1/code76 APK is verified on Desktop. All new capabilities remain off until Staff acceptance. Billing and native/provider acceptance/enablement remain separate; preserve private/device/manual state.
 
 - [New report limits and map pin](tasks/new-report-pin-limits.md): source4d6907d merged/pushed with `[skip ci]`; zero Actions, combined573 tests/types/scoped lint/harness and browser limits/geometry verify. Task worktree/local branch removed; hash-verified evidence retained in `.cache/recovery/new-report-pin-limits-20261023`. Unrelated edits/stashes/worktrees preserved; native acceptance/release remain separate.
 

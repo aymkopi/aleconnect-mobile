@@ -1,5 +1,14 @@
 # Implementation history
 
+## 2026-10-24 — Phases 1–4 merged and local release APK verified
+
+- Scope: authorized public Mobile/private Staff merges with `[skip ci]`, additive live migrations, direct Staff deployment and a local APK. Mobile PR28 source `e38eca7` pairs with Staff PR60/61 deployment source `bfb937aa`; billing is excluded and all new capabilities stay off until Staff acceptance.
+- Verification: Staff1.4.0-alpha.1 is live after six guarded migrations/full backup/read-back. Five Worker bundles/15 web assets match local hashes;14 read-only probes and unchanged runtime/bindings/crons pass. Earlier609 Mobile tests/types/scoped lint/harness/browser checks remain applicable, with5 existing lint warnings.
+- Artifact: standalone release-runtime1.6.0-alpha.1/code76, original signer, non-debuggable live API/fixture-off Hermes,54 libraries/ARM64+x86_64 and ELF/ZIP16KB alignment verify; APK verifier2/2 passes. Desktop APK/metadata/checksum copies match SHA256 `e8e5ae2372ceba64c698d87f0b40d2b966806c1f2306c718556cd4d470b172ca`. Task-only shorter compilation paths resolved Windows limits without changing product sources/signing policy.
+- Preservation: generated version/type edits saved then restored;5 Mobile/205 Staff manual files, old APKs/checkouts/stashes and device queues remain. Source/merge Actions counts are zero; closeout uses skip markers. No GitHub release/tag publication, iOS build or device installation.
+- Remaining risks: authenticated production/native permission/restart/accessibility and real delivery/taps remain unverified. Billing stays out of scope.
+- Next: Staff acceptance and separate enablement approval. Full source/version/hash/recovery evidence is in the [handoff](tasks/consumer-service-improvements.md).
+
 ## 2026-10-23 — Phase 1 report follow-up and resolution responses
 
 - Scope: report-detail public follow-ups with optional private photos, nonblocking resolution confirmation/correction, durable original-account/revision/cycle-bound drafts and retries, and Staff response notification routing. Existing copied PanelUI components and semantic tokens are used; ticket/title/status positions, five tabs and old report queue remain. Billing and later plan phases excluded.
