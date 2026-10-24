@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { apiRequest } from "@/services/api";
 import { claimRefresh } from "@/utils/refresh-cooldown";
 import { normalizeHumanReference } from "@/utils/human-reference";
+import { normalizeReminderOccurrences, type ReminderOccurrence } from "@/features/advisories/reminder-contract";
 
 export type MobileAdvisory = {
   readonly id: string;
@@ -19,6 +20,8 @@ export type MobileAdvisory = {
   readonly scheduledEndAt: string | null;
   readonly publishedAt: string;
   readonly photos?: readonly MobilePublicPhoto[];
+  readonly occurrences?: readonly ReminderOccurrence[];
+  readonly publicationRevision?: number;
 };
 
 export type MobilePublicPhoto = {
@@ -64,6 +67,8 @@ export function normalizePublicPhoto(value: unknown): MobilePublicPhoto {
 export function normalizeMobileAdvisory(value: unknown): MobileAdvisory {
   const record = value && typeof value === "object" ? value as UnknownRecord : {};
   return {
+    occurrences: normalizeReminderOccurrences(record.occurrences),
+    publicationRevision: Number.isSafeInteger(record.publicationRevision) ? Number(record.publicationRevision) : 0,
     id: typeof record.id === "string" ? record.id : "",
     controlNumber: normalizeHumanReference(record.controlNumber),
     type: nullableString(record.type),

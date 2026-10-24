@@ -53,6 +53,13 @@ export function ticketIdFromPushData(data: unknown) {
   return typeof ticketId === "string" && ticketId.trim() ? ticketId : null;
 }
 
+export function consumerReportUpdatePushFromData(data: unknown) {
+  if (!data || typeof data !== "object" || Array.isArray(data)) return null;
+  const value = data as Record<string, unknown>;
+  if (value.context !== "ticket" || value.event !== "ticket.consumer_update" || value.version !== 1 || typeof value.ticketId !== "string" || !value.ticketId.trim() || typeof value.serviceAccountId !== "string" || !value.serviceAccountId.trim()) return null;
+  return { ticketId: value.ticketId, serviceAccountId: value.serviceAccountId };
+}
+
 export function classifyTicketStatusChangedPushData(data: unknown): TicketStatusChangedPushClassification {
   if (!data || typeof data !== "object" || Array.isArray(data)) return { kind: "unrelated" };
   const value = data as Record<string, unknown>;

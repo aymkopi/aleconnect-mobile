@@ -17,6 +17,7 @@ const stageFields = {
     "currentRegisteredName",
     "requestedRegisteredName",
     "desiredAction",
+    "requestedServiceDate",
   ],
   5: ["evidence"],
 } as const;
@@ -96,6 +97,8 @@ export function changeReportIssue(
     typeDescription: "",
     currentRegisteredName: "",
     requestedRegisteredName: "",
+    serviceRequestKind: null,
+    requestedServiceDate: "",
   };
 }
 

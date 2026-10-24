@@ -9,6 +9,7 @@ import {
   type AuthSession,
 } from "@/services/api";
 import { syncReportQueue } from "@/services/report-queue";
+import { syncConsumerUpdateQueue } from "@/services/consumer-update-queue";
 import { recordReportSubmissionCompletions } from "@/services/report-submission-events";
 
 const reportSyncTaskName = "aleconnect-report-queue-sync";
@@ -36,6 +37,7 @@ if (Platform.OS !== "web") {
         accessRevision: Number.isSafeInteger(access.accessRevision) ? Number(access.accessRevision) : 0,
       });
       await recordReportSubmissionCompletions(results);
+      await syncConsumerUpdateQueue();
       return BackgroundTask.BackgroundTaskResult.Success;
     } catch {
       return BackgroundTask.BackgroundTaskResult.Failed;

@@ -31,6 +31,8 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useUniwind } from "uniwind";
 import { getHomeLayout } from "./home-layout";
+import { AccountOutageCard } from "./account-outage-card";
+import { SavedOutageAcknowledgements } from "@/features/reports/saved-outage-acknowledgements";
 import { openContact } from "@/features/hotlines/contact-card";
 const actions = [
   { label: "Report\nan issue", icon: Plus, route: "/reports/new" },
@@ -45,11 +47,12 @@ export default function HomeScreen() {
     { height, width, fontScale } = useWindowDimensions(),
     router = useRouter();
   const { session } = useAuthSession(),
-    { accountContext } = useConsumerAccount(),
+    { accountContext, selectedServiceAccountId } = useConsumerAccount(),
     { publicFixtures: fixtures } = useVisualPreview();
   const { guest, openFeature } = useGuestAccess();
 
   const [focused, setFocused] = useState(false);
+  const [hasSavedOutage, setHasSavedOutage] = useState(false);
   useFocusEffect(
     useCallback(() => {
       setFocused(true);
@@ -104,12 +107,14 @@ export default function HomeScreen() {
   const carouselCardHeight = layout.cardHeight;
   const refreshFailed = items.length > 0 && Boolean(updates.error);
   const savedUpdates = Boolean(updates.data?.isStale);
+  const outageAccountId = selectedServiceAccountId ?? accountContext?.defaultServiceAccountId;
+  const showOutage = !guest && !fixtures && Boolean(userId && accountContext?.capabilities.areaOutageStatus && outageAccountId);
   return (
     <View className="flex-1 bg-background">
       <ScrollView
         ref={scrollRef}
         className="flex-1"
-        scrollEnabled={layout.scrollRequired}
+        scrollEnabled={layout.scrollRequired || showOutage || hasSavedOutage}
         showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{
@@ -226,6 +231,8 @@ export default function HomeScreen() {
             </GuideStep>
           </View>
         </ImageBackground>
+        {showOutage && accountContext && userId && outageAccountId ? <AccountOutageCard key={`${userId}:${accountContext.identityUserId}:${accountContext.accessRevision}:${outageAccountId}`} scope={{ principalId: userId, identityUserId: accountContext.identityUserId, accessRevision: accountContext.accessRevision, serviceAccountId: outageAccountId }} accountLabel={accountContext.accounts.find(account => account.id === outageAccountId)?.accountNumber ?? "Selected ALECO account"} /> : null}
+        {!guest && !fixtures && accountContext && userId && outageAccountId ? <SavedOutageAcknowledgements key={`saved:${userId}:${accountContext.identityUserId}:${accountContext.accessRevision}:${outageAccountId}`} className="mx-4" onVisibilityChange={setHasSavedOutage} scope={{ principalId: userId, identityUserId: accountContext.identityUserId, accessRevision: accountContext.accessRevision, authorizedServiceAccountIds: accountContext.authorizedServiceAccountIds }} serviceAccountId={outageAccountId} accountLabel={accountContext.accounts.find(account => account.id === outageAccountId)?.accountNumber ?? "Selected ALECO account"} canRetry={accountContext.capabilities.outageAcknowledgements === true} /> : null}
         <GuideStep chapter="home" target="shortcuts" className="px-4" style={{ gap: layout.gap }} onActivate={() => scrollRef.current?.scrollTo({ y: layout.scrollRequired ? layout.headerHeight : 0, animated: false })}>
           <PreviewLabel />
           <Text weight="semibold" style={{ fontSize: 16, lineHeight: 22 }}>

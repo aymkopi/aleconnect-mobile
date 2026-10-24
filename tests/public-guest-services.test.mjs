@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import ts from "typescript";
+import * as reminderContract from '../src/features/advisories/reminder-contract.ts';
 
 async function harness() {
   const values = new Map();
@@ -9,6 +10,7 @@ async function harness() {
   let response = { advisories: [{ id: "public-notice", title: "Public" }], items: [{ kind: "facebook_post", id: "page_post", message: "Public post" }], nextCursor: null };
   class ApiRequestError extends Error { constructor(message, status) { super(message); this.status = status; } }
   const modules = {
+    '@/features/advisories/reminder-contract': reminderContract,
     "@react-native-async-storage/async-storage": { __esModule: true, default: { getItem: async (key) => values.get(key) ?? null, setItem: async (key, value) => values.set(key, value), removeItem: async (key) => values.delete(key) } },
     "@/services/api": { ApiRequestError, apiRequest: async (path, init, options) => { calls.push({ path, init, options }); if (response instanceof Error) throw response; return response; } },
     "@/utils/refresh-cooldown": { claimRefresh: () => true },

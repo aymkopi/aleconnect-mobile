@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Linking, Pressable, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -46,6 +46,7 @@ import {
 } from "./presentation";
 import { detailFixture } from "./detail-fixtures";
 import { PublicUpdatePhotos } from "./public-update-photos";
+import { AdvisoryReminderSection } from "./advisory-reminder-section";
 
 export default function AdvisoryDetailScreen() {
   return <UpdateDetailScreen kind="advisory" />;
@@ -59,9 +60,10 @@ function UpdateDetailScreen({ kind }: { kind: MobilePublicUpdate["kind"] }) {
   const id = typeof params.id === "string" ? params.id : "",
     preview = typeof params.preview === "string" ? params.preview : undefined;
   const { session, isLoading } = useAuthSession(),
-    { accountContext } = useConsumerAccount(),
+    { accountContext, selectedServiceAccountId } = useConsumerAccount(),
     { publicFixtures: fixtures } = useVisualPreview();
   const { guest, requestSignIn } = useGuestAccess();
+  const reminderScope = useMemo(() => session && accountContext && selectedServiceAccountId ? ({ principalId: session.user.id, identityUserId: accountContext.identityUserId, accessRevision: accountContext.accessRevision, serviceAccountId: selectedServiceAccountId }) : null, [session, accountContext, selectedServiceAccountId]);
   const [areas, setAreas] = useState(fixtures && preview === "areas"),
     [query, setQuery] = useState("");
   const [foreground, primary] = useAppColors(["foreground", "primary"]);
@@ -217,7 +219,7 @@ function UpdateDetailScreen({ kind }: { kind: MobilePublicUpdate["kind"] }) {
                       Control no. {advisory.controlNumber}
                     </Text>
                   ) : null}
-                  {schedule ? (
+                  {schedule && !advisory.occurrences?.length ? (
                     <View className="gap-1">
                       <Text size="sm" weight="semibold">
                         {schedule.label}
@@ -240,7 +242,7 @@ function UpdateDetailScreen({ kind }: { kind: MobilePublicUpdate["kind"] }) {
                         </Text>
                       ) : null}
                     </View>
-                  ) : [
+                  ) : !advisory.occurrences?.length && [
                       "scheduled_outage",
                       "unscheduled_outage",
                       "maintenance",
@@ -252,6 +254,7 @@ function UpdateDetailScreen({ kind }: { kind: MobilePublicUpdate["kind"] }) {
                   <Text muted size="xs">
                     Published {formatManilaDateTime(advisory.publishedAt)} (Philippine time)
                   </Text>
+                  {reminderScope && advisory.occurrences?.length ? <AdvisoryReminderSection key={`${advisory.id}:${reminderScope.identityUserId}:${reminderScope.serviceAccountId}:${reminderScope.accessRevision}`} advisoryId={advisory.id} occurrences={advisory.occurrences} scope={reminderScope} available={accountContext?.capabilities.advisoryReminders === true} /> : advisory.occurrences?.map(row => <Text key={row.id} size="sm">{row.date}{row.startTime ? ` · ${row.startTime}` : ' · Time to be announced'}{row.status === 'cancelled' ? ' · Cancelled' : ''}</Text>)}
                 </Card>
               ) : (
                 <View className="gap-2">

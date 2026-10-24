@@ -3,10 +3,11 @@ import {readFile} from "node:fs/promises";
 import test from "node:test";
 import vm from "node:vm";
 import ts from "typescript";
+import * as reminderContract from '../src/features/advisories/reminder-contract.ts';
 async function load(file,modules={}) {
  const source=await readFile(new URL("../src/"+file,import.meta.url),"utf8");
  const exports={};const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText;
- vm.runInNewContext(code,{exports,require:name=>{if(name in modules)return modules[name];throw Error(name)},Map,Set,Date,URL,console});
+ vm.runInNewContext(code,{exports,require:name=>{if(name==='@/features/advisories/reminder-contract')return reminderContract;if(name in modules)return modules[name];throw Error(name)},Map,Set,Date,URL,console});
  return exports;
 }
 test("Topic readers retain legacy cached posts and expose topics consistently in search",async()=>{

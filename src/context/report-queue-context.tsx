@@ -1,4 +1,5 @@
 import NetInfo from "@react-native-community/netinfo";
+import { syncConsumerUpdateQueue } from "@/services/consumer-update-queue";
 import {
   createContext,
   useCallback,
@@ -105,8 +106,8 @@ export function ReportQueueProvider({ children, syncEnabled = true }: PropsWithC
 
   useEffect(() => {
     void refresh();
-    if (userId) void sync();
-  }, [queueScope, refresh, sync, userId]);
+    if (userId) { void sync(); if (syncEnabled) void syncConsumerUpdateQueue().catch(() => {}); }
+  }, [queueScope, refresh, sync, userId, syncEnabled]);
 
   useEffect(() => {
     if (!syncEnabled || !userId) return;
@@ -127,12 +128,12 @@ export function ReportQueueProvider({ children, syncEnabled = true }: PropsWithC
   useEffect(() => {
     if (!syncEnabled || !userId) return;
     const networkSubscription = NetInfo.addEventListener((state) => {
-      if (state.isConnected && state.isInternetReachable !== false) void sync();
+      if (state.isConnected && state.isInternetReachable !== false) { void sync(); void syncConsumerUpdateQueue().catch(() => {}); }
     });
     const appStateSubscription = AppState.addEventListener(
       "change",
       (state) => {
-        if (state === "active") void sync();
+        if (state === "active") { void sync(); void syncConsumerUpdateQueue().catch(() => {}); }
       },
     );
     return () => {

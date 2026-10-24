@@ -37,10 +37,37 @@ test("category Continue reopens multiple type cards even when a type is retained
       form: { categoryId: "power", typeId: "retained" }, accountReady: true,
       types: Array(count).fill({}), setIssueView: view => calls.push(view),
       stepErrors: [], editingReview: false, setEditingReview() {},
+      fixtures: false, type: {}, accountContext: null, scopeCurrent: true,
       nextCreationStep: () => 3, setStep: step => calls.push(step),
     });
     run();
     assert.deepEqual(calls, count === 1 ? [3] : ["type"]);
+  }
+});
+
+test("outage acknowledgement persists original intent before any offline network work", async () => {
+  const code=await expression('src/features/reports/known-outage-choice.tsx','acknowledge'), calls=[];
+  const {run}=evaluate(`exports.run = ${code}`,{}, {
+    scope:{principalId:'p'},serviceAccountId:'a',outageScope:{},read:{reload:async()=>{}},
+    fetchServiceStatus:async()=>{calls.push('refresh');throw new Error('offline')},
+    enqueueOutageAcknowledgement:async()=>{calls.push('save')},
+    syncConsumerUpdateQueue:async()=>{calls.push('network');throw new Error('offline')},
+  });
+  await assert.rejects(run({advisoryId:'notice',occurrenceId:null,publicationRevision:2}),/offline/);
+  assert.deepEqual(calls,['save','network']);
+});
+
+test("only fresh active matching notices divert Residence No Power reporting", async () => {
+  const code=await expression('src/features/reports/new-report-screen.tsx','continueStep');
+  for(const data of [null,{enabled:false},{enabled:true,canAcknowledge:true,items:[]},{enabled:true,canAcknowledge:true,items:[{state:'planned'}]},{enabled:true,isStale:true,canAcknowledge:true,items:[{state:'active'}]},{enabled:true,canAcknowledge:true,items:[{state:'active'}]}]){
+    const calls=[],{run}=evaluate(`exports.run = ${code}`,{}, {
+      setAttempted(){},pickerBusy:false,step:2,issueView:'type',stepErrors:[],editingReview:false,setEditingReview(){},
+      fixtures:false,type:{knownOutageEligible:true},accountContext:{capabilities:{areaOutageStatus:true}},scopeCurrent:true,
+      form:{typeId:'residence'},accountId:'a',currentScope:{principalId:'p',identityUserId:'i',accessRevision:2},
+      outageRead:{data},outageScopeKey:'scope',setOutageChoiceScope:()=>calls.push('outage'),setOutageChoice:()=>calls.push('outage'),
+      nextCreationStep:()=>3,setStep:step=>calls.push(step),
+    });
+    run();assert.deepEqual(calls,data?.enabled && !data.isStale && data.canAcknowledge && data.items.some(item=>item.state==='active')?['outage']:[3]);
   }
 });
 

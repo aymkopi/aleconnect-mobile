@@ -1,7 +1,9 @@
 import { Asset } from "expo-asset";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BackHandler, Image, Pressable, View } from "react-native";
-import { useFocusEffect, useNavigation, useRouter } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { ServiceRequestFields } from "@/features/services/service-request-fields";
+import { selectServiceRequest } from "@/features/services/service-request-contract";
 import { useAppGuide } from "@/context/app-guide-context";
 import { toast } from "@/components/panelui/toast";
 import {
@@ -57,6 +59,10 @@ import {
 } from "./data";
 import { ReportPage } from "./components/report-page";
 import { ReportReceipt } from "./report-receipt";
+import { KnownOutageChoice } from "./known-outage-choice";
+import { useScopedRead } from "@/hooks/use-scoped-read";
+import { fetchServiceStatus } from "@/services/service-status";
+import type { ServiceStatus } from "@/features/home/service-status-contract";
 import { EvidencePhotoViewer } from "./components/evidence-photo-viewer";
 import {
   creationStepErrors,
@@ -174,6 +180,8 @@ function draftHasContent(form: ComplaintFormState) {
 }
 
 export default function NewReportScreen() {
+  const { serviceRequest: requestedServiceKind } = useLocalSearchParams<{serviceRequest?: string}>();
+  const preselectedService = useRef("");
   const { guide, stopGuide } = useAppGuide();
   const router = useRouter(),
     navigation = useNavigation();
@@ -201,6 +209,7 @@ export default function NewReportScreen() {
   ]);
   const [step, setStep] = useState<CreationStep>(1),
     [editingReview, setEditingReview] = useState(false);
+  const [outageChoice, setOutageChoice] = useState<{ scopeKey: string; status: Extract<ServiceStatus, { enabled: true }> } | null>(null);
   const [form, setForm] = useState<ComplaintFormState>({
     ...initialComplaintForm,
   });
@@ -210,6 +219,13 @@ export default function NewReportScreen() {
     [metaRetry, setMetaRetry] = useState(0);
   const [selectedAccount, setSelectedAccount] = useState<string | null>(null),
     [scope, setScope] = useState<ReportDraftScope | null>(null);
+  useEffect(() => {
+    const selected = selectServiceRequest(meta.serviceRequestKinds ?? [], requestedServiceKind);
+    const key = `${selectedAccount}:${requestedServiceKind}`;
+    if (metaLoading || !selected || preselectedService.current === key) return;
+    preselectedService.current = key;
+    setForm(current => ({ ...changeReportIssue(current, selected.categoryId, selected.typeId), serviceRequestKind: selected.kind, requestedServiceDate: "" }));
+  }, [meta, metaLoading, requestedServiceKind, selectedAccount]);
   const [attempted, setAttempted] = useState(false),
     [submitError, setSubmitError] = useState<string | null>(null),
     [submitting, setSubmitting] = useState(false);
@@ -402,6 +418,8 @@ export default function NewReportScreen() {
     (item) => item.categoryId === form.categoryId,
   );
   const options = filterComplaintOptions(meta, issueQuery, issueView === "type" ? form.categoryId : undefined);
+  const outageScopeKey = `${currentScope.principalId}:${currentScope.identityUserId}:${currentScope.accessRevision}:${accountId}:${form.typeId}`;
+  const outageRead = useScopedRead(!fixtures && step === 2 && accountReady && type?.knownOutageEligible === true && accountContext?.capabilities.areaOutageStatus ? outageScopeKey : null, () => fetchServiceStatus({ principalId: currentScope.principalId!, identityUserId: currentScope.identityUserId!, accessRevision: currentScope.accessRevision, serviceAccountId: accountId! }));
   const errors = validateReportForm(form, category, type, meta),
     stepErrors = creationStepErrors(step, errors, accountReady);
   const summaryErrors = step === 5 ? [] : stepErrors.filter(message => step !== 3 || message !== errors.purok);
@@ -460,6 +478,7 @@ export default function NewReportScreen() {
     else setConfirm("discard");
   }, [form, leave, closeDraft, receipt]);
   const back = useCallback(() => {
+    if (outageChoice) { setOutageChoice(null); return; }
     if (submitting && fixtures) {
       setSubmitting(false);
       return;
@@ -493,6 +512,7 @@ export default function NewReportScreen() {
     setEditingReview(false);
     setAttempted(false);
   }, [
+    outageChoice,
     mapOpen,
     viewerIndex,
     confirm,
@@ -552,7 +572,8 @@ export default function NewReportScreen() {
     setAttempted(false);
   };
   const applyIssue = (categoryId: string, typeId: string) => {
-    setForm(current => changeReportIssue(current, categoryId, typeId));
+    const selected = meta.serviceRequestKinds?.find(item => item.typeId === typeId && item.categoryId === categoryId);
+    setForm(current => ({ ...changeReportIssue(current, categoryId, typeId), serviceRequestKind: selected?.kind ?? null }));
     setAttempted(false);
   };
   const selectIssue = (categoryId: string, typeId: string) => {
@@ -793,6 +814,10 @@ export default function NewReportScreen() {
       if (types.length !== 1 || !form.typeId) { setIssueView("type"); setAttempted(false); return; }
     }
     if (stepErrors.length) return;
+    if (step === 2 && !fixtures && type?.knownOutageEligible === true && accountContext?.capabilities.areaOutageStatus && scopeCurrent && outageRead.data?.enabled && !outageRead.data.isStale && outageRead.data.canAcknowledge && outageRead.data.items.some(item => item.state === "active")) {
+      setOutageChoice({scopeKey:outageScopeKey,status:outageRead.data});
+      return;
+    }
     if (step === 6) {
       void submit();
       return;
@@ -923,6 +948,9 @@ export default function NewReportScreen() {
         )}
       </ReportPage>
     );
+
+  if (outageChoice?.scopeKey === outageScopeKey && scopeCurrent && accountContext && session && accountId)
+    return <ReportPage title="Outage notice" onBack={() => setOutageChoice(null)}><KnownOutageChoice key={outageChoice.scopeKey} initialStatus={outageChoice.status} scope={{ principalId: session.user.id, identityUserId: accountContext.identityUserId, accessRevision: accountContext.accessRevision, authorizedServiceAccountIds: accountContext.authorizedServiceAccountIds }} serviceAccountId={accountId} accountLabel={accountLabel} onContinue={() => { setOutageChoice(null); setStep(nextCreationStep(step, editingReview)); setEditingReview(false); setAttempted(false); }} onHome={() => leave("/home")} /></ReportPage>;
 
   if (receipt && scopeCurrent)
     return (
@@ -1110,6 +1138,7 @@ export default function NewReportScreen() {
             ) : null}
             {step === 2 ? (
               <>
+                {outageRead.busy ? <Text muted size="sm">Checking matching outage notices…</Text> : outageRead.data?.enabled && !outageRead.data.isStale && outageRead.data.canAcknowledge && outageRead.data.items.some(item => item.state === "active") ? <Text muted size="sm">A current official notice may describe this issue.</Text> : null}
                 <Heading
                   description={
                     issueView === "category"
@@ -1307,6 +1336,7 @@ export default function NewReportScreen() {
             ) : null}
             {step === 4 ? (
               <>
+                {form.serviceRequestKind ? <ServiceRequestFields kind={form.serviceRequestKind} requirements={meta.serviceRequestKinds?.find(item => item.kind === form.serviceRequestKind)?.requirements} requestedDate={form.requestedServiceDate ?? ""} onChange={value => setForm(current => ({ ...current, requestedServiceDate: value }))} error={attempted ? errors.requestedServiceDate : undefined} disabled={submitting} /> : null}
                 <Heading>Describe the issue</Heading>
                 {textField(
                   "categoryDescription",
@@ -1453,6 +1483,7 @@ export default function NewReportScreen() {
                     Requested action
                   </Text>
                   <Text size="sm">{form.desiredAction || "Not specified"}</Text>
+                  {form.serviceRequestKind ? <><Text size="xs" muted>Requested service date (not confirmed)</Text><Text size="sm">{form.requestedServiceDate || "No preference provided"}</Text></> : null}
                 </View>
                 <View className="rounded-xl bg-card p-3 gap-2">
                   <EditRow

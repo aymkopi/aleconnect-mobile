@@ -1,5 +1,7 @@
 # Active work
 
+- [Consumer service improvements](tasks/consumer-service-improvements.md): Phase 4 service requests/durable app feedback and paired Staff review/triage are source-complete with existing PanelUI. One fresh review's fixes and paired regressions pass; Phase 1–3/private state is preserved and capabilities remain off. Migration-first Staff deployment, billing and production/native/provider acceptance remain separate.
+
 - [New report limits and map pin](tasks/new-report-pin-limits.md): source4d6907d merged/pushed with `[skip ci]`; zero Actions, combined573 tests/types/scoped lint/harness and browser limits/geometry verify. Task worktree/local branch removed; hash-verified evidence retained in `.cache/recovery/new-report-pin-limits-20261023`. Unrelated edits/stashes/worktrees preserved; native acceptance/release remain separate.
 
 - [Mobile service UX](tasks/mobile-service-ux.md): isolated Mobile/Staff PRs in preparation; simpler Login, four Home actions, official links, shared card pilot and searchable report types. The merged PR25 Tour fix is preserved and reverified. Migration/deployment/native acceptance remain separate.

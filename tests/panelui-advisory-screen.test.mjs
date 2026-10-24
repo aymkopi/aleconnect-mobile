@@ -49,7 +49,7 @@ function harness() {
     typeof type === "function" ? type(props) : { type, props };
   const modules = {
     "@/components/data-state": { DataState: "DataState", DataNotice: "DataNotice" },
-    react: { useEffect: () => {}, useState: (v) => [v, () => {}] },
+    react: { useEffect: () => {}, useState: (v) => [v, () => {}], useMemo: (f) => f() },
     "react/jsx-runtime": { jsx, jsxs: jsx, Fragment: "Fragment" },
     "react-native": {
       View: "View",
@@ -152,6 +152,7 @@ function harness() {
       },
     },
     "./public-update-photos": { PublicUpdatePhotos: "PublicUpdatePhotos" },
+    "./advisory-reminder-section": { AdvisoryReminderSection: "AdvisoryReminderSection" },
   };
   for (const name of [
     "Text",
