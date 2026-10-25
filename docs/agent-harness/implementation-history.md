@@ -1019,3 +1019,10 @@ Final gates: Staff85 focused tests, production TypeScript/Vite build and scoped 
 - Verification:610 Mobile tests, types/app lint, six browser journeys, Staff build, five parser and twelve disposable MySQL checks pass. Three review findings are reproduced and fixed. Figma layers/screens inspected; old native reply screenshot retained privately. Copied Rating retains nine upstream compiler lint warnings.
 - Remaining risks: new APK/device validation and iOS/native accessibility/provider acceptance remain separate; preserve source, private queues, credentials, signing and tested artifacts.
 - Next: use [skip ci] for authorized main/master publication; deploy compatible Staff API before the Mobile APK and record exact runtime/artifact/native evidence.
+
+## 2026-10-25 — Staff reply destination
+
+- Scope: Staff reply pushes open the separate Follow-up screen with the original ticket/account; ordinary status notifications keep Ticket details.
+- Verification: route regression reproduced RED then fixed; full Mobile suite, types and scoped lint are rerun before publication.
+- Remaining risks: source routing does not prove OS notification delivery or a physical notification tap.
+- Next: include this caller in the same source release and matching native build; billing remains excluded.

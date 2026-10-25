@@ -57,7 +57,7 @@ export function consumerReportUpdatePushFromData(data: unknown) {
   if (!data || typeof data !== "object" || Array.isArray(data)) return null;
   const value = data as Record<string, unknown>;
   if (value.context !== "ticket" || value.event !== "ticket.consumer_update" || value.version !== 1 || typeof value.ticketId !== "string" || !value.ticketId.trim() || typeof value.serviceAccountId !== "string" || !value.serviceAccountId.trim()) return null;
-  return { ticketId: value.ticketId, serviceAccountId: value.serviceAccountId };
+  return { ticketId: value.ticketId, serviceAccountId: value.serviceAccountId, pathname: "/reports/follow-up" as const };
 }
 
 export function classifyTicketStatusChangedPushData(data: unknown): TicketStatusChangedPushClassification {

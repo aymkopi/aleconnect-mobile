@@ -149,9 +149,10 @@ function PushTokenBridge() {
             requestReportRevalidation(userId);
           }
         }
-        const ticket = ticketStatusChangedEventFromPushData(data) ?? consumerReportUpdatePushFromData(data);
+        const reportUpdate = consumerReportUpdatePushFromData(data);
+        const ticket = ticketStatusChangedEventFromPushData(data) ?? reportUpdate;
         router.push({
-          pathname: "/report/[id]",
+          pathname: reportUpdate?.pathname ?? "/report/[id]",
           params: {
             id: ticketId,
             focus: "notification",
