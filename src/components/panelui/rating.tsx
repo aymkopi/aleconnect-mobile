@@ -232,9 +232,9 @@ export const Rating = forwardRef<View, RatingProps>(
 
     // SVG paints with real colour strings, not classes — resolve the tokens.
     const fillColor = useCSSVariable(FILL_VAR[color]);
-    const emptyColor = useCSSVariable('--color-border');
+    const emptyColor = useCSSVariable('--color-muted-foreground');
     const fill = typeof fillColor === 'string' ? fillColor : '#f59e0b';
-    const empty = typeof emptyColor === 'string' ? emptyColor : '#d4d4d4';
+    const empty = typeof emptyColor === 'string' ? emptyColor : '#737373';
 
     // Drives every star's clipped fill on the UI thread.
     const display = useSharedValue(value);
