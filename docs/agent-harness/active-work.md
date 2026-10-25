@@ -1,6 +1,6 @@
 # Active work
 
-- [Consumer service improvements](tasks/consumer-service-improvements.md): Phases1-4 enabled through verified Staff1.4.0-alpha.3. Mobile1.6.0-alpha.1/code76 is installed in place; Juan login, restart/draft/receipt and resolution confirmation pass. Final Staff-reply native readback waits for Find Lineman feature gaps to release the tablet. Billing excluded; preserve old APK, private queues, primaries and other device work.
+- [Consumer service improvements](tasks/consumer-service-improvements.md): Phases1-4 are live; final code76 Staff-reply tablet readback passes. Follow-up-only Figma/UI refinement preserves Ticket details layout, uses final no-comment resolution answers and a star-rating sheet. Source verification passes; release is being prepared. Billing excluded; preserve all manual, private and device state.
 
 - [New report limits and map pin](tasks/new-report-pin-limits.md): source4d6907d merged/pushed with `[skip ci]`; zero Actions, combined573 tests/types/scoped lint/harness and browser limits/geometry verify. Task worktree/local branch removed; hash-verified evidence retained in `.cache/recovery/new-report-pin-limits-20261023`. Unrelated edits/stashes/worktrees preserved; native acceptance/release remain separate.
 

@@ -64,7 +64,7 @@ export async function enqueueConsumerUpdate(id: string, scope: ConsumerUpdateSco
     if (row.id !== id) return row;
     if (!consumerUpdateScopeCurrent(row, scope) || row.status !== "draft") throw new Error("Review this draft under its original account before sending.");
     if (isOutageAcknowledgement(row)) throw new Error("Use the acknowledgement choice for this saved action.");
-    if (row.payload.kind !== "resolution_confirmed" && !row.payload.text.trim()) throw new Error("Describe your update before sending.");
+    if (row.payload.kind === "consumer_update" && !row.payload.text.trim()) throw new Error("Describe your update before sending.");
     return { ...row, status: "queued" as const };
     });
   });

@@ -41,3 +41,10 @@ test('optional feedback stays durable after uncertainty and only a matching rece
  await assert.rejects(h.feedback.sendServiceFeedback({...scope,accessRevision:3},value),/Review/);
  h.mode('ok');await h.feedback.sendServiceFeedback(scope,value);assert.equal(await h.feedback.readServiceFeedbackDraft(scope,'ticket'),null);
 });
+
+test('invalid star values cannot overwrite a readable service rating draft',async()=>{
+ const h=await harness(),value={kind:'service',clientMutationId:'mutation',ticketId:'ticket',cycleId:'cycle',serviceAccountId:'account',accessRevision:2,responseVersion:1,expectedVersion:0,rating:3,comment:'Existing note'};
+ await h.feedback.saveServiceFeedbackDraft(scope,{input:value,pending:false});
+ for(const rating of [0,6,1.5,NaN])await assert.rejects(h.feedback.saveServiceFeedbackDraft(scope,{input:{...value,rating},pending:false}));
+ assert.deepEqual((await h.feedback.readServiceFeedbackDraft(scope,'ticket')).input,value);
+});

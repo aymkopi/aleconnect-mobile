@@ -224,7 +224,7 @@ function ServiceUpdateView({
   );
 }
 
-export default function ReportDetailScreen() {
+export default function ReportDetailScreen({ followUp = false }: { followUp?: boolean } = {}) {
   const router = useRouter();
   const focused = useIsFocused();
   const params = useLocalSearchParams<{
@@ -384,9 +384,10 @@ export default function ReportDetailScreen() {
     void reload(true);
   }, [scope, fixtures, report, reload]);
   const handleBack = useCallback(() => {
+    if (followUp) { router.dismissTo({ pathname: "/reports/[id]", params: { id, ...(serviceAccountId ? { serviceAccountId } : {}) } }); return; }
     if (router.canGoBack()) router.back();
     else router.replace("/reports");
-  }, [router]);
+  }, [router, followUp, id, serviceAccountId]);
   useFocusEffect(
     useCallback(() => {
       if (scope && lastFocus.current === scope) void reload();
@@ -454,9 +455,12 @@ export default function ReportDetailScreen() {
         ? "This service account is no longer linked. Return to your reports to select an available account."
         : "Your account access could not be confirmed. Try again.";
 
+  if (followUp && report && !fixtures && session && accountContext && report.serviceAccountId && accountContext.authorizedServiceAccountIds.includes(report.serviceAccountId)) {
+    return <ConsumerUpdatesSection key={`${scope}:follow-up`} screen ticketId={report.id} serviceAccountId={report.serviceAccountId} scope={{ principalId: session.user.id, identityUserId: accountContext.identityUserId, accessRevision: accountContext.accessRevision, authorizedServiceAccountIds: accountContext.authorizedServiceAccountIds }} featureAvailable={accountContext.capabilities.reportUpdates === true} active={focused} ticketNumber={report.ticketNumber} title={report.title} onBack={handleBack} />;
+  }
   return (
     <ReportPage
-      title="Ticket details"
+      title={followUp ? "Follow-up" : "Ticket details"}
       onBack={handleBack}
       refreshing={refreshing}
       onRefresh={refresh}
@@ -618,7 +622,8 @@ export default function ReportDetailScreen() {
               />
             ) : null}
           </View>
-          {!fixtures && session && accountContext && report.serviceAccountId && accountContext.authorizedServiceAccountIds.includes(report.serviceAccountId) ? <ConsumerUpdatesSection key={`${scope}:consumer-updates`} ticketId={report.id} serviceAccountId={report.serviceAccountId} scope={{ principalId: session.user.id, identityUserId: accountContext.identityUserId, accessRevision: accountContext.accessRevision, authorizedServiceAccountIds: accountContext.authorizedServiceAccountIds }} featureAvailable={accountContext.capabilities.reportUpdates === true} serviceFeedbackAvailable={accountContext.capabilities.serviceFeedback === true} active={focused} /> : null}
+
+          {!fixtures && session && accountContext && report.serviceAccountId && accountContext.authorizedServiceAccountIds.includes(report.serviceAccountId) ? <ConsumerUpdatesSection key={`${scope}:consumer-updates`} ticketId={report.id} serviceAccountId={report.serviceAccountId} scope={{ principalId: session.user.id, identityUserId: accountContext.identityUserId, accessRevision: accountContext.accessRevision, authorizedServiceAccountIds: accountContext.authorizedServiceAccountIds }} featureAvailable={accountContext.capabilities.reportUpdates === true} serviceFeedbackAvailable={accountContext.capabilities.serviceFeedback === true} active={focused} ticketNumber={report.ticketNumber} title={report.title} refreshRequest={refreshing} onOpen={() => router.push({ pathname: "/reports/follow-up", params: { id: report.id, serviceAccountId: report.serviceAccountId! } })} /> : null}
           {report.serviceRequest ? <ServiceRequestProgressCard value={report.serviceRequest} /> : null}
           <View className="gap-2">
             <Text weight="medium" size="sm">

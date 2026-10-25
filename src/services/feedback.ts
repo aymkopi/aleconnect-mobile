@@ -26,6 +26,7 @@ export async function sendAppFeedback(scope:ConsumerIntentScope,draft:AppFeedbac
  const received:AppFeedbackDraft={...pending,status:'received',receipt};await saveAppFeedbackDraft(scope,received);return received;
 }
 export async function saveServiceFeedbackDraft(scope:ReminderScope,draft:FeedbackDraft){
+ if(draft.input.serviceAccountId!==scope.serviceAccountId || !validServiceFeedback(draft.input.rating,draft.input.comment))throw new Error('Choose a rating from 1 to 5 before saving.');
  const next=()=>AsyncStorage.setItem(key(scope,draft.input.ticketId),JSON.stringify(draft));const result=writes.then(next,next);writes=result.catch(()=>{});return result;
 }
 export async function readServiceFeedbackDraft(scope:ReminderScope,ticketId:string):Promise<FeedbackDraft|null>{
