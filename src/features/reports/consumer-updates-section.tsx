@@ -39,7 +39,7 @@ export function ConsumerUpdatesSection({ ticketId, serviceAccountId, scope, feat
     if (!featureAvailable || !active) return;
     const generation = ++readGeneration.current; setLoading(true); setReadError("");
     try { const next = await fetchConsumerUpdates(ticketId, serviceAccountId); if (alive.current && generation === readGeneration.current) setPage(next); }
-    catch { if (alive.current && generation === readGeneration.current) setReadError("Updates unavailable. Saved work is kept."); }
+    catch { if (alive.current && generation === readGeneration.current) setReadError("Updates unavailable."); }
     finally { if (alive.current && generation === readGeneration.current) setLoading(false); }
   }, [featureAvailable, active, ticketId, serviceAccountId]);
   // eslint-disable-next-line react-hooks/set-state-in-effect -- Subscribe to persisted device state and load its initial snapshot.
@@ -143,7 +143,7 @@ export function ConsumerUpdatesSection({ ticketId, serviceAccountId, scope, feat
     </View>)}
     {page?.enabled && !messages.length ? <Text muted size="sm">No messages yet.</Text> : null}
     {formOpen && canWrite ? <View className="gap-3">
-      {draft.payload.kind === "consumer_update" ? <Input label="Your update" isRequired multiline avoidKeyboard maxLength={2000} value={draft.payload.text} disabled={busy} onChangeText={text => { void persistDraft({ ...currentDraft.current, payload: { ...currentDraft.current.payload, text } }).catch(() => {}); }} description="Saved on this device." /> : <Text size="sm">Saved response: {draft.payload.kind === "resolution_confirmed" ? "Resolved" : "Problem still exists"}{draft.payload.text ? ` — ${draft.payload.text}` : ""}. Once submitted, it can’t be changed.</Text>}
+      {draft.payload.kind === "consumer_update" ? <Input label="Your update" isRequired multiline avoidKeyboard maxLength={2000} value={draft.payload.text} disabled={busy} onChangeText={text => { void persistDraft({ ...currentDraft.current, payload: { ...currentDraft.current.payload, text } }).catch(() => {}); }} description={`${draft.payload.text.length}/2000`} /> : <Text size="sm">Saved response: {draft.payload.kind === "resolution_confirmed" ? "Resolved" : "Problem still exists"}{draft.payload.text ? ` — ${draft.payload.text}` : ""}. Once submitted, it can’t be changed.</Text>}
       <Text muted size="sm">Up to 3 photos, 5 MB each.</Text>
       <FileUpload key={draft.id} value={files} onValueChange={changePhotos} sources={["camera", "library"]} sourceTitle="Add follow-up photos" accept={["image/*"]} multiple maxFiles={3} image={{ quality: 1 }} disabled={busy || preparing > 0} onError={failure => setError(failure.message)} onReject={failures => setError(failures.map(value => value.message).join(" "))}><FileUpload.Grid columns={3} placeholders addLabel="Add photos" /></FileUpload>
       {preparing ? <Text muted size="sm" accessibilityLiveRegion="polite">Preparing photos…</Text> : null}

@@ -1022,7 +1022,7 @@ Final gates: Staff85 focused tests, production TypeScript/Vite build and scoped 
 
 ## 2026-10-25 — Staff reply destination
 
-- Scope: Staff reply pushes open the separate Follow-up screen with the original ticket/account; ordinary status notifications keep Ticket details. Receipt lookup uses reverse/find for older Hermes runtimes.
+- Scope: Staff reply pushes open the separate Follow-up screen with the original ticket/account; ordinary status notifications keep Ticket details. Receipt lookup uses reverse/find for older Hermes runtimes. Pending-copy wording does not claim a successful disk save; the composer shows a concise character counter.
 - Verification: route regression reproduced RED then fixed; full Mobile suite, types and scoped lint are rerun before publication.
 - Remaining risks: source routing does not prove OS notification delivery or a physical notification tap.
 - Next: include this caller in the same source release and matching native build; billing remains excluded.

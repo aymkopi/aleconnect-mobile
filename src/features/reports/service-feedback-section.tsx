@@ -25,18 +25,18 @@ export function ServiceFeedbackSection({ticketId,cycleId,responseVersion,confirm
  async function change(rating:number,comment:string){
   if(busy || current.current?.pending || !confirmed || stale || !canWrite)return;
   const next={input:current.current ? {...current.current.input,rating,comment}:input(rating,comment),pending:false};current.current=next;setDraft(next);setScore(rating);setError('');setNotice('');
-  try{await saveServiceFeedbackDraft(scope,next);}catch{setError('This feedback draft could not be saved. Keep this screen open.');}
+  try{await saveServiceFeedbackDraft(scope,next);}catch{setError('Draft not saved. Keep this sheet open.');}
  }
  async function send(){
   const value=current.current?.input;if(!value || busy)return;setBusy(true);setError('');setNotice('');
   current.current={input:value,pending:true};setDraft(current.current);
-  try{await sendServiceFeedback(scope,value);current.current=null;setDraft(null);setNotice('Rating received.');setRefresh(v=>v+1);}catch(failure){setError(failure instanceof Error?failure.message:'Feedback receipt was not confirmed. Your draft is kept.');}finally{setBusy(false);}
+  try{await sendServiceFeedback(scope,value);current.current=null;setDraft(null);setNotice('Rating received.');setRefresh(v=>v+1);}catch(failure){setError(failure instanceof Error?failure.message:'Delivery unconfirmed. Keep this sheet open.');}finally{setBusy(false);}
  }
  async function discard(){try{await discardServiceFeedbackDraft(scope,ticketId);current.current=null;setDraft(null);setRefresh(v=>v+1);setError('');}catch{setError('The saved feedback could not be removed.');}}
  if(!available && !draft || !confirmed && !draft && !saved)return null;
  const editable=ready && available && enabled && canWrite && confirmed && !stale && !busy && !draft?.pending;
  return <BottomSheet open={open} onOpenChange={setOpen}>
-  <BottomSheet.Trigger><Button variant="outline">{draft?.pending?'Rating awaiting receipt':saved?`Rating: ${saved.rating}/5`:'Rate service'}</Button></BottomSheet.Trigger>
+  <BottomSheet.Trigger><Button variant="outline">{draft?.pending?'Rating pending':saved?`Rating: ${saved.rating}/5`:'Rate service'}</Button></BottomSheet.Trigger>
   <BottomSheet.Content>
    <BottomSheet.Header title="Rate the service" description={ticketNumber} />
    <BottomSheet.Body><View className="gap-4">
@@ -44,7 +44,7 @@ export function ServiceFeedbackSection({ticketId,cycleId,responseVersion,confirm
     <Text size="sm" className="text-center">{score?`${score}/5 · ${labels[score-1]}`:'Select a rating'}</Text>
     {saved&&!draft&&!notice?<Text size="sm">Rating submitted.</Text>:null}
     {stale?<Text accessibilityRole="alert" size="sm">Report or account changed. Remove the saved rating to choose again.</Text>:null}
-    {draft?.pending?<Text size="sm">Awaiting receipt. Your rating is saved.</Text>:null}
+    {draft?.pending?<Text size="sm">Delivery unconfirmed.</Text>:null}
     {original?.comment?<Text muted size="sm">Saved note: {original.comment}</Text>:null}
     {!available || enabled&&!canWrite?<Text muted size="sm">Rating unavailable. Saved work is kept.</Text>:null}
     {error?<Text accessibilityRole="alert" size="sm" className="text-destructive">{error}</Text>:null}
