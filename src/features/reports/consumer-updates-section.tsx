@@ -112,7 +112,7 @@ export function ConsumerUpdatesSection({ ticketId, serviceAccountId, scope, feat
   const pendingAnswer = items.some(item => !["draft", "sent", "needs_attention"].includes(item.status) && item.payload.kind !== "consumer_update" && item.payload.cycleId === page?.resolutionCheck?.cycleId);
   const visibleItems = items.filter(item => item.status !== "sent");
   const check = page?.resolutionCheck;
-  const accepted = items.findLast(item => item.status === "sent" && item.receipt && item.payload.kind !== "consumer_update" && item.payload.cycleId === check?.cycleId);
+  const accepted = [...items].reverse().find(item => item.status === "sent" && item.receipt && item.payload.kind !== "consumer_update" && item.payload.cycleId === check?.cycleId);
   const answer = check?.answer ?? (accepted ? accepted.payload.kind === "resolution_confirmed" ? "confirmed" : "still_exists" : null);
   const messages = page?.events.filter(event => event.kind !== "resolution_confirmed" && event.kind !== "resolution_disputed") ?? [];
   const unavailable = (!featureAvailable || page?.enabled === false) && !visibleItems.length;
