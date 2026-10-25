@@ -23,8 +23,8 @@
 - [x] Mobile: keep consumer-updates-section.tsx as the scoped controller, add compact entry and full-screen route/ReportPage, final resolution receipt and choice controls, preserve legacy drafts and retry controls, remove exposed resolution events. Enqueue requires text only for ordinary updates.
 - [x] Mobile: replace service-feedback-section.tsx form with an entry button and PanelUI BottomSheet/Rating. Copy only Rating source from the official registry, mapped to existing local helpers. Save draft before mutation; keep receipt state if the refresh fails.
 - [x] Ticket details: wire pull-to-refresh into the communication read and replace only the existing inline follow-up section. Preserve all other layout and content.
-- [ ] Verify focused API and queue/storage tests, disposable MySQL domain/replay/review tests, Mobile TypeScript/scoped lint/full suite, Staff build, and actual production-screen browser interactions at phone/tablet widths in light/dark. Refresh Graphify, keep graph churn separate, run both harnesses and diff checks.
-- [ ] Close out the completed native Staff-reply readback in both handoffs/history. Release Staff before dependent Mobile; keep existing release/signer/device state and [skip ci] instructions. Source, deployment and native acceptance are separate evidence.
+- [x] Verify focused API and queue/storage tests, disposable MySQL domain/replay/review tests, Mobile TypeScript/scoped lint/full suite, Staff build, and actual production-screen browser interactions at phone/tablet widths in light/dark. Refresh Graphify, keep graph churn separate, run both harnesses and diff checks.
+- [x] Close out the completed native Staff-reply readback in both handoffs/history. Release Staff before dependent Mobile; keep existing release/signer/device state and [skip ci] instructions. Source, deployment and native acceptance are separate evidence.
 
 ## Rollout and recovery
 

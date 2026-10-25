@@ -1026,3 +1026,11 @@ Final gates: Staff85 focused tests, production TypeScript/Vite build and scoped 
 - Verification: route regression reproduced RED then fixed; full Mobile suite, types and scoped lint are rerun before publication.
 - Remaining risks: source routing does not prove OS notification delivery or a physical notification tap.
 - Next: include this caller in the same source release and matching native build; billing remains excluded.
+
+
+## 2026-10-26 — Follow-up deployment and native closeout
+
+- Scope: follow-up-only Figma/UI, final no-comment resolution receipts and optional star-rating sheet are released; Ticket details layout and billing boundary are preserved.
+- Verification: API91c98300/sourcec5d759d0 and14 smoke probes verify unchanged runtime/bindings/delivery Workers. Mobileb7cbd2d1 /1.6.0-alpha.2/code77, original signer and16KB alignment pass. Exact installed/Desktop APK SHA256ba426b367a25a687254b0f46808c26d53d8f518b42a9079d4788199c087509af. Native retained-session Staff reply/final receipt/pull-to-refresh and four-star draft recovery/cleanup pass. Existing610 Mobile and focused Staff/browser gates remain green; fresh16 release checks, lint, Graphify and paired harness/diff closeout are recorded in the task handoff.
+- Remaining risks: online Expo Doctor20/21 reports existing seven-package patch drift; copied Rating retains nine compiler warnings. iOS/native assistive technology and final OS/provider delivery/taps remain unverified. No dependency upgrade, new migration, business lifecycle command, billing, store or OTA release.
+- Next: authorized [skip ci] main/master closeout and zero-Actions readback; retain unrelated dirty primaries, private evidence, keys, APKs and all device queues.

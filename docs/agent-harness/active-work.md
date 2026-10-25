@@ -1,6 +1,6 @@
 # Active work
 
-- [Consumer service improvements](tasks/consumer-service-improvements.md): Phases1-4 are live; final code76 Staff-reply tablet readback passes. Follow-up-only Figma/UI refinement preserves Ticket details layout, uses final no-comment resolution answers and a star-rating sheet. Source verification passes; release is being prepared. Billing excluded; preserve all manual, private and device state.
+- [Consumer service improvements](tasks/consumer-service-improvements.md): Phases1-4 and Dispatcher Reports are live. Follow-up-only refinement is deployed; same-signer Mobile1.6.0-alpha.2/code77 passes final tablet Staff-reply/receipt, pull-to-refresh and rating-draft recovery checks. Ticket details layout is retained. Source/closeout use [skip ci]; billing excluded. Preserve all unrelated manual/private/device state.
 
 - [New report limits and map pin](tasks/new-report-pin-limits.md): source4d6907d merged/pushed with `[skip ci]`; zero Actions, combined573 tests/types/scoped lint/harness and browser limits/geometry verify. Task worktree/local branch removed; hash-verified evidence retained in `.cache/recovery/new-report-pin-limits-20261023`. Unrelated edits/stashes/worktrees preserved; native acceptance/release remain separate.
 
