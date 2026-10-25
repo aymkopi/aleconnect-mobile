@@ -1034,3 +1034,11 @@ Final gates: Staff85 focused tests, production TypeScript/Vite build and scoped 
 - Verification: API91c98300/sourcec5d759d0 and14 smoke probes verify unchanged runtime/bindings/delivery Workers. Mobileb7cbd2d1 /1.6.0-alpha.2/code77, original signer and16KB alignment pass. Exact installed/Desktop APK SHA256ba426b367a25a687254b0f46808c26d53d8f518b42a9079d4788199c087509af. Native retained-session Staff reply/final receipt/pull-to-refresh and four-star draft recovery/cleanup pass. Existing610 Mobile and focused Staff/browser gates remain green; fresh16 release checks, lint, Graphify and paired harness/diff closeout are recorded in the task handoff.
 - Remaining risks: online Expo Doctor20/21 reports existing seven-package patch drift; copied Rating retains nine compiler warnings. iOS/native assistive technology and final OS/provider delivery/taps remain unverified. No dependency upgrade, new migration, business lifecycle command, billing, store or OTA release.
 - Next: authorized [skip ci] main/master closeout and zero-Actions readback; retain unrelated dirty primaries, private evidence, keys, APKs and all device queues.
+
+
+## 2026-10-26 — Resolution-first Figma design
+
+- Scope: revised resolved-report question, direct optional rating, required250-character unresolved query, compact photos and Staff-led consumer turn taking. Simple update feed; cached reads, global rate-limit copy and timed acknowledgements are designed across Staff/API and Mobile. Billing excluded.
+- Verification: current-house Figma components/tokens, rendered phone/tablet/dark/acknowledgement states, structural action/timer checks and a fresh brief-only builder check pass. Paired design brief and task handoffs record the source constraints and planned safeguards.
+- Remaining risks: this is a proposed design; current production/code77 behavior is unchanged. No new product code, schema, release, provider or device acceptance is claimed.
+- Next: chat review of Figma v3, then the compatible implementation plan and Staff/Mobile changes. Preserve all prior code/artifacts, signing, queues and unrelated primary work.

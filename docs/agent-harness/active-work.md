@@ -1,6 +1,6 @@
 # Active work
 
-- [Consumer service improvements](tasks/consumer-service-improvements.md): Phases1-4 and Dispatcher Reports are live. Follow-up-only refinement is deployed; same-signer Mobile1.6.0-alpha.2/code77 passes final tablet Staff-reply/receipt, pull-to-refresh and rating-draft recovery checks. Ticket details layout is retained. Source/closeout use [skip ci]; billing excluded. Preserve all unrelated manual/private/device state.
+- [Consumer service improvements](tasks/consumer-service-improvements.md): Phases1-4/code77 remain live. The revised resolution-first Figma flow is ready for chat review, with Staff-controlled consumer turns, optional rating, cached reads and consistent rate-limit copy planned. No new app/API release; billing excluded. Preserve all manual/private/device state.
 
 - [New report limits and map pin](tasks/new-report-pin-limits.md): source4d6907d merged/pushed with `[skip ci]`; zero Actions, combined573 tests/types/scoped lint/harness and browser limits/geometry verify. Task worktree/local branch removed; hash-verified evidence retained in `.cache/recovery/new-report-pin-limits-20261023`. Unrelated edits/stashes/worktrees preserved; native acceptance/release remain separate.
 
