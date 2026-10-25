@@ -1,6 +1,6 @@
 # Active work
 
-- [Consumer service improvements](tasks/consumer-service-improvements.md): Phases1–4 merged through Mobile PR28 and Staff PR60/61 with zero Actions. Six guarded live migrations and Staff1.4.0-alpha.1 verification pass; local Mobile1.6.0-alpha.1/code76 APK is verified on Desktop. All new capabilities remain off until Staff acceptance. Billing and native/provider acceptance/enablement remain separate; preserve private/device/manual state.
+- [Consumer service improvements](tasks/consumer-service-improvements.md): Phases1-4 enabled through verified Staff1.4.0-alpha.3. Mobile1.6.0-alpha.1/code76 is installed in place; Juan login, restart/draft/receipt and resolution confirmation pass. Final Staff-reply native readback waits for Find Lineman feature gaps to release the tablet. Billing excluded; preserve old APK, private queues, primaries and other device work.
 
 - [New report limits and map pin](tasks/new-report-pin-limits.md): source4d6907d merged/pushed with `[skip ci]`; zero Actions, combined573 tests/types/scoped lint/harness and browser limits/geometry verify. Task worktree/local branch removed; hash-verified evidence retained in `.cache/recovery/new-report-pin-limits-20261023`. Unrelated edits/stashes/worktrees preserved; native acceptance/release remain separate.
 
