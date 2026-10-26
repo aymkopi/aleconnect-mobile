@@ -1067,3 +1067,11 @@ Final gates: Staff85 focused tests, production TypeScript/Vite build and scoped 
 - Production/native: API source9afe3af8, version7e5fc17c and remote bundle digest verify with unchanged runtime/31 bindings/schedules; Pages and other Workers remain unchanged. The user's original saved report submits exactly once on Xiaomi code78 with original details/photo; private evidence retains the receipt. No second report or lifecycle change is submitted.
 - Remaining risks: real new-failure behavior on-device, iOS, provider and elapsed follow-up timers are not established by these browser/queue tests. Preserve prior signed APKs, session, drafts/queues and dirty primary work.
 - Next: publish source with [skip ci], then complete build/install/readback of Mobile code79.
+
+## 2026-10-27 - Saved report native release closeout
+
+- Scope: published the bounded Staff validation fix and Mobile saved-report recovery/UX using [skip ci]; built and installed standalone1.7.0-alpha.2/code79. Billing excluded; no migration or unrelated product deployment.
+- Verification:626 Mobile/10 Staff tests, four browser checks, types/scoped lint (two existing warnings), hotfix Vite/native builds and APK signer/runtime/16KB alignment pass. Source Actions counts are zero. Native installed hash582f21d1342f715aeffde1e77bcd2a750f4670218838c88af0ddc3f48442ec74 matches Desktop; original session/date and report details/photo remain, with no saved duplicate.
+- Production: later concurrent Command Center APIa10569eb/source3c420782 retains this task's deployed9afe3af8 fix. Current digest, unchanged runtime/bindings/schedules/four delivery versions and three Mobile401 probes verify. No rollback of concurrent source. Original report recovery is accepted exactly once; receipt/image evidence is private.
+- Remaining risks: failures/discard races are fixture-tested rather than induced against real saved work. Existing Expo patch drift, iOS/AT/provider and elapsed follow-up timer acceptance remain separate. Dirty primary/source graphs, prior signed APKs and device work are preserved.
+- Next: retain scoped native/recovery evidence. No required saved-report repair work remains; publish only this documentation closeout with [skip ci].

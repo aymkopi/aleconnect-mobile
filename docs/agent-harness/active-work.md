@@ -1,6 +1,6 @@
 # Active work
 
-- [Consumer service improvements](tasks/consumer-service-improvements.md): production Saved report API repair accepts optional issue notes; the original Xiaomi report is received once with its details/photo. Mobile queue/UX fixes pass626 tests and four browser checks; same-signer code79 build/native readback is next. Earlier resolution-first rollout remains live. Billing excluded; preserve primaries, APKs and device work.
+- [Consumer service improvements](tasks/consumer-service-improvements.md): Saved report validation/receipt repair is live; the original Xiaomi report is received once. Mobile1.7.0-alpha.2/code79 is installed/hash-verified with the retained session, details and photo.626 tests/four browser checks pass; source pushes use [skip ci] with zero Actions. Billing excluded; provider/iOS/elapsed-timer acceptance remains separate.
 
 - [New report limits and map pin](tasks/new-report-pin-limits.md): source4d6907d merged/pushed with `[skip ci]`; zero Actions, combined573 tests/types/scoped lint/harness and browser limits/geometry verify. Task worktree/local branch removed; hash-verified evidence retained in `.cache/recovery/new-report-pin-limits-20261023`. Unrelated edits/stashes/worktrees preserved; native acceptance/release remain separate.
 
