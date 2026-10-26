@@ -6,7 +6,7 @@ import type {ReminderScope} from './advisory-reminders';
 import type {ConsumerIntentScope} from './consumer-intent';
 import {appFeedbackPayload,appFeedbackReceiptMatches,normalizeAppFeedbackDraft,type AppFeedbackDraft,type AppFeedbackScope} from '@/features/profile/app-feedback-contract';
 export type ServiceFeedbackInput={kind:'service';clientMutationId:string;ticketId:string;cycleId:string;serviceAccountId:string;accessRevision:number;responseVersion:number;expectedVersion:number;rating:number;comment:string};
-export type FeedbackDraft={input:ServiceFeedbackInput;pending:boolean};
+export type FeedbackDraft={input:ServiceFeedbackInput;pending:boolean;receipt?:unknown};
 function key(scope:ReminderScope,ticketId:string){return `consumer_service_feedback_v1:${JSON.stringify([scope.principalId,scope.identityUserId,scope.serviceAccountId,ticketId])}`;}
 let writes:Promise<unknown>=Promise.resolve();
 function appKey(scope:AppFeedbackScope){return `consumer_app_feedback_v1:${JSON.stringify([scope.principalId,scope.identityUserId])}`;}
@@ -27,11 +27,18 @@ export async function sendAppFeedback(scope:ConsumerIntentScope,draft:AppFeedbac
 }
 export async function saveServiceFeedbackDraft(scope:ReminderScope,draft:FeedbackDraft){
  if(draft.input.serviceAccountId!==scope.serviceAccountId || !validServiceFeedback(draft.input.rating,draft.input.comment))throw new Error('Choose a rating from 1 to 5 before saving.');
- const next=()=>AsyncStorage.setItem(key(scope,draft.input.ticketId),JSON.stringify(draft));const result=writes.then(next,next);writes=result.catch(()=>{});return result;
+ const next=async()=>{
+  const storageKey=key(scope,draft.input.ticketId),raw=await AsyncStorage.getItem(storageKey),previous=raw?JSON.parse(raw) as FeedbackDraft:null;
+  if(previous?.input.cycleId===draft.input.cycleId&&(previous.pending||previous.receipt)&&JSON.stringify(previous.input)!==JSON.stringify(draft.input))throw new Error('A saved rating is awaiting a receipt or already submitted. Reopen the sheet to review it.');
+  if(previous?.receipt&&previous.input.cycleId===draft.input.cycleId&&draft.pending)throw new Error('Your rating was already submitted.');
+  if(previous&&previous.input.cycleId!==draft.input.cycleId)await AsyncStorage.setItem(`${storageKey}:cycle:${previous.input.cycleId}`,JSON.stringify(previous));
+  await AsyncStorage.setItem(storageKey,JSON.stringify(draft));
+ };const result=writes.then(next,next);writes=result.catch(()=>{});return result;
 }
-export async function readServiceFeedbackDraft(scope:ReminderScope,ticketId:string):Promise<FeedbackDraft|null>{
- await writes;const raw=await AsyncStorage.getItem(key(scope,ticketId));if(!raw)return null;const row=JSON.parse(raw) as FeedbackDraft;
- if(!row.input || row.input.ticketId!==ticketId || row.input.serviceAccountId!==scope.serviceAccountId || !validServiceFeedback(row.input.rating,row.input.comment) || typeof row.pending!=='boolean')throw new Error('The saved feedback needs review.');return row;
+export async function readServiceFeedbackDraft(scope:ReminderScope,ticketId:string,cycleId?:string):Promise<FeedbackDraft|null>{
+ await writes;let raw=await AsyncStorage.getItem(key(scope,ticketId));if(!raw)return null;let row=JSON.parse(raw) as FeedbackDraft;
+ if(cycleId&&row.input?.cycleId!==cycleId){raw=await AsyncStorage.getItem(`${key(scope,ticketId)}:cycle:${cycleId}`);if(!raw)return null;row=JSON.parse(raw) as FeedbackDraft;}
+ if(!row.input || row.input.ticketId!==ticketId || row.input.serviceAccountId!==scope.serviceAccountId || !validServiceFeedback(row.input.rating,row.input.comment) || typeof row.pending!=='boolean'||cycleId&&row.input.cycleId!==cycleId)throw new Error('The saved feedback needs review.');return row;
 }
 export async function discardServiceFeedbackDraft(scope:ReminderScope,ticketId:string){await writes;await AsyncStorage.removeItem(key(scope,ticketId));}
 export async function fetchServiceFeedback(ticketId:string,cycleId:string,serviceAccountId:string){
@@ -46,5 +53,5 @@ export async function sendServiceFeedback(scope:ReminderScope,input:ServiceFeedb
  const authToken=await consumerIntentToken(scope);
  const receipt=await apiRequest<unknown>('/api/mobile/feedback',{method:'POST',body:JSON.stringify(input)},{authToken,idempotent:true,phase:'final submit'});
  if(!feedbackReceiptMatches(receipt,input))throw new Error('Feedback receipt was not confirmed. Your saved feedback is kept.');
- await discardServiceFeedbackDraft(scope,input.ticketId);return receipt;
+ await saveServiceFeedbackDraft(scope,{input,pending:false,receipt});return receipt;
 }

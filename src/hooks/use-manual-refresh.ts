@@ -19,10 +19,10 @@ export function useManualRefresh(
       toast.show({
         label: claim.pending
           ? "An update is already in progress"
-          : "Please wait before refreshing",
+          : "Too many requests. Try again later.",
         description: claim.pending
           ? "Try again when the current update finishes."
-          : `Try again in ${Math.ceil(claim.retryAfterMs / 1_000)} seconds. You can refresh up to 3 times per minute.`,
+          : `Retry in ${Math.ceil(claim.retryAfterMs / 1_000)} seconds.`,
       });
       return;
     }

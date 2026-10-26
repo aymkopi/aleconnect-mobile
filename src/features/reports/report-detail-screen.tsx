@@ -2,6 +2,7 @@ import { DataNotice, DataState } from "@/components/data-state";
 import { appScrollableBottomPadding } from "@/components/floating-app-bar";
 import { Button } from "@/components/panelui/button";
 import { ConsumerUpdatesSection } from "./consumer-updates-section";
+import { ConsumerRatingAction } from './consumer-rating-action';
 import { ServiceRequestProgressCard } from "@/features/services/service-request-fields";
 import { Skeleton } from "@/components/panelui/skeleton";
 import { Text } from "@/components/panelui/text";
@@ -456,12 +457,13 @@ export default function ReportDetailScreen({ followUp = false }: { followUp?: bo
         : "Your account access could not be confirmed. Try again.";
 
   if (followUp && report && !fixtures && session && accountContext && report.serviceAccountId && accountContext.authorizedServiceAccountIds.includes(report.serviceAccountId)) {
-    return <ConsumerUpdatesSection key={`${scope}:follow-up`} screen ticketId={report.id} serviceAccountId={report.serviceAccountId} scope={{ principalId: session.user.id, identityUserId: accountContext.identityUserId, accessRevision: accountContext.accessRevision, authorizedServiceAccountIds: accountContext.authorizedServiceAccountIds }} featureAvailable={accountContext.capabilities.reportUpdates === true} active={focused} ticketNumber={report.ticketNumber} title={report.title} onBack={handleBack} />;
+    return <ConsumerUpdatesSection key={`${scope}:follow-up`} screen ticketId={report.id} serviceAccountId={report.serviceAccountId} scope={{ principalId: session.user.id, identityUserId: accountContext.identityUserId, accessRevision: accountContext.accessRevision, authorizedServiceAccountIds: accountContext.authorizedServiceAccountIds }} featureAvailable={accountContext.capabilities.reportUpdates === true} serviceFeedbackAvailable={accountContext.capabilities.serviceFeedback===true} active={focused} ticketNumber={report.ticketNumber} title={report.title} onBack={handleBack} />;
   }
   return (
     <ReportPage
       title={followUp ? "Follow-up" : "Ticket details"}
       onBack={handleBack}
+      headerAction={!fixtures&&report&&session&&accountContext&&report.serviceAccountId&&accountContext.authorizedServiceAccountIds.includes(report.serviceAccountId)?<ConsumerRatingAction key={`${scope}:rating`} ticketId={report.id} serviceAccountId={report.serviceAccountId} scope={{principalId:session.user.id,identityUserId:accountContext.identityUserId,accessRevision:accountContext.accessRevision,authorizedServiceAccountIds:accountContext.authorizedServiceAccountIds}} available={accountContext.capabilities.serviceFeedback===true&&accountContext.capabilities.reportUpdates===true} ticketNumber={report.ticketNumber}/>:undefined}
       refreshing={refreshing}
       onRefresh={refresh}
     >

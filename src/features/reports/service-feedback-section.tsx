@@ -1,59 +1,73 @@
 import {useEffect,useRef,useState} from 'react';
-import {View} from 'react-native';
+import {AppState,Keyboard,View} from 'react-native';
+import {Star,Check} from 'lucide-react-native';
 import {Button} from '@/components/panelui/button';
 import {Text} from '@/components/panelui/text';
 import {BottomSheet} from '@/components/panelui/bottom-sheet';
 import {Rating} from '@/components/panelui/rating';
-import {fetchServiceFeedback,readServiceFeedbackDraft,saveServiceFeedbackDraft,sendServiceFeedback,discardServiceFeedbackDraft,type FeedbackDraft,type ServiceFeedbackInput} from '@/services/feedback';
+import {useAppColors} from '@/hooks/use-app-colors';
+import {readServiceFeedbackDraft,saveServiceFeedbackDraft,sendServiceFeedback,type FeedbackDraft,type ServiceFeedbackInput} from '@/services/feedback';
 import type {ConsumerIntentScope} from '@/services/consumer-intent';
 import {createConsumerUpdateId} from './consumer-updates-contract';
-import type {ServiceFeedback} from './service-feedback-contract';
+import {feedbackReceiptMatches,type ServiceFeedback} from './service-feedback-contract';
 const labels=['Very dissatisfied','Dissatisfied','Neutral','Satisfied','Very satisfied'];
-export function ServiceFeedbackSection({ticketId,cycleId,responseVersion,confirmed,available,scope,ticketNumber,refreshRequest=false}:{ticketId:string;cycleId:string;responseVersion:number;confirmed:boolean;available:boolean;scope:ConsumerIntentScope;ticketNumber?:string;refreshRequest?:boolean}){
- const [saved,setSaved]=useState<ServiceFeedback|null>(null),[draft,setDraft]=useState<FeedbackDraft|null>(null),[enabled,setEnabled]=useState(false),[canWrite,setCanWrite]=useState(false),[busy,setBusy]=useState(false),[ready,setReady]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[refresh,setRefresh]=useState(0);
- const [open,setOpen]=useState(false),[score,setScore]=useState(0);
- const current=useRef<FeedbackDraft|null>(null);
+export function ServiceFeedbackSection({ticketId,cycleId,responseVersion,confirmed,available,canWrite,saved,scope,ticketNumber,firstName,openRequest=0,triggerVisible=true,onReceived,onFinished}:{ticketId:string;cycleId:string;responseVersion:number;confirmed:boolean;available:boolean;canWrite:boolean;saved:ServiceFeedback|null;scope:ConsumerIntentScope;ticketNumber?:string;firstName?:string;openRequest?:number;triggerVisible?:boolean;onReceived:(feedback:ServiceFeedback)=>Promise<void>;onFinished?:()=>void}){
+ const [draft,setDraft]=useState<FeedbackDraft|null>(null),[busy,setBusy]=useState(false),[ready,setReady]=useState(false),[error,setError]=useState('');
+ const [open,setOpen]=useState(false),[score,setScore]=useState(saved?.rating??0),[received,setReceived]=useState<ServiceFeedback|null>(null),[ack,setAck]=useState(false);
+ const current=useRef<FeedbackDraft|null>(null),alive=useRef(true),lastRequest=useRef(0),done=useRef(onFinished);
+ useEffect(()=>{done.current=onFinished;},[onFinished]);
+ const [primary]=useAppColors(['primary']);
+ const submitted=received??saved;
+ const name=firstName?.trim().split(/\s+/)[0];
+ useEffect(()=>{alive.current=true;return()=>{alive.current=false;};},[]);
+ useEffect(()=>{let active=true;void readServiceFeedbackDraft(scope,ticketId,cycleId).then(value=>{if(active){current.current=value;setDraft(value);if(value)setScore(value.input.rating);if(value?.receipt&&feedbackReceiptMatches(value.receipt,value.input)&&value.input.cycleId===cycleId){const receipt=value.receipt as {feedbackId:string;version:number;acceptedAt:string};setReceived({feedbackId:receipt.feedbackId,ticketId,cycleId,serviceAccountId:scope.serviceAccountId,rating:value.input.rating,comment:value.input.comment,version:receipt.version,responseVersion:value.input.responseVersion,updatedAt:receipt.acceptedAt});}setReady(true);}}).catch(()=>{if(active)setError('Saved rating could not load.');});return()=>{active=false;};},[scope,ticketId,cycleId,open]);
+ useEffect(()=>{if(openRequest>lastRequest.current){lastRequest.current=openRequest;setReady(false);setOpen(true);}},[openRequest]);
  useEffect(()=>{
-  let active=true;const atRead=current.current;
-  void readServiceFeedbackDraft(scope,ticketId).then(value=>{if(active && current.current===atRead){current.current=value;setDraft(value);if(value)setScore(value.input.rating);setReady(true);}}).catch(()=>{if(active)setError('The saved feedback could not load.');});
-  if(available)void fetchServiceFeedback(ticketId,cycleId,scope.serviceAccountId).then(value=>{if(active){setSaved(value.serviceFeedback);setEnabled(value.enabled);setCanWrite(value.canWrite);if(!current.current)setScore(value.serviceFeedback?.rating ?? 0);}}).catch(()=>{if(active){setCanWrite(false);setError('Feedback could not refresh. Your saved choice is kept.');}});
-  return()=>{active=false;};
- },[scope,ticketId,cycleId,available,refresh,refreshRequest,open]);
+  if(!ack||!open)return;
+  let timer:ReturnType<typeof setTimeout>|undefined;
+  const schedule=(state:string|null)=>{if(timer)clearTimeout(timer);if(state===null||state==='active')timer=setTimeout(()=>{setOpen(false);setAck(false);Keyboard.dismiss();done.current?.();},3000);};
+  schedule(AppState.currentState);const listener=AppState.addEventListener('change',schedule);
+  return()=>{if(timer)clearTimeout(timer);listener.remove();};
+ },[ack,open]);
  const original=draft?.input;
- const stale=!!original && (original.cycleId!==cycleId || original.responseVersion!==responseVersion || original.accessRevision!==scope.accessRevision);
- function input(rating:number,comment:string):ServiceFeedbackInput{return {kind:'service',clientMutationId:createConsumerUpdateId(),ticketId,cycleId,serviceAccountId:scope.serviceAccountId,accessRevision:scope.accessRevision,responseVersion,expectedVersion:saved?.version ?? 0,rating,comment};}
- async function change(rating:number,comment:string){
-  if(busy || current.current?.pending || !confirmed || stale || !canWrite)return;
-  const next={input:current.current ? {...current.current.input,rating,comment}:input(rating,comment),pending:false};current.current=next;setDraft(next);setScore(rating);setError('');setNotice('');
-  try{await saveServiceFeedbackDraft(scope,next);}catch{setError('Draft not saved. Keep this sheet open.');}
+ const stale=!!original&&(original.cycleId!==cycleId||original.responseVersion!==responseVersion||original.accessRevision!==scope.accessRevision);
+ const editable=ready&&available&&canWrite&&confirmed&&!stale&&!busy&&!draft?.pending&&!submitted;
+ async function change(rating:number){
+  if(!editable)return;
+  const input:ServiceFeedbackInput=original?{...original,rating}:{kind:'service',clientMutationId:createConsumerUpdateId(),ticketId,cycleId,serviceAccountId:scope.serviceAccountId,accessRevision:scope.accessRevision,responseVersion,expectedVersion:0,rating,comment:''};
+  const next={input,pending:false};current.current=next;setDraft(next);setScore(rating);setError('');
+  try{await saveServiceFeedbackDraft(scope,next);}catch{setError('Rating not saved. Keep this sheet open.');}
  }
  async function send(){
-  const value=current.current?.input;if(!value || busy)return;setBusy(true);setError('');setNotice('');
-  current.current={input:value,pending:true};setDraft(current.current);
-  try{await sendServiceFeedback(scope,value);current.current=null;setDraft(null);setNotice('Rating received.');setRefresh(v=>v+1);}catch(failure){setError(failure instanceof Error?failure.message:'Delivery unconfirmed. Keep this sheet open.');}finally{setBusy(false);}
+  const value=current.current?.input;if(!value||busy||submitted||stale)return;setBusy(true);setError('');current.current={input:value,pending:true};setDraft(current.current);
+  try{
+   const receipt=await sendServiceFeedback(scope,value) as {feedbackId:string;version:number;acceptedAt:string};
+   if(!alive.current)return;
+   const feedback:ServiceFeedback={feedbackId:receipt.feedbackId,ticketId,cycleId,serviceAccountId:scope.serviceAccountId,rating:value.rating,comment:value.comment,version:receipt.version,responseVersion,updatedAt:receipt.acceptedAt};
+   current.current=null;setDraft(null);setReceived(feedback);setAck(true);Keyboard.dismiss();
+   await onReceived(feedback);
+  }catch(failure){if(alive.current)setError(failure instanceof Error?failure.message:'Delivery unconfirmed. Your rating is kept.');}
+  finally{if(alive.current)setBusy(false);}
  }
- async function discard(){try{await discardServiceFeedbackDraft(scope,ticketId);current.current=null;setDraft(null);setRefresh(v=>v+1);setError('');}catch{setError('The saved feedback could not be removed.');}}
- if(!available && !draft || !confirmed && !draft && !saved)return null;
- const editable=ready && available && enabled && canWrite && confirmed && !stale && !busy && !draft?.pending;
- return <BottomSheet open={open} onOpenChange={setOpen}>
-  <BottomSheet.Trigger><Button variant="outline">{draft?.pending?'Rating pending':saved?`Rating: ${saved.rating}/5`:'Rate service'}</Button></BottomSheet.Trigger>
+ if(!confirmed&&!draft&&!submitted)return null;
+ if(!available&&!draft&&!submitted)return null;
+ return <BottomSheet open={open} onOpenChange={value=>{if(value)setReady(false);setOpen(value);if(!value&&ack){setAck(false);Keyboard.dismiss();done.current?.();}}}>
+  {triggerVisible?<BottomSheet.Trigger><Button variant="ghost" accessibilityLabel={submitted?'Your rating: '+submitted.rating+' out of 5':'Rate service'}><Star size={18} color={primary} fill={submitted?primary:'transparent'} />{submitted?<Text size="sm" weight="semibold">{submitted.rating}/5</Text>:<Text size="sm" weight="semibold">Rate</Text>}</Button></BottomSheet.Trigger>:null}
   <BottomSheet.Content>
-   <BottomSheet.Header title="Rate the service" description={ticketNumber} />
-   <BottomSheet.Body><View className="gap-4">
-    <Rating value={score} onValueChange={value=>{if(editable)setScore(value);}} onValueCommit={value=>{void change(Math.max(1,value),original?.comment ?? saved?.comment ?? '');}} max={5} precision={1} size="lg" color="primary" label="Service rating" headerClassName="hidden" formatValue={value=>`${value} out of 5${value?`: ${labels[value-1]}`:''}`} disabled={!editable} className="self-center" rowClassName="min-h-12" />
-    <Text size="sm" className="text-center">{score?`${score}/5 · ${labels[score-1]}`:'Select a rating'}</Text>
-    {saved&&!draft&&!notice?<Text size="sm">Rating submitted.</Text>:null}
-    {stale?<Text accessibilityRole="alert" size="sm">Report or account changed. Remove the saved rating to choose again.</Text>:null}
-    {draft?.pending?<Text size="sm">Delivery unconfirmed.</Text>:null}
-    {original?.comment?<Text muted size="sm">Saved note: {original.comment}</Text>:null}
-    {!available || enabled&&!canWrite?<Text muted size="sm">Rating unavailable. Saved work is kept.</Text>:null}
+   <BottomSheet.Header title={ack?(score>=4?'Thank you'+(name?', '+name:'')+'!':'Thanks'+(name?', '+name:'')+'.'):'Rate the service'} description={ack?undefined:ticketNumber} />
+   <BottomSheet.Body><View className="gap-5">
+    {ack?<><View className="items-center"><Check size={32} color={primary}/></View><Text size="sm" className="text-center">{score<=2?'We’ll use your feedback to improve our service.':score===3?'Your feedback helps us serve you better.':'We’re glad we could help. We’ll keep improving.'}</Text></>:<>
+     <Text size="sm" className="text-center">{submitted?'Your rating for this report.':'Rate how ALECO handled this report'+(name?', '+name:'')+'.'}</Text>
+     <Rating value={submitted?.rating??score} onValueChange={value=>{if(editable)setScore(value);}} onValueCommit={value=>{void change(Math.max(1,value));}} max={5} precision={1} size="lg" color="primary" label="Service rating" readOnly={!!submitted} disabled={!editable&&!submitted} headerClassName="hidden" formatValue={value=>value+' out of 5'+(value?': '+labels[value-1]:'')} className="self-center" rowClassName="min-h-12" />
+     <Text size="sm" className="text-center">{(submitted?.rating??score)?labels[(submitted?.rating??score)-1]:'Select a rating'}</Text>
+     {submitted?<Text size="xs" muted className="text-center">Rating submitted.</Text>:null}
+     {stale?<Text accessibilityRole="alert" size="sm">Saved for an earlier report or account state. Your original rating is kept.</Text>:null}
+     {draft?.pending&&!submitted?<Text size="sm">Awaiting receipt. Retry your saved rating.</Text>:null}
+     {!canWrite&&!submitted?<Text muted size="sm">Rating unavailable. Your choice is kept.</Text>:null}
+    </>}
     {error?<Text accessibilityRole="alert" size="sm" className="text-destructive">{error}</Text>:null}
-    {notice?<Text accessibilityLiveRegion="polite" size="sm">{notice}</Text>:null}
    </View></BottomSheet.Body>
-   <BottomSheet.Footer>
-    {notice&&!draft?<Button onPress={()=>setOpen(false)}>Done</Button>:<><Button disabled={!draft || busy || !available || !canWrite || !confirmed || stale} onPress={()=>void send()}>{busy?'Sending…':draft?.pending?'Retry rating':'Submit rating'}</Button><Button variant="ghost" onPress={()=>setOpen(false)}>Not now</Button></>}
-    {draft?<Button variant="ghost" disabled={busy} onPress={()=>void discard()}>Remove local copy</Button>:null}
-   </BottomSheet.Footer>
+   {!ack?<BottomSheet.Footer>{submitted?<Button onPress={()=>setOpen(false)}>Done</Button>:<><Button disabled={!draft||busy||!available||!canWrite||!confirmed||stale} onPress={()=>void send()}>{busy?'Sending…':draft?.pending?'Retry rating':'Submit rating'}</Button><Button variant="ghost" onPress={()=>setOpen(false)}>Not now</Button></>}</BottomSheet.Footer>:null}
   </BottomSheet.Content>
  </BottomSheet>;
 }

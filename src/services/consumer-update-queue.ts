@@ -11,6 +11,7 @@ import { consumerUpdateScopeCurrent, runQueuedConsumerUpdate, parseConsumerWorkQ
 import { sendOutageAcknowledgement } from "./service-status";
 import type { OutageItem } from "@/features/home/service-status-contract";
 import { PANELUI_PREVIEW } from "@/constants/panelui-preview";
+import {cacheConsumerUpdateReceipt} from './consumer-updates-cache';
 
 export type { ConsumerUpdateScope, QueuedConsumerUpdate, QueuedOutageAcknowledgement } from "./consumer-update-queue-core";
 const storageKey = "consumer_report_updates_v1";
@@ -74,11 +75,13 @@ async function persist(item: QueuedConsumerWork) {
     if (!rows.some(row => row.id === item.id)) throw new Error("This local update was removed; sending has stopped.");
     return rows.map(row => row.id === item.id ? item : row);
   });
+  if(!isOutageAcknowledgement(item)&&item.status==='sent')await cacheConsumerUpdateReceipt(item).catch(()=>{});
 }
 export async function retryConsumerUpdate(id: string, scope: ConsumerUpdateScope) {
   await changeQueue(rows => rows.map(row => {
     if (row.id !== id) return row;
     if (!consumerUpdateScopeCurrent(row, scope) || !["failed", "queued"].includes(row.status)) throw new Error("Review the saved details before creating a new update.");
+    if(/RATE_LIMIT/.test(row.errorCode??'')&&row.nextAttemptAt>Date.now())throw new ApiRequestError('Too many requests. Try again later.',429,undefined,'final submit',false,'RATE_LIMITED',Math.ceil((row.nextAttemptAt-Date.now())/1000));
     return { ...row, status: "queued" as const, nextAttemptAt: 0 };
   }));
   return syncConsumerUpdateQueue();

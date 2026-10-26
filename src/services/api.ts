@@ -9,6 +9,7 @@ import {
   type RequestPhase,
 } from "@/utils/report-transport";
 import type { ConsumerCapabilities } from "@/features/accounts/contract";
+import {isRateLimit,RATE_LIMIT_MESSAGE} from '@/utils/rate-limit';
 
 const authTokenKey = "aleconnect_auth_token_v1";
 const defaultRequestTimeoutMs = 30_000;
@@ -30,8 +31,9 @@ export class ApiRequestError extends Error {
     readonly phase: RequestPhase = "request",
     readonly retryable = false,
     readonly code?: string,
+    readonly retryAfterSeconds?: number,
   ) {
-    super(message);
+    super(isRateLimit(status,code)?RATE_LIMIT_MESSAGE:message);
     this.name = "ApiRequestError";
   }
 }
@@ -223,6 +225,7 @@ async function performRequest<T>(
       error?: string;
       message?: string;
       code?: string;
+      retryAfterSeconds?:number;
     }>(response).catch(() => null);
     if (response.status === 401 && token) {
       await markAuthInvalidated(token, body?.code === "PASSWORD_CHANGE_REAUTHENTICATE"
@@ -242,6 +245,7 @@ async function performRequest<T>(
       phase,
       shouldRetryHttpRequest("GET", response.status, false),
       typeof body?.code === "string" ? body.code : undefined,
+      Number.isFinite(Number(response.headers.get('Retry-After')??body?.retryAfterSeconds)) ? Number(response.headers.get('Retry-After')??body?.retryAfterSeconds) : undefined,
     );
   }
 

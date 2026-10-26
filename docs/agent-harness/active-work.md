@@ -1,6 +1,6 @@
 # Active work
 
-- [Consumer service improvements](tasks/consumer-service-improvements.md): Phases1-4/code77 remain live. The revised resolution-first Figma flow is ready for chat review, with Staff-controlled consumer turns, optional rating, cached reads and consistent rate-limit copy planned. No new app/API release; billing excluded. Preserve all manual/private/device state.
+- [Consumer service improvements](tasks/consumer-service-improvements.md): Phases1-4/code77 remain live. The approved resolution-first exchange, optional final ratings, scoped cache and24/48-hour inactivity policy are implemented and verified locally; guarded production rollout remains pending. No new app/API release; billing excluded. Preserve all manual/private/device state.
 
 - [New report limits and map pin](tasks/new-report-pin-limits.md): source4d6907d merged/pushed with `[skip ci]`; zero Actions, combined573 tests/types/scoped lint/harness and browser limits/geometry verify. Task worktree/local branch removed; hash-verified evidence retained in `.cache/recovery/new-report-pin-limits-20261023`. Unrelated edits/stashes/worktrees preserved; native acceptance/release remain separate.
 

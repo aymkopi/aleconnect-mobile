@@ -73,6 +73,7 @@ async function fixture(os = "web") {
     },
     "react-native": { Platform: { OS: os } },
     "@/constants": { aleconnectApiBaseUrl: "https://fixture.invalid" },
+    "@/utils/rate-limit": {isRateLimit:(status,code)=>status===429||/RATE_LIMIT|TOO_MANY|ATTEMPTS_EXCEEDED/.test(code??''),RATE_LIMIT_MESSAGE:'Too many requests. Try again later.'},
     "@/utils/http-retry": { shouldRetryHttpRequest: () => false },
     "@/utils/report-transport": {
       requestPhaseFailureMessage: () => "Request failed",

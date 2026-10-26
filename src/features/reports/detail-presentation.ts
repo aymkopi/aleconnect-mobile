@@ -70,6 +70,8 @@ export function publishedRestorationEstimate(update: {
 }
 
 export type ReportTimelineRow = {
+  followUpCycle?:number;
+  followUpStart?:boolean;
   id: string;
   status: ConsumerTicketStatus | null;
   changedAt: string | null;
@@ -80,8 +82,10 @@ export type ReportTimelineRow = {
 export function reportTimelineRows(
   report: Pick<ReportDetail, "status" | "history">,
 ): ReportTimelineRow[] {
-  const rows = report.history.map((item) => ({
+  const rows:ReportTimelineRow[] = report.history.map((item) => ({
     id: item.id,
+    followUpCycle:item.followUpCycle,
+    followUpStart:item.followUpStart,
     status: item.toStatus,
     changedAt: parseApiInstant(item.changedAt) ? item.changedAt : null,
     note: item.note,

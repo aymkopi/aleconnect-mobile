@@ -39,7 +39,7 @@ test('optional feedback stays durable after uncertainty and only a matching rece
  const h=await harness(),value={kind:'service',clientMutationId:'mutation',ticketId:'ticket',cycleId:'cycle',serviceAccountId:'account',accessRevision:2,responseVersion:1,expectedVersion:0,rating:4,comment:''};
  await assert.rejects(h.feedback.sendServiceFeedback(scope,value),/Receipt lost/);assert.deepEqual((await h.feedback.readServiceFeedbackDraft(scope,'ticket')).input,value);
  await assert.rejects(h.feedback.sendServiceFeedback({...scope,accessRevision:3},value),/Review/);
- h.mode('ok');await h.feedback.sendServiceFeedback(scope,value);assert.equal(await h.feedback.readServiceFeedbackDraft(scope,'ticket'),null);
+ h.mode('ok');await h.feedback.sendServiceFeedback(scope,value);assert.ok((await h.feedback.readServiceFeedbackDraft(scope,'ticket')).receipt);
 });
 
 test('invalid star values cannot overwrite a readable service rating draft',async()=>{
@@ -47,4 +47,17 @@ test('invalid star values cannot overwrite a readable service rating draft',asyn
  await h.feedback.saveServiceFeedbackDraft(scope,{input:value,pending:false});
  for(const rating of [0,6,1.5,NaN])await assert.rejects(h.feedback.saveServiceFeedbackDraft(scope,{input:{...value,rating},pending:false}));
  assert.deepEqual((await h.feedback.readServiceFeedbackDraft(scope,'ticket')).input,value);
+});
+test('a later resolution cycle can be rated while retaining the original cycle receipt',async()=>{
+ const h=await harness(),first={kind:'service',clientMutationId:'mutation-a',ticketId:'ticket',cycleId:'cycle-a',serviceAccountId:'account',accessRevision:2,responseVersion:1,expectedVersion:0,rating:4,comment:''};h.mode('ok');await h.feedback.sendServiceFeedback(scope,first);
+ assert.equal(await h.feedback.readServiceFeedbackDraft(scope,'ticket','cycle-b'),null);
+ const next={...first,clientMutationId:'mutation-b',cycleId:'cycle-b',rating:5};await h.feedback.saveServiceFeedbackDraft(scope,{input:next,pending:false});
+ assert.deepEqual((await h.feedback.readServiceFeedbackDraft(scope,'ticket','cycle-a')).input,first);assert.ok((await h.feedback.readServiceFeedbackDraft(scope,'ticket','cycle-a')).receipt);
+ await h.feedback.sendServiceFeedback(scope,next);assert.deepEqual((await h.feedback.readServiceFeedbackDraft(scope,'ticket','cycle-b')).input,next);
+});
+test('a second rating sheet cannot overwrite an uncertain original intent',async()=>{
+ const h=await harness(),input={kind:'service',clientMutationId:'original',ticketId:'ticket',cycleId:'cycle',serviceAccountId:'account',accessRevision:2,responseVersion:1,expectedVersion:0,rating:2,comment:''};
+ await h.feedback.saveServiceFeedbackDraft(scope,{input,pending:true});
+ await assert.rejects(h.feedback.saveServiceFeedbackDraft(scope,{input:{...input,clientMutationId:'replacement',rating:5},pending:false}),/awaiting a receipt/);
+ assert.deepEqual((await h.feedback.readServiceFeedbackDraft(scope,'ticket','cycle')).input,input);
 });

@@ -138,6 +138,7 @@ async function reportRecovery({ session = { user: { id: "user" }, session: { id:
     "@/hooks/use-scoped-read": { useScopedRead: scope => ({ data, busy: false, error: null, reload: async force => { assert.ok(scope, "Retry cannot request an inaccessible report"); calls.push(["reload", force]); } }) },
     "@/services/report-sync-events": { requestReportRevalidation: id => calls.push(["invalidate",id]) },
     "@/services/reports": { clearReportListCache: async id => calls.push(["clear",id]) }, "@/services/notifications": { markNotificationsRead: markRead }, "@/utils/manila-time": {},
+    "./consumer-rating-action": {ConsumerRatingAction:'ConsumerRatingAction'},
     "./report-status-badge": { ReportStatusBadge: "ReportStatusBadge" },
     "./components/report-page": { ReportPage: "ReportPage" },
     "./components/evidence-photo-viewer": {},

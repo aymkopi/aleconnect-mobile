@@ -120,6 +120,8 @@ export function preserveKnownConsumerReportDetailStatus<
 }
 
 export type ReportHistoryItem = {
+  followUpCycle?:number;
+  followUpStart?:boolean;
   id: string;
   fromStatus: ConsumerTicketStatus | null;
   toStatus: ConsumerTicketStatus | null;
@@ -327,6 +329,8 @@ function parseReportHistoryItem(value: unknown): ReportHistoryItem | null {
     fromStatus,
     toStatus,
     note: typeof value.note === "string" ? value.note : null,
+    followUpCycle:Number.isSafeInteger(value.followUpCycle)&&Number(value.followUpCycle)>=0?Number(value.followUpCycle):0,
+    followUpStart:value.followUpStart===true,
     changedAt,
   };
 }

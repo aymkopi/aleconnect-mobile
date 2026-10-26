@@ -37,21 +37,6 @@ function pruneOldAttempts(attempts: number[], nowMs: number): number[] {
   );
 }
 
-function formatRemainingTime(waitMs: number): string {
-  const totalSeconds = Math.max(1, Math.ceil(waitMs / 1000));
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-
-  if (minutes <= 0) {
-    return `${seconds}s`;
-  }
-
-  if (seconds === 0) {
-    return `${minutes}m`;
-  }
-
-  return `${minutes}m ${seconds}s`;
-}
 
 async function readAttempts(accountNumber: string): Promise<number[]> {
   const key = getRateLimitKey(accountNumber);
@@ -94,9 +79,7 @@ async function assertRateLimit(accountNumber: string): Promise<void> {
   if (activeAttempts.length >= loginRateLimitMaxAttempts) {
     const earliestAttempt = activeAttempts[0];
     const waitMs = loginRateLimitWindowMs - (nowMs - earliestAttempt);
-    throw new Error(
-      `Too many login attempts. Try again in ${formatRemainingTime(waitMs)}.`,
-    );
+    throw new ApiRequestError('Too many requests. Try again later.',429,undefined,'request',false,'LOGIN_RATE_LIMITED',Math.ceil(waitMs/1000));
   }
 
   if (activeAttempts.length !== attempts.length) {

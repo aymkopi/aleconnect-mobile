@@ -1,4 +1,4 @@
-const transientStatuses = new Set([408, 425, 429, 500, 502, 503, 504]);
+const transientStatuses = new Set([408, 425, 500, 502, 503, 504]);
 
 export function shouldRetryHttpRequest(
   method: string,

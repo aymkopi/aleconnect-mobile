@@ -114,7 +114,7 @@ export function AccountPasswordVerificationFields({ verification, description = 
       autoComplete="current-password" maxLength={128} editable={!busy && !remaining}
       placeholder="Enter your password" description="Use your ALEConnect sign-in password, not the ALECO account password." />
     {remaining ? <ProfileNotice title={"Try again in " + Math.floor(remaining / 60) + ":" + String(remaining % 60).padStart(2, "0")}
-      description="Too many incorrect attempts. Try again when the timer ends. You can still sign in." /> : null}
+      description="Too many requests. Try again later." /> : null}
     {error ? <ProfileNotice title="Unable to verify" description={error} danger /> : null}
   </>;
 }

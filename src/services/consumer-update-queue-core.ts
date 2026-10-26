@@ -42,9 +42,9 @@ export async function runQueuedConsumerUpdate<T extends QueuedConsumerWork>(item
       current = { ...current, status: "sent", receipt, error: null, nextAttemptAt: 0 } as T;
       await work.persist(current);
     } catch (error) {
-      const failure = error as { status?: number; code?: string; message?: string };
+      const failure = error as { status?: number; code?: string; message?: string; retryAfterSeconds?:number };
       const permanent = [400, 401, 403, 404, 409, 413, 422].includes(failure.status ?? 0);
-      current = { ...current, status: permanent ? "needs_attention" : "failed", error: failure.message ?? "This update could not be sent. Your saved details are kept.", errorCode: failure.code, nextAttemptAt: Date.now() + Math.min(900_000, 5_000 * 2 ** Math.min(current.attempts, 8)) };
+      current = { ...current, status: permanent ? "needs_attention" : "failed", error: failure.message ?? "This update could not be sent. Your saved details are kept.", errorCode: failure.code??(failure.status===429?'RATE_LIMITED':undefined), nextAttemptAt: Date.now() + (failure.status===429?Math.max(60,failure.retryAfterSeconds??60)*1000:Math.min(900_000, 5_000 * 2 ** Math.min(current.attempts, 8))) };
       await work.persist(current); return current;
     }
   }
