@@ -2,7 +2,6 @@ import { Asset } from "expo-asset";
 import { useLayoutEffect, useRef, useState } from "react";
 import { Pressable, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import NetInfo from "@react-native-community/netinfo";
 import * as Clipboard from "expo-clipboard";
 import {
   ChevronRight,
@@ -11,7 +10,6 @@ import {
   FileText,
   Image,
   MapPin,
-  Wifi,
 } from "lucide-react-native";
 import { ReportPage } from "./components/report-page";
 import { EvidencePhotoViewer } from "./components/evidence-photo-viewer";
@@ -41,10 +39,10 @@ import {
   simulateQueueRetry,
 } from "./queue-presentation";
 import type { ReportQueueItem } from "@/services/report-queue";
+import { reportFailureMessage } from '@/utils/report-transport';
 
 type QueueSheet =
   | ""
-  | "connection"
   | "diagnostic"
   | "discard"
   | "account"
@@ -125,7 +123,6 @@ export default function ReportQueueScreen() {
     scope: string;
     text: string;
   } | null>(null);
-  const [connection, setConnection] = useState<string | null>(null);
   const [viewer, setViewer] = useState<{
     scope: string;
     itemId: string;
@@ -231,31 +228,6 @@ export default function ReportQueueScreen() {
     else if (router.canGoBack()) router.back();
     else router.replace("/reports");
   }
-  async function checkConnection() {
-    if (running) return;
-    const key = scope;
-    setBusy({ scope: key, action: "connection" });
-    setConnection(null);
-    open("connection");
-    try {
-      const state = fixtures
-        ? { isConnected: true, isInternetReachable: true }
-        : await NetInfo.fetch();
-      if (activeScope.current === key)
-        setConnection(
-          state.isConnected && state.isInternetReachable !== false
-            ? "A connection is available. Sending still requires ALECO confirmation."
-            : "No usable connection yet. Your saved report and photos stay on this device.",
-        );
-    } catch {
-      if (activeScope.current === key)
-        setConnection(
-          "Connection could not be checked. Your saved report remains on this device.",
-        );
-    } finally {
-      if (activeScope.current === key) setBusy(null);
-    }
-  }
   async function retry() {
     const item = selectedNow.current;
     const allowed =
@@ -301,23 +273,17 @@ export default function ReportQueueScreen() {
               : "Fixture retry failed. No saved device report was changed.",
         });
       } else {
-        await queue.retry(item.id);
+        const results = await queue.retry(item.id);
         if (activeScope.current !== key) return;
         await queue.refresh();
-        if (activeScope.current === key)
-          setFeedback({
-            scope: key,
-            text: "Retry finished. A confirmed report moves to Sent reports; an unconfirmed report stays saved here.",
-          });
+        const received = results?.find(row => row.id === item.id && row.status === 'submitted' && row.ticketId && row.ticketNumber);
+        if (activeScope.current === key && received) router.replace({ pathname: '/reports/[id]', params: { id: received.ticketId!, ...(received.serviceAccountId ? { serviceAccountId: received.serviceAccountId } : {}) } });
       }
     } catch (error) {
       if (activeScope.current === key)
         setFeedback({
           scope: key,
-          text:
-            error instanceof Error
-              ? error.message
-              : "Could not retry. Your saved report is retained.",
+          text: reportFailureMessage({ message: error instanceof Error ? error.message : null }),
         });
     } finally {
       if (activeScope.current === key) setBusy(null);
@@ -417,7 +383,7 @@ export default function ReportQueueScreen() {
             ? "Received by ALECO"
             : presentation.sending
               ? "Sending report…"
-              : "Try sending now"}
+              : "Try again"}
         </Button>
         {presentation.confirmed ? (
           <Button
@@ -449,42 +415,12 @@ export default function ReportQueueScreen() {
           </Button>
         )}
       </>
-    ) : (
-      <>
-        <Button
-          fullWidth
-          startContent={<Wifi size={18} />}
-          loading={running && busy?.action === "connection"}
-          onPress={() => void checkConnection()}
-        >
-          Check connection
-        </Button>
-        {items.length ? (
-          <Button
-            fullWidth
-            variant="outline"
-            onPress={() => router.setParams({ id: items[0].id })}
-          >
-            View saved report
-          </Button>
-        ) : (
-          <Button
-            fullWidth
-            variant="outline"
-            onPress={() => router.push("/reports/list")}
-          >
-            View sent reports
-          </Button>
-        )}
-      </>
-    );
+    ) : !items.length ? <Button fullWidth onPress={() => router.push('/reports/new')}>New report</Button> : undefined;
   const sheetTitle =
-    sheet === "connection"
-      ? "Connection check"
-      : sheet === "diagnostic"
+    sheet === "diagnostic"
         ? copied
-          ? "Support reference copied"
-          : "Report diagnostics"
+          ? "Copied"
+          : "Support details"
         : sheet === "discard"
           ? "Discard this saved report?"
           : sheet === "account"
@@ -496,7 +432,7 @@ export default function ReportQueueScreen() {
                 : "Fixture states";
   return (
     <ReportPage
-      title={id ? "Saved report" : "Saved on this device"}
+      title={id ? "Saved report" : "Saved reports"}
       onBack={back}
       footer={footer}
       headerAction={
@@ -508,6 +444,10 @@ export default function ReportQueueScreen() {
             onPress={() => open("preview")}
           >
             Preview
+          </Button>
+        ) : selected ? (
+          <Button size="icon" variant="ghost" accessibilityLabel="Support details" onPress={() => open('diagnostic')}>
+            <Copy size={20} color={primary} />
           </Button>
         ) : undefined
       }
@@ -554,30 +494,11 @@ export default function ReportQueueScreen() {
               <Badge variant={presentation.variant}>{presentation.label}</Badge>
               {presentation.sending ? <Spinner size="sm" /> : null}
             </View>
-            <Text size="sm">{presentation.description}</Text>
+            {!presentation.sending ? <Text size="sm" accessibilityRole={selected.lastError ? 'alert' : undefined}>{presentation.description}</Text> : null}
             <Text muted size="xs">
               Saved {formatManilaDateTime(selected.createdAt)}
             </Text>
           </View>
-          {selected.lastError ? (
-            <View className="rounded-xl bg-card p-3 gap-2">
-              <Text weight="semibold" size="sm">
-                {selected.lastErrorPhase === "evidence upload"
-                  ? "Photo needs attention"
-                  : "Last attempt"}
-              </Text>
-              <Text size="sm" accessibilityRole="alert">
-                {selected.lastError}
-              </Text>
-              <Button
-                variant="outline"
-                size="sm"
-                onPress={() => open("diagnostic")}
-              >
-                View diagnostics
-              </Button>
-            </View>
-          ) : null}
           <QueueRow
             title="Account"
             subtitle={accountLabel}
@@ -602,31 +523,16 @@ export default function ReportQueueScreen() {
           </Text>
           <QueueRow
             title="Photos"
-            subtitle={`${selected.evidence.length} prepared photo${selected.evidence.length === 1 ? "" : "s"}`}
+            subtitle={`${selected.evidence.length} photo${selected.evidence.length === 1 ? "" : "s"}`}
             icon={<Image size={20} color={primary} />}
             onPress={() => open("photos")}
           />
-          <Button
-            variant="ghost"
-            size="sm"
-            startContent={<Copy size={16} color={primary} />}
-            onPress={() => open("diagnostic")}
-          >
-            Support reference
-          </Button>
-          {presentation.unconfirmed || presentation.sending ? (
-            <Text muted size="sm">
-              Discard is unavailable while sending or awaiting ALECO
-              confirmation.
-            </Text>
-          ) : null}
           {!presentation.canRetry &&
           !presentation.confirmed &&
           !presentation.sending ? (
             <View className="gap-2">
               <Text muted size="sm">
-                Retry is unavailable for this account access or submission
-                error.
+                Refresh your accounts to check access.
               </Text>
               {!fixtures && !accessAllowed ? (
                 <Button
@@ -656,29 +562,13 @@ export default function ReportQueueScreen() {
         </>
       ) : (
         <>
-          <Text weight="semibold" size="lg">
-            {items.length ? "Waiting to send" : "No saved reports"}
-          </Text>
-          <View className="rounded-xl bg-card p-3 gap-1">
-            <Text weight="semibold" size="sm">
-              {items.length
-                ? "Receipt not confirmed"
-                : "Your device queue is clear"}
-            </Text>
-            <Text size="sm">
-              {items.length
-                ? "No ALECO reference is available for an unconfirmed report. Saved reports retry with the same account and submission key."
-                : !session && !fixtures
-                  ? "Sign in to view saved reports belonging to your consumer account."
-                  : "New reports saved while offline will appear here. Sent reports are available in your report list."}
-            </Text>
-          </View>
+          {!items.length ? <View className="gap-2"><Text weight="semibold" size="lg">No saved reports</Text><Text muted size="sm">{!session && !fixtures ? 'Sign in to view your saved reports.' : 'Reports saved offline will appear here.'}</Text></View> : null}
           {items.map((item) => (
             <QueueRow
               key={item.id}
               title={item.title}
               subtitle={presentQueuedReport(item, syncing).label}
-              details={`${item.evidence.length} photos\nSaved ${formatManilaDateTime(item.createdAt)}`}
+              details={`${item.evidence.length} photo${item.evidence.length === 1 ? '' : 's'}\nSaved ${formatManilaDateTime(item.createdAt)}`}
               onPress={() => router.setParams({ id: item.id })}
             />
           ))}
@@ -687,29 +577,6 @@ export default function ReportQueueScreen() {
             subtitle="See reports received by ALECO"
             onPress={() => router.push("/reports/list")}
           />
-          {!fixtures && session ? (
-            <Button
-              variant="ghost"
-              loading={running && busy?.action === "refresh"}
-              onPress={async () => {
-                const key = scope;
-                setBusy({ scope: key, action: "refresh" });
-                try {
-                  await queue.refresh();
-                } catch {
-                  if (activeScope.current === key)
-                    setFeedback({
-                      scope: key,
-                      text: "Saved reports could not be refreshed. Try again.",
-                    });
-                } finally {
-                  if (activeScope.current === key) setBusy(null);
-                }
-              }}
-            >
-              Refresh saved reports
-            </Button>
-          ) : null}
         </>
       )}
       <BottomSheet
@@ -727,17 +594,7 @@ export default function ReportQueueScreen() {
                 {feedback.text}
               </Text>
             ) : null}
-            {sheet === "connection" ? (
-              <>
-                {running && busy?.action === "connection" ? <Spinner /> : null}
-                <Text>{connection || "Checking connection…"}</Text>
-                {fixtures ? (
-                  <Text muted size="sm">
-                    Fixture connection check. No sending occurs.
-                  </Text>
-                ) : null}
-              </>
-            ) : sheet === "preview" && fixtures ? (
+            {sheet === "preview" && fixtures ? (
               <>
                 <Text muted size="sm">
                   These states and actions affect memory only. Retained device
@@ -778,11 +635,7 @@ export default function ReportQueueScreen() {
               sheet === "discard" ? (
                 <>
                   <Text>
-                    Your saved report and its prepared photos will be removed
-                    from this device. This cannot be undone.
-                  </Text>
-                  <Text muted size="sm">
-                    Only discard a report you no longer want to send.
+                    Delete this saved report and its photos? This can’t be undone.
                   </Text>
                   {!presentation?.canDiscard ? (
                     <Text accessibilityRole="alert">
@@ -793,17 +646,12 @@ export default function ReportQueueScreen() {
                 </>
               ) : sheet === "diagnostic" ? (
                 <>
-                  <Text muted size="sm">
-                    Keep the saved report until ALECO has helped you resolve the
-                    problem.
-                  </Text>
                   <Text selectable size="sm">
                     {queueDiagnosticText(selected)}
                   </Text>
                   {copied ? (
                     <Text size="sm" accessibilityRole="alert">
-                      Support reference copied. Account details, evidence paths
-                      and the submission key are excluded.
+                      Copied.
                     </Text>
                   ) : null}
                 </>
@@ -811,10 +659,6 @@ export default function ReportQueueScreen() {
                 <>
                   <Text weight="semibold">{accountLabel}</Text>
                   <Text>{maskedAccount}</Text>
-                  <Text muted size="sm">
-                    This report keeps the account it was saved with. Saved
-                    reports cannot be edited or assigned to another account.
-                  </Text>
                 </>
               ) : sheet === "location" ? (
                 <>
@@ -830,9 +674,6 @@ export default function ReportQueueScreen() {
                       No map pin was saved.
                     </Text>
                   )}
-                  <Text muted size="sm">
-                    Saved locations are read-only.
-                  </Text>
                 </>
               ) : sheet === "photos" ? (
                 <>

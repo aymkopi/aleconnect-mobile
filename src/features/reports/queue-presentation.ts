@@ -1,4 +1,5 @@
 import type { ReportQueueItem } from "../../services/report-queue.ts";
+import { reportFailureMessage, reportReceiptIsUncertain } from '../../utils/report-transport.ts';
 
 export function presentQueuedReport(
   item: ReportQueueItem,
@@ -7,33 +8,26 @@ export function presentQueuedReport(
 ) {
   const confirmed = item.status === "submitted";
   const sending = !confirmed && (item.status === "submitting" || syncing);
-  // Only the latest phase is retained, so repeated attempts cannot rule out an earlier committed ticket.
-  const unconfirmed =
-    !confirmed &&
-    (item.lastErrorPhase === "final submit" ||
-      item.attempts > 1 ||
-      (item.attempts > 0 && !item.lastErrorPhase));
+  const unconfirmed = !confirmed && reportReceiptIsUncertain(item);
   return {
     label: confirmed
       ? "Received by ALECO"
       : sending
-        ? "Sending report"
+        ? "Sending"
         : unconfirmed
-          ? "Receipt not confirmed"
+          ? "Not confirmed"
           : item.status === "failed"
-            ? "Needs attention"
-            : "Waiting for a connection",
+            ? "Not sent"
+            : item.lastError ? "Not sent" : "Waiting to send",
     description: confirmed
       ? `ALECO reference: ${item.ticketNumber || "Reference unavailable"}.`
       : sending
-        ? "Your saved report is being sent. Keep the app open; its details and photos stay protected."
-        : unconfirmed
-          ? "ALECO may have received this report. Try again with the same account and submission key to confirm; keep this saved copy."
-          : item.nonRetryable || !accessAllowed
-            ? "This saved report no longer matches current account access. Refresh your linked accounts before trying again."
-            : item.status === "failed"
-              ? "Your details and photos remain saved. Review the error before trying again."
-              : "Saved on this device. No ALECO reference has been assigned. It will use the same account and submission key when sent.",
+        ? "Sending to ALECO…"
+        : item.nonRetryable || !accessAllowed
+          ? "Account access changed. Refresh your accounts."
+          : item.lastError
+            ? reportFailureMessage({ status: item.lastErrorStatus, code: item.lastErrorCode, phase: item.lastErrorPhase, message: item.lastError })
+            : unconfirmed ? "Couldn’t confirm submission. Try again." : "We’ll send it when you’re connected.",
     canRetry: !sending && !confirmed && !item.nonRetryable && accessAllowed,
     canDiscard: !sending && !confirmed && !unconfirmed,
     confirmed,
@@ -57,6 +51,7 @@ export function queueDiagnosticText(item: ReportQueueItem) {
     `Attempts: ${item.attempts}`,
     `Saved: ${item.createdAt}`,
     `Last attempt: ${item.updatedAt}`,
+    ...(item.lastError ? [`Cause: ${reportFailureMessage({status:item.lastErrorStatus,code:item.lastErrorCode,phase:item.lastErrorPhase,message:item.lastError})}`] : []),
   ].join("\n");
 }
 export function simulateQueueRetry(

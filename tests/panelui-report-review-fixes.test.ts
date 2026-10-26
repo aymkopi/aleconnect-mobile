@@ -13,6 +13,7 @@ import {
 import { preserveKnownConsumerReportDetailStatus } from "../src/features/reports/data.ts";
 import { reportAccessUnavailable } from "../src/features/reports/detail-presentation.ts";
 import type { ReportQueueItem } from "../src/services/report-queue.ts";
+import { reportReceiptIsUncertain, reportFailureMessage } from '../src/utils/report-transport.ts';
 
 async function parse(file: string) {
   return ts.createSourceFile(
@@ -47,6 +48,9 @@ test("server receipt followed by local cache failure keeps the queue copy protec
     fn.getText(source) + "\nexports.run = submitQueuedReport;",
     {
       ApiRequestError: class extends Error {},
+      reportReceiptIsUncertain,
+      reportFailureMessage,
+      activeSubmissions: new Set<string>(),
       replaceQueueItem: async () => {},
       readConsistentConsumerAccountSnapshot: async () => ({
         identityUserId: "fixture-owner",

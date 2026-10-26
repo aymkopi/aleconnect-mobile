@@ -36,7 +36,7 @@ type ReportQueueContextValue = {
   refresh: () => Promise<void>;
   sync: (announce?: boolean) => Promise<ReportQueueItem[]>;
   announceSubmission: (id: string) => Promise<void>;
-  retry: (id: string) => Promise<void>;
+  retry: (id: string) => Promise<ReportQueueItem[]>;
   remove: (id: string) => Promise<void>;
 };
 
@@ -163,9 +163,9 @@ export function ReportQueueProvider({ children, syncEnabled = true }: PropsWithC
           : { status: "info", message: "Report saved to your queue. Open Reports to check or retry." });
       },
       retry: async (id) => {
-        if (!syncEnabled) return;
+        if (!syncEnabled) return [];
         await retryQueuedReport(id);
-        await sync();
+        return sync();
       },
       remove: async (id) => {
         if (!syncEnabled) return;

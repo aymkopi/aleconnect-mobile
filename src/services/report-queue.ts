@@ -23,7 +23,8 @@ import {
 } from "@/utils/evidence-image-processing";
 import {
   mapWithConcurrency,
-  requestPhaseFailureMessage,
+  reportFailureMessage,
+  reportReceiptIsUncertain,
   type RequestPhase,
 } from "@/utils/report-transport";
 
@@ -48,6 +49,9 @@ export type ReportQueueItem = {
   lastError: string | null;
   lastErrorPhase: RequestPhase | null;
   diagnosticId: string | null;
+  lastErrorStatus?: number | null;
+  lastErrorCode?: string | null;
+  receiptUncertain?: boolean;
   ticketId: string | null;
   ticketNumber: string | null;
   title: string;
@@ -73,6 +77,7 @@ const queueStorageKey = "report_submission_queue_v1";
 const listeners = new Set<() => void>();
 const runQueueMutation = createKeyedSerialExecutor();
 const queueSyncRequests = createPromiseRegistry<string, ReportQueueItem[]>();
+const activeSubmissions = new Set<string>();
 
 function notifyQueueChanged() {
   listeners.forEach((listener) => listener());
@@ -86,10 +91,11 @@ async function readQueue(): Promise<ReportQueueItem[]> {
     const items = JSON.parse(raw) as ReportQueueItem[];
     return items.map((item) => ({
       ...item,
-      status: item.status === "submitting" ? "queued" : item.status,
+      status: item.status === "submitting" && !activeSubmissions.has(item.id) ? "queued" : item.status,
       lastErrorPhase: item.lastErrorPhase ?? null,
       diagnosticId: item.diagnosticId ?? null,
       nonRetryable: item.nonRetryable === true,
+      receiptUncertain: reportReceiptIsUncertain(item),
     }));
   } catch {
     return [];
@@ -153,6 +159,7 @@ export async function enqueueReport(input: ReportQueueInput) {
       lastError: null,
       lastErrorPhase: null,
       diagnosticId: null,
+      receiptUncertain: false,
       ticketId: null,
       ticketNumber: null,
     };
@@ -162,6 +169,8 @@ export async function enqueueReport(input: ReportQueueInput) {
 }
 
 async function submitQueuedReport(item: ReportQueueItem, authToken: string) {
+  const previouslyUncertain = reportReceiptIsUncertain(item);
+  let finalSubmitAttempted = false;
   const submitting: ReportQueueItem = {
     ...item,
     status: "submitting",
@@ -170,10 +179,13 @@ async function submitQueuedReport(item: ReportQueueItem, authToken: string) {
     lastError: null,
     lastErrorPhase: null,
     diagnosticId: null,
+    lastErrorStatus: null,
+    lastErrorCode: null,
+    receiptUncertain: previouslyUncertain,
   };
-  await replaceQueueItem(submitting);
-
+  activeSubmissions.add(item.id);
   try {
+    await replaceQueueItem(submitting);
     const currentAccess = await readConsistentConsumerAccountSnapshot({
       readIdentity: async () => normalizeConsumerIdentity(await apiRequest<unknown>("/api/mobile/consumer-identity", {}, { authToken, phase: "metadata", timeoutMs: 15_000 }), { id: item.userId }),
       readLinkedAccounts: async () => normalizeLinkedAccounts(await apiRequest<unknown>("/api/mobile/linked-accounts", {}, { authToken, phase: "metadata", timeoutMs: 15_000 }), { id: item.userId }),
@@ -185,7 +197,7 @@ async function submitQueuedReport(item: ReportQueueItem, authToken: string) {
     });
     if (!accessDecision.allowed) {
       const code = accessDecision.code;
-      const failed = { ...submitting, status: "failed" as const, nonRetryable: true, lastError: `${code}: This protected report draft no longer matches your current account access. Refresh before creating a new report.`, lastErrorPhase: "metadata" as const };
+      const failed = { ...submitting, status: "failed" as const, nonRetryable: true, lastError: reportFailureMessage({ code }), lastErrorCode: code, lastErrorPhase: "metadata" as const };
       await replaceQueueItem(failed);
       return failed;
     }
@@ -210,6 +222,8 @@ async function submitQueuedReport(item: ReportQueueItem, authToken: string) {
     // Strip it so retries use only the category/type-specific fields.
     const { description: _legacyDescription, ...payload } =
       item.payload as typeof item.payload & { description?: unknown };
+    await replaceQueueItem({ ...freshItem, receiptUncertain: true });
+    finalSubmitAttempted = true;
     const ticket = await submitComplaint(
       {
         ...payload,
@@ -253,14 +267,9 @@ async function submitQueuedReport(item: ReportQueueItem, authToken: string) {
   } catch (error) {
     const accessFailure = error instanceof ApiRequestError && ["ACCOUNT_NOT_ACCESSIBLE", "STALE_ACCESS_REVISION"].includes(error.code ?? "");
     const retryable = !accessFailure && (!(error instanceof ApiRequestError) || error.retryable);
-    const lastError =
-      error instanceof ApiRequestError &&
-      error.status != null &&
-      error.status >= 500
-        ? requestPhaseFailureMessage(error.phase, "network")
-        : error instanceof Error
-          ? error.message
-          : "Report submission failed.";
+    const failure = error instanceof ApiRequestError ? error : {};
+    const rejected = error instanceof ApiRequestError && !error.outcomeUnknown && [400, 401, 403, 404, 413, 422, 429].includes(error.status ?? 0);
+    const lastError = reportFailureMessage({ ...failure, message: error instanceof Error ? error.message : null });
     const failed: ReportQueueItem = {
       ...submitting,
       status: retryable ? "queued" : "failed",
@@ -270,9 +279,14 @@ async function submitQueuedReport(item: ReportQueueItem, authToken: string) {
       lastErrorPhase: error instanceof ApiRequestError ? error.phase : null,
       diagnosticId:
         error instanceof ApiRequestError ? (error.requestId ?? null) : null,
+      lastErrorStatus: error instanceof ApiRequestError ? error.status ?? null : null,
+      lastErrorCode: error instanceof ApiRequestError ? error.code ?? null : null,
+      receiptUncertain: previouslyUncertain || (finalSubmitAttempted && !rejected),
     };
     await replaceQueueItem(failed);
     return failed;
+  } finally {
+    activeSubmissions.delete(item.id);
   }
 }
 
@@ -329,7 +343,8 @@ export async function removeQueuedReport(id: string) {
   await runQueueMutation(queueStorageKey, async () => {
     const items = await readQueue();
     const item = items.find((entry) => entry.id === id);
-    if (!item || item.status === "submitting") return;
+    if (!item) return;
+    if (activeSubmissions.has(item.id) || item.status === "submitting" || item.status !== 'submitted' && reportReceiptIsUncertain(item)) throw new Error('Submission is still being confirmed. Try again.');
     if (item.status !== "submitted") evidenceId = item.id;
     await writeQueue(items.filter((entry) => entry.id !== id));
   });

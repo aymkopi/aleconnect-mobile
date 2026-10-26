@@ -433,11 +433,10 @@ export default function AllReportsScreen() {
         >
           <View className="flex-1 gap-0.5">
             <Text weight="semibold" size="sm">
-              Saved on this device
+              Saved reports
             </Text>
             <Text muted size="xs">
-              {savedCount} report{savedCount === 1 ? "" : "s"} awaiting
-              confirmation
+              {savedCount} report{savedCount === 1 ? "" : "s"}
             </Text>
           </View>
         </Button>

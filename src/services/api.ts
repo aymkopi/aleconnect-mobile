@@ -24,6 +24,7 @@ export function getAuthTokenRevision() {
 }
 
 export class ApiRequestError extends Error {
+  outcomeUnknown = false;
   constructor(
     message: string,
     readonly status?: number,
@@ -268,6 +269,7 @@ export async function apiRequest<T>(
   const method = init.method ?? "GET";
   const requestId = options.requestId ?? createApiRequestId();
   const phase = options.phase ?? "request";
+  let outcomeUnknown = false;
 
   for (let attempt = 0; ; attempt += 1) {
     try {
@@ -282,6 +284,10 @@ export async function apiRequest<T>(
     } catch (error) {
       const status =
         error instanceof ApiRequestError ? error.status : undefined;
+      if (!["GET", "HEAD"].includes(method.toUpperCase())) {
+        outcomeUnknown ||= status === undefined || status >= 500 || status === 408 || status === 425;
+        if (error instanceof ApiRequestError) error.outcomeUnknown ||= outcomeUnknown;
+      }
       if (
         attempt > 0 ||
         !shouldRetryHttpRequest(

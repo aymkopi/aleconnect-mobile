@@ -617,6 +617,9 @@ export async function submitComplaint(
       idempotent: true,
     },
   );
+  if (typeof response?.ticketId !== 'string' || !response.ticketId.trim() || typeof response.ticketNumber !== 'string' || !response.ticketNumber.trim()) {
+    throw new ApiRequestError('Couldn’t confirm submission. Try again.', 409, undefined, 'final submit', false, 'REPORT_RECEIPT_MISMATCH');
+  }
   try { assertServiceRequestReceipt(input.reportDetails?.serviceRequest, response); }
   catch (error) { throw new ApiRequestError(error instanceof Error ? error.message : "Service-request receipt is incomplete.", 409, undefined, "final submit", false, "SERVICE_REQUEST_RECEIPT_MISMATCH"); }
   complaintReportsMemoryCache = null;

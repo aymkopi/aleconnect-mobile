@@ -1,9 +1,32 @@
+import { isRateLimit, RATE_LIMIT_MESSAGE } from './rate-limit.ts';
+
 export type RequestPhase =
   | "request"
   | "metadata"
   | "evidence upload"
   | "final submit"
   | "refresh";
+
+export function reportReceiptIsUncertain(item: { receiptUncertain?: boolean; attempts: number; lastErrorPhase: RequestPhase | null }) {
+  return item.receiptUncertain ?? (item.lastErrorPhase === 'final submit' || item.attempts > 1 || (item.attempts > 0 && !item.lastErrorPhase));
+}
+
+export function reportFailureMessage(error: { status?: number | null; code?: string | null; message?: string | null; phase?: RequestPhase | null }) {
+  if (isRateLimit(error.status ?? undefined, error.code ?? undefined)) return RATE_LIMIT_MESSAGE;
+  if (error.status != null && error.status >= 500) return 'Server error. Try again later.';
+  if (error.status === 401) return 'Sign in again to send your report.';
+  if (error.status === 403 || /ACCOUNT_NOT_ACCESSIBLE|STALE_ACCESS_REVISION|QUEUE_ACCESS_STALE/.test(error.code ?? '')) return 'Account access changed. Refresh your accounts.';
+  if (/timed out|timeout/i.test(error.message ?? '')) return 'Connection timed out. Try again.';
+  if (error.phase === 'evidence upload' || /photo|evidence/i.test(error.message ?? '') && error.status === 400) return 'Photo upload failed. Try again.';
+  if (error.status === 400 || error.status === 422) {
+    if (/location|coordinates|barangay|PSGC/i.test(error.message ?? '')) return 'Choose a report location in Albay.';
+    if (/description is required/i.test(error.message ?? '')) return 'Add details about the issue.';
+    return 'Check your report details and try again.';
+  }
+  if (error.status === 409) return 'Couldn’t confirm submission. Try again.';
+  if (/connect|network/i.test(error.message ?? '')) return 'Connection failed. Try again.';
+  return 'Couldn’t send your report. Try again.';
+}
 
 export function requestPhaseFailureMessage(
   phase: RequestPhase,

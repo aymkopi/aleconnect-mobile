@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import ts from "typescript";
 import * as queuePresentation from "../src/features/reports/queue-presentation.ts";
 import * as queueAccess from "../src/services/report-queue-access.ts";
+import * as reportTransport from "../src/utils/report-transport.ts";
 import * as browseFilter from "../src/features/reports/browse-filter.ts";
 import {
   filterBrowseReports,
@@ -286,7 +287,7 @@ test("durable queue never permits discard during sending or uncertain final subm
   );
   assert.equal(uncertain.canDiscard, false);
   assert.equal(uncertain.canRetry, true);
-  assert.equal(uncertain.label, "Receipt not confirmed");
+  assert.equal(uncertain.label, "Not confirmed");
   assert.equal(
     presentQueuedReport(
       { ...item, attempts: 2, lastErrorPhase: "metadata" },
@@ -346,10 +347,12 @@ async function queueScreenHarness({
   fixtures,
   preview,
   sourceItem = queuePresentation.fixtureSavedReport,
+  retryReceipts,
 }: {
   fixtures: boolean;
   preview: boolean;
   sourceItem?: ReportQueueItem;
+  retryReceipts?: ReportQueueItem[];
 }) {
   const source = await readFile(
     new URL("../src/features/reports/queue-screen.tsx", import.meta.url),
@@ -366,6 +369,7 @@ async function queueScreenHarness({
     isSyncing: false,
     retry: async () => {
       calls.push("retry");
+      if (retryReceipts) return retryReceipts;
       queue.items = queue.items.map((r) => ({
         ...r,
         lastError: "Metadata request failed",
@@ -417,7 +421,7 @@ async function queueScreenHarness({
         setParams: (p: typeof params) => Object.assign(params, p),
         push: () => {},
         canGoBack: () => false,
-        replace: () => {},
+        replace: (target?: {params?: {id?: string}} | string) => { if (typeof target === 'object') calls.push('open:' + target.params?.id); },
       }),
     },
     "@react-native-community/netinfo": {
@@ -464,6 +468,7 @@ async function queueScreenHarness({
       fetchComplaintMeta: async () => ({ barangays: [] }),
     },
     "@/utils/manila-time": { formatManilaDateTime: (v: string) => v },
+    "@/utils/report-transport": reportTransport,
     "./queue-presentation": queuePresentation,
   };
   for (const [file, name] of [
@@ -524,7 +529,7 @@ async function queueScreenHarness({
 test("fixture screen retry and discard simulate locally without provider mutations", async () => {
   const h = await queueScreenHarness({ fixtures: true, preview: true });
   const before = JSON.stringify(h.queue.items);
-  const retry = h.find((p) => p.children === "Try sending now");
+  const retry = h.find((p) => p.children === "Try again");
   assert.ok(retry);
   (retry.onPress as () => void)();
   await h.flush();
@@ -583,7 +588,7 @@ test("paused durable preview and uncertain submission reject destructive callbac
     await h.flush();
     assert.deepEqual(h.calls, []);
     if (preview) {
-      const retry = h.find((p) => p.children === "Try sending now");
+      const retry = h.find((p) => p.children === "Try again");
       assert.ok(retry);
       assert.equal(retry.disabled, true);
       (retry.onPress as () => void)();
@@ -602,7 +607,7 @@ test("a failed receipt-confirmation retry does not enable discard when its lates
       attempts: 1,
     },
   });
-  const retry = h.find((p) => p.children === "Try sending now");
+  const retry = h.find((p) => p.children === "Try again");
   assert.ok(retry);
   (retry.onPress as () => void)();
   await h.flush();
@@ -612,4 +617,13 @@ test("a failed receipt-confirmation retry does not enable discard when its lates
   );
   assert.ok(discard);
   assert.equal(discard.disabled, true);
+});
+
+test('a retry opens the received report only when its matching receipt is complete',async()=>{
+ for(const complete of [true,false]){
+  const row={...queuePresentation.fixtureSavedReport,status:'submitted' as const,ticketId:'received',ticketNumber:complete?'TK-RECEIVED':null};
+  const h=await queueScreenHarness({fixtures:false,preview:false,retryReceipts:[row]});
+  const button=h.find(p=>p.children==='Try again');assert.ok(button);(button.onPress as()=>void)();await h.flush();
+  assert.deepEqual(h.calls,complete?['retry','refresh','open:received']:['retry','refresh']);
+ }
 });
