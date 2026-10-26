@@ -1,6 +1,6 @@
 # Active work
 
-- [Consumer service improvements](tasks/consumer-service-improvements.md): Phases1-4/code77 remain live. The approved resolution-first exchange, optional final ratings, scoped cache and24/48-hour inactivity policy are implemented and verified locally; guarded production rollout remains pending. No new app/API release; billing excluded. Preserve all manual/private/device state.
+- [Consumer service improvements](tasks/consumer-service-improvements.md): resolution-first flow, additive migration and Staff1.5.0-alpha.1/five Workers are live and verified. Mobile1.7.0-alpha.1/code78 signed standalone APK is verified on Desktop; source main/master pushes use [skip ci] with zero Actions. Native/provider/elapsed-timer acceptance remains separate. Billing excluded; preserve primaries, prior APKs and private/device work.
 
 - [New report limits and map pin](tasks/new-report-pin-limits.md): source4d6907d merged/pushed with `[skip ci]`; zero Actions, combined573 tests/types/scoped lint/harness and browser limits/geometry verify. Task worktree/local branch removed; hash-verified evidence retained in `.cache/recovery/new-report-pin-limits-20261023`. Unrelated edits/stashes/worktrees preserved; native acceptance/release remain separate.
 
