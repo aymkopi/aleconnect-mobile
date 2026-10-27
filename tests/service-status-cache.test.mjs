@@ -29,3 +29,17 @@ test('disabled service status removes only its own cache and old capabilities no
   const h=await harness();h.respond(value);await h.fetchServiceStatus(scope);h.respond({enabled:false});assert.deepEqual(await h.fetchServiceStatus(scope),{enabled:false});assert.equal(h.storage.size,0);
   h.token(null);await assert.rejects(h.fetchServiceStatus(scope));
 });
+
+
+test('native-shaped abort signals support live lookup and cached fallback without throwIfAborted', async()=>{
+ const h=await harness(),signal={aborted:false};
+ h.respond(value);assert.equal((await h.fetchServiceStatus(scope,signal)).canAcknowledge,true);
+ h.fail(new Error('offline'));assert.equal((await h.fetchServiceStatus(scope,signal)).isStale,true);
+ signal.aborted=true;await assert.rejects(h.fetchServiceStatus(scope,signal),/cancelled/);
+});
+
+test('a cancelled native lookup cannot save a late response or use cached context', async()=>{
+ const h=await harness(),signal={aborted:false};
+ h.respond(value);const pending=h.fetchServiceStatus(scope,signal);signal.aborted=true;
+ await assert.rejects(pending,/cancelled/);assert.equal(h.storage.size,0);
+});

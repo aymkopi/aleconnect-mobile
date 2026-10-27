@@ -179,6 +179,7 @@ async function performRequest<T>(
   requestId: string,
   phase: RequestPhase,
 ): Promise<T> {
+  if (init.signal?.aborted) throw new ApiRequestError("Request cancelled.", undefined, requestId, phase, false);
   const headers = new Headers(init.headers);
   const controller = new AbortController();
   let didTimeout = false;

@@ -34,8 +34,8 @@ async function listConsumerWork(scope: ConsumerUpdateScope) {
 export async function listConsumerUpdates(scope: ConsumerUpdateScope, ticketId?: string) {
   return (await listConsumerWork(scope)).filter((item): item is QueuedConsumerUpdate => !isOutageAcknowledgement(item) && (!ticketId || item.ticketId === ticketId));
 }
-export async function listOutageAcknowledgements(scope: ConsumerUpdateScope, serviceAccountId: string) {
-  return (await listConsumerWork(scope)).filter((item): item is QueuedOutageAcknowledgement => isOutageAcknowledgement(item) && item.serviceAccountId === serviceAccountId);
+export async function listOutageAcknowledgements(scope: ConsumerUpdateScope, serviceAccountId?: string) {
+  return (await listConsumerWork(scope)).filter((item): item is QueuedOutageAcknowledgement => isOutageAcknowledgement(item) && (!serviceAccountId||item.serviceAccountId === serviceAccountId));
 }
 export async function enqueueOutageAcknowledgement(scope: ConsumerUpdateScope, serviceAccountId: string, notice: OutageItem) {
   if (!scope.authorizedServiceAccountIds.includes(serviceAccountId) || notice.state !== "active") throw new Error("Review the selected account and current notice.");

@@ -22,3 +22,8 @@ test('acknowledgement receipts must match the original mutation, notice, occurre
   assert.equal(normalizeOutageReceipt(receipt, expected).acknowledgementId, id);
   for (const patch of [{ mutationId: 'bad' }, { serviceAccountId: 'b' }, { occurrenceId: id }, { acceptedAt: 'bad' }]) assert.throws(() => normalizeOutageReceipt({ ...receipt, ...patch }, expected));
 });
+
+test('optional outage deadlines are validated while old payloads remain readable',()=>{
+ for(const patch of [{outageDate:'invalid'},{outageDate:'2026-02-31'},{expiresAt:'tomorrow'}]) assert.throws(()=>normalizeServiceStatus({...dto,items:[{...item,...patch}]},'a'));
+ assert.equal(normalizeServiceStatus({...dto,items:[{...item,outageDate:'2026-10-27',expiresAt:null}]},'a').enabled,true);
+});

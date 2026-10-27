@@ -470,6 +470,7 @@ async function queueScreenHarness({
     "@/utils/manila-time": { formatManilaDateTime: (v: string) => v },
     "@/utils/report-transport": reportTransport,
     "./queue-presentation": queuePresentation,
+    "./saved-outage-acknowledgements": { SavedOutageAcknowledgements:"SavedOutageAcknowledgements",useSavedOutageAcknowledgements:()=>({items:[],error:"",loading:false}) },
   };
   for (const [file, name] of [
     ["button", "Button"],
@@ -553,7 +554,7 @@ test("fixture screen retry and discard simulate locally without provider mutatio
   await discardHarness.flush();
   assert.deepEqual(discardHarness.calls, []);
   assert.equal(discardHarness.queue.items.length, 1);
-  assert.ok(discardHarness.find((p) => p.children === "No saved reports"));
+  assert.ok(discardHarness.find((p) => p.children === "No saved items"));
 });
 test("paused durable preview and uncertain submission reject destructive callbacks", async () => {
   for (const [preview, sourceItem] of [

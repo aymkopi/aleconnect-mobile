@@ -66,3 +66,10 @@ test('a success response without a report receipt remains unconfirmed',async()=>
  let response={};const submit=new Function('apiRequest','ApiRequestError','assertServiceRequestReceipt','let complaintReportsMemoryCache;\n'+compiled+'\nreturn submitComplaint;')(async()=>response,class extends Error{constructor(message,status){super(message);this.status=status}},()=>{});
  await assert.rejects(submit({}),error=>error.status===409);response={ticketId:'ticket',ticketNumber:'TK-1'};assert.deepEqual(await submit({}),response);
 });
+
+test('an already cancelled request never starts another transport attempt',async t=>{
+ const api=await load('src/services/api.ts',{'@react-native-async-storage/async-storage':{getItem:async()=>null},'expo-secure-store':{},'react-native':{Platform:{OS:'web'}},'@/constants':{aleconnectApiBaseUrl:'https://fixture.invalid'},'@/utils/rate-limit':rateLimit,'@/utils/http-retry':retry,'@/utils/report-transport':transport});
+ const original=globalThis.fetch;t.after(()=>globalThis.fetch=original);let calls=0;globalThis.fetch=async()=>{calls++;return new Response('{}')};
+ const controller=new AbortController();controller.abort();
+ await assert.rejects(api.apiRequest('/service-status',{signal:controller.signal}),/cancelled/);assert.equal(calls,0);
+});

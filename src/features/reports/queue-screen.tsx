@@ -39,6 +39,7 @@ import {
   simulateQueueRetry,
 } from "./queue-presentation";
 import type { ReportQueueItem } from "@/services/report-queue";
+import {SavedOutageAcknowledgements,useSavedOutageAcknowledgements} from './saved-outage-acknowledgements';
 import { reportFailureMessage } from '@/utils/report-transport';
 
 type QueueSheet =
@@ -103,6 +104,9 @@ export default function ReportQueueScreen() {
       }
     : null;
   const scope = JSON.stringify([fixtures, session?.user.id, currentScope]);
+  const outageScope=!fixtures&&session&&currentScope?{...currentScope,principalId:session.user.id}:null;
+  const outageWork=useSavedOutageAcknowledgements(outageScope);
+  const pendingOutages=outageWork.items.filter(item=>item.status!=='sent').length;
   const activeScope = useRef(scope);
   useLayoutEffect(() => {
     activeScope.current = scope;
@@ -415,7 +419,7 @@ export default function ReportQueueScreen() {
           </Button>
         )}
       </>
-    ) : !items.length ? <Button fullWidth onPress={() => router.push('/reports/new')}>New report</Button> : undefined;
+    ) : !items.length&&!pendingOutages&&!outageWork.loading ? <Button fullWidth onPress={() => router.push('/reports/new')}>New report</Button> : undefined;
   const sheetTitle =
     sheet === "diagnostic"
         ? copied
@@ -432,7 +436,7 @@ export default function ReportQueueScreen() {
                 : "Fixture states";
   return (
     <ReportPage
-      title={id ? "Saved report" : "Saved reports"}
+      title={id ? "Saved report" : "Saved"}
       onBack={back}
       footer={footer}
       headerAction={
@@ -562,7 +566,8 @@ export default function ReportQueueScreen() {
         </>
       ) : (
         <>
-          {!items.length ? <View className="gap-2"><Text weight="semibold" size="lg">No saved reports</Text><Text muted size="sm">{!session && !fixtures ? 'Sign in to view your saved reports.' : 'Reports saved offline will appear here.'}</Text></View> : null}
+          {!items.length&&!pendingOutages&&!outageWork.loading ? <View className="gap-2"><Text weight="semibold" size="lg">No saved items</Text><Text muted size="sm">{!session&&!fixtures?'Sign in to view saved items.':'Reports saved offline will appear here.'}</Text></View> : null}
+          <SavedOutageAcknowledgements scope={outageScope} accountLabels={Object.fromEntries((accountContext?.accounts??[]).map(account=>[account.id,account.registeredName+(account.accountNumber?' · •••• '+account.accountNumber.slice(-4):'')]))}/>
           {items.map((item) => (
             <QueueRow
               key={item.id}

@@ -18,6 +18,7 @@ import { useScopedRead } from "@/hooks/use-scoped-read";
 import { useManualRefresh } from "@/hooks/use-manual-refresh";
 import { calendarShortDate } from "@/lib/date";
 import { isQueuedReportVisible } from "@/services/report-queue-access";
+import {useSavedOutageAcknowledgements} from './saved-outage-acknowledgements';
 import {
   subscribeReportRevalidationRequested,
   subscribeReportStatusChanged,
@@ -308,14 +309,15 @@ export default function AllReportsScreen() {
         accessRevision: accountContext?.accessRevision ?? 0,
       }
     : null;
-  const savedCount = fixtures
+  const outageWork=useSavedOutageAcknowledgements(!fixtures&&session&&queueScope?{...queueScope,principalId:session.user.id}:null);
+  const savedCount = (fixtures
     ? 1
     : queue.items.filter(
         (item) =>
           queueScope &&
           isQueuedReportVisible(item, queueScope) &&
           item.status !== "submitted",
-      ).length;
+      ).length)+outageWork.items.filter(item=>item.status!=='sent').length;
   const filterCount = [
     account !== "all",
     filters.status !== "all",
@@ -433,10 +435,10 @@ export default function AllReportsScreen() {
         >
           <View className="flex-1 gap-0.5">
             <Text weight="semibold" size="sm">
-              Saved reports
+              Saved
             </Text>
             <Text muted size="xs">
-              {savedCount} report{savedCount === 1 ? "" : "s"}
+              {savedCount} item{savedCount === 1 ? "" : "s"}
             </Text>
           </View>
         </Button>

@@ -62,6 +62,8 @@ import { ReportReceipt } from "./report-receipt";
 import { KnownOutageChoice } from "./known-outage-choice";
 import { useScopedRead } from "@/hooks/use-scoped-read";
 import { fetchServiceStatus } from "@/services/service-status";
+import {createOutageCapture,outageCaptureKey,matchingOutageNotices} from './outage-capture';
+import {getAuthTokenRevision} from '@/services/api';
 import type { ServiceStatus } from "@/features/home/service-status-contract";
 import { EvidencePhotoViewer } from "./components/evidence-photo-viewer";
 import {
@@ -210,6 +212,8 @@ export default function NewReportScreen() {
   const [step, setStep] = useState<CreationStep>(1),
     [editingReview, setEditingReview] = useState(false);
   const [outageChoice, setOutageChoice] = useState<{ scopeKey: string; status: Extract<ServiceStatus, { enabled: true }> } | null>(null);
+  const outageCapture=useRef(createOutageCapture(fetchServiceStatus));
+  const [separateOutageDraft,setSeparateOutageDraft]=useState<string|null>(null);
   const [form, setForm] = useState<ComplaintFormState>({
     ...initialComplaintForm,
   });
@@ -418,8 +422,10 @@ export default function NewReportScreen() {
     (item) => item.categoryId === form.categoryId,
   );
   const options = filterComplaintOptions(meta, issueQuery, issueView === "type" ? form.categoryId : undefined);
-  const outageScopeKey = `${currentScope.principalId}:${currentScope.identityUserId}:${currentScope.accessRevision}:${accountId}:${form.typeId}`;
-  const outageRead = useScopedRead(!fixtures && step === 2 && accountReady && type?.knownOutageEligible === true && accountContext?.capabilities.areaOutageStatus ? outageScopeKey : null, () => fetchServiceStatus({ principalId: currentScope.principalId!, identityUserId: currentScope.identityUserId!, accessRevision: currentScope.accessRevision, serviceAccountId: accountId! }));
+  const outageScope={principalId:currentScope.principalId!,identityUserId:currentScope.identityUserId!,accessRevision:currentScope.accessRevision,serviceAccountId:accountId!};
+  const outageScopeKey=outageCaptureKey(reportId.current,String(getAuthTokenRevision()),outageScope);
+  const shouldCheckOutage=!fixtures&&step===2&&accountReady&&type?.knownOutageEligible===true&&accountContext?.capabilities.areaOutageStatus&&separateOutageDraft!==outageScopeKey;
+  const outageRead=useScopedRead(shouldCheckOutage?outageScopeKey:null,()=>outageCapture.current.read(outageScopeKey,outageScope));
   const errors = validateReportForm(form, category, type, meta),
     stepErrors = creationStepErrors(step, errors, accountReady);
   const summaryErrors = step === 5 ? [] : stepErrors.filter(message => step !== 3 || message !== errors.purok);
@@ -814,7 +820,8 @@ export default function NewReportScreen() {
       if (types.length !== 1 || !form.typeId) { setIssueView("type"); setAttempted(false); return; }
     }
     if (stepErrors.length) return;
-    if (step === 2 && !fixtures && type?.knownOutageEligible === true && accountContext?.capabilities.areaOutageStatus && scopeCurrent && outageRead.data?.enabled && !outageRead.data.isStale && outageRead.data.canAcknowledge && outageRead.data.items.some(item => item.state === "active")) {
+    if(shouldCheckOutage&&outageRead.busy)return;
+    if (step === 2 && shouldCheckOutage && scopeCurrent && outageRead.data?.enabled && outageRead.data.canAcknowledge && matchingOutageNotices(outageRead.data).length) {
       setOutageChoice({scopeKey:outageScopeKey,status:outageRead.data});
       return;
     }
@@ -950,7 +957,7 @@ export default function NewReportScreen() {
     );
 
   if (outageChoice?.scopeKey === outageScopeKey && scopeCurrent && accountContext && session && accountId)
-    return <ReportPage title="Outage notice" onBack={() => setOutageChoice(null)}><KnownOutageChoice key={outageChoice.scopeKey} initialStatus={outageChoice.status} scope={{ principalId: session.user.id, identityUserId: accountContext.identityUserId, accessRevision: accountContext.accessRevision, authorizedServiceAccountIds: accountContext.authorizedServiceAccountIds }} serviceAccountId={accountId} accountLabel={accountLabel} onContinue={() => { setOutageChoice(null); setStep(nextCreationStep(step, editingReview)); setEditingReview(false); setAttempted(false); }} onHome={() => leave("/home")} /></ReportPage>;
+    return <KnownOutageChoice key={outageChoice.scopeKey} initialStatus={outageChoice.status} scope={{principalId:session.user.id,identityUserId:accountContext.identityUserId,accessRevision:accountContext.accessRevision,authorizedServiceAccountIds:accountContext.authorizedServiceAccountIds}} serviceAccountId={accountId} accountLabel={accountLabel+(form.accountNumber?' · •••• '+form.accountNumber.slice(-4):'')} locationLabel={[profile?.purokOrStreet,meta.barangays.find(item=>item.code===profile?.barangayPsgc)?.name,meta.municipalities.find(item=>item.code===profile?.municipalityCode)?.name].filter(Boolean).join(', ')} onBack={()=>setOutageChoice(null)} onReview={async()=>{outageCapture.current.invalidate(outageScopeKey);const value=await outageCapture.current.read(outageScopeKey,outageScope);if(mounted.current&&isDraftScopeCurrent(scope,latest.current.currentScope)&&latest.current.accountId===accountId){await outageRead.reload();}return value}} onContinue={()=>{setSeparateOutageDraft(outageScopeKey);setOutageChoice(null);setStep(nextCreationStep(step,editingReview));setEditingReview(false);setAttempted(false)}} onHome={()=>leave('/home')}/>;
 
   if (receipt && scopeCurrent)
     return (
@@ -1032,8 +1039,8 @@ export default function NewReportScreen() {
               ) : null}
               <Button
                 className="flex-1 rounded-2xl"
-                loading={submitting}
-                disabled={metaLoading || stale || pickerBusy || !accountReady}
+                loading={submitting||!!(shouldCheckOutage&&outageRead.busy)}
+                disabled={metaLoading || stale || pickerBusy || !accountReady||!!(shouldCheckOutage&&outageRead.busy)}
                 onPress={continueStep}
               >
                 {editingReview
@@ -1138,7 +1145,6 @@ export default function NewReportScreen() {
             ) : null}
             {step === 2 ? (
               <>
-                {outageRead.busy ? <Text muted size="sm">Checking matching outage notices…</Text> : outageRead.data?.enabled && !outageRead.data.isStale && outageRead.data.canAcknowledge && outageRead.data.items.some(item => item.state === "active") ? <Text muted size="sm">A current official notice may describe this issue.</Text> : null}
                 <Heading
                   description={
                     issueView === "category"

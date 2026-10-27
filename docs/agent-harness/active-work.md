@@ -1,5 +1,7 @@
 # Active work
 
+- [Simpler outage reporting](tasks/outage-reporting.md): source complete; user authorizes Staff main/Mobile master pushes with [skip ci], then direct API/Pages deployment. Fresh review fixes native abort compatibility and persistent publication review invalidation. Final checks/release evidence in progress; preserve primary/generated/device state. Billing, migrations and native distribution excluded.
+
 - [Consumer service improvements](tasks/consumer-service-improvements.md): Saved report validation/receipt repair is live; the original Xiaomi report is received once. Mobile1.7.0-alpha.2/code79 is installed/hash-verified with the retained session, details and photo.626 tests/four browser checks pass; source pushes use [skip ci] with zero Actions. Billing excluded; provider/iOS/elapsed-timer acceptance remains separate.
 
 - [New report limits and map pin](tasks/new-report-pin-limits.md): source4d6907d merged/pushed with `[skip ci]`; zero Actions, combined573 tests/types/scoped lint/harness and browser limits/geometry verify. Task worktree/local branch removed; hash-verified evidence retained in `.cache/recovery/new-report-pin-limits-20261023`. Unrelated edits/stashes/worktrees preserved; native acceptance/release remain separate.
