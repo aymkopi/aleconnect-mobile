@@ -1,6 +1,6 @@
 # Active work
 
-- [Simpler outage reporting](tasks/outage-reporting.md): source complete; user authorizes Staff main/Mobile master pushes with [skip ci], then direct API/Pages deployment. Fresh review fixes native abort compatibility and persistent publication review invalidation. Final checks/release evidence in progress; preserve primary/generated/device state. Billing, migrations and native distribution excluded.
+- [Simpler outage reporting](tasks/outage-reporting.md): Staff1.7.0-alpha.1/source3910d4af deployed APIbe2bf212/Pages6db62da2; public Mobile master58069cb pushed with [skip ci].634 Mobile/36 focused Staff checks, builds/types/lint/harness,50 asset comparisons and22 production probes pass; all31 bindings/runtime settings retained. Preserve primary/generated/device work. Billing/native distribution excluded; provider recovery/device acceptance separate.
 
 - [Consumer service improvements](tasks/consumer-service-improvements.md): Saved report validation/receipt repair is live; the original Xiaomi report is received once. Mobile1.7.0-alpha.2/code79 is installed/hash-verified with the retained session, details and photo.626 tests/four browser checks pass; source pushes use [skip ci] with zero Actions. Billing excluded; provider/iOS/elapsed-timer acceptance remains separate.
 

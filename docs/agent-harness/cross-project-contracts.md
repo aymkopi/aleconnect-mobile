@@ -1,7 +1,7 @@
 # ALEConnect cross-project contracts
 
 <!-- outage-reporting-contract:start -->
-## Simpler outage reporting (source implementation 2026-10-27; not deployed)
+## Simpler outage reporting (Staff/API deployed 2026-10-28; Mobile source pushed)
 
 - Existing consumer service-status and acknowledgement routes/commands remain. All No Light/Power report types may request context; only fresh active matching notices divert. Scope is principal/identity/access revision/service account plus current draft/session. One10-second overall capture includes retry/failure/no-match; type, Back and Advisory return reuse it. At most three active choices; no-end notices qualify on their recorded Philippine outage date only. Real feeder/substation coverage and All service areas qualify. Optional `outageDate` and `expiresAt` fields are backward-compatible; server revalidates every new acknowledgement.
 - Confirmation persists original intent in `consumer_report_updates_v1` before sending. Success requires its matching receipt; replay preserves the mutation ID. Separate/hazard reporting stays available after a confirmation. Pending items live in Saved; Home equals its pre-outage-card file. No ticket, memo, dispatch or billing write follows a confirmation.
