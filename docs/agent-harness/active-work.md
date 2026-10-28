@@ -1,6 +1,8 @@
 # Active work
 
-- [Simpler outage reporting](tasks/outage-reporting.md): Staff1.7.0-alpha.1/source3910d4af deployed APIbe2bf212/Pages6db62da2; public Mobile master58069cb pushed with [skip ci].634 Mobile/36 focused Staff checks, builds/types/lint/harness,50 asset comparisons and22 production probes pass; all31 bindings/runtime settings retained. Preserve primary/generated/device work. Billing/native distribution excluded; provider recovery/device acceptance separate.
+- [Mobile legal documents](tasks/mobile-legal-documents.md): full scrollable legal reader from Account/About/report links;636 full tests, types/lint, paired harness and browser checks pass. User authorizes `[skip ci]` publication to public master and local1.8.0-alpha.2/code81 APK. Preserve code80,215 dirty primary files and generated/device work. Billing excluded; build/readback and native acceptance are tracked separately.
+
+- [Simpler outage reporting](tasks/outage-reporting.md): Staff1.7.0-alpha.1/source3910d4af deployed APIbe2bf212/Pages6db62da2; public Mobile master58069cb pushed with [skip ci]. Local release APK1.8.0-alpha.1/code80 from74a1a3a is verified and saved to Desktop/AleconnectApps.634 Mobile/36 focused Staff checks and production verification pass; all31 bindings/runtime settings retained. Preserve primary/generated/device work. Billing excluded; installation, native acceptance and provider recovery remain separate.
 
 - [Consumer service improvements](tasks/consumer-service-improvements.md): Saved report validation/receipt repair is live; the original Xiaomi report is received once. Mobile1.7.0-alpha.2/code79 is installed/hash-verified with the retained session, details and photo.626 tests/four browser checks pass; source pushes use [skip ci] with zero Actions. Billing excluded; provider/iOS/elapsed-timer acceptance remains separate.
 

@@ -1,0 +1,928 @@
+{
+  "privacy": {
+    "title": "Privacy Policy",
+    "blocks": [
+      {
+        "type": "heading",
+        "text": "1 Who is responsible for your information"
+      },
+      {
+        "type": "paragraph",
+        "text": "Albay Electric Cooperative Inc. (ALECO), referred to as “ALECO,” “we,” “us,” or “our,” is the personal information controller for ALEConnect-Mobile and the supporting service-report system. The controller decides why and how personal data is processed."
+      },
+      {
+        "type": "paragraph",
+        "text": "ALEConnect-Mobile is the consumer application used to access public updates and hotlines, view available consumer-account information, submit service concerns, and follow report progress. Supporting ALEConnect staff and field systems process reports and operational updates."
+      },
+      {
+        "type": "paragraph",
+        "text": "This notice explains the personal data handled through those activities. It applies to consumers and authorized account representatives, guests, people submitting reports, people named or pictured in reports, and ALECO personnel, administrators, dispatchers, field crews, developers, contractors, and other authorized persons whose information forms part of these records. A person does not have to install the app or accept its Terms to have privacy rights."
+      },
+      {
+        "type": "paragraph",
+        "text": "This notice supplements ALECO's notices for electricity-service applications, employment, membership, billing, and other activities. It does not imply that every item collected elsewhere by ALECO is collected by this app. Additional staff and field notices are necessary for their distinct processing activities."
+      },
+      {
+        "type": "heading",
+        "text": "2 Information we process and where it comes from"
+      },
+      {
+        "type": "paragraph",
+        "text": "We obtain data from you, your authorized representative, ALECO's existing service-account records, authorized personnel handling a concern, and the devices and systems used to operate the service."
+      },
+      {
+        "type": "paragraph",
+        "text": "Identity and service-account information"
+      },
+      {
+        "type": "paragraph",
+        "text": "Names, ALECO account numbers, internal account identifiers, available email addresses and telephone numbers, service addresses, municipality and barangay identifiers, purok or street, landmarks, saved map coordinates, customer classification, and available pole and meter serial numbers. These identify the relevant account and service location and support account and report handling. Some values originate in existing ALECO records rather than being newly requested in the app."
+      },
+      {
+        "type": "paragraph",
+        "text": "Authentication and account-access records"
+      },
+      {
+        "type": "paragraph",
+        "text": "The account number or email used to sign in; passwords provided for authentication, password changes, or account-link verification; stored password hashes; session identifiers and tokens; session expiry; IP address and user-agent information; and security or access-change records. These verify identity, maintain sessions, and prevent unauthorized access. Passwords must not be included in report text, photos, or ordinary support messages."
+      },
+      {
+        "type": "paragraph",
+        "text": "Account-linking records"
+      },
+      {
+        "type": "paragraph",
+        "text": "The account number and registered name submitted for verification, identity-to-account relationships, credential-verification results and times, link requests, decisions and reasons, default-account choices, unlinking events, and relevant audit records. These establish and review access to additional service accounts. Available actions depend on server authorization and enabled capabilities."
+      },
+      {
+        "type": "paragraph",
+        "text": "Report information"
+      },
+      {
+        "type": "paragraph",
+        "text": "The selected service account, category and type of concern, applicable descriptions, requested action, incident address, map coordinates, landmarks, attached photos, submission and reference identifiers, and timestamps. A relevant meter-name-transfer report can include both the current and requested registered names. These details allow ALECO to assess and investigate the concern."
+      },
+      {
+        "type": "paragraph",
+        "text": "Operational follow-up"
+      },
+      {
+        "type": "paragraph",
+        "text": "Report status and history, review and incident associations, Service Memo and dispatch references, work updates, relevant personnel identifiers, and field observations or evidence. Separate field systems also process duty-related crew location records. These support investigation, assignment, service work, accountability, and follow-up."
+      },
+      {
+        "type": "paragraph",
+        "text": "Notification information"
+      },
+      {
+        "type": "paragraph",
+        "text": "Push-delivery tokens, Android or iOS platform, a device-related value derived from the operating-system build identifier or device name where available, selected substations or feeders, notification preferences, notification content, read status, and delivery or error records. These support relevant updates and notification delivery."
+      },
+      {
+        "type": "paragraph",
+        "text": "Local and technical records"
+      },
+      {
+        "type": "paragraph",
+        "text": "Saved session and profile information, report lists, settings, queued reports and evidence, timestamps, request identifiers, and technical error or security records. These support offline access, retries, troubleshooting, and system protection. Public browsing also generates network requests even when no account is signed in."
+      },
+      {
+        "type": "paragraph",
+        "text": "The app's consumer report flow currently accepts one to three photos. It does not implement consumer video or audio evidence uploads."
+      },
+      {
+        "type": "paragraph",
+        "text": "The consumer app do not request government-ID numbers, payment-card details, banking passwords, contact-book access, call logs, biometric templates, or continuous background consumer location. Payment pages provide information and external links; they do not collect payment credentials within ALEConnect-Mobile. Avoid including these details in free-text fields or photographs."
+      },
+      {
+        "type": "heading",
+        "text": "3 Sensitive information and information about other people"
+      },
+      {
+        "type": "paragraph",
+        "text": "A report or photo can reveal information about a resident, bystander, account holder, worker, or child who is not the person submitting it. Some content, such as health information, government-issued identifiers, or allegations concerning an offense, can be sensitive personal information under Philippine law. A photograph or location is not automatically classified as sensitive personal information merely because it is private; its content and context matter."
+      },
+      {
+        "type": "paragraph",
+        "text": "Provide only information relevant to the concern. Avoid unnecessary faces, identification documents, private conversations, medical information, and unrelated people or property details. Do not place yourself or another person in danger to obtain evidence."
+      },
+      {
+        "type": "paragraph",
+        "text": "Submitting another person's information does not mean you can consent for that person. ALECO must establish an applicable legal basis for its processing, limit access, and consider redaction, restriction, or secure deletion of unnecessary content. Sensitive or privileged information requires a condition under Section 13 of the Data Privacy Act; an ordinary service contract or a general claim of legitimate interest is not, by itself, sufficient."
+      },
+      {
+        "type": "heading",
+        "text": "4 Purposes and legal bases"
+      },
+      {
+        "type": "paragraph",
+        "text": "We process personal data only for a declared, lawful purpose and only to the extent reasonably needed for it. The applicable legal basis depends on the person, purpose, and information involved:"
+      },
+      {
+        "type": "paragraph",
+        "text": "Provide requested account access, receive and handle service concerns, and provide related updates"
+      },
+      {
+        "type": "paragraph",
+        "text": "Processing necessary to perform a contract with the data subject or take requested steps toward one, under Section 12(b). This does not automatically cover information about unrelated people or representatives who are not parties to that contract."
+      },
+      {
+        "type": "paragraph",
+        "text": "Protect accounts and systems, prevent misuse, maintain appropriate audit records, and handle necessary operational information about affected third parties"
+      },
+      {
+        "type": "paragraph",
+        "text": "Legitimate interests under Section 12(f), only after establishing a real purpose, necessity, and a balance that does not override the person's rights and freedoms."
+      },
+      {
+        "type": "paragraph",
+        "text": "Comply with an applicable legal duty or valid regulatory or judicial requirement"
+      },
+      {
+        "type": "paragraph",
+        "text": "Section 12(c), with the particular duty and necessary records identified. Being a utility does not make every processing activity legally compulsory."
+      },
+      {
+        "type": "paragraph",
+        "text": "Optional processing for which consent is the chosen legal basis"
+      },
+      {
+        "type": "paragraph",
+        "text": "Specific, informed, freely given consent under Section 12(a), obtained before that processing. Permission to use a device feature is not blanket consent to every subsequent use of the resulting information."
+      },
+      {
+        "type": "paragraph",
+        "text": "An actual emergency involving life, health, or public safety"
+      },
+      {
+        "type": "paragraph",
+        "text": "The relevant conditions of Section 12(d) or 12(e), where genuinely applicable. These provisions are not a general exemption for routine utility processing."
+      },
+      {
+        "type": "paragraph",
+        "text": "Where sensitive personal information is necessary, ALECO must identify the applicable Section 13 condition, such as valid purpose-specific consent, processing expressly permitted by a law with safeguards, a qualifying life-or-health emergency, or processing necessary for qualifying legal claims. A report is not automatically a legal claim merely because ALECO retains it."
+      },
+      {
+        "type": "paragraph",
+        "text": "Acknowledging this notice or accepting the Terms is not consent to unrelated marketing, public disclosure, research, or other new purposes. Where consent is relied on, you may withdraw it through the privacy contact below. Withdrawal operates prospectively; it does not invalidate previous lawful processing or require the removal of records that must lawfully be retained on another basis. We will explain any effect on the particular feature."
+      },
+      {
+        "type": "heading",
+        "text": "5 Permissions location and background activity"
+      },
+      {
+        "type": "paragraph",
+        "text": "Foreground location"
+      },
+      {
+        "type": "paragraph",
+        "text": "Helps locate you while using the report-location picker and set a report pin. The picker can use location updates while active. A saved service-location pin or a submitted incident pin is retained with the relevant record; it is not a continuous movement history. You can deny or revoke location permission and position the pin manually or enter coordinates. Address-search availability depends on the device and service. A valid incident location is still required for an in-app report."
+      },
+      {
+        "type": "paragraph",
+        "text": "Camera"
+      },
+      {
+        "type": "paragraph",
+        "text": "Takes a photo when you choose the camera option. You can instead select an existing suitable photo. The consumer camera flow captures images, not audio or video."
+      },
+      {
+        "type": "paragraph",
+        "text": "Photos or media selection"
+      },
+      {
+        "type": "paragraph",
+        "text": "Lets you choose report evidence or a profile image. Depending on the operating system, this uses a system picker or a limited media/storage permission. Older Android versions can require storage access. The app does not upload your entire photo library. A report currently requires valid photo evidence; use another official reporting channel if you cannot supply it safely."
+      },
+      {
+        "type": "paragraph",
+        "text": "Notifications"
+      },
+      {
+        "type": "paragraph",
+        "text": "Enables push alerts. You can change device notification permissions and available in-app push/advisory and area preferences. Disabling push does not erase notifications or report records held by ALECO."
+      },
+      {
+        "type": "paragraph",
+        "text": "Background report synchronization"
+      },
+      {
+        "type": "paragraph",
+        "text": "Attempts to submit reports you have already queued when connectivity, a valid session, current account access, and operating-system scheduling permit. This is separate from collecting background GPS. Delivery is not guaranteed at a particular time."
+      },
+      {
+        "type": "paragraph",
+        "text": "Telephone and external links"
+      },
+      {
+        "type": "paragraph",
+        "text": "Open a dialer, browser, or another application when you choose a hotline or link. The consumer flow does not read your contacts or record your calls. The external service handles the ensuing interaction under its own terms and notice."
+      },
+      {
+        "type": "paragraph",
+        "text": "You can review permissions in your device settings. A denied permission affects the feature that needs it, rather than giving ALECO authority to bypass your choice."
+      },
+      {
+        "type": "paragraph",
+        "text": "The separate ALEConnect-Lineman application supports duty-based background crew location and field synchronization. That is not consumer tracking performed by ALEConnect-Mobile. ALECO must provide field personnel with an appropriate notice covering the actual tracking conditions, recipients, retention, and employment or contractual basis; this consumer notice is not a substitute."
+      },
+      {
+        "type": "heading",
+        "text": "6 How reports are processed"
+      },
+      {
+        "type": "paragraph",
+        "text": "The app prepares selected evidence images for upload, including resizing and conversion to WebP. A report can remain in a private app directory and local queue before successful submission. Subject to current authorization, it is uploaded through backend-issued upload capabilities and recorded in ALECO's service-report system."
+      },
+      {
+        "type": "paragraph",
+        "text": "Authorized staff can review the report, associate related incidents, prepare Service Memos, and dispatch field work. Authorized crews can provide evidence and progress updates through the separate field system. These activities can add to the operational record and produce consumer notifications."
+      },
+      {
+        "type": "paragraph",
+        "text": "Automated functions validate access and report fields, prevent duplicate submissions, select update audiences, and manage retries and delivery. These functions do not constitute approval of a meter-name transfer or a guarantee that a report has been investigated or resolved. You may ask ALECO to explain relevant processing or review an incorrect record or outcome."
+      },
+      {
+        "type": "paragraph",
+        "text": "A report is handled as an operational submission, not as a public social-media post. Submission does not authorize publication of identifiable report evidence on Facebook or other public channels. Any public reuse requires a separate lawful basis, necessary minimization, and appropriate notice."
+      },
+      {
+        "type": "heading",
+        "text": "7 Who receives information"
+      },
+      {
+        "type": "paragraph",
+        "text": "Access must follow the person's role, assignment, and legitimate need:"
+      },
+      {
+        "type": "bullet",
+        "text": "Consumer-service personnel and report reviewers: information necessary to verify access, assess concerns, and communicate about them."
+      },
+      {
+        "type": "bullet",
+        "text": "Administrators and dispatchers: information necessary to administer authorized access, coordinate Service Memos and assignments, maintain security, and investigate operational issues."
+      },
+      {
+        "type": "bullet",
+        "text": "Authorized field crews and contractors: relevant assignment, incident, location, and evidence information needed for their work."
+      },
+      {
+        "type": "bullet",
+        "text": "Authorized developers and technical support: access only where needed for an approved support, maintenance, or security task, under instructions and confidentiality obligations. Developing the system does not itself authorize unrestricted access or independent reuse."
+      },
+      {
+        "type": "bullet",
+        "text": "Service providers: necessary information for the functions described below, subject to their actual contractual and legal roles."
+      },
+      {
+        "type": "bullet",
+        "text": "Competent authorities and professional advisers: necessary information for a valid legal obligation, lawful investigation, regulatory requirement, emergency, or establishment, exercise, or defense of legal rights. A request is not automatically sufficient merely because it comes from a third party."
+      },
+      {
+        "type": "subheading",
+        "text": "Service and integration information"
+      },
+      {
+        "type": "paragraph",
+        "text": "Cloudflare Workers, Pages, Hyperdrive, R2, and supporting infrastructure"
+      },
+      {
+        "type": "paragraph",
+        "text": "Operate the APIs, web assets, database connectivity, processing and delivery components, and evidence/object storage. Relevant records, uploaded media, and network/security metadata pass through the applicable services."
+      },
+      {
+        "type": "paragraph",
+        "text": "Aiven-hosted MySQL"
+      },
+      {
+        "type": "paragraph",
+        "text": "Stores supporting account, report, operational, notification, and audit records. The mobile app accesses authorized APIs rather than the database directly."
+      },
+      {
+        "type": "paragraph",
+        "text": "Better Auth"
+      },
+      {
+        "type": "paragraph",
+        "text": "Authentication software used by the ALECO backend. Its use does not mean consumers have a separate Better Auth account. The backend also includes an infrastructure and dashboard integration with authentication-event processing capability."
+      },
+      {
+        "type": "paragraph",
+        "text": "Expo Push Service; Google Firebase Cloud Messaging on Android; Apple Push Notification service on iOS"
+      },
+      {
+        "type": "paragraph",
+        "text": "Process push tokens, notification content and routing information, and delivery-related metadata where configured and available. A push delivery receipt is not proof that a person read the message."
+      },
+      {
+        "type": "paragraph",
+        "text": "MapLibre and OpenFreeMap"
+      },
+      {
+        "type": "paragraph",
+        "text": "MapLibre renders maps. The configured map style requests OpenFreeMap tiles, fonts, and sprites. Tile requests can disclose the map area being viewed and network metadata to the serving infrastructure. MapLibre as a library is distinct from the operator serving those requests. See the OpenFreeMap privacy notice."
+      },
+      {
+        "type": "paragraph",
+        "text": "Device geocoding/location services"
+      },
+      {
+        "type": "paragraph",
+        "text": "Address searches and location features use operating-system services, which can involve Apple, Google, or another platform provider depending on the device. Address queries and relevant device/network information are handled by that provider."
+      },
+      {
+        "type": "paragraph",
+        "text": "Linked external services"
+      },
+      {
+        "type": "paragraph",
+        "text": "Opening an ALECO website, Facebook/Meta page, bank, payment-channel page, or other link places you in that service's environment. The app can display public updates associated with ALECO's Facebook publishing system; this is separate from consumer sign-in and private report submission."
+      },
+      {
+        "type": "paragraph",
+        "text": "Providers acting only on ALECO's instructions are processors for those activities. A provider independently deciding purposes can act as a separate controller. Not every software library is a processor. ALECO remains accountable for its processing and must determine the actual roles and required safeguards rather than relying only on a provider's general privacy statement."
+      },
+      {
+        "type": "paragraph",
+        "text": "The consumer app do not implement advertising, sale of consumer data, or a consumer marketing subscription. Those activities are not authorized by this notice."
+      },
+      {
+        "type": "heading",
+        "text": "8 Storage international processing and security"
+      },
+      {
+        "type": "paragraph",
+        "text": "Supporting records are stored in ALECO's service database and object storage. Copies of session information, profile or report data, preferences, and queued evidence can also exist on your device. Providers may process data outside the Philippines. Storage and processing are not represented as being confined to the Philippines."
+      },
+      {
+        "type": "paragraph",
+        "text": "ALECO must ensure an adequate level of protection and appropriate contractual or other reasonable safeguards for transfers. Transferring data does not remove ALECO's accountability."
+      },
+      {
+        "type": "paragraph",
+        "text": "The implementation requires HTTPS for the production consumer API, verifies sessions and account access on the server, hashes stored passwords, uses signed authentication tokens, and uses scoped, time-limited media access. Native authentication tokens use operating-system secure storage. These measures reduce risk; they do not establish that every stored record or local file is separately encrypted or that the system cannot be compromised."
+      },
+      {
+        "type": "paragraph",
+        "text": "Other local records, including queued-report metadata and evidence files, use app storage rather than the same secure-token store. Protect your device with a screen lock, install updates, and sign out before sharing it. Some operating-system credential storage may persist independently of an ordinary app reinstall. Signing out does not necessarily erase every local cache or pending report. Ask ALECO for help if a device is lost or compromised."
+      },
+      {
+        "type": "paragraph",
+        "text": "ALECO must maintain organizational, physical, and technical safeguards appropriate to the risk, including controlled access, personnel confidentiality and training, provider oversight, incident handling, and secure disposal."
+      },
+      {
+        "type": "heading",
+        "text": "9 Retention and deletion"
+      },
+      {
+        "type": "paragraph",
+        "text": "We must keep identifiable data only for as long as necessary for the stated purpose, an applicable legal or regulatory duty, or a specific legitimate need such as resolving a dispute. Data must not be retained indefinitely merely because storage is available. Where a legal hold applies, access and use must remain limited to that hold."
+      },
+      {
+        "type": "paragraph",
+        "text": "The app checks the age of some locally saved records, removes a queued report and its app evidence directory after confirmed submission, and provides a mechanism for removing a queued item. Cache expiry checks do not necessarily erase the underlying stored bytes. Abandoned local queues do not have a verified universal expiry."
+      },
+      {
+        "type": "paragraph",
+        "text": "The backend marks unconsumed report-evidence upload drafts as expiring after 24 hours and includes cleanup logic for expired, unlinked uploads. This is not a promise that all copies disappear exactly 24 hours after upload, and it does not apply to evidence already attached to a submitted report."
+      },
+      {
+        "type": "paragraph",
+        "text": "You can request erasure, blocking, or restriction where legally available. ALECO must review what can be removed, what must remain, the reason, and the applicable duration. When no lawful retention purpose remains, data must be securely deleted or irreversibly anonymized. Backup copies must be addressed under the approved backup schedule and protected from ordinary reuse while awaiting lawful disposal."
+      },
+      {
+        "type": "paragraph",
+        "text": "Deleting the app, signing out, disabling push, or unlinking a service account does not itself delete server records, close the electricity-service account, transfer ownership, or cancel payment obligations. The app does not provide a dedicated self-service account-deletion or personal-data export function. Use the privacy-request channel below."
+      },
+      {
+        "type": "heading",
+        "text": "10 Your rights and available controls"
+      },
+      {
+        "type": "paragraph",
+        "text": "Subject to applicable legal conditions and necessary protection of other people, you have the right to:"
+      },
+      {
+        "type": "bullet",
+        "text": "Be informed about collection, purposes, legal bases, recipients, retention, and relevant automated processing."
+      },
+      {
+        "type": "bullet",
+        "text": "Obtain reasonable access to your personal data and information about its processing, sources, disclosures, and relevant changes."
+      },
+      {
+        "type": "bullet",
+        "text": "Dispute inaccurate or incomplete data and request correction, including appropriate communication of corrections to relevant recipients."
+      },
+      {
+        "type": "bullet",
+        "text": "Object to processing where the law permits and withdraw consent where processing relies on consent."
+      },
+      {
+        "type": "bullet",
+        "text": "Request erasure, blocking, removal, destruction, or restriction where the legal grounds exist."
+      },
+      {
+        "type": "bullet",
+        "text": "Obtain a copy in a structured and commonly used electronic format where the statutory right to portability applies. This is not an unrestricted right to other people's records or the system's source code."
+      },
+      {
+        "type": "bullet",
+        "text": "Complain to ALECO and the National Privacy Commission (NPC), and seek damages or other remedies available under law."
+      },
+      {
+        "type": "paragraph",
+        "text": "Rights may also be exercised through a properly authorized representative and, in circumstances recognized by law, lawful heirs or assigns."
+      },
+      {
+        "type": "paragraph",
+        "text": "Available app controls include editable profile fields where allowed, password change, available account-link/default/unlink actions, notification preferences, device permissions, and removal of queued reports. Some profile fields or actions can be restricted by account authority or an active operational concern. Such an app restriction does not remove your right to request a lawful correction or other remedy through ALECO."
+      },
+      {
+        "type": "heading",
+        "text": "11 Making a request or complaint"
+      },
+      {
+        "type": "paragraph",
+        "text": "Contact the ALECO privacy contact in Section 15 and identify the request as an “ALEConnect-Mobile privacy request.” Provide your name, a safe reply channel, the relevant account or report reference if available, and what you want ALECO to review. A person named or pictured in a report can make a request without having an app account."
+      },
+      {
+        "type": "paragraph",
+        "text": "Do not send passwords or unnecessary identification documents. ALECO may request proportionate verification of identity or representative authority and arrange a secure way to provide needed supporting information. It must protect other people's data when responding."
+      },
+      {
+        "type": "paragraph",
+        "text": "ALECO will assess the request under applicable law, communicate the outcome, and explain any justified refusal, limitation, additional verification, or necessary retention.  There is no universal promise here that every request is completed in 30 days."
+      },
+      {
+        "type": "paragraph",
+        "text": "You may seek NPC assistance and use its current complaints procedure. That procedure generally requires a prior written complaint to the respondent and evidence of inadequate action or no response within 15 calendar days, subject to the applicable rules and exceptions. This procedural period is not a guarantee that all access or deletion requests must be completed within 15 days. Nothing here prevents urgent relief or any other legally available remedy."
+      },
+      {
+        "type": "heading",
+        "text": "12 Security incidents and personal data breaches"
+      },
+      {
+        "type": "paragraph",
+        "text": "Report suspected unauthorized access, a lost device exposing app data, or an unintended disclosure to ALECO promptly using the contacts below. Avoid redistributing the exposed information while reporting it."
+      },
+      {
+        "type": "paragraph",
+        "text": "ALECO must assess, contain, document, and respond to incidents and require appropriate cooperation from its processors. Where the legal mandatory-notification conditions are met, ALECO must notify the NPC and affected data subjects within the applicable 72-hour period from knowledge or reasonable belief of a notifiable breach, subject only to legally permitted exceptions or delays. This is not a rule that every technical error triggers public notification."
+      },
+      {
+        "type": "paragraph",
+        "text": "Relevant notifications should explain the breach and information involved, measures taken, practical protective steps, and a contact for further information. A pending request for postponement, exemption, or alternative notification does not itself suspend reporting obligations or amount to NPC approval."
+      },
+      {
+        "type": "heading",
+        "text": "13 Children and vulnerable persons"
+      },
+      {
+        "type": "paragraph",
+        "text": "The app is designed for electricity consumers and their authorized representatives. It does not verify age or request date of birth as a general consumer field. Children can nevertheless appear in evidence or use public information."
+      },
+      {
+        "type": "paragraph",
+        "text": "If a child needs to use an account-based service, a parent, guardian, or other legally authorized adult should assist as appropriate to the child's capacity and the activity. Adult assistance does not authorize unnecessary collection or remove the child's rights. ALECO must use proportionate safeguards and understandable notices when processing children's data. Contact the privacy officer if unnecessary child information has been submitted."
+      },
+      {
+        "type": "heading",
+        "text": "14 Changes to this notice"
+      },
+      {
+        "type": "paragraph",
+        "text": "ALECO will identify the version and effective date of an approved revision and make the current notice accessible. Material changes affecting how data is processed must be communicated through an appropriate available channel before the new processing begins where required. If a new use requires consent, ALECO must obtain valid consent rather than treating continued use or silence as consent."
+      },
+      {
+        "type": "heading",
+        "text": "15 Privacy and support contacts"
+      },
+      {
+        "type": "paragraph",
+        "text": "Privacy requests can be directed to the following contacts published on ALECO's official Data Privacy Statement, checked on 18 October 2026:"
+      },
+      {
+        "type": "paragraph",
+        "text": "ALECO Data Privacy Officer Email: galmodiel.aleco.it@gmail.com"
+      },
+      {
+        "type": "paragraph",
+        "text": "Published ALECO office address: W. Vinzons St., Old Albay, Legazpi City, Albay, Philippines 4500. General consumer support published by ALECO: aleco.cares@gmail.com, the official website, and the app's Help/Hotlines directory."
+      },
+      {
+        "type": "paragraph",
+        "text": "For regulator information, see the National Privacy Commission and its data-subject rights guidance."
+      },
+      {
+        "type": "heading",
+        "text": "16 Legal framework"
+      },
+      {
+        "type": "paragraph",
+        "text": "This notice should be read together with the Data Privacy Act of 2012, Republic Act No. 10173, its Implementing Rules and Regulations, and applicable NPC issuances. These include Circulars 2023-04 on consent, 2023-07 on legitimate interest, 2023-06 on security, 16-03 on breach management, 2022-04 on registration, and 2020-03 on data sharing, together with relevant later clarifications. See the NPC's current issuances index. Applicable law controls over any inconsistent wording in this notice."
+      }
+    ]
+  },
+  "terms": {
+    "title": "Terms of Use",
+    "blocks": [
+      {
+        "type": "heading",
+        "text": "1 Parties scope and acceptance"
+      },
+      {
+        "type": "paragraph",
+        "text": "These Terms govern the use of ALEConnect-Mobile, the consumer application, and its related consumer-facing digital services. The service provider is Albay Electric Cooperative Inc. (ALECO), referred to as “ALECO,” “we,” “us,” or “our.”  “You” means a person using the app personally or within valid authority to act for a service-account holder."
+      },
+      {
+        "type": "paragraph",
+        "text": "When these Terms are made available before a relevant transaction and you choose to proceed after a clear notice that doing so signifies acceptance, you agree to the Terms to the extent a binding agreement is formed under Philippine law. The report form displays an acceptance notice at submission. A person named or pictured in a report does not become a contracting party merely because another person submits their information."
+      },
+      {
+        "type": "paragraph",
+        "text": "The Privacy Policy explains personal-data processing. Accepting these Terms is not blanket consent to unrelated data uses or a waiver of privacy rights. Any processing that relies on consent requires the appropriate separate, specific, informed choice."
+      },
+      {
+        "type": "heading",
+        "text": "2 Your electricity service rights remain protected"
+      },
+      {
+        "type": "paragraph",
+        "text": "The app is an additional service channel. These Terms do not replace your electricity-service or membership agreement, amend an approved tariff, transfer account ownership, or remove any right under applicable law or an Energy Regulatory Commission (ERC) rule or order."
+      },
+      {
+        "type": "paragraph",
+        "text": "Where applicable, protections under the Electric Power Industry Reform Act, the Magna Carta for Residential Electricity Consumers and its implementing rules, and other consumer-protection laws continue to apply. A conflict with mandatory law or a binding regulatory obligation is resolved in favor of that requirement."
+      },
+      {
+        "type": "paragraph",
+        "text": "Not using the app, declining an optional permission, making a good-faith complaint, or having app access restricted does not by itself authorize disconnection of electricity service. Any such action requires its own lawful grounds and procedures."
+      },
+      {
+        "type": "heading",
+        "text": "3 Eligibility and authorized use"
+      },
+      {
+        "type": "paragraph",
+        "text": "Public guest features include available public updates, service previews, and hotline information. Protected account information, report submission, and other restricted actions require a valid consumer session and appropriate server-authorized access. Guest access does not include anonymous in-app report submission in the app."
+      },
+      {
+        "type": "paragraph",
+        "text": "Account-based use requires the legal capacity or lawful representative authority appropriate to the transaction. If you are under 18 or otherwise need assistance, a parent, guardian, or properly authorized adult should assist where required by law. The app does not currently verify age."
+      },
+      {
+        "type": "paragraph",
+        "text": "The app currently supports existing consumer-account access using an account number and password, and email sign-in where the required identity setup and capability are available. It does not offer unrestricted public self-registration. Do not assume that an email-setup, verification, recovery, or account-linking function is available merely because the app contains a related screen; the server determines availability and authority."
+      },
+      {
+        "type": "paragraph",
+        "text": "You may access or link another service account only if you have lawful authority to do so. Knowing an account number, registered name, or password does not by itself establish legal authority or ownership."
+      },
+      {
+        "type": "heading",
+        "text": "4 Accounts passwords and device security"
+      },
+      {
+        "type": "paragraph",
+        "text": "Provide accurate information and keep contact information current where the app permits. Keep passwords and session credentials confidential; use a strong password that you do not reuse elsewhere. Do not send passwords through report text, photos, email, Facebook messages, or ordinary support conversations."
+      },
+      {
+        "type": "paragraph",
+        "text": "You are responsible for reasonable care of your device and credentials and for actions you authorize. Activity recorded under an account is not conclusive proof that the account holder personally performed it, and these Terms do not automatically make you liable for an unauthorized action caused by someone else's misconduct or a system failure."
+      },
+      {
+        "type": "paragraph",
+        "text": "Notify ALECO promptly if you suspect unauthorized access, account-link misuse, a lost device, or an incorrect password change. Use the available password-change control and sign out when appropriate. ALECO can require a password change, revoke sessions, or apply reasonable safeguards to protect an account."
+      },
+      {
+        "type": "paragraph",
+        "text": "The current consumer login flow gives the newest successful login control of the session and invalidates older sessions. A password change or account-access change can also require a fresh sign-in. These safeguards do not guarantee that every compromised device or cached copy is remotely erased."
+      },
+      {
+        "type": "heading",
+        "text": "5 Account linking and profile changes"
+      },
+      {
+        "type": "paragraph",
+        "text": "Where available, account linking allows an authorized consumer identity to request or manage access to additional service accounts. ALECO may require relevant account credentials and registered details, conduct staff review, approve or refuse a link, or revoke a link where authority changes or misuse is identified."
+      },
+      {
+        "type": "paragraph",
+        "text": "A link permits only the access authorized by the system and ALECO. It does not transfer the electricity-service contract, ownership of premises, membership, or responsibility for a bill. A meter-name-transfer report is a request for review, not an approved transfer."
+      },
+      {
+        "type": "paragraph",
+        "text": "Default-account selection and unlinking are subject to current capability, verification, and account-access rules. An action can be unavailable where it would leave no supported account access or conflict with an applicable safeguard. If app controls prevent a legitimate correction or change, contact ALECO for review."
+      },
+      {
+        "type": "paragraph",
+        "text": "Before submitting a report or changing an editable field, check the selected service account. Existing report records can retain their historical account and address information. Changing a profile does not automatically rewrite every earlier operational record."
+      },
+      {
+        "type": "heading",
+        "text": "6 Incident and service reporting"
+      },
+      {
+        "type": "paragraph",
+        "text": "Use the report categories and fields provided for the actual concern. Submit information that is accurate to the best of your knowledge, distinguish observation from suspicion, and correct a material mistake by contacting ALECO with the reference number. Do not deliberately fabricate an outage, hazard, identity, location, evidence image, or account relationship."
+      },
+      {
+        "type": "paragraph",
+        "text": "The consumer report flow requires a valid incident location within the supported Albay area and one to three photos, with descriptions and other details required according to the report type. A relevant transfer request also requires current and requested registered names. The app prepares evidence images for upload and applies format and size checks. Consumer video and audio evidence submission is not currently supported."
+      },
+      {
+        "type": "paragraph",
+        "text": "Only photograph or describe what is relevant and lawfully obtainable. Avoid unnecessary images of people, identity documents, private conversations, or sensitive personal information. Do not trespass, interfere with work, approach an electrical hazard, or expose anyone to danger to satisfy the photo requirement. If you cannot submit safely or use the app, use an appropriate official alternative channel."
+      },
+      {
+        "type": "paragraph",
+        "text": "ALECO may verify a report, seek clarification, associate related concerns, prepare a Service Memo, assign a crew, and update the record according to its procedures and applicable duties. An acknowledgment or reference number confirms recording of a submission; it does not establish that an allegation is proven, a request is approved, a crew is dispatched, or service work is complete."
+      },
+      {
+        "type": "paragraph",
+        "text": "Estimated response or restoration information can change with safety conditions, weather, access, available resources, and the facts found on investigation. These Terms do not cancel a legally required response, notice, performance standard, or available remedy."
+      },
+      {
+        "type": "heading",
+        "text": "7 Emergencies and electrical safety"
+      },
+      {
+        "type": "paragraph",
+        "text": "Do not rely solely on an in-app report or push notification for an immediate threat to life, fire, a fallen or sparking wire, or another urgent hazard. Keep a safe distance, avoid contact with electrical equipment, and contact emergency services and the appropriate published ALECO hotline."
+      },
+      {
+        "type": "paragraph",
+        "text": "The app is not a continuous emergency-monitoring service, a guarantee of immediate rescue, or permission to inspect or repair electrical facilities yourself. A map marker, a report status, or the absence of an advisory does not establish that an area or piece of equipment is safe."
+      },
+      {
+        "type": "heading",
+        "text": "8 Offline reports and submission status"
+      },
+      {
+        "type": "paragraph",
+        "text": "The app can save queued reports and associated evidence locally and attempt synchronization when connectivity, authorization, and device conditions permit, including a background attempt where supported. A status such as queued, pending, or retrying does not mean ALECO's server has received the report."
+      },
+      {
+        "type": "paragraph",
+        "text": "Check for the server acknowledgment and report reference. If confirmation does not arrive and the matter is urgent, use an official alternative channel and explain any pending app submission to help avoid confusion."
+      },
+      {
+        "type": "paragraph",
+        "text": "Pending work can be affected by storage limits, device failure, uninstalling the app, expired sessions, changed account access, or operating-system restrictions. The app must not redirect a queued report to a different account merely because you change the current account. A queued item can require review or fail when its original account authorization is no longer valid."
+      },
+      {
+        "type": "paragraph",
+        "text": "You can remove a queued report where the control is available. Removal of a local pending item is not a recall or deletion of a report already accepted by the server. Contact ALECO about any submitted report requiring correction, withdrawal consideration, or privacy review. Keep an independent record of important references and original evidence where appropriate."
+      },
+      {
+        "type": "heading",
+        "text": "9 Updates notifications maps and hotlines"
+      },
+      {
+        "type": "paragraph",
+        "text": "The app provides available report updates, advisories, public information, and hotline contacts. Some content is selected according to your authorized accounts, available location or service-area records, and notification preferences."
+      },
+      {
+        "type": "paragraph",
+        "text": "Push notifications require operating-system permission and an available delivery path. Delivery can be delayed, duplicated, blocked, or unsuccessful. A delivery receipt is not proof that you read a message. You can manage available preferences and device settings; a notification already in transit or a server-side record might remain after a setting changes."
+      },
+      {
+        "type": "paragraph",
+        "text": "On a shared device, notification previews can reveal report or account-related information. Review your lock-screen and notification settings accordingly."
+      },
+      {
+        "type": "paragraph",
+        "text": "Cached information, map data, and hotline directories can become outdated. Refresh when possible and verify material uncertainties through an official channel. Map pins and third-party map information assist location identification; they do not determine legal boundaries, access rights, account ownership, or electrical safety."
+      },
+      {
+        "type": "paragraph",
+        "text": "Turning off notifications or failing to receive one does not waive your right to any notice required by law, and the app is not automatically the exclusive legally effective channel for electricity-service notices."
+      },
+      {
+        "type": "heading",
+        "text": "10 External links payment information and costs"
+      },
+      {
+        "type": "paragraph",
+        "text": "The payment screens list external payment channels and related information. ALEConnect-Mobile does not currently collect banking passwords, card credentials, or payment instructions to execute an in-app payment. A service preview or link is not confirmation that a financial transaction has been processed."
+      },
+      {
+        "type": "paragraph",
+        "text": "When you open an external bank, payment provider, website, social-media page, or hotline, that service's applicable terms, privacy notice, transaction rules, and charges govern its separate service. Confirm the destination and any payment details before proceeding. ALECO remains responsible for its own representations, instructions, and legally attributable conduct."
+      },
+      {
+        "type": "paragraph",
+        "text": "Your network provider can charge for mobile data, messages, or calls. Electricity-service charges remain governed by the applicable service arrangements and lawful tariffs. These Terms do not introduce a new app subscription, payment fee, or electricity-service charge."
+      },
+      {
+        "type": "heading",
+        "text": "11 Acceptable use"
+      },
+      {
+        "type": "paragraph",
+        "text": "You must not:"
+      },
+      {
+        "type": "bullet",
+        "text": "Access, link, disclose, or alter an account or record without lawful authority; impersonate another person; or obtain credentials through deception."
+      },
+      {
+        "type": "bullet",
+        "text": "Bypass authentication or account restrictions, exploit a vulnerability to access data, introduce malicious software, or deliberately disrupt the app or supporting systems."
+      },
+      {
+        "type": "bullet",
+        "text": "Submit knowingly false or malicious reports, falsify evidence, or automate abusive requests that interfere with service."
+      },
+      {
+        "type": "bullet",
+        "text": "Upload unlawful material, unlawfully disclose personal information, infringe intellectual property, threaten or harass individuals, or use the reporting process to target someone for an unrelated purpose."
+      },
+      {
+        "type": "bullet",
+        "text": "Publish confidential account records, staff access credentials, private media-access links, or nonpublic operational information without lawful authority."
+      },
+      {
+        "type": "bullet",
+        "text": "Use ALECO's name, branding, or the app to misrepresent an endorsement, operate a scam, or conduct unauthorized commercial activity."
+      },
+      {
+        "type": "paragraph",
+        "text": "These restrictions do not prohibit honest criticism, a good-faith complaint or appeal, lawful reporting to an authority, exercise of consumer or privacy rights, or lawful security research conducted within appropriate authorization. Report a vulnerability through an official support or security channel without accessing or exposing more information than necessary. These Terms do not assert that every contractual breach is a criminal offense."
+      },
+      {
+        "type": "heading",
+        "text": "12 Your content and the permission needed to handle it"
+      },
+      {
+        "type": "paragraph",
+        "text": "You retain any intellectual-property rights you lawfully hold in the text or images you submit. You must have the rights or other lawful authority needed to provide them. You cannot grant rights belonging to someone else merely by accepting these Terms."
+      },
+      {
+        "type": "paragraph",
+        "text": "To handle a concern, you grant ALECO a non-exclusive, royalty-free permission, to the extent of your rights, to receive, store, copy, resize or convert, display to authorized personnel, and otherwise use the submitted content for verification, service work, updates, security, lawful recordkeeping, and related dispute handling. ALECO may allow its authorized processors and service contractors to perform those activities for the same limited purposes."
+      },
+      {
+        "type": "paragraph",
+        "text": "This permission does not authorize sale of your content, unrelated advertising, public social-media publication of identifiable evidence, or independent developer reuse. Its duration follows the justified processing and retention period, not an unrestricted perpetual license. Statutory privacy rights and lawful retention obligations continue to govern even where a content permission is withdrawn or the app is no longer used."
+      },
+      {
+        "type": "paragraph",
+        "text": "ALECO may restrict or remove access to content that is unlawful, unnecessary, unsafe, or outside the reporting purpose, while preserving any record that must lawfully remain. It must not use moderation to suppress a good-faith complaint or avoid a legal obligation."
+      },
+      {
+        "type": "heading",
+        "text": "13 ALECO and third party intellectual property"
+      },
+      {
+        "type": "paragraph",
+        "text": "App software, designs, branding, documentation, and other supplied materials remain with their respective owners or licensors. These Terms do not decide ownership between ALECO and its developers or imply that ALECO owns all third-party components."
+      },
+      {
+        "type": "paragraph",
+        "text": "You receive a limited, non-exclusive permission to use the app for its intended authorized purposes. You may not sell, falsely rebrand, or commercially exploit protected materials without the required permission. Third-party and open-source licenses remain applicable, and nothing here removes a permission or exception granted by those licenses or by law."
+      },
+      {
+        "type": "heading",
+        "text": "14 Personnel administrators dispatchers crews and developers"
+      },
+      {
+        "type": "paragraph",
+        "text": "The consumer app does not grant staff or field authority. Personnel and contractors must use their separately authorized roles, accounts, assignments, and systems. To the extent they accept and use services covered by these Terms, they must also comply with these relevant rules."
+      },
+      {
+        "type": "paragraph",
+        "text": "Employment, development, support, confidentiality, processing, and contractor agreements must address their distinct responsibilities. These Terms do not replace those agreements or bind a nonparty merely because that person's information is processed."
+      },
+      {
+        "type": "paragraph",
+        "text": "Authorized persons must use data only for assigned lawful purposes, protect credentials and private records, report suspected incidents, and avoid exporting or reusing production information for personal, demonstration, training, research, or development purposes without separate authority and safeguards. Administrative access and developer access do not confer permission to override business authority or statutory rights."
+      },
+      {
+        "type": "paragraph",
+        "text": "No clause in these Terms grants ALECO personnel, individual developers, or a service provider immunity from responsibility imposed by law for their own conduct. Conversely, a developer does not personally guarantee electricity supply, restoration schedules, or every decision made by ALECO merely by having worked on the software."
+      },
+      {
+        "type": "heading",
+        "text": "15 Availability maintenance and changes"
+      },
+      {
+        "type": "paragraph",
+        "text": "The app depends on internet access, devices, supporting APIs, storage, notification and map providers, and operational systems. ALECO may perform maintenance, correct errors, change features, or retire a function for a legitimate operational, security, legal, or service reason."
+      },
+      {
+        "type": "paragraph",
+        "text": "ALECO will use reasonable efforts appropriate to its obligations to maintain the service and communicate a material interruption or planned change through an available channel where practicable."
+      },
+      {
+        "type": "paragraph",
+        "text": "An interruption does not remove ALECO's applicable utility duties or privacy and security responsibilities. Where a digital channel is unavailable, you may use other official channels. A failure of a provider or an adverse event is not automatically an excuse for ALECO's own negligence or a non-waivable duty."
+      },
+      {
+        "type": "heading",
+        "text": "16 Restricting or ending app access"
+      },
+      {
+        "type": "paragraph",
+        "text": "ALECO may restrict a session, link, account, or particular feature where reasonably necessary to address a credible security risk, invalid or withdrawn authority, a material breach of these Terms, unlawful misuse, or a binding legal requirement. The response should be proportionate to the reason."
+      },
+      {
+        "type": "paragraph",
+        "text": "Where practicable and lawful, ALECO will explain the reason and how you can seek review. Immediate action can be taken where necessary to prevent harm, secure records, or comply with law; notice can be limited where disclosure would prejudice an investigation or another person's rights. Contact consumer support to dispute an incorrect restriction or demonstrate restored authority."
+      },
+      {
+        "type": "paragraph",
+        "text": "An app restriction does not itself authorize electricity disconnection, dispose of an unresolved service complaint, or prevent a privacy request or regulatory complaint. Records remain subject to lawful retention and data-subject rights."
+      },
+      {
+        "type": "paragraph",
+        "text": "You may stop using the app and sign out. To request closure of app access or deletion of eligible personal data, contact ALECO's privacy officer. Uninstalling the app or unlinking an account does not close the underlying electricity-service account or erase all server records."
+      },
+      {
+        "type": "heading",
+        "text": "17 Disclaimers and fair allocation of responsibility"
+      },
+      {
+        "type": "paragraph",
+        "text": "The app is provided subject to its available functions and the limitations explained in these Terms. Except for assurances required by law or expressly approved by ALECO, there is no promise of uninterrupted availability, error-free maps, delivery of every push message, or a particular investigation or restoration time."
+      },
+      {
+        "type": "paragraph",
+        "text": "Subject to applicable law, ALECO and its authorized personnel, developers, and providers are not responsible for a loss to the extent it is caused solely by your unlawful misuse or an event outside their reasonable control, where that person has not breached an applicable duty. Whether a loss was caused by a person's act, omission, system defect, or third-party event must be assessed on the facts. There is no automatic finding of user fault from an account login or recorded device action."
+      },
+      {
+        "type": "paragraph",
+        "text": "Nothing in these Terms excludes or limits liability that cannot lawfully be excluded or limited, including liability arising from fraud, bad faith, gross negligence, unlawful personal-data processing or disclosure, or breach of a mandatory consumer, privacy, safety, or utility obligation. Claims involving personal injury, death, property damage, ordinary negligence, or other loss remain governed by applicable law and any lawful judicial assessment. No zero-liability rule or nominal monetary cap is imposed merely because the app has no in-app charge."
+      },
+      {
+        "type": "paragraph",
+        "text": "You remain responsible, subject to law and proof, for loss directly caused by your fraud, deliberate unlawful misuse, or infringement. These Terms do not require you to indemnify ALECO or a developer for their own unlawful or negligent conduct or to surrender a statutory remedy."
+      },
+      {
+        "type": "heading",
+        "text": "18 Complaints governing law and disputes"
+      },
+      {
+        "type": "paragraph",
+        "text": "Philippine law governs these Terms. You may contact ALECO to resolve an account, report, content, access, or service concern and provide the relevant reference and supporting facts. Do not provide passwords or unnecessary sensitive records."
+      },
+      {
+        "type": "paragraph",
+        "text": "Privacy concerns may be directed to the privacy officer and brought to the National Privacy Commission under its applicable procedure. Electricity-service and consumer concerns may be brought to the ERC or another competent authority according to its jurisdiction and procedures. Other remedies before a competent court or authority remain available."
+      },
+      {
+        "type": "paragraph",
+        "text": "These Terms do not impose compulsory private arbitration, an exclusive venue that overrides mandatory venue rules, a waiver of regulatory complaints, or a shortened statutory period for claims. A support exchange does not automatically stop a legal filing deadline."
+      },
+      {
+        "type": "heading",
+        "text": "19 Changes to these Terms and other provisions"
+      },
+      {
+        "type": "paragraph",
+        "text": "ALECO will identify the effective date and provide appropriate notice of an approved material change. Where a change requires acceptance, ALECO must obtain and be able to establish that acceptance. A later change will not retroactively remove an accrued right or turn silence into privacy consent."
+      },
+      {
+        "type": "paragraph",
+        "text": "If a provision is unenforceable, it applies only to the lawful extent, and the remaining provisions continue where they can fairly operate. A failure to enforce a provision immediately does not by itself waive the right to enforce it later. No person may transfer app access or an account relationship without the required authority; any lawful transfer by ALECO must respect existing legal duties and users' rights."
+      },
+      {
+        "type": "paragraph",
+        "text": "These Terms concern the app's use. They do not replace separately applicable electricity-service, membership, employment, contractor, data-processing, or development agreements. Mandatory law and regulatory requirements prevail."
+      },
+      {
+        "type": "heading",
+        "text": "20 Contact information"
+      },
+      {
+        "type": "paragraph",
+        "text": "General consumer support: the app's Help/Hotlines directory, ALECO's official website, and aleco.cares@gmail.com, as published by ALECO."
+      },
+      {
+        "type": "paragraph",
+        "text": "Privacy requests: ALECO Data Privacy Officer, galmodiel.aleco.it@gmail.com."
+      },
+      {
+        "type": "paragraph",
+        "text": "Published office address: W. Vinzons St., Old Albay, Legazpi City, Albay, Philippines 4500."
+      },
+      {
+        "type": "paragraph",
+        "text": "These details were checked against ALECO's published Data Privacy Statement on 18 October 2026."
+      },
+      {
+        "type": "heading",
+        "text": "21 Principal legal references"
+      },
+      {
+        "type": "paragraph",
+        "text": "These Terms are subject to the Civil Code, including limits on contractual stipulations and waivers; the Electronic Commerce Act, RA 8792; the Data Privacy Act, RA 10173; applicable protections under the Consumer Act, RA 7394; the Intellectual Property Code, RA 8293, as amended; and relevant prohibitions under the Cybercrime Prevention Act, RA 10175, as affected by applicable jurisprudence."
+      },
+      {
+        "type": "paragraph",
+        "text": "Electricity-service obligations remain subject to the Electric Power Industry Reform Act, RA 9136, relevant ERC rules, and the ERC's residential-consumer protections and complaint framework. Inclusion of a reference does not mean every provision of that law applies to every app interaction."
+      }
+    ]
+  }
+}

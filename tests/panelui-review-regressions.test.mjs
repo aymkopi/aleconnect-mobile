@@ -1205,19 +1205,23 @@ test("notification toast uses readable neutral text while its indicator retains 
   }
 });
 
-test("legal notice return preserves report navigation and normal profile return", async () => {
-  const h = hooks(), calls = [];
+test("legal entry points share the sheet with report and profile return contexts", async () => {
+  const h = hooks();
   const module = await load("src/features/profile/support-screen.tsx", {
     react: h.react, "react/jsx-runtime": jsx, "react-native": { View: "View", Linking: {} },
-    "expo-router": { useRouter: () => ({ canGoBack: () => true, back: () => calls.push("back"), replace: route => calls.push(["replace", route]), dismissTo: route => calls.push(["dismissTo", route]) }) },
+    "expo-router": { useRouter: () => ({}) },
+    "@/features/legal/legal-document-screen": { LegalDocumentScreen: "LegalDocumentScreen" },
     "@/components/panelui/button": { Button: "Button" }, "@/components/panelui/text": { Text: "Text" },
     "@/hooks/use-app-colors": { useAppColors: () => ["blue"] }, "@/features/reports/components/report-page": { ReportPage: "ReportPage" },
   });
   h.start(); const legal = module.SupportScreen({ kind: "terms", returnToReport: true });
-  assert.equal(legal.props.footer.props.children, "Back to report"); legal.props.footer.props.onPress();
+  assert.equal(legal.type, "LegalDocumentScreen");
+  assert.equal(legal.props.kind, "terms");
+  assert.equal(legal.props.returnToReport, true);
   h.start(); const profile = module.SupportScreen({ kind: "privacy" });
-  assert.equal(profile.props.footer.props.children, "Back to Account"); profile.props.footer.props.onPress();
-  assert.deepEqual(calls, ["back", ["dismissTo", "/profile"]]);
+  assert.equal(profile.type, "LegalDocumentScreen");
+  assert.equal(profile.props.kind, "privacy");
+  assert.equal(profile.props.returnToReport, false);
 });
 
 test("default compact tabs retain their 48-point touch target", async () => {

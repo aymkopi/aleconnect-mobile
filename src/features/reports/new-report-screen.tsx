@@ -1020,7 +1020,7 @@ export default function NewReportScreen() {
             {step === 6 ? (
               <Text size="xs" muted>
                 By submitting, you confirm these details are accurate and agree to the{" "}
-                <Text size="xs" className="text-primary" accessibilityRole="link" onPress={() => router.push("/legal/terms")}>Terms and Conditions</Text>{" "}
+                <Text size="xs" className="text-primary" accessibilityRole="link" onPress={() => router.push("/legal/terms")}>Terms of Use</Text>{" "}
                 and{" "}<Text size="xs" className="text-primary" accessibilityRole="link" onPress={() => router.push("/legal/privacy")}>Privacy Policy</Text>.
               </Text>
             ) : null}

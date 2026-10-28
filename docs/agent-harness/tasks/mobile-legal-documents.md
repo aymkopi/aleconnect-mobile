@@ -1,0 +1,20 @@
+# Mobile legal documents
+
+- Scope: show the existing October18 app-facing Privacy Policy and Terms of Use in Mobile. The user selected that source on October28; exclude Part Three's ALECO review notes. No new legal drafting, acceptance tracking, billing, API change or release.
+- Design: reuse PanelUI's full-height BottomSheet with a fixed title/close control, scrollable selectable text and one pinned action for the other document. Keep the Account, About and report entry points and their return destinations. Bundle the text so reading works offline; do not invent an effective date or approval status.
+- Isolation: `codex/mobile-legal-documents` starts at74a1a3a in `.cache/mobile-legal-documents`. Preserve the outage worktree, source/generated work, code80 APK, signing and device state.
+- Plan:
+  - [x] Extract Parts One and Two without rewriting; pin their complete text with a content-integrity check.
+  - [x] Replace legal placeholders with the shared sheet and keep all existing entry points working.
+  - [x] Verify content, types/lint, rendered scroll/close/switch/return behavior, offline access and harness; record limitations.
+- Source: `ALEConnect_Mobile_Privacy_Policy_and_Terms_and_Conditions.docx`, source SHA256 `ad814ee3fe04ea1af7f40a4b9147826e2cc58680bed9b7e8147ddbaa98afb758`. Privacy has130 blocks/16 numbered sections; Terms has99 blocks/21 numbered sections. Tests pin the complete text digests; app text excludes the separate review section and adds no effective-date or approval claims.
+- Verification:24 focused content/guest/profile/navigation/sheet tests, TypeScript and scoped ESLint pass. Rendered checks cover Account and both About links, public legal routes, end-of-document scrolling, fixed title, switching/reset, offline reading and correct close destination. A synthetic report stays byte-for-byte on step6 with its entered text and three sample photos after Close, Escape and browser Back; zero API writes occur. Light phone390x844, dark tablet820x1180 and small phone360x640 with doubled text pass width/overflow checks. Private screenshots/source proof/logs are `.cache/legal-documents`.
+- Remaining: no new APK, installation, push or deployment. The earlier code80 APK predates this source change. Native gestures, screen-reader acceptance and formal ALECO legal approval are not established by these checks. Graphify refresh was attempted but its configured Python cannot be accessed; generated source maps remain unverified. The existing preview's Home accessibility-prop warning/map-loading issue is outside this change; its dev error toast was hidden only in the controlled browser test.
+- Next: review/integrate the scoped Mobile source, then rebuild for separately authorized native acceptance. The retained outage APK, source/worktrees, device data and signing remain untouched.
+
+## Authorized source publication and local APK (October 28)
+
+- User authorizes committing/pushing the legal changes with `[skip ci]` to public Mobile master, then rebuilding the local release APK with the outage changes. No device installation, tag/release, OTA, Staff deployment or billing work.
+- Target:1.8.0-alpha.2/code81, preserving the original package and signer. Reserve81 in `release.config.json` so future CI allocations exceed this local APK. Temporary package/app/native version edits remain build-only.
+- Preserve215 dirty primary files, six generated files, sixteen previous Desktop APKs, the signing key and three pending outage build documents using `.cache/legal-documents/release-20261028/preservation.json`. The prior code80 build record is retained in this source closeout rather than discarded during integration.
+- Release checks:636 full Mobile tests pass after updating the superseded legal-page regression to check the shared reader's return context, regenerating the existing ignored map worker and selecting the authoritative Staff root. Keep the existing Expo Doctor20/21 seven-package patch drift; do not upgrade dependencies for this UI release.

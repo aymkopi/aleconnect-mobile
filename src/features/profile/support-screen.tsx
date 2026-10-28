@@ -18,16 +18,18 @@ import { ReportPage } from "@/features/reports/components/report-page";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { ProfileHeading, ProfileNotice } from "./profile-ui";
 import { useGuestAccess } from "@/context/guest-access-context";
+import { LegalDocumentScreen } from "@/features/legal/legal-document-screen";
 export function SupportScreen({ kind, returnToReport = false }: { kind: "help" | "about" | "privacy" | "terms"; returnToReport?: boolean }) {
   const { guest } = useGuestAccess();
   const router = useRouter(),
     [primary] = useAppColors(["primary"]),
     [error, setError] = useState("");
+  if (kind === "privacy" || kind === "terms") {
+    return <LegalDocumentScreen kind={kind} returnToReport={returnToReport && !guest} />;
+  }
   const title = {
     help: "Help & support",
     about: "About ALEConnect",
-    privacy: "Privacy information",
-    terms: "Terms of use",
   }[kind];
   async function open(url: string) {
     try {
@@ -77,57 +79,18 @@ export function SupportScreen({ kind, returnToReport = false }: { kind: "help" |
           {row("Contact ALECO", "Consumer services and official channels", () =>
             router.push("/profile/help" as Href),
           )}
-          {row("Terms of use", "Information about app terms", () =>
+          {row("Terms of Use", "Using ALEConnect", () =>
             router.push("/profile/terms" as Href),
           )}
           {row(
-            "Privacy notice",
-            "Read ALECO’s published statement",
+            "Privacy Policy",
+            "How your information is handled",
             () => router.push("/profile/privacy" as Href),
             ShieldCheck,
           )}
           <Text size="xs" muted>
             ALEConnect version {Constants.expoConfig?.extra?.releaseVersion ?? Constants.expoConfig?.version ?? "1.0.0"}
           </Text>
-        </>
-      ) : kind === "privacy" ? (
-        <>
-          <ProfileHeading
-            title="ALECO’s privacy statement"
-            description="Read ALECO’s published statement on how it collects, uses and protects consumer information."
-          />
-          {row(
-            "Open the official statement",
-            "web.alecoinc.com.ph",
-            () => void open("https://web.alecoinc.com.ph/data-privacy.html"),
-            ShieldCheck,
-          )}
-          {row(
-            "Ask about your information",
-            "Contact ALECO",
-            () => router.push("/profile/help" as Href),
-            LifeBuoy,
-          )}
-        </>
-      ) : kind === "terms" ? (
-        <>
-          <ProfileHeading title="App terms of use" />
-          <ProfileNotice
-            title="Contact ALECO for approved terms"
-            description="ALEConnect-specific terms have not been supplied for this app. ALECO consumer services can provide the applicable approved documents."
-          />
-          {row(
-            "Contact consumer services",
-            "Ask about account and service terms",
-            () => router.push("/profile/help" as Href),
-            LifeBuoy,
-          )}
-          {row(
-            "ALECO website",
-            "Official service and membership information",
-            () => void open("https://web.alecoinc.com.ph/"),
-            Globe,
-          )}
         </>
       ) : (
         <>
