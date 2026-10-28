@@ -1,0 +1,9 @@
+# Ticket closure and offline reporting
+
+- Status: design preparation; no application implementation or live change.
+- Confirmed: remove follow-up; rating, Staff or 24-hour closure after resolution; full Albay offline map during onboarding; persistent connected-account cache. Existing Resolved tickets receive 24 hours from rollout; active redispatch remains active. Billing excluded.
+- Design: [shared proposal](../../superpowers/specs/2026-10-29-ticket-closure-offline-design.md). Await approval of the additional calls listed there before implementation.
+- Isolation: existing Staff and Mobile legal checkouts now use local `codex/ticket-closure-offline` branches from d94789db and bb6355c respectively. Primary checkouts, prior branches/APKs, generated evidence and private/device work remain untouched.
+- Source findings: linked-account context is memory-only; failed profile refresh blocks cached-report creation. The bundled 720-feature Albay boundary extends to longitude124.220096 while current Mobile reporting bounds stop at124.0. Current ratings require a positive resolution response and do not close reports. Current maintenance uses the superseded 48-hour Staff-reply timer.
+- Checks: paired documentation harnesses and whitespace checks pass. A fresh read-only builder review reports no important unanswered question. Source/Graphify leads were inspected; no runtime, schema, map size, native capability or new lifecycle behavior is verified by design preparation.
+- Next: approve design; write the implementation plan; implement Staff-owned compatibility/lifecycle before dependent Mobile UI/cache/map changes. Deployment, production migration/backfill, distribution and installation require their own authorized scope. Preserve original receipts, account revisions, draft/photos and queues.

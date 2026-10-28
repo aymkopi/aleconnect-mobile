@@ -1,5 +1,12 @@
 # Implementation history
 
+## 2026-10-29 - Ticket closure and offline reporting design
+
+- Scope: user replaces follow-up with rating/Staff/24-hour closure and requests mandatory full-Albay map setup plus persistent linked accounts for offline reporting. Existing Resolved tickets receive 24 hours from rollout; active redispatch is preserved. Billing excluded.
+- Verification: paired Staff/Mobile source inspection identified the memory-only account snapshot, cached-profile refresh gate and eastern-Albay bounds gap. The [design](../superpowers/specs/2026-10-29-ticket-closure-offline-design.md) covers rating/closure receipts, old queues, scoped caches and native map/setup verification. Fresh read-only builder review, paired documentation harnesses and whitespace checks pass.
+- Remaining risks: design preparation proves no product behavior, full-pack size, resource budget or Android/iOS cold-offline acceptance. No product, queue, APK, device, deployment or production migration change is included.
+- Next: approve the proposed design, then write the implementation plan. Preserve primary work, signing, original queues and earlier APKs.
+
 ## 2026-10-24 — Phases 1–4 merged and local release APK verified
 
 - Scope: authorized public Mobile/private Staff merges with `[skip ci]`, additive live migrations, direct Staff deployment and a local APK. Mobile PR28 source `e38eca7` pairs with Staff PR60/61 deployment source `bfb937aa`; billing is excluded and all new capabilities stay off until Staff acceptance.
