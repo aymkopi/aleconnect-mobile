@@ -7,8 +7,8 @@ import { Skeleton } from "@/components/panelui/skeleton";
 import { useAppColors } from "@/hooks/use-app-colors";
 import {
   loadMapLibreModule,
+  loadNativeMapStyle,
   MAP_LOAD_TIMEOUT_MS,
-  MAP_STYLE_URL,
   type MapLibreModule,
 } from "./map-runtime";
 import { WebLocationMap } from "./web-location-map";
@@ -34,12 +34,13 @@ export function StaticLocationMap({
     [ready, setReady] = useState(false),
     [failed, setFailed] = useState(false);
   const [primary] = useAppColors(["primary"]);
+  const [mapStyle, setMapStyle] = useState("");
   useEffect(() => {
     if (Platform.OS === "web") return;
     let active = true;
-    loadMapLibreModule()
-      .then((next) => {
-        if (active) setModule(next);
+    Promise.all([loadNativeMapStyle(), loadMapLibreModule()])
+      .then(([style, next]) => {
+        if (active) { setMapStyle(style); setModule(next); }
       })
       .catch(() => {
         if (active) setFailed(true);
@@ -82,7 +83,7 @@ export function StaticLocationMap({
         <>
           <Map
             style={{ flex: 1 }}
-            mapStyle={MAP_STYLE_URL}
+            mapStyle={mapStyle}
             androidView="texture"
             dragPan={false}
             touchZoom={false}
@@ -91,7 +92,7 @@ export function StaticLocationMap({
             doubleTapZoom={false}
             compass={false}
             logo={false}
-            attribution={false}
+            attribution
             onDidFinishLoadingMap={() => setReady(true)}
             onDidFinishLoadingStyle={() => setReady(true)}
             onDidFailLoadingMap={() => setFailed(true)}

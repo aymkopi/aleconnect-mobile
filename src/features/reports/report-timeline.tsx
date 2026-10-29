@@ -45,7 +45,7 @@ export function ReportTimeline({ report }: { report: ReportDetail }) {
             className="flex-1 gap-0.5"
             style={{ paddingBottom: index < rows.length - 1 ? 16 : 0 }}
           >
-            {rows.some(item=>(item.followUpCycle??0)>0)&&(index===0||row.followUpStart)?<Text size="xs" weight="semibold" className="text-primary mb-2">{row.followUpCycle?`Follow-up ${row.followUpCycle}`:"Initial report"}</Text>:null}
+            {!report.closurePolicy&&rows.some(item=>(item.followUpCycle??0)>0)&&(index===0||row.followUpStart)?<Text size="xs" weight="semibold" className="text-primary mb-2">{row.followUpCycle?`Follow-up ${row.followUpCycle}`:"Initial report"}</Text>:null}
             <Text size="sm" weight={row.current ? "semibold" : "normal"}>
               {consumerTicketStatusLabel(row.status)}
             </Text>

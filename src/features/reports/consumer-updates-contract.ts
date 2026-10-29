@@ -1,15 +1,21 @@
 import {normalizeServiceFeedback,type ServiceFeedback} from './service-feedback-contract.ts';
+export type TicketClosurePolicy={version:1;closesAt:string|null;cycleId:string|null;canRate:boolean};
 export type ConsumerUpdateKind = "consumer_update" | "resolution_confirmed" | "resolution_disputed";
 export type ConsumerExchange = {version:1;cycleId:string;revision:number;responseVersion?:number;state:'not_started'|'awaiting_staff'|'awaiting_consumer'|'confirmed'|'expired';expiresAt?:string|null;consumerUpdateId:string|null;replyTo:string|null;canSubmitUpdate:boolean;canConfirmResolution:boolean};
 export type ConsumerUpdatePayload = { kind: ConsumerUpdateKind; text: string; cycleId: string | null; responseVersion: number;followupVersion?:1;expectedFollowupRevision?:number;replyTo?:string|null };
 export type ConsumerUpdateReceipt = { mutationId: string; eventId: string; ticketId: string; acceptedAt: string; reviewVersion: number;imageUrls?:string[];conversation?:ConsumerExchange|null;resolutionCheck?:ConsumerUpdatesPage['resolutionCheck'] };
 export type ConsumerReportEvent = { id: string; kind: string; text: string; imageUrls: string[]; author: "ALECO" | "Consumer"; createdAt: string; reviewState: "pending" | "awaiting_superadmin" | "addressed" | null; reviewVersion: number };
-export type ConsumerUpdatesPage = { enabled: boolean; canWrite: boolean; events: ConsumerReportEvent[]; nextCursor: string | null; resolutionCheck: { cycleId: string; responseVersion: number; answer: "confirmed" | "still_exists" | null; reviewState: string | null } | null;conversation?:ConsumerExchange|null;serviceFeedback?:ServiceFeedback|null;serviceFeedbackEnabled?:boolean;serviceFeedbackCanWrite?:boolean;canRate?:boolean };
+export type ConsumerUpdatesPage = { enabled: boolean; canWrite: boolean; events: ConsumerReportEvent[]; nextCursor: string | null; resolutionCheck: { cycleId: string; responseVersion: number; answer: "confirmed" | "still_exists" | null; reviewState: string | null } | null;closurePolicy?:TicketClosurePolicy|null;conversation?:ConsumerExchange|null;serviceFeedback?:ServiceFeedback|null;serviceFeedbackEnabled?:boolean;serviceFeedbackCanWrite?:boolean;canRate?:boolean };
 const uuid = (value: unknown): value is string => typeof value === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 const record = (value: unknown): Record<string, unknown> => value !== null && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
 const version = (value: unknown): value is number => Number.isSafeInteger(value) && Number(value) >= 0;
 const instant = (value: unknown): value is string => typeof value === "string" && Number.isFinite(Date.parse(value));
 const review = (value: unknown): ConsumerReportEvent["reviewState"] => value === "pending" || value === "awaiting_superadmin" || value === "addressed" ? value : null;
+export function normalizeTicketClosurePolicy(value:unknown):TicketClosurePolicy|null{
+ const row=record(value);
+ if(row.version!==1||(row.cycleId!==null&&!uuid(row.cycleId))||(row.closesAt!==null&&!instant(row.closesAt)))return null;
+ return {version:1,cycleId:row.cycleId as string|null,closesAt:row.closesAt as string|null,canRate:row.canRate===true&&uuid(row.cycleId)};
+}
 export function normalizeConsumerExchange(value:unknown):ConsumerExchange|null {
  const row=record(value);
  if(row.version!==1||!uuid(row.cycleId)||!version(row.revision)||!['not_started','awaiting_staff','awaiting_consumer','confirmed','expired'].includes(String(row.state))||row.consumerUpdateId!==null&&!uuid(row.consumerUpdateId)||row.replyTo!==null&&!uuid(row.replyTo))return null;
@@ -26,7 +32,8 @@ export function normalizeConsumerUpdates(value: unknown): ConsumerUpdatesPage {
   });
   const check = record(source.resolutionCheck);
   const resolutionCheck = uuid(check.cycleId) && version(check.responseVersion) && (check.answer === null || check.answer === "confirmed" || check.answer === "still_exists") ? { cycleId: check.cycleId, responseVersion: check.responseVersion, answer: check.answer as "confirmed" | "still_exists" | null, reviewState: review(check.reviewState) } : null;
-  return { enabled: true, canWrite: source.canWrite === true, events, nextCursor: typeof source.nextCursor === "string" && source.nextCursor.length <= 300 ? source.nextCursor : null, resolutionCheck,conversation:normalizeConsumerExchange(source.conversation),serviceFeedback:normalizeServiceFeedback(source.serviceFeedback),serviceFeedbackEnabled:source.serviceFeedbackEnabled===true,serviceFeedbackCanWrite:source.serviceFeedbackCanWrite===true,canRate:source.canRate===true };
+  const closurePolicy=normalizeTicketClosurePolicy(source.closurePolicy),hasPolicy=source.closurePolicy!=null;
+  return { enabled: true, canWrite: source.canWrite === true&&!hasPolicy, events, nextCursor: typeof source.nextCursor === "string" && source.nextCursor.length <= 300 ? source.nextCursor : null, resolutionCheck,...(source.closurePolicy!==undefined?{closurePolicy}:{}),conversation:normalizeConsumerExchange(source.conversation),serviceFeedback:normalizeServiceFeedback(source.serviceFeedback),serviceFeedbackEnabled:source.serviceFeedbackEnabled===true,serviceFeedbackCanWrite:source.serviceFeedbackCanWrite===true,canRate:source.canRate===true&&(!hasPolicy||closurePolicy?.canRate===true) };
 }
 export function normalizeConsumerUpdateReceipt(value: unknown, mutationId: string, ticketId: string): ConsumerUpdateReceipt {
   const row = record(value);

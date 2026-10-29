@@ -76,6 +76,9 @@ async function load(file, mocks) {
       },
     }).outputText,
   )((id) => {
+    if (id === "@/services/consumer-account-cache") return { readConsumerAccountCache: async () => null, writeConsumerAccountCache: async () => {}, clearConsumerAccountCache: async () => {}, isConsumerReadTransportError: error => error instanceof TypeError || error?.status >= 500 };
+    if (id === "@/hooks/use-consumer-profile" && !mocks[id]) return { warmConsumerProfileCache: async () => {}, clearConsumerProfileCaches: async () => {} };
+    if (id === "@/services/reports" && !mocks[id]) return { fetchComplaintMeta: async () => {} };
     if (id === "@/hooks/use-manual-refresh") return manualRefresh;
     if (id === "@/context/app-guide-context") return { GuideStep: "View", useAppGuide: () => ({ guide: null, stopGuide: () => {} }) };
     if (id === "@/context/guest-access-context") return { useGuestAccess: () => ({ guest: false, openFeature: () => {}, requestSignIn: () => {} }) };
@@ -128,6 +131,7 @@ test("consumer snapshots are hidden synchronously on principal switch, late comp
   }
   render();
   h.flush();
+  await tick();
   requests[0].resolve({
     identityUserId: "canonical-A",
     authorizedServiceAccountIds: ["service"],

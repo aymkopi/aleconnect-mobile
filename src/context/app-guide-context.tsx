@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { usePathname, useRouter } from "expo-router";
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type PropsWithChildren } from "react";
-import { View, useWindowDimensions, type ViewProps } from "react-native";
+import { Platform, View, useWindowDimensions, type ViewProps } from "react-native";
 import { BottomSheet } from "@/components/panelui/bottom-sheet";
 import { Button } from "@/components/panelui/button";
 import { Text } from "@/components/panelui/text";
@@ -64,13 +64,14 @@ export function AppGuideProvider({ children }: PropsWithChildren) {
       const pending = session && interactivePrincipal === session.user.id ? "account" : values[0][1];
       const kind = pendingWelcomeOffer(pending, { isLoading, hasSession: !!session, mustChangePassword: !!session?.user.mustChangePassword, alreadyOffered: values[1][1] === "1", interactiveSignIn: !!session && interactivePrincipal === session.user.id });
       if (!kind) return;
-      setOffer({ scope, kind, open: true });
+      if (kind === "account" && Platform.OS !== "web") router.push("/profile/setup");
+      else setOffer({ scope, kind, open: true });
       // These are optional UI hints, never authentication or authorization records.
       await AsyncStorage.setItem(key, "1").catch(() => undefined);
       if (active) await AsyncStorage.removeItem(pendingWelcomeKey).catch(() => undefined);
     }).catch(() => undefined);
     return () => { active = false; };
-  }, [pathname, scope, isLoading, gateOpen, session, interactivePrincipal]);
+  }, [pathname, scope, isLoading, gateOpen, session, interactivePrincipal, router]);
 
   const registerActivation = useCallback((target: string, action: () => void) => {
     activations.current.set(target, action);

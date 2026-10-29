@@ -20,8 +20,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Modal, Platform, View } from "react-native";
 import {
   loadMapLibreModule,
+  loadNativeMapStyle,
   MAP_LOAD_TIMEOUT_MS,
-  MAP_STYLE_URL,
   type MapLibreModule,
 } from "./map-runtime";
 import {
@@ -71,6 +71,7 @@ function ActiveReportLocationPicker({
   fixture = false,
 }: ReportLocationPickerProps) {
   const focused = useIsFocused();
+  const [mapStyle, setMapStyle] = useState("");
   const [module, setModule] = useState<MapLibreModule | null>(null),
     [coordinates, setCoordinates] = useState(
       initialReportCoordinates(
@@ -173,9 +174,9 @@ function ActiveReportLocationPicker({
   useEffect(() => {
     if (!open || Platform.OS === "web") return;
     let active = true;
-    loadMapLibreModule()
-      .then((next) => {
-        if (active) setModule(next);
+    Promise.all([loadNativeMapStyle(), loadMapLibreModule()])
+      .then(([style, next]) => {
+        if (active) { setMapStyle(style); setModule(next); }
       })
       .catch(() => {
         if (active)
@@ -567,7 +568,7 @@ function ActiveReportLocationPicker({
                 key={retry}
                 style={{ flex: 1 }}
                 androidView="texture"
-                mapStyle={MAP_STYLE_URL}
+                mapStyle={mapStyle}
                 dragPan={!locating}
                 touchZoom={!locating}
                 touchRotate={false}

@@ -48,10 +48,10 @@ export function shouldReloadReportsForAccountChange(
 }
 
 export const albayBounds = {
-  minLatitude: 12.9,
-  maxLatitude: 13.55,
-  minLongitude: 123.25,
-  maxLongitude: 124,
+  minLatitude: 12.986185,
+  maxLatitude: 13.523255,
+  minLongitude: 123.280548,
+  maxLongitude: 124.220096,
 };
 
 export type ReportFormErrors = Partial<

@@ -72,8 +72,7 @@ function Accounts({ identity }: { identity: ProfileIdentity }) {
       else {
         await setDefaultLinkedAccount(defaultId, identity.account.accessRevision);
         if (!current()) return;
-        await clearConsumerProfileCaches();
-        await refreshConsumerAccount();
+        await Promise.all([clearConsumerProfileCaches(), refreshConsumerAccount({ invalidate: true })]);
       }
       if (current()) {
         setDefaultId("");
@@ -121,12 +120,12 @@ function Accounts({ identity }: { identity: ProfileIdentity }) {
           verificationFlowId: proof.flowId,
         }, proof.authToken);
         if (!current()) return;
-        await clearConsumerProfileCaches();
         if (result.reauthenticationRequired) {
           const revision = getAuthTokenRevision(), authToken = await getAuthToken();
           if (!current() || getAuthTokenRevision() !== revision || authToken !== proof.authToken) return;
           allowLeave();
           clearConsumerAccount();
+          await clearConsumerProfileCaches();
           await signOut();
           const signedOutRevision = getAuthTokenRevision(), remainingToken = await getAuthToken();
           if (!remainingToken && getAuthTokenRevision() === signedOutRevision) router.replace("/sign-in");
@@ -134,7 +133,7 @@ function Accounts({ identity }: { identity: ProfileIdentity }) {
         }
         setUnlink(null);
         verification.reset();
-        await refreshConsumerAccount();
+        await Promise.all([clearConsumerProfileCaches(), refreshConsumerAccount({ invalidate: true })]);
 
       }
     } catch (e) {

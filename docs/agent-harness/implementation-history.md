@@ -1,5 +1,15 @@
 # Implementation history
 
+## 2026-10-29 - Ticket closure and offline reporting implementation
+
+- Scope: paired isolated Staff/Mobile codex/ticket-closure-offline branches; approved rating/Staff/24-hour closure, follow-up retirement, persistent offline account/profile reads and full-Albay native map setup. Billing excluded. Staff owns lifecycle/schema/authorization; Mobile owns private snapshots/native maps.
+- Files/contracts: additive closurePolicy version1 and immutable rating marker; guarded nullable deadline/index migration and separate grace activation; canonical per-ticket locks, parent closure only after every child closes, compatible exact legacy receipts and suppressed obsolete reminders. Account snapshots never grant server authority or retarget original queues. The locally stored style/full province pack uses installed MapLibre and bounded native downloads; web remains online.
+- Verification: in progress; Staff13 focused contracts, seven disposable DB regressions, one starvation regression, app/node types and private production build pass. Mobile full669 tests/types, nine rating/cache regressions,25 map/setup tests and Android4 native guard tests pass. Android module compiles against cached installed native dependencies. Six controlled browser journeys pass at phone/tablet/desktop widths in Light/Dark. All API writes in those journeys are synthetic. New reconciliation and final integration/review checks remain pending.
+- Git/deployment: implementation remains local and is being checkpointed with skip markers; no push, production migration/activation/deployment, native distribution, installation or device mutation. Earlier APKs, queues/photos, signing material, dirty primaries and unrelated artifacts are preserved.
+- Remaining risks: actual native pack download/database size/cold-offline rendering, iOS Xcode compilation and device/provider acceptance are unverified. Full Staff broad-suite attempt was interrupted after sandbox temp-file denials/fixture-port conflicts; focused elevated isolated checks pass. Map native source/exports and final review are still in progress.
+- Next: finish paired review/gates and record exact final results in the task handoff. Any later rollout follows docs/ticket-closure-rollout.md; populated deadlines/receipts/Closed statuses must be retained.
+
+
 ## 2026-10-29 - Ticket closure and offline reporting design
 
 - Scope: user replaces follow-up with rating/Staff/24-hour closure and requests mandatory full-Albay map setup plus persistent linked accounts for offline reporting. Existing Resolved tickets receive 24 hours from rollout; active redispatch is preserved. Billing excluded.

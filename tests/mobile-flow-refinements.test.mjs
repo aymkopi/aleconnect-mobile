@@ -85,7 +85,7 @@ test("report map starts at street zoom locally and rejects ocean and neighboring
     assert.ok(findAlbayBarangay(fallback.latitude, fallback.longitude));
   }
   assert.equal(REPORT_MAP_MIN_ZOOM, 9);
-  assert.deepEqual(REPORT_MAP_BOUNDS, [123.25, 12.9, 124, 13.55]);
+  assert.deepEqual(REPORT_MAP_BOUNDS, [123.280548, 12.986185, 124.220096, 13.523255]);
 });
 
 test("Android channels are created before permission and Expo token requests", async () => {

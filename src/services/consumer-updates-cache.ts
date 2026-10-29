@@ -60,7 +60,7 @@ export async function readConsumerUpdateHead(scope:ConsumerUpdateScope,ticketId:
 export function peekConsumerUpdateHead(scope:ConsumerUpdateScope,ticketId:string,accountId:string){return memory.get(key(scope,ticketId,accountId))??null;}
 export async function cacheConsumerUpdateReceipt(item:QueuedConsumerUpdate){
  const cacheKey=key({...item,authorizedServiceAccountIds:[item.serviceAccountId]},item.ticketId,item.serviceAccountId),local=await localHead(cacheKey),page=memory.get(cacheKey)??local,receipt=item.receipt;
- if(!page||!receipt?.conversation||page.conversation?.cycleId!==receipt.conversation.cycleId)return;
+ if(!page||page.closurePolicy||!receipt?.conversation||page.conversation?.cycleId!==receipt.conversation.cycleId)return;
  const incoming={...page,conversation:receipt.conversation,resolutionCheck:receipt.resolutionCheck??null};
  if(newerConsumerUpdates(page,incoming)===page)return;
  if(item.payload.kind!=='resolution_confirmed'&&!incoming.events.some(event=>event.id===receipt.eventId))incoming.events=[...incoming.events,{id:receipt.eventId,kind:item.payload.kind,text:item.payload.text,imageUrls:receipt.imageUrls??[],author:'Consumer',createdAt:receipt.acceptedAt,reviewState:'pending',reviewVersion:receipt.reviewVersion}];
@@ -69,7 +69,7 @@ export async function cacheConsumerUpdateReceipt(item:QueuedConsumerUpdate){
 }
 export async function cacheServiceFeedback(scope:ConsumerUpdateScope,ticketId:string,accountId:string,feedback:ServiceFeedback){
  const cacheKey=key(scope,ticketId,accountId),local=await localHead(cacheKey),page=memory.get(cacheKey)??local;
- if(page?.conversation?.cycleId===feedback.cycleId)await store(cacheKey,{...page,serviceFeedback:feedback,canRate:false});
+ if((page?.closurePolicy?.cycleId??page?.conversation?.cycleId)===feedback.cycleId&&page)await store(cacheKey,{...page,serviceFeedback:feedback,canRate:false,...(page.closurePolicy?{closurePolicy:{...page.closurePolicy,canRate:false}}:{})});
 }
 export async function renewConsumerUpdateEvidence(scope:ConsumerUpdateScope,ticketId:string,accountId:string,eventId:string){
  const cacheKey=key(scope,ticketId,accountId),revision=getAuthTokenRevision(),token=await getAuthToken();

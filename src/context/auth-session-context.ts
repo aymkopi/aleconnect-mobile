@@ -1,5 +1,7 @@
 import type { PropsWithChildren } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { clearConsumerAccountCache } from "@/services/consumer-account-cache";
+import { clearConsumerProfileCaches } from "@/hooks/use-consumer-profile";
 import {
   createContext,
   createElement,
@@ -47,7 +49,11 @@ async function readCachedSession(): Promise<AuthSession | null> {
 
   try {
     const parsed = JSON.parse(raw) as AuthSessionCache;
-    if (Date.now() - parsed.fetchedAt > authSessionCacheTtlMs) {
+    const expiresAt = new Date(parsed.value?.session?.expiresAt).getTime();
+    if (!Number.isFinite(parsed.fetchedAt) || parsed.fetchedAt > Date.now() ||
+      Date.now() - parsed.fetchedAt > authSessionCacheTtlMs || !Number.isFinite(expiresAt) || expiresAt <= Date.now() ||
+      !parsed.value?.user?.id || parsed.value.user.role !== "consumer" ||
+      parsed.value.session.userId !== parsed.value.user.id) {
       return null;
     }
 
@@ -65,7 +71,9 @@ async function writeCachedSession(value: AuthSession): Promise<void> {
 }
 
 async function clearCachedSession(): Promise<void> {
+  const privateReads = Promise.allSettled([clearConsumerAccountCache(), clearConsumerProfileCaches()]);
   await AsyncStorage.removeItem(authSessionCacheKey);
+  await privateReads;
 }
 
 export function AuthSessionProvider({ children }: PropsWithChildren) {

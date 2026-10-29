@@ -50,3 +50,13 @@ test('a delayed same-revision head cannot erase an accepted rating',async()=>{
  await h.api.cacheServiceFeedback(scope,id,'account',{feedbackId:id,ticketId:id,cycleId:id,serviceAccountId:'account',rating:5,comment:'',version:1,responseVersion:1,updatedAt:'2026-10-26T01:00Z'});release();await read;
  const received=h.api.peekConsumerUpdateHead(scope,id,'account');assert.equal(received.serviceFeedback.rating,5);assert.equal(received.canRate,false);
 });
+
+test('a replayed legacy rating cannot erase the authoritative closing deadline',async()=>{
+ const h=await harness(),closesAt='2026-10-30T12:00:00Z';
+ h.value({...head(1),closurePolicy:{version:1,cycleId:id,closesAt,canRate:true}});
+ await h.api.readConsumerUpdateHead(scope,id,'account');
+ await h.api.cacheServiceFeedback(scope,id,'account',{feedbackId:id,ticketId:id,cycleId:id,serviceAccountId:'account',rating:4,comment:'',version:1,responseVersion:1,updatedAt:'2026-10-26T01:00Z'});
+ const page=h.api.peekConsumerUpdateHead(scope,id,'account');
+ assert.equal(page.closurePolicy.closesAt,closesAt);
+ assert.equal(page.closurePolicy.canRate,false);
+});

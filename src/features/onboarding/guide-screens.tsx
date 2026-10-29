@@ -1,6 +1,7 @@
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import { Bell, ChevronRight, FileText, House, Link, Megaphone, Phone, Plus, UserRound, type LucideIcon } from "lucide-react-native";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 import { Button } from "@/components/panelui/button";
 import { Text } from "@/components/panelui/text";
 import { useAppGuide } from "@/context/app-guide-context";
@@ -8,6 +9,8 @@ import { useGuestAccess } from "@/context/guest-access-context";
 import { ReportPage } from "@/features/reports/components/report-page";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { appGuides } from "./guidance-state";
+import { OfflineMapSetup } from "@/features/maps/offline-map-setup";
+import { offlineMaps } from "@/services/offline-map-native";
 
 const guideIcons = { House, FileText, Plus, Megaphone, Phone, UserRound };
 
@@ -35,13 +38,32 @@ export function AppGuideScreen() {
 
 export function AccountSetupScreen() {
   const router = useRouter();
+  const [mapReady, setMapReady] = useState(Platform.OS === "web");
+  const [checking, setChecking] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  async function finish() {
+    setChecking(true);
+    try {
+      if (Platform.OS !== "web" && (await offlineMaps().status()).state !== "ready") {
+        setMapReady(false);
+        setError("Finish downloading the Albay map to complete setup.");
+        return;
+      }
+      router.dismissTo("/home");
+    } catch {
+      setMapReady(false);
+      setError("The Albay map could not be verified. Resume setup and try again.");
+    } finally { setChecking(false); }
+  }
   return <ReportPage title="Account setup" onBack={() => router.canGoBack() ? router.back() : router.replace("/home")}
     footer={<>
+      <Button fullWidth disabled={!mapReady} loading={checking} style={{ minHeight: 48 }} onPress={() => void finish()}>Finish setup</Button>
       <Button fullWidth style={{ minHeight: 48 }} onPress={() => router.push("/guide")}>Explore with a guide</Button>
-      <Button variant="ghost" fullWidth style={{ minHeight: 48 }} labelClassName="text-primary" onPress={() => router.dismissTo("/home")}>Back to Home</Button>
     </>}>
     <Text style={{ fontFamily: "PlusJakartaSans_600SemiBold", fontSize: 20, lineHeight: 28 }}>Set up at your pace</Text>
-    <Text muted style={{ fontSize: 16, lineHeight: 24 }}>The optional checks help ALECO reach you. You can return to them later.</Text>
+    <Text muted style={{ fontSize: 16, lineHeight: 24 }}>Download the Albay map while reviewing your profile. The profile checks are optional.</Text>
+    <OfflineMapSetup onReady={setMapReady} />
+    {error ? <Text size="sm" className="text-destructive" accessibilityLiveRegion="polite">{error}</Text> : null}
     <GuideRow title="Review your profile" description="Photo, contact details and home location." Icon={UserRound} onPress={() => router.push("/profile/details")} />
     <GuideRow title="Service accounts" description="Check your account or link another one." Icon={Link} onPress={() => router.push("/profile/accounts")} />
     <GuideRow title="Alerts & notifications" description="Choose updates and device alerts." Icon={Bell} onPress={() => router.push("/notification-settings")} />

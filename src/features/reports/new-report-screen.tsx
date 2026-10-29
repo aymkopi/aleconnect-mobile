@@ -90,6 +90,7 @@ import { useConsumerAccount } from "@/hooks/use-consumer-account";
 import { useConsumerProfile } from "@/hooks/use-consumer-profile";
 import { createLocalReportId, enqueueReport } from "@/services/report-queue";
 import { fetchComplaintMeta } from "@/services/reports";
+import { isConsumerReadTransportError } from "@/services/consumer-account-cache";
 import {
   deleteEvidencePhoto,
   prepareEvidencePhoto,
@@ -191,6 +192,7 @@ export default function NewReportScreen() {
   const {
     accountContext,
     selectedServiceAccountId,
+    isStale: accountStale,
     isLoading: accountLoading,
     refreshConsumerAccount,
   } = useConsumerAccount();
@@ -289,7 +291,9 @@ export default function NewReportScreen() {
     scopeCurrent &&
     !metaLoading &&
     hasCurrentReportContract(meta) &&
-    (fixtures || (!accountLoading && !profileLoading && !profileError));
+    (fixtures || (!accountLoading && !profileLoading &&
+      Boolean(accountContext?.authorizedServiceAccountIds.includes(accountId ?? "")) && profile?.profileId === accountId &&
+      (!profileError || isConsumerReadTransportError(profileError))));
   const stale = Boolean(
     scope &&
     (scope.principalId !== currentScope.principalId ||
@@ -1111,7 +1115,7 @@ export default function NewReportScreen() {
                       Loading account details
                     </Text>
                   </View>
-                ) : profileError ? (
+                ) : profileError && (!profile || !isConsumerReadTransportError(profileError)) ? (
                   <>
                     <Text
                       accessibilityRole="alert"
@@ -1127,6 +1131,8 @@ export default function NewReportScreen() {
                       Retry account details
                     </Button>
                   </>
+                ) : accountStale || (profile && profileError && isConsumerReadTransportError(profileError)) ? (
+                  <Text muted size="sm" accessibilityLiveRegion="polite">Offline. Your report will send when connected.</Text>
                 ) : null}
                 {accountReady && !(fixtures ? selected?.accountNumber : profile?.accountNumber) ? <Input
                     label="Account number"

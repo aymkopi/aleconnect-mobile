@@ -11,3 +11,8 @@ export function loadMapLibreModule() {
   mapModulePromise ??= import("@maplibre/maplibre-react-native");
   return mapModulePromise;
 }
+
+export async function loadNativeMapStyle() {
+  const { nativeMapStyle } = await import("@/services/offline-map-native");
+  return nativeMapStyle();
+}

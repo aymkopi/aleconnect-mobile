@@ -5,6 +5,7 @@ import test from "node:test";
 import {
   normalizeConsumerIdentity,
   normalizeLinkedAccounts,
+  combineConsumerAccountSnapshots,
 } from "../src/features/accounts/contract.ts";
 
 test("linked account responses retain a legacy sole-account fallback", () => {
@@ -13,6 +14,27 @@ test("linked account responses retain a legacy sole-account fallback", () => {
     defaultServiceAccountId: "legacy",
     accessRevision: 0,
   });
+});
+
+test("explicit empty account reads never synthesize legacy access", () => {
+  const principal = { id: "identity", sessionMode: "identity" };
+  const identity = normalizeConsumerIdentity({ identityUserId: "identity", sessionMode: "identity", authorizedServiceAccountIds: [], accessRevision: 4 }, principal);
+  const linked = normalizeLinkedAccounts({ identityUserId: "identity", accounts: [], accessRevision: 4 }, principal);
+  assert.deepEqual(identity.authorizedServiceAccountIds, []);
+  assert.equal(identity.defaultServiceAccountId, "");
+  assert.deepEqual(linked.accounts, []);
+  const combined = combineConsumerAccountSnapshots(identity, linked);
+  assert.deepEqual(combined.accounts, []);
+  assert.deepEqual(combined.authorizedServiceAccountIds, []);
+});
+
+test("only an omitted legacy array permits the sole-account fallback", () => {
+  const principal = { id: "identity", sessionMode: "identity" };
+  assert.deepEqual(normalizeConsumerIdentity({ sessionMode: "identity" }, principal).authorizedServiceAccountIds, []);
+  assert.deepEqual(normalizeConsumerIdentity({}, principal).authorizedServiceAccountIds, []);
+  assert.deepEqual(normalizeLinkedAccounts({}, principal).accounts, []);
+  assert.deepEqual(normalizeConsumerIdentity({ authorizedServiceAccountIds: null }, { id: "legacy" }).authorizedServiceAccountIds, []);
+  assert.deepEqual(normalizeLinkedAccounts({ accounts: null }, { id: "legacy" }).accounts, []);
 });
 
 test("consumer identity parsing keeps the legacy account authoritative when additive fields are omitted", () => {

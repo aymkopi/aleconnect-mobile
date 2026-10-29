@@ -5,7 +5,7 @@ import {feedbackReceiptMatches,normalizeServiceFeedback,validServiceFeedback} fr
 import type {ReminderScope} from './advisory-reminders';
 import type {ConsumerIntentScope} from './consumer-intent';
 import {appFeedbackPayload,appFeedbackReceiptMatches,normalizeAppFeedbackDraft,type AppFeedbackDraft,type AppFeedbackScope} from '@/features/profile/app-feedback-contract';
-export type ServiceFeedbackInput={kind:'service';clientMutationId:string;ticketId:string;cycleId:string;serviceAccountId:string;accessRevision:number;responseVersion:number;expectedVersion:number;rating:number;comment:string};
+export type ServiceFeedbackInput={kind:'service';clientMutationId:string;ticketId:string;cycleId:string;serviceAccountId:string;accessRevision:number;responseVersion:number;expectedVersion:number;rating:number;comment:string;closurePolicyVersion?:1};
 export type FeedbackDraft={input:ServiceFeedbackInput;pending:boolean;receipt?:unknown};
 function key(scope:ReminderScope,ticketId:string){return `consumer_service_feedback_v1:${JSON.stringify([scope.principalId,scope.identityUserId,scope.serviceAccountId,ticketId])}`;}
 let writes:Promise<unknown>=Promise.resolve();

@@ -322,8 +322,7 @@ function Details({
       if (!identity.fixture) {
         await setDefaultLinkedAccount(id, identity.account.accessRevision);
         if (!current()) return;
-        await clearConsumerProfileCaches();
-        await refreshConsumerAccount();
+        await Promise.all([clearConsumerProfileCaches(), refreshConsumerAccount({ invalidate: true })]);
       }
       if (current()) { setDefaultSaved(true); setDefaultDialog(false); }
     } catch (e) { if (current()) setError(e instanceof Error ? e.message : "Could not change the default account."); }

@@ -194,7 +194,7 @@ test("mandatory-route logout retains linking recovery instead of defaulting Home
 });
 test("forced auth reads fail closed on network uncertainty while ordinary reads retain cache", async () => {
   const h = hooks(),
-    cached = { user: { id: "owner", mustChangePassword: false } };
+    cached = { user: { id: "owner", role: "consumer", mustChangePassword: false }, session: { id: "retained-session", userId: "owner", expiresAt: "2099-01-01" } };
   const data = new Map([
     [
       "auth_session_cache_v1",

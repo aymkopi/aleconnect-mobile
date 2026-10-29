@@ -100,6 +100,7 @@ export class ConsumerAccountSnapshotMismatchError extends Error {
 
 export type LegacyUser = {
   id: string;
+  sessionMode?: "legacy" | "identity";
   username?: string | null;
   name?: string | null;
 };
@@ -137,18 +138,18 @@ export function normalizeConsumerIdentity(
   legacyUser: LegacyUser,
 ): ConsumerAccessContext {
   const source = record(value);
-  const requestedMode = source.sessionMode === "identity" ? "identity" : "legacy";
+  const requestedMode = source.sessionMode === "identity" || legacyUser.sessionMode === "identity" ? "identity" : "legacy";
   const identityUserId = typeof source.identityUserId === "string" && source.identityUserId
     ? source.identityUserId
     : legacyUser.id;
   const authorizedServiceAccountIds = stringIds(source.authorizedServiceAccountIds);
-  const serviceAccountIds = authorizedServiceAccountIds.length
-    ? authorizedServiceAccountIds
-    : [legacyUser.id];
+  const serviceAccountIds = source.authorizedServiceAccountIds === undefined && requestedMode === "legacy"
+    ? [legacyUser.id]
+    : authorizedServiceAccountIds;
   const defaultServiceAccountId = typeof source.defaultServiceAccountId === "string"
     && serviceAccountIds.includes(source.defaultServiceAccountId)
     ? source.defaultServiceAccountId
-    : serviceAccountIds[0];
+    : serviceAccountIds[0] ?? "";
   const sessionMode = requestedMode;
 
   return {
@@ -169,7 +170,7 @@ export function normalizeLinkedAccounts(value: unknown, legacyUser: LegacyUser |
     ? source.accounts.filter((item): item is LinkedAccount => Boolean(item && typeof item === "object" && typeof (item as LinkedAccount).id === "string"))
     : [];
   const legacy = legacyUser ? [{ id: legacyUser.id, accountNumber: legacyUser.username ?? null, registeredName: legacyUser.name ?? "ALECO account", isDefault: true }] : [];
-  const normalized = accounts.length ? accounts : legacy;
+  const normalized = source.accounts === undefined && legacyUser?.sessionMode !== "identity" ? legacy : accounts;
   const defaultServiceAccountId = typeof source.defaultServiceAccountId === "string" && normalized.some((account) => account.id === source.defaultServiceAccountId)
     ? source.defaultServiceAccountId
     : normalized.find((account) => account.isDefault)?.id ?? normalized[0]?.id ?? null;
@@ -199,11 +200,12 @@ export function combineConsumerAccountSnapshots(
     && linkedAccounts.defaultServiceAccountId === identityAccounts[0];
   const sameAccountSet = identityAccounts.length === linkedAccountIds.length
     && identityAccounts.every((id, index) => id === linkedAccountIds[index]);
+  const emptyDefault = identityAccounts.length === 0 && identity.defaultServiceAccountId === "" && linkedAccounts.defaultServiceAccountId === null;
   if (!strictLegacyFallback && (
     identity.accessRevision !== linkedAccounts.accessRevision
     || linkedAccounts.identityUserId !== identity.identityUserId
     || !sameAccountSet
-    || linkedAccounts.defaultServiceAccountId !== identity.defaultServiceAccountId
+    || (!emptyDefault && linkedAccounts.defaultServiceAccountId !== identity.defaultServiceAccountId)
   )) {
     throw new ConsumerAccountSnapshotMismatchError();
   }

@@ -1,6 +1,6 @@
 # Ticket closure and offline reporting
 
-Date: 2026-10-29, Asia/Manila. Status: proposed design, awaiting user approval.
+Date: 2026-10-29, Asia/Manila. Status: approved by the user; implementation in progress.
 
 ## Intent and confirmed decisions
 
@@ -28,7 +28,7 @@ Billing, unrelated screen redesigns, field workflow changes, map routing, new PO
 2. **Not selected: packs around linked accounts.** Smaller initial downloads leave gaps elsewhere and require more setup management.
 3. **Implementation proposal: use the installed MapLibre offline manager.** Save tiles, style, fonts and sprites in its local offline store. A separate pre-generated archive/download service or a second map library adds ownership and compatibility work that is not needed unless a measured native limitation prevents the existing package from meeting the requirements.
 
-Retain existing authenticated APIs and queue formats. Add the smallest compatible closure metadata instead of deleting old endpoints/tables or rewriting receipts. These implementation choices are proposals for approval, not additional user decisions.
+Retain existing authenticated APIs and queue formats. Add the smallest compatible closure metadata instead of deleting old endpoints/tables or rewriting receipts. These implementation choices were approved with the design.
 
 ## Ticket closure
 
@@ -107,6 +107,6 @@ Deployment order for a later authorized rollout: pause old follow-up producers/d
 
 Confirmed by user: full Albay coverage; 24 hours from rollout for existing Resolved tickets; no follow-up; rating/Staff/24-hour closure; mandatory map setup; cached linked accounts; billing excluded.
 
-Additional proposals to approve with this design: optional first rating after Staff/automatic closure, no separate resolution question, no new advance reminder, preserving existing users' offline drafting during one-time map setup, and using MapLibre's installed offline manager rather than a new map service/library.
+Additional choices approved with this design: optional first rating after Staff/automatic closure, no separate resolution question, no new advance reminder, preserving existing users' offline drafting during one-time map setup, and using MapLibre's installed offline manager rather than a new map service/library.
 
 Technical choices left to implementation: exact additive field/index names after schema inspection, measured pack budgets/source zoom, internal cache serialization, and reused native safeguards. A discovered constraint that changes coverage, required onboarding, supported platforms or lifecycle behavior comes back to the user before implementation diverges.

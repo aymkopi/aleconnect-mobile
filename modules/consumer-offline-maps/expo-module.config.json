@@ -1,0 +1,1 @@
+{"platforms":["android","apple"],"android":{"modules":["expo.modules.consumermaps.ConsumerOfflineMapsModule"]},"apple":{"modules":["ConsumerOfflineMapsModule"]}}

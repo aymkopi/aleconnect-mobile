@@ -3,6 +3,7 @@ import {
   parseApiInstant,
 } from "../../utils/manila-time.ts";
 import { normalizeHumanReference } from "../../utils/human-reference.ts";
+import {normalizeTicketClosurePolicy,type TicketClosurePolicy} from './consumer-updates-contract.ts';
 import { normalizeServiceRequestProgress, type ServiceRequestKind, type ServiceRequestKindMetadata, type ServiceRequestProgress } from "../services/service-request-contract.ts";
 import {
   consumerTicketStatusLabel,
@@ -155,6 +156,7 @@ export type ConsumerServiceMemoUpdate = {
 };
 
 export type ReportDetail = Report & {
+  closurePolicy?:TicketClosurePolicy|null;
   serviceRequest?: ServiceRequestProgress | null;
   imageUrlsExpiresAt: string | null;
   consumerMessage: string | null;
@@ -401,6 +403,7 @@ export function parseReportDetailResponse(value: unknown): ReportDetail {
     history,
     publicUpdates,
     consumerUpdates,
+    ...(report.closurePolicy!==undefined?{closurePolicy:normalizeTicketClosurePolicy(report.closurePolicy)}:{}),
     serviceRequest: normalizeServiceRequestProgress(report.serviceRequest),
     imageUrls: Array.isArray(report.imageUrls)
       ? report.imageUrls.filter(isHttpUrl)
