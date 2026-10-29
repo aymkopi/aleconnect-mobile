@@ -1,5 +1,12 @@
 # Implementation history
 
+## 2026-10-30 - Native map repair verified on Xiaomi
+
+- Scope: Mobile8477e1e fixes0% offline-map startup by preloading its pinned file style into the SDK resource cache; transient native capability failure can retry. Public master receives [skip ci], with zero Actions runs. No Staff/schema/deployment or billing change.
+- Verification:681 full tests,15 focused cases, types/lint/harness,4 native guard tests and release build pass; focused review has no findings. Same-signer1.9.1-alpha.1/code83 is installed and saved with SHA2561d86500fd3b83bf303ab740bead96aa6a5e7bf48ffa75ce1814b0abb9f1f57d6. Actual Xiaomi pack progresses to Ready offline; cold launch under app-only network denial retains completion, and a fresh offline map renders cached geometry/labels with zoom. Exact installed APK matches Desktop; package UID/first-install identity, all18 previous APKs and original signing material are retained. Temporary build versions and original network settings are restored; only the unsent QA draft was discarded, with no report/profile mutation.
+- Remaining risks: iOS native compilation/device acceptance and additional hardware/storage/cellular edge cases remain unverified. Graphify update cannot launch its configured Python; generated state is retained.
+- Next: retain native83/completed map and the task evidence; independently validate iOS. No further Android download fix is outstanding from the reproduced failure.
+
 ## 2026-10-30 - Offline map startup repair preparation
 
 - Scope: fix Mobile map setup stalled at0% on the connected Xiaomi; preserve the existing pack, report queue, session, signing key and earlier APKs. Billing and Staff lifecycle/database changes are excluded.

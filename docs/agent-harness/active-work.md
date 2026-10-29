@@ -1,6 +1,6 @@
 # Active work
 
-- [Ticket closure and offline reporting](tasks/ticket-closure-offline.md): production1.9.0-alpha.1 activated;33 Resolved tickets receive rollout+24h, other76 unchanged. Both sources pushed with [skip ci]; verified Mobile1.9.0-alpha.1/code82 APK saved to Desktop.288 asset/14 access checks pass; original files/APKs/key preserved. Native device/iOS acceptance remains; billing excluded.
+- [Ticket closure and offline reporting](tasks/ticket-closure-offline.md): closure rollout recorded; Mobile1.9.1-alpha.1/code83 fixes native0% map startup. Xiaomi download/Ready/restart/app-offline rendering and zoom pass; exact APK installed/saved, source8477e1e pushed with [skip ci].681 tests/native guards pass, prior data/APKs/network settings preserved. iOS remains pending; billing excluded.
 - [Centered child-screen header](tasks/child-app-header.md): measured balanced action space keeps child titles centered; same header reused in Lineman. Reviewed source/browser checks pass; native acceptance remains separate.
 
 - [Mobile legal documents](tasks/mobile-legal-documents.md): sourceb879ae0 pushed to public master with `[skip ci]`; local1.8.0-alpha.2/code81 includes legal and outage reporting, verified and saved to Desktop/AleconnectApps.636 tests, types/lint/harness, original signer, all229 legal blocks, three outage markers and54-library16KB checks pass.215 primary files, six generated files and sixteen prior APKs are preserved. Billing excluded; installation/native acceptance remain separate.
