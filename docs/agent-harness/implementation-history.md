@@ -1,5 +1,12 @@
 # Implementation history
 
+## 2026-10-29 - Ticket closure production and local APK closeout
+
+- Scope: authorized paired skip-CI source publication, production nullable deadline/index migration and24-hour policy activation, ALEConnect1.9.0-alpha.1 API/maintenance/push/Pages deployment and local release APK1.9.0-alpha.1/code82. Billing, device installation and store/OTA/GitHub release publication excluded. Deployed RBAC and newer Mobile headers are retained.
+- Verification: Staff21 focused/6 SQL/types/build/merged-file lint, Mobile678 tests plus1 existing skip/types, paired harness and three Staff browser cases pass. Exact3 Worker bundles,288 assets and14 production access checks verify; original runtime/bindings/schedule and operations service retained.33 Resolved receive2026-10-30T12:44:06.193Z grace,76 other records unchanged. APK signer/package/version/runtime/content/native module and54-library16KB checks, Desktop hashes and restored build inputs pass. Protected1435 file hashes,17 previous APKs and signing key remain unchanged. See task handoff for exact identifiers and private evidence.
+- Remaining risks: physical Android native acceptance, elapsed scheduler/provider delivery and iOS build/device checks remain unverified. Broad Staff/Expo baselines remain documented. Two initial SQL cases and one cold browser deadline pass unchanged reruns; Graphify refreshes time out and tracked outputs are restored.
+- Next: native acceptance using the saved APK; retain rollback snapshots and populated closure state. No automated reopen or destructive schema rollback.
+
 ## 2026-10-29 - Ticket closure authorized release preparation
 
 - Scope: user authorizes ticket-closure production migration/deployment, paired source pushes with CI skip, and a local release APK. Billing, device installation and store/OTA publication remain excluded.
