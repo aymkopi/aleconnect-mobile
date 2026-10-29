@@ -1,5 +1,7 @@
 # Active work
 
+- [Centered child-screen header](tasks/child-app-header.md): measured balanced action space keeps child titles centered; same header reused in Lineman. Reviewed source/browser checks pass; native acceptance remains separate.
+
 - [Mobile legal documents](tasks/mobile-legal-documents.md): sourceb879ae0 pushed to public master with `[skip ci]`; local1.8.0-alpha.2/code81 includes legal and outage reporting, verified and saved to Desktop/AleconnectApps.636 tests, types/lint/harness, original signer, all229 legal blocks, three outage markers and54-library16KB checks pass.215 primary files, six generated files and sixteen prior APKs are preserved. Billing excluded; installation/native acceptance remain separate.
 
 - [Simpler outage reporting](tasks/outage-reporting.md): Staff1.7.0-alpha.1/source3910d4af deployed APIbe2bf212/Pages6db62da2; public Mobile master58069cb pushed with [skip ci]. Local release APK1.8.0-alpha.1/code80 from74a1a3a is verified and saved to Desktop/AleconnectApps.634 Mobile/36 focused Staff checks and production verification pass; all31 bindings/runtime settings retained. Preserve primary/generated/device work. Billing excluded; installation, native acceptance and provider recovery remain separate.

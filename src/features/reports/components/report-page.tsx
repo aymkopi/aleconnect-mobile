@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { ArrowLeft, X } from "lucide-react-native";
 import { Button } from "@/components/panelui/button";
+import { ChildAppHeader } from "@/components/child-app-header";
 import { Text } from "@/components/panelui/text";
 import { PreviewLabel } from "@/components/preview-label";
 import { useAppColors } from "@/hooks/use-app-colors";
@@ -54,31 +55,14 @@ export function ReportPage({
   const Icon = onClose ? X : ArrowLeft;
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
-      <View
-        className="flex-row items-center gap-2 px-4"
-        style={{ minHeight: 56 }}
-      >
-        <Button
+      <ChildAppHeader title={title} action={headerAction} backButton={<Button
           variant="ghost"
           size="icon"
           accessibilityLabel={onClose ? "Close report" : "Back"}
           onPress={leave}
         >
           <Icon size={20} color={foreground} />
-        </Button>
-        <Text
-          accessibilityRole="header"
-          className="flex-1 text-center"
-          style={{
-            fontFamily: "PlusJakartaSans_600SemiBold",
-            fontSize: 18,
-            lineHeight: 26,
-          }}
-        >
-          {title}
-        </Text>
-        {headerAction ?? <View style={{ width: 44 }} />}
-      </View>
+        </Button>} />
       {step ? (
         <GuideStep chapter="report-new" target={guideReport ? "progress" : ""} className="gap-1 px-4 pb-1">
           <View
