@@ -1,5 +1,12 @@
 # Implementation history
 
+## 2026-10-29 - Ticket closure authorized release preparation
+
+- Scope: user authorizes ticket-closure production migration/deployment, paired source pushes with CI skip, and a local release APK. Billing, device installation and store/OTA publication remain excluded.
+- Verification: integrated deployed Staff access policy a3150f32 and Mobile master shared headers; retained intended closure flags and reserved Android code82. Source checks: Staff21 focused tests and app/node types pass; Mobile678 tests pass with1 existing skip, plus types. Generated web-map asset absence on fresh checkout was corrected through the existing sync script. SQL/build/release verification continues.
+- Remaining risks: migration/activation, native build and device/iOS acceptance remain unverified.
+- Next: finish target-bound release, artifact verification and exact handoff. Production target is re-inspected; private backup preserves109 tickets/33 Resolved plus all Worker bundles/runtime and Pages settings. Migration/activation/deployment and APK remain pending at this checkpoint. Original checkout state, signing key and17 prior APK hashes are preserved. Exact release results will follow in this task handoff.
+
 ## 2026-10-29 - Ticket closure and offline reporting implementation
 
 - Scope: paired isolated Staff/Mobile codex/ticket-closure-offline branches; approved rating/Staff/24-hour closure, follow-up retirement, persistent offline account/profile reads and full-Albay native map setup. Billing excluded. Staff owns lifecycle/schema/authorization; Mobile owns private snapshots/native maps.
