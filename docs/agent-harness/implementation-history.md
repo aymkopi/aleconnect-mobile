@@ -1145,3 +1145,11 @@ Final gates: Staff85 focused tests, production TypeScript/Vite build and scoped 
 - Verification:636 full tests, two verifier tests, types/scoped lint (two existing test-helper warnings), paired harness and controlled reader/browser checks pass. The actual release build succeeds; original signer/package/code81, standalone fixture-off live-API Hermes and54-library ZIP/ELF16KB alignment verify. All229 legal blocks and three outage markers are compiled into the APK; obsolete placeholder text is absent. Desktop APK and adjacent metadata/checksum match SHA256 `9426950bc1d8e74090346b5e1167753ca3b37ded079f37be7e9e80e46f64335a`. Remote source/zero Actions are verified; code81 is reserved so future CI uses a higher code.
 - Remaining risks: installation, native gestures/screen-reader/provider acceptance remain separate. Expo Doctor20/21 retains seven existing patch differences; Graphify's configured interpreter remains inaccessible.215 primary files, six generated files, sixteen previous APKs, preview APK, signing and queued/device state are preserved. Temporary build inputs are restored; [task handoff](tasks/mobile-legal-documents.md#release-closeout-october-29) records artifact paths and private evidence.
 - Next: push this docs-only closeout with `[skip ci]` and recheck remote/Actions and final status. No requested source publication or local APK work remains afterward.
+
+
+## 2026-10-29 — Centered child-screen header
+
+- Scope: extract the existing ReportPage header, mirror measured action width and reuse the identical header in Lineman. Preserve navigation, actions, safe area, progress and keyboard/footer handling.
+- Verification: focused tests, scoped lint, read-only review and160browser layout cases; candidate full-suite/type evidence and baseline dependency limits are in the [handoff](tasks/child-app-header.md).
+- Remaining risks: native Android/iOS rendering and gestures are unverified. Saved reports, queues, tested APKs and unrelated primary work are preserved; no native release or deployment.
+- Next: source-only PR integration with CI skipped, then separate native inspection.
