@@ -12,7 +12,10 @@ const guard = Platform.OS === "web" ? null : requireOptionalNativeModule<NativeG
 let capability: Promise<boolean> | undefined;
 export function offlineMapSupport() {
   capability ??= guard && (Platform.OS === "android" || Platform.OS === "ios")
-    ? guard.capabilities().then((value) => value.version === 1 && value.platform === Platform.OS).catch(() => false)
+    ? guard.capabilities().then((value) => value.version === 1 && value.platform === Platform.OS).catch(() => {
+      capability = undefined;
+      return false;
+    })
     : Promise.resolve(false);
   return capability;
 }

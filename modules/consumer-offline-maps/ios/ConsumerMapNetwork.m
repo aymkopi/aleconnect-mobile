@@ -3,6 +3,12 @@
 #import <math.h>
 #import <CFNetwork/CFNetwork.h>
 
+@protocol ConsumerMapStyleStorage <NSObject>
+- (void)preloadData:(NSData *)data forURL:(NSURL *)url modificationDate:(NSDate *)modified
+    expirationDate:(NSDate *)expires eTag:(NSString *)eTag mustRevalidate:(BOOL)mustRevalidate
+    completionHandler:(void (^)(NSURL *, NSError *))completion;
+@end
+
 static const int64_t MaxBytes = 50000000;
 static const NSUInteger MaxTiles = 3000;
 static NSMutableDictionary *policy;
@@ -234,12 +240,32 @@ static NSInteger TileY(double latitude, double n) { return floor((1 - asinh(tan(
       }
       if (error) break;
     }
+    NSData *resolved = nil;
     if (!error) {
-      NSData *resolved = [NSJSONSerialization dataWithJSONObject:style options:0 error:&error];
+      resolved = [NSJSONSerialization dataWithJSONObject:style options:0 error:&error];
       if (resolved) [resolved writeToURL:file options:NSDataWritingAtomic error:&error];
     }
-    if (error) [self stop:area];
-    completion(error);
+    if (error) { [self stop:area]; completion(error); return; }
+    NSUInteger preparedGeneration;
+    @synchronized (self) { preparedGeneration = generation; }
+    dispatch_async(dispatch_get_main_queue(), ^{
+      id<ConsumerMapStyleStorage> storage = Shared(@"MLNOfflineStorage", @"sharedOfflineStorage");
+      SEL selector = @selector(preloadData:forURL:modificationDate:expirationDate:eTag:mustRevalidate:completionHandler:);
+      if (![(id)storage respondsToSelector:selector]) {
+        [self stop:area]; completion(Failure(@"Map style could not be prepared. Update the app and retry.")); return;
+      }
+      // Seed the pinned file before the offline engine tries its HTTP loader.
+      [storage preloadData:resolved forURL:file modificationDate:nil
+          expirationDate:[NSDate dateWithTimeIntervalSinceNow:365.0 * 24 * 60 * 60]
+          eTag:nil mustRevalidate:NO completionHandler:^(NSURL *url, NSError *cacheError) {
+        @synchronized (self) {
+          if (!cacheError && (!foreground || !policy || generation != preparedGeneration || ![lease isEqual:area]))
+            cacheError = Failure(@"Map download paused.");
+        }
+        if (cacheError) [self stop:area];
+        completion(cacheError);
+      }];
+    });
   });
 }
 + (void)stop:(NSString *)area { @synchronized (self) { if (area && lease && ![lease isEqual:area]) return; policy = nil; suspended = YES; generation++; for (ConsumerMapProtocol *request in requests) [request stopLoading]; [transfers cancelAllOperations]; } }

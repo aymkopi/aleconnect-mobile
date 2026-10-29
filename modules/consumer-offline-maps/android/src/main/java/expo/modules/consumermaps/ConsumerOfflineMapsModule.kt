@@ -131,6 +131,20 @@ class ConsumerOfflineMapsModule: Module() {
     val temporary = File(styleFile.parentFile, styleFile.name + ".tmp")
     temporary.writeText(style.toString())
     if (!temporary.renameTo(styleFile)) throw IOException("Map style could not be saved.")
+    // Offline regions use the HTTP loader, even for a file:// style URL.
+    val cached = CountDownLatch(1)
+    var cacheFailure: Exception? = null
+    Handler(Looper.getMainLooper()).post {
+     try {
+      val now = System.currentTimeMillis() / 1000
+      OfflineManager.getInstance(context).putResourceWithUrl(
+       styleUrl, styleFile.readBytes(), now, now + 365L * 24 * 60 * 60, null, false
+      )
+     } catch (error: Exception) { cacheFailure = error }
+     finally { cached.countDown() }
+    }
+    if (!cached.await(10, TimeUnit.SECONDS) || cacheFailure != null)
+     throw IOException("Map style could not be prepared. Try again.", cacheFailure)
     guard.assertReady(ready)
     mapOf("ready" to true)
    } catch (error: Exception) { guard.end(area); client.dispatcher.cancelAll(); throw error }

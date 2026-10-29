@@ -1,5 +1,12 @@
 # Implementation history
 
+## 2026-10-30 - Offline map startup repair preparation
+
+- Scope: fix Mobile map setup stalled at0% on the connected Xiaomi; preserve the existing pack, report queue, session, signing key and earlier APKs. Billing and Staff lifecycle/database changes are excluded.
+- Verification: reproduced on native release82, with MapLibre HTTP rejecting the file URL of the pinned style. Public metadata/tile/sprite/font probes pass. Native preparation now seeds that exact pinned style in the SDK cache before region startup; Android respects the main-thread SDK and iOS awaits its preload completion. A separate startup-failure cache bug reproduces RED and passes15 focused regressions after repair. Android83 is reserved;681 full tests pass, with types/lint and the new native APK/readback in progress.
+- Remaining risks: rebuilt APK/native resume and cold-offline acceptance are pending; iOS compilation requires Xcode. Prior source/static checks did not establish real download behavior.
+- Next: compile/test, build a same-signer APK, update the connected device without clearing data, verify the original full-Albay download and preserve its evidence.
+
 ## 2026-10-29 - Ticket closure production and local APK closeout
 
 - Scope: authorized paired skip-CI source publication, production nullable deadline/index migration and24-hour policy activation, ALEConnect1.9.0-alpha.1 API/maintenance/push/Pages deployment and local release APK1.9.0-alpha.1/code82. Billing, device installation and store/OTA/GitHub release publication excluded. Deployed RBAC and newer Mobile headers are retained.
