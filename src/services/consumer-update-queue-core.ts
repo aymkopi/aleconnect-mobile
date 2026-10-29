@@ -25,6 +25,19 @@ export function parseConsumerWorkQueue(raw: string | null): QueuedConsumerWork[]
 export function consumerUpdateScopeCurrent(item: QueuedConsumerWork, scope: ConsumerUpdateScope) {
   return item.principalId === scope.principalId && item.identityUserId === scope.identityUserId && item.accessRevision === scope.accessRevision && scope.authorizedServiceAccountIds.includes(item.serviceAccountId);
 }
+
+export async function recoverQueuedConsumerReceipt(item: QueuedConsumerUpdate, scope: ConsumerUpdateScope, work: {
+  read(item: QueuedConsumerUpdate): Promise<unknown>; current(): boolean; persist(item: QueuedConsumerUpdate): Promise<void>;
+}) {
+  if (item.principalId !== scope.principalId || item.identityUserId !== scope.identityUserId || !scope.authorizedServiceAccountIds.includes(item.serviceAccountId)) throw Error("This saved update belongs to another account.");
+  const response = await work.read(item);
+  if (!work.current()) throw Error("Your sign-in changed. The saved update is kept.");
+  if (response === null) return item;
+  const receipt = normalizeConsumerUpdateReceipt(response, item.id, item.ticketId);
+  const received: QueuedConsumerUpdate = { ...item, receipt, status: "sent", error: null, errorCode: undefined, nextAttemptAt: 0 };
+  await work.persist(received);
+  return received;
+}
 type Work<T> = { persist: (item: T) => Promise<void>; send: (item: T, prepared: (upload: { imageKeys: string[]; draftIds: string[] }) => Promise<void>) => Promise<unknown>; cleanup: (item: T) => Promise<void> };
 export async function runQueuedConsumerUpdate<T extends QueuedConsumerWork>(item: T, scope: ConsumerUpdateScope, work: Work<T>): Promise<T> {
   if (!consumerUpdateScopeCurrent(item, scope)) {

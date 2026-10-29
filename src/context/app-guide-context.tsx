@@ -9,6 +9,7 @@ import { Tour } from "@/components/panelui/tour";
 import { useGuestAccess } from "@/context/guest-access-context";
 import { appGuides, guideOfferKey, pendingWelcomeKey, pendingWelcomeOffer, isInteractiveSignIn, type GuideId, type GuideStepDefinition, type WelcomeOffer } from "@/features/onboarding/guidance-state";
 import { useAuthSession } from "@/hooks/use-auth-session";
+import { nativeMapSetup } from "@/services/native-map-setup";
 
 type Guide = (typeof appGuides)[number];
 type ContextValue = {
@@ -61,11 +62,18 @@ export function AppGuideProvider({ children }: PropsWithChildren) {
     const key = guideOfferKey(session?.user.id ?? null);
     void AsyncStorage.multiGet([pendingWelcomeKey, key]).then(async (values) => {
       if (!active) return;
+      if (session && Platform.OS !== "web") {
+        const showSetup = await nativeMapSetup.offer(session.user.id, session.session.id, () => active);
+        if (!active) return;
+        if (showSetup) router.push("/profile/setup");
+        // The independent map requirement survives Back, sign-in and restart.
+        await AsyncStorage.removeItem(pendingWelcomeKey).catch(() => undefined);
+        return;
+      }
       const pending = session && interactivePrincipal === session.user.id ? "account" : values[0][1];
       const kind = pendingWelcomeOffer(pending, { isLoading, hasSession: !!session, mustChangePassword: !!session?.user.mustChangePassword, alreadyOffered: values[1][1] === "1", interactiveSignIn: !!session && interactivePrincipal === session.user.id });
       if (!kind) return;
-      if (kind === "account" && Platform.OS !== "web") router.push("/profile/setup");
-      else setOffer({ scope, kind, open: true });
+      setOffer({ scope, kind, open: true });
       // These are optional UI hints, never authentication or authorization records.
       await AsyncStorage.setItem(key, "1").catch(() => undefined);
       if (active) await AsyncStorage.removeItem(pendingWelcomeKey).catch(() => undefined);

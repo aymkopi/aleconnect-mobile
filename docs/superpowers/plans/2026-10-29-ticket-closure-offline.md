@@ -83,8 +83,10 @@
 
 **Files:** paired contract snapshots, `PRODUCT.md` where affected, task/active-work/history, migration/rollback runbook and this plan.
 
-- [ ] Run all relevant Staff policy/auth/replay/DB tests and build; full Mobile suite/types/scoped lint; paired harness and whitespace checks. Refresh Graphify separately, preserving prior churn.
-- [ ] Obtain one fresh read-only whole-change review with plan/spec, verified tests and rulings. Reproduce/fix important findings with focused failing tests, then rerun affected/full checks.
-- [ ] Record source-only completion, exact migration/activation order and still-unverified physical-device/iOS/provider work. Preserve all original artifacts/queues. Do not push/deploy/install without separately authorized scope.
+- [x] Run all relevant Staff policy/auth/replay/DB tests and build; full Mobile suite/types/scoped lint; paired harness and whitespace checks. Refresh Graphify separately, preserving prior churn.
+- [x] Obtain one fresh read-only whole-change review with plan/spec, verified tests and rulings. Reproduce/fix important findings with focused failing tests, then rerun affected/full checks.
+- [x] Record source-only completion, exact migration/activation order and still-unverified physical-device/iOS/provider work. Preserve all original artifacts/queues. Do not push/deploy/install without separately authorized scope.
 
-Implementation checkpoint: source and local tests are verified; final independent review is pending. Physical-device map/setup acceptance and iOS native compilation are not established by JS exports/Kotlin tests. Expo Doctor20/21 passes with the same seven existing patch-version drifts; dependencies are preserved. Graphify refresh is blocked by its inaccessible configured Python launcher.
+Implementation checkpoint: source and local tests are verified; whole-change review and all six finding fixes are complete. Physical-device map/setup acceptance and iOS native compilation are not established by JS exports/Kotlin tests. Expo Doctor20/21 passes with the same seven existing patch-version drifts; dependencies are preserved. Graphify refresh is blocked by its inaccessible configured Python launcher.
+
+Final source checks: Staff29 focused/6 disposableSQL; Mobile675 full tests/13 focused map+setup; seven synthetic browser journeys; Android4 native JUnit/cached-SDK module compile; two native Hermes exports. Physical native/iOS acceptance remains unchecked above. See the task handoff for baseline warnings and release gates.

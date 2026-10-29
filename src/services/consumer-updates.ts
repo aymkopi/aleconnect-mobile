@@ -12,6 +12,12 @@ export async function fetchConsumerUpdateEvidence(ticketId:string,serviceAccount
   if(response.eventId!==eventId||!Array.isArray(response.imageUrls)||response.imageUrls.length>3||response.imageUrls.some(url=>typeof url!=='string'||!url.startsWith('https://')))throw new Error('Photo access could not be confirmed.');
   return response.imageUrls as string[];
 }
+export async function fetchConsumerUpdateReceipt(item: QueuedConsumerUpdate, authToken: string) {
+  const params = new URLSearchParams({serviceAccountId:item.serviceAccountId,receiptMutationId:item.id});
+  const result = await apiRequest<{receipt:unknown}>(`/api/mobile/complaints/${encodeURIComponent(item.ticketId)}/consumer-updates?${params}`, {}, {authToken,phase:'metadata'});
+  if (!result || !Object.hasOwn(result,'receipt') || result.receipt === undefined) throw Error('Submission status is unavailable. Try again later.');
+  return result.receipt;
+}
 export async function createConsumerUpdateUploads(item: QueuedConsumerUpdate, authToken: string) {
   return apiRequest<{ draftId: string; uploads: { key: string; uploadUrl: string }[] }>(`/api/mobile/complaints/${encodeURIComponent(item.ticketId)}/consumer-updates/evidence-upload`, { method: "POST", body: JSON.stringify({ ...item.payload,clientMutationId:item.id,serviceAccountId: item.serviceAccountId, accessRevision: item.accessRevision, count: item.evidence.length }) }, { authToken, phase: "metadata", timeoutMs: 15_000 });
 }

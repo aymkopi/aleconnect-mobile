@@ -51,6 +51,24 @@ test("Wi-Fi default refuses cellular without consent before style or pack transf
   assert.equal(f.packs.length, 1);
 });
 
+test("restoring a partial Android pack attaches its activating observer behind the native guard", async () => {
+  const f = fixture();
+  let suspended = false, unguarded = 0;
+  f.dependencies.guard.stop = async () => { suspended = true; };
+  f.dependencies.guard.finish = async () => { suspended = false; };
+  await maps.createOfflineMaps(f.dependencies).start();
+  f.dependencies.manager.addListener = async () => {
+    // Installed Android MapLibre setPackObserver activates the region.
+    if (!suspended) unguarded++;
+    f.update({ state: "active" });
+  };
+  f.packs[0].pause = async () => { f.update({ state: "inactive" }); };
+  const restored = await maps.createOfflineMaps(f.dependencies).restore();
+  assert.equal(unguarded, 0, "native observation must not transfer before consent/budget checks");
+  assert.equal(restored.state, "paused");
+  assert.equal(suspended, false, "ordinary online maps can resume after the pack is paused");
+});
+
 test("missing native capability and insufficient storage retain a failed resumable setup", async () => {
   for (const overrides of [{ available: async () => false }, { freeBytes: () => 1 }]) {
     const f = fixture(overrides), manager = maps.createOfflineMaps(f.dependencies);

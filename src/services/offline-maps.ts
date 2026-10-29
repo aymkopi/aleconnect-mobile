@@ -96,7 +96,8 @@ export function createOfflineMaps(dependencies: Dependencies) {
       // Old duplicate downloads remain preserved and paused; only one pack can transfer.
       await pauseNative();
       for (const candidate of packs) if ((await candidate.status()).state !== "complete") await candidate.pause();
-      await dependencies.manager.addListener(pack.id, onProgress, onError);
+      // Android attaches observers by activating the region. Restore only reads
+      // paused state; attach after consent/storage checks and native preparation.
       return await observe(pack, await pack.status(), false);
     } catch (error) { return fail(error); }
   }
@@ -120,10 +121,14 @@ export function createOfflineMaps(dependencies: Dependencies) {
         activeArea = originalAreaId;
         await dependencies.guard.prepare({ areaId: originalAreaId, bounds: ALBAY_MAP_BOUNDS, styleUrl, mobileData });
         if (operation !== generation) { await dependencies.guard.stop(originalAreaId); await dependencies.guard.finish(originalAreaId); throw Error("Map download paused."); }
-        if (pack) await pack.resume();
+        if (pack) {
+          await dependencies.manager.addListener(pack.id, onProgress, onError);
+          if ((await pack.status()).state !== "complete") await pack.resume();
+        }
         else pack = await dependencies.manager.createPack({ mapStyle: styleUrl, bounds: ALBAY_MAP_BOUNDS, minZoom: OFFLINE_MAP_POLICY.minZoom, maxZoom: OFFLINE_MAP_POLICY.maxZoom,
           metadata: { app: "aleconnect-mobile", areaId: originalAreaId, styleVersion: OFFLINE_MAP_STYLE_VERSION, styleUrl } }, onProgress, onError);
         if (operation !== generation) { await pauseNative(); return publish({ state: "paused", packId: pack.id, error: null }); }
+        if ((await pack.status()).state === "complete") return observe(pack, await pack.status());
         return publish({ state: "downloading", packId: pack.id, error: null });
       } catch (error) { await fail(error); throw error; }
       finally { starting = null; }

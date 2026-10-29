@@ -9,7 +9,7 @@ import { FileUpload, type FileUploadFile } from "@/components/panelui/file-uploa
 import { ImageViewer } from "@/components/panelui/image-viewer";
 import { prepareEvidencePhoto, deleteEvidencePhoto } from "@/utils/evidence-image-processing";
 import { fetchConsumerUpdates } from "@/services/consumer-updates";
-import { listConsumerUpdates, saveConsumerUpdateDraft, enqueueConsumerUpdate, syncConsumerUpdateQueue, retryConsumerUpdate, discardConsumerUpdate, subscribeConsumerUpdates, type ConsumerUpdateScope, type QueuedConsumerUpdate } from "@/services/consumer-update-queue";
+import { listConsumerUpdates, saveConsumerUpdateDraft, enqueueConsumerUpdate, syncConsumerUpdateQueue, retryConsumerUpdate, recoverConsumerUpdateReceipt, discardConsumerUpdate, subscribeConsumerUpdates, type ConsumerUpdateScope, type QueuedConsumerUpdate } from "@/services/consumer-update-queue";
 import { createConsumerUpdateId, type ConsumerUpdatePayload, type ConsumerReportEvent, type ConsumerUpdatesPage } from "./consumer-updates-contract";
 import { formatReportDate } from "./data";
 import { ChevronRight } from "lucide-react-native";
@@ -24,11 +24,11 @@ import { ServiceFeedbackSection } from "./service-feedback-section";
 type Draft = { id: string; payload: ConsumerUpdatePayload; evidence: QueuedConsumerUpdate["evidence"] };
 const freshDraft = (page?:ConsumerUpdatesPage|null,kind:ConsumerUpdatePayload['kind']='consumer_update'):Draft => ({id:createConsumerUpdateId(),payload:{kind,text:'',cycleId:page?.conversation?.cycleId??null,responseVersion:page?.conversation?.responseVersion??page?.resolutionCheck?.responseVersion??0,followupVersion:1,expectedFollowupRevision:page?.conversation?.revision??0,replyTo:page?.conversation?.replyTo??null},evidence:[]});
 const labels: Record<QueuedConsumerUpdate["status"], string> = { draft: "Draft", queued: "Waiting to send", sending: "Sending…", failed: "Awaiting receipt", needs_attention: "Review needed", sent: "Received" };
-export function ConsumerUpdatesSection({ ticketId, serviceAccountId, scope, featureAvailable, serviceFeedbackAvailable = false, active = true, screen = false, onOpen, onBack, ticketNumber, title, refreshRequest = false }: { ticketId: string; serviceAccountId: string; scope: ConsumerUpdateScope; featureAvailable: boolean; serviceFeedbackAvailable?: boolean; active?: boolean; screen?: boolean; onOpen?: () => void; onBack?: () => void; ticketNumber?: string; title?: string; refreshRequest?: boolean }) {
+export function ConsumerUpdatesSection({ ticketId, serviceAccountId, scope, featureAvailable, retired = false, serviceFeedbackAvailable = false, active = true, screen = false, onOpen, onBack, ticketNumber, title, refreshRequest = false }: { ticketId: string; serviceAccountId: string; scope: ConsumerUpdateScope; featureAvailable: boolean; retired?: boolean; serviceFeedbackAvailable?: boolean; active?: boolean; screen?: boolean; onOpen?: () => void; onBack?: () => void; ticketNumber?: string; title?: string; refreshRequest?: boolean }) {
   const [primary] = useAppColors(["primary"]);
   const feedbackScope = useMemo(() => ({ principalId: scope.principalId, identityUserId: scope.identityUserId, accessRevision: scope.accessRevision, serviceAccountId }), [scope.principalId, scope.identityUserId, scope.accessRevision, serviceAccountId]);
   const {session}=useAuthSession();
-  const {page,loading,error:readError,refresh,scope:stableScope}=useConsumerUpdates(scope,ticketId,serviceAccountId,featureAvailable&&active);
+  const {page,loading,error:readError,refresh,scope:stableScope}=useConsumerUpdates(scope,ticketId,serviceAccountId,(featureAvailable||retired)&&active);
   const [olderEvents,setOlderEvents]=useState<ConsumerReportEvent[]>([]),[cursor,setCursor]=useState<string|null|undefined>(undefined),[paging,setPaging]=useState(false);
   const [photoOpen,setPhotoOpen]=useState<string|null>(null),[photoState,setPhotoState]=useState<{eventId:string;message:string;loading?:boolean}|null>(null);
   const photoRequest=useRef(0);
@@ -116,7 +116,8 @@ export function ConsumerUpdatesSection({ ticketId, serviceAccountId, scope, feat
     catch(failure){setError(failure instanceof Error?failure.message:'Older updates could not load.');}finally{if(alive.current)setPaging(false);}
   }
   const pending=items.some(item=>!['draft','sent','needs_attention'].includes(item.status)&&item.accessRevision===scope.accessRevision&&item.payload.cycleId===page?.conversation?.cycleId);
-  const canWrite=featureAvailable&&page?.canWrite===true;
+  const readOnly=retired||Boolean(page?.closurePolicy);
+  const canWrite=!readOnly&&featureAvailable&&page?.canWrite===true;
   const canSubmit=canWrite&&page?.conversation?.canSubmitUpdate===true&&!pending;
   const canConfirm=canWrite&&page?.conversation?.canConfirmResolution===true&&!pending;
   const visibleItems=items.filter(item=>item.status!=='sent'&&(!formOpen||item.id!==draft.id));
@@ -126,7 +127,32 @@ export function ConsumerUpdatesSection({ ticketId, serviceAccountId, scope, feat
   const composerStarted=useRef(false);
   useEffect(()=>{if(screen&&!composerStarted.current&&conversation?.state==='not_started'&&canSubmit){composerStarted.current=true;openForm();}},[screen,conversation?.state,canSubmit,openForm]);
   useEffect(()=>{if(refreshRequest)void refresh(true);},[refreshRequest,refresh]);
-  if(page?.closurePolicy)return null;
+  const updateFeed = messages.map(event=><View key={event.id} className="gap-2 rounded-xl bg-card p-4"><View className="flex-row justify-between gap-3"><Text weight="semibold" size="xs">{event.author==='Consumer'?'You':'ALECO'}</Text><Text muted size="xs">{formatReportDate(event.createdAt)}</Text></View>{event.text?<Text selectable size="sm">{event.text}</Text>:null}{event.imageUrls.length?<ImageViewer closeLabel="Close photo" open={active&&photoOpen===event.id} onOpenChange={open=>{void openPhoto(open,event.id);}}><View className="flex-row flex-wrap gap-2">{event.imageUrls.map((uri,index)=><ImageViewer.Trigger disabled={photoState?.eventId===event.id&&photoState.loading===true} key={event.id+':'+index} source={{uri}} alt={'Follow-up photo '+(index+1)} className="h-24 w-24 rounded-xl" radius={12}/>)}</View></ImageViewer>:null}{photoState?.eventId===event.id?<Text size="xs" accessibilityLiveRegion="polite">{photoState.message}</Text>:null}</View>);
+  if (readOnly) {
+    if (!screen) return messages.length || items.length || page?.nextCursor ? <Button variant="outline" onPress={onOpen}>Past updates</Button> : null;
+    return <ReportPage title="Past updates" onBack={onBack} refreshing={loading} onRefresh={() => { void refreshLocal(); void refresh(true); }}>
+      <Text size="xs" muted>{ticketNumber}</Text>
+      {loading && !page ? <Text size="sm" muted>Loading updates…</Text> : null}
+      {updateFeed}
+      {(cursor === undefined ? page?.nextCursor : cursor) ? <Button variant="outline" disabled={paging} onPress={() => void older()}>Earlier updates</Button> : null}
+      {items.map(item => <View key={item.id} className="gap-2 rounded-xl bg-card p-4">
+        <Text size="sm" weight="semibold" accessibilityLiveRegion="polite">{labels[item.status]}</Text>
+        <Text selectable size="sm">{item.payload.text || (item.payload.kind === "resolution_confirmed" ? "Yes, resolved" : "Problem still exists")}</Text>
+        {item.evidence.length ? <ImageViewer><View className="flex-row flex-wrap gap-2">{item.evidence.map((photo,index) => <ImageViewer.Trigger key={photo.id} source={{uri:photo.uri}} alt={'Saved update photo '+(index+1)} className="h-24 w-24 rounded-xl" />)}</View></ImageViewer> : null}
+        {item.payload.text ? <Button variant="outline" onPress={() => { void Clipboard.setStringAsync(item.payload.text).then(() => setNotice('Copied.')).catch(() => setError('Select the saved text to copy it.')); }}>Copy saved text</Button> : null}
+        {item.attempts > 0 && item.status !== 'sent' && item.status !== 'sending' ? <Button variant="outline" disabled={busy} onPress={() => {
+          setBusy(true); setError('');
+          void recoverConsumerUpdateReceipt(item.id,stableScope).then(async result => {
+            if (!alive.current) return;
+            setNotice(result.status === 'sent' ? 'Submission confirmed.' : 'No submission confirmed. Create a new report if needed.');
+            await refreshLocal();
+          }).catch(failure => { if (alive.current) setError(failure instanceof Error ? failure.message : 'Could not check this submission.'); }).finally(() => { if (alive.current) setBusy(false); });
+        }}>Check submission</Button> : null}
+      </View>)}
+      {readError || error ? <Text size="sm" accessibilityRole="alert" className="text-destructive">{error || readError}</Text> : null}
+      {notice ? <Text size="sm" accessibilityLiveRegion="polite">{notice}</Text> : null}
+    </ReportPage>;
+  }
   const rating=page?.resolutionCheck?<ServiceFeedbackSection key={page.resolutionCheck.cycleId} ticketId={ticketId} cycleId={page.resolutionCheck.cycleId} responseVersion={page.resolutionCheck.responseVersion} confirmed={page.resolutionCheck.answer==='confirmed'} available={serviceFeedbackAvailable&&page.serviceFeedbackEnabled===true} canWrite={page.canRate===true} saved={page.serviceFeedback??null} scope={feedbackScope} ticketNumber={ticketNumber} firstName={session?.user.name} openRequest={ratingRequest} triggerVisible={screen} onReceived={feedback=>cacheServiceFeedback(stableScope,ticketId,serviceAccountId,feedback)} onFinished={()=>{setFormOpen(false);Keyboard.dismiss();}}/>:null;
   const prompt=question?<BottomSheet open onOpenChange={setQuestion}><BottomSheet.Content><BottomSheet.Header title="Is the issue resolved?" description={ticketNumber}/><BottomSheet.Body><View className="gap-3"><Button disabled={busy||!canConfirm} onPress={()=>void confirmResolution()}>Yes, resolved</Button><Button variant="outline" disabled={busy||!canSubmit} onPress={()=>{setQuestion(false);if(screen)openForm();else navigateAfterQuestion.current=true;}}>Still having an issue</Button></View></BottomSheet.Body></BottomSheet.Content></BottomSheet>:null;
   if (unavailable && !screen) return null;
@@ -142,7 +168,7 @@ export function ConsumerUpdatesSection({ ticketId, serviceAccountId, scope, feat
     {conversation?.state==='awaiting_consumer'&&conversation.expiresAt?<Text size="xs" muted>Reply by {formatReportDate(conversation.expiresAt)} to keep this follow-up open.</Text>:null}
     {loading&&!page?<Text accessibilityLiveRegion="polite" muted size="sm">Loading updates…</Text>:null}
     {readError?<Text accessibilityRole="alert" size="sm" className="text-destructive">{readError}</Text>:null}
-    {messages.map(event=><View key={event.id} className="gap-2 rounded-xl bg-card p-4"><View className="flex-row justify-between gap-3"><Text weight="semibold" size="xs">{event.author==='Consumer'?'You':'ALECO'}</Text><Text muted size="xs">{formatReportDate(event.createdAt)}</Text></View>{event.text?<Text selectable size="sm">{event.text}</Text>:null}{event.imageUrls.length?<ImageViewer closeLabel="Close photo" open={active&&photoOpen===event.id} onOpenChange={open=>{void openPhoto(open,event.id);}}><View className="flex-row flex-wrap gap-2">{event.imageUrls.map((uri,index)=><ImageViewer.Trigger disabled={photoState?.eventId===event.id&&photoState.loading===true} key={event.id+':'+index} source={{uri}} alt={'Follow-up photo '+(index+1)} className="h-24 w-24 rounded-xl" radius={12}/>)}</View></ImageViewer>:null}{photoState?.eventId===event.id?<Text size="xs" accessibilityLiveRegion="polite">{photoState.message}</Text>:null}</View>)}
+    {updateFeed}
     {(cursor===undefined?page?.nextCursor:cursor)?<Button variant="outline" disabled={paging} onPress={()=>void older()}>Earlier updates</Button>:null}
     {page?.enabled&&!messages.length&&!formOpen?<Text muted size="sm">No updates yet.</Text>:null}
     {prompt}

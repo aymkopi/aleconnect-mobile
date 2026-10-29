@@ -1,6 +1,6 @@
 # Active work
 
-- [Ticket closure and offline reporting](tasks/ticket-closure-offline.md): approved source implementation on paired isolated branches; rating/Staff/24-hour closure, retired follow-up, persistent offline accounts and full-Albay native setup. Verification/review in progress; production activation and native acceptance remain separate. Billing excluded.
+- [Ticket closure and offline reporting](tasks/ticket-closure-offline.md): approved source and six review fixes locally verified; Mobile675 tests, Staff29 focused/6 SQL and seven browser journeys pass. Rating/Staff/24-hour closure, retired exchange, offline accounts and full-Albay native setup. Production activation/native device and iOS acceptance remain separate; billing excluded.
 
 - [Mobile legal documents](tasks/mobile-legal-documents.md): sourceb879ae0 pushed to public master with `[skip ci]`; local1.8.0-alpha.2/code81 includes legal and outage reporting, verified and saved to Desktop/AleconnectApps.636 tests, types/lint/harness, original signer, all229 legal blocks, three outage markers and54-library16KB checks pass.215 primary files, six generated files and sixteen prior APKs are preserved. Billing excluded; installation/native acceptance remain separate.
 

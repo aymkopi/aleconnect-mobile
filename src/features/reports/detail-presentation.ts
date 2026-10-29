@@ -13,7 +13,7 @@ export const reportStatusDescription: Record<ConsumerTicketStatus, string> = {
   dispatched: "A field crew has been assigned to your concern.",
   in_progress: "Work is underway to address your concern.",
   resolved: "ALECO has marked the concern as addressed.",
-  closed: "ALECO has completed the report’s follow-up and closed it.",
+  closed: "This report is closed.",
 };
 
 export function reportDetailScope(input: {

@@ -1,6 +1,6 @@
 # Ticket closure and offline reporting
 
-Date: 2026-10-29, Asia/Manila. Status: approved by the user; implementation in progress.
+Date: 2026-10-29, Asia/Manila. Status: approved; source implemented and locally verified. Native/production acceptance remains separate.
 
 ## Intent and confirmed decisions
 
@@ -91,7 +91,7 @@ Retain existing authenticated APIs and queue formats. Add the smallest compatibl
 - Retain original pack IDs when resuming; avoid duplicate province downloads. Pause safely on interrupted network/background conditions, enforce bounded requests/tiles/bytes and storage checks, and never purge the global map database or private report work. Choose resource budgets from a measured full-pack download rather than silently truncating required coverage/detail.
 - Reuse compatible Lineman safeguards where appropriate. Android and iOS need their own native capability/failure and cold-start verification; do not copy Lineman's Android-only gate into mandatory iOS onboarding. Web keeps its existing online map and does not pretend to have a native downloaded pack.
 - GPS pin placement and the bundled boundary lookup remain usable offline. Network address search/reverse lookup must fail gracefully; map storage does not create offline geocoding or routing.
-- Confirm current provider resource/attribution requirements and measure a full-pack size before presenting a size estimate. Current live asset metadata could not be read in the restricted shell; no size or download-time claim has been verified.
+- Confirm current provider resource/attribution requirements and measure a full-pack size before presenting a size estimate. Implementation measured the full public resource inventory at1550 tiles/1582 resources/14,540,666bytes. This is not an observed native database size or promised pack estimate; native SDK requests and cold rendering still require platform acceptance.
 
 ## Verification and delivery
 

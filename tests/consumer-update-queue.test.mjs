@@ -1,10 +1,24 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { runQueuedConsumerUpdate, consumerUpdateScopeCurrent, parseConsumerWorkQueue, isOutageAcknowledgement } from '../src/services/consumer-update-queue-core.ts'
+import * as queue from '../src/services/consumer-update-queue-core.ts'
 const id = '11111111-1111-4111-8111-111111111111'
 const scope = { principalId: 'identity', identityUserId: 'identity', serviceAccountId: 'account-a', accessRevision: 2, authorizedServiceAccountIds: ['account-a'] }
 const item = () => ({ id, principalId: 'identity', identityUserId: 'identity', serviceAccountId: 'account-a', accessRevision: 2, ticketId: id, createdAt: '2026-10-23T00:00:00Z', status: 'queued', attempts: 0, error: null, nextAttemptAt: 0, payload: { kind: 'consumer_update', text: 'Still no power', cycleId: null, responseVersion: 0 }, evidence: [{ id: 'photo', uri: 'file:///prepared.webp', size: 42 }], imageKeys: [], draftIds: [], receipt: null })
 const receipt = { mutationId: id, eventId: id, ticketId: id, acceptedAt: '2026-10-23T01:00:00Z', reviewVersion: 1 }
+
+test('retired saved work recovers only a matching owned receipt and retains its original photos',async()=>{
+ assert.equal(typeof queue.recoverQueuedConsumerReceipt,'function')
+ const saved={...item(),status:'failed'},writes=[]
+ const result=await queue.recoverQueuedConsumerReceipt(saved,{...scope,accessRevision:3},{read:async()=>receipt,current:()=>true,persist:async value=>writes.push(value)})
+ assert.equal(result.status,'sent');assert.equal(result.accessRevision,2);assert.deepEqual(result.evidence,saved.evidence);assert.deepEqual(result.payload,saved.payload);assert.equal(writes.length,1)
+ const absent=await queue.recoverQueuedConsumerReceipt(saved,scope,{read:async()=>null,current:()=>true,persist:async()=>assert.fail('unconfirmed work changed')})
+ assert.equal(absent,saved)
+ for(const changed of [{principalId:'foreign'},{identityUserId:'foreign'},{authorizedServiceAccountIds:[]}])await assert.rejects(queue.recoverQueuedConsumerReceipt(saved,{...scope,...changed},{read:async()=>assert.fail('foreign receipt requested'),current:()=>true,persist:async()=>assert.fail('foreign work changed')}))
+ await assert.rejects(queue.recoverQueuedConsumerReceipt(saved,scope,{read:async()=>({...receipt,mutationId:'wrong'}),current:()=>true,persist:async()=>assert.fail('bad receipt stored')}))
+ await assert.rejects(queue.recoverQueuedConsumerReceipt(saved,scope,{read:async()=>undefined,current:()=>true,persist:async()=>assert.fail('unavailable reader treated as a receipt')}))
+ await assert.rejects(queue.recoverQueuedConsumerReceipt(saved,scope,{read:async()=>receipt,current:()=>false,persist:async()=>assert.fail('late receipt stored after signout')}))
+})
 test('save precedes network; receipt precedes deleting evidence', async () => {
   const order = []
   const result = await runQueuedConsumerUpdate(item(), scope, { persist: async value => order.push(value.status), send: async () => { order.push('network'); return receipt }, cleanup: async () => order.push('delete') })

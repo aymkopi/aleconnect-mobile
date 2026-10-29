@@ -11,6 +11,8 @@ import { useAppColors } from "@/hooks/use-app-colors";
 import { appGuides } from "./guidance-state";
 import { OfflineMapSetup } from "@/features/maps/offline-map-setup";
 import { offlineMaps } from "@/services/offline-map-native";
+import { nativeMapSetup } from "@/services/native-map-setup";
+import { useAuthSession } from "@/hooks/use-auth-session";
 
 const guideIcons = { House, FileText, Plus, Megaphone, Phone, UserRound };
 
@@ -38,6 +40,7 @@ export function AppGuideScreen() {
 
 export function AccountSetupScreen() {
   const router = useRouter();
+  const { session } = useAuthSession();
   const [mapReady, setMapReady] = useState(Platform.OS === "web");
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,6 +52,7 @@ export function AccountSetupScreen() {
         setError("Finish downloading the Albay map to complete setup.");
         return;
       }
+      if (Platform.OS !== "web") await nativeMapSetup.finish(session?.user.id ?? "");
       router.dismissTo("/home");
     } catch {
       setMapReady(false);

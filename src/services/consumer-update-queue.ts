@@ -1,13 +1,13 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
-import { apiRequest, getAuthToken, ApiRequestError, type AuthSession } from "@/services/api";
+import { apiRequest, getAuthToken, getAuthTokenRevision, ApiRequestError, type AuthSession } from "@/services/api";
 import { createKeyedSerialExecutor, createPromiseRegistry } from "@/utils/async-coordination";
 import { deleteReportEvidence, readEvidencePhoto } from "@/utils/evidence-image-processing";
 import { uploadEvidenceToR2 } from "@/services/reports";
-import { createConsumerUpdateUploads, sendConsumerUpdate } from "./consumer-updates";
+import { createConsumerUpdateUploads, sendConsumerUpdate, fetchConsumerUpdateReceipt } from "./consumer-updates";
 import { normalizeConsumerIdentity } from "@/features/accounts/contract";
 import { createConsumerUpdateId, type ConsumerUpdatePayload } from "@/features/reports/consumer-updates-contract";
-import { consumerUpdateScopeCurrent, runQueuedConsumerUpdate, parseConsumerWorkQueue, isOutageAcknowledgement, type ConsumerUpdateScope, type QueuedConsumerUpdate, type QueuedConsumerWork, type QueuedOutageAcknowledgement } from "./consumer-update-queue-core";
+import { consumerUpdateScopeCurrent, runQueuedConsumerUpdate, recoverQueuedConsumerReceipt, parseConsumerWorkQueue, isOutageAcknowledgement, type ConsumerUpdateScope, type QueuedConsumerUpdate, type QueuedConsumerWork, type QueuedOutageAcknowledgement } from "./consumer-update-queue-core";
 import { sendOutageAcknowledgement } from "./service-status";
 import type { OutageItem } from "@/features/home/service-status-contract";
 import { PANELUI_PREVIEW } from "@/constants/panelui-preview";
@@ -85,6 +85,20 @@ export async function retryConsumerUpdate(id: string, scope: ConsumerUpdateScope
     return { ...row, status: "queued" as const, nextAttemptAt: 0 };
   }));
   return syncConsumerUpdateQueue();
+}
+export async function recoverConsumerUpdateReceipt(id: string, scope: ConsumerUpdateScope) {
+  const item = (await listConsumerUpdates(scope)).find(row => row.id === id);
+  if (!item) throw Error('This saved update is unavailable.');
+  const token = await getAuthToken(), revision = getAuthTokenRevision();
+  if (!token) throw Error('Sign in to check this submission.');
+  return recoverQueuedConsumerReceipt(item,scope,{
+    read: value => fetchConsumerUpdateReceipt(value,token),
+    current: () => revision === getAuthTokenRevision(),
+    persist: async value => {
+      if (revision !== getAuthTokenRevision() || await getAuthToken() !== token) throw Error('Your sign-in changed. The saved update is kept.');
+      await persist(value);
+    },
+  });
 }
 export async function discardConsumerUpdate(id: string, scope: ConsumerUpdateScope) {
   await changeQueue(rows => {
